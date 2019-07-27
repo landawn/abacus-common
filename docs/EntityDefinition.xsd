@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.abacusep.com/landawn/abacus" xmlns:tns="http://www.abacusep.com/landawn/abacus">
+
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			Entity definition schema. Copyright 2015, Haiyang Li. All rights reserved.
+		</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:element name="entityDef" type="tns:EntityDef" />
+
+	<xsd:complexType name="EntityDef">
+		<xsd:sequence>
+			<xsd:element name="entity" type="tns:Entity" />
+		</xsd:sequence>
+		<xsd:attribute name="package" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="Entity">
+		<xsd:sequence>
+			<xsd:element name="slices" type="tns:Slices" />
+			<xsd:element name="properties" type="tns:Properties" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="table" type="xsd:string" use="required" />
+		<!-- composite ids are split by ','. for example: id="id1, id2, id3..." -->
+		<xsd:attribute name="id" type="xsd:string" />
+		<!-- Single unique property but not defined as id. Composite unique properties are not supported. This attribute is added/defined for performance improvement. 
+			So Abacus is able to cache entity by either id or the 'uid' properties. split multiple single unique ids by ',' -->
+		<xsd:attribute name="uid" type="xsd:string" />
+		<xsd:attribute name="class" type="xsd:string" />
+		
+		<!-- It's for code generation only -->
+		<xsd:attribute name="abstract" type="xsd:boolean" />
+		<xsd:attribute name="extends" type="xsd:string" />
+		<xsd:attribute name="generateCopyMethod" type="xsd:boolean" />
+		<xsd:attribute name="generateHashEqualsMethod" type="xsd:boolean" />
+		<xsd:attribute name="generateToStringMethod" type="xsd:boolean" />
+		<xsd:attribute name="hashEqualsWithParentProperties" type="xsd:boolean" />
+		<xsd:attribute name="toStringWithParentProperties" type="xsd:boolean" />
+	</xsd:complexType>
+
+	<xsd:complexType name="Slices">
+		<xsd:sequence>
+			<xsd:element name="entity" type="tns:SliceEntity" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="SliceEntity">
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="table" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="Properties">
+		<xsd:sequence>
+			<xsd:element name="property" type="tns:Property" />
+			<xsd:element name="list" type="tns:Property" />
+			<xsd:element name="set" type="tns:Property" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Property">
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="column" type="xsd:string" use="required" />
+		<xsd:attribute name="type" type="xsd:string" use="required" />
+		<xsd:attribute name="readable" type="xsd:boolean" />
+		<xsd:attribute name="insertable" type="xsd:boolean" />
+		<xsd:attribute name="updatable" type="xsd:boolean" />
+		<xsd:attribute name="readOnly" type="xsd:boolean" />
+		<xsd:attribute name="idGenerator" type="xsd:string" />
+		<!-- By default it's true for non-entity(excluding nested entity) property. If the entity is loaded as a property of its parent entity, this entity's entity property 
+			won't be load if this attribute is set to true. -->
+		<xsd:attribute name="loadByDefault" type="xsd:boolean" />
+		<!-- orderBy. it's supported for entity property -->
+		<xsd:attribute name="orderBy" type="xsd:string" />
+		<!-- For 'Date', 'Time' and 'TimeStamp'type, 'sysTime' is a special default value, which represents the current system time. -->
+		<xsd:attribute name="defaultOnInsert" type="xsd:string" />
+		<xsd:attribute name="defaultOnUpdate" type="xsd:string" />
+		<!-- Multiple validators are split by ';' -->
+		<xsd:attribute name="validator" type="xsd:string" />
+		<xsd:attribute name="joinOn" type="xsd:string" />
+		<!-- Not supported at present -->
+		<xsd:attribute name="actionOnUpdate" type="xsd:string" />
+		<!-- 'noAction', 'setNull' and 'cascade' are supported -->
+		<xsd:attribute name="actionOnDelete" type="xsd:string" />
+		
+		<!-- It's for code generation only -->
+		<xsd:attribute name="hashEquals" type="xsd:boolean" />
+		<xsd:attribute name="toString" type="xsd:boolean" />
+	</xsd:complexType>
+
+</xsd:schema>

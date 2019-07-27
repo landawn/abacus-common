@@ -1,0 +1,6 @@
+The product(abacus-util) includes codes from software(Apache Commons Lang, Apache Commons IO, Google Guava, Retrofit ...) developed at
+The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
+(See: N.java, Fraction.java, Range.java, IEEE754rUtil.java, URLEncodedUtil.java, WSSecurityUtil.java, ThreadMonitor.java, 
+FileSystemUtil.java, FilenameUtil.java, IOCase.java, LineIterator.java, IOUtil.java, Mutable*.java, 
+Logger.java, FormattedMessage.java, MessageFormatter.java, JSONReaderImpl.java, BufferedJSONWriter.java, BufferedXMLWriter.java,
+GET.java, POST.java, PUT.java, DELETE.java, Field.java, Path.java)

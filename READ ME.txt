@@ -1,0 +1,13 @@
+1, JDK 8 or above is required for abacus-util-*.jar, which supports sequential and immutable streams.
+
+2, JDK 7 or above is required for abacus-util-jdk7-*.jar
+
+3, Parallel Streams/MongodbExecutor/Hashing... are excluded from abacus-android-*.jar libraries to reduce the library size.
+
+4, To reduce the effort on the management of dependences, abacus-util-all-*.jar and abacus-util-all-jdk7-*.jar include below libraries/frameworks:
+	1), kryo-shaded-3.0.3 at Github: https://github.com/EsotericSoftware/kryo, Maven: http://search.maven.org/#artifactdetails%7Ccom.esotericsoftware%7Ckryo-shaded%7C3.0.3%7Cbundle
+	2), minlog-1.3.0 at Github: https://github.com/EsotericSoftware/minlog, Maven: http://search.maven.org/#artifactdetails%7Ccom.esotericsoftware%7Cminlog%7C1.3.0%7Cbundle
+	3), objenesis-2.2 at Github: https://github.com/easymock/objenesis, Maven:http://search.maven.org/#artifactdetails%7Corg.objenesis%7Cobjenesis%7C2.2%7Cjar
+	4), lz4-1.3.0 at Github: https://github.com/jpountz/lz4-java, Maven: http://search.maven.org/#artifactdetails%7Cnet.jpountz.lz4%7Clz4%7C1.3.0%7Cjar
+	5), snappy-java-1.1.2.6 at Github: https://github.com/xerial/snappy-java, Maven: http://search.maven.org/#artifactdetails%7Corg.xerial.snappy%7Csnappy-java%7C1.1.2.1%7Cbundle
+	

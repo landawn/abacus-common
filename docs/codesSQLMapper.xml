@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<sqlMapper>
+	<sql id="insertAccount">INSERT INTO account (first_name, last_name, gui, last_update_time, create_time) VALUES (#{firstName}, #{lastName}, #{gui}, #{lastUpdateTime}, #{createTime})</sql>
+
+	<sql id="selectAccountById">select * from account WHERE account.id = #{id}</sql>
+
+	<sql id="selectAllAccount">select * from account</sql>
+
+	<sql id="updateAccountFirstNameById">UPDATE account SET first_name = #{firstName} WHERE account.id = #{id}</sql>
+
+	<sql id="deleteAccountById">DELETE FROM account WHERE account.id = #{id}</sql>
+
+	<sql id="deleteAllAccount">DELETE FROM account</sql>
+</sqlMapper>

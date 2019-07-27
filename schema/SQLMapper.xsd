@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.abacusep.com/landawn/abacus" xmlns:tns="http://www.abacusep.com/landawn/abacus">
+
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			Schema for pre-defined SQL in xml file. Copyright 2015, Haiyang Li. All rights reserved.
+		</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:element name="sqlMapper" type="tns:SQLMapper" />
+	<xsd:complexType name="SQLMapper">
+		<xsd:sequence>
+			<xsd:element name="sql" type="tns:SQL" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="SQL">
+		<xsd:attribute name="id" type="xsd:string" />
+        <!-- default value is 200. -->
+		<xsd:attribute name="batchSize" type="xsd:integer" />
+		<xsd:attribute name="fetchSize" type="xsd:integer" />
+		<!-- 'FORWARD_ONLY', 'SCROLL_INSENSITIVE', 'SCROLL_SENSITIVE' are supported -->
+		<xsd:attribute name="resultSetType" type="xsd:string" />
+		<!-- unit is millisecond -->
+		<xsd:attribute name="timeout" type="xsd:integer" />
+	</xsd:complexType>
+
+</xsd:schema>

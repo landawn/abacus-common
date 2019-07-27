@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0028)http://jdbi.org/archive.html -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+
+
+<title>abacus-util</title>
+
+<script type="text/javascript" src="./css/ga.js"></script>
+<script type="text/javascript">
+	if (top.location != self.location)
+		top.location.replace(self.location);
+</script>
+
+<link href="./css/css" rel="stylesheet" type="text/css"></link>
+<link href="./css/css(1)" rel="stylesheet" type="text/css"></link>
+<link rel="stylesheet" href="./css/syntax.css" type="text/css"></link>
+<link rel="stylesheet" href="./css/screen.css" type="text/css"></link>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-65247258-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</head>
+<body>
+	<div id="site">
+		<h1>
+			<a href="./index.html">abacus-util</a> <span id="navigation"> <a href="./docs.html">Docs</a> | <a href="./download.html">Download</a>
+				| <a href="./api-docs/index.html">Javadoc</a> | <a href="./faq.html">FAQ</a> | <a href="./community.html">Community</a>
+			</span>
+		</h1>
+	</div>
+
+	<div id="content">
+
+		<div id="page">
+		
+			<h1>JSON Parser</h1>
+			<p><a href="./JSONParser_view.html">JSONParser</a>/<a href="./XMLParser_view.html">XMLParser</a> is one of the core parts in abacus-util.
+			It provides the high performance APIs for the general data transfer among servers/clients and conversion among different types.
+			abacus-util also provides the wrappers for <a href="./api-docs/com/landawn/abacus/parser/JSONParser.html">Jackson</a>,
+			<a href="./api-docs/com/landawn/abacus/parser/JSONParser.html">Fastjson</a>,
+			<a href="./api-docs/com/landawn/abacus/parser/JSONParser.html">Gson</a>,
+			<a href="./api-docs/com/landawn/abacus/parser/KryoParser.html">Kryo</a>,
+			<a href="./api-docs/com/landawn/abacus/parser/ObjectMapper.html">ObjectMapper</a> with integrated and concise APIs.
+			Here is a simple sample:
+			</p>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #B00040">void</span> <span style="color: #0000FF">test_xmlParser</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+    Account account <span style="color: #666666">=</span> createAccount<span style="color: #666666">();</span>
+
+    String str <span style="color: #666666">=</span> xmlParser<span style="color: #666666">.</span><span style="color: #7D9029">serialize</span><span style="color: #666666">(</span>account<span style="color: #666666">);</span>    
+    <span style="color: #408080; font-style: italic">// XML: &lt;account&gt;&lt;id&gt;0&lt;/id&gt;&lt;gui&gt;bf99db2f-9698-423c-ad7c-1668d6f03502&lt;/gui&gt;&lt;firstName&gt;3f2dec29-1676-4ae9-8cca-ff339d9dd5f5&lt;/firstName&gt;&lt;lastName&gt;2fb341dd-1e6e-4b57-ab73-ceba94ff7b65&lt;/lastName&gt;&lt;status&gt;0&lt;/status&gt;&lt;lastUpdateTime&gt;1439324554075&lt;/lastUpdateTime&gt;&lt;createTime&gt;1439324554075&lt;/createTime&gt;&lt;/account&gt;</span>
+
+    Account account2 <span style="color: #666666">=</span> xmlParser<span style="color: #666666">.</span><span style="color: #7D9029">deserialize</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">,</span> str<span style="color: #666666">);</span>
+
+    assertEquals<span style="color: #666666">(</span>account<span style="color: #666666">,</span> account2<span style="color: #666666">);</span>
+<span style="color: #666666">}</span>
+
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #B00040">void</span> <span style="color: #0000FF">test_jsonParser</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+    Account account <span style="color: #666666">=</span> createAccount<span style="color: #666666">(</span>N<span style="color: #666666">.</span><span style="color: #7D9029">uuid</span><span style="color: #666666">(),</span> N<span style="color: #666666">.</span><span style="color: #7D9029">uuid</span><span style="color: #666666">());</span>
+
+    String str <span style="color: #666666">=</span> jsonParser<span style="color: #666666">.</span><span style="color: #7D9029">serialize</span><span style="color: #666666">(</span>account<span style="color: #666666">);</span>    
+    <span style="color: #408080; font-style: italic">// JSON: {&quot;id&quot;:0, &quot;gui&quot;:&quot;d0bc219b-b1be-4f3d-a99f-aa03001ffc62&quot;, &quot;firstName&quot;:&quot;15bf3775-60bb-4f52-bc8a-e95364aa4b1d&quot;, &quot;lastName&quot;:&quot;1253246a-f6ec-4d31-b495-3c0deb26943d&quot;, &quot;status&quot;:0, &quot;lastUpdateTime&quot;:1439324554283, &quot;createTime&quot;:1439324554283}</span>
+
+    Account account2 <span style="color: #666666">=</span> jsonParser<span style="color: #666666">.</span><span style="color: #7D9029">deserialize</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">,</span> str<span style="color: #666666">);</span>
+
+    assertEquals<span style="color: #666666">(</span>account<span style="color: #666666">,</span> account2<span style="color: #666666">);</span>
+<span style="color: #666666">}</span>
+
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #B00040">void</span> <span style="color: #0000FF">test_kryoParser</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+    Account account <span style="color: #666666">=</span> createAccount<span style="color: #666666">(</span>N<span style="color: #666666">.</span><span style="color: #7D9029">uuid</span><span style="color: #666666">(),</span> N<span style="color: #666666">.</span><span style="color: #7D9029">uuid</span><span style="color: #666666">());</span>
+
+    String str <span style="color: #666666">=</span> kryoParser<span style="color: #666666">.</span><span style="color: #7D9029">serialize</span><span style="color: #666666">(</span>account<span style="color: #666666">);</span>    
+    <span style="color: #408080; font-style: italic">// Encoded with Base 64: AQEAamF2YS5zcWwuVGltZXN0YW3wAcaIt/PxKQABODY2ODJjYjItYTMyNy00YjNiLTg1YzYtZDM2Y2QzNDE3MWWyATFjNTVjY2QyLWZlZDItNDliZS1hMmY0LTFlZDBkNDQzNGZltwABOTJhOWVhOWEtYTMzNi00ODNhLTkwZDctNDY1NDhjZmU0Mjm2AQABxoi38/EpAA==</span>
+
+    Account account2 <span style="color: #666666">=</span> kryoParser<span style="color: #666666">.</span><span style="color: #7D9029">deserialize</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">,</span> str<span style="color: #666666">);</span>
+
+    assertEquals<span style="color: #666666">(</span>account<span style="color: #666666">,</span> account2<span style="color: #666666">);</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+			
+			<p></p>
+			<p>We have put a lot of efforts on performance tuning as we know it's so critical for this genernal framework. The JSON parser is about two times faster than Gson and close to Fastjson/Jackson. The XML parser is one the fastest xml parsers in the world.
+			(Refer to project <a href="./Helloabacus-util.zip">Helloabacus-util.zip</a> for the complete performance test)
+			</p>
+
+		</div>
+
+	</div>
+</body>
+
+</html>

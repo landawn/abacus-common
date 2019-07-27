@@ -1,0 +1,522 @@
+========Changes in 0.9.24=========================================================================
+
+1, Refactoring: RemoteExecutor, RemoteExecutionRequest, RemoteExecutionResponse
+
+2, Add split(Predicate) to Stream/IntStream/DoubleStream/... to support split the stream sequence by window.
+
+3, zip(...) is supported by IntStream/DoubleStream/...
+
+4, Refactoring zip(...) in Stream.
+
+5, interval(...) is supported by LongStream
+
+6, Improvements and bug fix
+
+
+========Changes in 0.9.23=========================================================================
+
+1, Add join(...) to ObjectList/IntList/DoubleList/...
+
+2, Add cached() and persist(...) to Stream
+
+3, Add findFirst(...) and findLast(...) to N
+
+4, Add append(...) and more methods to IOUtil
+
+5, Add Difference and MapDifference
+
+6, Improvements and bug fix
+
+========Changes in 0.9.22=========================================================================
+
+1, Change the specification/implementation of N.splitXXX(...).
+
+2, Refactoring: XXXParseConfig.
+
+3, Improvements and bug fix
+
+========Changes in 0.9.21=========================================================================
+
+1, Refactoring: removeAll(Collection) in Multiset and LongMultiset to keep consistent with removeAll(Collection) in Collection.
+
+2, Improvements and bug fix
+
+========Changes in 0.9.20=========================================================================
+
+1, Refactoring: Multimap, Multiset and LongMultiset
+
+2, Improvements and bug fix
+
+========Changes in 0.9.19=========================================================================
+
+1, Rename SQLBuilder.Pair to Pair2 and CQLBuilder.Pair to Pair3.
+
+2, Refactoring: Holder, Pair and Triple.
+
+3, Refactoring: DataSet.
+
+4, Refactoring: Change Optional to OptionalNullable for most of operations in Stream/Collectors.
+
+5, Add stream(...) to PaginatedDataSet.
+
+6, Add com.landawn.abacus.util.Builder.
+
+7, Improvements and bug fix
+
+========Changes in 0.9.18=========================================================================
+
+1, Add N.fill(entity), filling the properties of specified entity with random values. Mostly it's designed for mock test.
+
+2, Refactoring: RemoteExecutor.
+
+3, Improvements and bug fix
+
+========Changes in 0.9.17=========================================================================
+
+1, Add com.landawn.abacus.util.AutoRetry and integrate it with AsyncExecutor.java and N.java.
+
+2, remove removeAll from Stream, and add except/intersect to IntStream/Long/Stream/DoubleStream/...
+
+3, Remove the batchInsert(...Object[] batchParameters) and batchUpdate(...Object[] batchParameters) from SQLExecutor. 
+
+4, rename N.asArray(Collection<?> c) to N.toArray(Collection<?> c);
+
+5, Refactoring: change SQLiteExecutor.get(long, String ...) to SQLiteExecutor.get(long)
+
+6, Refactoring: DynamoDBExecutor
+
+7, Refactoring: remove forEach2(...) in N/Stream/ObjectList/... and add forEach(final R identity, BiFunction<R, ? super T, R> accumulator, final Predicate<? super R> till);
+
+8, Rename N.getType(...) to N.typeOf(...)
+
+9, Support generateEntity(...) in CodeGenerator
+
+10, bug fix and improvements.
+
+========Changes in 0.9.16=========================================================================
+
+1, Supports Parallel Stream
+
+2, Remove public static <T> Stream<T> queued(...) in Stream and add stream.queued(...)
+
+3, Refacotring: change the order of parameter 'queueSize' in parallelZip(...) in Stream.
+
+4, bug fix and improvements.
+
+========Changes in 0.9.15=========================================================================
+
+1, Add summarize/distribution to Stream/IntStream/DoubleStream/....
+
+2, bug fix and improvements.
+
+========Changes in 0.9.10=========================================================================
+
+1, Add sumInt/sumLong/sumDouble/averageInt/averageLong/averageDouble/summarizeInt/summarizeLong/summarizeDouble to Stream.
+
+2, Remove distribution from DataSet
+
+3, bug fix and improvements.
+
+
+========Changes in 0.9.9=========================================================================
+
+1, Add iterate(...) to Stream/IntStream/DoubleStream/....
+
+2, bug fix and improvements.
+
+
+========Changes in 0.9.8=========================================================================
+
+1, Add toList()/toSet()/toMultiset()/toLongMultiset()/toMap/toMultimap to Stream/IntStream/DoubleStream/....
+
+2, Remove toMap/toMultimap/toMultiset from N/ObjectList/IntList/.... It's replaced by the methods in toMap/toMultimap/toMultiset in Stream/IntStream/DoubleStream...
+
+3, Add forEach2 to IntList/DoubleList/... and IntStream/DoubleStream/....
+
+4, Remove forEach/forEach2 from N. it's replaced by the forEach/forEach2 in ObjectList/IntList/DoubleList/.../Stream/IntStream/DoubleStream/...
+
+5, bug fix and improvements.
+
+
+========Changes in 0.9.7=========================================================================
+
+1, Add removeAll/except/intersect/append to Stream/IntStream/....
+
+2, Move from(...) method from Stream to IntStream/CharStream/ByteStream/... to keep consistent with IntList/LongList/DoubleList/...
+
+3, bug fix and improvements.
+
+
+========Changes in 0.9.6=========================================================================
+
+1, getOrDefault/addIfAbsent/computeIfAbsent/computeIfPresent/compute/merge to Multiset/LongMultiset.
+
+2, getOrDefault/addIfAbsent/computeIfAbsent/computeIfPresent/compute/merge to Multimap.
+
+3, Add except(...)/intersect(...)/xor(...) to N/ObjectList/IntList/DoubleList/...
+
+4, change the specification of N.removeAll(...) to keep consistent with Collection.removeAll()/ObjectList/IntList/Double/.../.removeAll();
+
+5, bug fix and improvements.
+
+========Changes in 0.9.5=========================================================================
+
+1, Add mapTo(...) and mapToXXX(...) to ObjectList.
+
+2, Add forEach(IndexedConsumer)/forEach(IndexedXXXConsumer) ObjectList/IntList/DoubleList/...
+
+3, Refactoring accept(T t, int idx) to void accept(int idx, T t) in IndexedConsumer/IndexedDoubleConsumer/IndexedIntConsumer/....  
+
+4, Change the default queue size for methods: parallelConcat(...)/parallelZip(...) in Stream. 
+
+5, Remove map(...)/flatmap(...)/reduce(...)/groupBy(...) from N/ObjectList/IntList/DoubleList/... 
+   to keep the code consistent and simple, both for abacus-util and the applications written by abacus-util.
+   Stream APIs will the only interfaces to provide these advanced features: map/flatmap/reduce/groupBy.
+   We may add it back to N/ObjectList/IntList/... later if it's really useful/necessary.
+
+6, Refactoring toXXX(Class,...) to toXXX(...,Supplier) in DataSet/N/ObjectList/IntList/DoubleList/.../Collectors/.
+   It's more friendly and beautiful by 'Supplier' for JDK 8 with Lambdas. 
+
+7, add boolean forEach2(Function<? super T, Boolean> action) to Stream/ObjectList/N/DataSet/Multiset/MultiMap/...
+   Below code can be simplified to: return stream.forEach2(e -> action(e));   
+	   for (E e : c) {
+	   		if (action) {
+	   			return false;
+	   		}
+	   }
+	   return true;
+
+8, bug fix and improvements
+
+========Changes in 0.9.4=========================================================================
+
+1, Add top(...)/parallelSorted(...) to Stream/IntStream/DoubleStream/.../ObjectList/IntList/DoubleList/....
+
+2, Change the specification of kthLargest(...) in stream. Return OptionalXXX if the length of the stream is 0 or less than k. 
+
+3, bug fix and improvements
+
+========Changes in 0.9.3=========================================================================
+
+1, Rename methods from asUnmodifiableXXX to asImmutableXXX.
+
+2, Add flatMap3(...) to N/Stream/ObjectList/IntList/DoubleList/...
+
+3, bug fix and improvements
+
+========Changes in 0.9.2=========================================================================
+
+1, Add split/splitIntoList/splitIntoSet to Stream/IntStream/LongStream/DoubleStream/...
+
+2, Add zip(...)/zipInParallel to Stream.
+
+3, Add findFirst(Predicate)/findLast(Predicate)/findAny(Predicate) to Stream/IntStream/LongStream/DoubleStream/... and ObjectList/IntList/LongList/DoubleList...
+
+4, Remove findFirst()/findLast()/findAny()/findFirstNonNull()/findLastNonNull() from Stream/IntStream/LongStream/DoubleStream/... and ObjectList/IntList/LongList/DoubleList...
+
+5, Add concatInParalle(...) to Stream.
+
+6, Add iterate(...) to Stream.
+
+7, rename DataSet.sum(...)/average(...) to sumDouble(...)/averageDouble(...). Add sumInt(...)/sumLong(...)/averageInt(...)/averageLong(...)
+
+8, Add sumInt(...)/sumLong(...)/sumDouble(...)/averageInt(...)/averageLong(...)/averageDouble(...) to ObjectList.
+
+9, bug fix and improvements.
+
+========Changes in 0.9.1=========================================================================
+
+1, Rename N.nCopies(...) to repeat and move it to Array.
+2, Add findyFirst(Predicate)/findAny(Predicate) in Stream and IntStream/LongStream...
+3, Add concat/repeat in Stream and IntStream/LongStream...
+4, rename *.avg(...) to *.average(...)
+5, Add method reverse(...) and rotate(...) in IntList/LongList/...
+6, Add method removeAllOccurrences(...) in Multiset/LongMultiset
+7, change remove(element, removeAllOccurrences = true) to removeAllOccurrences(element) in IntList/LongList/...
+
+========Changes in 0.8.23=========================================================================
+
+1, Bug fix and improvements
+
+========Changes in 0.8.22=========================================================================
+
+1, Refactoring and improvements.
+
+
+========Changes in 0.8.21=========================================================================
+
+1, Refactoring and improvements.
+
+
+========Changes in 0.8.20=========================================================================
+
+1, Refactoring and improvements.
+   a) rename Array.wrap(...) and Array.unwrap(...) to Array.box(...) and Array.unbox(...);
+
+   
+========Changes in 0.8.19=========================================================================
+
+1, Refactoring and improvements.
+   a) rename Stream.of(...) to Stream.from(...) and add a new Stream.of(...) method
+   b) rename XXXList.of(...) to XXXList.from(...) and add a new XXXList.of(...) method
+   c) refactoring N.java
+
+========Changes in 0.8.18=========================================================================
+
+1, Refactoring and improvements.
+   a) move wrap/unwarp from N.java to Array.java
+   b) replace N.arrayOf(...) with Array.of(...)
+   c) replace N.listOf(...) with Lists.of(...)
+   d) Improve PrimitiveList
+   e) change return type of queryForXXX methods to OptionalXXX in SQLExecutor, SQLiteExecutor, CassandraExecutor, CouchbaseExecutor, MongoDBExecutor
+      queryForXXX(...) can be replaced by queryForXXX(...).orNull()/queryForXXX(...).orZero()/queryForXXX(...).orFalse()
+
+
+========Changes in 0.8.17=========================================================================
+
+1, Add ImmutableList/ImmutableSet/ImmutableMap
+2, Add Hex.java/DigestUtil.java (copied from Apache Commons Codec)
+2, Add CQLBuilder.java for Cassandra.
+
+
+========Changes in 0.8.16=========================================================================
+
+1, Minor improvements
+
+========Changes in 0.8.15=========================================================================
+
+1, Support EventBus
+
+2, rename DisplayProgressBarTask to ProgressBarTask.
+
+3, Bug fix and improvements.
+
+========Changes in 0.8.13=========================================================================
+
+1, Move extractData,toList, toEntity, toContentValues from SQLiteExecutor.java to Util.java
+
+2, Remove Util.callXXX(). It's replaced with AsyncExecutor.executeXXX().get() and AsyncExecutor.executeXXX().get(Callback)
+
+3, Rename FutureExecutor to CompletableFuture.
+
+4, DisplayProgressBarTask is designed to show progress bar easily for network or other heavy operation.
+
+5, Support lambda in Logger.java
+	1) https://garygregory.wordpress.com/2015/09/16/a-gentle-introduction-to-the-log4j-api-and-lambda-basics/
+	2) http://logging.apache.org/log4j/2.x/manual/api.html#LambdaSupport
+
+6, rename getBitmapBytes to getByteCount in Util.java
+
+7, rename com.landawn.abacus.util.Handle to com.landawn.abacus.util.Holder.
+
+8, Exclude classes under package com.landawn.abacus.android from abacus-util-.*.jar files
+
+9, Bug fix and improvements.
+
+
+========Changes in 0.8.12=========================================================================
+1, Add fluent API for HTTP client.
+
+2, Below methods are removed from IOUtil.java:
+	1) public static void parse(final File file, final int processThreadNumber, final int queueSize, final Consumer<String> lineParser)
+	2) public static void parse(final Collection<File> files, final int processThreadNumber, final int queueSize, final Consumer<String> lineParser)
+	3) public static void parse(final InputStream is, final int processThreadNumber, final int queueSize, final Consumer<String> lineParser)
+	4) public static <T> void parse(final Iterator<T> iter, final int processThreadNumber, final int queueSize, final Consumer<T> elementParser)
+The reason is these methods may be misused with:
+	public static void parse(final File file, final long lineOffset, final long count, final Consumer<String> lineParser)
+	public static void parse(final Collection<File> files, final long lineOffset, final long count, final Consumer<String> lineParser)
+	public static void parse(final InputStream is, final long lineOffset, final long count, final Consumer<String> lineParser)
+	public static void parse(final Iterator<T> iter, final long lineOffset, final long count, final Consumer<String> lineParser)
+
+BE CAREFUL that methods fall to parse(XXX, final long lineOffset, final long count, final Consumer<String> lineParser) if the removed methods are used in your code.
+
+3, Move SQLiteExecutor from package: com.landawn.abacus.util to package:com.landawn.abacus.android.util. The reason is because SQLiteExecutor is tied to Android.
+
+4, Move com.landawn.abacus.android.AsyncExecutor.java/CallbackFuture.java/Util.java to package com.landawn.abacus.android.util
+
+5, rename CallbackFuture to FutureExecutor.
+
+6, Support cache measured by memory size with GenericKeyedObjectPool/GenericObjectPool
+
+7, Bug fix and improvements
+
+
+========Changes in 0.8.11=========================================================================
+1, Build separated library for android.
+2, Add utility classes to support Android: http://www.landawn.com/programming-in-android.html
+3, Support stream for jdk 7, specially for android. Lambda can be supported by Retrolambda: https://github.com/evant/gradle-retrolambda
+4, move methods N.streamOf(...) to com.landawn.util.stream.Stream.Of(...); 
+5, rename CallableFuture to CallbackFuture.
+6, enhancement and bug fix.
+
+========Changes in 0.8.10=========================================================================
+1, Add below methods to SQLiteExecutor:
+	public long insert(Object entity, int conflictAlgorithm)
+	 ...
+	public DataSet query(String table, Map<String, Class> selectColumnNameTypeMap, Condition whereClause, String groupBy, String having, String orderBy,int offset, int count)
+
+2, Refactoring the parse methods in JdbcUtil.java and IOUtil.java.
+
+3, Refactoring HttpClient and Integrated with Square okhttp.
+
+========Changes in 0.8.9=========================================================================
+1, Add Neo4jExecutor.
+2, Fix the log issue for Android.
+
+=================================================================================================
+
+========Changes in 0.8.8=========================================================================
+1, Minor bug fix and improvements
+
+=================================================================================================
+
+========Changes in 0.8.7=========================================================================
+
+1, rename the variable name from '_' to '__' in auto-generated entity classes by CodeGenerator due to '_' is a reserved key word since Java 8.
+
+=================================================================================================
+
+
+========Changes in 0.8.6=========================================================================
+
+1, Fix bugs for user-defined types support in CassandraExecutor.java.
+
+2, Rename OrderDirection to SortDirection and move it from com.landawn.abacus.condition to com.landawn.abacus.util
+
+3, Support Android 4.4 (API Level: 19).
+
+=================================================================================================
+
+
+========Changes in 0.8.5=========================================================================
+
+1, Support user-defined types in CassandraExecutor.java.
+
+=================================================================================================
+
+
+
+========Changes in 0.8.4=========================================================================
+
+1, Changes in IOUtil.java
+		a) Rename method: public static boolean delete(final File file, FileFilter filter) {...} to: public static boolean deleteFiles(final File file, FileFilter filter) {...}
+		
+		b) Impove the copy(...) methods.
+		
+2, Impovements and bug fix in CodeGenerator.java.
+
+3, Remove NamingPolicy.IDENTITY to NamingPolicy.CAMEL_CASE
+
+=================================================================================================
+
+
+
+========Changes in 0.8.3=========================================================================
+
+1, Rename Range.is(...) and Range.between(...) to Range.of(...)
+
+2, Changes in IOUtil.java
+	a) Change default charset from Charsets.UTF_8 to Charsets.DEFAULT.
+	
+	b) Remove method: public static boolean createFileIfNotExists(String filePath) {...} and Add method: createFileIfNotExists(File file) {...}
+	
+	c) Remove method: public static boolean deleteFileIfExists(String filePath) {...} and Add method: deleteIfExists(File file) {...}
+	
+	d) Remove method: public static void copy(File srcFile, File destDir, final boolean preserveFileDate, final FilenameFilter filter) {...} and Add method: public static void copy(File srcFile, File destDir, final boolean preserveFileDate, final FileFilter filter) {...}
+	
+	e) Rename method: delete(File file) to deleteAllIfExists(File file) and Add method: public static boolean delete(final File file, FileFilter filter) {...}
+	
+	f) Refactoring methods:
+		------------------------------------------------------------------------------------------------------------------------- 
+		From: 
+			public static void copy(File srcFile, File destDir, final FilenameFilter filter, final boolean preserveFileDate) {...}
+		To:
+			public static void copy(File srcFile, File destDir, final boolean preserveFileDate, final FilenameFilter filter) {...}
+		------------------------------------------------------------------------------------------------------------------------- 
+		
+		-------------------------------------------------------------------------------------------------------------------------
+		From:
+			public static List<String> list(File path, final boolean excludeDirectory, final boolean recursively) {...}
+		To: 
+			public static List<String> list(File path, final boolean recursively, final boolean excludeDirectory) {...}
+		-------------------------------------------------------------------------------------------------------------------------
+		
+		-------------------------------------------------------------------------------------------------------------------------
+		From:
+			public static List<String> list(File path, final FileFilter filter, final boolean recursively) {...}		
+		To:
+			public static List<String> list(File path, final boolean recursively, final FileFilter filter) {...}
+		-------------------------------------------------------------------------------------------------------------------------
+		
+		-------------------------------------------------------------------------------------------------------------------------
+		From:
+			public static List<String> listFiles(File path, final boolean excludeDirectory, final boolean recursively) {...}
+		To: 
+			public static List<String> listFiles(File path, final boolean recursively, final boolean excludeDirectory) {...}
+		-------------------------------------------------------------------------------------------------------------------------
+		
+		-------------------------------------------------------------------------------------------------------------------------
+		From:
+			public static List<String> listFiles(File path, final FileFilter filter, final boolean recursively) {...}		
+		To:
+			public static List<String> listFiles(File path, final boolean recursively, final FileFilter filter) {...}
+		-------------------------------------------------------------------------------------------------------------------------
+		
+		-------------------------------------------------------------------------------------------------------------------------
+		From:
+			public static List<String> listDirectories(File path, final boolean excludeDirectory, final boolean recursively) {...}
+		To: 
+			public static List<String> listDirectories(File path, final boolean recursively, final boolean excludeDirectory) {...}
+		-------------------------------------------------------------------------------------------------------------------------
+		
+		-------------------------------------------------------------------------------------------------------------------------
+		From:
+			public static List<String> listDirectories(File path, final FileFilter filter, final boolean recursively) {...}		
+		To:
+			public static List<String> listDirectories(File path, final boolean recursively, final FileFilter filter) {...}
+		-------------------------------------------------------------------------------------------------------------------------
+
+=================================================================================================
+
+
+
+========Changes in 0.8.2=========================================================================
+
+1, Bug fix in method:
+    public static void parse(final Collection<File> files, final long lineOffset, final long count, final boolean inParallel,
+            final Consumer<String> lineParser) {
+            ...
+    }
+            
+	change: countForAll.intValue() to countForAll.longValue()
+
+2, Improvements: Array.range(...) and Array.rangeClosed(...). 
+	a) Decrement is supported by negative 'by'
+	b) Remove range/rangeClosed for float/double due to precision issue. "3.3d - 1.1d != 2.2d". Refer to: https://en.wikipedia.org/wiki/IEEE_floating_point
+
+=================================================================================================
+
+
+
+========Changes in 0.8.1=========================================================================
+
+1, Rename N.defaultValue(Class) to N.defaultValueOf(Class)
+
+2, Rename N.difference(String, String) to N.differenceOf(String, String)
+
+3, Rename N.difference(Object, Object) to N.differenceOf(Object, Object)
+
+4, Extend N.forEach(...) method
+
+5, Extend N.split(...) method
+
+6, Extend N.copyOfRange(...) method
+
+=================================================================================================
+
+
+
+
+
+
+		

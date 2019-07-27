@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0028)http://jdbi.org/achieve.html -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+
+
+<title>abacus-util</title>
+
+<script type="text/javascript" src="./css/ga.js"></script>
+<script type="text/javascript">
+	if (top.location != self.location)
+		top.location.replace(self.location);
+</script>
+
+<link href="./css/css" rel="stylesheet" type="text/css"></link>
+<link href="./css/css(1)" rel="stylesheet" type="text/css"></link>
+<link rel="stylesheet" href="./css/syntax.css" type="text/css"></link>
+<link rel="stylesheet" href="./css/screen.css" type="text/css"></link>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-65247258-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</head>
+<body>
+	<div id="site">
+		<h1>
+			<a href="./index.html">abacus-util</a> <span id="navigation"> <a href="./docs.html">Docs</a> | <a href="./download.html">Download</a>
+				| <a href="./api-docs/index.html">Javadoc</a> | <a href="./faq.html">FAQ</a> | <a href="./community.html">Community</a>
+			</span>
+		</h1>
+	</div>
+
+	<div id="content">
+
+		<div id="page">
+
+			<h1>What make Java different/successful</h1>
+			<p>I was taught that Java(C/C++) is a concise programming language and influenced since I was in college. For example:</p>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #B00040">int</span><span style="color: #666666">[]</span> a <span style="color: #666666">=</span> <span style="color: #666666">{</span> <span style="color: #666666">1,</span> <span style="color: #666666">2,</span> <span style="color: #666666">3</span> <span style="color: #666666">};</span>
+<span style="color: #008000; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #B00040">int</span> i <span style="color: #666666">=</span> <span style="color: #666666">0,</span> len <span style="color: #666666">=</span> a<span style="color: #666666">.</span><span style="color: #7D9029">length</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;</span> len<span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+    <span style="color: #008000; font-weight: bold">if</span> <span style="color: #666666">(</span>i <span style="color: #666666">%</span> <span style="color: #666666">2</span> <span style="color: #666666">==</span> <span style="color: #666666">0)</span> <span style="color: #666666">{</span>
+        System<span style="color: #666666">.</span><span style="color: #7D9029">out</span><span style="color: #666666">.</span><span style="color: #7D9029">print</span><span style="color: #666666">(</span>a<span style="color: #666666">[</span>i<span style="color: #666666">]);</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+
+			<p></p>
+			<p>Recently, I found some developers complain that Java syntax is verbose, comparing to some other programming languages. For example, The above codes can be rewrote with below format:</p>
+			
+			<li>Python</li>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">a <span style="color: #666666">=</span> [<span style="color: #666666">1</span>, <span style="color: #666666">2</span>, <span style="color: #666666">3</span>]
+<span style="color: #008000; font-weight: bold">for</span> e <span style="color: #AA22FF; font-weight: bold">in</span> a:
+    <span style="color: #008000; font-weight: bold">if</span> e <span style="color: #666666">%</span> <span style="color: #666666">2</span> <span style="color: #666666">==</span> <span style="color: #666666">0</span>:
+        <span style="color: #008000">print</span> e
+</pre></div>
+
+		<li>Go</li>
+		<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">a <span style="color: #666666">:=</span> [<span style="color: #666666">3</span>]<span style="color: #B00040">int</span>{<span style="color: #666666">1</span>, <span style="color: #666666">2</span>, <span style="color: #666666">3</span>}
+<span style="color: #008000; font-weight: bold">for</span> i <span style="color: #666666">:=</span> <span style="color: #666666">0</span>; i &lt; <span style="color: #008000">len</span>(a); i<span style="color: #666666">++</span> {
+    <span style="color: #008000; font-weight: bold">if</span> a[i] <span style="color: #666666">%</span> <span style="color: #666666">2</span> <span style="color: #666666">==</span> <span style="color: #666666">0</span> {
+	fmt.Println(a[i])
+    }
+}
+</pre></div>
+
+		<li>Ruby</li>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">a <span style="color: #666666">=</span> <span style="color: #666666">[1</span>, <span style="color: #666666">2</span>, <span style="color: #666666">3]</span>
+<span style="color: #008000; font-weight: bold">for</span> e <span style="color: #008000; font-weight: bold">in</span> a
+    <span style="color: #008000; font-weight: bold">if</span> e <span style="color: #666666">%</span> <span style="color: #666666">2</span> <span style="color: #666666">==</span> <span style="color: #666666">0</span> 
+	<span style="color: #008000">puts</span> e
+    <span style="color: #008000; font-weight: bold">end</span>
+<span style="color: #008000; font-weight: bold">end</span>
+</pre></div>
+
+
+			<p></p>
+			<p>The parenthesis/brace/comma are omitted to make the codes looks more concise than Java. 
+			This is the first and small step which has reflected how you're going to define/think about what a good programming language should be.
+			And it's kind of thing which is hard to be approved right or wrong. As a Java developer, I think Java syntax is pretty simple/concise. There is nothing with parenthesis/brace/comma bothering me at all.
+			Actually I like the syntax inherited from C/C++, rather than the syntax in other programming languages. Personally I even think the c-style syntax is a critical reason to <a href="http://www.tiobe.com/index.php/content/paperinfo/tpci/index.html">make C/C++/Java/C#/Object-C so successful</a>. Because the syntax has huge impact to your thoughts about how to resolve a problem, and the SDK/libraries/IDE/tools you can use.</p>
+			
+			<p></p>
+			<p>Secondly, Performance is very critical for a programming language to achieve a big success, even it's unnecessary or much higher than what a project needs. Because we're human being who always like things which are more powerful/fast/Strong, even they don't need it. Specially High performance is provided for free in other languages.
+			So don't logically argue with people that: "Performance deson't matter because you don't need it", "I don't care. That's what I want" is people's response in the real world.</p>
+
+			<p></p>
+			<p>Thirdly, To achieve the big success, feathers provided in the programming language must resolve certain problems which can not be resolved very well by other programming languages. If the feathers are just provided in different approaches but don't dramatically improve the solution, comparing to other existing programming languages, there will be little attraction to developers.
+			When C/C++/Java occurred, each of them brought big changes in solving certain problems</p>		
+				
+			<p>Finally, I would like to summary a few arguments during the comparison among different programming languages:</p>
+			<p>1), To evaluate a programming not equals to evaluate a personal taste about pizza or burger. All the programming languages have their own feathers and adopted in resolving different problems. 
+			They are comparable, and I think it's meaningful to compare different programming languages to help people understanding more and making correct decision. 
+			</p>
+			<p>2), It's not convinced at all to approve that a programming language is better than another by a few lines of code or feathers.
+			I think we can do it better by making the statistics: How many projects in resolving certain problems are written with the specific programming language and how many succeed or failed. 
+			The statistics will reflect how developer/people think about a programming language and the changes it brings. Of course, the number of projects for statistics must be enough big (in hundreds) and the projects are enough big (in tens of thousands lines of code).  
+			</p>
+
+		</div>
+
+	</div>
+</body>
+
+</html>

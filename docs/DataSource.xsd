@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.abacusep.com/landawn/abacus" xmlns:tns="http://www.abacusep.com/landawn/abacus">
+
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			Data source schema. Copyright 2015, Haiyang Li. All rights reserved.
+		</xsd:documentation>
+	</xsd:annotation>
+
+<!-- 
+	<dataSourceManager liveEnv="dev">
+		<dataSource name="codes" env="dev">
+		    <provider>dbcp</provider>
+		    <sqlLog>true</sqlLog>
+		    <perfLog>100</perfLog>
+		    <queryWithReadOnlyConnectionByDefault>true</queryWithReadOnlyConnectionByDefault>
+			<connection>
+				<url>jdbc:mysql://localhost:3306/abacustest</url>
+				<driver>com.mysql.jdbc.Driver</driver>
+				<user>root</user>
+				<password>admin</password>
+				<initialSize>8</initialSize>
+				<maxActive>32</maxActive>
+				<liveTime>86400000</liveTime>
+				<maxIdleTime>300000</maxIdleTime>
+				<validationQuery>select 1 from dual</validationQuery>
+			</connection>
+			<readOnlyConnection>
+				<url>jdbc:mysql://localhost:3306/abacustest</url>
+				<driver>com.mysql.jdbc.Driver</driver>
+				<user>root</user>
+				<password>admin</password>
+				<initialSize>8</initialSize>
+				<maxActive>100</maxActive>
+				<liveTime>86400000</liveTime>
+				<maxIdleTime>300000</maxIdleTime>
+				<validationQuery>select 1 from dual</validationQuery>
+			</readOnlyConnection>
+		</dataSource>
+	</dataSourceManager>
+ -->
+
+	<xsd:element name="dataSourceManager" type="tns:DataSourceManager" />
+
+	<xsd:complexType name="DataSourceManager">
+		<xsd:sequence>
+			<!-- For distributed data source -->
+			<xsd:element name="dataSourceSelector" type="xsd:string" />
+			<!-- For partitioning tables -->
+			<xsd:element name="sliceSelector" type="xsd:string" />
+			<xsd:element name="dataSource" type="tns:DataSource" />
+		</xsd:sequence>
+		<xsd:attribute name="liveEnv" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="DataSource">
+		<xsd:sequence>
+			<xsd:element name="sliceSelector" type="xsd:string" />
+			<!-- dbcp, c3p0 or by default are supported -->
+			<xsd:element name="provider" type="xsd:string" />
+			<!-- default value READ_UNCOMMITTED, READ_COMMITTED, REPEATABLE_READ, SERIALIZABLE and DEFAULT are supported  -->
+			<xsd:element name="defaultIsolation" type="xsd:string" />
+			<!-- default value is false -->
+			<xsd:element name="sqlLog" type="xsd:boolean" />
+			<!-- log the duration and sql if it's bigger than the specified time. unit is millisecond -->
+			<xsd:element name="perfLog" type="xsd:integer" />
+			<xsd:element name="queryWithReadOnlyConnectionByDefault" type="xsd:boolean" />
+			<xsd:element name="connection" type="tns:Connection" />
+			<xsd:element name="readOnlyConnection" type="tns:Connection" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="env" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="Connection">
+		<xsd:sequence>
+			<!-- Following properties: 'jndiName', 'jndiContextFactory' and 'jndiProviderUrl' 
+				are for jndi DataSource. -->
+			<xsd:element name="jndiName" type="xsd:string" />
+			<xsd:element name="jndiContextFactory" type="xsd:string" />
+			<xsd:element name="jndiProviderUrl" type="xsd:string" />
+
+			<!-- Following properties: 'driver', 'url', 'user' and 'password' are 
+				for DriverManager. You must select one between DataSource and DriverManager. 
+				If you fill all the properties for the DataSource and DriverManager, Abacus 
+				will only use the DataSource properties, and ignore the DriverManager properties -->
+			<xsd:element name="driver" type="xsd:string" />
+			<xsd:element name="url" type="xsd:string" />
+			<xsd:element name="user" type="xsd:string" />
+			<xsd:element name="password" type="xsd:string" />
+
+			<!-- The connection number which is created when server is started. Default value is 0 -->
+			<xsd:element name="initialSize" type="xsd:positiveInteger" />
+			<!-- The connection number which will can be idle in connection pool permanently when they're not used. Default value is 8 -->
+			<xsd:element name="minIdle" type="xsd:positiveInteger" />
+			<!-- The connection number which is allowed to be idle in connection pool when they're not used. Default value be will be same as 'maxActive' -->
+			<xsd:element name="maxIdle" type="xsd:positiveInteger" />
+			<!-- The connection number which is allowed to create. Default value is 32 -->
+			<xsd:element name="maxActive" type="xsd:positiveInteger" />
+			<!-- default value is 256 -->
+			<xsd:element name="maxOpenPreparedStatementsPerConnection" type="xsd:positiveInteger" />
+			<!-- default value is 24 * 60 * 60 * 1000 = 86400000. unit is milliseconds -->
+			<xsd:element name="liveTime" type="xsd:positiveInteger" />
+			<!-- default value is 30 * 60 * 1000 = 1800000. unit is milliseconds -->
+			<xsd:element name="maxIdleTime" type="xsd:positiveInteger" />
+			<!-- default value is 1000. unit is milliseconds -->
+			<xsd:element name="maxWaitTime" type="xsd:positiveInteger" />
+			<!-- some sql statement like: select 1 from dual -->
+			<xsd:element name="validationQuery" type="xsd:string" />
+			<!-- default value is true -->
+			<xsd:element name="testOnBorrow" type="xsd:boolean" />
+			<!-- default value is false -->
+			<xsd:element name="testOnReturn" type="xsd:boolean" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+</xsd:schema>

@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0028)http://jdbi.org/archive.html -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+
+
+<title>abacus-util</title>
+
+<script type="text/javascript" src="./css/ga.js"></script>
+<script type="text/javascript">
+	if (top.location != self.location)
+		top.location.replace(self.location);
+</script>
+
+<link href="./css/css" rel="stylesheet" type="text/css"></link>
+<link href="./css/css(1)" rel="stylesheet" type="text/css"></link>
+<link rel="stylesheet" href="./css/syntax.css" type="text/css"></link>
+<link rel="stylesheet" href="./css/screen.css" type="text/css"></link>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-65247258-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</head>
+<body>
+	<div id="site">
+		<h1>
+			<a href="./index.html">abacus-util</a> <span id="navigation"> <a href="./docs.html">Docs</a> | <a href="./download.html">Download</a> | <a
+				href="./api-docs/index.html">Javadoc</a> | <a href="./faq.html">FAQ</a> | <a href="./community.html">Community</a>
+			</span>
+		</h1>
+	</div>
+
+	<div id="content">
+
+		<div id="page">
+
+			<h1>SQL/NoSQL</h1>
+			<p>There are most three types of data: 1, Binary(Image/Video/Audio/...), 2 Text(Article...), 3 Structured or semi-structured records(address/...). Generally, Type 1
+				and 2 are stored in (distributed) file system and query/process by text/binary search and batch process. Type 3 is stored in (distributed) RDBMS or NoSQL
+				data store and query/process by specific query language/expression and online APIs. It's much easier to process structured records than binary/text data.
+				However, how to store the structured records efficiently is a common problem to resolve. Here are couple of general principles we
+				should adopt:</p>
+
+			<li>If possible, always define your data with good model/structure, no matter it's for SQL, or NoSQL.</li>
+
+			<li>Theoretically, RDBMS is much more efficient than NoSQL data store to process/analyze the structured data with SQL.</li>
+
+			<li>Don't distribute your data until it's more than billion/TB or can't be handled by single machine. There is few reason to distribute tens of GB/million data.</li>
+
+			<br></br>
+			<p>
+				Refer to the <a href = "https://www.quora.com/Why-does-Quora-use-MySQL-as-the-data-store-instead-of-NoSQLs-such-as-Cassandra-MongoDB-or-CouchDB">comments about SQL/NoSQL from Adam D'Angelo at Quora</a>.
+			</p>
+		</div>
+
+	</div>
+</body>
+
+</html>

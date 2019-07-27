@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+	<display-name>account</display-name>
+
+	<servlet>
+		<description>Account Web Service</description>
+		<display-name>Account Web Service</display-name>
+		<servlet-name>Account</servlet-name>
+		<servlet-class>com.landawn.abacus.http.WebServiceServlet</servlet-class>
+
+		<init-param>
+			<param-name>serviceImplClass</param-name>
+			<param-value>com.landawn.abacus.http.demo.AccountServiceImpl</param-value>
+		</init-param>
+
+		<!-- below url mapper configuration is optional -->
+		<init-param>
+			<param-name>urlMapper</param-name>
+			<param-value>getAccount=getAccount; addAccount=addAccount</param-value>
+		</init-param>
+
+		<!-- below http method mapper configuration is optional -->
+		<init-param>
+			<param-name>httpMethodMapper</param-name>
+			<param-value>getAccount=GET, POST; addAccount=POST, PUT</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>Account</servlet-name>
+		<url-pattern>/AccountService/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>

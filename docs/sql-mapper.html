@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0028)http://jdbi.org/archive.html -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+
+
+<title>abacus-util</title>
+
+<script type="text/javascript" src="./css/ga.js"></script>
+<script type="text/javascript">
+	if (top.location != self.location)
+		top.location.replace(self.location);
+</script>
+
+<link href="./css/css" rel="stylesheet" type="text/css"></link>
+<link href="./css/css(1)" rel="stylesheet" type="text/css"></link>
+<link rel="stylesheet" href="./css/syntax.css" type="text/css"></link>
+<link rel="stylesheet" href="./css/screen.css" type="text/css"></link>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-65247258-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</head>
+<body>
+	<div id="site">
+		<h1>
+			<a href="./index.html">abacus-util</a> <span id="navigation"> <a href="./docs.html">Docs</a> | <a href="./download.html">Download</a>
+				| <a href="./api-docs/index.html">Javadoc</a> | <a href="./faq.html">FAQ</a> | <a href="./community.html">Community</a>
+			</span>
+		</h1>
+	</div>
+
+	<div id="content">
+
+		<div id="page">
+		
+			<h1>SQL Mapper</h1>
+			
+			<p><a href="./api-docs/com/landawn/abacus/util/SQLMapper.html">SQLMapper</a> supports the pre-defined sql in xml file. Here is the schema: <a href="./SQLMapper.xsd">SQLMapper.xsd</a>.
+			It's easy to generate class for the mapping id by <a href="./code-generation.html">Code Generation</a> and used in:
+			 <a href="./api-docs/com/landawn/abacus/util/SQLExecutor.html">SQLExecutor</a>, 
+			 <a href="./api-docs/com/landawn/abacus/util/CassandraExecutor.html">CassandraExecutor</a>, 
+			 <a href="./api-docs/com/landawn/abacus/util/CouchbaseExecutor.html">CouchbaseExecutor</a>. Here are the steps/samples about how to do it: </p>
+
+			<li><b>Step 1: Write the sql scripts in the xml file. Here is a sample:</b></li>
+			<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #BC7A00">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;</span>
+<span style="color: #008000; font-weight: bold">&lt;sqlMapper&gt;</span>
+	<span style="color: #008000; font-weight: bold">&lt;sql</span> <span style="color: #7D9029">id=</span><span style="color: #BA2121">&quot;insertAccount&quot;</span><span style="color: #008000; font-weight: bold">&gt;</span>INSERT INTO account (first_name, last_name, gui, last_update_time, create_time) VALUES (#{firstName}, #{lastName}, #{gui}, #{lastUpdateTime}, #{createTime})<span style="color: #008000; font-weight: bold">&lt;/sql&gt;</span>
+
+	<span style="color: #008000; font-weight: bold">&lt;sql</span> <span style="color: #7D9029">id=</span><span style="color: #BA2121">&quot;selectAccountById&quot;</span><span style="color: #008000; font-weight: bold">&gt;</span>select * from account WHERE account.id = #{id}<span style="color: #008000; font-weight: bold">&lt;/sql&gt;</span>
+
+	<span style="color: #008000; font-weight: bold">&lt;sql</span> <span style="color: #7D9029">id=</span><span style="color: #BA2121">&quot;selectAllAccount&quot;</span><span style="color: #008000; font-weight: bold">&gt;</span>select * from account<span style="color: #008000; font-weight: bold">&lt;/sql&gt;</span>
+
+	<span style="color: #008000; font-weight: bold">&lt;sql</span> <span style="color: #7D9029">id=</span><span style="color: #BA2121">&quot;updateAccountFirstNameById&quot;</span><span style="color: #008000; font-weight: bold">&gt;</span>UPDATE account SET first_name = #{firstName} WHERE account.id = #{id}<span style="color: #008000; font-weight: bold">&lt;/sql&gt;</span>
+
+	<span style="color: #008000; font-weight: bold">&lt;sql</span> <span style="color: #7D9029">id=</span><span style="color: #BA2121">&quot;deleteAccountById&quot;</span><span style="color: #008000; font-weight: bold">&gt;</span>DELETE FROM account WHERE account.id = #{id}<span style="color: #008000; font-weight: bold">&lt;/sql&gt;</span>
+
+	<span style="color: #008000; font-weight: bold">&lt;sql</span> <span style="color: #7D9029">id=</span><span style="color: #BA2121">&quot;deleteAllAccount&quot;</span><span style="color: #008000; font-weight: bold">&gt;</span>DELETE FROM account<span style="color: #008000; font-weight: bold">&lt;/sql&gt;</span>
+<span style="color: #008000; font-weight: bold">&lt;/sqlMapper&gt;</span>
+</pre></div>
+			
+		<p></p>
+		<li><b>Step 2: Generate the class for SQL mapper ids by the xml file</b></li>
+		<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">static</span> <span style="color: #B00040">void</span> <span style="color: #0000FF">generateSQLMapperIdTable</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+    String srcPath <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;./src/&quot;</span><span style="color: #666666">;</span>
+    <span style="color: #008000; font-weight: bold">final</span> String sqlMapperXmlFile <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;./resources/codesSQLMapper.xml&quot;</span><span style="color: #666666">;</span>
+    <span style="color: #008000; font-weight: bold">final</span> String targetClassName <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;CodesSQLMapperIdList&quot;</span><span style="color: #666666">;</span>
+
+    CodeGenerator<span style="color: #666666">.</span><span style="color: #7D9029">generateSQLMapperIdTable</span><span style="color: #666666">(</span>sqlMapperXmlFile<span style="color: #666666">,</span> srcPath<span style="color: #666666">,</span> packageName<span style="color: #666666">,</span> targetClassName<span style="color: #666666">,</span> <span style="color: #008000; font-weight: bold">null</span><span style="color: #666666">);</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+		<p></p>
+		<li><b>Step 3: Initialize the SQLExecutor with SQLMapper</b></li>
+		<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">static</span> <span style="color: #008000; font-weight: bold">final</span> String dataSourcePath <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;./resources/h2_dataSource.xml&quot;</span><span style="color: #666666">;</span>
+
+<span style="color: #008000; font-weight: bold">static</span> <span style="color: #008000; font-weight: bold">final</span> SQLMapper sqlMapper <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">new</span> SQLMapper<span style="color: #666666">(</span><span style="color: #BA2121">&quot;./resources/codesSQLMapper.xml&quot;</span><span style="color: #666666">);</span>
+
+<span style="color: #008000; font-weight: bold">static</span> <span style="color: #008000; font-weight: bold">final</span> SQLExecutor sqlExecutor <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">new</span> SQLExecutor<span style="color: #666666">(</span>JdbcUtil<span style="color: #666666">.</span><span style="color: #7D9029">createDataSourceManager</span><span style="color: #666666">(</span>dataSourcePath<span style="color: #666666">),</span> <span style="color: #008000; font-weight: bold">null</span><span style="color: #666666">,</span> sqlMapper<span style="color: #666666">);</span>
+</pre></div>
+		
+
+		<p></p>
+		<li><b>Programming with sql mapper ids</b></li>
+		<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #B00040">void</span> <span style="color: #0000FF">test_crud</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+    Account account <span style="color: #666666">=</span> createAccount<span style="color: #666666">(</span><span style="color: #BA2121">&quot;firstName123&quot;</span><span style="color: #666666">,</span> <span style="color: #BA2121">&quot;lastName123&quot;</span><span style="color: #666666">);</span>
+
+    <span style="color: #408080; font-style: italic">// insert</span>
+    <span style="color: #B00040">long</span> id <span style="color: #666666">=</span> sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">insert</span><span style="color: #666666">(</span>INSERT_ACCOUNT<span style="color: #666666">,</span> account<span style="color: #666666">);</span>
+
+    <span style="color: #408080; font-style: italic">// read</span>
+    Account dbAccount <span style="color: #666666">=</span> sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">queryForEntity</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">,</span> SELECT_ACCOUNT_BY_ID<span style="color: #666666">,</span> id<span style="color: #666666">);</span>
+    N<span style="color: #666666">.</span><span style="color: #7D9029">println</span><span style="color: #666666">(</span>dbAccount<span style="color: #666666">);</span>
+
+    <span style="color: #408080; font-style: italic">// update</span>
+    String newFirstName <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;newFirstName&quot;</span><span style="color: #666666">;</span>
+    dbAccount<span style="color: #666666">.</span><span style="color: #7D9029">setFirstName</span><span style="color: #666666">(</span>newFirstName<span style="color: #666666">);</span>
+    sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">update</span><span style="color: #666666">(</span>UPDATE_ACCOUNT_FIRST_NAME_BY_ID<span style="color: #666666">,</span> dbAccount<span style="color: #666666">);</span>
+    dbAccount <span style="color: #666666">=</span> sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">queryForEntity</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">,</span> SELECT_ACCOUNT_BY_ID<span style="color: #666666">,</span> id<span style="color: #666666">);</span>
+    assertEquals<span style="color: #666666">(</span>newFirstName<span style="color: #666666">,</span> dbAccount<span style="color: #666666">.</span><span style="color: #7D9029">getFirstName</span><span style="color: #666666">());</span>
+
+    <span style="color: #408080; font-style: italic">// delete</span>
+    sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">update</span><span style="color: #666666">(</span>DELETE_ACCOUNT_BY_ID<span style="color: #666666">,</span> dbAccount<span style="color: #666666">);</span>
+    dbAccount <span style="color: #666666">=</span> sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">queryForEntity</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">,</span> SELECT_ACCOUNT_BY_ID<span style="color: #666666">,</span> id<span style="color: #666666">);</span>
+    assertNull<span style="color: #666666">(</span>dbAccount<span style="color: #666666">);</span>
+<span style="color: #666666">}</span>
+</pre></div>
+		
+
+		</div>
+
+	</div>
+</body>
+
+</html>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<entityDef package="com.sample.ws.model">
+
+	<!-- ====================================== Basic request/response ==================================== -->
+	<!-- RequestBase -->
+	<entity name="RequestBase" abstract="true">
+		<properties>
+			<property name="accessToken" type="String" />
+		</properties>
+	</entity>
+
+	<!-- ResponseBase -->
+	<entity name="ResponseBase" abstract="true">
+		<properties>
+			<property name="respCode" type="com.sample.ws.model.ResponseCode" />
+			<property name="respMessage" type="String" />
+		</properties>
+	</entity>
+	<!-- ================================================================================================== -->
+
+
+	<!-- ====================================== Account service =========================================== -->
+	<!-- Client profile -->
+	<entity name="Account">
+		<properties>
+			<property name="id" type="long" />
+			<property name="emailAddress" type="String" />
+			<property name="fullName" type="String" />
+			<property name="birthday" type="JUDate" />
+			<property name="gender" type="com.sample.ws.dataTypes.Gender" />
+			<property name="accountType" type="com.sample.ws.dataTypes.AccountType" />
+			<property name="phoneNumber" type="List&lt;String&gt;" />
+		</properties>
+	</entity>
+
+	<entity name="ClientProfile">
+		<properties>
+			<property name="os" type="String" />
+			<property name="deviceModel" type="String" />
+			<property name="client" type="String" />
+		</properties>
+	</entity>
+
+	<!-- CreateAccountRequest -->
+	<entity name="CreateAccountRequest" extends="RequestBase">
+		<properties>
+			<property name="emailAddress" type="String" />
+			<property name="password" type="String" />
+			<property name="fullName" type="String" />
+			<property name="birthday" type="JUDate" />
+			<property name="gender" type="com.sample.ws.dataTypes.Gender" />
+			<property name="accountType" type="com.sample.ws.dataTypes.AccountType" />
+			<property name="phoneNumber" type="List&lt;String&gt;" />
+		</properties>
+	</entity>
+
+	<!-- CreateAccountResponse -->
+	<entity name="CreateAccountResponse" extends="ResponseBase">
+		<properties>
+			<property name="accountId" type="long" />
+		</properties>
+	</entity>
+
+	<!-- CheckLoginIdRequest -->
+	<entity name="CheckLoginIdRequest" extends="RequestBase">
+		<properties>
+			<property name="loginId" type="String" />
+		</properties>
+	</entity>
+
+	<!-- CheckLoginIdResponse -->
+	<entity name="CheckLoginIdResponse" extends="ResponseBase">
+		<properties>
+		</properties>
+	</entity>
+
+	<!-- LoginRequest -->
+	<entity name="LoginRequest" extends="RequestBase">
+		<properties>
+			<property name="loginId" type="String" />
+			<property name="loginPassword" type="String" />
+			<property name="clientProfile" type="ClientProfile" />
+		</properties>
+	</entity>
+
+	<!-- LoginResponse -->
+	<entity name="LoginResponse" extends="ResponseBase">
+		<properties>
+			<property name="userAccessToken" type="String" />
+			<property name="account" type="Account" />
+		</properties>
+	</entity>
+
+	<!-- GetAccountRequest -->
+	<entity name="GetAccountRequest" extends="RequestBase">
+	</entity>
+
+	<!-- GetAccountResponse -->
+	<entity name="GetAccountResponse" extends="ResponseBase">
+		<properties>
+			<property name="account" type="Account" />
+		</properties>
+	</entity>
+
+	<!-- UpdateAccountRequest -->
+	<entity name="UpdateAccountRequest" extends="RequestBase">
+		<properties>
+			<property name="emailAddress" type="String" />
+			<property name="password" type="String" />
+			<property name="fullName" type="String" />
+			<property name="birthday" type="JUDate" />
+			<property name="gender" type="com.sample.ws.dataTypes.Gender" />
+			<property name="phoneNumber" type="List&lt;String&gt;" />
+		</properties>
+	</entity>
+
+	<!-- UpdateAccountResponse -->
+	<entity name="UpdateAccountResponse" extends="ResponseBase">
+		<properties>
+		</properties>
+	</entity>
+
+	<!-- ResetPasswordRequest -->
+	<entity name="ResetPasswordRequest" extends="RequestBase">
+		<properties>
+			<property name="loginId" type="String" />
+			<property name="fullName" type="String" />
+		</properties>
+	</entity>
+
+	<!-- ResetPasswordResponse -->
+	<entity name="ResetPasswordResponse" extends="ResponseBase">
+		<properties>
+		</properties>
+	</entity>
+
+	<!-- CloseAccountRequest -->
+	<entity name="CloseAccountRequest" extends="RequestBase">
+		<properties>
+		</properties>
+	</entity>
+
+	<!-- CloseAccountResponse -->
+	<entity name="CloseAccountResponse" extends="ResponseBase">
+		<properties>
+		</properties>
+	</entity>
+	<!-- ================================================================================================== -->
+
+</entityDef>
