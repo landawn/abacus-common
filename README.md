@@ -17,7 +17,6 @@ A general programming library in Java/Android. It's easy to learn and simple to 
 [Maps](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Maps_view.html), 
 [DateUtil](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/DateUtil_view.html), 
 [IOUtil](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/IOUtil_view.html), 
-[f](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/f_view.html), 
 [Indexed](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Indexed_view.html), 
 [If](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/If_view.html), 
 [Try](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Try_view.html), 

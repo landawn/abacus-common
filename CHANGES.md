@@ -1,3 +1,10 @@
+### 1.8.3
+
+* Move `f` to `abacus-da`.
+
+* Improvements and bug fix.
+
+
 ### 1.8.2
 
 * Remove `Primitives.unboxOrDefault`, replaced by `N.defaultIfNull`.
