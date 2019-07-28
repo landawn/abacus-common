@@ -1,6 +1,6 @@
 ### 1.8.3
 
-* Move `f` to `abacus-da`.
+* Move `f/Points` to `abacus-da`.
 
 * Improvements and bug fix.
 
