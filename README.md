@@ -196,8 +196,6 @@ compile 'com.landawn:abacus-util:1.8.2'
 compile 'abacus-util-se:1.8.2'
 ```
 
-## Also See: [abacus-da](https://github.com/landawn/abacus-da), [abacus-android](https://github.com/landawn/abacus-android), 
-
 
 ### Functional Programming:
 (It's very important to learn Lambdas and Stream APIs in Java 8 to get the best user experiences with the APIs provided in abacus-util)
@@ -215,6 +213,9 @@ compile 'abacus-util-se:1.8.2'
 
 ## User Guide:
 Please refer to [Wiki](https://github.com/landawn/abacus-util/wiki), [Introduction to JDBC](https://www.javacodegeeks.com/2015/02/jdbc-tutorial.html), [Programming in JDBC/DB with JdbcUtil/PreparedQuery/SQLExecutor/Dao/Mapper](https://github.com/landawn/abacus-util/wiki/Programming-in-RDBMS-with-Jdbc,-Dao,-PreparedQuery-and-SQLExecutor-Mapper).
+
+
+## Also See: [abacus-da](https://github.com/landawn/abacus-da), [abacus-android](https://github.com/landawn/abacus-android), 
 
 
 ## Recommended Java programming libraries/frameworks:
