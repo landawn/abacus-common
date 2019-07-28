@@ -192,7 +192,7 @@ A general programming library in Java/Android. It's easy to learn and simple to 
 // JDK 1.8 or above:
 compile 'com.landawn:abacus-util:1.8.2' 
 
-// util-se (Java 1.7) - small edition without Streams/Primitive Lists:
+// util-se (Java 1.7) - small edition without Streams/Primitive Lists... Mostly it's for abacus-android.
 compile 'abacus-util-se:1.8.2'
 ```
 
