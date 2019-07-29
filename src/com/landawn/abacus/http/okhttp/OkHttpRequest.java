@@ -16,8 +16,10 @@ package com.landawn.abacus.http.okhttp;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -30,11 +32,15 @@ import com.landawn.abacus.http.HTTP;
 import com.landawn.abacus.http.HttpHeaders;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.type.Type;
+import com.landawn.abacus.parser.KryoParser;
+import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.parser.XMLParser;
+import com.landawn.abacus.util.BufferedReader;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Try;
 
 import okhttp3.CacheControl;
@@ -89,6 +95,9 @@ public class OkHttpRequest {
             }
         });
     }
+
+    static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
+    static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
     static final OkHttpClient defaultClient = new OkHttpClient();
 
@@ -295,19 +304,28 @@ public class OkHttpRequest {
 
         try (Response resp = execute(method)) {
             if (resp.isSuccessful()) {
-                final ContentFormat responseContentFormat = HTTP.getContentFormat(resp.header(HttpHeaders.Names.CONTENT_TYPE),
+                final ContentFormat respContentFormat = HTTP.getContentFormat(resp.header(HttpHeaders.Names.CONTENT_TYPE),
                         resp.header(HttpHeaders.Names.CONTENT_ENCODING));
+                final Charset respCharset = HTTP.getCharset(resp.header(HttpHeaders.Names.CONTENT_TYPE));
 
-                final InputStream is = HTTP.wrapInputStream(resp.body().byteStream(), responseContentFormat);
+                final InputStream is = HTTP.wrapInputStream(resp.body().byteStream(), respContentFormat);
 
-                final Type<Object> type = N.typeOf(resultClass);
-
-                if (byte[].class.equals(resultClass)) {
+                if (resultClass == null || resultClass.equals(String.class)) {
+                    return (T) IOUtil.readString(is, respCharset);
+                } else if (byte[].class.equals(resultClass)) {
                     return (T) IOUtil.readBytes(is);
-                } else if (type.isSerializable()) {
-                    return (T) type.valueOf(IOUtil.readString(is));
                 } else {
-                    return HTTP.getParser(responseContentFormat).deserialize(resultClass, is);
+                    if (respContentFormat == ContentFormat.KRYO && kryoParser != null) {
+                        return kryoParser.deserialize(resultClass, is);
+                    } else {
+                        final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
+
+                        try {
+                            return HTTP.getParser(respContentFormat).deserialize(resultClass, br);
+                        } finally {
+                            Objectory.recycle(br);
+                        }
+                    }
                 }
             } else {
                 throw new IOException(resp.code() + ": " + resp.message());

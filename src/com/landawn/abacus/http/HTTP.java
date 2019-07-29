@@ -128,6 +128,7 @@ public final class HTTP {
                 contentEncoding2Format.put(LZ4, entry.getKey());
             } else if (entry.getKey().name().contains("KRYO")) {
                 contentEncoding2Format.put(KRYO, entry.getKey());
+                contentEncoding2Format.put(N.EMPTY_STRING, entry.getKey());
             } else {
                 contentEncoding2Format.put(N.EMPTY_STRING, entry.getKey());
             }
@@ -333,10 +334,10 @@ public final class HTTP {
         return charset;
     }
 
-    private static Charset getCharset(String value) {
-        int fromIndex = value.indexOf("charset=");
-        int toIndex = value.indexOf(';', fromIndex);
+    public static Charset getCharset(String contentType) {
+        int fromIndex = contentType.indexOf("charset=");
+        int toIndex = contentType.indexOf(';', fromIndex);
 
-        return Charsets.get(value.substring(fromIndex + "charset=".length(), toIndex > 0 ? toIndex : value.length()));
+        return Charsets.get(contentType.substring(fromIndex + "charset=".length(), toIndex > 0 ? toIndex : contentType.length()));
     }
 }

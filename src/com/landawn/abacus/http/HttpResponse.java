@@ -14,12 +14,15 @@
 
 package com.landawn.abacus.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.BufferedReader;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Objectory;
 
 /**
  * 
@@ -86,16 +89,24 @@ public class HttpResponse {
             return (T) body;
         }
 
-        final Type<Object> type = N.typeOf(resultClass);
-        final Charset charset = HTTP.getCharset(headers);
-        final String str = new String(body, charset);
+        final Charset respCharset = HTTP.getCharset(headers);
 
-        if (resultClass.equals(String.class)) {
-            return (T) str;
-        } else if (type.isSerializable()) {
-            return (T) type.valueOf(str);
+        if (resultClass == null || resultClass.equals(String.class)) {
+            return (T) new String(body, respCharset);
+        } else if (byte[].class.equals(resultClass)) {
+            return (T) body;
         } else {
-            return HTTP.getParser(bodyFormat).deserialize(resultClass, str);
+            if (bodyFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
+                return HTTP.kryoParser.deserialize(resultClass, new ByteArrayInputStream(body));
+            } else {
+                final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(new ByteArrayInputStream(body), respCharset));
+
+                try {
+                    return HTTP.getParser(bodyFormat).deserialize(resultClass, br);
+                } finally {
+                    Objectory.recycle(br);
+                }
+            }
         }
     }
 

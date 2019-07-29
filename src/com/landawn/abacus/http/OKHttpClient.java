@@ -249,10 +249,18 @@ public final class OKHttpClient extends AbstractHttpClient {
                             Objectory.recycle(bw);
                         }
                     } else {
-                        if (type.isSerializable()) {
-                            IOUtil.write(os, type.stringOf(request).getBytes(requestCharset));
+                        if (requestContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
+                            HTTP.kryoParser.serialize(os, request);
                         } else {
-                            HTTP.getParser(requestContentFormat).serialize(new OutputStreamWriter(os, requestCharset), request);
+                            final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
+
+                            try {
+                                HTTP.getParser(requestContentFormat).serialize(bw, request);
+
+                                bw.flush();
+                            } finally {
+                                Objectory.recycle(bw);
+                            }
                         }
                     }
 
@@ -279,14 +287,15 @@ public final class OKHttpClient extends AbstractHttpClient {
             httpResponse = client.newCall(httpRequest).execute();
 
             final Map<String, List<String>> respHeaders = httpResponse.headers().toMultimap();
-            final Charset charset = HTTP.getCharset(respHeaders);
-            final ContentFormat responseContentFormat = HTTP.getContentFormat(httpResponse.header(HttpHeaders.Names.CONTENT_TYPE),
+            final Charset respCharset = HTTP.getCharset(respHeaders);
+            final ContentFormat respContentFormat = HTTP.getContentFormat(httpResponse.header(HttpHeaders.Names.CONTENT_TYPE),
                     httpResponse.header(HttpHeaders.Names.CONTENT_ENCODING));
-            final InputStream is = N.defaultIfNull(HTTP.wrapInputStream(httpResponse.body().byteStream(), responseContentFormat), N.emptyInputStream());
+            final InputStream is = N.defaultIfNull(HTTP.wrapInputStream(httpResponse.body().byteStream(), respContentFormat), N.emptyInputStream());
 
             if (httpResponse.isSuccessful() == false
                     && (resultClass == null || !(resultClass.equals(HttpResponse.class) || resultClass.equals(okhttp3.Response.class)))) {
-                throw new UncheckedIOException(new IOException(httpResponse.code() + ": " + httpResponse.message() + ". " + IOUtil.readString(is, charset)));
+                throw new UncheckedIOException(
+                        new IOException(httpResponse.code() + ": " + httpResponse.message() + ". " + IOUtil.readString(is, respCharset)));
             }
 
             if (isOneWayRequest(settings)) {
@@ -301,7 +310,7 @@ public final class OKHttpClient extends AbstractHttpClient {
 
                     return null;
                 } else if (outputWriter != null) {
-                    final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, charset));
+                    final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
 
                     try {
                         IOUtil.write(outputWriter, br, true);
@@ -313,18 +322,24 @@ public final class OKHttpClient extends AbstractHttpClient {
                 } else {
                     if (resultClass != null && resultClass.equals(HttpResponse.class)) {
                         return (T) new HttpResponse(httpResponse.sentRequestAtMillis(), httpResponse.receivedResponseAtMillis(), httpResponse.code(),
-                                httpResponse.message(), respHeaders, IOUtil.readBytes(is), responseContentFormat);
+                                httpResponse.message(), respHeaders, IOUtil.readBytes(is), respContentFormat);
                     } else {
-                        final Type<Object> type = resultClass == null ? null : N.typeOf(resultClass);
-
-                        if (type == null) {
-                            return (T) IOUtil.readString(is, charset);
+                        if (resultClass == null || resultClass.equals(String.class)) {
+                            return (T) IOUtil.readString(is, respCharset);
                         } else if (byte[].class.equals(resultClass)) {
                             return (T) IOUtil.readBytes(is);
-                        } else if (type.isSerializable()) {
-                            return (T) type.valueOf(IOUtil.readString(is, charset));
                         } else {
-                            return HTTP.getParser(responseContentFormat).deserialize(resultClass, IOUtil.newBufferedReader(is, charset));
+                            if (respContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
+                                return HTTP.kryoParser.deserialize(resultClass, is);
+                            } else {
+                                final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
+
+                                try {
+                                    return HTTP.getParser(respContentFormat).deserialize(resultClass, br);
+                                } finally {
+                                    Objectory.recycle(br);
+                                }
+                            }
                         }
                     }
                 }

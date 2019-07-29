@@ -18,6 +18,8 @@ import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import com.landawn.abacus.util.N;
+
 /**
  * 
  * @since 1.3
@@ -161,11 +163,26 @@ public final class HttpSettings {
     }
 
     public ContentFormat getContentFormat() {
+        if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
+            contentFormat = HTTP.getContentFormat(N.stringOf(headers.get(HttpHeaders.Names.CONTENT_TYPE)),
+                    N.stringOf(headers.get(HttpHeaders.Names.CONTENT_ENCODING)));
+        }
+
         return contentFormat;
     }
 
     public HttpSettings setContentFormat(ContentFormat contentFormat) {
         this.contentFormat = contentFormat;
+
+        if (contentFormat == null || contentFormat == ContentFormat.NONE) {
+            if (headers != null) {
+                headers.remove(HttpHeaders.Names.CONTENT_TYPE);
+                headers.remove(HttpHeaders.Names.CONTENT_ENCODING);
+            }
+        } else {
+            header(HttpHeaders.Names.CONTENT_TYPE, HTTP.getContentType(contentFormat));
+            header(HttpHeaders.Names.CONTENT_TYPE, HTTP.getContentEncoding(contentFormat));
+        }
 
         return this;
     }
@@ -224,7 +241,7 @@ public final class HttpSettings {
                 .doOutput(doOutput)
                 .isOneWayRequest(isOneWayRequest)
                 .setContentFormat(contentFormat)
-                .headers(headers.copy());
+                .headers(headers == null ? null : headers.copy());
     }
 
     @Override
