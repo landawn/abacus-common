@@ -164,8 +164,8 @@ public final class HttpSettings {
 
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
-            contentFormat = HTTP.getContentFormat(N.stringOf(headers.get(HttpHeaders.Names.CONTENT_TYPE)),
-                    N.stringOf(headers.get(HttpHeaders.Names.CONTENT_ENCODING)));
+            contentFormat = HTTP.getContentFormat((String) headers.get(HttpHeaders.Names.CONTENT_TYPE),
+                    (String) headers.get(HttpHeaders.Names.CONTENT_ENCODING));
         }
 
         return contentFormat;
@@ -180,8 +180,17 @@ public final class HttpSettings {
                 headers.remove(HttpHeaders.Names.CONTENT_ENCODING);
             }
         } else {
-            header(HttpHeaders.Names.CONTENT_TYPE, HTTP.getContentType(contentFormat));
-            header(HttpHeaders.Names.CONTENT_TYPE, HTTP.getContentEncoding(contentFormat));
+            final String contentType = HTTP.getContentType(contentFormat);
+
+            if (N.notNullOrEmpty(contentType)) {
+                header(HttpHeaders.Names.CONTENT_TYPE, contentType);
+            }
+
+            final String contentEncoding = HTTP.getContentEncoding(contentFormat);
+
+            if (N.notNullOrEmpty(contentEncoding)) {
+                header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
+            }
         }
 
         return this;

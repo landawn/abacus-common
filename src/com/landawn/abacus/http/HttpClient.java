@@ -193,17 +193,23 @@ public final class HttpClient extends AbstractHttpClient {
                         Objectory.recycle(bw);
                     }
                 } else {
-                    if (requestContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
-                        HTTP.kryoParser.serialize(os, request);
+                    if (request instanceof String) {
+                        IOUtil.write(os, ((String) request).getBytes(requestCharset));
+                    } else if (request.getClass().equals(byte[].class)) {
+                        IOUtil.write(os, (byte[]) request);
                     } else {
-                        final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
+                        if (requestContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
+                            HTTP.kryoParser.serialize(os, request);
+                        } else {
+                            final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
 
-                        try {
-                            HTTP.getParser(requestContentFormat).serialize(bw, request);
+                            try {
+                                HTTP.getParser(requestContentFormat).serialize(bw, request);
 
-                            bw.flush();
-                        } finally {
-                            Objectory.recycle(bw);
+                                bw.flush();
+                            } finally {
+                                Objectory.recycle(bw);
+                            }
                         }
                     }
                 }

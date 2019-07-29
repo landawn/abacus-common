@@ -300,9 +300,10 @@ public final class HTTP {
         Charset charset = Charsets.UTF_8;
 
         if (headers != null && headers.headerNameSet().contains(HttpHeaders.Names.CONTENT_TYPE)) {
-            String value = N.stringOf(headers.get(HttpHeaders.Names.CONTENT_TYPE));
-            if (value.indexOf("charset=") >= 0) {
-                charset = getCharset(value);
+            String contentType = N.stringOf(headers.get(HttpHeaders.Names.CONTENT_TYPE));
+
+            if (N.notNullOrEmpty(contentType) && contentType.indexOf("charset=") >= 0) {
+                charset = getCharset(contentType);
             }
         }
 
@@ -313,17 +314,17 @@ public final class HTTP {
         Charset charset = Charsets.UTF_8;
 
         if (headers != null && headers.containsKey(HttpHeaders.Names.CONTENT_TYPE)) {
-            final Object val = headers.get(HttpHeaders.Names.CONTENT_TYPE);
+            final Object values = headers.get(HttpHeaders.Names.CONTENT_TYPE);
 
-            if (val instanceof Collection) {
-                for (String e : ((Collection<String>) val)) {
-                    if (N.notNullOrEmpty(e) && e.indexOf("charset=") >= 0) {
-                        charset = getCharset(e);
+            if (values instanceof Collection) {
+                for (String contentType : ((Collection<String>) values)) {
+                    if (N.notNullOrEmpty(contentType) && contentType.indexOf("charset=") >= 0) {
+                        charset = getCharset(contentType);
                         break;
                     }
                 }
             } else {
-                final String str = N.stringOf(val);
+                final String str = N.stringOf(values);
 
                 if (N.notNullOrEmpty(str) && str.indexOf("charset=") >= 0) {
                     charset = getCharset(str);
@@ -335,6 +336,10 @@ public final class HTTP {
     }
 
     public static Charset getCharset(String contentType) {
+        if (N.notNullOrEmpty(contentType)) {
+            return Charsets.UTF_8;
+        }
+
         int fromIndex = contentType.indexOf("charset=");
         int toIndex = contentType.indexOf(';', fromIndex);
 
