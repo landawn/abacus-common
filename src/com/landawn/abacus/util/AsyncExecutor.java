@@ -72,7 +72,7 @@ public class AsyncExecutor {
     }
 
     public AsyncExecutor(int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
-        this(DEFAULT_CORE_POOL_SIZE, maxThreadPoolSize, keepAliveTime, unit);
+        this(Math.min(DEFAULT_CORE_POOL_SIZE, maxThreadPoolSize), maxThreadPoolSize, keepAliveTime, unit);
     }
 
     public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
@@ -94,7 +94,7 @@ public class AsyncExecutor {
                 }
 
                 final ExecutorService executorService = (ExecutorService) executor;
-                
+
                 logger.warn("Starting to shutdown task in AsyncExecutor");
 
                 try {
