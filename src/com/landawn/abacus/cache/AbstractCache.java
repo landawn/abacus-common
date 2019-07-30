@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.u.Optional;
 
@@ -29,7 +30,7 @@ import com.landawn.abacus.util.u.Optional;
  * @author Haiyang Li
  */
 public abstract class AbstractCache<K, V> implements Cache<K, V> {
-    protected final AsyncExecutor asyncExecutor = new AsyncExecutor(64, 300L, TimeUnit.SECONDS);
+    protected final AsyncExecutor asyncExecutor = new AsyncExecutor(Math.min(8, IOUtil.CPU_CORES), 64, 180L, TimeUnit.SECONDS);
     protected final Properties<String, Object> properties = new Properties<>();
 
     protected long defaultLiveTime;

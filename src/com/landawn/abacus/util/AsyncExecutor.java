@@ -20,18 +20,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -51,15 +45,6 @@ public class AsyncExecutor {
     private static final int DEFAULT_CORE_POOL_SIZE = Math.max(8, IOUtil.CPU_CORES);
     private static final int DEFAULT_MAX_THREAD_POOL_SIZE = Math.max(16, IOUtil.CPU_CORES);
 
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR;
-    static {
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(64);
-        executor.setKeepAliveTime(180, TimeUnit.SECONDS);
-        executor.allowCoreThreadTimeOut(true);
-        executor.setRemoveOnCancelPolicy(true);
-        SCHEDULED_EXECUTOR = MoreExecutors.getExitingScheduledExecutorService(executor);
-    }
-
     private final int coreThreadPoolSize;
     private final int maxThreadPoolSize;
     private final long keepAliveTime;
@@ -68,11 +53,7 @@ public class AsyncExecutor {
     private volatile Executor executor;
 
     public AsyncExecutor() {
-        this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 300, TimeUnit.SECONDS);
-    }
-
-    public AsyncExecutor(int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
-        this(Math.min(DEFAULT_CORE_POOL_SIZE, maxThreadPoolSize), maxThreadPoolSize, keepAliveTime, unit);
+        this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
     }
 
     public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
@@ -115,32 +96,13 @@ public class AsyncExecutor {
      * @param asyncExecutor
      */
     public AsyncExecutor(final Executor executor) {
-        this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 300, TimeUnit.SECONDS);
+        this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
 
         this.executor = executor;
     }
 
     public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> command) {
         return execute(new FutureTask<Void>(FN.toCallable(command)));
-    }
-
-    public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> action, final long delay) {
-        return execute(action, delay, TimeUnit.MILLISECONDS);
-    }
-
-    public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> action, final long delay, final TimeUnit timeUnit) {
-        final Executor executor = getExecutor();
-
-        final Callable<ContinuableFuture<Void>> scheduledAction = new Callable<ContinuableFuture<Void>>() {
-            @Override
-            public ContinuableFuture<Void> call() throws Exception {
-                return execute(action);
-            }
-        };
-
-        final ScheduledFuture<ContinuableFuture<Void>> scheduledFuture = SCHEDULED_EXECUTOR.schedule(scheduledAction, delay, timeUnit);
-
-        return new ContinuableFuture<>(wrap(scheduledFuture), null, executor);
     }
 
     @SafeVarargs
@@ -174,25 +136,6 @@ public class AsyncExecutor {
 
     public <T> ContinuableFuture<T> execute(final Callable<T> command) {
         return execute(new FutureTask<>(command));
-    }
-
-    public <T> ContinuableFuture<T> execute(final Callable<T> action, final long delay) {
-        return execute(action, delay, TimeUnit.MILLISECONDS);
-    }
-
-    public <T> ContinuableFuture<T> execute(final Callable<T> action, final long delay, final TimeUnit timeUnit) {
-        final Executor executor = getExecutor();
-
-        final Callable<ContinuableFuture<T>> scheduledAction = new Callable<ContinuableFuture<T>>() {
-            @Override
-            public ContinuableFuture<T> call() throws Exception {
-                return execute(action);
-            }
-        };
-
-        final ScheduledFuture<ContinuableFuture<T>> scheduledFuture = SCHEDULED_EXECUTOR.schedule(scheduledAction, delay, timeUnit);
-
-        return new ContinuableFuture<>(wrap(scheduledFuture), null, executor);
     }
 
     @SafeVarargs
@@ -252,69 +195,6 @@ public class AsyncExecutor {
         executor.execute(futureTask);
 
         return new ContinuableFuture<>(futureTask, null, executor);
-    }
-
-    private static <T> Future<T> wrap(final ScheduledFuture<ContinuableFuture<T>> scheduledFuture) {
-        return new Future<T>() {
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                if (scheduledFuture.cancel(mayInterruptIfRunning) && scheduledFuture.isDone()) {
-                    try {
-                        final ContinuableFuture<T> resFuture = scheduledFuture.get();
-                        return resFuture == null || resFuture.cancel(mayInterruptIfRunning);
-                    } catch (Exception e) {
-                        return false;
-                    }
-                }
-
-                return false;
-            }
-
-            @Override
-            public boolean isCancelled() {
-                if (scheduledFuture.isCancelled() && scheduledFuture.isDone()) {
-                    try {
-                        final ContinuableFuture<T> resFuture = scheduledFuture.get();
-                        return resFuture == null || resFuture.isCancelled();
-                    } catch (Exception e) {
-                        return false;
-                    }
-                }
-
-                return false;
-            }
-
-            @Override
-            public boolean isDone() {
-                if (scheduledFuture.isDone()) {
-                    try {
-                        final ContinuableFuture<T> resFuture = scheduledFuture.get();
-                        return resFuture == null || resFuture.isDone();
-                    } catch (Exception e) {
-                        return false;
-                    }
-                }
-
-                return false;
-            }
-
-            @Override
-            public T get() throws InterruptedException, ExecutionException {
-                final ContinuableFuture<T> resFuture = scheduledFuture.get();
-                return resFuture == null ? null : resFuture.get();
-            }
-
-            @Override
-            public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                final long beginTime = System.currentTimeMillis();
-
-                final ContinuableFuture<T> resFuture = scheduledFuture.get(timeout, unit);
-
-                final long remainingTimeout = unit.toMillis(timeout) - (System.currentTimeMillis() - beginTime);
-
-                return resFuture == null ? null : (remainingTimeout > 0 ? resFuture.get(remainingTimeout, TimeUnit.MILLISECONDS) : resFuture.get());
-            }
-        };
     }
 
     private Executor getExecutor() {

@@ -114,9 +114,9 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
 
         if (IOUtil.IS_PLATFORM_ANDROID) {
             // executor = android.os.AsyncTask.THREAD_POOL_EXECUTOR; // dead lock if execute stream in parallel with big max thread number by small thread pool.
-            executor = new ThreadPoolExecutor(CORE_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE, 300, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1));
+            executor = new ThreadPoolExecutor(CORE_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1));
         } else {
-            executor = new ThreadPoolExecutor(CORE_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE, 300, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1));
+            executor = new ThreadPoolExecutor(CORE_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1));
         }
 
         DEFAULT_ASYNC_EXECUTOR = new AsyncExecutor(executor) {

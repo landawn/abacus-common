@@ -45,10 +45,10 @@ import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XMLDeserializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.URLEncodedUtil;
+import com.landawn.abacus.util.WD;
 
 /**
  * It's a quick way to deploy json/xml web service by
@@ -86,14 +86,14 @@ public class WebServiceServlet extends AbstractHttpServlet {
     protected static final String SERVICE_FACTORY_CLASS = "serviceFactoryClass";
     protected static final String SERVICE_FACTORY_METHOD = "serviceFactoryMethod";
 
-    protected static final String URL_MAPPER = "urlMapper";
+    protected static final String PATH_MAPPER = "pathMapper";
     protected static final String HTTP_METHOD_MAPPER = "httpMethodMapper";
 
     protected static final String ENCRYPTION_USER_NAME = "encryptionUserName";
     protected static final String ENCRYPTION_PASSWORD = "encryptionPassword";
     protected static final String ENCRYPTION_MESSAGE = "encryptionMessage";
 
-    private final Map<String, Method> urlMethodMap = new HashMap<>();
+    private final Map<String, Method> pathMethodMap = new HashMap<>();
     private final Map<String, Class<?>> methodParameterClassMap = new HashMap<>();
     private final Map<String, Method> parameterMethodMap = new HashMap<>();
     private final Map<String, Method> eleNameMethodMap = new HashMap<>();
@@ -226,8 +226,34 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 }
             }
 
-            urlMethodMap.put(methodName, method);
-            methodHttpMethodMap.put(methodName, N.asSet(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE));
+            String path = methodName;
+            RestMethod methodInfo = null;
+
+            for (Annotation methodAnnotation : method.getAnnotations()) {
+                Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
+
+                for (Annotation innerAnnotation : annotationType.getAnnotations()) {
+                    if (RestMethod.class == innerAnnotation.annotationType()) {
+                        methodInfo = (RestMethod) innerAnnotation;
+
+                        break;
+                    }
+                }
+
+                if (methodInfo != null) {
+                    try {
+                        path = (String) annotationType.getMethod("value").invoke(methodAnnotation);
+                    } catch (Exception e) {
+                        throw new AbacusException("Failed to extract String 'value' from @%s annotation:" + annotationType.getSimpleName());
+                    }
+
+                    methodHttpMethodMap.put(methodName, N.asSet(HttpMethod.valueOf(methodInfo.value())));
+
+                    break;
+                }
+            }
+
+            pathMethodMap.put(path, method);
 
             if (parameterCount == 0) {
                 // ignore.
@@ -285,7 +311,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
             }
         }
 
-        String urlMethodMapperParameter = getInitParameter(config, URL_MAPPER);
+        String urlMethodMapperParameter = getInitParameter(config, PATH_MAPPER);
 
         if (N.notNullOrEmpty(urlMethodMapperParameter)) {
             urlMethodMapperParameter = urlMethodMapperParameter.trim();
@@ -294,7 +320,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
             for (String st : sts) {
                 String[] tmp = st.split(WD.EQUAL);
-                urlMethodMap.put(tmp[1].trim(), findDeclaredMethodByName(serviceImplClass, tmp[0].trim()));
+                pathMethodMap.put(tmp[1].trim(), findDeclaredMethodByName(serviceImplClass, tmp[0].trim()));
             }
         }
 
@@ -303,23 +329,26 @@ public class WebServiceServlet extends AbstractHttpServlet {
         if (N.notNullOrEmpty(httpMethodMapperParameter)) {
             httpMethodMapperParameter = httpMethodMapperParameter.trim();
 
-            String[] sts = httpMethodMapperParameter.split(WD.SEMICOLON);
+            final String[] sts = httpMethodMapperParameter.split(WD.SEMICOLON);
 
             for (String st : sts) {
-                String[] tmp = st.split(WD.EQUAL);
-                String[] httpMethods = tmp[1].split(WD.COMMA);
+                final String[] tmp = st.split(WD.EQUAL);
+                final String[] httpMethods = tmp[1].split(WD.COMMA);
+                final String methodName = tmp[0].trim();
 
-                if (N.notNullOrEmpty(httpMethods) && "ALL".equalsIgnoreCase(httpMethods[0].trim())) {
-                    continue;
+                if (N.notNullOrEmpty(httpMethods)) {
+                    if ("ALL".equalsIgnoreCase(httpMethods[0].trim())) {
+                        methodHttpMethodMap.put(methodName, N.asSet(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE));
+                    } else {
+                        final Set<HttpMethod> set = new HashSet<>();
+
+                        for (String e : httpMethods) {
+                            set.add(HttpMethod.valueOf(e.trim().toUpperCase()));
+                        }
+
+                        methodHttpMethodMap.put(methodName, set);
+                    }
                 }
-
-                Set<HttpMethod> set = new HashSet<>();
-
-                for (String e : httpMethods) {
-                    set.add(HttpMethod.valueOf(e.trim().toUpperCase()));
-                }
-
-                methodHttpMethodMap.put(tmp[0].trim(), set);
             }
         }
 
@@ -414,7 +443,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
             int index = url.lastIndexOf('/');
 
             if ((index > 0) && (index < url.length())) {
-                method = urlMethodMap.get(url.substring(index + 1));
+                method = pathMethodMap.get(url.substring(index + 1));
             }
 
             if (isGetOrDelete) {

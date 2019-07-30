@@ -46,7 +46,7 @@ import com.landawn.abacus.util.u.Holder;
  */
 public final class Array {
 
-    static final AsyncExecutor parallelSortExecutor = new AsyncExecutor(64, 300L, TimeUnit.SECONDS);
+    static final AsyncExecutor parallelSortExecutor = new AsyncExecutor(Math.min(8, IOUtil.CPU_CORES), IOUtil.CPU_CORES, 180L, TimeUnit.SECONDS);
 
     static volatile int CPU_CORES = IOUtil.CPU_CORES;
 

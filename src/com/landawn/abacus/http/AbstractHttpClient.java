@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 
 /**
@@ -42,7 +43,7 @@ public abstract class AbstractHttpClient implements Closeable {
     public static final int DEFAULT_READ_TIMEOUT = 16000;
 
     // for static asynchronization operation.
-    protected static final AsyncExecutor asyncExecutor = new AsyncExecutor(256, 300L, TimeUnit.SECONDS);
+    protected static final AsyncExecutor asyncExecutor = new AsyncExecutor(Math.min(8, IOUtil.CPU_CORES), 256, 180L, TimeUnit.SECONDS);
 
     // ...
     protected final String _url;
@@ -81,7 +82,7 @@ public abstract class AbstractHttpClient implements Closeable {
         this._readTimeout = (readTimeout == 0) ? DEFAULT_READ_TIMEOUT : readTimeout;
         this._settings = settings == null ? HttpSettings.create() : settings;
 
-        _asyncExecutor = new AsyncExecutor(this._maxConnection, 300L, TimeUnit.SECONDS);
+        _asyncExecutor = new AsyncExecutor(Math.min(8, this._maxConnection), this._maxConnection, 300L, TimeUnit.SECONDS);
     }
 
     public String url() {

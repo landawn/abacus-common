@@ -15,6 +15,7 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -538,6 +539,20 @@ public abstract class Fn extends Comparators {
         @Override
         public boolean test(CharSequence value) {
             return N.notNullOrEmptyOrBlank(value);
+        }
+    };
+
+    private static final Predicate<File> IS_FILE = new Predicate<File>() {
+        @Override
+        public boolean test(File value) {
+            return value.isFile();
+        }
+    };
+
+    private static final Predicate<File> IS_DIRECTORY = new Predicate<File>() {
+        @Override
+        public boolean test(File value) {
+            return value.isDirectory();
         }
     };
 
@@ -1108,6 +1123,14 @@ public abstract class Fn extends Comparators {
 
     public static <T extends CharSequence> Predicate<T> notNullOrEmptyOrBlank() {
         return (Predicate<T>) NOT_NULL_OR_EMPTY_OR_BLANK;
+    }
+
+    public static Predicate<File> isFile() {
+        return IS_FILE;
+    }
+
+    public static Predicate<File> isDirectory() {
+        return IS_DIRECTORY;
     }
 
     public static <T> Predicate<T> equal(final Object target) {

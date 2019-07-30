@@ -72,7 +72,7 @@ public abstract class Observer<T> {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             asyncExecutor = android.os.AsyncTask.THREAD_POOL_EXECUTOR;
         } else {
-            asyncExecutor = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 300, TimeUnit.SECONDS,
+            asyncExecutor = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>());
         }
     }

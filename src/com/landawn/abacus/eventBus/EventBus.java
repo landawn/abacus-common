@@ -95,7 +95,7 @@ public class EventBus {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             DEFAULT_EXECUTOR = android.os.AsyncTask.THREAD_POOL_EXECUTOR;
         } else {
-            DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 300, TimeUnit.SECONDS,
+            DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>());
         }
     }

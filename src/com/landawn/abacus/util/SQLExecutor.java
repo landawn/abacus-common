@@ -619,7 +619,7 @@ public class SQLExecutor implements Closeable {
 
         this._sqlMapper = sqlMapper == null ? new SQLMapper() : sqlMapper;
         this._namingPolicy = namingPolicy == null ? NamingPolicy.LOWER_CASE_WITH_UNDERSCORE : namingPolicy;
-        this._asyncExecutor = asyncExecutor == null ? new AsyncExecutor(64, 300, TimeUnit.SECONDS) : asyncExecutor;
+        this._asyncExecutor = asyncExecutor == null ? new AsyncExecutor(8, 64, 180L, TimeUnit.SECONDS) : asyncExecutor;
         this._isReadOnly = isReadOnly;
 
         int originalIsolationLevel;

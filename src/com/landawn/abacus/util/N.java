@@ -76,6 +76,8 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.DataSet;
@@ -98,6 +100,7 @@ import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Fn.FN;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -139,7 +142,17 @@ import com.landawn.abacus.util.function.ToLongFunction;
  * @see com.landawn.abacus.util.Seq
  */
 public final class N {
-    private static final AsyncExecutor asyncExecutor = new AsyncExecutor(32, 256, 300L, TimeUnit.SECONDS);
+    private static final AsyncExecutor asyncExecutor = new AsyncExecutor(8, 256, 180L, TimeUnit.SECONDS);
+
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR;
+
+    static {
+        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(8);
+        executor.setKeepAliveTime(180, TimeUnit.SECONDS);
+        executor.allowCoreThreadTimeOut(true);
+        executor.setRemoveOnCancelPolicy(true);
+        SCHEDULED_EXECUTOR = MoreExecutors.getExitingScheduledExecutorService(executor);
+    }
 
     // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
@@ -27997,8 +28010,8 @@ public final class N {
         return asyncExecutor.execute(command);
     }
 
-    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command, final long delay) {
-        return asyncExecutor.execute(command, delay);
+    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command, final long delayInMillis) {
+        return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(FN.toCallable(command), delayInMillis, TimeUnit.MILLISECONDS));
     }
 
     @SafeVarargs
@@ -28014,8 +28027,8 @@ public final class N {
         return asyncExecutor.execute(command);
     }
 
-    public static <T> ContinuableFuture<T> asyncExecute(final Callable<T> command, final long delay) {
-        return asyncExecutor.execute(command, delay);
+    public static <T> ContinuableFuture<T> asyncExecute(final Callable<T> command, final long delayInMillis) {
+        return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(command, delayInMillis, TimeUnit.MILLISECONDS));
     }
 
     @SafeVarargs
@@ -28027,23 +28040,23 @@ public final class N {
         return asyncExecutor.execute(commands);
     }
 
-    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> cmd, final int retryTimes, final long retryInterval,
+    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervalInMillis,
             final Predicate<? super Exception> retryCondition) {
         return asyncExecutor.execute(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                Retry.of(retryTimes, retryInterval, retryCondition).run(cmd);
+                Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
                 return null;
             }
         });
     }
 
-    public static <T> ContinuableFuture<T> asyncExecute(final Callable<T> cmd, final int retryTimes, final long retryInterval,
+    public static <T> ContinuableFuture<T> asyncExecute(final Callable<T> cmd, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super T, ? super Exception> retryCondition) {
         return asyncExecutor.execute(new Callable<T>() {
             @Override
             public T call() throws Exception {
-                final Retry<T> retry = Retry.of(retryTimes, retryInterval, retryCondition);
+                final Retry<T> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
                 return retry.call(cmd);
             }
         });
