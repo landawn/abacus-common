@@ -1,0 +1,7 @@
+Run below command under project root folder:
+
+	mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=./lib/android.jar -DgroupId=android -DartifactId=android -Dversion=UNKNOWN -Dpackaging=jar -DlocalRepositoryPath=lib
+	
+
+Also refer to: 
+	https://github.com/markkolich/blog/blob/master/content/entries/maven-add-local-jar-dependency-to-classpath.md
