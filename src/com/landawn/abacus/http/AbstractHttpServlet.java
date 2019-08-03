@@ -61,7 +61,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 
         ContentFormat contentFormat = HTTP.getContentFormat(contentType, contentEncoding);
 
-        return contentFormat == ContentFormat.NONE ? ContentFormat.JSON : contentFormat;
+        return contentFormat == null || contentFormat == ContentFormat.NONE ? ContentFormat.JSON : contentFormat;
     }
 
     protected InputStream getInputStream(HttpServletRequest request, final ContentFormat contentFormat) throws IOException {

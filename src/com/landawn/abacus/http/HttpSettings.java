@@ -182,13 +182,17 @@ public final class HttpSettings {
         } else {
             final String contentType = HTTP.getContentType(contentFormat);
 
-            if (N.notNullOrEmpty(contentType)) {
+            if (N.isNullOrEmpty(contentType)) {
+                headers.remove(HttpHeaders.Names.CONTENT_TYPE);
+            } else {
                 header(HttpHeaders.Names.CONTENT_TYPE, contentType);
             }
 
             final String contentEncoding = HTTP.getContentEncoding(contentFormat);
 
-            if (N.notNullOrEmpty(contentEncoding)) {
+            if (N.isNullOrEmpty(contentEncoding)) {
+                headers.remove(HttpHeaders.Names.CONTENT_ENCODING);
+            } else {
                 header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
             }
         }

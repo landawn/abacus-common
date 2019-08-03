@@ -35,6 +35,7 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XMLParser;
+import com.landawn.abacus.util.AndroidUtil;
 import com.landawn.abacus.util.BufferedReader;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
@@ -66,7 +67,7 @@ public class OkHttpRequest {
 
     static {
         if (IOUtil.IS_PLATFORM_ANDROID) {
-            DEFAULT_EXECUTOR = android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+            DEFAULT_EXECUTOR = AndroidUtil.getThreadPoolExecutor();
         } else {
             DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>());

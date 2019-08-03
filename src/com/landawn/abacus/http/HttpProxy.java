@@ -50,6 +50,7 @@ import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.Parser;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.AndroidUtil;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Maps;
@@ -308,7 +309,7 @@ public final class HttpProxy {
                     if (_config.getAsyncExecutor() != null) {
                         executor = _config.getAsyncExecutor();
                     } else if (IOUtil.IS_PLATFORM_ANDROID) {
-                        executor = android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+                        executor = AndroidUtil.getThreadPoolExecutor();
                     } else {
                         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(16, IOUtil.CPU_CORES), 300,
                                 TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());

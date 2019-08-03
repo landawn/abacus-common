@@ -187,7 +187,11 @@ public final class HTTP {
             }
         }
 
-        return contentEncoding2Format.get(contentEncoding);
+        return N.defaultIfNull(contentEncoding2Format.get(contentEncoding), ContentFormat.NONE);
+    }
+
+    public static ContentFormat getContentFormat(final HttpURLConnection connection) {
+        return getContentFormat(connection.getHeaderField(HttpHeaders.Names.CONTENT_TYPE), connection.getHeaderField(HttpHeaders.Names.CONTENT_ENCODING));
     }
 
     public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(ContentFormat contentFormat) {
@@ -205,7 +209,7 @@ public final class HTTP {
     }
 
     public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) {
-        if (is == null) {
+        if (contentFormat == null || contentFormat == ContentFormat.NONE || is == null) {
             return is;
         }
 
@@ -221,7 +225,7 @@ public final class HTTP {
     }
 
     public static OutputStream wrapOutputStream(final OutputStream os, final ContentFormat contentFormat) {
-        if (contentFormat == null) {
+        if (contentFormat == null || contentFormat == ContentFormat.NONE || os == null) {
             return os;
         }
 
@@ -234,10 +238,6 @@ public final class HTTP {
         } else {
             return os;
         }
-    }
-
-    public static ContentFormat getContentFormat(final HttpURLConnection connection) {
-        return getContentFormat(connection.getHeaderField(HttpHeaders.Names.CONTENT_TYPE), connection.getHeaderField(HttpHeaders.Names.CONTENT_ENCODING));
     }
 
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat) throws IOException {

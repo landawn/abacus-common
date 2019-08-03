@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.AndroidUtil;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -83,7 +84,7 @@ import com.landawn.abacus.util.ThreadMode;
  * </pre>
  * 
  * @author haiyang li
- */
+ */ 
 public class EventBus {
     private static final Logger logger = LoggerFactory.getLogger(EventBus.class);
 
@@ -93,7 +94,7 @@ public class EventBus {
 
     static {
         if (IOUtil.IS_PLATFORM_ANDROID) {
-            DEFAULT_EXECUTOR = android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+            DEFAULT_EXECUTOR = AndroidUtil.getThreadPoolExecutor();
         } else {
             DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>());
