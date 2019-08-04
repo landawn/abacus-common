@@ -1,5 +1,6 @@
 ### 1.8.7
 
+* Upgrade to Maven project.
 * Improvements and bug fix.
 
 

@@ -1,13 +1,13 @@
-package com.landawn.samples.abacus;
+package com.landawn.abacus.samples;
 
 import java.util.Random;
 
 import org.junit.Test;
 
 import com.landawn.abacus.DataSet;
+import com.landawn.abacus.samples.entity.Account;
+import com.landawn.abacus.samples.entity.Contact;
 import com.landawn.abacus.util.N;
-import com.landawn.samples.abacus.entity.Account;
-import com.landawn.samples.abacus.entity.Contact;
 
 public class DataSetTest {
     static final Random RAND = new Random();

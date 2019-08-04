@@ -1,4 +1,4 @@
-package com.landawn.samples.abacus;
+package com.landawn.abacus.samples;
 
 import static org.junit.Assert.assertEquals;
 
