@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
 import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -638,7 +639,7 @@ public final class HttpProxy {
                             Object newParameter = parameter;
 
                             if (type.isEntity()) {
-                                newParameter = Maps.entity2Map(parameter, !ClassUtil.isDirtyMarker(parameter.getClass()), null,
+                                newParameter = Maps.entity2Map(parameter, !DirtyMarkerUtil.isDirtyMarker(parameter.getClass()), null,
                                         _config.requestParamNamingPolicy);
                             } else if (type.isMap()) {
                                 final Map<String, Object> m = ((Map<String, Object>) parameter);

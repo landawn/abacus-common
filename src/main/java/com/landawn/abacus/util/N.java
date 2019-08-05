@@ -85,7 +85,7 @@ import com.landawn.abacus.DirtyMarker;
 import com.landawn.abacus.EntityId;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.NullSafe;
-import com.landawn.abacus.core.EntityUtil;
+import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
 import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.exception.UncheckedException;
@@ -690,33 +690,6 @@ public final class N {
     public static <T> T defaultIfNull(final T obj, final T defaultForNull) {
         return obj == null ? defaultForNull : obj;
     }
-
-    @SuppressWarnings("unchecked")
-    //    @SafeVarargs
-    //    public static <T> List<Type<T>> typeOf(final Class<?>... classes) {
-    //        if (N.isNullOrEmpty(classes)) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final List<Type<T>> result = new ArrayList<>(classes.length);
-    //
-    //        for (int i = 0, len = classes.length; i < len; i++) {
-    //            result.add((Type<T>) typeOf(classes[i]));
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    @SuppressWarnings("unchecked")
-    //    public static <T> List<Type<T>> typeOf(final Collection<? extends Class<?>> classes) {
-    //        final List<Type<T>> result = new ArrayList<>(classes.size());
-    //
-    //        for (Class<?> cls : classes) {
-    //            result.add((Type<T>) typeOf(cls));
-    //        }
-    //
-    //        return result;
-    //    }
 
     public static String stringOf(final boolean val) {
         return String.valueOf(val);
@@ -1435,7 +1408,6 @@ public final class N {
      * @param rows list of row which can be: Map/Entity or Array/Collection if {@code columnNames} is null or empty.
      * @return
      */
-    @SuppressWarnings("deprecation")
     public static <T> DataSet newDataSet(Collection<String> columnNames, Collection<T> rowList) {
         if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
@@ -1475,7 +1447,7 @@ public final class N {
 
                         Method method = null;
 
-                        for (String signedPropName : ((DirtyMarker) e).signedPropNames()) {
+                        for (String signedPropName : DirtyMarkerUtil.signedPropNames((DirtyMarker) e)) {
                             if (clsSignedPropNameSet.add(signedPropName) == false) {
                                 continue;
                             }
@@ -1582,7 +1554,6 @@ public final class N {
         return new RowDataSet(columnNameList, columnList);
     }
 
-    @SuppressWarnings("deprecation")
     static MapEntity asMapEntity(final String entityName, final Object... props) {
         final MapEntity mapEntity = new MapEntity(entityName);
 
@@ -1601,7 +1572,7 @@ public final class N {
                 if (anEntity instanceof DirtyMarker) {
                     Class<?> entityClass = anEntity.getClass();
                     Method propGetMethod = null;
-                    for (String propName : ((DirtyMarker) anEntity).signedPropNames()) {
+                    for (String propName : DirtyMarkerUtil.signedPropNames((DirtyMarker) anEntity)) {
                         propGetMethod = ClassUtil.getPropGetMethod(entityClass, propName);
                         propName = ClassUtil.getPropNameByMethod(propGetMethod);
                         mapEntity.set(propName, ClassUtil.getPropValue(anEntity, propGetMethod));
@@ -3852,30 +3823,34 @@ public final class N {
         } else if (targetType.isNumber() && srcPropType.isNumber() && CLASS_TYPE_ENUM.containsKey(targetType.clazz())) {
             switch (CLASS_TYPE_ENUM.get(targetType.clazz())) {
                 case 3:
-                case 13:
+                case 23:
                     return (T) (Byte) ((Number) obj).byteValue();
 
                 case 4:
-                case 14:
+                case 24:
                     return (T) (Short) ((Number) obj).shortValue();
 
                 case 5:
-                case 15:
+                case 25:
                     return (T) (Integer) ((Number) obj).intValue();
 
                 case 6:
-                case 16:
+                case 26:
                     return (T) (Long) ((Number) obj).longValue();
 
                 case 7:
-                case 17:
+                case 27:
                     return (T) (Float) ((Number) obj).floatValue();
 
                 case 8:
-                case 18:
+                case 28:
                     return (T) (Double) ((Number) obj).doubleValue();
 
             }
+        } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcPropType.clazz().equals(Character.class)) {
+            return (T) (Integer.valueOf(((Character) obj).charValue()));
+        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcPropType.clazz().equals(Integer.class)) {
+            return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
         }
 
         return targetType.valueOf(obj);
@@ -4203,11 +4178,11 @@ public final class N {
      * @param cls
      * @return
      * @deprecated replaced by {@code ClassUtil.isDirtyMarker(Class)}
-     * @see ClassUtil#isDirtyMarker(Class)
+     * @see DirtyMarkerUtil#isDirtyMarker(Class)
      */
     @Deprecated
     public static boolean isDirtyMarker(final Class<?> cls) {
-        return ClassUtil.isDirtyMarker(cls);
+        return DirtyMarkerUtil.isDirtyMarker(cls);
     }
 
     private static final Set<Class<?>> notKryoCompatible = new HashSet<>();
@@ -4248,7 +4223,7 @@ public final class N {
             String xml = Utils.abacusXMLParser.serialize(entity, Utils.xscForClone);
             copy = Utils.abacusXMLParser.deserialize(targetClass, xml);
 
-            setDirtyMarker(entity, copy);
+            DirtyMarkerUtil.setDirtyMarker(entity, copy);
         }
 
         return (T) copy;
@@ -4313,7 +4288,7 @@ public final class N {
 
         merge(entity, copy, selectPropNames);
 
-        setDirtyMarker(entity, copy);
+        DirtyMarkerUtil.setDirtyMarker(entity, copy);
 
         return copy;
     }
@@ -4350,7 +4325,7 @@ public final class N {
 
         merge(entity, copy, ignoreUnknownProperty, ignorePropNames);
 
-        setDirtyMarker(entity, copy);
+        DirtyMarkerUtil.setDirtyMarker(entity, copy);
 
         return copy;
     }
@@ -4371,14 +4346,13 @@ public final class N {
      *            and setter methods.
      * @param selectPropNames
      */
-    @SuppressWarnings("deprecation")
     public static void merge(final Object sourceEntity, final Object targetEntity, final Collection<String> selectPropNames) {
         final Class<?> srcCls = sourceEntity.getClass();
         final boolean ignoreUnknownProperty = selectPropNames == null;
 
         if (selectPropNames == null) {
             if (sourceEntity instanceof DirtyMarker) {
-                Set<String> signedPropNames = ((DirtyMarker) sourceEntity).signedPropNames();
+                final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
 
                 if (signedPropNames.size() == 0) {
                     // logger.warn("no property is signed in the specified source entity: "
@@ -4427,12 +4401,11 @@ public final class N {
      * @param ignoreUnknownProperty
      * @param ignorePropNames
      */
-    @SuppressWarnings("deprecation")
     public static void merge(final Object sourceEntity, final Object targetEntity, final boolean ignoreUnknownProperty, final Set<String> ignorePropNames) {
         final Class<?> srcCls = sourceEntity.getClass();
 
         if (sourceEntity instanceof DirtyMarker) {
-            Set<String> signedPropNames = ((DirtyMarker) sourceEntity).signedPropNames();
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
 
             if (signedPropNames.size() == 0) {
                 // logger.warn("no property is signed in the specified source entity: "
@@ -4467,26 +4440,10 @@ public final class N {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    private static void setDirtyMarker(final Object source, final Object target) {
-        if (source instanceof DirtyMarker && target instanceof DirtyMarker) {
-            DirtyMarker dirtyMarkerSource = (DirtyMarker) source;
-            DirtyMarker dirtyMarkerTarget = (DirtyMarker) target;
-
-            dirtyMarkerTarget.signedPropNames().clear();
-            dirtyMarkerTarget.signedPropNames().addAll(dirtyMarkerSource.signedPropNames());
-
-            dirtyMarkerTarget.dirtyPropNames().clear();
-            dirtyMarkerTarget.dirtyPropNames().addAll(dirtyMarkerSource.dirtyPropNames());
-
-            EntityUtil.setVersion(dirtyMarkerTarget, dirtyMarkerSource.version());
-        }
-    }
-
-    @SuppressWarnings("deprecation")
     @SafeVarargs
     public static void erase(final Object entity, final String... propNames) {
-        if (entity == null || N.isNullOrEmpty(propNames) || (entity instanceof DirtyMarker && ((DirtyMarker) entity).signedPropNames().size() == 0)) {
+        if (entity == null || N.isNullOrEmpty(propNames)
+                || (entity instanceof DirtyMarker && DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size() == 0)) {
             return;
         }
 
@@ -4498,15 +4455,15 @@ public final class N {
             final DirtyMarker dirtyMarkerEntity = (DirtyMarker) entity;
 
             for (String propName : propNames) {
-                dirtyMarkerEntity.signedPropNames().remove(propName);
-                dirtyMarkerEntity.dirtyPropNames().remove(propName);
+                DirtyMarkerUtil.signedPropNames(dirtyMarkerEntity).remove(propName);
+                DirtyMarkerUtil.dirtyPropNames(dirtyMarkerEntity).remove(propName);
             }
         }
     }
 
-    @SuppressWarnings("deprecation")
     public static void erase(final Object entity, final Collection<String> propNames) {
-        if (entity == null || N.isNullOrEmpty(propNames) || (entity instanceof DirtyMarker && ((DirtyMarker) entity).signedPropNames().size() == 0)) {
+        if (entity == null || N.isNullOrEmpty(propNames)
+                || (entity instanceof DirtyMarker && DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size() == 0)) {
             return;
         }
 
@@ -4517,12 +4474,11 @@ public final class N {
         if (entity instanceof DirtyMarker) {
             final DirtyMarker dirtyMarkerEntity = (DirtyMarker) entity;
 
-            dirtyMarkerEntity.signedPropNames().removeAll(propNames);
-            dirtyMarkerEntity.dirtyPropNames().removeAll(propNames);
+            DirtyMarkerUtil.signedPropNames(dirtyMarkerEntity).removeAll(propNames);
+            DirtyMarkerUtil.dirtyPropNames(dirtyMarkerEntity).removeAll(propNames);
         }
     }
 
-    @SuppressWarnings("deprecation")
     public static void eraseAll(final Object entity) {
         if (entity == null) {
             return;
@@ -4530,7 +4486,7 @@ public final class N {
 
         if (entity instanceof DirtyMarker) {
             final DirtyMarker dirtyMarkerEntity = (DirtyMarker) entity;
-            final Set<String> signedPropNames = dirtyMarkerEntity.signedPropNames();
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames(dirtyMarkerEntity);
 
             if (signedPropNames.size() == 0) {
                 // logger.warn("No property is signed in the specified source entity: " + toString(entity));
@@ -4541,8 +4497,8 @@ public final class N {
                 ClassUtil.setPropValue(entity, propName, null);
             }
 
-            dirtyMarkerEntity.signedPropNames().clear();
-            dirtyMarkerEntity.dirtyPropNames().clear();
+            DirtyMarkerUtil.signedPropNames(dirtyMarkerEntity).clear();
+            DirtyMarkerUtil.dirtyPropNames(dirtyMarkerEntity).clear();
         } else {
             Class<?> cls = entity.getClass();
             Map<String, Method> setterMethodList = ClassUtil.getPropSetMethodList(cls);
@@ -8810,6 +8766,10 @@ public final class N {
 
                     case 18:
                         toString(sb, (double[]) element);
+                        break;
+
+                    case 19:
+                        toString(sb, (String[]) element);
                         break;
 
                     default:

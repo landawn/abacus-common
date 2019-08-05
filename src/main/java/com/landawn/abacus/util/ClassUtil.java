@@ -90,7 +90,6 @@ import java.util.jar.JarFile;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.DataSet;
-import com.landawn.abacus.DirtyMarker;
 import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.ReadOnlyId;
@@ -156,7 +155,6 @@ public final class ClassUtil {
 
     // ...
     private static final Map<Class<?>, Boolean> entityClassPool = new ObjectPool<>(POOL_SIZE);
-    private static final Map<Class<?>, Boolean> dirtyMarkerClassPool = new ObjectPool<>(POOL_SIZE);
 
     // formalized property name list.
     private static final Map<String, Class<?>> BUILT_IN_TYPE = new ObjectPool<>(POOL_SIZE); // new LinkedHashMap<>();
@@ -428,7 +426,7 @@ public final class ClassUtil {
 
     private static final Map<Class<?>, Map<Class<?>[], Constructor<?>>> classDeclaredConstructorPool = new ObjectPool<>(POOL_SIZE);
     private static final Map<Class<?>, Map<String, Map<Class<?>[], Method>>> classDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
- 
+
     /**
      * @deprecated for internal only.
      */
@@ -562,17 +560,6 @@ public final class ClassUtil {
             }
 
             entityClassPool.put(cls, b);
-        }
-
-        return b;
-    }
-
-    public static boolean isDirtyMarker(final Class<?> cls) {
-        Boolean b = dirtyMarkerClassPool.get(cls);
-
-        if (b == null) {
-            b = DirtyMarker.class.isAssignableFrom(cls);
-            dirtyMarkerClassPool.put(cls, b);
         }
 
         return b;

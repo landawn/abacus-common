@@ -1,5 +1,17 @@
 /*
- * Copyright (c) 2015, Haiyang Li. All rights reserved.
+ * Copyright (c) 2015, Haiyang Li.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.landawn.abacus.core;
@@ -147,16 +159,15 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     };
 
-    // For Kryo
-    private List<String> _columnNameList;
-    private List<List<Object>> _columnList;
-    private Map<String, Integer> _columnIndexMap;
-    private int[] _columnIndexes;
-    private int _currentRowNum = 0;
-    private boolean _isFrozen = false;
-    private Properties<String, Object> _properties;
+    List<String> _columnNameList;
+    List<List<Object>> _columnList;
+    Map<String, Integer> _columnIndexMap;
+    int[] _columnIndexes;
+    int _currentRowNum = 0;
+    boolean _isFrozen = false;
+    Properties<String, Object> _properties;
 
-    private transient int modCount = 0;
+    transient int modCount = 0;
 
     // For Kryo
     protected RowDataSet() {
@@ -1521,7 +1532,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return size() == 0 ? (Optional<T>) Optional.empty() : Optional.of(getRow(rowClass, columnNames, size() - 1));
     }
 
-    @SuppressWarnings("deprecation")
     private void getRow(final Type<?> rowType, final Object output, int[] columnIndexes, final Collection<String> columnNames, final int rowNum) {
         checkRowNum(rowNum);
 
@@ -1565,7 +1575,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             if (result instanceof DirtyMarker) {
-                ((DirtyMarker) result).markDirty(false);
+                DirtyMarkerUtil.markDirty((DirtyMarker) result, false);
             }
         } else {
             throw new IllegalArgumentException(
@@ -1788,7 +1798,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return toList(rowClass, columnNames, 0, size());
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public <T> List<T> toList(final Class<? extends T> rowClass, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
         checkRowIndex(fromRowIndex, toRowIndex);
@@ -1895,7 +1905,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             if ((rowList.size() > 0) && rowList.get(0) instanceof DirtyMarker) {
                 for (Object e : rowList) {
-                    ((DirtyMarker) e).markDirty(false);
+                    DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
                 }
             }
         } else {
@@ -1921,7 +1931,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return toList(rowSupplier, columnNames, 0, size());
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public <T> List<T> toList(IntFunction<? extends T> rowSupplier, Collection<String> columnNames, int fromRowIndex, int toRowIndex) {
         checkRowIndex(fromRowIndex, toRowIndex);
@@ -2016,7 +2025,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             if ((rowList.size() > 0) && rowList.get(0) instanceof DirtyMarker) {
                 for (Object e : rowList) {
-                    ((DirtyMarker) e).markDirty(false);
+                    DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
                 }
             }
         } else {
@@ -2075,7 +2084,6 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public <K, V, M extends Map<K, V>> M toMap(Class<? extends V> rowClass, String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex,
             int toRowIndex, IntFunction<? extends M> supplier) {
@@ -2137,7 +2145,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         } else if (valueType.isEntity()) {
             final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
-            final boolean isDirtyMarker = ClassUtil.isDirtyMarker(rowClass);
+            final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             Object value = null;
             String propName = null;
 
@@ -2151,7 +2159,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
 
                 if (isDirtyMarker) {
-                    ((DirtyMarker) value).markDirty(false);
+                    DirtyMarkerUtil.markDirty((DirtyMarker) value, false);
                 }
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
@@ -2180,7 +2188,6 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public <K, V, M extends Map<K, V>> M toMap(IntFunction<? extends V> rowSupplier, String keyColumnName, Collection<String> valueColumnNames,
             int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier) {
@@ -2232,7 +2239,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         } else if (valueType.isEntity()) {
             final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
-            final boolean isDirtyMarker = ClassUtil.isDirtyMarker(rowClass);
+            final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             Object value = null;
             String propName = null;
 
@@ -2246,7 +2253,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
 
                 if (isDirtyMarker) {
-                    ((DirtyMarker) value).markDirty(false);
+                    DirtyMarkerUtil.markDirty((DirtyMarker) value, false);
                 }
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
@@ -2307,7 +2314,6 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(Class<? extends E> rowClass, String keyColumnName,
             Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier) {
@@ -2370,7 +2376,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         } else if (elementType.isEntity()) {
             final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
-            final boolean isDirtyMarker = ClassUtil.isDirtyMarker(rowClass);
+            final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             Object value = null;
             String propName = null;
 
@@ -2384,7 +2390,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
 
                 if (isDirtyMarker) {
-                    ((DirtyMarker) value).markDirty(false);
+                    DirtyMarkerUtil.markDirty((DirtyMarker) value, false);
                 }
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
@@ -2413,7 +2419,6 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(IntFunction<? extends E> rowSupplier, String keyColumnName,
             Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier) {
@@ -2466,7 +2471,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         } else if (elementType.isEntity()) {
             final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
-            final boolean isDirtyMarker = ClassUtil.isDirtyMarker(rowClass);
+            final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             Object value = null;
             String propName = null;
 
@@ -2480,7 +2485,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
 
                 if (isDirtyMarker) {
-                    ((DirtyMarker) value).markDirty(false);
+                    DirtyMarkerUtil.markDirty((DirtyMarker) value, false);
                 }
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
@@ -7739,13 +7744,13 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    private void checkFrozen() {
+    void checkFrozen() {
         if (_isFrozen) {
             throw new IllegalStateException("This DataSet is frozen, can't modify it.");
         }
     }
 
-    private int checkColumnName(final String columnName) {
+    int checkColumnName(final String columnName) {
         int columnIndex = getColumnIndex(columnName);
 
         if (columnIndex < 0) {
@@ -7770,7 +7775,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return columnIndexes;
     }
 
-    private int[] checkColumnName(final Collection<String> columnNames) {
+    int[] checkColumnName(final Collection<String> columnNames) {
         if (N.isNullOrEmpty(columnNames)) {
             throw new IllegalArgumentException("The specified columnNames is null or empty");
         }
@@ -7799,23 +7804,23 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    private void checkRowNum(final int rowNum) {
+    void checkRowNum(final int rowNum) {
         if ((rowNum < 0) || (rowNum >= size())) {
             throw new IllegalArgumentException("Invalid row number: " + rowNum + ". It must be >= 0 and < " + size());
         }
     }
 
-    private void checkRowIndex(final int fromRowIndex, final int toRowIndex) {
+    void checkRowIndex(final int fromRowIndex, final int toRowIndex) {
         checkRowIndex(fromRowIndex, toRowIndex, size());
     }
 
-    private void checkRowIndex(final int fromRowIndex, final int toRowIndex, final int size) {
+    void checkRowIndex(final int fromRowIndex, final int toRowIndex, final int size) {
         if ((fromRowIndex < 0) || (fromRowIndex > toRowIndex) || (toRowIndex > size)) {
             throw new IllegalArgumentException("Invalid fromRowIndex : " + fromRowIndex + " or toRowIndex: " + toRowIndex);
         }
     }
 
-    private static Object getHashKey(Object obj) {
+    static Object getHashKey(Object obj) {
         return obj == null || obj.getClass().isArray() == false ? obj : Wrapper.of(obj);
     }
 

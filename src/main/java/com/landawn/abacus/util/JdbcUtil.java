@@ -97,6 +97,7 @@ import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.condition.Condition;
 import com.landawn.abacus.condition.ConditionFactory.CF;
+import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.dataSource.DataSourceConfiguration;
 import com.landawn.abacus.dataSource.DataSourceManagerConfiguration;
@@ -115,6 +116,7 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.ExceptionalStream.ExceptionalIterator;
 import com.landawn.abacus.util.Fn.FN;
 import com.landawn.abacus.util.Fn.Suppliers;
@@ -2319,7 +2321,7 @@ public final class JdbcUtil {
             };
         } else if (ClassUtil.isEntity(targetClass)) {
             return new BiRowMapper<T>() {
-                private final boolean isDirtyMarker = ClassUtil.isDirtyMarker(targetClass);
+                private final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(targetClass);
                 private volatile String[] columnLabels = null;
                 private volatile Method[] propSetters;
                 private volatile Type<?>[] columnTypes = null;
@@ -2383,7 +2385,7 @@ public final class JdbcUtil {
                     }
 
                     if (isDirtyMarker) {
-                        ((DirtyMarker) entity).markDirty(false);
+                        DirtyMarkerUtil.markDirty((DirtyMarker) entity, false);
                     }
 
                     return (T) entity;
@@ -4879,14 +4881,14 @@ public final class JdbcUtil {
             }
         }
 
+        private static final Type<Character> charType = TypeFactory.getType(char.class);
+        
         public OptionalChar queryForChar() throws SQLException {
             assertNotClosed();
 
             try (ResultSet rs = executeQuery()) {
                 if (rs.next()) {
-                    final String str = rs.getString(1);
-
-                    return OptionalChar.of(str == null || str.length() == 0 ? N.CHAR_0 : str.charAt(0));
+                    return OptionalChar.of(charType.get(rs, 1));
                 } else {
                     return OptionalChar.empty();
                 }
@@ -11358,7 +11360,7 @@ public final class JdbcUtil {
                                     .update();
 
                             if (args[0] instanceof DirtyMarker) {
-                                ((DirtyMarker) args[0]).markDirty(false);
+                                DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
                             }
 
                             return N.defaultValueOf(returnType);
@@ -11377,7 +11379,7 @@ public final class JdbcUtil {
                                         .orElse(N.defaultValueOf(returnType));
 
                                 if (args[0] instanceof DirtyMarker) {
-                                    ((DirtyMarker) args[0]).markDirty(false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
                                 }
 
                                 return id;
@@ -11389,7 +11391,7 @@ public final class JdbcUtil {
                                         .update();
 
                                 if (args[0] instanceof DirtyMarker) {
-                                    ((DirtyMarker) args[0]).markDirty(false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
                                 }
 
                                 return idPropValue;
@@ -11409,12 +11411,12 @@ public final class JdbcUtil {
                             }
 
                             final NamedSQL namedSQL = NamedSQL.parse(insertWithoutId);
-                            proxy.prepareQuery(namedSQL.getParameterizedSQL(), false).batchUpdate(entities,
-                                    (pq, param) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(param)));
+                            proxy.prepareQuery(namedSQL.getParameterizedSQL(), false)
+                                    .batchUpdate(entities, (pq, param) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(param)));
 
                             if (N.first(entities).orNull() instanceof DirtyMarker) {
                                 for (Object e : entities) {
-                                    ((DirtyMarker) e).markDirty(false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
                                 }
                             }
 
@@ -11433,8 +11435,8 @@ public final class JdbcUtil {
                             if (JdbcUtil.isDefaultIdPropValue(idPropValue)) {
                                 final NamedSQL namedSQL = NamedSQL.parse(insertWithoutId);
 
-                                final List<Object> ids = proxy.prepareQuery(namedSQL.getParameterizedSQL(), true).batchInsert(entities,
-                                        (pq, param) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(param)));
+                                final List<Object> ids = proxy.prepareQuery(namedSQL.getParameterizedSQL(), true)
+                                        .batchInsert(entities, (pq, param) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(param)));
 
                                 if (N.notNullOrEmpty(entities) && ids.size() == N.size(entities)) {
                                     int idx = 0;
@@ -11446,7 +11448,7 @@ public final class JdbcUtil {
 
                                 if (N.first(entities).orNull() instanceof DirtyMarker) {
                                     for (Object e : entities) {
-                                        ((DirtyMarker) e).markDirty(false);
+                                        DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
                                     }
                                 }
 
@@ -11454,12 +11456,12 @@ public final class JdbcUtil {
                             } else {
                                 final NamedSQL namedSQL = NamedSQL.parse(insertWithId);
 
-                                proxy.prepareQuery(namedSQL.getParameterizedSQL(), false).batchUpdate(entities,
-                                        (pq, param) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(param)));
+                                proxy.prepareQuery(namedSQL.getParameterizedSQL(), false)
+                                        .batchUpdate(entities, (pq, param) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(param)));
 
                                 if (N.first(entities).orNull() instanceof DirtyMarker) {
                                     for (Object e : entities) {
-                                        ((DirtyMarker) e).markDirty(false);
+                                        DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
                                     }
                                 }
 
@@ -12010,7 +12012,7 @@ public final class JdbcUtil {
                                             .setParameters(stmt -> StatementSetter.DEFAULT.setParameters(namedSQL, stmt, N.asArray(args[0])))
                                             .update();
 
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
 
                                     return result;
                                 };
@@ -12023,7 +12025,7 @@ public final class JdbcUtil {
                                             .setParameters(stmt -> StatementSetter.DEFAULT.setParameters(namedSQL, stmt, N.asArray(args[0])))
                                             .update();
 
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
 
                                     return result;
                                 };
@@ -12036,7 +12038,7 @@ public final class JdbcUtil {
                                             .setParameters(stmt -> StatementSetter.DEFAULT.setParameters(namedSQL, stmt, N.asArray(args[0])))
                                             .update();
 
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
 
                                     return result;
                                 };
@@ -12050,7 +12052,7 @@ public final class JdbcUtil {
                                         .update();
 
                                 if (args[0] instanceof DirtyMarker) {
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
                                 }
 
                                 return result;
@@ -12077,7 +12079,7 @@ public final class JdbcUtil {
                                         .update();
 
                                 if (args[0] instanceof DirtyMarker) {
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
                                 }
 
                                 return result;
@@ -12095,7 +12097,7 @@ public final class JdbcUtil {
                                         .update();
 
                                 if (args[0] instanceof DirtyMarker) {
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
                                 }
 
                                 return result;
@@ -12113,7 +12115,7 @@ public final class JdbcUtil {
                                         .update();
 
                                 if (args[0] instanceof DirtyMarker) {
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
                                 }
 
                                 return result;
@@ -12202,14 +12204,14 @@ public final class JdbcUtil {
                                 final String sql = NSC.update(entityClass).set(entity, idPropNameSet).where(CF.eq(idPropName)).sql();
                                 final NamedSQL namedSQL = NamedSQL.parse(sql);
 
-                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL()).batchUpdate(entities,
-                                        (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
+                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL())
+                                        .batchUpdate(entities, (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
 
                                 if (entity instanceof DirtyMarker) {
                                     final Collection<String> propNamesToUpdate = namedSQL.getNamedParameters();
 
                                     for (Object e : entities) {
-                                        ((DirtyMarker) e).markDirty(propNamesToUpdate, false);
+                                        DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
                                     }
                                 }
 
@@ -12228,14 +12230,14 @@ public final class JdbcUtil {
                                 final String sql = NAC.update(entityClass).set(entity, idPropNameSet).where(CF.eq(idPropName)).sql();
                                 final NamedSQL namedSQL = NamedSQL.parse(sql);
 
-                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL()).batchUpdate(entities,
-                                        (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
+                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL())
+                                        .batchUpdate(entities, (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
 
                                 if (entity instanceof DirtyMarker) {
                                     final Collection<String> propNamesToUpdate = namedSQL.getNamedParameters();
 
                                     for (Object e : entities) {
-                                        ((DirtyMarker) e).markDirty(propNamesToUpdate, false);
+                                        DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
                                     }
                                 }
 
@@ -12254,14 +12256,14 @@ public final class JdbcUtil {
                                 final String sql = NLC.update(entityClass).set(entity, idPropNameSet).where(CF.eq(idPropName)).sql();
                                 final NamedSQL namedSQL = NamedSQL.parse(sql);
 
-                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL()).batchUpdate(entities,
-                                        (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
+                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL())
+                                        .batchUpdate(entities, (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
 
                                 if (entity instanceof DirtyMarker) {
                                     final Collection<String> propNamesToUpdate = namedSQL.getNamedParameters();
 
                                     for (Object e : entities) {
-                                        ((DirtyMarker) e).markDirty(propNamesToUpdate, false);
+                                        DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
                                     }
                                 }
 
@@ -12290,12 +12292,12 @@ public final class JdbcUtil {
                                 final String sql = NSC.update(entityClass).set(propNamesToUpdate).where(CF.eq(idPropName)).sql();
                                 final NamedSQL namedSQL = NamedSQL.parse(sql);
 
-                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL()).batchUpdate(entities,
-                                        (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
+                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL())
+                                        .batchUpdate(entities, (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
 
                                 if (N.first(entities).orNull() instanceof DirtyMarker) {
                                     for (Object e : entities) {
-                                        ((DirtyMarker) e).markDirty(propNamesToUpdate, false);
+                                        DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
                                     }
                                 }
 
@@ -12315,12 +12317,12 @@ public final class JdbcUtil {
                                 final String sql = NAC.update(entityClass).set(propNamesToUpdate).where(CF.eq(idPropName)).sql();
                                 final NamedSQL namedSQL = NamedSQL.parse(sql);
 
-                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL()).batchUpdate(entities,
-                                        (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
+                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL())
+                                        .batchUpdate(entities, (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
 
                                 if (N.first(entities).orNull() instanceof DirtyMarker) {
                                     for (Object e : entities) {
-                                        ((DirtyMarker) e).markDirty(propNamesToUpdate, false);
+                                        DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
                                     }
                                 }
 
@@ -12340,12 +12342,12 @@ public final class JdbcUtil {
                                 final String sql = NLC.update(entityClass).set(propNamesToUpdate).where(CF.eq(idPropName)).sql();
                                 final NamedSQL namedSQL = NamedSQL.parse(sql);
 
-                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL()).batchUpdate(entities,
-                                        (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
+                                final int result = proxy.prepareQuery(namedSQL.getParameterizedSQL())
+                                        .batchUpdate(entities, (pq, e) -> StatementSetter.DEFAULT.setParameters(namedSQL, pq.stmt, N.asArray(e)));
 
                                 if (N.first(entities).orNull() instanceof DirtyMarker) {
                                     for (Object e : entities) {
-                                        ((DirtyMarker) e).markDirty(propNamesToUpdate, false);
+                                        DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
                                     }
                                 }
 
@@ -12657,7 +12659,8 @@ public final class JdbcUtil {
                         };
                     } else if (Optional.class.equals(returnType)) {
                         call = (proxy, args) -> JdbcUtil
-                                .prepareQuery(proxy, query, isNamedQuery, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter).insert();
+                                .prepareQuery(proxy, query, isNamedQuery, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter)
+                                .insert();
                     } else {
                         call = (proxy, args) -> JdbcUtil
                                 .prepareQuery(proxy, query, isNamedQuery, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter)
@@ -12674,7 +12677,8 @@ public final class JdbcUtil {
 
                     if (returnType.equals(int.class) || returnType.equals(Integer.class)) {
                         call = (proxy, args) -> JdbcUtil
-                                .prepareQuery(proxy, query, isNamedQuery, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter).update();
+                                .prepareQuery(proxy, query, isNamedQuery, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter)
+                                .update();
                     } else if (returnType.equals(boolean.class) || returnType.equals(Boolean.class)) {
                         call = (proxy,
                                 args) -> JdbcUtil
@@ -12810,8 +12814,9 @@ public final class JdbcUtil {
                 return constructor.newInstance(declaringClass).in(declaringClass).unreflectSpecial(method, declaringClass);
             } catch (Exception ex) {
                 try {
-                    return MethodHandles.lookup().findSpecial(declaringClass, method.getName(),
-                            MethodType.methodType(method.getReturnType(), method.getParameterTypes()), declaringClass);
+                    return MethodHandles.lookup()
+                            .findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+                                    declaringClass);
                 } catch (Exception exx) {
                     throw new UnsupportedOperationException(exx);
                 }

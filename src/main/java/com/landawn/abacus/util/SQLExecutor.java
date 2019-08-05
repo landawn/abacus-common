@@ -51,6 +51,7 @@ import com.landawn.abacus.condition.And;
 import com.landawn.abacus.condition.Condition;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 import com.landawn.abacus.condition.Equal;
+import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.dataSource.SQLDataSource;
 import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.DuplicatedResultException;
@@ -61,6 +62,7 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.Fn.FN;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.JdbcUtil.BiRowMapper;
@@ -234,15 +236,15 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    private static final Type<Character> charType = TypeFactory.getType(char.class);
+
     private static final ResultExtractor<OptionalChar> SINGLE_CHAR_EXTRACTOR = new ResultExtractor<OptionalChar>() {
         @Override
         public OptionalChar extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
             JdbcUtil.skip(rs, jdbcSettings.getOffset());
 
             if (rs.next()) {
-                final String str = rs.getString(1);
-
-                return OptionalChar.of(str == null || str.length() == 0 ? N.CHAR_0 : str.charAt(0));
+                return OptionalChar.of(charType.get(rs, 1));
             }
 
             return OptionalChar.empty();
@@ -839,7 +841,7 @@ public class SQLExecutor implements Closeable {
             }
 
             if (parameters[0] instanceof DirtyMarker) {
-                ((DirtyMarker) parameters[0]).dirtyPropNames().clear();
+                DirtyMarkerUtil.dirtyPropNames((DirtyMarker) parameters[0]).clear();
             }
         }
 
@@ -1191,7 +1193,7 @@ public class SQLExecutor implements Closeable {
 
             if (N.firstNonNull(parametersList).orNull() instanceof DirtyMarker) {
                 for (Object parameters : parametersList) {
-                    ((DirtyMarker) parameters).dirtyPropNames().clear();
+                    DirtyMarkerUtil.dirtyPropNames((DirtyMarker) parameters).clear();
                 }
             }
         }
@@ -1279,7 +1281,6 @@ public class SQLExecutor implements Closeable {
     /**
      * @see #batchUpdate(Connection, String, StatementSetter, JdbcSettings, Object[])
      */
-    @SuppressWarnings("deprecation")
     @SafeVarargs
     public final int update(final Connection conn, final String sql, StatementSetter statementSetter, JdbcSettings jdbcSettings, final Object... parameters)
             throws UncheckedSQLException {
@@ -1302,7 +1303,7 @@ public class SQLExecutor implements Closeable {
 
             if (isEntityOrMapParameter(namedSQL, parameters)) {
                 if (parameters[0] instanceof DirtyMarker) {
-                    ((DirtyMarker) parameters[0]).markDirty(namedSQL.getNamedParameters(), false);
+                    DirtyMarkerUtil.markDirty((DirtyMarker) parameters[0], namedSQL.getNamedParameters(), false);
                 }
             }
 
@@ -1358,7 +1359,6 @@ public class SQLExecutor implements Closeable {
     /**
      * @see #batchUpdate(Connection, String, StatementSetter, JdbcSettings, Object[])
      */
-    @SuppressWarnings("deprecation")
     public int batchUpdate(final Connection conn, final String sql, StatementSetter statementSetter, JdbcSettings jdbcSettings, final List<?> parametersList)
             throws UncheckedSQLException {
         final NamedSQL namedSQL = getNamedSQL(sql);
@@ -1428,7 +1428,7 @@ public class SQLExecutor implements Closeable {
 
             if (N.firstNonNull(parametersList).orNull() instanceof DirtyMarker) {
                 for (Object parameters : parametersList) {
-                    ((DirtyMarker) parameters).markDirty(namedSQL.getNamedParameters(), false);
+                    DirtyMarkerUtil.markDirty((DirtyMarker) parameters, namedSQL.getNamedParameters(), false);
                 }
             }
 
@@ -3885,13 +3885,13 @@ public class SQLExecutor implements Closeable {
      * DON'T close it again by calling the close method.
      * <br />
      * <br />
-<<<<<<< .working
+    <<<<<<< .working
      * The transaction will be shared cross the instances of {@code SQLExecutor} by the methods called with same {@code DataSource} in the same thread.
-||||||| .merge-left.r3730
+    ||||||| .merge-left.r3730
      * The transaction will be shared cross the instances of {@code SQLExecutor} by the methods called in the same thread with same {@code DataSource}.
-=======
+    =======
      * The transaction will be shared cross the instances of {@code SQLExecutor/JdbcUtil.Dao/CrudDao} by the methods called in the same thread with same {@code DataSource}.
->>>>>>> .merge-right.r3729
+    >>>>>>> .merge-right.r3729
      * 
      * <br />
      * <br />
@@ -5967,7 +5967,7 @@ public class SQLExecutor implements Closeable {
                 insertingPropNames = new HashSet<>();
 
                 for (T e : entities) {
-                    insertingPropNames.addAll(((DirtyMarker) e).signedPropNames());
+                    insertingPropNames.addAll(DirtyMarkerUtil.signedPropNames((DirtyMarker) e));
                 }
             } else {
                 final boolean isDefaultIdPropValue = JdbcUtil.isDefaultIdPropValue(ClassUtil.getPropValue(entity, idPropName));
@@ -5995,12 +5995,12 @@ public class SQLExecutor implements Closeable {
         private String prepareInsertSql(final T entity, final Collection<String> propNamesToInsert) {
             checkEntity(entity);
 
-            final boolean isDirtyMarkerEntity = ClassUtil.isDirtyMarker(entity.getClass());
+            final boolean isDirtyMarkerEntity = DirtyMarkerUtil.isDirtyMarker(entity.getClass());
             Collection<String> insertingPropNames = propNamesToInsert;
 
             if (N.isNullOrEmpty(propNamesToInsert)) {
                 if (isDirtyMarkerEntity) {
-                    insertingPropNames = ((DirtyMarker) entity).signedPropNames();
+                    insertingPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) entity);
                 } else {
                     boolean isDefaultIdPropValue = true;
 
@@ -6083,9 +6083,9 @@ public class SQLExecutor implements Closeable {
             }
         }
 
-        @SuppressWarnings("deprecation")
         public boolean refresh(final T entity) {
-            final Collection<String> propNamesToRefresh = ClassUtil.isDirtyMarker(entity.getClass()) ? ((DirtyMarker) entity).signedPropNames()
+            final Collection<String> propNamesToRefresh = DirtyMarkerUtil.isDirtyMarker(entity.getClass())
+                    ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity)
                     : defaultSelectPropNameList;
 
             return refresh(entity, propNamesToRefresh);
@@ -6097,7 +6097,6 @@ public class SQLExecutor implements Closeable {
          * @param propNamesToRefresh
          * @return {@code false} if no record found by the ids in the specified {@code entity}.
          */
-        @SuppressWarnings("deprecation")
         public boolean refresh(final T entity, Collection<String> propNamesToRefresh) {
             if (N.isNullOrEmpty(propNamesToRefresh)) {
                 return idPropNameList.size() == 1 ? exists((ID) ClassUtil.getPropValue(entity, idPropName)) : exists((ID) entity);
@@ -6111,8 +6110,8 @@ public class SQLExecutor implements Closeable {
             } else {
                 N.merge(dbEntity, entity);
 
-                if (ClassUtil.isDirtyMarker(entity.getClass())) {
-                    ((DirtyMarker) entity).markDirty(propNamesToRefresh, false);
+                if (DirtyMarkerUtil.isDirtyMarker(entity.getClass())) {
+                    DirtyMarkerUtil.markDirty((DirtyMarker) entity, propNamesToRefresh, false);
                 }
 
                 return true;
@@ -6139,11 +6138,10 @@ public class SQLExecutor implements Closeable {
             return update(conn, entity, (Collection<String>) null);
         }
 
-        @SuppressWarnings("deprecation")
         public int update(final Connection conn, final T entity, final Collection<String> propNamesToUpdate) {
             N.checkArgNotNull(entity);
 
-            if (propNamesToUpdate == null && ClassUtil.isDirtyMarker(entity.getClass()) && !((DirtyMarker) entity).isDirty()) {
+            if (propNamesToUpdate == null && DirtyMarkerUtil.isDirtyMarker(entity.getClass()) && !DirtyMarkerUtil.isDirty((DirtyMarker) entity)) {
                 return 0;
             }
 
@@ -6252,7 +6250,7 @@ public class SQLExecutor implements Closeable {
                 updatingPropNames = new HashSet<>();
 
                 for (T e : entities) {
-                    updatingPropNames.addAll(((DirtyMarker) e).dirtyPropNames());
+                    updatingPropNames.addAll(DirtyMarkerUtil.dirtyPropNames((DirtyMarker) e));
                 }
             } else {
                 updatingPropNames = propNamesToUpdate;
@@ -6273,16 +6271,15 @@ public class SQLExecutor implements Closeable {
             return updateCount;
         }
 
-        @SuppressWarnings("deprecation")
         private String prepareUpdateSql(final T entity, final Collection<String> propNamesToUpdate) {
             checkEntity(entity);
 
-            final boolean isDirtyMarkerEntity = ClassUtil.isDirtyMarker(entity.getClass());
+            final boolean isDirtyMarkerEntity = DirtyMarkerUtil.isDirtyMarker(entity.getClass());
             Collection<String> updatingpropNames = propNamesToUpdate;
 
             if (N.isNullOrEmpty(propNamesToUpdate)) {
                 if (isDirtyMarkerEntity) {
-                    updatingpropNames = ((DirtyMarker) entity).dirtyPropNames();
+                    updatingpropNames = DirtyMarkerUtil.dirtyPropNames((DirtyMarker) entity);
                 } else {
                     return sql_update_by_id;
                 }

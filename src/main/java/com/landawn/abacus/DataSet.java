@@ -3197,7 +3197,7 @@ public interface DataSet {
      * 
      * @return key are column name, value is column - an immutable list, backed by the column in this {@code DataSet}.
      */
-    Map<String, ImmutableList<Object>> columnMap(); 
+    Map<String, ImmutableList<Object>> columnMap();
 
     // DataSetBuilder builder();
 

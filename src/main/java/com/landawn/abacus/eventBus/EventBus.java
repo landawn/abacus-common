@@ -84,7 +84,7 @@ import com.landawn.abacus.util.ThreadMode;
  * </pre>
  * 
  * @author haiyang li
- */ 
+ */
 public class EventBus {
     private static final Logger logger = LoggerFactory.getLogger(EventBus.class);
 

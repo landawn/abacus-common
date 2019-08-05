@@ -31,6 +31,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.landawn.abacus.DirtyMarker;
+import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.BiFunction;
@@ -1013,10 +1014,9 @@ public final class Maps {
         return entity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
-    @SuppressWarnings("deprecation")
     public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        final int initCapacity = (entity instanceof DirtyMarker ? ((DirtyMarker) entity).signedPropNames().size()
+        final int initCapacity = (entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
                 : N.initHashCapacity(ClassUtil.getPropGetMethodList(entity.getClass()).size()));
         final Map<String, Object> resultMap = new LinkedHashMap<>(initCapacity);
 
@@ -1089,7 +1089,6 @@ public final class Maps {
      * @param keyNamingPolicy
      * @return the input <code>resultMap</code>
      */
-    @SuppressWarnings("deprecation")
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
@@ -1099,7 +1098,7 @@ public final class Maps {
 
         if (entity instanceof DirtyMarker) {
             final Class<?> entityClass = entity.getClass();
-            signedPropNames = ((DirtyMarker) entity).signedPropNames();
+            signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) entity);
 
             if (signedPropNames.size() == 0) {
                 // logger.warn("no property is signed in the specified source entity: "
@@ -1249,10 +1248,9 @@ public final class Maps {
         return deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
-    @SuppressWarnings("deprecation")
     public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        final int initCapacity = entity instanceof DirtyMarker ? ((DirtyMarker) entity).signedPropNames().size()
+        final int initCapacity = entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
                 : N.initHashCapacity(ClassUtil.getPropGetMethodList(entity.getClass()).size());
         final Map<String, Object> resultMap = new LinkedHashMap<>(initCapacity);
 
@@ -1325,7 +1323,6 @@ public final class Maps {
      * @param keyNamingPolicy
      * @return the input <code>resultMap</code>
      */
-    @SuppressWarnings("deprecation")
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
@@ -1335,7 +1332,7 @@ public final class Maps {
 
         if (entity instanceof DirtyMarker) {
             final Class<?> entityClass = entity.getClass();
-            signedPropNames = ((DirtyMarker) entity).signedPropNames();
+            signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) entity);
 
             if (signedPropNames.size() == 0) {
                 // logger.warn("no property is signed in the specified source entity: "
@@ -1500,10 +1497,9 @@ public final class Maps {
         return entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
-    @SuppressWarnings("deprecation")
     public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        final int initCapacity = entity instanceof DirtyMarker ? ((DirtyMarker) entity).signedPropNames().size()
+        final int initCapacity = entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
                 : N.initHashCapacity(ClassUtil.getPropGetMethodList(entity.getClass()).size());
         final Map<String, Object> resultMap = new LinkedHashMap<>(initCapacity);
 
@@ -1591,7 +1587,6 @@ public final class Maps {
      * @param parentPropName
      * @return the input <code>resultMap</code>
      */
-    @SuppressWarnings("deprecation")
     static <T extends Map<String, Object>> T entity2FlatMap(final T resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName) {
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
@@ -1599,7 +1594,7 @@ public final class Maps {
 
         if (entity instanceof DirtyMarker) {
             final Class<?> entityClass = entity.getClass();
-            final Set<String> signedPropNames = ((DirtyMarker) entity).signedPropNames();
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) entity);
 
             if (signedPropNames.size() == 0) {
                 // logger.warn("no property is signed in the specified source entity: "

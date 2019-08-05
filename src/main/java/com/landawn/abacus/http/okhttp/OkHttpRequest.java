@@ -74,6 +74,11 @@ public class OkHttpRequest {
         }
     }
 
+    static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
+    static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
+
+    static final OkHttpClient defaultClient = new OkHttpClient();
+
     static {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -96,11 +101,6 @@ public class OkHttpRequest {
             }
         });
     }
-
-    static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
-    static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
-
-    static final OkHttpClient defaultClient = new OkHttpClient();
 
     final OkHttpClient httpClient;
     final Request.Builder builder = new Request.Builder();

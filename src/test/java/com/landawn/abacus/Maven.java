@@ -33,6 +33,10 @@ public class Maven {
 
         IOUtil.copy(sourceDir, targetDir);
 
+        StreamEx.listFiles(targetDir) // 
+                .filter(file -> file.getName().startsWith("settings"))
+                .forEach(file -> IOUtil.deleteIfExists(file));
+
         StreamEx.listFiles(new File("./target/"))
                 .filter(f -> f.getName().startsWith("abacus-util") && f.getName().endsWith(".jar"))
                 .peek(f -> N.println(f.getName()))
