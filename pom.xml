@@ -5,7 +5,7 @@
 
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-util</artifactId>
-	<version>1.8.7</version>
+	<version>1.8.8</version>
 	<packaging>jar</packaging>
 
 	<name>abacus-util</name>
@@ -345,6 +345,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<doclint>none</doclint>
+					<excludePackageNames>com.landawn.abacus.core:com.landawn.abacus.dataSource:com.landawn.abacus.lock:com.landawn.abacus.type:com.landawn.abacus.logging</excludePackageNames>
 				</configuration>
 
 				<executions>
