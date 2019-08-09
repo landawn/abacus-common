@@ -1,5 +1,11 @@
+### 1.8.9
+
+* Improvements and bug fix.
+
+
 ### 1.8.8
 
+* Improve Java Docs.
 * Improvements and bug fix.
 
 
