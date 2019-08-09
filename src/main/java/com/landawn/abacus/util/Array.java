@@ -36,26 +36,43 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.util.u.Holder;
 
+// TODO: Auto-generated Javadoc
 /**
+ * The Class Array.
  *
- * @since 0.8
- * 
  * @author Haiyang Li
- * 
  * @see java.lang.reflect.Array
+ * @since 0.8
  */
 public final class Array {
 
+    /** The Constant parallelSortExecutor. */
     static final AsyncExecutor parallelSortExecutor = new AsyncExecutor(Math.min(8, IOUtil.CPU_CORES), IOUtil.CPU_CORES, 180L, TimeUnit.SECONDS);
 
+    /** The cpu cores. */
     static volatile int CPU_CORES = IOUtil.CPU_CORES;
 
+    /** The Constant MIN_ARRAY_SORT_GRAN. */
     static final int MIN_ARRAY_SORT_GRAN = 8192;
+
+    /** The Constant BINARYSEARCH_THRESHOLD. */
     static final int BINARYSEARCH_THRESHOLD = 64;
 
+    /**
+     * Instantiates a new array.
+     */
     private Array() {
     }
 
+    /**
+     * New instance.
+     *
+     * @param <T> the generic type
+     * @param componentType the component type
+     * @param length the length
+     * @return the t
+     * @throws NegativeArraySizeException the negative array size exception
+     */
     public static <T> T newInstance(final Class<?> componentType, final int length) throws NegativeArraySizeException {
         if (length == 0) {
             Object result = N.CLASS_EMPTY_ARRAY.get(componentType);
@@ -71,94 +88,275 @@ public final class Array {
         return (T) java.lang.reflect.Array.newInstance(componentType, length);
     }
 
+    /**
+     * New instance.
+     *
+     * @param <T> the generic type
+     * @param componentType the component type
+     * @param dimensions the dimensions
+     * @return the t
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws NegativeArraySizeException the negative array size exception
+     */
     @SafeVarargs
     public static <T> T newInstance(final Class<?> componentType, final int... dimensions) throws IllegalArgumentException, NegativeArraySizeException {
         return (T) java.lang.reflect.Array.newInstance(componentType, dimensions);
     }
 
+    /**
+     * Gets the length.
+     *
+     * @param array the array
+     * @return the length
+     * @throws IllegalArgumentException the illegal argument exception
+     */
     public static int getLength(final Object array) throws IllegalArgumentException {
         return java.lang.reflect.Array.getLength(array);
     }
 
+    /**
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param array the array
+     * @param index the index
+     * @return the t
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static <T> T get(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return (T) java.lang.reflect.Array.get(array, index);
     }
 
+    /**
+     * Gets the boolean.
+     *
+     * @param array the array
+     * @param index the index
+     * @return the boolean
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static boolean getBoolean(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getBoolean(array, index);
     }
 
+    /**
+     * Gets the byte.
+     *
+     * @param array the array
+     * @param index the index
+     * @return the byte
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static byte getByte(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getByte(array, index);
     }
 
+    /**
+     * Gets the char.
+     *
+     * @param array the array
+     * @param index the index
+     * @return the char
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static char getChar(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getChar(array, index);
     }
 
+    /**
+     * Gets the short.
+     *
+     * @param array the array
+     * @param index the index
+     * @return the short
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static short getShort(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getShort(array, index);
     }
 
+    /**
+     * Gets the int.
+     *
+     * @param array the array
+     * @param index the index
+     * @return the int
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static int getInt(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getInt(array, index);
     }
 
+    /**
+     * Gets the long.
+     *
+     * @param array the array
+     * @param index the index
+     * @return the long
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static long getLong(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getLong(array, index);
     }
 
+    /**
+     * Gets the float.
+     *
+     * @param array the array
+     * @param index the index
+     * @return the float
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static float getFloat(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getFloat(array, index);
     }
 
+    /**
+     * Gets the double.
+     *
+     * @param array the array
+     * @param index the index
+     * @return the double
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static double getDouble(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getDouble(array, index);
     }
 
+    /**
+     * Sets the.
+     *
+     * @param array the array
+     * @param index the index
+     * @param value the value
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void set(final Object array, final int index, final Object value) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.set(array, index, value);
     }
 
+    /**
+     * Sets the boolean.
+     *
+     * @param array the array
+     * @param index the index
+     * @param z the z
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void setBoolean(final Object array, final int index, final boolean z) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setBoolean(array, index, z);
     }
 
+    /**
+     * Sets the byte.
+     *
+     * @param array the array
+     * @param index the index
+     * @param b the b
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void setByte(final Object array, final int index, final byte b) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setByte(array, index, b);
     }
 
+    /**
+     * Sets the char.
+     *
+     * @param array the array
+     * @param index the index
+     * @param c the c
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void setChar(final Object array, final int index, final char c) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setChar(array, index, c);
     }
 
+    /**
+     * Sets the short.
+     *
+     * @param array the array
+     * @param index the index
+     * @param s the s
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void setShort(final Object array, final int index, final short s) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setShort(array, index, s);
     }
 
+    /**
+     * Sets the int.
+     *
+     * @param array the array
+     * @param index the index
+     * @param i the i
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void setInt(final Object array, final int index, final int i) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setInt(array, index, i);
     }
 
+    /**
+     * Sets the long.
+     *
+     * @param array the array
+     * @param index the index
+     * @param l the l
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void setLong(final Object array, final int index, final long l) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setLong(array, index, l);
     }
 
+    /**
+     * Sets the float.
+     *
+     * @param array the array
+     * @param index the index
+     * @param f the f
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void setFloat(final Object array, final int index, final float f) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setFloat(array, index, f);
     }
 
+    /**
+     * Sets the double.
+     *
+     * @param array the array
+     * @param index the index
+     * @param d the d
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     */
     public static void setDouble(final Object array, final int index, final double d) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setDouble(array, index, d);
     }
 
     /**
-    * Returns a fixed-size list backed by the specified array if it's not null or empty, otherwise an immutable empty list is returned.
-    * 
-    * @param a
-    * @return
-    * @see Arrays#asList(Object...)
-    */
+     * Returns a fixed-size list backed by the specified array if it's not null or empty, otherwise an immutable empty list is returned.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @return the list
+     * @see Arrays#asList(Object...)
+     */
     @SafeVarargs
     @NullSafe
     public static <T> List<T> asList(T... a) {
@@ -166,10 +364,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the boolean[]
      */
     @SafeVarargs
     public static boolean[] of(final boolean... a) {
@@ -177,10 +375,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the char[]
      */
     @SafeVarargs
     public static char[] of(final char... a) {
@@ -188,10 +386,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the byte[]
      */
     @SafeVarargs
     public static byte[] of(final byte... a) {
@@ -199,10 +397,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the short[]
      */
     @SafeVarargs
     public static short[] of(final short... a) {
@@ -210,10 +408,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the int[]
      */
     @SafeVarargs
     public static int[] of(final int... a) {
@@ -221,10 +419,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the long[]
      */
     @SafeVarargs
     public static long[] of(final long... a) {
@@ -232,10 +430,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the float[]
      */
     @SafeVarargs
     public static float[] of(final float... a) {
@@ -243,10 +441,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the double[]
      */
     @SafeVarargs
     public static double[] of(final double... a) {
@@ -254,10 +452,10 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the a
+     * @return the string[]
      */
     @SafeVarargs
     public static String[] of(final String... a) {
@@ -265,10 +463,11 @@ public final class Array {
     }
 
     /**
-     * Returns the input array
+     * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param <T> the generic type
+     * @param a the a
+     * @return the t[]
      */
     @SafeVarargs
     public static <T> T[] oF(final T... a) {
@@ -449,6 +648,13 @@ public final class Array {
     //        return a;
     //    }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @return the char[]
+     */
     public static char[] range(char startInclusive, final char endExclusive) {
         if (startInclusive >= endExclusive) {
             return N.EMPTY_CHAR_ARRAY;
@@ -463,6 +669,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @return the byte[]
+     */
     public static byte[] range(byte startInclusive, final byte endExclusive) {
         if (startInclusive >= endExclusive) {
             return N.EMPTY_BYTE_ARRAY;
@@ -477,6 +690,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @return the short[]
+     */
     public static short[] range(short startInclusive, final short endExclusive) {
         if (startInclusive >= endExclusive) {
             return N.EMPTY_SHORT_ARRAY;
@@ -491,6 +711,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @return the int[]
+     */
     public static int[] range(int startInclusive, final int endExclusive) {
         if (startInclusive >= endExclusive) {
             return N.EMPTY_INT_ARRAY;
@@ -509,6 +736,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @return the long[]
+     */
     public static long[] range(long startInclusive, final long endExclusive) {
         if (startInclusive >= endExclusive) {
             return N.EMPTY_LONG_ARRAY;
@@ -561,6 +795,14 @@ public final class Array {
     //        return a;
     //    }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @param by the by
+     * @return the char[]
+     */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -585,6 +827,14 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @param by the by
+     * @return the byte[]
+     */
     public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -609,6 +859,14 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @param by the by
+     * @return the short[]
+     */
     public static short[] range(short startInclusive, final short endExclusive, final short by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -633,6 +891,14 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @param by the by
+     * @return the int[]
+     */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -662,6 +928,14 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @param by the by
+     * @return the long[]
+     */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -758,6 +1032,13 @@ public final class Array {
     //        return a;
     //    }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @return the char[]
+     */
     public static char[] rangeClosed(char startInclusive, final char endInclusive) {
         if (startInclusive > endInclusive) {
             return N.EMPTY_CHAR_ARRAY;
@@ -774,6 +1055,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @return the byte[]
+     */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive) {
         if (startInclusive > endInclusive) {
             return N.EMPTY_BYTE_ARRAY;
@@ -790,6 +1078,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @return the short[]
+     */
     public static short[] rangeClosed(short startInclusive, final short endInclusive) {
         if (startInclusive > endInclusive) {
             return N.EMPTY_SHORT_ARRAY;
@@ -806,6 +1101,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @return the int[]
+     */
     public static int[] rangeClosed(int startInclusive, final int endInclusive) {
         if (startInclusive > endInclusive) {
             return N.EMPTY_INT_ARRAY;
@@ -826,6 +1128,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @return the long[]
+     */
     public static long[] rangeClosed(long startInclusive, final long endInclusive) {
         if (startInclusive > endInclusive) {
             return N.EMPTY_LONG_ARRAY;
@@ -870,6 +1179,14 @@ public final class Array {
     //        return a;
     //    }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @param by the by
+     * @return the char[]
+     */
     public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -896,6 +1213,14 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @param by the by
+     * @return the byte[]
+     */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -922,6 +1247,14 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @param by the by
+     * @return the short[]
+     */
     public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -948,6 +1281,14 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @param by the by
+     * @return the int[]
+     */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -979,6 +1320,14 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @param by the by
+     * @return the long[]
+     */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
         if (by == 0) {
             throw new IllegalArgumentException("The input parameter 'by' can't be zero");
@@ -1074,48 +1423,104 @@ public final class Array {
     //        return a;
     //    }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param n the n
+     * @return the boolean[]
+     */
     public static boolean[] repeat(final boolean element, final int n) {
         final boolean[] a = new boolean[n];
         N.fill(a, element);
         return a;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param n the n
+     * @return the char[]
+     */
     public static char[] repeat(final char element, final int n) {
         final char[] a = new char[n];
         N.fill(a, element);
         return a;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param n the n
+     * @return the byte[]
+     */
     public static byte[] repeat(final byte element, final int n) {
         final byte[] a = new byte[n];
         N.fill(a, element);
         return a;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param n the n
+     * @return the short[]
+     */
     public static short[] repeat(final short element, final int n) {
         final short[] a = new short[n];
         N.fill(a, element);
         return a;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param n the n
+     * @return the int[]
+     */
     public static int[] repeat(final int element, final int n) {
         final int[] a = new int[n];
         N.fill(a, element);
         return a;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param n the n
+     * @return the long[]
+     */
     public static long[] repeat(final long element, final int n) {
         final long[] a = new long[n];
         N.fill(a, element);
         return a;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param n the n
+     * @return the float[]
+     */
     public static float[] repeat(final float element, final int n) {
         final float[] a = new float[n];
         N.fill(a, element);
         return a;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param n the n
+     * @return the double[]
+     */
     public static double[] repeat(final double element, final int n) {
         final double[] a = new double[n];
         N.fill(a, element);
@@ -1123,10 +1528,12 @@ public final class Array {
     }
 
     /**
-     * 
-     * @param element
-     * @param n
-     * @return
+     * Repeat.
+     *
+     * @param <T> the generic type
+     * @param element the element
+     * @param n the n
+     * @return the t[]
      * @throws NullPointerException if the specified {@code element} is null.
      */
     public static <T> T[] repeat(final T element, final int n) throws NullPointerException {
@@ -1135,6 +1542,13 @@ public final class Array {
         return a;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the boolean[][]
+     */
     public static boolean[][] concat(final boolean[][] a, final boolean[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new boolean[0][] : N.clone(b);
@@ -1152,6 +1566,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the boolean[][][]
+     */
     public static boolean[][][] concat(final boolean[][][] a, final boolean[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new boolean[0][][] : N.clone(b);
@@ -1169,6 +1590,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the char[][]
+     */
     public static char[][] concat(final char[][] a, final char[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new char[0][] : N.clone(b);
@@ -1186,6 +1614,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the char[][][]
+     */
     public static char[][][] concat(final char[][][] a, final char[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new char[0][][] : N.clone(b);
@@ -1203,6 +1638,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the byte[][]
+     */
     public static byte[][] concat(final byte[][] a, final byte[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new byte[0][] : N.clone(b);
@@ -1220,6 +1662,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the byte[][][]
+     */
     public static byte[][][] concat(final byte[][][] a, final byte[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new byte[0][][] : N.clone(b);
@@ -1237,6 +1686,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the short[][]
+     */
     public static short[][] concat(final short[][] a, final short[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new short[0][] : N.clone(b);
@@ -1254,6 +1710,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the short[][][]
+     */
     public static short[][][] concat(final short[][][] a, final short[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new short[0][][] : N.clone(b);
@@ -1271,6 +1734,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the int[][]
+     */
     public static int[][] concat(final int[][] a, final int[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new int[0][] : N.clone(b);
@@ -1288,6 +1758,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the int[][][]
+     */
     public static int[][][] concat(final int[][][] a, final int[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new int[0][][] : N.clone(b);
@@ -1305,6 +1782,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the long[][]
+     */
     public static long[][] concat(final long[][] a, final long[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new long[0][] : N.clone(b);
@@ -1322,6 +1806,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the long[][][]
+     */
     public static long[][][] concat(final long[][][] a, final long[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new long[0][][] : N.clone(b);
@@ -1339,6 +1830,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the float[][]
+     */
     public static float[][] concat(final float[][] a, final float[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new float[0][] : N.clone(b);
@@ -1356,6 +1854,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the float[][][]
+     */
     public static float[][][] concat(final float[][][] a, final float[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new float[0][][] : N.clone(b);
@@ -1373,6 +1878,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the double[][]
+     */
     public static double[][] concat(final double[][] a, final double[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new double[0][] : N.clone(b);
@@ -1390,6 +1902,13 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concat.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the double[][][]
+     */
     public static double[][][] concat(final double[][][] a, final double[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.isNullOrEmpty(b) ? new double[0][][] : N.clone(b);
@@ -1407,6 +1926,14 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concatt.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the t[][]
+     */
     public static <T> T[][] concatt(final T[][] a, final T[][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.clone(b);
@@ -1424,6 +1951,14 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Concatt.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the t[][][]
+     */
     public static <T> T[][][] concatt(final T[][][] a, final T[][][] b) {
         if (N.isNullOrEmpty(a)) {
             return N.clone(b);
@@ -1441,6 +1976,11 @@ public final class Array {
         return result;
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final boolean[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1457,6 +1997,11 @@ public final class Array {
         N.fill(a, numOfFalse, a.length, true);
     }
 
+    /**
+     * Reverse sort.
+     *
+     * @param a the a
+     */
     static void reverseSort(final boolean[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1473,6 +2018,11 @@ public final class Array {
         N.fill(a, numOfTrue, a.length, false);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final char[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1481,6 +2031,13 @@ public final class Array {
         Arrays.sort(a);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void sort(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1491,6 +2048,11 @@ public final class Array {
         Arrays.sort(a, fromIndex, toIndex);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final byte[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1499,6 +2061,13 @@ public final class Array {
         Arrays.sort(a);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void sort(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1509,6 +2078,11 @@ public final class Array {
         Arrays.sort(a, fromIndex, toIndex);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final short[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1517,6 +2091,13 @@ public final class Array {
         Arrays.sort(a);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void sort(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1527,6 +2108,11 @@ public final class Array {
         Arrays.sort(a, fromIndex, toIndex);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final int[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1535,6 +2121,13 @@ public final class Array {
         Arrays.sort(a);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void sort(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1545,6 +2138,11 @@ public final class Array {
         Arrays.sort(a, fromIndex, toIndex);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final long[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1553,6 +2151,13 @@ public final class Array {
         Arrays.sort(a);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void sort(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1563,6 +2168,11 @@ public final class Array {
         Arrays.sort(a, fromIndex, toIndex);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final float[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1571,6 +2181,13 @@ public final class Array {
         Arrays.sort(a);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void sort(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1581,6 +2198,11 @@ public final class Array {
         Arrays.sort(a, fromIndex, toIndex);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final double[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1589,6 +2211,13 @@ public final class Array {
         Arrays.sort(a);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void sort(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1599,6 +2228,11 @@ public final class Array {
         Arrays.sort(a, fromIndex, toIndex);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     */
     static void sort(final Object[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1607,10 +2241,24 @@ public final class Array {
         sort(a, 0, a.length);
     }
 
+    /**
+     * Sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void sort(final Object[] a, final int fromIndex, final int toIndex) {
         sort(a, fromIndex, toIndex, Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * Sort.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param cmp the cmp
+     */
     static <T> void sort(final T[] a, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -1619,6 +2267,15 @@ public final class Array {
         sort(a, 0, a.length, cmp);
     }
 
+    /**
+     * Sort.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param cmp the cmp
+     */
     static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1629,6 +2286,12 @@ public final class Array {
         Arrays.sort(a, fromIndex, toIndex, cmp);
     }
 
+    /**
+     * Sort.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     */
     static <T extends Comparable<? super T>> void sort(final List<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
             return;
@@ -1637,10 +2300,25 @@ public final class Array {
         sort(c, 0, c.size());
     }
 
+    /**
+     * Sort.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static <T extends Comparable<? super T>> void sort(final List<? extends T> c, final int fromIndex, final int toIndex) {
         sort(c, fromIndex, toIndex, Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * Sort.
+     *
+     * @param <T> the generic type
+     * @param list the list
+     * @param cmp the cmp
+     */
     static <T> void sort(final List<? extends T> list, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(list)) {
             return;
@@ -1649,6 +2327,15 @@ public final class Array {
         sort(list, 0, list.size(), cmp);
     }
 
+    /**
+     * Sort.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param cmp the cmp
+     */
     @SuppressWarnings("rawtypes")
     static <T> void sort(final List<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if ((N.isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
@@ -1828,6 +2515,11 @@ public final class Array {
     //        Arrays.parallelSort(a, fromIndex, toIndex, cmp);
     //    }
 
+    /**
+     * Parallel sort.
+     *
+     * @param array the array
+     */
     static void parallelSort(final char[] array) {
         if (N.isNullOrEmpty(array)) {
             return;
@@ -1836,6 +2528,13 @@ public final class Array {
         parallelSort(array, 0, array.length);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void parallelSort(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -1934,6 +2633,17 @@ public final class Array {
         }
     }
 
+    /**
+     * Merge.
+     *
+     * @param a the a
+     * @param fromIndexA the from index A
+     * @param toIndexA the to index A
+     * @param b the b
+     * @param fromIndexB the from index B
+     * @param toIndexB the to index B
+     * @param fromIndex the from index
+     */
     static void merge(final char[] a, int fromIndexA, int toIndexA, final char[] b, int fromIndexB, int toIndexB, int fromIndex) {
         while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
             if (a[fromIndexA] <= b[fromIndexB]) {
@@ -1949,6 +2659,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param array the array
+     */
     static void parallelSort(final byte[] array) {
         if (N.isNullOrEmpty(array)) {
             return;
@@ -1957,6 +2672,13 @@ public final class Array {
         parallelSort(array, 0, array.length);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2055,6 +2777,17 @@ public final class Array {
         }
     }
 
+    /**
+     * Merge.
+     *
+     * @param a the a
+     * @param fromIndexA the from index A
+     * @param toIndexA the to index A
+     * @param b the b
+     * @param fromIndexB the from index B
+     * @param toIndexB the to index B
+     * @param fromIndex the from index
+     */
     static void merge(final byte[] a, int fromIndexA, int toIndexA, final byte[] b, int fromIndexB, int toIndexB, int fromIndex) {
         while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
             if (a[fromIndexA] <= b[fromIndexB]) {
@@ -2070,6 +2803,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param array the array
+     */
     static void parallelSort(final short[] array) {
         if (N.isNullOrEmpty(array)) {
             return;
@@ -2078,6 +2816,13 @@ public final class Array {
         parallelSort(array, 0, array.length);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void parallelSort(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2176,6 +2921,17 @@ public final class Array {
         }
     }
 
+    /**
+     * Merge.
+     *
+     * @param a the a
+     * @param fromIndexA the from index A
+     * @param toIndexA the to index A
+     * @param b the b
+     * @param fromIndexB the from index B
+     * @param toIndexB the to index B
+     * @param fromIndex the from index
+     */
     static void merge(final short[] a, int fromIndexA, int toIndexA, final short[] b, int fromIndexB, int toIndexB, int fromIndex) {
         while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
             if (a[fromIndexA] <= b[fromIndexB]) {
@@ -2191,6 +2947,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param array the array
+     */
     static void parallelSort(final int[] array) {
         if (N.isNullOrEmpty(array)) {
             return;
@@ -2199,6 +2960,13 @@ public final class Array {
         parallelSort(array, 0, array.length);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void parallelSort(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2297,6 +3065,17 @@ public final class Array {
         }
     }
 
+    /**
+     * Merge.
+     *
+     * @param a the a
+     * @param fromIndexA the from index A
+     * @param toIndexA the to index A
+     * @param b the b
+     * @param fromIndexB the from index B
+     * @param toIndexB the to index B
+     * @param fromIndex the from index
+     */
     static void merge(final int[] a, int fromIndexA, int toIndexA, final int[] b, int fromIndexB, int toIndexB, int fromIndex) {
         while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
             if (a[fromIndexA] <= b[fromIndexB]) {
@@ -2312,6 +3091,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param array the array
+     */
     static void parallelSort(final long[] array) {
         if (N.isNullOrEmpty(array)) {
             return;
@@ -2320,6 +3104,13 @@ public final class Array {
         parallelSort(array, 0, array.length);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void parallelSort(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2418,6 +3209,17 @@ public final class Array {
         }
     }
 
+    /**
+     * Merge.
+     *
+     * @param a the a
+     * @param fromIndexA the from index A
+     * @param toIndexA the to index A
+     * @param b the b
+     * @param fromIndexB the from index B
+     * @param toIndexB the to index B
+     * @param fromIndex the from index
+     */
     static void merge(final long[] a, int fromIndexA, int toIndexA, final long[] b, int fromIndexB, int toIndexB, int fromIndex) {
         while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
             if (a[fromIndexA] <= b[fromIndexB]) {
@@ -2433,6 +3235,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param array the array
+     */
     static void parallelSort(final float[] array) {
         if (N.isNullOrEmpty(array)) {
             return;
@@ -2441,6 +3248,13 @@ public final class Array {
         parallelSort(array, 0, array.length);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void parallelSort(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2539,6 +3353,17 @@ public final class Array {
         }
     }
 
+    /**
+     * Merge.
+     *
+     * @param a the a
+     * @param fromIndexA the from index A
+     * @param toIndexA the to index A
+     * @param b the b
+     * @param fromIndexB the from index B
+     * @param toIndexB the to index B
+     * @param fromIndex the from index
+     */
     static void merge(final float[] a, int fromIndexA, int toIndexA, final float[] b, int fromIndexB, int toIndexB, int fromIndex) {
         int numOfNaN = 0;
 
@@ -2573,6 +3398,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param array the array
+     */
     static void parallelSort(final double[] array) {
         if (N.isNullOrEmpty(array)) {
             return;
@@ -2581,6 +3411,13 @@ public final class Array {
         parallelSort(array, 0, array.length);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void parallelSort(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2679,6 +3516,17 @@ public final class Array {
         }
     }
 
+    /**
+     * Merge.
+     *
+     * @param a the a
+     * @param fromIndexA the from index A
+     * @param toIndexA the to index A
+     * @param b the b
+     * @param fromIndexB the from index B
+     * @param toIndexB the to index B
+     * @param fromIndex the from index
+     */
     static void merge(final double[] a, int fromIndexA, int toIndexA, final double[] b, int fromIndexB, int toIndexB, int fromIndex) {
         int numOfNaN = 0;
 
@@ -2713,6 +3561,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     */
     static void parallelSort(final Object[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -2721,10 +3574,24 @@ public final class Array {
         parallelSort(a, 0, a.length);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void parallelSort(final Object[] a, final int fromIndex, final int toIndex) {
         parallelSort(a, fromIndex, toIndex, Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param cmp the cmp
+     */
     static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -2733,6 +3600,15 @@ public final class Array {
         parallelSort(a, 0, a.length, cmp);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param cmp the cmp
+     */
     static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2833,6 +3709,19 @@ public final class Array {
         }
     }
 
+    /**
+     * Merge.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndexA the from index A
+     * @param toIndexA the to index A
+     * @param b the b
+     * @param fromIndexB the from index B
+     * @param toIndexB the to index B
+     * @param fromIndex the from index
+     * @param cmp the cmp
+     */
     static <T> void merge(final T[] a, int fromIndexA, int toIndexA, final T[] b, int fromIndexB, int toIndexB, int fromIndex, Comparator<? super T> cmp) {
         while (fromIndexA < toIndexA && fromIndexB < toIndexB) {
             if (cmp.compare(a[fromIndexA], b[fromIndexB]) <= 0) {
@@ -2848,6 +3737,12 @@ public final class Array {
         }
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     */
     static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
             return;
@@ -2856,10 +3751,25 @@ public final class Array {
         parallelSort(c, 0, c.size());
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> c, final int fromIndex, final int toIndex) {
         parallelSort(c, fromIndex, toIndex, Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param <T> the generic type
+     * @param list the list
+     * @param cmp the cmp
+     */
     static <T> void parallelSort(final List<? extends T> list, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(list)) {
             return;
@@ -2868,6 +3778,15 @@ public final class Array {
         parallelSort(list, 0, list.size(), cmp);
     }
 
+    /**
+     * Parallel sort.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param cmp the cmp
+     */
     @SuppressWarnings("rawtypes")
     static <T> void parallelSort(final List<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if ((N.isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
@@ -2904,6 +3823,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param a the a
+     */
     static void bucketSort(final int[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -2912,6 +3836,13 @@ public final class Array {
         bucketSort(a, 0, a.length);
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void bucketSort(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2944,6 +3875,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param a the a
+     */
     static void bucketSort(final long[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -2952,6 +3888,13 @@ public final class Array {
         bucketSort(a, 0, a.length);
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void bucketSort(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -2985,6 +3928,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param a the a
+     */
     static void bucketSort(final float[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -2993,6 +3941,13 @@ public final class Array {
         bucketSort(a, 0, a.length);
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void bucketSort(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -3025,6 +3980,11 @@ public final class Array {
         }
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param a the a
+     */
     static void bucketSort(final double[] a) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -3033,6 +3993,13 @@ public final class Array {
         bucketSort(a, 0, a.length);
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     static void bucketSort(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -3068,7 +4035,8 @@ public final class Array {
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
      *   
-     * @param a
+     *
+     * @param a the a
      */
     static void bucketSort(final Object[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -3080,15 +4048,22 @@ public final class Array {
 
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
-     * 
+     *
      * @param a the elements in the array must implements the <code>Comparable</code> interface.
-     * @param fromIndex
-     * @param toIndex
+     * @param fromIndex the from index
+     * @param toIndex the to index
      */
     static void bucketSort(final Object[] a, final int fromIndex, final int toIndex) {
         bucketSort(a, fromIndex, toIndex, null);
     }
 
+    /**
+     * Bucket sort.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param cmp the cmp
+     */
     static <T> void bucketSort(final T[] a, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -3099,11 +4074,12 @@ public final class Array {
 
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
-     * 
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param cmp the cmp
      */
     static <T> void bucketSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -3140,8 +4116,9 @@ public final class Array {
 
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
-     * 
-     * @param c
+     *
+     * @param <T> the generic type
+     * @param c the c
      */
     static <T extends Comparable<T>> void bucketSort(final List<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -3153,10 +4130,11 @@ public final class Array {
 
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
-     * 
-     * @param c
-     * @param fromIndex
-     * @param toIndex
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
      */
     static <T extends Comparable<T>> void bucketSort(final List<T> c, final int fromIndex, final int toIndex) {
         bucketSort(c, fromIndex, toIndex, null);
@@ -3164,9 +4142,10 @@ public final class Array {
 
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
-     * 
-     * @param c
-     * @param cmp
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param cmp the cmp
      */
     static <T> void bucketSort(final List<? extends T> c, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(c)) {
@@ -3178,11 +4157,12 @@ public final class Array {
 
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
-     * 
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param cmp the cmp
      */
     static <T> void bucketSort(final List<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
@@ -3228,11 +4208,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(boolean[], boolean)}
+     * {@link Arrays#binarySearch(boolean[], boolean)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final boolean[] a, final boolean key) {
         if (N.isNullOrEmpty(a)) {
@@ -3259,11 +4239,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(char[], char)}
+     * {@link Arrays#binarySearch(char[], char)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final char[] a, final char key) {
         if (N.isNullOrEmpty(a)) {
@@ -3274,13 +4254,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(char[], int, int, char)}
+     * {@link Arrays#binarySearch(char[], int, int, char)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final char[] a, final int fromIndex, final int toIndex, final char key) {
         if (N.isNullOrEmpty(a)) {
@@ -3291,11 +4271,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(byte[], byte)}
+     * {@link Arrays#binarySearch(byte[], byte)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final byte[] a, final byte key) {
         if (N.isNullOrEmpty(a)) {
@@ -3306,13 +4286,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(byte[], int, int, byte)}
+     * {@link Arrays#binarySearch(byte[], int, int, byte)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final byte[] a, final int fromIndex, final int toIndex, final byte key) {
         if (N.isNullOrEmpty(a)) {
@@ -3323,11 +4303,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(short[], short)}
+     * {@link Arrays#binarySearch(short[], short)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final short[] a, final short key) {
         if (N.isNullOrEmpty(a)) {
@@ -3338,13 +4318,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(short[], int, int, short)}
+     * {@link Arrays#binarySearch(short[], int, int, short)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final short[] a, final int fromIndex, final int toIndex, final short key) {
         if (N.isNullOrEmpty(a)) {
@@ -3355,11 +4335,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(int[], int)}
+     * {@link Arrays#binarySearch(int[], int)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final int[] a, final int key) {
         if (N.isNullOrEmpty(a)) {
@@ -3370,13 +4350,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(int[], int, int, int)}
+     * {@link Arrays#binarySearch(int[], int, int, int)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final int[] a, final int fromIndex, final int toIndex, final int key) {
         if (N.isNullOrEmpty(a)) {
@@ -3387,11 +4367,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(long[], long)}
+     * {@link Arrays#binarySearch(long[], long)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final long[] a, final long key) {
         if (N.isNullOrEmpty(a)) {
@@ -3402,13 +4382,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(long[], int, int, long)}
+     * {@link Arrays#binarySearch(long[], int, int, long)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final long[] a, final int fromIndex, final int toIndex, final long key) {
         if (N.isNullOrEmpty(a)) {
@@ -3419,11 +4399,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(float[], float)}
+     * {@link Arrays#binarySearch(float[], float)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final float[] a, final float key) {
         if (N.isNullOrEmpty(a)) {
@@ -3434,13 +4414,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(float[], int, int, float)}
+     * {@link Arrays#binarySearch(float[], int, int, float)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final float[] a, final int fromIndex, final int toIndex, final float key) {
         if (N.isNullOrEmpty(a)) {
@@ -3451,11 +4431,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(double[], double)}
+     * {@link Arrays#binarySearch(double[], double)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final double[] a, final double key) {
         if (N.isNullOrEmpty(a)) {
@@ -3466,13 +4446,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(double[], int, int, double)}
+     * {@link Arrays#binarySearch(double[], int, int, double)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final double[] a, final int fromIndex, final int toIndex, final double key) {
         if (N.isNullOrEmpty(a)) {
@@ -3483,11 +4463,11 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(Object[], Object)}
+     * {@link Arrays#binarySearch(Object[], Object)}.
      *
-     * @param a
-     * @param key
-     * @return
+     * @param a the a
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final Object[] a, final Object key) {
         if (N.isNullOrEmpty(a)) {
@@ -3498,13 +4478,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(Object[], int, int, Object)}
+     * {@link Arrays#binarySearch(Object[], int, int, Object)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     static int binarySearch(final Object[] a, final int fromIndex, final int toIndex, final Object key) {
         if (N.isNullOrEmpty(a)) {
@@ -3515,12 +4495,13 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(Object[], Object, Comparator)}
+     * {@link Arrays#binarySearch(Object[], Object, Comparator)}.
      *
-     * @param a
-     * @param key
-     * @param cmp
-     * @return
+     * @param <T> the generic type
+     * @param a the a
+     * @param key the key
+     * @param cmp the cmp
+     * @return the int
      */
     static <T> int binarySearch(final T[] a, final T key, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
@@ -3531,14 +4512,15 @@ public final class Array {
     }
 
     /**
-     * {@link Arrays#binarySearch(Object[], int, int, Object, Comparator)}
+     * {@link Arrays#binarySearch(Object[], int, int, Object, Comparator)}.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @param c
-     * @return
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @param cmp the cmp
+     * @return the int
      */
     static <T> int binarySearch(final T[] a, final int fromIndex, final int toIndex, final T key, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
@@ -3549,11 +4531,12 @@ public final class Array {
     }
 
     /**
-     * {@link Collections#binarySearch(List, Object)}
+     * {@link Collections#binarySearch(List, Object)}.
      *
-     * @param list
-     * @param key
-     * @return
+     * @param <T> the generic type
+     * @param list the list
+     * @param key the key
+     * @return the int
      */
     static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final T key) {
         if (N.isNullOrEmpty(list)) {
@@ -3563,6 +4546,16 @@ public final class Array {
         return binarySearch(list, 0, list.size(), key);
     }
 
+    /**
+     * Binary search.
+     *
+     * @param <T> the generic type
+     * @param list the list
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
+     */
     static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T key) {
         if (N.isNullOrEmpty(list)) {
             return N.INDEX_NOT_FOUND;
@@ -3571,6 +4564,15 @@ public final class Array {
         return binarySearch(list, fromIndex, toIndex, key, Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * Binary search.
+     *
+     * @param <T> the generic type
+     * @param list the list
+     * @param key the key
+     * @param cmp the cmp
+     * @return the int
+     */
     static <T> int binarySearch(final List<? extends T> list, final T key, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(list)) {
             return N.INDEX_NOT_FOUND;
@@ -3580,13 +4582,15 @@ public final class Array {
     }
 
     /**
+     * Binary search.
      *
-     * @param list
-     * @param key
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     * @return
+     * @param <T> the generic type
+     * @param list the list
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @param cmp the cmp
+     * @return the int
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T key, final Comparator<? super T> cmp) {
@@ -3616,6 +4620,17 @@ public final class Array {
         }
     }
 
+    /**
+     * Indexed binary search.
+     *
+     * @param <T> the generic type
+     * @param l the l
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @param cmp the cmp
+     * @return the int
+     */
     private static <T> int indexedBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T key,
             final Comparator<? super T> cmp) {
         int low = fromIndex;
@@ -3639,6 +4654,17 @@ public final class Array {
         return N.INDEX_NOT_FOUND; // key not found
     }
 
+    /**
+     * Iterator binary search.
+     *
+     * @param <T> the generic type
+     * @param l the l
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @param cmp the cmp
+     * @return the int
+     */
     private static <T> int iteratorBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T key,
             final Comparator<? super T> cmp) {
         int low = fromIndex;
@@ -3667,6 +4693,11 @@ public final class Array {
     /**
      * Gets the ith element from the given list by repositioning the specified
      * list listIterator.
+     *
+     * @param <T> the generic type
+     * @param iterator the iterator
+     * @param index the index
+     * @return the t
      */
     private static <T> T get(final ListIterator<? extends T> iterator, final int index) {
         T obj = null;
@@ -3685,10 +4716,26 @@ public final class Array {
         return obj;
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param k the k
+     * @return the char
+     */
     static char kthLargest(final char[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the char
+     */
     static char kthLargest(final char[] a, final int fromIndex, final int toIndex, int k) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -3741,10 +4788,26 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param k the k
+     * @return the byte
+     */
     static byte kthLargest(final byte[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the byte
+     */
     static byte kthLargest(final byte[] a, final int fromIndex, final int toIndex, int k) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -3797,10 +4860,26 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param k the k
+     * @return the short
+     */
     static short kthLargest(final short[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the short
+     */
     static short kthLargest(final short[] a, final int fromIndex, final int toIndex, int k) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -3853,10 +4932,26 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param k the k
+     * @return the int
+     */
     static int kthLargest(final int[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the int
+     */
     static int kthLargest(final int[] a, final int fromIndex, final int toIndex, int k) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -3909,10 +5004,26 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param k the k
+     * @return the long
+     */
     static long kthLargest(final long[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the long
+     */
     static long kthLargest(final long[] a, final int fromIndex, final int toIndex, int k) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -3965,10 +5076,26 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param k the k
+     * @return the float
+     */
     static float kthLargest(final float[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the float
+     */
     static float kthLargest(final float[] a, final int fromIndex, final int toIndex, int k) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -4021,10 +5148,26 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param k the k
+     * @return the double
+     */
     static double kthLargest(final double[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the double
+     */
     static double kthLargest(final double[] a, final int fromIndex, final int toIndex, int k) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -4077,18 +5220,56 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param k the k
+     * @return the t
+     */
     static <T extends Comparable<T>> T kthLargest(final T[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the t
+     */
     static <T extends Comparable<T>> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k) {
         return (T) kthLargest(a, fromIndex, toIndex, k, Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param k the k
+     * @param cmp the cmp
+     * @return the t
+     */
     static <T> T kthLargest(final T[] a, int k, final Comparator<? super T> cmp) {
         return kthLargest(a, 0, a.length, k, cmp);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @param cmp the cmp
+     * @return the t
+     */
     static <T> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -4142,18 +5323,56 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param k the k
+     * @return the t
+     */
     static <T extends Comparable<T>> T kthLargest(final Collection<? extends T> c, int k) {
         return kthLargest(c, 0, c.size(), k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the t
+     */
     static <T extends Comparable<T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k) {
         return (T) kthLargest(c, fromIndex, toIndex, k, Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param k the k
+     * @param cmp the cmp
+     * @return the t
+     */
     static <T> T kthLargest(final Collection<? extends T> c, int k, final Comparator<? super T> cmp) {
         return kthLargest(c, 0, c.size(), k, cmp);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @param cmp the cmp
+     * @return the t
+     */
     static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
         N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
@@ -4231,6 +5450,12 @@ public final class Array {
         return queue.peek();
     }
 
+    /**
+     * Sets the error.
+     *
+     * @param errorHolder the error holder
+     * @param e the e
+     */
     static void setError(final Holder<Throwable> errorHolder, Throwable e) {
         synchronized (errorHolder) {
             if (errorHolder.value() == null) {

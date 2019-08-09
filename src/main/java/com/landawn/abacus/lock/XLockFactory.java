@@ -20,27 +20,53 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.TypeAttrParser;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * A factory for creating XLock objects.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class XLockFactory {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(XLockFactory.class);
 
+    /**
+     * Instantiates a new x lock factory.
+     */
     private XLockFactory() {
         // singleton
     }
 
+    /**
+     * Creates a new XLock object.
+     *
+     * @param <T> the generic type
+     * @return the x lock< t>
+     */
     public static <T> XLock<T> createLocalXLock() {
         return new LocalXLock<T>();
     }
 
+    /**
+     * Creates a new XLock object.
+     *
+     * @param <T> the generic type
+     * @param timeout the timeout
+     * @return the x lock< t>
+     */
     public static <T> XLock<T> createLocalXLock(long timeout) {
         return new LocalXLock<T>(timeout);
     }
 
+    /**
+     * Creates a new XLock object.
+     *
+     * @param <T> the generic type
+     * @param provider the provider
+     * @return the x lock< t>
+     */
     @SuppressWarnings("unchecked")
     public static <T> XLock<T> createLock(String provider) {
         if (logger.isInfoEnabled()) {

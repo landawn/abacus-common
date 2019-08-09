@@ -17,21 +17,25 @@ package com.landawn.abacus.lock;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class RefReentrantLock.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class RefReentrantLock extends ReentrantLock {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -6795827089746882791L;
 
+    /** The ref count. */
     private final AtomicInteger refCount = new AtomicInteger();
 
     /**
-     * Method getRefCount
-     * 
-     * @return
+     * Method getRefCount.
+     *
+     * @return the ref count
      */
     public int getRefCount() {
         return refCount.get();
@@ -39,8 +43,8 @@ public class RefReentrantLock extends ReentrantLock {
 
     /**
      * Method incrementRefCount.
-     * 
-     * @return
+     *
+     * @return the int
      */
     public int incrementRefCount() {
         return refCount.incrementAndGet();
@@ -48,8 +52,8 @@ public class RefReentrantLock extends ReentrantLock {
 
     /**
      * Method decrementRefCount.
-     * 
-     * @return
+     *
+     * @return the int
      */
     public int decrementRefCount() {
         return refCount.decrementAndGet();
@@ -57,8 +61,6 @@ public class RefReentrantLock extends ReentrantLock {
 
     /**
      * Method resetRefCount.
-     * 
-     * @return
      */
     public void resetRefCount() {
         refCount.set(0);

@@ -21,13 +21,16 @@ import com.landawn.abacus.util.function.DoubleSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.DoubleStream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class DoubleIterator.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class DoubleIterator extends ImmutableIterator<Double> {
+
+    /** The Constant EMPTY. */
     public static final DoubleIterator EMPTY = new DoubleIterator() {
         @Override
         public boolean hasNext() {
@@ -40,15 +43,34 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     };
 
+    /**
+     * Empty.
+     *
+     * @return the double iterator
+     */
     public static DoubleIterator empty() {
         return EMPTY;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the double iterator
+     */
     @SafeVarargs
     public static DoubleIterator of(final double... a) {
         return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the double iterator
+     */
     public static DoubleIterator of(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -87,9 +109,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param iteratorSupplier
-     * @return
+     *
+     * @param iteratorSupplier the iterator supplier
+     * @return the double iterator
      */
     public static DoubleIterator of(final Supplier<? extends DoubleIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -127,9 +149,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param arraySupplier
-     * @return
+     *
+     * @param arraySupplier the array supplier
+     * @return the double iterator
      */
     public static DoubleIterator oF(final Supplier<double[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -174,9 +196,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      * Returns an infinite {@code DoubleIterator}.
-     * 
-     * @param supplier
-     * @return
+     *
+     * @param supplier the supplier
+     * @return the double iterator
      */
     public static DoubleIterator generate(final DoubleSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -195,10 +217,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
-     * @param hasNext
-     * @param supplier
-     * @return
+     * Generate.
+     *
+     * @param hasNext the has next
+     * @param supplier the supplier
+     * @return the double iterator
      */
     public static DoubleIterator generate(final BooleanSupplier hasNext, final DoubleSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -222,7 +245,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * 
+     * Next.
+     *
+     * @return the double
      * @Deprecated use <code>nextDouble()</code> instead.
      */
     @Deprecated
@@ -231,12 +256,27 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return nextDouble();
     }
 
+    /**
+     * Next double.
+     *
+     * @return the double
+     */
     public abstract double nextDouble();
 
+    /**
+     * To array.
+     *
+     * @return the double[]
+     */
     public double[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * To list.
+     *
+     * @return the double list
+     */
     public DoubleList toList() {
         final DoubleList list = new DoubleList();
 
@@ -247,10 +287,22 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return list;
     }
 
+    /**
+     * Stream.
+     *
+     * @return the double stream
+     */
     public DoubleStream stream() {
         return DoubleStream.of(this);
     }
 
+    /**
+     * Foreach remaining.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void foreachRemaining(Try.DoubleConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -259,6 +311,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     }
 
+    /**
+     * For each remaining.
+     *
+     * @param action the action
+     */
     @Override
     @Deprecated
     public void forEachRemaining(java.util.function.Consumer<? super Double> action) {

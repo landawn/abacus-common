@@ -50,16 +50,18 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.URLEncodedUtil;
 
+// TODO: Auto-generated Javadoc
 /**
  * Any header can be set into the parameter <code>settings</code>
  * 
  * <br>HttpClient is thread safe.</br>
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class HttpClient extends AbstractHttpClient {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
     static {
@@ -73,26 +75,67 @@ public final class HttpClient extends AbstractHttpClient {
         }
     }
 
+    /** The net URL. */
     protected final URL _netURL;
 
+    /** The active connection counter. */
     protected final AtomicInteger _activeConnectionCounter;
 
+    /**
+     * Instantiates a new http client.
+     *
+     * @param url the url
+     */
     protected HttpClient(String url) {
         this(url, DEFAULT_MAX_CONNECTION);
     }
 
+    /**
+     * Instantiates a new http client.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     */
     protected HttpClient(String url, int maxConnection) {
         this(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
+    /**
+     * Instantiates a new http client.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     */
     protected HttpClient(String url, int maxConnection, long connTimeout, long readTimeout) {
         this(url, maxConnection, connTimeout, readTimeout, null);
     }
 
+    /**
+     * Instantiates a new http client.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     protected HttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
         this(url, maxConnection, connTimeout, readTimeout, settings, new AtomicInteger(0));
     }
 
+    /**
+     * Instantiates a new http client.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param settings the settings
+     * @param sharedActiveConnectionCounter the shared active connection counter
+     */
     protected HttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
         super(url, maxConnection, connTimeout, readTimeout, settings);
@@ -106,37 +149,109 @@ public final class HttpClient extends AbstractHttpClient {
         this._activeConnectionCounter = sharedActiveConnectionCounter;
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @return the http client
+     */
     public static HttpClient create(String url) {
         return new HttpClient(url);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @return the http client
+     */
     public static HttpClient create(String url, int maxConnection) {
         return new HttpClient(url, maxConnection);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @return the http client
+     */
     public static HttpClient create(String url, long connTimeout, long readTimeout) {
         return new HttpClient(url, DEFAULT_MAX_CONNECTION, connTimeout, readTimeout);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @return the http client
+     */
     public static HttpClient create(String url, int maxConnection, long connTimeout, long readTimeout) {
         return new HttpClient(url, maxConnection, connTimeout, readTimeout);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param settings the settings
+     * @return the http client
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static HttpClient create(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
         return new HttpClient(url, maxConnection, connTimeout, readTimeout, settings);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param settings the settings
+     * @param sharedActiveConnectionCounter the shared active connection counter
+     * @return the http client
+     */
     public static HttpClient create(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
         return new HttpClient(url, maxConnection, connTimeout, readTimeout, settings, sharedActiveConnectionCounter);
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param resultClass the result class
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @return the t
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @Override
     public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request, final HttpSettings settings)
             throws UncheckedIOException {
         return execute(resultClass, null, null, httpMethod, request, settings);
     }
 
+    /**
+     * Execute.
+     *
+     * @param output the output
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @Override
     public void execute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         OutputStream os = null;
@@ -151,16 +266,47 @@ public final class HttpClient extends AbstractHttpClient {
         }
     }
 
+    /**
+     * Execute.
+     *
+     * @param output the output
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @Override
     public void execute(final OutputStream output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         execute(null, output, null, httpMethod, request, settings);
     }
 
+    /**
+     * Execute.
+     *
+     * @param output the output
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @Override
     public void execute(final Writer output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         execute(null, null, output, httpMethod, request, settings);
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param resultClass the result class
+     * @param outputStream the output stream
+     * @param outputWriter the output writer
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @return the t
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     private <T> T execute(final Class<T> resultClass, final OutputStream outputStream, final Writer outputWriter, final HttpMethod httpMethod,
             final Object request, final HttpSettings settings) throws UncheckedIOException {
         final ContentFormat requestContentFormat = getContentFormat(settings);
@@ -276,22 +422,64 @@ public final class HttpClient extends AbstractHttpClient {
         }
     }
 
+    /**
+     * Open connection.
+     *
+     * @param httpMethod the http method
+     * @return the http URL connection
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     HttpURLConnection openConnection(HttpMethod httpMethod) throws UncheckedIOException {
         return openConnection(httpMethod, HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod));
     }
 
+    /**
+     * Open connection.
+     *
+     * @param httpMethod the http method
+     * @param doOutput the do output
+     * @return the http URL connection
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     HttpURLConnection openConnection(HttpMethod httpMethod, boolean doOutput) throws UncheckedIOException {
         return openConnection(httpMethod, doOutput, _settings);
     }
 
+    /**
+     * Open connection.
+     *
+     * @param httpMethod the http method
+     * @param settings the settings
+     * @return the http URL connection
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     HttpURLConnection openConnection(HttpMethod httpMethod, HttpSettings settings) throws UncheckedIOException {
         return openConnection(httpMethod, HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod), settings);
     }
 
+    /**
+     * Open connection.
+     *
+     * @param httpMethod the http method
+     * @param doOutput the do output
+     * @param settings the settings
+     * @return the http URL connection
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     HttpURLConnection openConnection(HttpMethod httpMethod, boolean doOutput, HttpSettings settings) throws UncheckedIOException {
         return openConnection(httpMethod, null, doOutput, settings);
     }
 
+    /**
+     * Open connection.
+     *
+     * @param httpMethod the http method
+     * @param queryParameters the query parameters
+     * @param doOutput the do output
+     * @param settings the settings
+     * @return the http URL connection
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     HttpURLConnection openConnection(HttpMethod httpMethod, final Object queryParameters, boolean doOutput, HttpSettings settings) throws UncheckedIOException {
         HttpURLConnection connection = null;
 
@@ -359,6 +547,13 @@ public final class HttpClient extends AbstractHttpClient {
         }
     }
 
+    /**
+     * Sets the http properties.
+     *
+     * @param connection the connection
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     void setHttpProperties(HttpURLConnection connection, HttpSettings settings) throws UncheckedIOException {
         final HttpHeaders headers = settings.headers();
 
@@ -385,6 +580,13 @@ public final class HttpClient extends AbstractHttpClient {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param os the os
+     * @param is the is
+     * @param connection the connection
+     */
     void close(OutputStream os, InputStream is, HttpURLConnection connection) {
         try {
             IOUtil.closeQuietly(os);

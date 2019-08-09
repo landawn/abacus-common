@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.hash;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -23,23 +24,43 @@ package com.landawn.abacus.hash;
  * @author Kurt Alfred Kluever
  */
 final class Crc32cHashFunction extends AbstractStreamingHashFunction {
+
+    /**
+     * Bits.
+     *
+     * @return the int
+     */
     @Override
     public int bits() {
         return 32;
     }
 
+    /**
+     * New hasher.
+     *
+     * @return the hasher
+     */
     @Override
     public Hasher newHasher() {
         return new Crc32cHasher();
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "Hashing.crc32c()";
     }
 
+    /**
+     * The Class Crc32cHasher.
+     */
     static final class Crc32cHasher extends AbstractByteHasher {
 
+        /** The Constant CRC_TABLE. */
         // The CRC table, generated from the polynomial 0x11EDC6F41.
         static final int[] CRC_TABLE = { 0x00000000, 0xf26b8303, 0xe13b70f7, 0x1350f3f4, 0xc79a971f, 0x35f1141c, 0x26a1e7e8, 0xd4ca64eb, 0x8ad958cf, 0x78b2dbcc,
                 0x6be22838, 0x9989ab3b, 0x4d43cfd0, 0xbf284cd3, 0xac78bf27, 0x5e133c24, 0x105ec76f, 0xe235446c, 0xf165b798, 0x030e349b, 0xd7c45070, 0x25afd373,
@@ -64,8 +85,14 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
                 0x4f48173d, 0xbd23943e, 0xf36e6f75, 0x0105ec76, 0x12551f82, 0xe03e9c81, 0x34f4f86a, 0xc69f7b69, 0xd5cf889d, 0x27a40b9e, 0x79b737ba, 0x8bdcb4b9,
                 0x988c474d, 0x6ae7c44e, 0xbe2da0a5, 0x4c4623a6, 0x5f16d052, 0xad7d5351 };
 
+        /** The crc. */
         private int crc = 0;
 
+        /**
+         * Update.
+         *
+         * @param b the b
+         */
         @Override
         public void update(byte b) {
             crc ^= 0xFFFFFFFF;
@@ -73,6 +100,11 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
             crc = ~((crc >>> 8) ^ CRC_TABLE[(crc ^ b) & 0xFF]);
         }
 
+        /**
+         * Hash.
+         *
+         * @return the hash code
+         */
         @Override
         public HashCode hash() {
             return HashCode.fromInt(crc);

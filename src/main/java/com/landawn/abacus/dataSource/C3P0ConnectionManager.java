@@ -42,18 +42,29 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class C3P0ConnectionManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 class C3P0ConnectionManager extends AbstractConnectionManager {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(C3P0ConnectionManager.class);
 
+    /** The ds. */
     private final DataSource ds;
+
+    /** The cpds. */
     private final com.mchange.v2.c3p0.ComboPooledDataSource cpds;
 
+    /**
+     * Instantiates a new c 3 P 0 connection manager.
+     *
+     * @param props the props
+     */
     public C3P0ConnectionManager(Map<String, ?> props) {
         super(props);
 
@@ -93,6 +104,11 @@ class C3P0ConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Gets the max active.
+     *
+     * @return the max active
+     */
     @Override
     public int getMaxActive() {
         if (cpds == null) {
@@ -102,6 +118,11 @@ class C3P0ConnectionManager extends AbstractConnectionManager {
         return cpds.getMaxPoolSize();
     }
 
+    /**
+     * Gets the num active.
+     *
+     * @return the num active
+     */
     @Override
     public int getNumActive() {
         if (cpds == null) {
@@ -115,6 +136,11 @@ class C3P0ConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     @Override
     public Connection getConnection() {
         try {
@@ -124,6 +150,11 @@ class C3P0ConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Close connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void closeConnection(Connection conn) {
         if (conn != null) {
@@ -135,11 +166,19 @@ class C3P0ConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Detroy connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void detroyConnection(Connection conn) {
         closeConnection(conn);
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (cpds != null) {

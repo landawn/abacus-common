@@ -20,6 +20,7 @@ import java.io.OutputStream;
 
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -29,13 +30,18 @@ import com.landawn.abacus.util.N;
  * @since 16.0
  */
 public final class HashingOutputStream extends FilterOutputStream {
+
+    /** The hasher. */
     private final Hasher hasher;
 
     /**
      * Creates an output stream that hashes using the given {@link HashFunction}, and forwards all
      * data written to it to the underlying {@link OutputStream}.
-     *
+     * 
      * <p>The {@link OutputStream} should not be written to before or after the hand-off.
+     *
+     * @param hashFunction the hash function
+     * @param out the out
      */
     // TODO(user): Evaluate whether it makes sense to always piggyback the computation of a
     // HashCode on an existing OutputStream, compared to creating a separate OutputStream that could
@@ -46,12 +52,26 @@ public final class HashingOutputStream extends FilterOutputStream {
         this.hasher = N.checkArgNotNull(hashFunction.newHasher());
     }
 
+    /**
+     * Write.
+     *
+     * @param b the b
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     @Override
     public void write(int b) throws IOException {
         hasher.put((byte) b);
         out.write(b);
     }
 
+    /**
+     * Write.
+     *
+     * @param bytes the bytes
+     * @param off the off
+     * @param len the len
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     @Override
     public void write(byte[] bytes, int off, int len) throws IOException {
         hasher.put(bytes, off, len);
@@ -61,6 +81,8 @@ public final class HashingOutputStream extends FilterOutputStream {
     /**
      * Returns the {@link HashCode} based on the data written to this stream. The result is
      * unspecified if this method is called more than once on the same instance.
+     *
+     * @return the hash code
      */
     public HashCode hash() {
         return hasher.hash();
@@ -68,6 +90,11 @@ public final class HashingOutputStream extends FilterOutputStream {
 
     // Overriding close() because FilterOutputStream's close() method pre-JDK8 has bad behavior:
     // it silently ignores any exception thrown by flush(). Instead, just close the delegate stream.
+    /**
+     * Close.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     // It should flush itself if necessary.
     @Override
     public void close() throws IOException {

@@ -34,17 +34,26 @@ import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class HikariConnectionManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 class HikariConnectionManager extends AbstractConnectionManager {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(HikariConnectionManager.class);
 
+    /** The ds. */
     private final com.zaxxer.hikari.HikariDataSource ds;
 
+    /**
+     * Instantiates a new hikari connection manager.
+     *
+     * @param props the props
+     */
     public HikariConnectionManager(Map<String, ?> props) {
         super(props);
 
@@ -69,16 +78,31 @@ class HikariConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Gets the max active.
+     *
+     * @return the max active
+     */
     @Override
     public int getMaxActive() {
         return ds.getMaximumPoolSize();
     }
 
+    /**
+     * Gets the num active.
+     *
+     * @return the num active
+     */
     @Override
     public int getNumActive() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     @Override
     public Connection getConnection() {
         try {
@@ -88,6 +112,11 @@ class HikariConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Close connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void closeConnection(Connection conn) {
         if (conn != null) {
@@ -99,11 +128,19 @@ class HikariConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Detroy connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void detroyConnection(Connection conn) {
         closeConnection(conn);
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (ds != null) {

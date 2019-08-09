@@ -27,6 +27,7 @@ package com.landawn.abacus.logging;
 
 import com.landawn.abacus.util.function.Supplier;
 
+// TODO: Auto-generated Javadoc
 /**
  * The org.slf4j.Logger interface is the main user entry point of SLF4J API. It is expected that logging takes place
  * through concrete implementations of this interface.
@@ -67,13 +68,17 @@ public interface Logger {
      */
     final public String ROOT_LOGGER_NAME = "ROOT";
 
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
     public String getName();
 
     /**
-     * Is the logger instance enabled for the TRACE level?
-     * 
+     * Is the logger instance enabled for the TRACE level?.
+     *
      * @return True if this Logger is enabled for the TRACE level, false otherwise.
-     * 
      * @since 1.4
      */
     public boolean isTraceEnabled();
@@ -87,10 +92,31 @@ public interface Logger {
      */
     public void trace(String msg);
 
+    /**
+     * Trace.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     public void trace(String template, Object arg);
 
+    /**
+     * Trace.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void trace(String template, Object arg1, Object arg2);
 
+    /**
+     * Trace.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void trace(String template, Object arg1, Object arg2, Object arg3);
 
     /**
@@ -123,32 +149,73 @@ public interface Logger {
      */
     public void trace(String msg, Throwable t);
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     public void trace(Throwable t, String msg);
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     public void trace(Throwable t, String template, Object arg);
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void trace(Throwable t, String template, Object arg1, Object arg2);
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void trace(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
+    /**
+     * Trace.
+     *
+     * @param supplier the supplier
+     */
     public void trace(Supplier<String> supplier);
 
     /**
-     * 
-     * @param supplier
-     * @param t
+     * Trace.
+     *
+     * @param supplier the supplier
+     * @param t the t
      * @deprecated replaced by {@link #trace(Throwable, Supplier)}
      */
     @Deprecated
     public void trace(Supplier<String> supplier, Throwable t);
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     public void trace(Throwable t, Supplier<String> supplier);
 
     /**
-     * Is the logger instance enabled for the DEBUG level?
-     * 
+     * Is the logger instance enabled for the DEBUG level?.
+     *
      * @return True if this Logger is enabled for the DEBUG level, false otherwise.
-     * 
      */
     public boolean isDebugEnabled();
 
@@ -161,10 +228,31 @@ public interface Logger {
      */
     public void debug(String msg);
 
+    /**
+     * Debug.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     public void debug(String template, Object arg);
 
+    /**
+     * Debug.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void debug(String template, Object arg1, Object arg2);
 
+    /**
+     * Debug.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void debug(String template, Object arg1, Object arg2, Object arg3);
 
     /**
@@ -197,30 +285,72 @@ public interface Logger {
      */
     public void debug(String msg, Throwable t);
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     public void debug(Throwable t, String msg);
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     public void debug(Throwable t, String template, Object arg);
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void debug(Throwable t, String template, Object arg1, Object arg2);
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void debug(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
+    /**
+     * Debug.
+     *
+     * @param supplier the supplier
+     */
     public void debug(Supplier<String> supplier);
 
     /**
-     * 
-     * @param supplier
-     * @param t
+     * Debug.
+     *
+     * @param supplier the supplier
+     * @param t the t
      * @deprecated replaced by {@link #debug(Throwable, Supplier)}
      */
     @Deprecated
     public void debug(Supplier<String> supplier, Throwable t);
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     public void debug(Throwable t, Supplier<String> supplier);
 
     /**
-     * Is the logger instance enabled for the INFO level?
-     * 
+     * Is the logger instance enabled for the INFO level?.
+     *
      * @return True if this Logger is enabled for the INFO level, false otherwise.
      */
     public boolean isInfoEnabled();
@@ -234,10 +364,31 @@ public interface Logger {
      */
     public void info(String msg);
 
+    /**
+     * Info.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     public void info(String template, Object arg);
 
+    /**
+     * Info.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void info(String template, Object arg1, Object arg2);
 
+    /**
+     * Info.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void info(String template, Object arg1, Object arg2, Object arg3);
 
     /**
@@ -270,30 +421,72 @@ public interface Logger {
      */
     public void info(String msg, Throwable t);
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     public void info(Throwable t, String msg);
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     public void info(Throwable t, String template, Object arg);
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void info(Throwable t, String template, Object arg1, Object arg2);
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void info(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
+    /**
+     * Info.
+     *
+     * @param supplier the supplier
+     */
     public void info(Supplier<String> supplier);
 
     /**
-     * 
-     * @param supplier
-     * @param t
+     * Info.
+     *
+     * @param supplier the supplier
+     * @param t the t
      * @deprecated replaced by {@link #info(Throwable, Supplier)}
      */
     @Deprecated
     public void info(Supplier<String> supplier, Throwable t);
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     public void info(Throwable t, Supplier<String> supplier);
 
     /**
-     * Is the logger instance enabled for the WARN level?
-     * 
+     * Is the logger instance enabled for the WARN level?.
+     *
      * @return True if this Logger is enabled for the WARN level, false otherwise.
      */
     public boolean isWarnEnabled();
@@ -307,10 +500,31 @@ public interface Logger {
      */
     public void warn(String msg);
 
+    /**
+     * Warn.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     public void warn(String template, Object arg);
 
+    /**
+     * Warn.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void warn(String template, Object arg1, Object arg2);
 
+    /**
+     * Warn.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void warn(String template, Object arg1, Object arg2, Object arg3);
 
     /**
@@ -343,30 +557,72 @@ public interface Logger {
      */
     public void warn(String msg, Throwable t);
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     public void warn(Throwable t, String msg);
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     public void warn(Throwable t, String template, Object arg);
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void warn(Throwable t, String template, Object arg1, Object arg2);
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void warn(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
+    /**
+     * Warn.
+     *
+     * @param supplier the supplier
+     */
     public void warn(Supplier<String> supplier);
 
     /**
-     * 
-     * @param supplier
-     * @param t
+     * Warn.
+     *
+     * @param supplier the supplier
+     * @param t the t
      * @deprecated replaced by {@link #warn(Throwable, Supplier)}
      */
     @Deprecated
     public void warn(Supplier<String> supplier, Throwable t);
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     public void warn(Throwable t, Supplier<String> supplier);
 
     /**
-     * Is the logger instance enabled for the ERROR level?
-     * 
+     * Is the logger instance enabled for the ERROR level?.
+     *
      * @return True if this Logger is enabled for the ERROR level, false otherwise.
      */
     public boolean isErrorEnabled();
@@ -380,10 +636,31 @@ public interface Logger {
      */
     public void error(String msg);
 
+    /**
+     * Error.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     public void error(String template, Object arg);
 
+    /**
+     * Error.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void error(String template, Object arg1, Object arg2);
 
+    /**
+     * Error.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void error(String template, Object arg1, Object arg2, Object arg3);
 
     /**
@@ -416,25 +693,67 @@ public interface Logger {
      */
     public void error(String msg, Throwable t);
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     public void error(Throwable t, String msg);
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     public void error(Throwable t, String template, Object arg);
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     public void error(Throwable t, String template, Object arg1, Object arg2);
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     public void error(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
+    /**
+     * Error.
+     *
+     * @param supplier the supplier
+     */
     public void error(Supplier<String> supplier);
 
     /**
-     * 
-     * @param supplier
-     * @param t
+     * Error.
+     *
+     * @param supplier the supplier
+     * @param t the t
      * @deprecated replaced by {@link #error(Throwable, Supplier)}
      */
     @Deprecated
     public void error(Supplier<String> supplier, Throwable t);
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     public void error(Throwable t, Supplier<String> supplier);
 
 }

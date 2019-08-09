@@ -16,6 +16,7 @@
  */
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
@@ -25,10 +26,10 @@ package com.landawn.abacus.util;
  * A mutable <code>byte</code> wrapper.
  * <p>
  * Note that as MutableByte does not extend Byte, it is not treated by String.format as a Byte parameter. 
- * 
+ *
+ * @version $Id: MutableByte.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Byte
  * @since 2.1
- * @version $Id: MutableByte.java 1669791 2015-03-28 15:22:59Z britter $
  */
 public final class MutableByte extends Number implements Comparable<MutableByte>, Mutable {
 
@@ -59,10 +60,21 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @return the mutable byte
+     */
     public static MutableByte of(final byte value) {
         return new MutableByte(value);
     }
 
+    /**
+     * Value.
+     *
+     * @return the byte
+     */
     public byte value() {
         return value;
     }
@@ -88,12 +100,24 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
         this.value = value;
     }
 
+    /**
+     * Gets the and set.
+     *
+     * @param value the value
+     * @return the and set
+     */
     public byte getAndSet(final byte value) {
         final byte result = this.value;
         this.value = value;
         return result;
     }
 
+    /**
+     * Sets the and get.
+     *
+     * @param value the value
+     * @return the byte
+     */
     public byte setAndGet(final byte value) {
         this.value = value;
         return this.value;
@@ -102,10 +126,12 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
-     * 
-     * @param newValue
+     *
+     * @param <E> the element type
+     * @param newValue the new value
      * @param predicate - test the current value.
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setIf(byte newValue, Try.BytePredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
@@ -119,10 +145,12 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
-     * 
-     * @param newValue
+     *
+     * @param <E> the element type
+     * @param newValue the new value
      * @param predicate the first parameter is the current value, the second parameter is the new value.
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setIf(byte newValue, Try.ByteBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {

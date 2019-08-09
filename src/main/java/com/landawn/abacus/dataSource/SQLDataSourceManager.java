@@ -25,23 +25,41 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.TypeAttrParser;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class SQLDataSourceManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class SQLDataSourceManager implements DataSourceManager {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(SQLDataSourceManager.class);
 
+    /** The dsm config. */
     private final DataSourceManagerConfiguration dsmConfig;
+
+    /** The properties. */
     private final Properties<String, String> properties;
+
+    /** The active data sources. */
     private final Map<String, DataSource> activeDataSources;
+
+    /** The primary data source. */
     private final DataSource primaryDataSource;
+
+    /** The data source selector. */
     private final DataSourceSelector dataSourceSelector;
 
+    /** The is closed. */
     private boolean isClosed = false;
 
+    /**
+     * Instantiates a new SQL data source manager.
+     *
+     * @param dataSourceManagerConfiguration the data source manager configuration
+     */
     public SQLDataSourceManager(DataSourceManagerConfiguration dataSourceManagerConfiguration) {
         this.dsmConfig = dataSourceManagerConfiguration;
 
@@ -82,26 +100,49 @@ public class SQLDataSourceManager implements DataSourceManager {
         }
     }
 
+    /**
+     * Gets the primary data source.
+     *
+     * @return the primary data source
+     */
     @Override
     public DataSource getPrimaryDataSource() {
         return primaryDataSource;
     }
 
+    /**
+     * Gets the active data sources.
+     *
+     * @return the active data sources
+     */
     @Override
     public Map<String, DataSource> getActiveDataSources() {
         return activeDataSources;
     }
 
+    /**
+     * Gets the data source selector.
+     *
+     * @return the data source selector
+     */
     @Override
     public DataSourceSelector getDataSourceSelector() {
         return dataSourceSelector;
     }
 
+    /**
+     * Gets the properties.
+     *
+     * @return the properties
+     */
     @Override
     public Properties<String, String> getProperties() {
         return properties;
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (isClosed) {
@@ -119,6 +160,11 @@ public class SQLDataSourceManager implements DataSourceManager {
         isClosed = true;
     }
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     @Override
     public boolean isClosed() {
         return isClosed;

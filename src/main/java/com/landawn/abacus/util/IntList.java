@@ -38,24 +38,39 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.IntStream;
 
+// TODO: Auto-generated Javadoc
 /**
- *
- * @since 0.8
+ * The Class IntList.
  *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class IntList extends PrimitiveList<Integer, int[], IntList> {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 8661773953226671696L;
 
+    /** The Constant RAND. */
     static final Random RAND = new SecureRandom();
 
+    /** The element data. */
     private int[] elementData = N.EMPTY_INT_ARRAY;
+
+    /** The size. */
     private int size = 0;
 
+    /**
+     * Instantiates a new int list.
+     */
     public IntList() {
         super();
     }
 
+    /**
+     * Instantiates a new int list.
+     *
+     * @param initialCapacity the initial capacity
+     */
     public IntList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_INT_ARRAY : new int[initialCapacity];
     }
@@ -63,12 +78,18 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * The specified array is used as the element array for this list without copying action.
      *
-     * @param a
+     * @param a the a
      */
     public IntList(int[] a) {
         this(a, a.length);
     }
 
+    /**
+     * Instantiates a new int list.
+     *
+     * @param a the a
+     * @param size the size
+     */
     public IntList(int[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -76,21 +97,48 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         this.size = size;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the int list
+     */
     @SafeVarargs
     public static IntList of(final int... a) {
         return new IntList(N.nullToEmpty(a));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param size the size
+     * @return the int list
+     */
     public static IntList of(final int[] a, final int size) {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new IntList(N.nullToEmpty(a), size);
     }
 
+    /**
+     * Copy of.
+     *
+     * @param a the a
+     * @return the int list
+     */
     public static IntList copyOf(final int[] a) {
         return of(N.clone(a));
     }
 
+    /**
+     * Copy of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the int list
+     */
     public static IntList copyOf(final int[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
@@ -115,6 +163,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     //        return of(elementData);
     //    }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @return the int list
+     */
     public static IntList from(Collection<Integer> c) {
         if (N.isNullOrEmpty(c)) {
             return new IntList();
@@ -123,6 +177,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return from(c, 0);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param defaultForNull the default for null
+     * @return the int list
+     */
     public static IntList from(Collection<Integer> c, int defaultForNull) {
         if (N.isNullOrEmpty(c)) {
             return new IntList();
@@ -138,6 +199,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return of(a);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the int list
+     */
     public static IntList from(final Collection<Integer> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
@@ -148,30 +217,82 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return from(c, fromIndex, toIndex, 0);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param defaultForNull the default for null
+     * @return the int list
+     */
     public static IntList from(final Collection<Integer> c, final int fromIndex, final int toIndex, int defaultForNull) {
         return of(N.toIntArray(c, fromIndex, toIndex, defaultForNull));
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @return the int list
+     */
     public static IntList range(int startInclusive, final int endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @param by the by
+     * @return the int list
+     */
     public static IntList range(int startInclusive, final int endExclusive, final int by) {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @return the int list
+     */
     public static IntList rangeClosed(int startInclusive, final int endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @param by the by
+     * @return the int list
+     */
     public static IntList rangeClosed(int startInclusive, final int endInclusive, final int by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param len the len
+     * @return the int list
+     */
     public static IntList repeat(int element, final int len) {
         return of(Array.repeat(element, len));
     }
 
+    /**
+     * Random.
+     *
+     * @param len the len
+     * @return the int list
+     */
     public static IntList random(final int len) {
         final int[] a = new int[len];
 
@@ -182,6 +303,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return of(a);
     }
 
+    /**
+     * Random.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @param len the len
+     * @return the int list
+     */
     public static IntList random(final int startInclusive, final int endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
             throw new IllegalArgumentException("'startInclusive' must be less than 'endExclusive'");
@@ -207,20 +336,31 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns the original element array without copying.
-     * 
-     * @return
+     *
+     * @return the int[]
      */
     @Override
     public int[] array() {
         return elementData;
     }
 
+    /**
+     * Gets the.
+     *
+     * @param index the index
+     * @return the int
+     */
     public int get(int index) {
         rangeCheck(index);
 
         return elementData[index];
     }
 
+    /**
+     * Range check.
+     *
+     * @param index the index
+     */
     private void rangeCheck(int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -228,9 +368,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
-     * @param index
-     * @param e
+     * Sets the.
+     *
+     * @param index the index
+     * @param e the e
      * @return the old value in the specified position.
      */
     public int set(int index, int e) {
@@ -243,12 +384,23 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return oldValue;
     }
 
+    /**
+     * Adds the.
+     *
+     * @param e the e
+     */
     public void add(int e) {
         ensureCapacityInternal(size + 1);
 
         elementData[size++] = e;
     }
 
+    /**
+     * Adds the.
+     *
+     * @param index the index
+     * @param e the e
+     */
     public void add(int index, int e) {
         rangeCheckForAdd(index);
 
@@ -265,6 +417,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         size++;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean addAll(IntList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -281,6 +439,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return true;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param index the index
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean addAll(int index, IntList c) {
         rangeCheckForAdd(index);
 
@@ -305,11 +470,24 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return true;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean addAll(int[] a) {
         return addAll(size(), a);
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param index the index
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean addAll(int index, int[] a) {
         rangeCheckForAdd(index);
@@ -335,6 +513,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return true;
     }
 
+    /**
+     * Range check for add.
+     *
+     * @param index the index
+     */
     private void rangeCheckForAdd(int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -342,8 +525,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
-     * @param e
+     * Removes the.
+     *
+     * @param e the e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(int e) {
@@ -360,8 +544,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
-     * @param e
+     * Removes the all occurrences.
+     *
+     * @param e the e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean removeAllOccurrences(int e) {
@@ -384,6 +569,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return numRemoved > 0;
     }
 
+    /**
+     * Fast remove.
+     *
+     * @param index the index
+     */
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
 
@@ -394,6 +584,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         elementData[--size] = 0; // clear to let GC do its work
     }
 
+    /**
+     * Removes the all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean removeAll(IntList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -402,6 +598,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return batchRemove(c, false) > 0;
     }
 
+    /**
+     * Removes the all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean removeAll(int[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -411,6 +613,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return removeAll(of(a));
     }
 
+    /**
+     * Removes the if.
+     *
+     * @param <E> the element type
+     * @param p the p
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean removeIf(Try.IntPredicate<E> p) throws E {
         final IntList tmp = new IntList(size());
 
@@ -431,6 +641,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return true;
     }
 
+    /**
+     * Retain all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean retainAll(IntList c) {
         if (N.isNullOrEmpty(c)) {
             boolean result = size() > 0;
@@ -441,6 +657,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return batchRemove(c, true) > 0;
     }
 
+    /**
+     * Retain all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     public boolean retainAll(int[] a) {
         if (N.isNullOrEmpty(a)) {
             boolean result = size() > 0;
@@ -451,6 +673,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return retainAll(IntList.of(a));
     }
 
+    /**
+     * Batch remove.
+     *
+     * @param c the c
+     * @param complement the complement
+     * @return the int
+     */
     private int batchRemove(IntList c, boolean complement) {
         final int[] elementData = this.elementData;
 
@@ -484,8 +713,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
-     * @param index
+     * Delete.
+     *
+     * @param index the index
      * @return the deleted element
      */
     public int delete(int index) {
@@ -498,6 +728,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return oldValue;
     }
 
+    /**
+     * Delete all.
+     *
+     * @param indices the indices
+     */
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
@@ -507,6 +742,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         size = tmp.length;
     }
 
+    /**
+     * Delete range.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, size());
@@ -526,6 +767,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         size = newSize;
     }
 
+    /**
+     * Replace all.
+     *
+     * @param oldVal the old val
+     * @param newVal the new val
+     * @return the int
+     */
     public int replaceAll(int oldVal, int newVal) {
         if (size() == 0) {
             return 0;
@@ -544,12 +792,28 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return result;
     }
 
+    /**
+     * Replace all.
+     *
+     * @param <E> the element type
+     * @param operator the operator
+     * @throws E the e
+     */
     public <E extends Exception> void replaceAll(Try.IntUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsInt(elementData[i]);
         }
     }
 
+    /**
+     * Replace if.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @param newValue the new value
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean replaceIf(Try.IntPredicate<E> predicate, int newValue) throws E {
         boolean result = false;
 
@@ -564,20 +828,44 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return result;
     }
 
+    /**
+     * Fill.
+     *
+     * @param val the val
+     */
     public void fill(final int val) {
         fill(0, size(), val);
     }
 
+    /**
+     * Fill.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param val the val
+     */
     public void fill(final int fromIndex, final int toIndex, final int val) {
         checkFromToIndex(fromIndex, toIndex);
 
         N.fill(elementData, fromIndex, toIndex, val);
     }
 
+    /**
+     * Contains.
+     *
+     * @param e the e
+     * @return true, if successful
+     */
     public boolean contains(int e) {
         return indexOf(e) >= 0;
     }
 
+    /**
+     * Contains all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean containsAll(IntList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -608,6 +896,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return true;
     }
 
+    /**
+     * Contains all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean containsAll(int[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -619,6 +913,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return containsAll(of(a));
     }
 
+    /**
+     * Contains any.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean containsAny(IntList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
             return false;
@@ -627,6 +927,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return !disjoint(c);
     }
 
+    /**
+     * Contains any.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean containsAny(int[] a) {
         if (this.isEmpty() || N.isNullOrEmpty(a)) {
@@ -636,6 +942,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return !disjoint(a);
     }
 
+    /**
+     * Disjoint.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean disjoint(final IntList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
             return true;
@@ -664,6 +976,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return true;
     }
 
+    /**
+     * Disjoint.
+     *
+     * @param b the b
+     * @return true, if successful
+     */
     @Override
     public boolean disjoint(final int[] b) {
         if (isEmpty() || N.isNullOrEmpty(b)) {
@@ -685,9 +1003,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * IntList b = IntList.of(2, 5, 1);
      * IntList c = a.intersection(b); // The elements c in a will be: [1, 2].
      * </pre>
-     * 
-     * @param b
-     * @return
+     *
+     * @param b the b
+     * @return the int list
      */
     public IntList intersection(final IntList b) {
         if (N.isNullOrEmpty(b)) {
@@ -707,6 +1025,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return c;
     }
 
+    /**
+     * Intersection.
+     *
+     * @param a the a
+     * @return the int list
+     */
     public IntList intersection(final int[] a) {
         if (N.isNullOrEmpty(a)) {
             return new IntList();
@@ -727,9 +1051,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * IntList b = IntList.of(2, 5, 1);
      * IntList c = a.difference(b); // The elements c in a will be: [0, 2, 3].
      * </pre>
-     * 
-     * @param b
-     * @return
+     *
+     * @param b the b
+     * @return the int list
      */
     public IntList difference(final IntList b) {
         if (N.isNullOrEmpty(b)) {
@@ -749,6 +1073,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return c;
     }
 
+    /**
+     * Difference.
+     *
+     * @param a the a
+     * @return the int list
+     */
     public IntList difference(final int[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -763,8 +1093,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * IntList b = IntList.of(2, 5, 1);
      * IntList c = a.symmetricDifference(b); // The elements c in a will be: [0, 2, 3, 5].
      * </pre>
-     * 
-     * @param b
+     *
+     * @param b the b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#difference(IntList)
      */
@@ -797,6 +1127,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return c;
     }
 
+    /**
+     * Symmetric difference.
+     *
+     * @param a the a
+     * @return the int list
+     */
     public IntList symmetricDifference(final int[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -807,14 +1143,33 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return symmetricDifference(of(a));
     }
 
+    /**
+     * Occurrences of.
+     *
+     * @param objectToFind the object to find
+     * @return the int
+     */
     public int occurrencesOf(final int objectToFind) {
         return N.occurrencesOf(elementData, objectToFind);
     }
 
+    /**
+     * Index of.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int indexOf(int e) {
         return indexOf(0, e);
     }
 
+    /**
+     * Index of.
+     *
+     * @param fromIndex the from index
+     * @param e the e
+     * @return the int
+     */
     public int indexOf(final int fromIndex, int e) {
         checkFromToIndex(fromIndex, size);
 
@@ -827,15 +1182,22 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return -1;
     }
 
+    /**
+     * Last index of.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int lastIndexOf(int e) {
         return lastIndexOf(size, e);
     }
 
     /**
-     * 
+     * Last index of.
+     *
      * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e
-     * @return
+     * @param e the e
+     * @return the int
      */
     public int lastIndexOf(final int fromIndex, int e) {
         checkFromToIndex(0, fromIndex);
@@ -849,40 +1211,90 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return -1;
     }
 
+    /**
+     * Min.
+     *
+     * @return the optional int
+     */
     public OptionalInt min() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.min(elementData, 0, size));
     }
 
+    /**
+     * Min.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the optional int
+     */
     public OptionalInt min(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.min(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * Median.
+     *
+     * @return the optional int
+     */
     public OptionalInt median() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, 0, size));
     }
 
+    /**
+     * Median.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the optional int
+     */
     public OptionalInt median(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * Max.
+     *
+     * @return the optional int
+     */
     public OptionalInt max() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.max(elementData, 0, size));
     }
 
+    /**
+     * Max.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the optional int
+     */
     public OptionalInt max(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.max(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param k the k
+     * @return the optional int
+     */
     public OptionalInt kthLargest(final int k) {
         return kthLargest(0, size(), k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the optional int
+     */
     public OptionalInt kthLargest(final int fromIndex, final int toIndex, final int k) {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgPositive(k, "k");
@@ -890,30 +1302,70 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return toIndex - fromIndex < k ? OptionalInt.empty() : OptionalInt.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
+    /**
+     * Sum.
+     *
+     * @return the int
+     */
     public int sum() {
         return sum(0, size());
     }
 
+    /**
+     * Sum.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the int
+     */
     public int sum(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.sum(elementData, fromIndex, toIndex);
     }
 
+    /**
+     * Average.
+     *
+     * @return the optional double
+     */
     public OptionalDouble average() {
         return average(0, size());
     }
 
+    /**
+     * Average.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the optional double
+     */
     public OptionalDouble average(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.average(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(Try.IntConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.IntConsumer<E> action) throws E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -930,14 +1382,32 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * First.
+     *
+     * @return the optional int
+     */
     public OptionalInt first() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(elementData[0]);
     }
 
+    /**
+     * Last.
+     *
+     * @return the optional int
+     */
     public OptionalInt last() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(elementData[size() - 1]);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public <E extends Exception> OptionalInt findFirst(Try.IntPredicate<E> predicate) throws E {
         for (int i = 0; i < size; i++) {
             if (predicate.test(elementData[i])) {
@@ -948,6 +1418,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return OptionalInt.empty();
     }
 
+    /**
+     * Find last.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public <E extends Exception> OptionalInt findLast(Try.IntPredicate<E> predicate) throws E {
         for (int i = size - 1; i >= 0; i--) {
             if (predicate.test(elementData[i])) {
@@ -958,6 +1436,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return OptionalInt.empty();
     }
 
+    /**
+     * Find first index.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public <E extends Exception> OptionalInt findFirstIndex(Try.IntPredicate<E> predicate) throws E {
         for (int i = 0; i < size; i++) {
             if (predicate.test(elementData[i])) {
@@ -968,6 +1454,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return OptionalInt.empty();
     }
 
+    /**
+     * Find last index.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public <E extends Exception> OptionalInt findLastIndex(Try.IntPredicate<E> predicate) throws E {
         for (int i = size - 1; i >= 0; i--) {
             if (predicate.test(elementData[i])) {
@@ -980,14 +1474,26 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns whether all elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean allMatch(Try.IntPredicate<E> filter) throws E {
         return allMatch(0, size(), filter);
     }
 
+    /**
+     * All match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean allMatch(final int fromIndex, final int toIndex, Try.IntPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1004,14 +1510,26 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns whether any elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean anyMatch(Try.IntPredicate<E> filter) throws E {
         return anyMatch(0, size(), filter);
     }
 
+    /**
+     * Any match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean anyMatch(final int fromIndex, final int toIndex, Try.IntPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1028,14 +1546,26 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns whether no elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean noneMatch(Try.IntPredicate<E> filter) throws E {
         return noneMatch(0, size(), filter);
     }
 
+    /**
+     * None match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean noneMatch(final int fromIndex, final int toIndex, Try.IntPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1051,14 +1581,27 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
-     * @param filter
-     * @return
+     * Count.
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return the int
+     * @throws E the e
      */
     public <E extends Exception> int count(Try.IntPredicate<E> filter) throws E {
         return count(0, size(), filter);
     }
 
+    /**
+     * Count.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return the int
+     * @throws E the e
+     */
     public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.IntPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1066,14 +1609,27 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
-     * @param filter
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param filter the filter
      * @return a new List with the elements match the provided predicate.
+     * @throws E the e
      */
     public <E extends Exception> IntList filter(Try.IntPredicate<E> filter) throws E {
         return filter(0, size(), filter);
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return the int list
+     * @throws E the e
+     */
     public <E extends Exception> IntList filter(final int fromIndex, final int toIndex, Try.IntPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1081,24 +1637,57 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
-     * @param filter
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @param max the max
      * @return a new List with the elements match the provided predicate.
+     * @throws E the e
      */
     public <E extends Exception> IntList filter(Try.IntPredicate<E> filter, int max) throws E {
         return filter(0, size(), filter, max);
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @param max the max
+     * @return the int list
+     * @throws E the e
+     */
     public <E extends Exception> IntList filter(final int fromIndex, final int toIndex, Try.IntPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.filter(elementData, fromIndex, toIndex, filter, max);
     }
 
+    /**
+     * Map.
+     *
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the int list
+     * @throws E the e
+     */
     public <E extends Exception> IntList map(final Try.IntUnaryOperator<E> mapper) throws E {
         return map(0, size, mapper);
     }
 
+    /**
+     * Map.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param mapper the mapper
+     * @return the int list
+     * @throws E the e
+     */
     public <E extends Exception> IntList map(final int fromIndex, final int toIndex, final Try.IntUnaryOperator<E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1111,10 +1700,30 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return result;
     }
 
+    /**
+     * Map to obj.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the list
+     * @throws E the e
+     */
     public <T, E extends Exception> List<T> mapToObj(final Try.IntFunction<? extends T, E> mapper) throws E {
         return mapToObj(0, size, mapper);
     }
 
+    /**
+     * Map to obj.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param mapper the mapper
+     * @return the list
+     * @throws E the e
+     */
     public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.IntFunction<? extends T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1134,19 +1743,21 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *    if (isEmpty()) {
      *        return OptionalInt.empty();
      *    }
-     *
+     * 
      *    int result = elementData[0];
-     *
+     * 
      *    for (int i = 1; i < size; i++) {
      *        result = accumulator.applyAsInt(result, elementData[i]);
      *    }
-     *
+     * 
      *    return OptionalInt.of(result);
      * </code>
      * </pre>
-     * 
-     * @param accumulator
-     * @return
+     *
+     * @param <E> the element type
+     * @param accumulator the accumulator
+     * @return the optional int
+     * @throws E the e
      */
     public <E extends Exception> OptionalInt reduce(final Try.IntBinaryOperator<E> accumulator) throws E {
         if (isEmpty()) {
@@ -1179,10 +1790,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *     return result;
      * </code>
      * </pre>
-     * 
-     * @param identity
-     * @param accumulator
-     * @return
+     *
+     * @param <E> the element type
+     * @param identity the identity
+     * @param accumulator the accumulator
+     * @return the int
+     * @throws E the e
      */
     public <E extends Exception> int reduce(final int identity, final Try.IntBinaryOperator<E> accumulator) throws E {
         if (isEmpty()) {
@@ -1198,11 +1811,23 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return result;
     }
 
+    /**
+     * Checks for duplicates.
+     *
+     * @return true, if successful
+     */
     @Override
     public boolean hasDuplicates() {
         return N.hasDuplicates(elementData, 0, size, false);
     }
 
+    /**
+     * Distinct.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the int list
+     */
     @Override
     public IntList distinct(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1214,26 +1839,59 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * Top.
+     *
+     * @param n the n
+     * @return the int list
+     */
     public IntList top(final int n) {
         return top(0, size(), n);
     }
 
+    /**
+     * Top.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param n the n
+     * @return the int list
+     */
     public IntList top(final int fromIndex, final int toIndex, final int n) {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n));
     }
 
+    /**
+     * Top.
+     *
+     * @param n the n
+     * @param cmp the cmp
+     * @return the int list
+     */
     public IntList top(final int n, Comparator<? super Integer> cmp) {
         return top(0, size(), n, cmp);
     }
 
+    /**
+     * Top.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param n the n
+     * @param cmp the cmp
+     * @return the int list
+     */
     public IntList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Integer> cmp) {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
     }
 
+    /**
+     * Sort.
+     */
     @Override
     public void sort() {
         if (size > 1) {
@@ -1241,12 +1899,18 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * Parallel sort.
+     */
     public void parallelSort() {
         if (size > 1) {
             N.parallelSort(elementData, 0, size);
         }
     }
 
+    /**
+     * Reverse sort.
+     */
     public void reverseSort() {
         if (size > 1) {
             sort();
@@ -1256,9 +1920,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * This List should be sorted first.
-     * 
-     * @param key
-     * @return
+     *
+     * @param key the key
+     * @return the int
      */
     public int binarySearch(final int key) {
         return N.binarySearch(elementData, key);
@@ -1267,10 +1931,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     public int binarySearch(final int fromIndex, final int toIndex, final int key) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1278,6 +1942,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return N.binarySearch(elementData, fromIndex, toIndex, key);
     }
 
+    /**
+     * Reverse.
+     */
     @Override
     public void reverse() {
         if (size > 1) {
@@ -1285,6 +1952,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * Reverse.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     @Override
     public void reverse(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1294,6 +1967,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * Rotate.
+     *
+     * @param distance the distance
+     */
     @Override
     public void rotate(int distance) {
         if (size > 1) {
@@ -1301,6 +1979,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * Shuffle.
+     */
     @Override
     public void shuffle() {
         if (size() > 1) {
@@ -1308,6 +1989,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * Shuffle.
+     *
+     * @param rnd the rnd
+     */
     @Override
     public void shuffle(final Random rnd) {
         if (size() > 1) {
@@ -1315,6 +2001,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * Swap.
+     *
+     * @param i the i
+     * @param j the j
+     */
     @Override
     public void swap(int i, int j) {
         rangeCheck(i);
@@ -1323,11 +2015,23 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         set(i, set(j, elementData[i]));
     }
 
+    /**
+     * Copy.
+     *
+     * @return the int list
+     */
     @Override
     public IntList copy() {
         return new IntList(N.copyOfRange(elementData, 0, size));
     }
 
+    /**
+     * Copy.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the int list
+     */
     @Override
     public IntList copy(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1336,10 +2040,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * @param from
-     * @param to
-     * @param step
-     * 
+     * Copy.
+     *
+     * @param from the from
+     * @param to the to
+     * @param step the step
+     * @return the int list
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1352,9 +2058,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Returns List of {@code IntList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
-     * @param fromIndex
-     * @param toIndex
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+     * @return the list
      */
     @Override
     public List<IntList> split(final int fromIndex, final int toIndex, final int chunkSize) {
@@ -1399,6 +2107,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     //        return result;
     //    }
 
+    /**
+     * Join.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param delimiter the delimiter
+     * @return the string
+     */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1406,6 +2122,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
     }
 
+    /**
+     * Join.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param delimiter the delimiter
+     * @return the string
+     */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1413,6 +2137,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
     }
 
+    /**
+     * Trim to size.
+     *
+     * @return the int list
+     */
     @Override
     public IntList trimToSize() {
         if (elementData.length > size) {
@@ -1422,6 +2151,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return this;
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         if (size > 0) {
@@ -1431,20 +2163,42 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         size = 0;
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     @Override
     public boolean isEmpty() {
         return size == 0;
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * Boxed.
+     *
+     * @return the list
+     */
     public List<Integer> boxed() {
         return boxed(0, size);
     }
 
+    /**
+     * Boxed.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the list
+     */
     public List<Integer> boxed(int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1457,11 +2211,21 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return res;
     }
 
+    /**
+     * To array.
+     *
+     * @return the int[]
+     */
     @Override
     public int[] toArray() {
         return N.copyOfRange(elementData, 0, size);
     }
 
+    /**
+     * To long list.
+     *
+     * @return the long list
+     */
     public LongList toLongList() {
         final long[] a = new long[size];
 
@@ -1472,6 +2236,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return LongList.of(a);
     }
 
+    /**
+     * To float list.
+     *
+     * @return the float list
+     */
     public FloatList toFloatList() {
         final float[] a = new float[size];
 
@@ -1482,6 +2251,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return FloatList.of(a);
     }
 
+    /**
+     * To double list.
+     *
+     * @return the double list
+     */
     public DoubleList toDoubleList() {
         final double[] a = new double[size];
 
@@ -1492,6 +2266,15 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return DoubleList.of(a);
     }
 
+    /**
+     * To collection.
+     *
+     * @param <C> the generic type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param supplier the supplier
+     * @return the c
+     */
     @Override
     public <C extends Collection<Integer>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1505,6 +2288,14 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return c;
     }
 
+    /**
+     * To multiset.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param supplier the supplier
+     * @return the multiset
+     */
     @Override
     public Multiset<Integer> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Integer>> supplier) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1518,11 +2309,39 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return multiset;
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @return the map
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Try.IntFunction<? extends K, E> keyMapper,
             Try.IntFunction<? extends V, E2> valueMapper) throws E, E2 {
         return toMap(keyMapper, valueMapper, Factory.<K, V> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Try.IntFunction<? extends K, E> keyMapper,
             Try.IntFunction<? extends V, E2> valueMapper, IntFunction<? extends M> mapFactory) throws E, E2 {
         final Try.BinaryOperator<V, RuntimeException> mergeFunction = Fn.throwingMerger();
@@ -1530,11 +2349,45 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @return the map
+     * @throws E the e
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <K, V, E extends Exception, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(Try.IntFunction<? extends K, E> keyMapper,
             Try.IntFunction<? extends V, E2> valueMapper, Try.BinaryOperator<V, E3> mergeFunction) throws E, E2, E3 {
         return toMap(keyMapper, valueMapper, mergeFunction, Factory.<K, V> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(Try.IntFunction<? extends K, E> keyMapper,
             Try.IntFunction<? extends V, E2> valueMapper, Try.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
         final M result = mapFactory.apply(size);
@@ -1546,10 +2399,36 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return result;
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <E> the element type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @return the map
+     * @throws E the e
+     */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.IntFunction<? extends K, E> keyMapper, Collector<Integer, A, D> downstream) throws E {
         return toMap(keyMapper, downstream, Factory.<K, D> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.IntFunction<? extends K, E> keyMapper,
             final Collector<Integer, A, D> downstream, final IntFunction<? extends M> mapFactory) throws E {
         final M result = mapFactory.apply(size);
@@ -1583,6 +2462,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return result;
     }
 
+    /**
+     * Iterator.
+     *
+     * @return the int iterator
+     */
     public IntIterator iterator() {
         if (isEmpty()) {
             return IntIterator.EMPTY;
@@ -1591,31 +2475,75 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return IntIterator.of(elementData, 0, size);
     }
 
+    /**
+     * Stream.
+     *
+     * @return the int stream
+     */
     public IntStream stream() {
         return IntStream.of(elementData, 0, size());
     }
 
+    /**
+     * Stream.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the int stream
+     */
     public IntStream stream(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return IntStream.of(elementData, fromIndex, toIndex);
     }
 
+    /**
+     * Apply.
+     *
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param func the func
+     * @return the r
+     * @throws E the e
+     */
     @Override
     public <R, E extends Exception> R apply(Try.Function<? super IntList, R, E> func) throws E {
         return func.apply(this);
     }
 
+    /**
+     * Apply if not empty.
+     *
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param func the func
+     * @return the optional
+     * @throws E the e
+     */
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super IntList, R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
+    /**
+     * Accept.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     @Override
     public <E extends Exception> void accept(Try.Consumer<? super IntList, E> action) throws E {
         action.accept(this);
     }
 
+    /**
+     * Accept if not empty.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     @Override
     public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super IntList, E> action) throws E {
         if (size > 0) {
@@ -1623,11 +2551,22 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -1643,11 +2582,21 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);
     }
 
+    /**
+     * Ensure capacity internal.
+     *
+     * @param minCapacity the min capacity
+     */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_INT_ARRAY) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
@@ -1656,12 +2605,22 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         ensureExplicitCapacity(minCapacity);
     }
 
+    /**
+     * Ensure explicit capacity.
+     *
+     * @param minCapacity the min capacity
+     */
     private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
             grow(minCapacity);
         }
     }
 
+    /**
+     * Grow.
+     *
+     * @param minCapacity the min capacity
+     */
     private void grow(int minCapacity) {
         int oldCapacity = elementData.length;
         int newCapacity = oldCapacity + (oldCapacity >> 1);

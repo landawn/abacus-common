@@ -14,46 +14,90 @@
 
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.9
- * 
+ * The Class Timed.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.9
  */
 public class Timed<T> {
+
+    /** The time in millis. */
     private final long timeInMillis;
+
+    /** The value. */
     private final T value;
 
+    /**
+     * Instantiates a new timed.
+     *
+     * @param value the value
+     * @param timeInMillis the time in millis
+     */
     Timed(T value, long timeInMillis) {
         this.value = value;
         this.timeInMillis = timeInMillis;
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param value the value
+     * @return the timed
+     */
     public static <T> Timed<T> of(T value) {
         return new Timed<>(value, System.currentTimeMillis());
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param value the value
+     * @param timeInMillis the time in millis
+     * @return the timed
+     */
     public static <T> Timed<T> of(T value, long timeInMillis) {
         return new Timed<>(value, timeInMillis);
     }
 
     /**
-     * 
+     * Timestamp.
+     *
      * @return time in milliseconds.
      */
     public long timestamp() {
         return timeInMillis;
     }
 
+    /**
+     * Value.
+     *
+     * @return the t
+     */
     public T value() {
         return value;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return (int) (timeInMillis * 31 + (value == null ? 0 : value.hashCode()));
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -69,6 +113,11 @@ public class Timed<T> {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return timeInMillis + ": " + N.toString(value);

@@ -14,12 +14,27 @@
 
 package com.landawn.abacus.http;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Enum HttpMethod.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public enum HttpMethod {
-    GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE;
+
+    /** The get. */
+    GET,
+    /** The post. */
+    POST,
+    /** The put. */
+    PUT,
+    /** The delete. */
+    DELETE,
+    /** The head. */
+    HEAD,
+    /** The options. */
+    OPTIONS,
+    /** The trace. */
+    TRACE;
 }

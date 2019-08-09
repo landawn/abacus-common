@@ -20,25 +20,50 @@ import com.landawn.abacus.pool.KeyedObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
 import com.landawn.abacus.pool.PoolableWrapper;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class LocalCache.
+ *
  * @author Haiyang Li
+ * @param <K> the key type
+ * @param <V> the value type
+ * @since 0.8
  */
 public class LocalCache<K, V> extends AbstractCache<K, V> {
+
+    /** The pool. */
     private final KeyedObjectPool<K, PoolableWrapper<V>> pool;
 
+    /**
+     * Instantiates a new local cache.
+     *
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
+     */
     public LocalCache(int capacity, long evictDelay) {
         this(capacity, evictDelay, DEFAULT_LIVE_TIME, DEFAULT_MAX_IDLE_TIME);
     }
 
+    /**
+     * Instantiates a new local cache.
+     *
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
+     * @param defaultLiveTime the default live time
+     * @param defaultMaxIdleTime the default max idle time
+     */
     public LocalCache(int capacity, long evictDelay, long defaultLiveTime, long defaultMaxIdleTime) {
         super(defaultLiveTime, defaultMaxIdleTime);
 
         pool = PoolFactory.createKeyedObjectPool(capacity, evictDelay);
     }
 
+    /**
+     * Gets the t.
+     *
+     * @param key the key
+     * @return the t
+     */
     @Override
     public V gett(K key) {
         final PoolableWrapper<V> w = pool.get(key);
@@ -46,41 +71,82 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
         return w == null ? null : w.value();
     }
 
+    /**
+     * Put.
+     *
+     * @param key the key
+     * @param value the value
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @return true, if successful
+     */
     @Override
     public boolean put(K key, V value, long liveTime, long maxIdleTime) {
         return pool.put(key, PoolableWrapper.of(value, liveTime, maxIdleTime));
     }
 
+    /**
+     * Removes the.
+     *
+     * @param key the key
+     */
     @Override
     public void remove(K key) {
         pool.remove(key);
     }
 
+    /**
+     * Contains key.
+     *
+     * @param key the key
+     * @return true, if successful
+     */
     @Override
     public boolean containsKey(K key) {
         return pool.containsKey(key);
     }
 
+    /**
+     * Key set.
+     *
+     * @return the sets the
+     */
     @Override
     public Set<K> keySet() {
         return pool.keySet();
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         return pool.size();
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         pool.clear();
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         pool.close();
     }
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     @Override
     public boolean isClosed() {
         return pool.isClosed();

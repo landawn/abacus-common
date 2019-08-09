@@ -22,35 +22,64 @@ import java.math.RoundingMode;
 
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
  *
  */
 final class Util {
+
+    /**
+     * Instantiates a new util.
+     */
     private Util() {
         // singleton
     }
 
+    /**
+     * The Class Chars.
+     */
     public static final class Chars {
+
+        /** The Constant BYTES. */
         public static final int BYTES = Character.SIZE / Byte.SIZE;
 
+        /**
+         * Instantiates a new chars.
+         */
         private Chars() {
             // singleton
         }
     }
 
+    /**
+     * The Class Shorts.
+     */
     public static final class Shorts {
+
+        /** The Constant BYTES. */
         public static final int BYTES = Short.SIZE / Byte.SIZE;
 
+        /**
+         * Instantiates a new shorts.
+         */
         private Shorts() {
             // singleton
         }
     }
 
+    /**
+     * The Class Ints.
+     */
     public static final class Ints {
+
+        /** The Constant BYTES. */
         public static final int BYTES = Integer.SIZE / Byte.SIZE;
 
+        /**
+         * Instantiates a new ints.
+         */
         private Ints() {
             // singleton
         }
@@ -73,24 +102,58 @@ final class Util {
         }
     }
 
+    /**
+     * The Class Longs.
+     */
     public static final class Longs {
+
+        /** The Constant BYTES. */
         public static final int BYTES = Long.SIZE / Byte.SIZE;
 
+        /**
+         * Instantiates a new longs.
+         */
         private Longs() {
             // singleton
         }
 
+        /**
+         * From bytes.
+         *
+         * @param b1 the b 1
+         * @param b2 the b 2
+         * @param b3 the b 3
+         * @param b4 the b 4
+         * @param b5 the b 5
+         * @param b6 the b 6
+         * @param b7 the b 7
+         * @param b8 the b 8
+         * @return the long
+         */
         public static long fromBytes(byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7, byte b8) {
             return (b1 & 0xFFL) << 56 | (b2 & 0xFFL) << 48 | (b3 & 0xFFL) << 40 | (b4 & 0xFFL) << 32 | (b5 & 0xFFL) << 24 | (b6 & 0xFFL) << 16
                     | (b7 & 0xFFL) << 8 | (b8 & 0xFFL);
         }
     }
 
+    /**
+     * The Class SignedBytes.
+     */
     public static final class SignedBytes {
+
+        /**
+         * Instantiates a new signed bytes.
+         */
         private SignedBytes() {
             // singleton            
         }
 
+        /**
+         * Checked cast.
+         *
+         * @param value the value
+         * @return the byte
+         */
         public static byte checkedCast(long value) {
             byte result = (byte) value;
             if (result != value) {
@@ -101,13 +164,27 @@ final class Util {
         }
     }
 
+    /**
+     * The Class UnsignedBytes.
+     */
     public static final class UnsignedBytes {
+
+        /** The Constant UNSIGNED_MASK. */
         private static final int UNSIGNED_MASK = 0xFF;
 
+        /**
+         * Instantiates a new unsigned bytes.
+         */
         private UnsignedBytes() {
             // singleton            
         }
 
+        /**
+         * Checked cast.
+         *
+         * @param value the value
+         * @return the byte
+         */
         public static byte checkedCast(long value) {
             if ((value >> Byte.SIZE) != 0) {
                 // don't use checkArgument here, to avoid boxing
@@ -120,6 +197,8 @@ final class Util {
          * Returns the value of the given byte as an integer, when treated as unsigned. That is, returns
          * {@code value + 256} if {@code value} is negative; {@code value} itself otherwise.
          *
+         * @param value the value
+         * @return the int
          * @since 6.0
          */
         public static int toInt(byte value) {
@@ -127,26 +206,52 @@ final class Util {
         }
     }
 
+    /**
+     * The Class UnsignedInts.
+     */
     public static final class UnsignedInts {
+
+        /** The Constant INT_MASK. */
         static final long INT_MASK = 0xffffffffL;
 
+        /**
+         * Instantiates a new unsigned ints.
+         */
         private UnsignedInts() {
             // singleton            
         }
 
         /**
          * Returns the value of the given {@code int} as a {@code long}, when treated as unsigned.
+         *
+         * @param value the value
+         * @return the long
          */
         public static long toLong(int value) {
             return value & INT_MASK;
         }
     }
 
+    /**
+     * The Class LongMath.
+     */
     public static final class LongMath {
+
+        /**
+         * Instantiates a new long math.
+         */
         private LongMath() {
             // singleton         
         }
 
+        /**
+         * Divide.
+         *
+         * @param p the p
+         * @param q the q
+         * @param mode the mode
+         * @return the long
+         */
         public static long divide(long p, long q, RoundingMode mode) {
             N.checkArgNotNull(mode);
             long div = p / q; // throws if q == 0
@@ -200,6 +305,11 @@ final class Util {
             return increment ? div + signum : div;
         }
 
+        /**
+         * Check rounding unnecessary.
+         *
+         * @param condition the condition
+         */
         static void checkRoundingUnnecessary(boolean condition) {
             if (!condition) {
                 throw new ArithmeticException("mode was UNNECESSARY, but rounding was necessary");
@@ -207,6 +317,13 @@ final class Util {
         }
     }
 
+    /**
+     * Check position indexes.
+     *
+     * @param start the start
+     * @param end the end
+     * @param size the size
+     */
     public static void checkPositionIndexes(int start, int end, int size) {
         // Carefully optimized for execution by hotspot (explanatory comment above)
         if (start < 0 || end < start || end > size) {
@@ -214,6 +331,14 @@ final class Util {
         }
     }
 
+    /**
+     * Bad position indexes.
+     *
+     * @param start the start
+     * @param end the end
+     * @param size the size
+     * @return the string
+     */
     private static String badPositionIndexes(int start, int end, int size) {
         if (start < 0 || start > size) {
             return badPositionIndex(start, size, "start index");
@@ -225,6 +350,14 @@ final class Util {
         return format("end index (%s) must not be less than start index (%s)", end, start);
     }
 
+    /**
+     * Check position index.
+     *
+     * @param index the index
+     * @param size the size
+     * @param desc the desc
+     * @return the int
+     */
     public static int checkPositionIndex(int index, int size, String desc) {
         // Carefully optimized for execution by hotspot (explanatory comment above)
         if (index < 0 || index > size) {
@@ -233,6 +366,14 @@ final class Util {
         return index;
     }
 
+    /**
+     * Bad position index.
+     *
+     * @param index the index
+     * @param size the size
+     * @param desc the desc
+     * @return the string
+     */
     private static String badPositionIndex(int index, int size, String desc) {
         if (index < 0) {
             return format("%s (%s) must not be negative", desc, index);
@@ -252,6 +393,7 @@ final class Util {
      * @param template a non-null string containing 0 or more {@code %s} placeholders.
      * @param args the arguments to be substituted into the message template. Arguments are converted
      *     to strings using {@link String#valueOf(Object)}. Arguments can be null.
+     * @return the string
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
     static String format(String template, Object... args) {

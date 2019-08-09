@@ -36,6 +36,7 @@ import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
+// TODO: Auto-generated Javadoc
 /**
  * A simple way to run load/performance test.
  * 
@@ -61,59 +62,141 @@ import com.landawn.abacus.logging.LoggerFactory;
  *  });
  * </code>
  * </pre>
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class Profiler {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(Profiler.class);
+
+    /** The Constant elapsedTimeFormat. */
     private static final DecimalFormat elapsedTimeFormat = new DecimalFormat("#0.000");
 
+    /**
+     * Instantiates a new profiler.
+     */
     private Profiler() {
         // singleton
     }
 
+    /**
+     * Run.
+     *
+     * @param threadNum the thread num
+     * @param loopNum the loop num
+     * @param roundNum the round num
+     * @param command the command
+     * @return the multi loops statistics
+     */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final Try.Runnable<? extends Exception> command) {
         return run(threadNum, loopNum, roundNum, "run", command);
     }
 
+    /**
+     * Run.
+     *
+     * @param threadNum the thread num
+     * @param loopNum the loop num
+     * @param roundNum the round num
+     * @param label the label
+     * @param command the command
+     * @return the multi loops statistics
+     */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final String label,
             final Try.Runnable<? extends Exception> command) {
         return run(threadNum, 0, loopNum, 0, roundNum, label, command);
     }
 
+    /**
+     * Run.
+     *
+     * @param threadNum the thread num
+     * @param threadDelay the thread delay
+     * @param loopNum the loop num
+     * @param loopDelay the loop delay
+     * @param roundNum the round num
+     * @param label the label
+     * @param command the command
+     * @return the multi loops statistics
+     */
     public static MultiLoopsStatistics run(final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum,
             final String label, final Try.Runnable<? extends Exception> command) {
         return run(command, label, getMethod(command, "run"), null, null, null, null, null, threadNum, threadDelay, loopNum, loopDelay, roundNum);
     }
 
+    /**
+     * Run.
+     *
+     * @param instance the instance
+     * @param method the method
+     * @param threadNum the thread num
+     * @param loopNum the loop num
+     * @param roundNum the round num
+     * @return the multi loops statistics
+     */
     static MultiLoopsStatistics run(final Object instance, final String method, final int threadNum, final int loopNum, final int roundNum) {
         return run(instance, getMethod(instance, method), threadNum, loopNum, roundNum);
     }
 
+    /**
+     * Run.
+     *
+     * @param instance the instance
+     * @param method the method
+     * @param threadNum the thread num
+     * @param loopNum the loop num
+     * @param roundNum the round num
+     * @return the multi loops statistics
+     */
     static MultiLoopsStatistics run(final Object instance, final Method method, final int threadNum, final int loopNum, final int roundNum) {
         return run(instance, method, (Object) null, threadNum, loopNum, roundNum);
     }
 
+    /**
+     * Run.
+     *
+     * @param instance the instance
+     * @param method the method
+     * @param arg the arg
+     * @param threadNum the thread num
+     * @param loopNum the loop num
+     * @param roundNum the round num
+     * @return the multi loops statistics
+     */
     static MultiLoopsStatistics run(final Object instance, final Method method, final Object arg, final int threadNum, final int loopNum, final int roundNum) {
         return run(instance, method, arg, threadNum, 0, loopNum, 0, roundNum);
     }
 
+    /**
+     * Run.
+     *
+     * @param instance the instance
+     * @param method the method
+     * @param arg the arg
+     * @param threadNum the thread num
+     * @param threadDelay the thread delay
+     * @param loopNum the loop num
+     * @param loopDelay the loop delay
+     * @param roundNum the round num
+     * @return the multi loops statistics
+     */
     static MultiLoopsStatistics run(final Object instance, final Method method, final Object arg, final int threadNum, final long threadDelay,
             final int loopNum, final long loopDelay, final int roundNum) {
         return run(instance, method, ((arg == null) ? null : N.asList(arg)), null, null, null, null, threadNum, threadDelay, loopNum, loopDelay, roundNum);
     }
 
     /**
-     * 
-     * @param instance
-     * @param method
+     * Run.
+     *
+     * @param instance the instance
+     * @param method the method
      * @param args the size of <code>args</code> can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
-     * @param threadNum
-     * @param loopNum
-     * @param roundNum
-     * @return
+     * @param threadNum the thread num
+     * @param loopNum the loop num
+     * @param roundNum the round num
+     * @return the multi loops statistics
      */
     static MultiLoopsStatistics run(final Object instance, final Method method, final List<?> args, final int threadNum, final int loopNum,
             final int roundNum) {
@@ -123,20 +206,20 @@ public final class Profiler {
     /**
      * Run performance test for the specified <code>method</code> with the specified <code>threadNum</code> and <code>loopNum</code> for each thread.
      * The performance test will be repeatedly execute times specified by <code>roundNum</code>. 
-     * 
-     * @param instance
-     * @param method
+     *
+     * @param instance the instance
+     * @param method the method
      * @param args the size of <code>args</code> can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
-     * @param setUpForMethod
-     * @param tearDownForMethod
-     * @param setUpForLoop
-     * @param tearDownForLoop
-     * @param threadNum
-     * @param threadDelay
-     * @param loopNum
-     * @param loopDelay
-     * @param roundNum
-     * @return
+     * @param setUpForMethod the set up for method
+     * @param tearDownForMethod the tear down for method
+     * @param setUpForLoop the set up for loop
+     * @param tearDownForLoop the tear down for loop
+     * @param threadNum the thread num
+     * @param threadDelay the thread delay
+     * @param loopNum the loop num
+     * @param loopDelay the loop delay
+     * @param roundNum the round num
+     * @return the multi loops statistics
      */
     static MultiLoopsStatistics run(final Object instance, final Method method, final List<?> args, final Method setUpForMethod, final Method tearDownForMethod,
             final Method setUpForLoop, final Method tearDownForLoop, final int threadNum, final long threadDelay, final int loopNum, final long loopDelay,
@@ -148,21 +231,21 @@ public final class Profiler {
     /**
      * Run performance test for the specified <code>methodList</code> with the specified <code>threadNum</code> and <code>loopNum</code> for each thread.
      * The performance test will be repeatly execute times specified by <code>roundNum</code>. 
-     * 
+     *
      * @param instance it can be null if methods in the specified <code>methodList</code> are static methods
-     * @param methodName
-     * @param method
+     * @param methodName the method name
+     * @param method the method
      * @param args the size of <code>args</code> can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
-     * @param setUpForMethod
-     * @param tearDownForMethod
-     * @param setUpForLoop
-     * @param tearDownForLoop
-     * @param threadNum
-     * @param threadDelay
+     * @param setUpForMethod the set up for method
+     * @param tearDownForMethod the tear down for method
+     * @param setUpForLoop the set up for loop
+     * @param tearDownForLoop the tear down for loop
+     * @param threadNum the thread num
+     * @param threadDelay the thread delay
      * @param loopNum loops run by each thread.
-     * @param loopDelay
-     * @param roundNum
-     * @return
+     * @param loopDelay the loop delay
+     * @param roundNum the round num
+     * @return the multi loops statistics
      */
     static MultiLoopsStatistics run(final Object instance, final String methodName, final Method method, final List<?> args, final Method setUpForMethod,
             final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum, final long threadDelay,
@@ -202,6 +285,23 @@ public final class Profiler {
         }
     }
 
+    /**
+     * Run.
+     *
+     * @param instance the instance
+     * @param methodName the method name
+     * @param method the method
+     * @param args the args
+     * @param setUpForMethod the set up for method
+     * @param tearDownForMethod the tear down for method
+     * @param setUpForLoop the set up for loop
+     * @param tearDownForLoop the tear down for loop
+     * @param threadNum the thread num
+     * @param threadDelay the thread delay
+     * @param loopNum the loop num
+     * @param loopDelay the loop delay
+     * @return the multi loops statistics
+     */
     private static MultiLoopsStatistics run(final Object instance, final String methodName, final Method method, final List<?> args,
             final Method setUpForMethod, final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum,
             final long threadDelay, final int loopNum, final long loopDelay) {
@@ -241,6 +341,22 @@ public final class Profiler {
         return new MultiLoopsStatistics(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, threadNum, loopStatisticsList);
     }
 
+    /**
+     * Run loops.
+     *
+     * @param instance the instance
+     * @param methodName the method name
+     * @param method the method
+     * @param arg the arg
+     * @param setUpForMethod the set up for method
+     * @param tearDownForMethod the tear down for method
+     * @param setUpForLoop the set up for loop
+     * @param tearDownForLoop the tear down for loop
+     * @param loopNum the loop num
+     * @param loopDelay the loop delay
+     * @param loopStatisticsList the loop statistics list
+     * @param ps the ps
+     */
     private static void runLoops(final Object instance, final String methodName, final Method method, final Object arg, final Method setUpForMethod,
             final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int loopNum, final long loopDelay,
             final List<LoopStatistics> loopStatisticsList, final PrintStream ps) {
@@ -275,6 +391,18 @@ public final class Profiler {
         }
     }
 
+    /**
+     * Run loop.
+     *
+     * @param instance the instance
+     * @param methodName the method name
+     * @param method the method
+     * @param arg the arg
+     * @param setUpForMethod the set up for method
+     * @param tearDownForMethod the tear down for method
+     * @param ps the ps
+     * @return the list
+     */
     private static List<MethodStatistics> runLoop(final Object instance, final String methodName, final Method method, final Object arg,
             final Method setUpForMethod, final Method tearDownForMethod, final PrintStream ps) {
         final List<MethodStatistics> methodStatisticsList = new ArrayList<>();
@@ -321,6 +449,13 @@ public final class Profiler {
         return methodStatisticsList;
     }
 
+    /**
+     * Gets the method.
+     *
+     * @param instance the instance
+     * @param methodName the method name
+     * @return the method
+     */
     private static Method getMethod(final Object instance, final String methodName) {
         Method method = ClassUtil.getDeclaredMethod(instance.getClass(), methodName);
         if (method == null) {
@@ -331,90 +466,250 @@ public final class Profiler {
         return method;
     }
 
+    /**
+     * Gc.
+     */
     private static void gc() {
         Runtime.getRuntime().gc();
         N.sleep(3000);
     }
 
+    /** The suspended. */
     private static boolean suspended = false;
 
+    /**
+     * Suspend.
+     *
+     * @param yesOrNo the yes or no
+     */
     static void suspend(boolean yesOrNo) {
         suspended = yesOrNo;
     }
 
     /**
+     * The Interface Statistics.
+     *
      * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     static interface Statistics {
+
+        /**
+         * Gets the result.
+         *
+         * @return the result
+         */
         Object getResult();
 
+        /**
+         * Sets the result.
+         *
+         * @param result the new result
+         */
         void setResult(Object result);
 
+        /**
+         * Gets the start time in millis.
+         *
+         * @return the start time in millis
+         */
         long getStartTimeInMillis();
 
+        /**
+         * Sets the start time in millis.
+         *
+         * @param startTimeInMillis the new start time in millis
+         */
         void setStartTimeInMillis(long startTimeInMillis);
 
+        /**
+         * Gets the end time in millis.
+         *
+         * @return the end time in millis
+         */
         long getEndTimeInMillis();
 
+        /**
+         * Sets the end time in millis.
+         *
+         * @param endTimeInMillis the new end time in millis
+         */
         void setEndTimeInMillis(long endTimeInMillis);
 
+        /**
+         * Gets the start time in nano.
+         *
+         * @return the start time in nano
+         */
         long getStartTimeInNano();
 
+        /**
+         * Sets the start time in nano.
+         *
+         * @param startTimeInNano the new start time in nano
+         */
         void setStartTimeInNano(long startTimeInNano);
 
+        /**
+         * Gets the end time in nano.
+         *
+         * @return the end time in nano
+         */
         long getEndTimeInNano();
 
+        /**
+         * Sets the end time in nano.
+         *
+         * @param endTimeInNano the new end time in nano
+         */
         void setEndTimeInNano(long endTimeInNano);
 
+        /**
+         * Gets the elapsed time in millis.
+         *
+         * @return the elapsed time in millis
+         */
         double getElapsedTimeInMillis();
     }
 
     /**
+     * The Interface LoopStatistics.
+     *
      * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     static interface LoopStatistics extends Statistics {
+
+        /**
+         * Gets the method name list.
+         *
+         * @return the method name list
+         */
         List<String> getMethodNameList();
 
+        /**
+         * Gets the min elapsed time method.
+         *
+         * @return the min elapsed time method
+         */
         MethodStatistics getMinElapsedTimeMethod();
 
+        /**
+         * Gets the max elapsed time method.
+         *
+         * @return the max elapsed time method
+         */
         MethodStatistics getMaxElapsedTimeMethod();
 
+        /**
+         * Gets the method total elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method total elapsed time in millis
+         */
         public double getMethodTotalElapsedTimeInMillis(String methodName);
 
+        /**
+         * Gets the method max elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method max elapsed time in millis
+         */
         public double getMethodMaxElapsedTimeInMillis(String methodName);
 
+        /**
+         * Gets the method min elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method min elapsed time in millis
+         */
         public double getMethodMinElapsedTimeInMillis(String methodName);
 
+        /**
+         * Gets the method average elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method average elapsed time in millis
+         */
         public double getMethodAverageElapsedTimeInMillis(String methodName);
 
+        /**
+         * Gets the total elapsed time in millis.
+         *
+         * @return the total elapsed time in millis
+         */
         public double getTotalElapsedTimeInMillis();
 
+        /**
+         * Gets the method size.
+         *
+         * @param methodName the method name
+         * @return the method size
+         */
         public int getMethodSize(String methodName);
 
+        /**
+         * Gets the method statistics list.
+         *
+         * @param methodName the method name
+         * @return the method statistics list
+         */
         public List<MethodStatistics> getMethodStatisticsList(String methodName);
 
+        /**
+         * Gets the failed method statistics list.
+         *
+         * @param methodName the method name
+         * @return the failed method statistics list
+         */
         public List<MethodStatistics> getFailedMethodStatisticsList(String methodName);
 
+        /**
+         * Gets the all failed method statistics list.
+         *
+         * @return the all failed method statistics list
+         */
         List<MethodStatistics> getAllFailedMethodStatisticsList();
     }
 
     /**
+     * The Class AbstractStatistics.
+     *
      * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     static abstract class AbstractStatistics implements Statistics {
+
+        /** The start time in millis. */
         private long startTimeInMillis;
+
+        /** The end time in millis. */
         private long endTimeInMillis;
+
+        /** The start time in nano. */
         private long startTimeInNano;
+
+        /** The end time in nano. */
         private long endTimeInNano;
+
+        /** The result. */
         private Object result;
 
+        /**
+         * Instantiates a new abstract statistics.
+         */
         public AbstractStatistics() {
             this(0, 0, 0, 0);
         }
 
+        /**
+         * Instantiates a new abstract statistics.
+         *
+         * @param startTimeInMillis the start time in millis
+         * @param endTimeInMillis the end time in millis
+         * @param startTimeInNano the start time in nano
+         * @param endTimeInNano the end time in nano
+         */
         public AbstractStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano) {
             this.startTimeInMillis = startTimeInMillis;
             this.endTimeInMillis = endTimeInMillis;
@@ -422,61 +717,122 @@ public final class Profiler {
             this.endTimeInNano = endTimeInNano;
         }
 
+        /**
+         * Gets the start time in millis.
+         *
+         * @return the start time in millis
+         */
         @Override
         public long getStartTimeInMillis() {
             return startTimeInMillis;
         }
 
+        /**
+         * Sets the start time in millis.
+         *
+         * @param startTimeInMillis the new start time in millis
+         */
         @Override
         public void setStartTimeInMillis(long startTimeInMillis) {
             this.startTimeInMillis = startTimeInMillis;
         }
 
+        /**
+         * Gets the end time in millis.
+         *
+         * @return the end time in millis
+         */
         @Override
         public long getEndTimeInMillis() {
             return endTimeInMillis;
         }
 
+        /**
+         * Sets the end time in millis.
+         *
+         * @param endTimeInMillis the new end time in millis
+         */
         @Override
         public void setEndTimeInMillis(long endTimeInMillis) {
             this.endTimeInMillis = endTimeInMillis;
         }
 
+        /**
+         * Gets the start time in nano.
+         *
+         * @return the start time in nano
+         */
         @Override
         public long getStartTimeInNano() {
             return startTimeInNano;
         }
 
+        /**
+         * Sets the start time in nano.
+         *
+         * @param startTimeInNano the new start time in nano
+         */
         @Override
         public void setStartTimeInNano(final long startTimeInNano) {
             this.startTimeInNano = startTimeInNano;
         }
 
+        /**
+         * Gets the end time in nano.
+         *
+         * @return the end time in nano
+         */
         @Override
         public long getEndTimeInNano() {
             return endTimeInNano;
         }
 
+        /**
+         * Sets the end time in nano.
+         *
+         * @param endTimeInNano the new end time in nano
+         */
         @Override
         public void setEndTimeInNano(final long endTimeInNano) {
             this.endTimeInNano = endTimeInNano;
         }
 
+        /**
+         * Gets the elapsed time in millis.
+         *
+         * @return the elapsed time in millis
+         */
         @Override
         public double getElapsedTimeInMillis() {
             return (endTimeInNano - startTimeInNano) / 1000000.0d; // convert to milliseconds.
         }
 
+        /**
+         * Gets the result.
+         *
+         * @return the result
+         */
         @Override
         public Object getResult() {
             return result;
         }
 
+        /**
+         * Sets the result.
+         *
+         * @param result the new result
+         */
         @Override
         public void setResult(final Object result) {
             this.result = result;
         }
 
+        /**
+         * Time 2 string.
+         *
+         * @param timeInMillis the time in millis
+         * @return the string
+         */
         protected String time2String(final long timeInMillis) {
             final Timestamp timestamp = DateUtil.createTimestamp(timeInMillis);
             return DateUtil.format(timestamp, DateUtil.LOCAL_TIMESTAMP_FORMAT); // + " " + N.LOCAL_TIME_ZONE.getID();
@@ -484,23 +840,53 @@ public final class Profiler {
     }
 
     /**
+     * The Class MethodStatistics.
+     *
      * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     static class MethodStatistics extends AbstractStatistics {
+
+        /** The method name. */
         private final String methodName;
+
+        /** The result. */
         private Object result;
 
+        /**
+         * Instantiates a new method statistics.
+         *
+         * @param methodName the method name
+         */
         public MethodStatistics(final String methodName) {
             super();
             this.methodName = methodName;
         }
 
+        /**
+         * Instantiates a new method statistics.
+         *
+         * @param methodName the method name
+         * @param startTimeInMillis the start time in millis
+         * @param endTimeInMillis the end time in millis
+         * @param startTimeInNano the start time in nano
+         * @param endTimeInNano the end time in nano
+         */
         public MethodStatistics(final String methodName, final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano,
                 final long endTimeInNano) {
             this(methodName, startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, null);
         }
 
+        /**
+         * Instantiates a new method statistics.
+         *
+         * @param methodName the method name
+         * @param startTimeInMillis the start time in millis
+         * @param endTimeInMillis the end time in millis
+         * @param startTimeInNano the start time in nano
+         * @param endTimeInNano the end time in nano
+         * @param result the result
+         */
         public MethodStatistics(final String methodName, final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano,
                 final long endTimeInNano, final Object result) {
             super(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano);
@@ -508,24 +894,49 @@ public final class Profiler {
             this.result = result;
         }
 
+        /**
+         * Gets the method name.
+         *
+         * @return the method name
+         */
         public String getMethodName() {
             return methodName;
         }
 
+        /**
+         * Gets the result.
+         *
+         * @return the result
+         */
         @Override
         public Object getResult() {
             return result;
         }
 
+        /**
+         * Sets the result.
+         *
+         * @param result the new result
+         */
         @Override
         public void setResult(final Object result) {
             this.result = result;
         }
 
+        /**
+         * Checks if is failed.
+         *
+         * @return true, if is failed
+         */
         public boolean isFailed() {
             return (result != null) && result instanceof Exception;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             if (isFailed()) {
@@ -539,23 +950,53 @@ public final class Profiler {
         }
     }
 
+    /**
+     * The Class SingleLoopStatistics.
+     */
     static class SingleLoopStatistics extends AbstractStatistics implements LoopStatistics {
+
+        /** The method statistics list. */
         private List<MethodStatistics> methodStatisticsList;
 
+        /**
+         * Instantiates a new single loop statistics.
+         */
         public SingleLoopStatistics() {
             super();
         }
 
+        /**
+         * Instantiates a new single loop statistics.
+         *
+         * @param startTimeInMillis the start time in millis
+         * @param endTimeInMillis the end time in millis
+         * @param startTimeInNano the start time in nano
+         * @param endTimeInNano the end time in nano
+         */
         public SingleLoopStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano) {
             this(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, null);
         }
 
+        /**
+         * Instantiates a new single loop statistics.
+         *
+         * @param startTimeInMillis the start time in millis
+         * @param endTimeInMillis the end time in millis
+         * @param startTimeInNano the start time in nano
+         * @param endTimeInNano the end time in nano
+         * @param methodStatisticsList the method statistics list
+         */
         public SingleLoopStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
                 final List<MethodStatistics> methodStatisticsList) {
             super(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano);
             this.methodStatisticsList = methodStatisticsList;
         }
 
+        /**
+         * Gets the method name list.
+         *
+         * @return the method name list
+         */
         @Override
         public List<String> getMethodNameList() {
             List<String> result = new ArrayList<>();
@@ -569,6 +1010,11 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method statistics list.
+         *
+         * @return the method statistics list
+         */
         public List<MethodStatistics> getMethodStatisticsList() {
             if (methodStatisticsList == null) {
                 methodStatisticsList = new ArrayList<>();
@@ -576,14 +1022,29 @@ public final class Profiler {
             return methodStatisticsList;
         }
 
+        /**
+         * Sets the method statistics list.
+         *
+         * @param methodStatisticsList the new method statistics list
+         */
         public void setMethodStatisticsList(final List<MethodStatistics> methodStatisticsList) {
             this.methodStatisticsList = methodStatisticsList;
         }
 
+        /**
+         * Adds the method statistics list.
+         *
+         * @param methodStatistics the method statistics
+         */
         public void addMethodStatisticsList(final MethodStatistics methodStatistics) {
             getMethodStatisticsList().add(methodStatistics);
         }
 
+        /**
+         * Gets the max elapsed time method.
+         *
+         * @return the max elapsed time method
+         */
         @Override
         public MethodStatistics getMaxElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -597,6 +1058,11 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the min elapsed time method.
+         *
+         * @return the min elapsed time method
+         */
         @Override
         public MethodStatistics getMinElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -610,6 +1076,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method total elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method total elapsed time in millis
+         */
         @Override
         public double getMethodTotalElapsedTimeInMillis(final String methodName) {
             double result = 0;
@@ -623,6 +1095,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method max elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method max elapsed time in millis
+         */
         @Override
         public double getMethodMaxElapsedTimeInMillis(final String methodName) {
             double result = 0;
@@ -638,6 +1116,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method min elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method min elapsed time in millis
+         */
         @Override
         public double getMethodMinElapsedTimeInMillis(final String methodName) {
             double result = Integer.MAX_VALUE;
@@ -653,6 +1137,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method average elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method average elapsed time in millis
+         */
         @Override
         public double getMethodAverageElapsedTimeInMillis(final String methodName) {
             double totalTime = 0;
@@ -668,6 +1158,11 @@ public final class Profiler {
             return (methodNum > 0) ? (totalTime / methodNum) : totalTime;
         }
 
+        /**
+         * Gets the total elapsed time in millis.
+         *
+         * @return the total elapsed time in millis
+         */
         @Override
         public double getTotalElapsedTimeInMillis() {
             double result = 0;
@@ -679,6 +1174,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method size.
+         *
+         * @param methodName the method name
+         * @return the method size
+         */
         @Override
         public int getMethodSize(final String methodName) {
             int methodSize = 0;
@@ -692,6 +1193,12 @@ public final class Profiler {
             return methodSize;
         }
 
+        /**
+         * Gets the method statistics list.
+         *
+         * @param methodName the method name
+         * @return the method statistics list
+         */
         @Override
         public List<MethodStatistics> getMethodStatisticsList(final String methodName) {
             List<MethodStatistics> result = new ArrayList<>(getMethodSize(methodName));
@@ -705,6 +1212,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the failed method statistics list.
+         *
+         * @param methodName the method name
+         * @return the failed method statistics list
+         */
         @Override
         public List<MethodStatistics> getFailedMethodStatisticsList(final String methodName) {
             List<MethodStatistics> result = new ArrayList<>();
@@ -718,6 +1231,11 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the all failed method statistics list.
+         *
+         * @return the all failed method statistics list
+         */
         @Override
         public List<MethodStatistics> getAllFailedMethodStatisticsList() {
             List<MethodStatistics> result = new ArrayList<>();
@@ -732,16 +1250,44 @@ public final class Profiler {
         }
     }
 
+    /**
+     * The Class MultiLoopsStatistics.
+     */
     public static class MultiLoopsStatistics extends AbstractStatistics implements LoopStatistics {
+
+        /** The Constant SEPARATOR_LINE. */
         private static final String SEPARATOR_LINE = "========================================================================================================================";
+
+        /** The thread num. */
         private final int threadNum;
+
+        /** The loop statistics list. */
         private List<LoopStatistics> loopStatisticsList;
 
+        /**
+         * Instantiates a new multi loops statistics.
+         *
+         * @param startTimeInMillis the start time in millis
+         * @param endTimeInMillis the end time in millis
+         * @param startTimeInNano the start time in nano
+         * @param endTimeInNano the end time in nano
+         * @param threadNum the thread num
+         */
         public MultiLoopsStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
                 final int threadNum) {
             this(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, threadNum, null);
         }
 
+        /**
+         * Instantiates a new multi loops statistics.
+         *
+         * @param startTimeInMillis the start time in millis
+         * @param endTimeInMillis the end time in millis
+         * @param startTimeInNano the start time in nano
+         * @param endTimeInNano the end time in nano
+         * @param threadNum the thread num
+         * @param loopStatisticsList the loop statistics list
+         */
         public MultiLoopsStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
                 final int threadNum, final List<LoopStatistics> loopStatisticsList) {
             super(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano);
@@ -749,10 +1295,20 @@ public final class Profiler {
             this.loopStatisticsList = loopStatisticsList;
         }
 
+        /**
+         * Gets the thread num.
+         *
+         * @return the thread num
+         */
         public int getThreadNum() {
             return threadNum;
         }
 
+        /**
+         * Gets the method name list.
+         *
+         * @return the method name list
+         */
         @Override
         public List<String> getMethodNameList() {
             List<String> result = null;
@@ -764,6 +1320,11 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the loop statistics list.
+         *
+         * @return the loop statistics list
+         */
         public List<LoopStatistics> getLoopStatisticsList() {
             if (loopStatisticsList == null) {
                 loopStatisticsList = new ArrayList<>();
@@ -771,14 +1332,29 @@ public final class Profiler {
             return loopStatisticsList;
         }
 
+        /**
+         * Sets the loop statistics list.
+         *
+         * @param loopStatisticsList the new loop statistics list
+         */
         public void setLoopStatisticsList(final List<LoopStatistics> loopStatisticsList) {
             this.loopStatisticsList = loopStatisticsList;
         }
 
+        /**
+         * Adds the method statistics list.
+         *
+         * @param loopStatistics the loop statistics
+         */
         public void addMethodStatisticsList(final LoopStatistics loopStatistics) {
             getLoopStatisticsList().add(loopStatistics);
         }
 
+        /**
+         * Gets the max elapsed time method.
+         *
+         * @return the max elapsed time method
+         */
         @Override
         public MethodStatistics getMaxElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -793,6 +1369,11 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the min elapsed time method.
+         *
+         * @return the min elapsed time method
+         */
         @Override
         public MethodStatistics getMinElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -807,6 +1388,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method total elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method total elapsed time in millis
+         */
         @Override
         public double getMethodTotalElapsedTimeInMillis(final String methodName) {
             double result = 0;
@@ -818,6 +1405,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method max elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method max elapsed time in millis
+         */
         @Override
         public double getMethodMaxElapsedTimeInMillis(final String methodName) {
             double result = 0;
@@ -832,6 +1425,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method min elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method min elapsed time in millis
+         */
         @Override
         public double getMethodMinElapsedTimeInMillis(final String methodName) {
             double result = Integer.MAX_VALUE;
@@ -846,6 +1445,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method average elapsed time in millis.
+         *
+         * @param methodName the method name
+         * @return the method average elapsed time in millis
+         */
         @Override
         public double getMethodAverageElapsedTimeInMillis(final String methodName) {
             double totalTime = 0;
@@ -861,6 +1466,11 @@ public final class Profiler {
             return (methodNum > 0) ? (totalTime / methodNum) : totalTime;
         }
 
+        /**
+         * Gets the total elapsed time in millis.
+         *
+         * @return the total elapsed time in millis
+         */
         @Override
         public double getTotalElapsedTimeInMillis() {
             double result = 0;
@@ -873,6 +1483,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method size.
+         *
+         * @param methodName the method name
+         * @return the method size
+         */
         @Override
         public int getMethodSize(final String methodName) {
             int result = 0;
@@ -884,6 +1500,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the method statistics list.
+         *
+         * @param methodName the method name
+         * @return the method statistics list
+         */
         @Override
         public List<MethodStatistics> getMethodStatisticsList(final String methodName) {
             List<MethodStatistics> methodStatisticsList = new ArrayList<>(getMethodSize(methodName));
@@ -895,6 +1517,12 @@ public final class Profiler {
             return methodStatisticsList;
         }
 
+        /**
+         * Gets the failed method statistics list.
+         *
+         * @param methodName the method name
+         * @return the failed method statistics list
+         */
         @Override
         public List<MethodStatistics> getFailedMethodStatisticsList(final String methodName) {
             List<MethodStatistics> result = new ArrayList<>();
@@ -906,6 +1534,11 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the all failed method statistics list.
+         *
+         * @return the all failed method statistics list
+         */
         @Override
         public List<MethodStatistics> getAllFailedMethodStatisticsList() {
             List<MethodStatistics> result = new ArrayList<>();
@@ -917,6 +1550,11 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the total call.
+         *
+         * @return the total call
+         */
         private int getTotalCall() {
             int res = 0;
             if (loopStatisticsList != null) {
@@ -927,18 +1565,36 @@ public final class Profiler {
             return res;
         }
 
+        /**
+         * Prints the result.
+         */
         public void printResult() {
             writeResult(new PrintWriter(System.out));
         }
 
+        /**
+         * Write result.
+         *
+         * @param os the os
+         */
         public void writeResult(final OutputStream os) {
             writeResult(new PrintWriter(os));
         }
 
+        /**
+         * Write result.
+         *
+         * @param writer the writer
+         */
         public void writeResult(final Writer writer) {
             writeResult(new PrintWriter(writer));
         }
 
+        /**
+         * Write result.
+         *
+         * @param writer the writer
+         */
         private void writeResult(final PrintWriter writer) {
             writer.println();
             writer.println(SEPARATOR_LINE);
@@ -1009,6 +1665,11 @@ public final class Profiler {
             writer.flush();
         }
 
+        /**
+         * Write error.
+         *
+         * @param writer the writer
+         */
         private void writeError(final PrintWriter writer) {
             MethodStatistics methodStatistics;
             List<?> failedMethodList = getAllFailedMethodStatisticsList();
@@ -1023,14 +1684,29 @@ public final class Profiler {
             }
         }
 
+        /**
+         * Write html result.
+         *
+         * @param os the os
+         */
         public void writeHtmlResult(final OutputStream os) {
             writeHtmlResult(new PrintWriter(os));
         }
 
+        /**
+         * Write html result.
+         *
+         * @param writer the writer
+         */
         public void writeHtmlResult(final Writer writer) {
             writeHtmlResult(new PrintWriter(writer));
         }
 
+        /**
+         * Write html result.
+         *
+         * @param writer the writer
+         */
         private void writeHtmlResult(final PrintWriter writer) {
             writer.println(SEPARATOR_LINE);
             writer.println("<br/>" + "(unit: milliseconds)");
@@ -1109,6 +1785,11 @@ public final class Profiler {
             writer.flush();
         }
 
+        /**
+         * Write html error.
+         *
+         * @param writer the writer
+         */
         private void writeHtmlError(final PrintWriter writer) {
             MethodStatistics methodStatistics;
             List<?> failedMethodList = getAllFailedMethodStatisticsList();
@@ -1122,14 +1803,29 @@ public final class Profiler {
             }
         }
 
+        /**
+         * Write xml result.
+         *
+         * @param os the os
+         */
         public void writeXmlResult(final OutputStream os) {
             writeXmlResult(new PrintWriter(os));
         }
 
+        /**
+         * Write xml result.
+         *
+         * @param writer the writer
+         */
         public void writeXmlResult(final Writer writer) {
             writeXmlResult(new PrintWriter(writer));
         }
 
+        /**
+         * Write xml result.
+         *
+         * @param writer the writer
+         */
         private void writeXmlResult(final PrintWriter writer) {
             writer.println("<result>");
             writer.println("<unit>milliseconds</unit>");

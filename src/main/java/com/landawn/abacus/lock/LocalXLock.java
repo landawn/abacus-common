@@ -24,32 +24,63 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class LocalXLock.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public final class LocalXLock<T> extends AbstractXLock<T> {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(LocalXLock.class);
 
+    /** The blocked lock pool. */
     private final Map<T, ModeLock> blockedLockPool = new ConcurrentHashMap<T, ModeLock>();
 
+    /** The timeout. */
     private final long timeout;
 
+    /**
+     * Instantiates a new local X lock.
+     */
     public LocalXLock() {
         this(DEFAULT_TIMEOUT);
     }
 
+    /**
+     * Instantiates a new local X lock.
+     *
+     * @param timeout the timeout
+     */
     public LocalXLock(long timeout) {
         this.timeout = timeout;
     }
 
+    /**
+     * Lock.
+     *
+     * @param target the target
+     * @param lockMode the lock mode
+     * @param refLockCode the ref lock code
+     * @return the string
+     */
     @Override
     public String lock(T target, LockMode lockMode, String refLockCode) {
         return lock(target, lockMode, refLockCode, timeout);
     }
 
+    /**
+     * Lock.
+     *
+     * @param target the target
+     * @param lockMode the lock mode
+     * @param refLockCode the ref lock code
+     * @param timeout the timeout
+     * @return the string
+     */
     @Override
     public String lock(T target, LockMode lockMode, String refLockCode, long timeout) {
         checkTargetObject(target);
@@ -117,6 +148,14 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
         return null;
     }
 
+    /**
+     * Checks if is locked.
+     *
+     * @param target the target
+     * @param requiredLockMode the required lock mode
+     * @param refLockCode the ref lock code
+     * @return true, if is locked
+     */
     @Override
     public boolean isLocked(T target, LockMode requiredLockMode, String refLockCode) {
         checkTargetObject(target);
@@ -133,6 +172,13 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
         return lockMode != null && lockMode.isXLockOf(requiredLockMode);
     }
 
+    /**
+     * Unlock.
+     *
+     * @param target the target
+     * @param refLockCode the ref lock code
+     * @return true, if successful
+     */
     @Override
     public boolean unlock(T target, String refLockCode) {
         checkTargetObject(target);
@@ -164,12 +210,24 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
 
     }
 
+    /**
+     * Gets the target lock.
+     *
+     * @param target the target
+     * @return the target lock
+     */
     private ModeLock getTargetLock(T target) {
         synchronized (blockedLockPool) {
             return blockedLockPool.get(target);
         }
     }
 
+    /**
+     * Gets the or create lock.
+     *
+     * @param target the target
+     * @return the or create lock
+     */
     private ModeLock getOrCreateLock(T target) {
         ModeLock modeLock = null;
 
@@ -188,6 +246,12 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
         return modeLock;
     }
 
+    /**
+     * Close lock.
+     *
+     * @param target the target
+     * @param modeLock the mode lock
+     */
     private void closeLock(T target, ModeLock modeLock) {
         synchronized (blockedLockPool) {
             modeLock.decrementRefCount();
@@ -206,14 +270,20 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     }
 
     /**
+     * The Class ModeLock.
+     *
      * @author Haiyang Li
-     * 
      * @version $Revision: 0.8 $ 07/09/08
      */
     private static class ModeLock extends RefReentrantLock {
+
+        /** The Constant serialVersionUID. */
         private static final long serialVersionUID = 7138974744714225809L;
 
+        /** The lock code. */
         private volatile String lockCode;
+
+        /** The lock mode. */
         private volatile LockMode lockMode;
     }
 }

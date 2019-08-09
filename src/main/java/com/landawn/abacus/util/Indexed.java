@@ -16,42 +16,91 @@ package com.landawn.abacus.util;
 
 import java.util.Iterator;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class Indexed.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public final class Indexed<T> extends AbstractIndexed {
+
+    /** The value. */
     private final T value;
 
+    /**
+     * Instantiates a new indexed.
+     *
+     * @param index the index
+     * @param value the value
+     */
     Indexed(long index, T value) {
         super(index);
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param value the value
+     * @param index the index
+     * @return the indexed
+     */
     public static <T> Indexed<T> of(T value, int index) {
         N.checkArgNotNegative(index, "index");
 
         return new Indexed<>(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param value the value
+     * @param index the index
+     * @return the indexed
+     */
     public static <T> Indexed<T> of(T value, long index) {
         N.checkArgNotNegative(index, "index");
 
         return new Indexed<>(index, value);
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter) {
         return iterate(iter, 0);
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter, final int startIndex) {
         N.checkArgNotNegative(startIndex, "startIndex");
 
         return iterate(iter, (long) startIndex);
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter, final long startIndex) {
         N.checkArgNotNegative(startIndex, "startIndex");
 
@@ -70,15 +119,31 @@ public final class Indexed<T> extends AbstractIndexed {
         };
     }
 
+    /**
+     * Value.
+     *
+     * @return the t
+     */
     public T value() {
         return value;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return (int) (index * 31 + (value == null ? 0 : value.hashCode()));
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -94,6 +159,11 @@ public final class Indexed<T> extends AbstractIndexed {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + N.toString(value);

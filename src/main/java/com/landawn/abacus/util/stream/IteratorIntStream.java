@@ -2018,8 +2018,10 @@ class IteratorIntStream extends AbstractIntStream {
             return StreamSupport.intStream(Spliterators.spliteratorUnknownSize(spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL),
                     isParallel());
         } else {
-            return StreamSupport.intStream(Spliterators.spliteratorUnknownSize(spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL),
-                    isParallel()).onClose(() -> close(closeHandlers));
+            return StreamSupport
+                    .intStream(Spliterators.spliteratorUnknownSize(spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL),
+                            isParallel())
+                    .onClose(() -> close(closeHandlers));
         }
     }
 

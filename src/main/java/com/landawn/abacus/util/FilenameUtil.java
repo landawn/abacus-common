@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Stack;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
  * 
@@ -84,6 +85,7 @@ import java.util.Stack;
  */
 public final class FilenameUtil {
 
+    /** The Constant NOT_FOUND. */
     private static final int NOT_FOUND = -1;
 
     /**

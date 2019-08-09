@@ -20,6 +20,7 @@ import java.io.InputStream;
 
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -29,13 +30,18 @@ import com.landawn.abacus.util.N;
  * @since 16.0
  */
 public final class HashingInputStream extends FilterInputStream {
+
+    /** The hasher. */
     private final Hasher hasher;
 
     /**
      * Creates an input stream that hashes using the given {@link HashFunction} and delegates all data
      * read from it to the underlying {@link InputStream}.
-     *
+     * 
      * <p>The {@link InputStream} should not be read from before or after the hand-off.
+     *
+     * @param hashFunction the hash function
+     * @param in the in
      */
     public HashingInputStream(HashFunction hashFunction, InputStream in) {
         super(N.checkArgNotNull(in));
@@ -45,6 +51,9 @@ public final class HashingInputStream extends FilterInputStream {
     /**
      * Reads the next byte of data from the underlying input stream and updates the hasher with the
      * byte read.
+     *
+     * @return the int
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
 
@@ -59,6 +68,12 @@ public final class HashingInputStream extends FilterInputStream {
     /**
      * Reads the specified bytes of data from the underlying input stream and updates the hasher with
      * the bytes read.
+     *
+     * @param bytes the bytes
+     * @param off the off
+     * @param len the len
+     * @return the int
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
 
@@ -71,7 +86,7 @@ public final class HashingInputStream extends FilterInputStream {
     }
 
     /**
-     * mark() is not supported for HashingInputStream
+     * mark() is not supported for HashingInputStream.
      *
      * @return {@code false} always
      */
@@ -81,7 +96,9 @@ public final class HashingInputStream extends FilterInputStream {
     }
 
     /**
-     * mark() is not supported for HashingInputStream
+     * mark() is not supported for HashingInputStream.
+     *
+     * @param readlimit the readlimit
      */
     @Override
     public void mark(int readlimit) {
@@ -100,6 +117,8 @@ public final class HashingInputStream extends FilterInputStream {
     /**
      * Returns the {@link HashCode} based on the data read from this stream. The result is unspecified
      * if this method is called more than once on the same instance.
+     *
+     * @return the hash code
      */
     public HashCode hash() {
         return hasher.hash();

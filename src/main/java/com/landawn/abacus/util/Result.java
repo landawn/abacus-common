@@ -20,38 +20,85 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Supplier;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @author Haiyang Li
+ * The Class Result.
  *
- * @param <T>
- * @param <E>
+ * @author Haiyang Li
+ * @param <T> the generic type
+ * @param <E> the element type
  */
 public final class Result<T, E extends Throwable> {
+
+    /** The value. */
     private final T value;
+
+    /** The exception. */
     private final E exception;
 
+    /**
+     * Instantiates a new result.
+     *
+     * @param value the value
+     * @param exception the exception
+     */
     Result(T value, E exception) {
         this.value = value;
         this.exception = exception;
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param value the value
+     * @param exception the exception
+     * @return the result
+     */
     public static <T, E extends Throwable> Result<T, E> of(final T value, final E exception) {
         return new Result<>(value, exception);
     }
 
+    /**
+     * Checks if is failure.
+     *
+     * @return true, if is failure
+     */
     public boolean isFailure() {
         return exception != null;
     }
 
+    /**
+     * Checks if is success.
+     *
+     * @return true, if is success
+     */
     public boolean isSuccess() {
         return exception == null;
     }
 
+    /**
+     * If failure.
+     *
+     * @param <E2> the generic type
+     * @param actionOnFailure the action on failure
+     * @throws E2 the e2
+     */
     public <E2 extends Exception> void ifFailure(final Try.Consumer<? super E, E2> actionOnFailure) throws E2 {
         ifFailureOrElse(actionOnFailure, Fn.doNothing());
     }
 
+    /**
+     * If failure or else.
+     *
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param actionOnFailure the action on failure
+     * @param actionOnSuccess the action on success
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <E2 extends Exception, E3 extends Exception> void ifFailureOrElse(final Try.Consumer<? super E, E2> actionOnFailure,
             final Try.Consumer<? super T, E3> actionOnSuccess) throws E2, E3 {
         N.checkArgNotNull(actionOnFailure, "actionOnFailure");
@@ -64,10 +111,27 @@ public final class Result<T, E extends Throwable> {
         }
     }
 
+    /**
+     * If success.
+     *
+     * @param <E2> the generic type
+     * @param actionOnSuccess the action on success
+     * @throws E2 the e2
+     */
     public <E2 extends Exception> void ifSuccess(final Try.Consumer<? super T, E2> actionOnSuccess) throws E2 {
         ifSuccessOrElse(actionOnSuccess, Fn.doNothing());
     }
 
+    /**
+     * If success or else.
+     *
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param actionOnSuccess the action on success
+     * @param actionOnFailure the action on failure
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <E2 extends Exception, E3 extends Exception> void ifSuccessOrElse(final Try.Consumer<? super T, E2> actionOnSuccess,
             final Try.Consumer<? super E, E3> actionOnFailure) throws E2, E3 {
         N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
@@ -80,6 +144,12 @@ public final class Result<T, E extends Throwable> {
         }
     }
 
+    /**
+     * Or else.
+     *
+     * @param defaultValueIfErrorOccurred the default value if error occurred
+     * @return the t
+     */
     public T orElse(final T defaultValueIfErrorOccurred) {
         if (exception == null) {
             return value;
@@ -88,6 +158,12 @@ public final class Result<T, E extends Throwable> {
         }
     }
 
+    /**
+     * Or else get.
+     *
+     * @param valueSupplierIfErrorOccurred the value supplier if error occurred
+     * @return the t
+     */
     public T orElseGet(final Supplier<T> valueSupplierIfErrorOccurred) {
         N.checkArgNotNull(valueSupplierIfErrorOccurred, "valueSupplierIfErrorOccurred");
 
@@ -98,6 +174,12 @@ public final class Result<T, E extends Throwable> {
         }
     }
 
+    /**
+     * Or else throw.
+     *
+     * @return the t
+     * @throws E the e
+     */
     public T orElseThrow() throws E {
         if (exception == null) {
             return value;
@@ -106,6 +188,14 @@ public final class Result<T, E extends Throwable> {
         }
     }
 
+    /**
+     * Or else throw.
+     *
+     * @param <E2> the generic type
+     * @param exceptionSupplierIfErrorOccurred the exception supplier if error occurred
+     * @return the t
+     * @throws E2 the e2
+     */
     public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws E2 {
         N.checkArgNotNull(exceptionSupplierIfErrorOccurred, "exceptionSupplierIfErrorOccurred");
 
@@ -118,8 +208,8 @@ public final class Result<T, E extends Throwable> {
 
     /**
      * Returns the {@code Exception} if occurred, otherwise {@code null} is returned.
-     * 
-     * @return
+     *
+     * @return the exception if present
      */
     public E getExceptionIfPresent() {
         return exception;
@@ -135,21 +225,42 @@ public final class Result<T, E extends Throwable> {
     //        return exception == null ? Nullable.of(value) : Nullable.<T> empty();
     //    }
 
+    /**
+     * To tuple.
+     *
+     * @return the tuple 2
+     */
     public Tuple2<T, E> toTuple() {
         return Tuple.of(value, exception);
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return (exception == null) ? N.hashCode(value) : exception.hashCode();
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(final Object obj) {
         return this == obj || (obj instanceof Result && (N.equals(((Result) obj).value, value) && N.equals(((Result) obj).exception, exception)));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "{value=" + N.toString(value) + ", exception=" + N.toString(exception) + "}";

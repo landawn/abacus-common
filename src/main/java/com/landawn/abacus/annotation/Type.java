@@ -22,6 +22,10 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Interface Type.
+ */
 @Documented
 @Target({ FIELD, METHOD })
 @Retention(RUNTIME)
@@ -33,20 +37,40 @@ import java.lang.annotation.Target;
  * @author Haiyang Li
  */
 public @interface Type {
+
     /**
-     * 
-     * @return
+     * Value.
+     *
+     * @return the string
      * @deprecated use {@code name} to specify attribute explicitly.
      */
     @Deprecated
     String value() default "";
 
+    /**
+     * Name.
+     *
+     * @return the string
+     */
     String name() default "";
 
+    /**
+     * Enumerated.
+     *
+     * @return the enum type
+     */
     EnumType enumerated() default EnumType.STRING;
 
+    /**
+     * Scope.
+     *
+     * @return the scope
+     */
     Scope scope() default Scope.ALL;
 
+    /**
+     * The Enum EnumType.
+     */
     public static enum EnumType {
         /** Persist enumerated type property or field as an integer. */
         ORDINAL,
@@ -55,6 +79,9 @@ public @interface Type {
         STRING
     }
 
+    /**
+     * The Enum Scope.
+     */
     public static enum Scope {
         /**
          * Used for json/xml/... serialization/deserialization.

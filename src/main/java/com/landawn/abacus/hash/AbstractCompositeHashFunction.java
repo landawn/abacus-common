@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.function.BiConsumer;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -29,8 +30,15 @@ import com.landawn.abacus.util.function.BiConsumer;
  * @author Dimitris Andreou
  */
 abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFunction {
+
+    /** The functions. */
     final HashFunction[] functions;
 
+    /**
+     * Instantiates a new abstract composite hash function.
+     *
+     * @param functions the functions
+     */
     AbstractCompositeHashFunction(HashFunction... functions) {
         for (HashFunction function : functions) {
             N.checkArgNotNull(function);
@@ -42,10 +50,18 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
      * Constructs a {@code HashCode} from the {@code Hasher} objects of the functions. Each of them
      * has consumed the entire input and they are ready to output a {@code HashCode}. The order of the
      * hashers are the same order as the functions given to the constructor.
+     *
+     * @param hashers the hashers
+     * @return the hash code
      */
     // this could be cleaner if it passed HashCode[], but that would create yet another array...
     /* protected */ abstract HashCode makeHash(Hasher[] hashers);
 
+    /**
+     * New hasher.
+     *
+     * @return the hasher
+     */
     @Override
     public Hasher newHasher() {
         final Hasher[] hashers = new Hasher[functions.length];

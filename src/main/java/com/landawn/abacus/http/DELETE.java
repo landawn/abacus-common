@@ -22,11 +22,18 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+// TODO: Auto-generated Javadoc
 /** Make a DELETE request to a REST path relative to base URL. */
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
 @RestMethod("DELETE")
 public @interface DELETE {
+
+    /**
+     * Value.
+     *
+     * @return the string
+     */
     String value() default "";
 }

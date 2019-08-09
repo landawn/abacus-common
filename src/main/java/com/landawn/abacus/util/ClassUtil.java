@@ -123,39 +123,58 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.9
- * 
+ * The Class ClassUtil.
+ *
  * @author Haiyang Li
+ * @since 0.9
  */
 public final class ClassUtil {
+
+    /**
+     * Instantiates a new class util.
+     */
     private ClassUtil() {
         // singleton
     }
 
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(ClassUtil.class);
 
+    /** The Constant JAR_POSTFIX. */
     private static final String JAR_POSTFIX = ".jar";
 
+    /** The Constant CLASS_POSTFIX. */
     private static final String CLASS_POSTFIX = ".class";
 
+    /** The Constant PROP_NAME_SEPARATOR. */
     // ...
     private static final String PROP_NAME_SEPARATOR = ".";
 
+    /** The Constant GET. */
     // ...
     private static final String GET = "get".intern();
+
+    /** The Constant SET. */
     private static final String SET = "set".intern();
+
+    /** The Constant IS. */
     private static final String IS = "is".intern();
+
+    /** The Constant HAS. */
     private static final String HAS = "has".intern();
 
     // ... it has to be big enough to make it's safety to add element to
+    /** The Constant POOL_SIZE. */
     // ArrayBlockingQueue.
     private static final int POOL_SIZE = Internals.POOL_SIZE;
 
+    /** The Constant entityClassPool. */
     // ...
     private static final Map<Class<?>, Boolean> entityClassPool = new ObjectPool<>(POOL_SIZE);
 
+    /** The Constant BUILT_IN_TYPE. */
     // formalized property name list.
     private static final Map<String, Class<?>> BUILT_IN_TYPE = new ObjectPool<>(POOL_SIZE); // new LinkedHashMap<>();
 
@@ -364,6 +383,7 @@ public final class ClassUtil {
         // }
     }
 
+    /** The symbol of primitive array class name. */
     private static Map<String, String> SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME = new HashMap<>();
 
     static {
@@ -377,30 +397,60 @@ public final class ClassUtil {
         SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.put(double.class.getName(), "D");
     }
 
+    /** The Constant camelCasePropNamePool. */
     private static final Map<String, String> camelCasePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+
+    /** The Constant lowerCaseWithUnderscorePropNamePool. */
     private static final Map<String, String> lowerCaseWithUnderscorePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+
+    /** The Constant upperCaseWithUnderscorePropNamePool. */
     private static final Map<String, String> upperCaseWithUnderscorePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
+    /** The Constant registeredXMLBindingClassList. */
     private static final Map<Class<?>, Boolean> registeredXMLBindingClassList = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant registeredNonPropGetSetMethodPool. */
     private static final Map<Class<?>, Set<String>> registeredNonPropGetSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
+    /** The Constant entityPropFieldPool. */
     private static final Map<Class<?>, Map<String, Field>> entityPropFieldPool = new ObjectPool<>(POOL_SIZE);
 
+    /** The Constant entityDeclaredPropNameListPool. */
     // ...
     private static final Map<Class<?>, List<String>> entityDeclaredPropNameListPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant entityDeclaredPropGetMethodPool. */
     private static final Map<Class<?>, Map<String, Method>> entityDeclaredPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant entityDeclaredPropSetMethodPool. */
     private static final Map<Class<?>, Map<String, Method>> entityDeclaredPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant entityPropGetMethodPool. */
     private static final Map<Class<?>, Map<String, Method>> entityPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant entityPropSetMethodPool. */
     private static final Map<Class<?>, Map<String, Method>> entityPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant entityInlinePropGetMethodPool. */
     private static final Map<Class<?>, Map<String, List<Method>>> entityInlinePropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant entityInlinePropSetMethodPool. */
     private static final Map<Class<?>, Map<String, List<Method>>> entityInlinePropSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
+    /** The Constant formalizedPropNamePool. */
     // ...
     private static final Map<String, String> formalizedPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+
+    /** The Constant methodPropNamePool. */
     private static final Map<Method, String> methodPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+
+    /** The Constant methodTypeArgumentsPool. */
     private static final Map<Method, Class<?>[]> methodTypeArgumentsPool = new ObjectPool<>(POOL_SIZE * 2);
+
+    /** The Constant methodParameterizedTypeNamePool. */
     private static final Map<Method, String> methodParameterizedTypeNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
+    /** The Constant keyWordMapper. */
     // reserved words.
     private static final Map<String, String> keyWordMapper = new HashMap<>(16);
 
@@ -408,6 +458,7 @@ public final class ClassUtil {
         keyWordMapper.put("class", "clazz");
     }
 
+    /** The Constant nonGetMethodName. */
     private static final Set<String> nonGetMethodName = new HashSet<>(16);
 
     static {
@@ -415,19 +466,36 @@ public final class ClassUtil {
         nonGetMethodName.add("hashCode");
     }
 
+    /** The Constant packagePool. */
     private static final Map<Class<?>, Package> packagePool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant packageNamePool. */
     private static final Map<Class<?>, String> packageNamePool = new ObjectPool<>(POOL_SIZE);
 
+    /** The Constant clsNamePool. */
     private static final Map<String, Class<?>> clsNamePool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant simpleClassNamePool. */
     private static final Map<Class<?>, String> simpleClassNamePool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant nameClassPool. */
     private static final Map<Class<?>, String> nameClassPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant canonicalClassNamePool. */
     private static final Map<Class<?>, String> canonicalClassNamePool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant enclosingClassPool. */
     private static final Map<Class<?>, Class<?>> enclosingClassPool = new ObjectPool<>(POOL_SIZE);
 
+    /** The Constant classDeclaredConstructorPool. */
     private static final Map<Class<?>, Map<Class<?>[], Constructor<?>>> classDeclaredConstructorPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant classDeclaredMethodPool. */
     private static final Map<Class<?>, Map<String, Map<Class<?>[], Method>>> classDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
 
     /**
+     * The Constant CLASS_MASK.
+     *
      * @deprecated for internal only.
      */
     @Deprecated
@@ -435,6 +503,8 @@ public final class ClassUtil {
     public static final Class<?> CLASS_MASK = ClassMask.class;
 
     /**
+     * The Constant METHOD_MASK.
+     *
      * @deprecated for internal only.
      */
     @Deprecated
@@ -442,6 +512,8 @@ public final class ClassUtil {
     public static final Method METHOD_MASK = ClassUtil.internalGetDeclaredMethod(ClassMask.class, "methodMask");
 
     /**
+     * The Constant FIELD_MASK.
+     *
      * @deprecated for internal only.
      */
     @Deprecated
@@ -460,7 +532,7 @@ public final class ClassUtil {
      * The property maybe only has get method if its type is collection or map by xml binding specification
      * Otherwise, it will be ignored if not registered by calling this method.
      *
-     * @param cls
+     * @param cls the cls
      */
     public static void registerXMLBindingClassForPropGetSetMethod(final Class<?> cls) {
         if (registeredXMLBindingClassList.containsKey(cls)) {
@@ -480,10 +552,21 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * Register non entity class.
+     *
+     * @param cls the cls
+     */
     public static void registerNonEntityClass(final Class<?> cls) {
         TypeFactory.registerNonEntityClass(cls);
     }
 
+    /**
+     * Register non prop get set method.
+     *
+     * @param cls the cls
+     * @param propName the prop name
+     */
     public static void registerNonPropGetSetMethod(final Class<?> cls, final String propName) {
         Set<String> set = registeredNonPropGetSetMethodPool.get(cls);
 
@@ -501,6 +584,12 @@ public final class ClassUtil {
         set.add(propName);
     }
 
+    /**
+     * Register prop get set method.
+     *
+     * @param propName the prop name
+     * @param method the method
+     */
     public static void registerPropGetSetMethod(final String propName, final Method method) {
         Class<?> cls = method.getDeclaringClass();
 
@@ -547,6 +636,12 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * Checks if is entity.
+     *
+     * @param cls the cls
+     * @return true, if is entity
+     */
     public static boolean isEntity(final Class<?> cls) {
         Boolean b = entityClassPool.get(cls);
 
@@ -568,8 +663,9 @@ public final class ClassUtil {
     /**
      * Supports primitive types: boolean, char, byte, short, int, long, float, double. And array type with format {@code java.lang.String[]}
      *
-     * @param clsName
-     * @return
+     * @param <T> the generic type
+     * @param clsName the cls name
+     * @return the class
      * @throws IllegalArgumentException if class not found.
      */
     @SuppressWarnings("unchecked")
@@ -580,8 +676,10 @@ public final class ClassUtil {
     /**
      * Supports primitive types: boolean, char, byte, short, int, long, float, double. And array type with format {@code java.lang.String[]}
      *
-     * @param clsName
-     * @return
+     * @param <T> the generic type
+     * @param clsName the cls name
+     * @param cacheResult the cache result
+     * @return the class
      * @throws IllegalArgumentException if class not found.
      */
     @SuppressWarnings("unchecked")
@@ -732,6 +830,13 @@ public final class ClassUtil {
         return interfacesFound;
     }
 
+    /**
+     * Gets the all interfaces.
+     *
+     * @param cls the cls
+     * @param interfacesFound the interfaces found
+     * @return the all interfaces
+     */
     private static void getAllInterfaces(Class<?> cls, final Set<Class<?>> interfacesFound) {
         while (cls != null) {
             final Class<?>[] interfaces = cls.getInterfaces();
@@ -748,8 +853,9 @@ public final class ClassUtil {
 
     /**
      * Returns all the interfaces and super classes the specified class implements or extends, excluding {@code Object.class}.
-     * @param cls
-     * @return
+     *
+     * @param cls the cls
+     * @return the all super types
      */
     public static Set<Class<?>> getAllSuperTypes(final Class<?> cls) {
         final Set<Class<?>> superTypesFound = new LinkedHashSet<>();
@@ -759,6 +865,13 @@ public final class ClassUtil {
         return superTypesFound;
     }
 
+    /**
+     * Gets the all super types.
+     *
+     * @param cls the cls
+     * @param superTypesFound the super types found
+     * @return the all super types
+     */
     private static void getAllSuperTypes(Class<?> cls, final Set<Class<?>> superTypesFound) {
         while (cls != null) {
             final Class<?>[] interfaces = cls.getInterfaces();
@@ -779,6 +892,12 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * Gets the parameterized type name by method.
+     *
+     * @param method the method
+     * @return the parameterized type name by method
+     */
     public static String getParameterizedTypeNameByMethod(final Method method) {
         String parameterizedTypeName = methodParameterizedTypeNamePool.get(method);
 
@@ -792,6 +911,12 @@ public final class ClassUtil {
         return parameterizedTypeName;
     }
 
+    /**
+     * Format parameterized type name.
+     *
+     * @param parameterizedTypeName the parameterized type name
+     * @return the string
+     */
     static String formatParameterizedTypeName(final String parameterizedTypeName) {
         String res = parameterizedTypeName.replaceAll("java.lang.", "").replaceAll("class ", "");
         final int idx = res.lastIndexOf('$');
@@ -827,6 +952,12 @@ public final class ClassUtil {
         return res;
     }
 
+    /**
+     * Gets the type arguments by method.
+     *
+     * @param method the method
+     * @return the type arguments by method
+     */
     public static Class<?>[] getTypeArgumentsByMethod(final Method method) {
         Class<?>[] typeParameterClasses = methodTypeArgumentsPool.get(method);
 
@@ -861,8 +992,9 @@ public final class ClassUtil {
     }
 
     /**
+     * Gets the package.
      *
-     * @param cls
+     * @param cls the cls
      * @return <code>null</code> if it's primitive type or no package defined for the class.
      */
     public static Package getPackage(final Class<?> cls) {
@@ -884,8 +1016,9 @@ public final class ClassUtil {
     }
 
     /**
+     * Gets the package name.
      *
-     * @param cls
+     * @param cls the cls
      * @return <code>null</code> if it's primitive type or no package defined for the class.
      */
     public static String getPackageName(final Class<?> cls) {
@@ -968,10 +1101,31 @@ public final class ClassUtil {
     //        return method;
     //    }
 
+    /**
+     * Gets the classes by package.
+     *
+     * @param pkgName the pkg name
+     * @param isRecursive the is recursive
+     * @param skipClassLoaddingException the skip class loadding exception
+     * @return the classes by package
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static List<Class<?>> getClassesByPackage(String pkgName, boolean isRecursive, boolean skipClassLoaddingException) throws UncheckedIOException {
         return getClassesByPackage(pkgName, isRecursive, skipClassLoaddingException, Fn.alwaysTrue());
     }
 
+    /**
+     * Gets the classes by package.
+     *
+     * @param <E> the element type
+     * @param pkgName the pkg name
+     * @param isRecursive the is recursive
+     * @param skipClassLoaddingException the skip class loadding exception
+     * @param predicate the predicate
+     * @return the classes by package
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
+     */
     public static <E extends Exception> List<Class<?>> getClassesByPackage(String pkgName, boolean isRecursive, boolean skipClassLoaddingException,
             Try.Predicate<? super Class<?>, E> predicate) throws UncheckedIOException, E {
         if (logger.isInfoEnabled()) {
@@ -1089,6 +1243,12 @@ public final class ClassUtil {
         return classes;
     }
 
+    /**
+     * Package name 2 file path.
+     *
+     * @param pkgName the pkg name
+     * @return the string
+     */
     private static String packageName2FilePath(String pkgName) {
         String pkgPath = pkgName.replace('.', '/');
         pkgPath = pkgPath.endsWith("/") ? pkgPath : (pkgPath + "/");
@@ -1096,6 +1256,12 @@ public final class ClassUtil {
         return pkgPath;
     }
 
+    /**
+     * Gets the resources.
+     *
+     * @param pkgName the pkg name
+     * @return the resources
+     */
     private static List<URL> getResources(String pkgName) {
         List<URL> resourceList = new ArrayList<>();
         String pkgPath = packageName2FilePath(pkgName);
@@ -1144,6 +1310,12 @@ public final class ClassUtil {
         return resourceList;
     }
 
+    /**
+     * File path 2 package name.
+     *
+     * @param entryName the entry name
+     * @return the string
+     */
     private static String filePath2PackageName(String entryName) {
         String pkgName = entryName.replace('/', '.').replace('\\', '.');
         pkgName = pkgName.endsWith(".") ? pkgName.substring(0, pkgName.length() - 1) : pkgName;
@@ -1151,6 +1323,12 @@ public final class ClassUtil {
         return pkgName;
     }
 
+    /**
+     * Gets the class name.
+     *
+     * @param cls the cls
+     * @return the class name
+     */
     public static String getClassName(final Class<?> cls) {
         String clsName = nameClassPool.get(cls);
 
@@ -1162,6 +1340,12 @@ public final class ClassUtil {
         return clsName;
     }
 
+    /**
+     * Gets the simple class name.
+     *
+     * @param cls the cls
+     * @return the simple class name
+     */
     public static String getSimpleClassName(final Class<?> cls) {
         String clsName = simpleClassNamePool.get(cls);
 
@@ -1173,6 +1357,12 @@ public final class ClassUtil {
         return clsName;
     }
 
+    /**
+     * Gets the canonical class name.
+     *
+     * @param cls the cls
+     * @return the canonical class name
+     */
     public static String getCanonicalClassName(final Class<?> cls) {
         String clsName = canonicalClassNamePool.get(cls);
 
@@ -1186,6 +1376,12 @@ public final class ClassUtil {
         return clsName;
     }
 
+    /**
+     * Gets the enclosing class.
+     *
+     * @param cls the cls
+     * @return the enclosing class
+     */
     public static Class<?> getEnclosingClass(final Class<?> cls) {
         Class<?> enclosingClass = enclosingClassPool.get(cls);
 
@@ -1205,8 +1401,9 @@ public final class ClassUtil {
     /**
      * Returns the constructor declared in the specified {@code cls} with the specified {@code parameterTypes}.
      *
-     * @param cls
-     * @param parameterTypes
+     * @param <T> the generic type
+     * @param cls the cls
+     * @param parameterTypes the parameter types
      * @return {@code null} if no constructor is found
      */
     @SafeVarargs
@@ -1244,9 +1441,9 @@ public final class ClassUtil {
     /**
      * Returns the method declared in the specified {@code cls} with the specified {@code methodName} and {@code parameterTypes}.
      *
-     * @param cls
-     * @param methodName
-     * @param parameterTypes
+     * @param cls the cls
+     * @param methodName the method name
+     * @param parameterTypes the parameter types
      * @return {@code null} if no method is found
      */
     @SafeVarargs
@@ -1286,6 +1483,14 @@ public final class ClassUtil {
         return method;
     }
 
+    /**
+     * Internal get declared method.
+     *
+     * @param cls the cls
+     * @param methodName the method name
+     * @param parameterTypes the parameter types
+     * @return the method
+     */
     static Method internalGetDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
         Method method = null;
 
@@ -1310,6 +1515,14 @@ public final class ClassUtil {
         return method;
     }
 
+    /**
+     * Invoke constructor.
+     *
+     * @param <T> the generic type
+     * @param constructor the constructor
+     * @param args the args
+     * @return the t
+     */
     @SafeVarargs
     public static <T> T invokeConstructor(final Constructor<T> constructor, final Object... args) {
         try {
@@ -1319,12 +1532,29 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * Invoke method.
+     *
+     * @param <T> the generic type
+     * @param method the method
+     * @param args the args
+     * @return the t
+     */
     @SuppressWarnings("unchecked")
     @SafeVarargs
     public static <T> T invokeMethod(final Method method, final Object... args) {
         return invokeMethod(null, method, args);
     }
 
+    /**
+     * Invoke method.
+     *
+     * @param <T> the generic type
+     * @param instance the instance
+     * @param method the method
+     * @param args the args
+     * @return the t
+     */
     @SuppressWarnings("unchecked")
     @SafeVarargs
     public static <T> T invokeMethod(final Object instance, final Method method, final Object... args) {
@@ -1337,9 +1567,9 @@ public final class ClassUtil {
 
     /**
      * Returns an immutable entity property name List by the specified class.
-     * 
-     * @param cls
-     * @return
+     *
+     * @param cls the cls
+     * @return the prop name list
      */
     public static List<String> getPropNameList(final Class<?> cls) {
         List<String> propNameList = entityDeclaredPropNameListPool.get(cls);
@@ -1353,10 +1583,11 @@ public final class ClassUtil {
     }
 
     /**
-     * 
-     * @param cls
-     * @param propNameToExcluded
-     * @return
+     * Gets the prop name list exclusively.
+     *
+     * @param cls the cls
+     * @param propNameToExcluded the prop name to excluded
+     * @return the prop name list exclusively
      */
     public static List<String> getPropNameListExclusively(final Class<?> cls, final Set<String> propNameToExcluded) {
         final List<String> propNameList = getPropNameList(cls);
@@ -1376,6 +1607,13 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * Gets the prop name list exclusively.
+     *
+     * @param cls the cls
+     * @param propNameToExcluded the prop name to excluded
+     * @return the prop name list exclusively
+     */
     @SuppressWarnings("rawtypes")
     public static List<String> getPropNameListExclusively(final Class<?> cls, final Collection<String> propNameToExcluded) {
         if (N.isNullOrEmpty(propNameToExcluded)) {
@@ -1390,10 +1628,10 @@ public final class ClassUtil {
     /**
      * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB
-     * specification
+     * specification.
      *
-     * @param cls
-     * @return
+     * @param cls the cls
+     * @return the prop get method list
      */
     public static Map<String, Method> getPropGetMethodList(final Class<?> cls) {
         Map<String, Method> getterMethodList = entityDeclaredPropGetMethodPool.get(cls);
@@ -1406,6 +1644,12 @@ public final class ClassUtil {
         return getterMethodList;
     }
 
+    /**
+     * Gets the prop set method list.
+     *
+     * @param cls the cls
+     * @return the prop set method list
+     */
     public static Map<String, Method> getPropSetMethodList(final Class<?> cls) {
         Map<String, Method> setterMethodList = entityDeclaredPropSetMethodPool.get(cls);
 
@@ -1417,6 +1661,11 @@ public final class ClassUtil {
         return setterMethodList;
     }
 
+    /**
+     * Load prop get set method list.
+     *
+     * @param cls the cls
+     */
     private static void loadPropGetSetMethodList(final Class<?> cls) {
         synchronized (entityDeclaredPropGetMethodPool) {
             if (entityDeclaredPropGetMethodPool.containsKey(cls)) {
@@ -1586,6 +1835,12 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * Checks if is gets the method.
+     *
+     * @param method the method
+     * @return true, if is gets the method
+     */
     private static boolean isGetMethod(final Method method) {
         String mn = method.getName();
 
@@ -1593,6 +1848,13 @@ public final class ClassUtil {
                 && (N.isNullOrEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetMethodName.contains(mn);
     }
 
+    /**
+     * Checks if is field get method.
+     *
+     * @param method the method
+     * @param field the field
+     * @return true, if is field get method
+     */
     static boolean isFieldGetMethod(final Method method, final Field field) {
         if (!isGetMethod(method)) {
             return false;
@@ -1611,6 +1873,13 @@ public final class ClassUtil {
                 || (methodName.startsWith(GET) && methodName.substring(3).equalsIgnoreCase(fieldName));
     }
 
+    /**
+     * Checks if is JAXB get method.
+     *
+     * @param instance the instance
+     * @param method the method
+     * @return true, if is JAXB get method
+     */
     static boolean isJAXBGetMethod(final Object instance, final Method method) {
         try {
             return (instance != null) && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
@@ -1620,6 +1889,14 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * Gets the sets the method.
+     *
+     * @param clazz the clazz
+     * @param propName the prop name
+     * @param getMethod the get method
+     * @return the sets the method
+     */
     private static Method getSetMethod(final Class<?> clazz, final String propName, final Method getMethod) {
         Method setMethod = internalGetDeclaredMethod(clazz, propName.equalsIgnoreCase(getMethod.getName()) ? propName : SET + propName,
                 getMethod.getReturnType());
@@ -1629,6 +1906,13 @@ public final class ClassUtil {
                 : null;
     }
 
+    /**
+     * Gets the public static string fields.
+     *
+     * @param <T> the generic type
+     * @param cls the cls
+     * @return the public static string fields
+     */
     private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
         Map<String, String> statisFinalFields = new HashMap<>();
 
@@ -1653,14 +1937,14 @@ public final class ClassUtil {
      * Returns the property get method declared in the specified {@code cls}
      * with the specified property name {@code propName}.
      * {@code null} is returned if no method is found.
-     *
+     * 
      * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB
      * specification
      *
-     * @param cls
-     * @param propName
-     * @return
+     * @param cls the cls
+     * @param propName the prop name
+     * @return the prop get method
      */
     public static Method getPropGetMethod(final Class<?> cls, final String propName) {
         Map<String, Method> propGetMethodMap = entityPropGetMethodPool.get(cls);
@@ -1700,6 +1984,14 @@ public final class ClassUtil {
         return (method == METHOD_MASK) ? null : method;
     }
 
+    /**
+     * Checks if is prop name.
+     *
+     * @param cls the cls
+     * @param inputPropName the input prop name
+     * @param propNameByMethod the prop name by method
+     * @return true, if is prop name
+     */
     static boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
         if (inputPropName.length() > 128) {
             throw new IllegalArgumentException("The property name execeed 128: " + inputPropName);
@@ -1720,9 +2012,9 @@ public final class ClassUtil {
      * with the specified property name {@code propName}.
      * {@code null} is returned if no method is found.
      *
-     * @param cls
-     * @param propName
-     * @return
+     * @param cls the cls
+     * @param propName the prop name
+     * @return the prop set method
      */
     public static Method getPropSetMethod(final Class<?> cls, final String propName) {
         Map<String, Method> propSetMethodMap = entityPropSetMethodPool.get(cls);
@@ -1762,6 +2054,13 @@ public final class ClassUtil {
         return (method == METHOD_MASK) ? null : method;
     }
 
+    /**
+     * Gets the prop field.
+     *
+     * @param cls the cls
+     * @param propName the prop name
+     * @return the prop field
+     */
     public static Field getPropField(final Class<?> cls, final String propName) {
         Map<String, Field> propFieldMap = entityPropFieldPool.get(cls);
 
@@ -1804,11 +2103,10 @@ public final class ClassUtil {
      * Return the specified {@code propValue} got by the specified method
      * {@code propSetMethod} in the specified {@code entity}.
      *
-     * @param entity
-     *            MapEntity is not supported
-     * @param propGetMethod
-     *
-     * @return
+     * @param <T> the generic type
+     * @param entity            MapEntity is not supported
+     * @param propGetMethod the prop get method
+     * @return the prop value
      */
     @SuppressWarnings("unchecked")
     public static <T> T getPropValue(final Object entity, final Method propGetMethod) {
@@ -1828,10 +2126,9 @@ public final class ClassUtil {
      * {@code propValue} or converted property value, otherwise, exception will
      * be threw if the property value is set unsuccessfully.
      *
-     * @param entity
-     *            MapEntity is not supported
-     * @param propSetMethod
-     * @param propValue
+     * @param entity            MapEntity is not supported
+     * @param propSetMethod the prop set method
+     * @param propValue the prop value
      */
     public static void setPropValue(final Object entity, final Method propSetMethod, Object propValue) {
         try {
@@ -1847,6 +2144,13 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * Sets the prop value by get.
+     *
+     * @param entity the entity
+     * @param propGetMethod the prop get method
+     * @param propValue the prop value
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static void setPropValueByGet(final Object entity, final Method propGetMethod, final Object propValue) {
         if (propValue == null) {
@@ -1865,11 +2169,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Refer to getPropValue(Method, Object)
+     * Refer to getPropValue(Method, Object).
      *
-     * @param entity
-     * @param propName
-     *            is case insensitive
+     * @param <T> the generic type
+     * @param entity the entity
+     * @param propName            is case insensitive
      * @return {@link #getPropValue(Object, Method)}
      */
     @SuppressWarnings("unchecked")
@@ -1878,10 +2182,12 @@ public final class ClassUtil {
     }
 
     /**
-     * 
-     * @param entity
-     * @param propName
-     * @param ignoreUnknownProperty
+     * Gets the prop value.
+     *
+     * @param <T> the generic type
+     * @param entity the entity
+     * @param propName the prop name
+     * @param ignoreUnknownProperty the ignore unknown property
      * @return the property value or null if the property doesn't belong to specified entity.
      * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnknownProperty is false.
      */
@@ -1954,21 +2260,21 @@ public final class ClassUtil {
     /**
      * Refer to setPropValue(Method, Object, Object).
      *
-     * @param entity
-     * @param propName
-     *            is case insensitive
-     * @param propValue
+     * @param entity the entity
+     * @param propName            is case insensitive
+     * @param propValue the prop value
      */
     public static void setPropValue(final Object entity, final String propName, final Object propValue) {
         setPropValue(entity, propName, propValue, false);
     }
 
     /**
-     * 
-     * @param entity
-     * @param propName
-     * @param propValue
-     * @param ignoreUnknownProperty
+     * Sets the prop value.
+     *
+     * @param entity the entity
+     * @param propName the prop name
+     * @param propValue the prop value
+     * @param ignoreUnknownProperty the ignore unknown property
      * @return true if the property value has been set.
      * @throws IllegalArgumentException if the specified property can't be set and ignoreUnknownProperty is false.
      */
@@ -2075,6 +2381,12 @@ public final class ClassUtil {
         return true;
     }
 
+    /**
+     * Gets the prop name by method.
+     *
+     * @param getSetMethod the get set method
+     * @return the prop name by method
+     */
     public static String getPropNameByMethod(final Method getSetMethod) {
         String propName = methodPropNamePool.get(getSetMethod);
 
@@ -2097,6 +2409,13 @@ public final class ClassUtil {
         return propName;
     }
 
+    /**
+     * Gets the declared field.
+     *
+     * @param cls the cls
+     * @param fieldName the field name
+     * @return the declared field
+     */
     private static Field getDeclaredField(final Class<?> cls, final String fieldName) {
         try {
             return cls.getDeclaredField(fieldName);
@@ -2109,9 +2428,9 @@ public final class ClassUtil {
 
     /**
      * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
-     * 
-     * @param propName
-     * @return
+     *
+     * @param propName the prop name
+     * @return the string
      */
     public static String formalizePropName(final String propName) {
         String newPropName = formalizedPropNamePool.get(propName);
@@ -2135,9 +2454,9 @@ public final class ClassUtil {
 
     /**
      * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
-     * 
-     * @param str
-     * @return
+     *
+     * @param propName the prop name
+     * @return the string
      */
     public static String toCamelCase(final String propName) {
         String newPropName = camelCasePropNamePool.get(propName);
@@ -2151,6 +2470,11 @@ public final class ClassUtil {
         return newPropName;
     }
 
+    /**
+     * To camel case.
+     *
+     * @param props the props
+     */
     public static void toCamelCase(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
@@ -2166,9 +2490,9 @@ public final class ClassUtil {
 
     /**
      * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
-     * 
-     * @param str
-     * @return
+     *
+     * @param str the str
+     * @return the string
      */
     public static String toLowerCaseWithUnderscore(final String str) {
         if (N.isNullOrEmpty(str)) {
@@ -2185,6 +2509,11 @@ public final class ClassUtil {
         return result;
     }
 
+    /**
+     * To lower case key with underscore.
+     *
+     * @param props the props
+     */
     public static void toLowerCaseKeyWithUnderscore(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
@@ -2200,9 +2529,9 @@ public final class ClassUtil {
 
     /**
      * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
-     * 
-     * @param str
-     * @return
+     *
+     * @param str the str
+     * @return the string
      */
     public static String toUpperCaseWithUnderscore(final String str) {
         if (N.isNullOrEmpty(str)) {
@@ -2219,6 +2548,11 @@ public final class ClassUtil {
         return result;
     }
 
+    /**
+     * To upper case key with underscore.
+     *
+     * @param props the props
+     */
     public static void toUpperCaseKeyWithUnderscore(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
@@ -2232,13 +2566,17 @@ public final class ClassUtil {
         Objectory.recycle(tmp);
     }
 
+    /** The Constant idPropNamesMap. */
     private static final Map<Class<?>, List<String>> idPropNamesMap = new ConcurrentHashMap<>();
+
+    /** The Constant fakeIds. */
     private static final List<String> fakeIds = ImmutableList.of("not_defined_fake_id_in_abacus_" + N.uuid());
 
     /**
-     * 
-     * @param targetClass
-     * @return
+     * Gets the id field names.
+     *
+     * @param targetClass the target class
+     * @return the id field names
      * @deprecated for internal only.
      */
     @Deprecated
@@ -2248,10 +2586,11 @@ public final class ClassUtil {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param fakeIdForEmpty
-     * @return
+     * Gets the id field names.
+     *
+     * @param targetClass the target class
+     * @param fakeIdForEmpty the fake id for empty
+     * @return the id field names
      * @deprecated for internal only.
      */
     @Deprecated
@@ -2311,9 +2650,10 @@ public final class ClassUtil {
     }
 
     /**
-     * 
-     * @param idPropNames
-     * @return
+     * Checks if is fake id.
+     *
+     * @param idPropNames the id prop names
+     * @return true, if is fake id
      * @deprecated for internal only.
      */
     @Deprecated
@@ -2326,6 +2666,12 @@ public final class ClassUtil {
         return false;
     }
 
+    /**
+     * Check prop get method list.
+     *
+     * @param cls the cls
+     * @return the map
+     */
     static Map<String, Method> checkPropGetMethodList(final Class<?> cls) {
         Map<String, Method> getterMethodList = getPropGetMethodList(cls);
 
@@ -2336,6 +2682,13 @@ public final class ClassUtil {
         return getterMethodList;
     }
 
+    /**
+     * Make package folder.
+     *
+     * @param srcPath the src path
+     * @param pkgName the pkg name
+     * @return the string
+     */
     static String makePackageFolder(String srcPath, final String pkgName) {
         srcPath = (srcPath.endsWith("/") || srcPath.endsWith("\\")) ? srcPath : (srcPath + File.separator);
 
@@ -2417,9 +2770,17 @@ public final class ClassUtil {
     //        return method;
     //    }
 
+    /**
+     * The Class ClassMask.
+     */
     static final class ClassMask {
+
+        /** The Constant FIELD_MASK. */
         static final String FIELD_MASK = "FIELD_MASK";
 
+        /**
+         * Method mask.
+         */
         static final void methodMask() {
         }
     }

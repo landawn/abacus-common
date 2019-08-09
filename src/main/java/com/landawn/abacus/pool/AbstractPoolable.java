@@ -14,19 +14,33 @@
 
 package com.landawn.abacus.pool;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbstractPoolable.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class AbstractPoolable implements Poolable {
+
+    /** The activity print. */
     final ActivityPrint activityPrint;
 
+    /**
+     * Instantiates a new abstract poolable.
+     *
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     */
     protected AbstractPoolable(long liveTime, long maxIdleTime) {
         activityPrint = new ActivityPrint(liveTime, maxIdleTime);
     }
 
+    /**
+     * Activity print.
+     *
+     * @return the activity print
+     */
     @Override
     public ActivityPrint activityPrint() {
         return activityPrint;

@@ -52,24 +52,51 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
+// TODO: Auto-generated Javadoc
 /**
- *
- * @since 0.8
+ * The Class CSVUtil.
  *
  * @author Haiyang Li
- *
+ * @since 0.8
  */
 public final class CSVUtil {
+
+    /** The Constant jsonParser. */
     private static final JSONParser jsonParser = ParserFactory.createJSONParser();
 
+    /**
+     * Load CSV.
+     *
+     * @param csvFile the csv file
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final File csvFile) throws UncheckedIOException {
         return loadCSV(csvFile, (Collection<String>) null);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvFile the csv file
+     * @param selectColumnNames the select column names
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final File csvFile, final Collection<String> selectColumnNames) throws UncheckedIOException {
         return loadCSV(csvFile, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvFile the csv file
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final File csvFile, final Collection<String> selectColumnNames, final long offset, final long count)
             throws UncheckedIOException {
         return loadCSV(csvFile, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
@@ -77,13 +104,16 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * 
-     * @param csvFile
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param csvFile the csv file
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final File csvFile, final Collection<String> selectColumnNames, final long offset, final long count,
             final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
@@ -100,14 +130,39 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvInputStream the csv input stream
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final InputStream csvInputStream) throws UncheckedIOException {
         return loadCSV(csvInputStream, (Collection<String>) null);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvInputStream the csv input stream
+     * @param selectColumnNames the select column names
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final InputStream csvInputStream, final Collection<String> selectColumnNames) throws UncheckedIOException {
         return loadCSV(csvInputStream, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvInputStream the csv input stream
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final InputStream csvInputStream, final Collection<String> selectColumnNames, final long offset, final long count)
             throws UncheckedIOException {
         return loadCSV(csvInputStream, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
@@ -115,13 +170,16 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * 
-     * @param csvInputStream
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param csvInputStream the csv input stream
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final InputStream csvInputStream, final Collection<String> selectColumnNames, final long offset,
             final long count, final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
@@ -130,27 +188,55 @@ public final class CSVUtil {
         return loadCSV(csvReader, selectColumnNames, offset, count, filter);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvReader the csv reader
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Reader csvReader) throws UncheckedIOException {
         return loadCSV(csvReader, (Collection<String>) null);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvReader the csv reader
+     * @param selectColumnNames the select column names
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Reader csvReader, final Collection<String> selectColumnNames) throws UncheckedIOException {
         return loadCSV(csvReader, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvReader the csv reader
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Reader csvReader, final Collection<String> selectColumnNames, long offset, long count) throws UncheckedIOException {
         return loadCSV(csvReader, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
     }
 
     /**
      * Load the data from CSV.
-     * 
-     * @param csvReader
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param csvReader the csv reader
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Reader csvReader, final Collection<String> selectColumnNames, long offset, long count,
             final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
@@ -213,14 +299,42 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvFile the csv file
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final File csvFile) throws UncheckedIOException {
         return loadCSV(entityClass, csvFile, null);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvFile the csv file
+     * @param selectColumnNames the select column names
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final File csvFile, final Collection<String> selectColumnNames) throws UncheckedIOException {
         return loadCSV(entityClass, csvFile, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvFile the csv file
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final File csvFile, final Collection<String> selectColumnNames, final long offset,
             final long count) throws UncheckedIOException {
         return loadCSV(entityClass, csvFile, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
@@ -228,14 +342,17 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * 
-     * @param entityClass
-     * @param csvFile
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param csvFile the csv file
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final File csvFile, final Collection<String> selectColumnNames,
             final long offset, final long count, final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
@@ -252,15 +369,43 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvInputStream the csv input stream
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream) throws UncheckedIOException {
         return loadCSV(entityClass, csvInputStream, null);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvInputStream the csv input stream
+     * @param selectColumnNames the select column names
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream, final Collection<String> selectColumnNames)
             throws UncheckedIOException {
         return loadCSV(entityClass, csvInputStream, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvInputStream the csv input stream
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream, final Collection<String> selectColumnNames, final long offset,
             final long count) throws UncheckedIOException {
         return loadCSV(entityClass, csvInputStream, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
@@ -268,14 +413,17 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * 
-     * @param entityClass
-     * @param csvInputStream
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param csvInputStream the csv input stream
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream,
             final Collection<String> selectColumnNames, final long offset, final long count, final Try.Predicate<String[], E> filter)
@@ -284,14 +432,42 @@ public final class CSVUtil {
         return loadCSV(entityClass, csvReader, selectColumnNames, offset, count, filter);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvReader the csv reader
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final Reader csvReader) throws UncheckedIOException {
         return loadCSV(entityClass, csvReader, null);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvReader the csv reader
+     * @param selectColumnNames the select column names
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final Reader csvReader, final Collection<String> selectColumnNames) throws UncheckedIOException {
         return loadCSV(entityClass, csvReader, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param entityClass the entity class
+     * @param csvReader the csv reader
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static DataSet loadCSV(final Class<?> entityClass, final Reader csvReader, final Collection<String> selectColumnNames, long offset, long count)
             throws UncheckedIOException {
         return loadCSV(entityClass, csvReader, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
@@ -299,16 +475,17 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * 
-     * @param entityClass
-     * @param csvReader
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @return
-     * @throws UncheckedIOException
-     * @throws E
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param csvReader the csv reader
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final Reader csvReader, final Collection<String> selectColumnNames,
             long offset, long count, final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
@@ -380,11 +557,29 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvFile the csv file
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File csvFile, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
         return loadCSV(csvFile, 0, Long.MAX_VALUE, columnTypeMap);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvFile the csv file
+     * @param offset the offset
+     * @param count the count
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File csvFile, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedIOException {
@@ -393,13 +588,16 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param csvFile
-     * @param offset
-     * @param count
-     * @param filter
-     * @param columnTypeMap
-     * 
-     * @return
+     *
+     * @param <E> the element type
+     * @param csvFile the csv file
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final File csvFile, final long offset, final long count, final Try.Predicate<String[], E> filter,
@@ -417,11 +615,29 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvInputStream the csv input stream
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final InputStream csvInputStream, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
         return loadCSV(csvInputStream, 0, Long.MAX_VALUE, columnTypeMap);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvInputStream the csv input stream
+     * @param offset the offset
+     * @param count the count
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final InputStream csvInputStream, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedIOException {
@@ -430,13 +646,16 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param csvInputStream
-     * @param offset
-     * @param count
-     * @param filter
-     * @param columnTypeMap
-     * 
-     * @return
+     *
+     * @param <E> the element type
+     * @param csvInputStream the csv input stream
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final InputStream csvInputStream, final long offset, final long count,
@@ -446,11 +665,29 @@ public final class CSVUtil {
         return loadCSV(csvReader, offset, count, filter, columnTypeMap);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvReader the csv reader
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final Reader csvReader, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
         return loadCSV(csvReader, 0, Long.MAX_VALUE, columnTypeMap);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvReader the csv reader
+     * @param offset the offset
+     * @param count the count
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final Reader csvReader, long offset, long count, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedIOException {
@@ -459,13 +696,16 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param csvReader
-     * @param offset
-     * @param count
-     * @param filter
-     * @param columnTypeMap
-     * 
-     * @return
+     *
+     * @param <E> the element type
+     * @param csvReader the csv reader
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param columnTypeMap the column type map
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final Reader csvReader, long offset, long count, final Try.Predicate<String[], E> filter,
@@ -534,11 +774,29 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvFile the csv file
+     * @param columnTypeList the column type list
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File csvFile, final List<? extends Type> columnTypeList) throws UncheckedIOException {
         return loadCSV(csvFile, 0, Long.MAX_VALUE, columnTypeList);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvFile the csv file
+     * @param offset the offset
+     * @param count the count
+     * @param columnTypeList the column type list
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File csvFile, final long offset, final long count, final List<? extends Type> columnTypeList)
             throws UncheckedIOException {
@@ -547,13 +805,16 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param csvFile
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param csvFile the csv file
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * 
-     * @return
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final File csvFile, final long offset, final long count, final Try.Predicate<String[], E> filter,
@@ -571,11 +832,29 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvInputStream the csv input stream
+     * @param columnTypeList the column type list
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final InputStream csvInputStream, final List<? extends Type> columnTypeList) throws UncheckedIOException {
         return loadCSV(csvInputStream, 0, Long.MAX_VALUE, columnTypeList);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvInputStream the csv input stream
+     * @param offset the offset
+     * @param count the count
+     * @param columnTypeList the column type list
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final InputStream csvInputStream, final long offset, final long count, final List<? extends Type> columnTypeList)
             throws UncheckedIOException {
@@ -584,13 +863,15 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param csvInputStream
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param csvInputStream the csv input stream
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * 
-     * @return
+     * @return the data set
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final InputStream csvInputStream, final long offset, final long count,
@@ -600,11 +881,27 @@ public final class CSVUtil {
         return loadCSV(csvReader, offset, count, filter, columnTypeList);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvReader the csv reader
+     * @param columnTypeList the column type list
+     * @return the data set
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final Reader csvReader, final List<? extends Type> columnTypeList) {
         return loadCSV(csvReader, 0, Long.MAX_VALUE, columnTypeList);
     }
 
+    /**
+     * Load CSV.
+     *
+     * @param csvReader the csv reader
+     * @param offset the offset
+     * @param count the count
+     * @param columnTypeList the column type list
+     * @return the data set
+     */
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final Reader csvReader, long offset, long count, final List<? extends Type> columnTypeList) {
         return loadCSV(csvReader, offset, count, Fn.<String[]> alwaysTrue(), columnTypeList);
@@ -612,13 +909,16 @@ public final class CSVUtil {
 
     /**
      * Load the data from CSV.
-     * @param csvReader
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param csvReader the csv reader
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * 
-     * @return
+     * @return the data set
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final Reader csvReader, long offset, long count, final Try.Predicate<String[], E> filter,
@@ -682,11 +982,13 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS. Title will be added at the first line and columns will be quoted.
-     * 
-     * @param out
-     * @param conn
-     * @param querySQL
-     * @return
+     *
+     * @param out the out
+     * @param conn the conn
+     * @param querySQL the query SQL
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final File out, final Connection conn, final String querySQL) throws UncheckedSQLException, UncheckedIOException {
         return exportCSV(out, conn, querySQL, 0, Long.MAX_VALUE, true, true);
@@ -694,15 +996,17 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param conn
-     * @param querySQL
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param conn the conn
+     * @param querySQL the query SQL
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final File out, final Connection conn, final String querySQL, final long offset, final long count, final boolean writeTitle,
             final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
@@ -711,16 +1015,18 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param conn
-     * @param querySQL
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param conn the conn
+     * @param querySQL the query SQL
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final File out, final Connection conn, final String querySQL, final Collection<String> selectColumnNames, final long offset,
             final long count, final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
@@ -742,10 +1048,12 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS. Title will be added at the first line and columns will be quoted.
-     * 
-     * @param out
-     * @param stmt
-     * @return
+     *
+     * @param out the out
+     * @param stmt the stmt
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     @SuppressWarnings("unchecked")
     public static long exportCSV(final File out, final PreparedStatement stmt) throws UncheckedSQLException, UncheckedIOException {
@@ -754,14 +1062,16 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param stmt
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param stmt the stmt
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final File out, final PreparedStatement stmt, final long offset, final long count, final boolean writeTitle,
             final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
@@ -770,15 +1080,17 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param stmt
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param stmt the stmt
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final File out, final PreparedStatement stmt, final Collection<String> selectColumnNames, final long offset, final long count,
             final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
@@ -798,10 +1110,12 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS. Title will be added at the first line and columns will be quoted.
-     * 
-     * @param out
-     * @param rs
-     * @return
+     *
+     * @param out the out
+     * @param rs the rs
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final File out, final ResultSet rs) throws UncheckedSQLException, UncheckedIOException {
         return exportCSV(out, rs, 0, Long.MAX_VALUE, true, true);
@@ -809,14 +1123,16 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param rs
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final File out, final ResultSet rs, final long offset, final long count, final boolean writeTitle, final boolean quoted)
             throws UncheckedSQLException, UncheckedIOException {
@@ -824,15 +1140,18 @@ public final class CSVUtil {
     }
 
     /**
-     * 
-     * @param out
-     * @param rs
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     * Export CSV.
+     *
+     * @param out the out
+     * @param rs the rs
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final File out, final ResultSet rs, final Collection<String> selectColumnNames, final long offset, final long count,
             final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
@@ -859,10 +1178,12 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS. Title will be added at the first line and columns will be quoted.
-     * 
-     * @param out
-     * @param rs
-     * @return
+     *
+     * @param out the out
+     * @param rs the rs
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final OutputStream out, final ResultSet rs) throws UncheckedSQLException, UncheckedIOException {
         return exportCSV(out, rs, 0, Long.MAX_VALUE, true, true);
@@ -870,14 +1191,16 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param rs
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final OutputStream out, final ResultSet rs, final long offset, final long count, final boolean writeTitle,
             final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
@@ -886,15 +1209,17 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param rs
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param rs the rs
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final OutputStream out, final ResultSet rs, final Collection<String> selectColumnNames, final long offset, final long count,
             final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
@@ -915,10 +1240,12 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS. Title will be added at the first line and columns will be quoted.
-     * 
-     * @param out
-     * @param rs
-     * @return
+     *
+     * @param out the out
+     * @param rs the rs
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final Writer out, final ResultSet rs) throws UncheckedSQLException, UncheckedIOException {
         return exportCSV(out, rs, 0, Long.MAX_VALUE, true, true);
@@ -926,14 +1253,16 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param rs
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final Writer out, final ResultSet rs, final long offset, final long count, final boolean writeTitle, final boolean quoted)
             throws UncheckedSQLException, UncheckedIOException {
@@ -942,15 +1271,17 @@ public final class CSVUtil {
 
     /**
      * Exports the data from database to CVS.
-     * 
-     * @param out
-     * @param rs
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param writeTitle
-     * @param quoted
-     * @return
+     *
+     * @param out the out
+     * @param rs the rs
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param writeTitle the write title
+     * @param quoted the quoted
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long exportCSV(final Writer out, final ResultSet rs, final Collection<String> selectColumnNames, long offset, final long count,
             final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
@@ -1068,12 +1399,39 @@ public final class CSVUtil {
         return result;
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param columnTypeList the column type list
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final File file, final Connection conn, final String insertSQL, final List<? extends Type> columnTypeList)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, true, conn, insertSQL, 200, 0, columnTypeList);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param skipTitle the skip title
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeList the column type list
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static long importCSV(final File file, final long offset, final long count, final boolean skipTitle, final Connection conn, final String insertSQL,
             final int batchSize, final int batchInterval, final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException {
@@ -1082,18 +1440,22 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param file
-     * @param offset
-     * @param count
-     * @param skipTitle
-     * @param filter
-     * @param conn
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param skipTitle the skip title
+     * @param filter the filter
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * @return
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final boolean skipTitle,
@@ -1112,12 +1474,37 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param stmt the stmt
+     * @param columnTypeList the column type list
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final File file, final PreparedStatement stmt, final List<? extends Type> columnTypeList)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, true, stmt, 200, 0, columnTypeList);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param skipTitle the skip title
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeList the column type list
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static long importCSV(final File file, long offset, final long count, final boolean skipTitle, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException {
@@ -1126,17 +1513,21 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param file
-     * @param offset
-     * @param count
-     * @param skipTitle
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param skipTitle the skip title
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * @return
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final boolean skipTitle,
@@ -1155,12 +1546,37 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param is the is
+     * @param stmt the stmt
+     * @param columnTypeList the column type list
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final InputStream is, final PreparedStatement stmt, final List<? extends Type> columnTypeList)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(is, 0, Long.MAX_VALUE, true, stmt, 200, 0, columnTypeList);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param is the is
+     * @param offset the offset
+     * @param count the count
+     * @param skipTitle the skip title
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeList the column type list
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static long importCSV(final InputStream is, long offset, final long count, final boolean skipTitle, final PreparedStatement stmt,
             final int batchSize, final int batchInterval, final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException {
@@ -1169,17 +1585,21 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param is
-     * @param offset
-     * @param count
-     * @param skipTitle
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param is the is
+     * @param offset the offset
+     * @param count the count
+     * @param skipTitle the skip title
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * @return
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final InputStream is, final long offset, final long count, final boolean skipTitle,
@@ -1190,12 +1610,37 @@ public final class CSVUtil {
         return importCSV(reader, offset, count, skipTitle, filter, stmt, batchSize, batchInterval, columnTypeList);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param reader the reader
+     * @param stmt the stmt
+     * @param columnTypeList the column type list
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final Reader reader, final PreparedStatement stmt, final List<? extends Type> columnTypeList)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(reader, 0, Long.MAX_VALUE, true, stmt, 200, 0, columnTypeList);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param reader the reader
+     * @param offset the offset
+     * @param count the count
+     * @param skipTitle the skip title
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeList the column type list
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static long importCSV(final Reader reader, long offset, final long count, final boolean skipTitle, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException {
@@ -1204,17 +1649,21 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database. 
-     * 
-     * @param reader
-     * @param offset
-     * @param count
-     * @param skipTitle
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param reader the reader
+     * @param offset the offset
+     * @param count the count
+     * @param skipTitle the skip title
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
      * @param columnTypeList set the column type to null to skip the column in CSV.
-     * @return
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final boolean skipTitle,
@@ -1288,12 +1737,14 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param file
-     * @param conn
+     *
+     * @param file the file
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the CSV file.
-     * @param columnTypeMap
-     * @return
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final File file, final Connection conn, final String insertSQL, final Map<String, ? extends Type> columnTypeMap)
@@ -1301,6 +1752,21 @@ public final class CSVUtil {
         return importCSV(file, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, columnTypeMap);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final File file, final long offset, final long count, final Connection conn, final String insertSQL, final int batchSize,
             final int batchInterval, final Map<String, ? extends Type> columnTypeMap) throws UncheckedSQLException, UncheckedIOException {
@@ -1308,17 +1774,22 @@ public final class CSVUtil {
     }
 
     /**
-     * 
-     * @param file
-     * @param offset
-     * @param count
-     * @param filter
-     * @param conn
+     * Import CSV.
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
-     * @param columnTypeMap
-     * @return
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Try.Predicate<String[], E> filter,
@@ -1337,12 +1808,36 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param stmt the stmt
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final File file, final PreparedStatement stmt, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, stmt, 200, 0, columnTypeMap);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final File file, final long offset, final long count, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final Map<String, ? extends Type> columnTypeMap) throws UncheckedSQLException, UncheckedIOException {
@@ -1351,16 +1846,20 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param file
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
-     * @param columnTypeMap
-     * @return
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Try.Predicate<String[], E> filter,
@@ -1379,12 +1878,36 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param is the is
+     * @param stmt the stmt
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final InputStream is, final PreparedStatement stmt, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(is, 0, Long.MAX_VALUE, stmt, 200, 0, columnTypeMap);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param is the is
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final InputStream is, final long offset, final long count, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final Map<String, ? extends Type> columnTypeMap) throws UncheckedSQLException, UncheckedIOException {
@@ -1393,16 +1916,20 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param is
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param is the is
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
-     * @param columnTypeMap
-     * @return
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final InputStream is, long offset, final long count, final Try.Predicate<String[], E> filter,
@@ -1412,12 +1939,36 @@ public final class CSVUtil {
         return importCSV(reader, offset, count, filter, stmt, batchSize, batchInterval, columnTypeMap);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param reader the reader
+     * @param stmt the stmt
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings("rawtypes")
     public static long importCSV(final Reader reader, final PreparedStatement stmt, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(reader, 0, Long.MAX_VALUE, stmt, 200, 0, columnTypeMap);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param reader the reader
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static long importCSV(final Reader reader, long offset, final long count, final PreparedStatement stmt, final int batchSize, final int batchInterval,
             final Map<String, ? extends Type> columnTypeMap) throws UncheckedSQLException, UncheckedIOException {
@@ -1426,16 +1977,20 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database. 
-     * 
-     * @param reader
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param reader the reader
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
-     * @param columnTypeMap
-     * @return
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final Try.Predicate<String[], E> filter,
@@ -1531,18 +2086,35 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param file
-     * @param conn
+     *
+     * @param file the file
+     * @param conn the conn
      * @param insertSQL the column order in the sql should be consistent with the column order in the CSV file.
-     * @param stmtSetter
-     * @return
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final File file, final Connection conn, final String insertSQL,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super String[]> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, stmtSetter);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static long importCSV(final File file, final long offset, final long count, final Connection conn, final String insertSQL, final int batchSize,
             final int batchInterval, final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super String[]> stmtSetter)
             throws UncheckedSQLException, UncheckedIOException {
@@ -1550,17 +2122,22 @@ public final class CSVUtil {
     }
 
     /**
-     * 
-     * @param file
-     * @param offset
-     * @param count
-     * @param filter
-     * @param conn
+     * Import CSV.
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param conn the conn
      * @param insertSQL the column order in the sql should be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter
-     * @return
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Try.Predicate<String[], E> filter,
             final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
@@ -1578,11 +2155,35 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param stmt the stmt
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static long importCSV(final File file, final PreparedStatement stmt,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super String[]> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static long importCSV(final File file, final long offset, final long count, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super String[]> stmtSetter)
             throws UncheckedSQLException, UncheckedIOException {
@@ -1591,16 +2192,20 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param file
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql should be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter
-     * @return
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Try.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
@@ -1618,11 +2223,35 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param is the is
+     * @param stmt the stmt
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static long importCSV(final InputStream is, final PreparedStatement stmt,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super String[]> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(is, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param is the is
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static long importCSV(final InputStream is, final long offset, final long count, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super String[]> stmtSetter)
             throws UncheckedSQLException, UncheckedIOException {
@@ -1631,16 +2260,20 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database.
-     * 
-     * @param is
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param is the is
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql should be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter
-     * @return
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     public static <E extends Exception> long importCSV(final InputStream is, long offset, final long count, final Try.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
@@ -1649,11 +2282,35 @@ public final class CSVUtil {
         return importCSV(reader, offset, count, filter, stmt, batchSize, batchInterval, stmtSetter);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param reader the reader
+     * @param stmt the stmt
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static long importCSV(final Reader reader, final PreparedStatement stmt,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super String[]> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(reader, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
+    /**
+     * Import CSV.
+     *
+     * @param reader the reader
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @SuppressWarnings({ "unchecked" })
     public static long importCSV(final Reader reader, long offset, final long count, final PreparedStatement stmt, final int batchSize, final int batchInterval,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super String[]> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
@@ -1662,16 +2319,20 @@ public final class CSVUtil {
 
     /**
      * Imports the data from CSV to database. 
-     * 
-     * @param reader
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param reader the reader
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql should be consistent with the column order in the CSV file.
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter
-     * @return
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws E the e
      */
     @SuppressWarnings({ "unchecked" })
     public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final Try.Predicate<String[], E> filter,

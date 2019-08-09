@@ -14,11 +14,12 @@
 
 package com.landawn.abacus.exception;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class InvalidTransactionIdException.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class InvalidTransactionIdException extends AbacusException {
     /**
@@ -35,8 +36,8 @@ public class InvalidTransactionIdException extends AbacusException {
 
     /**
      * Constructor for InvalidTransactionIdException.
-     * 
-     * @param message
+     *
+     * @param message the message
      */
     public InvalidTransactionIdException(String message) {
         super(message);
@@ -44,9 +45,9 @@ public class InvalidTransactionIdException extends AbacusException {
 
     /**
      * Constructor for InvalidTransactionIdException.
-     * 
-     * @param message
-     * @param cause
+     *
+     * @param message the message
+     * @param cause the cause
      */
     public InvalidTransactionIdException(String message, Throwable cause) {
         super(message, cause);
@@ -54,8 +55,8 @@ public class InvalidTransactionIdException extends AbacusException {
 
     /**
      * Constructor for InvalidTransactionIdException.
-     * 
-     * @param cause
+     *
+     * @param cause the cause
      */
     public InvalidTransactionIdException(Throwable cause) {
         super(cause);

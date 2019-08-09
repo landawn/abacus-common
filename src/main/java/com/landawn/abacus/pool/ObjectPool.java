@@ -16,46 +16,53 @@ package com.landawn.abacus.pool;
 
 import java.util.concurrent.TimeUnit;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface ObjectPool.
+ *
  * @author Haiyang Li
+ * @param <E> the element type
+ * @since 0.8
  */
 public interface ObjectPool<E extends Poolable> extends Pool {
+
     /**
-     * 
-     * @param e
-     * @return
+     * Adds the.
+     *
+     * @param e the e
+     * @return true, if successful
      */
     boolean add(E e);
 
     /**
-     * 
-     * @param e
-     * @param autoDestroyOnFailedToAdd
-     * @return
+     * Adds the.
+     *
+     * @param e the e
+     * @param autoDestroyOnFailedToAdd the auto destroy on failed to add
+     * @return true, if successful
      */
     boolean add(E e, boolean autoDestroyOnFailedToAdd);
 
     /**
-     * 
-     * @param e
-     * @param timeout
-     * @param unit
-     * @return
-     * @throws InterruptedException
+     * Adds the.
+     *
+     * @param e the e
+     * @param timeout the timeout
+     * @param unit the unit
+     * @return true, if successful
+     * @throws InterruptedException the interrupted exception
      */
     boolean add(E e, long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
-     * 
-     * @param e
-     * @param timeout
-     * @param unit
-     * @param autoDestroyOnFailedToAdd
-     * @return
-     * @throws InterruptedException
+     * Adds the.
+     *
+     * @param e the e
+     * @param timeout the timeout
+     * @param unit the unit
+     * @param autoDestroyOnFailedToAdd the auto destroy on failed to add
+     * @return true, if successful
+     * @throws InterruptedException the interrupted exception
      */
     boolean add(E e, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
 
@@ -67,23 +74,36 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     E take();
 
     /**
-     * 
-     * @param timeout
-     * @param unit
-     * @return
-     * @throws InterruptedException
+     * Take.
+     *
+     * @param timeout the timeout
+     * @param unit the unit
+     * @return the e
+     * @throws InterruptedException the interrupted exception
      */
     E take(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
-     * Method contains
-     * 
-     * @param e
+     * Method contains.
+     *
+     * @param e the e
      * @return boolean
      */
     boolean contains(E e);
 
+    /**
+     * The Interface MemoryMeasure.
+     *
+     * @param <E> the element type
+     */
     public static interface MemoryMeasure<E> {
+
+        /**
+         * Size of.
+         *
+         * @param e the e
+         * @return the long
+         */
         long sizeOf(E e);
     }
 }

@@ -23,31 +23,71 @@ import com.landawn.abacus.pool.KeyedObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
 import com.landawn.abacus.pool.PoolableWrapper;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class NamedSQL.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class NamedSQL {
+
+    /** The Constant EVICT_TIME. */
     private static final int EVICT_TIME = 60 * 1000;
+
+    /** The Constant LIVE_TIME. */
     private static final int LIVE_TIME = 24 * 60 * 60 * 1000;
+
+    /** The Constant MAX_IDLE_TIME. */
     private static final int MAX_IDLE_TIME = 24 * 60 * 60 * 1000;
+
+    /** The Constant namedSQLPrefixSet. */
     private static final Set<String> namedSQLPrefixSet = N.asSet(WD.INSERT, WD.SELECT, WD.UPDATE, WD.DELETE, WD.WITH);
+
+    /** The Constant factor. */
     private static final int factor = Math.min(Math.max(1, IOUtil.MAX_MEMORY_IN_MB / 1024), 8);
+
+    /** The Constant pool. */
     private static final KeyedObjectPool<String, PoolableWrapper<NamedSQL>> pool = PoolFactory.createKeyedObjectPool(1000 * factor, EVICT_TIME);
+
+    /** The Constant PREFIX_OF_NAMED_PARAMETER. */
     private static final String PREFIX_OF_NAMED_PARAMETER = ":";
+
+    /** The Constant LEFT_OF_IBATIS_NAMED_PARAMETER. */
     private static final String LEFT_OF_IBATIS_NAMED_PARAMETER = "#{";
+
+    /** The Constant RIGHT_OF_IBATIS_NAMED_PARAMETER. */
     private static final String RIGHT_OF_IBATIS_NAMED_PARAMETER = "}";
+
+    /** The Constant PREFIX_OF_COUCHBASE_NAMED_PARAMETER. */
     private static final String PREFIX_OF_COUCHBASE_NAMED_PARAMETER = "$";
+
+    /** The named SQL. */
     private final String namedSQL;
+
+    /** The pure SQL. */
     private final String pureSQL;
+
+    /** The couchbase pure SQL. */
     private String couchbasePureSQL;
+
+    /** The named parameters. */
     private final List<String> namedParameters;
+
+    /** The couchbase named parameters. */
     private List<String> couchbaseNamedParameters;
+
+    /** The parameter count. */
     private int parameterCount;
+
+    /** The couchbase parameter count. */
     private int couchbaseParameterCount;
 
+    /**
+     * Instantiates a new named SQL.
+     *
+     * @param sql the sql
+     */
     @SuppressWarnings({ "unchecked" })
     private NamedSQL(String sql) {
         this.namedSQL = sql.trim();
@@ -98,6 +138,12 @@ public final class NamedSQL {
         }
     }
 
+    /**
+     * Parses the.
+     *
+     * @param sql the sql
+     * @return the named SQL
+     */
     public static NamedSQL parse(String sql) {
         NamedSQL result = null;
         PoolableWrapper<NamedSQL> w = pool.get(sql);
@@ -114,14 +160,30 @@ public final class NamedSQL {
         return result;
     }
 
+    /**
+     * Gets the named SQL.
+     *
+     * @return the named SQL
+     */
     public String getNamedSQL() {
         return namedSQL;
     }
 
+    /**
+     * Gets the parameterized SQL.
+     *
+     * @return the parameterized SQL
+     */
     public String getParameterizedSQL() {
         return pureSQL;
     }
 
+    /**
+     * Gets the parameterized SQL.
+     *
+     * @param isForCouchbase the is for couchbase
+     * @return the parameterized SQL
+     */
     public String getParameterizedSQL(boolean isForCouchbase) {
         if (isForCouchbase) {
             if (N.isNullOrEmpty(couchbasePureSQL)) {
@@ -134,10 +196,21 @@ public final class NamedSQL {
         }
     }
 
+    /**
+     * Gets the named parameters.
+     *
+     * @return the named parameters
+     */
     public List<String> getNamedParameters() {
         return namedParameters;
     }
 
+    /**
+     * Gets the named parameters.
+     *
+     * @param isForCouchbase the is for couchbase
+     * @return the named parameters
+     */
     public List<String> getNamedParameters(boolean isForCouchbase) {
         if (isForCouchbase) {
             if (N.isNullOrEmpty(couchbasePureSQL)) {
@@ -150,10 +223,21 @@ public final class NamedSQL {
         }
     }
 
+    /**
+     * Gets the parameter count.
+     *
+     * @return the parameter count
+     */
     public int getParameterCount() {
         return parameterCount;
     }
 
+    /**
+     * Gets the parameter count.
+     *
+     * @param isForCouchbase the is for couchbase
+     * @return the parameter count
+     */
     public int getParameterCount(boolean isForCouchbase) {
         if (isForCouchbase) {
             if (N.isNullOrEmpty(couchbasePureSQL)) {
@@ -166,6 +250,9 @@ public final class NamedSQL {
         }
     }
 
+    /**
+     * Parses the for couchbase.
+     */
     private void parseForCouchbase() {
         List<String> couchbaseNamedParameterList = new ArrayList<>();
 
@@ -237,6 +324,11 @@ public final class NamedSQL {
         }
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -246,6 +338,12 @@ public final class NamedSQL {
         return result;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -261,6 +359,11 @@ public final class NamedSQL {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "[NamedSQL] " + namedSQL + " [PureSQL] " + pureSQL;

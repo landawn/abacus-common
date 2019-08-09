@@ -33,29 +33,54 @@ import com.landawn.abacus.util.Fn.FN;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AsyncExecutor.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class AsyncExecutor {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(AsyncExecutor.class);
 
+    /** The Constant DEFAULT_CORE_POOL_SIZE. */
     private static final int DEFAULT_CORE_POOL_SIZE = Math.max(8, IOUtil.CPU_CORES);
+
+    /** The Constant DEFAULT_MAX_THREAD_POOL_SIZE. */
     private static final int DEFAULT_MAX_THREAD_POOL_SIZE = Math.max(16, IOUtil.CPU_CORES);
 
+    /** The core thread pool size. */
     private final int coreThreadPoolSize;
+
+    /** The max thread pool size. */
     private final int maxThreadPoolSize;
+
+    /** The keep alive time. */
     private final long keepAliveTime;
+
+    /** The unit. */
     private final TimeUnit unit;
 
+    /** The executor. */
     private volatile Executor executor;
 
+    /**
+     * Instantiates a new async executor.
+     */
     public AsyncExecutor() {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
     }
 
+    /**
+     * Instantiates a new async executor.
+     *
+     * @param coreThreadPoolSize the core thread pool size
+     * @param maxThreadPoolSize the max thread pool size
+     * @param keepAliveTime the keep alive time
+     * @param unit the unit
+     */
     public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
         N.checkArgNotNegative(coreThreadPoolSize, "coreThreadPoolSize");
         N.checkArgNotNegative(maxThreadPoolSize, "maxThreadPoolSize");
@@ -92,8 +117,9 @@ public class AsyncExecutor {
     }
 
     /**
-     * 
-     * @param asyncExecutor
+     * Instantiates a new async executor.
+     *
+     * @param executor the executor
      */
     public AsyncExecutor(final Executor executor) {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
@@ -101,10 +127,22 @@ public class AsyncExecutor {
         this.executor = executor;
     }
 
+    /**
+     * Execute.
+     *
+     * @param command the command
+     * @return the continuable future
+     */
     public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> command) {
         return execute(new FutureTask<Void>(FN.toCallable(command)));
     }
 
+    /**
+     * Execute.
+     *
+     * @param commands the commands
+     * @return the list
+     */
     @SafeVarargs
     public final List<ContinuableFuture<Void>> execute(final Try.Runnable<? extends Exception>... commands) {
         if (N.isNullOrEmpty(commands)) {
@@ -120,6 +158,12 @@ public class AsyncExecutor {
         return results;
     }
 
+    /**
+     * Execute.
+     *
+     * @param commands the commands
+     * @return the list
+     */
     public List<ContinuableFuture<Void>> execute(final List<? extends Try.Runnable<? extends Exception>> commands) {
         if (N.isNullOrEmpty(commands)) {
             return new ArrayList<>();
@@ -134,10 +178,24 @@ public class AsyncExecutor {
         return results;
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param command the command
+     * @return the continuable future
+     */
     public <T> ContinuableFuture<T> execute(final Callable<T> command) {
         return execute(new FutureTask<>(command));
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param commands the commands
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<ContinuableFuture<T>> execute(final Callable<T>... commands) {
         if (N.isNullOrEmpty(commands)) {
@@ -153,6 +211,13 @@ public class AsyncExecutor {
         return results;
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param commands the commands
+     * @return the list
+     */
     public <T> List<ContinuableFuture<T>> execute(final Collection<? extends Callable<T>> commands) {
         if (N.isNullOrEmpty(commands)) {
             return new ArrayList<>();
@@ -167,6 +232,15 @@ public class AsyncExecutor {
         return results;
     }
 
+    /**
+     * Execute.
+     *
+     * @param action the action
+     * @param retryTimes the retry times
+     * @param retryInterval the retry interval
+     * @param retryCondition the retry condition
+     * @return the continuable future
+     */
     public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> action, final int retryTimes, final long retryInterval,
             final Predicate<? super Exception> retryCondition) {
         return execute(new Callable<Void>() {
@@ -178,6 +252,16 @@ public class AsyncExecutor {
         });
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param action the action
+     * @param retryTimes the retry times
+     * @param retryInterval the retry interval
+     * @param retryCondition the retry condition
+     * @return the continuable future
+     */
     public <T> ContinuableFuture<T> execute(final Callable<T> action, final int retryTimes, final long retryInterval,
             final BiPredicate<? super T, ? super Exception> retryCondition) {
         return execute(new Callable<T>() {
@@ -189,6 +273,13 @@ public class AsyncExecutor {
         });
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param futureTask the future task
+     * @return the continuable future
+     */
     private <T> ContinuableFuture<T> execute(final FutureTask<T> futureTask) {
         final Executor executor = getExecutor();
 
@@ -197,6 +288,11 @@ public class AsyncExecutor {
         return new ContinuableFuture<>(futureTask, null, executor);
     }
 
+    /**
+     * Gets the executor.
+     *
+     * @return the executor
+     */
     private Executor getExecutor() {
         if (executor == null) {
             synchronized (this) {

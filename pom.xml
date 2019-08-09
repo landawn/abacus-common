@@ -345,7 +345,16 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<doclint>none</doclint>
+					<sourceFileExcludes>
+						<exclude>/com/landawn/abacus/core/**/*.java</exclude>
+						<exclude>/com/landawn/abacus/dataSource/**/*.java</exclude>
+						<exclude>/com/landawn/abacus/lock/**/*.java</exclude>
+						<exclude>/com/landawn/abacus/type/**/*.java</exclude>
+						<exclude>/com/landawn/abacus/logging/**/*.java</exclude>
+					</sourceFileExcludes>
+					<!--
 					<excludePackageNames>com.landawn.abacus.core:com.landawn.abacus.dataSource:com.landawn.abacus.lock:com.landawn.abacus.type:com.landawn.abacus.logging</excludePackageNames>
+					-->
 				</configuration>
 
 				<executions>

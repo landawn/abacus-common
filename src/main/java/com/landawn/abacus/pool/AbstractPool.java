@@ -27,19 +27,28 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.MoreExecutors;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbstractPool.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class AbstractPool implements Pool {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7780250223658416202L;
 
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(AbstractPool.class);
+
+    /** The Constant DEFAULT_EVICT_DELAY. */
     static final long DEFAULT_EVICT_DELAY = 3000;
+
+    /** The Constant DEFAULT_BALANCE_FACTOR. */
     static final float DEFAULT_BALANCE_FACTOR = 0.2f;
 
+    /** The Constant scheduledExecutor. */
     static final ScheduledExecutorService scheduledExecutor;
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(64);
@@ -49,20 +58,51 @@ public abstract class AbstractPool implements Pool {
         scheduledExecutor = MoreExecutors.getExitingScheduledExecutorService(executor);
     }
 
+    /** The put count. */
     final AtomicLong putCount = new AtomicLong();
+
+    /** The hit count. */
     final AtomicLong hitCount = new AtomicLong();
+
+    /** The miss count. */
     final AtomicLong missCount = new AtomicLong();
+
+    /** The eviction count. */
     final AtomicLong evictionCount = new AtomicLong();
 
+    /** The lock. */
     final ReentrantLock lock = new ReentrantLock();
+
+    /** The not empty. */
     final Condition notEmpty = lock.newCondition();
+
+    /** The not full. */
     final Condition notFull = lock.newCondition();
+
+    /** The capacity. */
     final int capacity;
+
+    /** The eviction policy. */
     final EvictionPolicy evictionPolicy;
+
+    /** The auto balance. */
     final boolean autoBalance;
+
+    /** The balance factor. */
     final float balanceFactor;
+
+    /** The is closed. */
     boolean isClosed = false;
 
+    /**
+     * Instantiates a new abstract pool.
+     *
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
+     * @param evictionPolicy the eviction policy
+     * @param autoBalance the auto balance
+     * @param balanceFactor the balance factor
+     */
     protected AbstractPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
         if (capacity < 0 || evictDelay < 0 || balanceFactor < 0) {
             throw new IllegalArgumentException(
@@ -90,57 +130,106 @@ public abstract class AbstractPool implements Pool {
         });
     }
 
+    /**
+     * Lock.
+     */
     @Override
     public void lock() {
         lock.lock();
     }
 
+    /**
+     * Unlock.
+     */
     @Override
     public void unlock() {
         lock.unlock();
     }
 
+    /**
+     * Gets the capacity.
+     *
+     * @return the capacity
+     */
     @Override
     public int getCapacity() {
         return capacity;
     }
 
+    /**
+     * Put count.
+     *
+     * @return the long
+     */
     @Override
     public long putCount() {
         return putCount.get();
     }
 
+    /**
+     * Hit count.
+     *
+     * @return the long
+     */
     @Override
     public long hitCount() {
         return hitCount.get();
     }
 
+    /**
+     * Miss count.
+     *
+     * @return the long
+     */
     @Override
     public long missCount() {
         return missCount.get();
     }
 
+    /**
+     * Eviction count.
+     *
+     * @return the long
+     */
     @Override
     public long evictionCount() {
         return evictionCount.get();
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     @Override
     public boolean isEmpty() {
         return size() == 0;
     }
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     @Override
     public boolean isClosed() {
         return isClosed;
     }
 
+    /**
+     * Assert not closed.
+     */
     protected void assertNotClosed() {
         if (isClosed) {
             throw new AbacusException(ClassUtil.getCanonicalClassName(getClass()) + " has been closed");
         }
     }
 
+    /**
+     * Finalize.
+     *
+     * @throws Throwable the throwable
+     */
     @Override
     protected void finalize() throws Throwable {
         super.finalize();

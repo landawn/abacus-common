@@ -17,37 +17,71 @@ package com.landawn.abacus.util;
 import java.util.AbstractMap;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.9
- * 
+ * The Class ImmutableEntry.
+ *
  * @author Haiyang Li
+ * @param <K> the key type
+ * @param <V> the value type
+ * @since 0.9
  */
 public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V> implements Map.Entry<K, V> {
 
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7667037689002186862L;
 
+    /**
+     * Instantiates a new immutable entry.
+     *
+     * @param key the key
+     * @param value the value
+     */
     public ImmutableEntry(K key, V value) {
         super(key, value);
     }
 
+    /**
+     * Instantiates a new immutable entry.
+     *
+     * @param entry the entry
+     */
     public ImmutableEntry(Map.Entry<? extends K, ? extends V> entry) {
         super(entry);
     }
 
+    /**
+     * Of.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param key the key
+     * @param value the value
+     * @return the immutable entry
+     */
     public static <K, V> ImmutableEntry<K, V> of(K key, V value) {
         return new ImmutableEntry<>(key, value);
     }
 
+    /**
+     * From.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param entry the entry
+     * @return the immutable entry
+     */
     public static <K, V> ImmutableEntry<K, V> from(Map.Entry<? extends K, ? extends V> entry) {
         return new ImmutableEntry<K, V>(entry.getKey(), entry.getValue());
     }
 
     /**
      * Always throw UnsupportedOperationException.
-     * 
-     * @deprecated
-     * @throws UnsupportedOperationException
+     *
+     * @param v the v
+     * @return the v
+     * @throws UnsupportedOperationException the unsupported operation exception
+     * @deprecated 
      */
     @Deprecated
     @Override

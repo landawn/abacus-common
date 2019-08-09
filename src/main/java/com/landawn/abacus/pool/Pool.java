@@ -16,37 +16,93 @@ package com.landawn.abacus.pool;
 
 import java.io.Serializable;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface Pool.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface Pool extends Serializable {
+
+    /**
+     * Lock.
+     */
     void lock();
 
+    /**
+     * Unlock.
+     */
     void unlock();
 
+    /**
+     * Gets the capacity.
+     *
+     * @return the capacity
+     */
     int getCapacity();
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     int size();
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     boolean isEmpty();
 
+    /**
+     * Vacate.
+     */
     void vacate();
 
+    /**
+     * Clear.
+     */
     void clear();
 
+    /**
+     * Close.
+     */
     void close();
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     boolean isClosed();
 
+    /**
+     * Put count.
+     *
+     * @return the long
+     */
     long putCount();
 
+    /**
+     * Hit count.
+     *
+     * @return the long
+     */
     long hitCount();
 
+    /**
+     * Miss count.
+     *
+     * @return the long
+     */
     long missCount();
 
-    /** Returns the number of values that have been evicted. */
+    /**
+     *  Returns the number of values that have been evicted.
+     *
+     * @return the long
+     */
     long evictionCount();
 }

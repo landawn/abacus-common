@@ -26,13 +26,17 @@ import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.9
- * 
+ * The Class ObjIterator.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.9
  */
 public abstract class ObjIterator<T> extends ImmutableIterator<T> {
+
+    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ObjIterator EMPTY = new ObjIterator() {
         @Override
@@ -46,10 +50,23 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         }
     };
 
+    /**
+     * Empty.
+     *
+     * @param <T> the generic type
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<T> empty() {
         return EMPTY;
     }
 
+    /**
+     * Just.
+     *
+     * @param <T> the generic type
+     * @param val the val
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<T> just(final T val) {
         return new ObjIterator<T>() {
             private boolean done = false;
@@ -72,11 +89,27 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @return the obj iterator
+     */
     @SafeVarargs
     public static <T> ObjIterator<T> of(final T... a) {
         return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<T> of(final T[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -119,6 +152,13 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<T> of(final Iterator<T> iter) {
         if (iter == null) {
             return empty();
@@ -139,19 +179,34 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param iterable the iterable
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<T> of(final Collection<T> iterable) {
         return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param iterable the iterable
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<T> of(final Iterable<T> iterable) {
         return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
     }
 
     /**
      * Lazy evaluation.
-     * 
-     * @param iteratorSupplier
-     * @return
+     *
+     * @param <T> the generic type
+     * @param iteratorSupplier the iterator supplier
+     * @return the obj iterator
      */
     public static <T> ObjIterator<T> of(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -189,9 +244,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param arraySupplier
-     * @return
+     *
+     * @param <T> the generic type
+     * @param arraySupplier the array supplier
+     * @return the obj iterator
      */
     public static <T> ObjIterator<T> oF(final Supplier<T[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -236,9 +292,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
     /**
      * Returns an infinite {@code ObjIterator}.
-     * 
-     * @param supplier
-     * @return
+     *
+     * @param <T> the generic type
+     * @param supplier the supplier
+     * @return the obj iterator
      */
     public static <T> ObjIterator<T> generate(final Supplier<T> supplier) {
         N.checkArgNotNull(supplier);
@@ -257,10 +314,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
-     * @param hasNext
-     * @param supplier
-     * @return
+     * Generate.
+     *
+     * @param <T> the generic type
+     * @param hasNext the has next
+     * @param supplier the supplier
+     * @return the obj iterator
      */
     public static <T> ObjIterator<T> generate(final BooleanSupplier hasNext, final Supplier<T> supplier) {
         N.checkArgNotNull(hasNext);
@@ -283,14 +342,31 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    /**
+     * To array.
+     *
+     * @return the object[]
+     */
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
 
+    /**
+     * To array.
+     *
+     * @param <A> the generic type
+     * @param a the a
+     * @return the a[]
+     */
     public <A> A[] toArray(A[] a) {
         return toList().toArray(a);
     }
 
+    /**
+     * To list.
+     *
+     * @return the list
+     */
     public List<T> toList() {
         final List<T> list = new ArrayList<>();
 
@@ -301,10 +377,22 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         return list;
     }
 
+    /**
+     * Stream.
+     *
+     * @return the stream
+     */
     public Stream<T> stream() {
         return Stream.of(this);
     }
 
+    /**
+     * Foreach remaining.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void foreachRemaining(Try.Consumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 

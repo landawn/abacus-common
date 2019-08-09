@@ -28,20 +28,37 @@ import redis.clients.jedis.BinaryShardedJedis;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class JRedis.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public class JRedis<T> extends AbstractDistributedCacheClient<T> {
+
+    /** The Constant kryoParser. */
     private static final KryoParser kryoParser = ParserFactory.createKryoParser();
+
+    /** The jedis. */
     private final BinaryShardedJedis jedis;
 
+    /**
+     * Instantiates a new j redis.
+     *
+     * @param serverUrl the server url
+     */
     public JRedis(String serverUrl) {
         this(serverUrl, DEFAULT_TIMEOUT);
     }
 
+    /**
+     * Instantiates a new j redis.
+     *
+     * @param serverUrl the server url
+     * @param timeout the timeout
+     */
     public JRedis(final String serverUrl, final long timeout) {
         super(serverUrl);
 
@@ -56,11 +73,25 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
         jedis = new BinaryShardedJedis(jedisClusterNodes);
     }
 
+    /**
+     * Gets the.
+     *
+     * @param key the key
+     * @return the t
+     */
     @Override
     public T get(String key) {
         return decode(jedis.get(getKeyBytes(key)));
     }
 
+    /**
+     * Sets the.
+     *
+     * @param key the key
+     * @param obj the obj
+     * @param liveTime the live time
+     * @return true, if successful
+     */
     @Override
     public boolean set(String key, T obj, long liveTime) {
         jedis.setex(getKeyBytes(key), toSeconds(liveTime), encode(obj));
@@ -68,6 +99,12 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
         return true;
     }
 
+    /**
+     * Delete.
+     *
+     * @param key the key
+     * @return true, if successful
+     */
     @Override
     public boolean delete(String key) {
         jedis.del(getKeyBytes(key));
@@ -75,26 +112,55 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
         return true;
     }
 
+    /**
+     * Incr.
+     *
+     * @param key the key
+     * @return the long
+     */
     @Override
     public long incr(String key) {
         return jedis.incr(getKeyBytes(key));
     }
 
+    /**
+     * Incr.
+     *
+     * @param key the key
+     * @param deta the deta
+     * @return the long
+     */
     @Override
     public long incr(String key, int deta) {
         return jedis.incrBy(getKeyBytes(key), deta);
     }
 
+    /**
+     * Decr.
+     *
+     * @param key the key
+     * @return the long
+     */
     @Override
     public long decr(String key) {
         return jedis.decr(getKeyBytes(key));
     }
 
+    /**
+     * Decr.
+     *
+     * @param key the key
+     * @param deta the deta
+     * @return the long
+     */
     @Override
     public long decr(String key, int deta) {
         return jedis.decrBy(getKeyBytes(key), deta);
     }
 
+    /**
+     * Flush all.
+     */
     @Override
     public void flushAll() {
         final Collection<Jedis> allShards = jedis.getAllShards();
@@ -104,19 +170,40 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
         }
     }
 
+    /**
+     * Disconnect.
+     */
     @Override
     public void disconnect() {
         jedis.disconnect();
     }
 
+    /**
+     * Gets the key bytes.
+     *
+     * @param key the key
+     * @return the key bytes
+     */
     protected byte[] getKeyBytes(String key) {
         return key.getBytes();
     }
 
+    /**
+     * Encode.
+     *
+     * @param obj the obj
+     * @return the byte[]
+     */
     protected byte[] encode(Object obj) {
         return obj == null ? N.EMPTY_BYTE_ARRAY : kryoParser.encode(obj);
     }
 
+    /**
+     * Decode.
+     *
+     * @param bytes the bytes
+     * @return the t
+     */
     protected T decode(byte[] bytes) {
         return (T) (N.isNullOrEmpty(bytes) ? null : kryoParser.decode(bytes));
     }

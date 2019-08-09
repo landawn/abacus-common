@@ -21,52 +21,59 @@ import java.lang.annotation.Target;
 
 import com.landawn.abacus.util.ThreadMode;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface Subscribe.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Subscribe {
+
+    /**
+     * Thread mode.
+     *
+     * @return the thread mode
+     */
     ThreadMode threadMode() default ThreadMode.DEFAULT;
 
     /**
      * Only accept the events which have extract same class type as the method parameter if it's true.
      * Otherwise, accept all the events which can be assigned to the parameter type.
      * The precondition for both <code>true</code> and <code>false</code> is the event id has to match.
-     * 
-     * @return
+     *
+     * @return true, if successful
      */
     boolean strictEventType() default false;
 
     /**
      * If true, delivers the most recent sticky event (posted with
      * {@link EventBus#postSticky(Object)}) to this subscriber (if event available).
-     * 
-     * @return
+     *
+     * @return true, if successful
      */
     boolean sticky() default false;
 
     /**
      * Only subscribe the events which are posted with the specified event id.
-     * 
-     * @return
+     *
+     * @return the string
      */
     String eventId() default "";
 
     /**
      * The event will be ignored if the interval between this event and last event is less than the specified <code>interval</code>.
-     * 
-     * @return
+     *
+     * @return the long
      */
     long interval() default 0; // Unit is milliseconds.
 
     /**
      * Ignore next event if it's same as previous one.
-     * 
-     * @return
+     *
+     * @return true, if successful
      */
     boolean deduplicate() default false;
 }

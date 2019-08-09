@@ -19,35 +19,73 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class DistributedCache.
+ *
  * @author Haiyang Li
+ * @param <K> the key type
+ * @param <V> the value type
+ * @since 0.8
  */
 public class DistributedCache<K, V> extends AbstractCache<K, V> {
+
+    /** The Constant DEFAULT_MAX_FAILED_NUMBER. */
     protected static final int DEFAULT_MAX_FAILED_NUMBER = 100;
+
+    /** The Constant DEFAULT_RETRY_DELAY. */
     protected static final long DEFAULT_RETRY_DELAY = 1000;
 
+    /** The dcc. */
     // ...
     private final DistributedCacheClient<V> dcc;
+
+    /** The key prefix. */
     private final String keyPrefix;
+
+    /** The max failed num for retry. */
     private final int maxFailedNumForRetry;
+
+    /** The retry delay. */
     private final long retryDelay;
 
+    /** The failed counter. */
     // ...
     private final AtomicInteger failedCounter = new AtomicInteger();
+
+    /** The last failed time. */
     private volatile long lastFailedTime = 0;
+
+    /** The is closed. */
     private boolean isClosed = false;
 
+    /**
+     * Instantiates a new distributed cache.
+     *
+     * @param dcc the dcc
+     */
     protected DistributedCache(DistributedCacheClient<V> dcc) {
         this(dcc, N.EMPTY_STRING, DEFAULT_MAX_FAILED_NUMBER, DEFAULT_RETRY_DELAY);
     }
 
+    /**
+     * Instantiates a new distributed cache.
+     *
+     * @param dcc the dcc
+     * @param keyPrefix the key prefix
+     */
     protected DistributedCache(DistributedCacheClient<V> dcc, String keyPrefix) {
         this(dcc, keyPrefix, DEFAULT_MAX_FAILED_NUMBER, DEFAULT_RETRY_DELAY);
     }
 
+    /**
+     * Instantiates a new distributed cache.
+     *
+     * @param dcc the dcc
+     * @param keyPrefix the key prefix
+     * @param maxFailedNumForRetry the max failed num for retry
+     * @param retryDelay the retry delay
+     */
     protected DistributedCache(DistributedCacheClient<V> dcc, String keyPrefix, int maxFailedNumForRetry, long retryDelay) {
         this.keyPrefix = N.isNullOrEmpty(keyPrefix) ? N.EMPTY_STRING : keyPrefix;
         this.dcc = dcc;
@@ -55,6 +93,12 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
         this.retryDelay = retryDelay;
     }
 
+    /**
+     * Gets the t.
+     *
+     * @param k the k
+     * @return the t
+     */
     @Override
     public V gett(K k) {
         assertNotClosed();
@@ -82,6 +126,15 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
         return result;
     }
 
+    /**
+     * Put.
+     *
+     * @param k the k
+     * @param v the v
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @return true, if successful
+     */
     @Override
     public boolean put(K k, V v, long liveTime, long maxIdleTime) {
         assertNotClosed();
@@ -90,7 +143,9 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Always return {@code null}
+     * Always return {@code null}.
+     *
+     * @param k the k
      */
     @Override
     public void remove(K k) {
@@ -99,21 +154,40 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
         dcc.delete(generateKey(k));
     }
 
+    /**
+     * Contains key.
+     *
+     * @param k the k
+     * @return true, if successful
+     */
     @Override
     public boolean containsKey(K k) {
         return get(k) != null;
     }
 
+    /**
+     * Key set.
+     *
+     * @return the sets the
+     */
     @Override
     public Set<K> keySet() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         assertNotClosed();
@@ -121,6 +195,9 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
         dcc.flushAll();
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (isClosed()) {
@@ -132,15 +209,29 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
         isClosed = true;
     }
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     @Override
     public boolean isClosed() {
         return isClosed;
     }
 
+    /**
+     * Generate key.
+     *
+     * @param k the k
+     * @return the string
+     */
     protected String generateKey(K k) {
         return N.isNullOrEmpty(keyPrefix) ? N.base64Encode(N.stringOf(k).getBytes()) : (keyPrefix + N.base64Encode(N.stringOf(k).getBytes()));
     }
 
+    /**
+     * Assert not closed.
+     */
     protected void assertNotClosed() {
         if (isClosed) {
             throw new IllegalStateException("This object pool has been closed");

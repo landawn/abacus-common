@@ -21,13 +21,16 @@ import com.landawn.abacus.util.function.IntSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.IntStream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class IntIterator.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class IntIterator extends ImmutableIterator<Integer> {
+
+    /** The Constant EMPTY. */
     public static final IntIterator EMPTY = new IntIterator() {
         @Override
         public boolean hasNext() {
@@ -40,15 +43,34 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         }
     };
 
+    /**
+     * Empty.
+     *
+     * @return the int iterator
+     */
     public static IntIterator empty() {
         return EMPTY;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the int iterator
+     */
     @SafeVarargs
     public static IntIterator of(final int... a) {
         return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the int iterator
+     */
     public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -87,9 +109,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param iteratorSupplier
-     * @return
+     *
+     * @param iteratorSupplier the iterator supplier
+     * @return the int iterator
      */
     public static IntIterator of(final Supplier<? extends IntIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -127,9 +149,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param arraySupplier
-     * @return
+     *
+     * @param arraySupplier the array supplier
+     * @return the int iterator
      */
     public static IntIterator oF(final Supplier<int[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -174,9 +196,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Returns an infinite {@code IntIterator}.
-     * 
-     * @param supplier
-     * @return
+     *
+     * @param supplier the supplier
+     * @return the int iterator
      */
     public static IntIterator generate(final IntSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -195,10 +217,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
-     * @param hasNext
-     * @param supplier
-     * @return
+     * Generate.
+     *
+     * @param hasNext the has next
+     * @param supplier the supplier
+     * @return the int iterator
      */
     public static IntIterator generate(final BooleanSupplier hasNext, final IntSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -222,7 +245,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * 
+     * Next.
+     *
+     * @return the integer
      * @Deprecated use <code>nextInt()</code> instead.
      */
     @Deprecated
@@ -231,12 +256,27 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         return nextInt();
     }
 
+    /**
+     * Next int.
+     *
+     * @return the int
+     */
     public abstract int nextInt();
 
+    /**
+     * To array.
+     *
+     * @return the int[]
+     */
     public int[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * To list.
+     *
+     * @return the int list
+     */
     public IntList toList() {
         final IntList list = new IntList();
 
@@ -247,10 +287,22 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         return list;
     }
 
+    /**
+     * Stream.
+     *
+     * @return the int stream
+     */
     public IntStream stream() {
         return IntStream.of(this);
     }
 
+    /**
+     * Foreach remaining.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void foreachRemaining(Try.IntConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -259,6 +311,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         }
     }
 
+    /**
+     * For each remaining.
+     *
+     * @param action the action
+     */
     @Override
     @Deprecated
     public void forEachRemaining(java.util.function.Consumer<? super Integer> action) {

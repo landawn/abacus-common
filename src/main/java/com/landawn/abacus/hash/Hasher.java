@@ -18,6 +18,7 @@ import java.nio.charset.Charset;
 
 import com.landawn.abacus.util.function.BiConsumer;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -52,37 +53,104 @@ import com.landawn.abacus.util.function.BiConsumer;
  */
 public interface Hasher {
 
+    /**
+     * Put.
+     *
+     * @param b the b
+     * @return the hasher
+     */
     Hasher put(byte b);
 
+    /**
+     * Put.
+     *
+     * @param bytes the bytes
+     * @return the hasher
+     */
     Hasher put(byte[] bytes);
 
+    /**
+     * Put.
+     *
+     * @param bytes the bytes
+     * @param off the off
+     * @param len the len
+     * @return the hasher
+     */
     Hasher put(byte[] bytes, int off, int len);
 
+    /**
+     * Put.
+     *
+     * @param s the s
+     * @return the hasher
+     */
     Hasher put(short s);
 
+    /**
+     * Put.
+     *
+     * @param i the i
+     * @return the hasher
+     */
     Hasher put(int i);
 
+    /**
+     * Put.
+     *
+     * @param l the l
+     * @return the hasher
+     */
     Hasher put(long l);
 
     /**
      * Equivalent to {@code putInt(Float.floatToRawIntBits(f))}.
+     *
+     * @param f the f
+     * @return the hasher
      */
     Hasher put(float f);
 
     /**
      * Equivalent to {@code putLong(Double.doubleToRawLongBits(d))}.
+     *
+     * @param d the d
+     * @return the hasher
      */
     Hasher put(double d);
 
     /**
      * Equivalent to {@code putByte(b ? (byte) 1 : (byte) 0)}.
+     *
+     * @param b the b
+     * @return the hasher
      */
     Hasher put(boolean b);
 
+    /**
+     * Put.
+     *
+     * @param c the c
+     * @return the hasher
+     */
     Hasher put(char c);
 
+    /**
+     * Put.
+     *
+     * @param chars the chars
+     * @return the hasher
+     */
     Hasher put(char[] chars);
 
+    /**
+     * Put.
+     *
+     * @param chars the chars
+     * @param off the off
+     * @param len the len
+     * @return the hasher
+     */
     Hasher put(char[] chars, int off, int len);
 
     /**
@@ -90,34 +158,47 @@ public interface Hasher {
      * other words, no character encoding is performed; the low byte and high byte of each {@code
      * char} are hashed directly (in that order). The input must not be updated while this method is
      * in progress.
-     *
+     * 
      * <p><b>Warning:</b> This method will produce different output than most other languages do when
      * running the same hash function on the equivalent input. For cross-language compatibility, use
      * {@link #putString}, usually with a charset of UTF-8. For other use cases, use {@code
      * putUnencodedChars}.
      *
+     * @param charSequence the char sequence
+     * @return the hasher
      * @since 15.0 (since 11.0 as putString(CharSequence)).
      */
     Hasher put(CharSequence charSequence);
 
     /**
      * Equivalent to {@code putBytes(charSequence.toString().getBytes(charset))}.
-     *
+     * 
      * <p><b>Warning:</b> This method, which reencodes the input before hashing it, is useful only for
      * cross-language compatibility. For other use cases, prefer {@link #putUnencodedChars}, which is
      * faster, produces the same output across Java releases, and hashes every {@code char} in the
      * input, even if some are invalid.
+     *
+     * @param charSequence the char sequence
+     * @param charset the charset
+     * @return the hasher
      */
     Hasher put(CharSequence charSequence, Charset charset);
 
     /**
      * A simple convenience for {@code funnel.funnel(object, this)}.
+     *
+     * @param <T> the generic type
+     * @param instance the instance
+     * @param funnel the funnel
+     * @return the hasher
      */
     <T> Hasher put(T instance, BiConsumer<? super T, ? super Hasher> funnel);
 
     /**
      * Computes a hash code based on the data that have been provided to this hasher. The result is
      * unspecified if this method is called more than once on the same instance.
+     *
+     * @return the hash code
      */
     HashCode hash();
 }

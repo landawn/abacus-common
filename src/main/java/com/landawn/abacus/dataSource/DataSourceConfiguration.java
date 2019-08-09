@@ -22,11 +22,12 @@ import org.w3c.dom.Element;
 import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.util.Configuration;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.3
- * 
+ * The Class DataSourceConfiguration.
+ *
  * @author Haiyang Li
+ * @since 1.3
  */
 public final class DataSourceConfiguration extends Configuration {
 
@@ -145,9 +146,7 @@ public final class DataSourceConfiguration extends Configuration {
      */
     public static final String PASSWORD = "password";
 
-    /**
-     * The connection number which is created when the server is started
-     */
+    /** The connection number which is created when the server is started. */
     public static final String INITIAL_SIZE = "initialSize";
 
     /**
@@ -175,9 +174,7 @@ public final class DataSourceConfiguration extends Configuration {
      */
     public static final int DEFAULT_MAX_IDLE = 16;
 
-    /**
-     * The connection number which can be created from the pool
-     */
+    /** The connection number which can be created from the pool. */
     public static final String MAX_ACTIVE = "maxActive";
 
     /**
@@ -265,9 +262,18 @@ public final class DataSourceConfiguration extends Configuration {
      */
     public static final boolean DEFAULT_TEST_ON_RETURN = false;
 
+    /** The connection props. */
     private Map<String, String> connectionProps;
+
+    /** The read only connection props. */
     private Map<String, String> readOnlyConnectionProps;
 
+    /**
+     * Instantiates a new data source configuration.
+     *
+     * @param element the element
+     * @param properties the properties
+     */
     public DataSourceConfiguration(Element element, Map<String, String> properties) {
         super(element, properties);
 
@@ -280,14 +286,29 @@ public final class DataSourceConfiguration extends Configuration {
         }
     }
 
+    /**
+     * Gets the connection props.
+     *
+     * @return the connection props
+     */
     public Map<String, String> getConnectionProps() {
         return connectionProps;
     }
 
+    /**
+     * Gets the read only connection props.
+     *
+     * @return the read only connection props
+     */
     public Map<String, String> getReadOnlyConnectionProps() {
         return readOnlyConnectionProps;
     }
 
+    /**
+     * Complex element 2 attr.
+     *
+     * @param element the element
+     */
     @Override
     protected void complexElement2Attr(Element element) {
         String eleName = element.getNodeName();

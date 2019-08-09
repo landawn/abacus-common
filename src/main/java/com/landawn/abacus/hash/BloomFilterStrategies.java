@@ -23,6 +23,7 @@ import com.landawn.abacus.hash.Util.Longs;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.function.BiConsumer;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -134,15 +135,32 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         }
     };
 
+    /**
+     * The Class BitArray.
+     */
     // Note: We use this instead of java.util.BitSet because we need access to the long[] data field
     static final class BitArray {
+
+        /** The data. */
         final long[] data;
+
+        /** The bit count. */
         long bitCount;
 
+        /**
+         * Instantiates a new bit array.
+         *
+         * @param bits the bits
+         */
         BitArray(long bits) {
             this(new long[Ints.checkedCast(LongMath.divide(bits, 64, RoundingMode.CEILING))]);
         }
 
+        /**
+         * Instantiates a new bit array.
+         *
+         * @param data the data
+         */
         // Used by serialization
         BitArray(long[] data) {
             N.checkArgument(data.length > 0, "data length is zero!");
@@ -154,7 +172,12 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
             this.bitCount = bitCount;
         }
 
-        /** Returns true if the bit changed value. */
+        /**
+         *  Returns true if the bit changed value.
+         *
+         * @param index the index
+         * @return true, if successful
+         */
         boolean set(long index) {
             if (!get(index)) {
                 data[(int) (index >>> 6)] |= (1L << index);
@@ -164,25 +187,48 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
             return false;
         }
 
+        /**
+         * Gets the.
+         *
+         * @param index the index
+         * @return true, if successful
+         */
         boolean get(long index) {
             return (data[(int) (index >>> 6)] & (1L << index)) != 0;
         }
 
-        /** Number of bits */
+        /**
+         *  Number of bits.
+         *
+         * @return the long
+         */
         long bitSize() {
             return (long) data.length * Long.SIZE;
         }
 
-        /** Number of set bits (1s) */
+        /**
+         *  Number of set bits (1s).
+         *
+         * @return the long
+         */
         long bitCount() {
             return bitCount;
         }
 
+        /**
+         * Copy.
+         *
+         * @return the bit array
+         */
         BitArray copy() {
             return new BitArray(data.clone());
         }
 
-        /** Combines the two BitArrays using bitwise OR. */
+        /**
+         *  Combines the two BitArrays using bitwise OR.
+         *
+         * @param array the array
+         */
         void putAll(BitArray array) {
             N.checkArgument(data.length == array.data.length, "BitArrays must be of equal length (%s != %s)", data.length, array.data.length);
             bitCount = 0;
@@ -192,6 +238,12 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
             }
         }
 
+        /**
+         * Equals.
+         *
+         * @param o the o
+         * @return true, if successful
+         */
         @Override
         public boolean equals(Object o) {
             if (o instanceof BitArray) {
@@ -201,6 +253,11 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
             return false;
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             return Arrays.hashCode(data);

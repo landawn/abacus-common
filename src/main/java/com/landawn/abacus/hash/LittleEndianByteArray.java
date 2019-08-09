@@ -20,6 +20,7 @@ import com.landawn.abacus.hash.Util.Longs;
 
 import sun.misc.Unsafe;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -102,6 +103,8 @@ final class LittleEndianByteArray {
      * Indicates that the loading of Unsafe was successful and the load and store operations will be
      * very efficient. May be useful for calling code to fall back on an alternative implementation
      * that is slower than Unsafe.get/store but faster than the pure-Java mask-and-shift.
+     *
+     * @return true, if successful
      */
     static boolean usingUnsafe() {
         return (byteArray instanceof UnsafeByteArray);
@@ -114,8 +117,23 @@ final class LittleEndianByteArray {
      * back on the slower approach of using Longs.fromBytes(byte...).
      */
     private interface LittleEndianBytes {
+
+        /**
+         * Gets the long little endian.
+         *
+         * @param array the array
+         * @param offset the offset
+         * @return the long little endian
+         */
         long getLongLittleEndian(byte[] array, int offset);
 
+        /**
+         * Put long little endian.
+         *
+         * @param array the array
+         * @param offset the offset
+         * @param value the value
+         */
         void putLongLittleEndian(byte[] array, int offset, long value);
     }
 
@@ -125,6 +143,8 @@ final class LittleEndianByteArray {
      * class's static initializer can fall back on a non-Unsafe version.
      */
     private enum UnsafeByteArray implements LittleEndianBytes {
+
+        /** The unsafe little endian. */
         // Do *not* change the order of these constants!
         UNSAFE_LITTLE_ENDIAN {
             @Override
@@ -137,6 +157,8 @@ final class LittleEndianByteArray {
                 theUnsafe.putLong(array, (long) offset + BYTE_ARRAY_BASE_OFFSET, value);
             }
         },
+
+        /** The unsafe big endian. */
         UNSAFE_BIG_ENDIAN {
             @Override
             public long getLongLittleEndian(byte[] array, int offset) {
@@ -153,9 +175,11 @@ final class LittleEndianByteArray {
             }
         };
 
+        /** The unsafe. */
         // Provides load and store operations that use native instructions to get better performance.
         private static final Unsafe theUnsafe;
 
+        /** The Constant BYTE_ARRAY_BASE_OFFSET. */
         // The offset to the first element in a byte array.
         private static final int BYTE_ARRAY_BASE_OFFSET;
 
@@ -204,6 +228,8 @@ final class LittleEndianByteArray {
 
     /** Fallback implementation for when Unsafe is not available in our current environment. */
     private enum JavaLittleEndianBytes implements LittleEndianBytes {
+
+        /** The instance. */
         INSTANCE {
             @Override
             public long getLongLittleEndian(byte[] source, int offset) {

@@ -18,6 +18,7 @@ package com.landawn.abacus.util;
 
 import java.util.regex.Pattern;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: Copied from Apache Commons Lang under Apache License V2.
  * 
@@ -29,6 +30,9 @@ import java.util.regex.Pattern;
  */
 public final class RegExUtil {
 
+    /**
+     * Instantiates a new reg ex util.
+     */
     private RegExUtil() {
         // Singleton for utility class.
     }
@@ -71,20 +75,20 @@ public final class RegExUtil {
 
     /**
      * <p>Removes each substring of the text String that matches the given regular expression.</p>
-     *
+     * 
      * This method is a {@code null} safe equivalent to:
      * <ul>
      *  <li>{@code text.replaceAll(regex, N.EMPTY_STRING)}</li>
      *  <li>{@code Pattern.compile(regex).matcher(text).replaceAll(N.EMPTY_STRING)}</li>
      * </ul>
-     *
+     * 
      * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
+     * 
      * <p>Unlike in the {@link #removePattern(String, String)} method, the {@link Pattern#DOTALL} option
      * is NOT automatically added.
      * To use the DOTALL option prepend <code>"(?s)"</code> to the regex.
      * DOTALL is also known as single-line mode in Perl.</p>
-     *
+     * 
      * <pre>
      * StringUtils.removeAll(null, *)      = null
      * StringUtils.removeAll("any", (String) null)  = "any"
@@ -101,10 +105,6 @@ public final class RegExUtil {
      * @param regex  the regular expression to which this string is to be matched
      * @return  the text with any removes processed,
      *              {@code null} if null String input
-     *
-     * @throws  java.util.regex.PatternSyntaxException
-     *              if the regular expression's syntax is invalid
-     *
      * @see #replaceAll(String, String, String)
      * @see #removePattern(String, String)
      * @see String#replaceAll(String, String)
@@ -153,19 +153,19 @@ public final class RegExUtil {
 
     /**
      * <p>Removes the first substring of the text string that matches the given regular expression.</p>
-     *
+     * 
      * This method is a {@code null} safe equivalent to:
      * <ul>
      *  <li>{@code text.replaceFirst(regex, N.EMPTY_STRING)}</li>
      *  <li>{@code Pattern.compile(regex).matcher(text).replaceFirst(N.EMPTY_STRING)}</li>
      * </ul>
-     *
+     * 
      * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
+     * 
      * <p>The {@link Pattern#DOTALL} option is NOT automatically added.
      * To use the DOTALL option prepend <code>"(?s)"</code> to the regex.
      * DOTALL is also known as single-line mode in Perl.</p>
-     *
+     * 
      * <pre>
      * StringUtils.removeFirst(null, *)      = null
      * StringUtils.removeFirst("any", (String) null)  = "any"
@@ -183,10 +183,6 @@ public final class RegExUtil {
      * @param regex  the regular expression to which this string is to be matched
      * @return  the text with the first replacement processed,
      *              {@code null} if null String input
-     *
-     * @throws  java.util.regex.PatternSyntaxException
-     *              if the regular expression's syntax is invalid
-     *
      * @see #replaceFirst(String, String, String)
      * @see String#replaceFirst(String, String)
      * @see java.util.regex.Pattern
@@ -273,19 +269,19 @@ public final class RegExUtil {
     /**
      * <p>Replaces the first substring of the text string that matches the given regular expression
      * with the given replacement.</p>
-     *
+     * 
      * This method is a {@code null} safe equivalent to:
      * <ul>
      *  <li>{@code text.replaceFirst(regex, replacement)}</li>
      *  <li>{@code Pattern.compile(regex).matcher(text).replaceFirst(replacement)}</li>
      * </ul>
-     *
+     * 
      * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
+     * 
      * <p>The {@link Pattern#DOTALL} option is NOT automatically added.
      * To use the DOTALL option prepend <code>"(?s)"</code> to the regex.
      * DOTALL is also known as single-line mode in Perl.</p>
-     *
+     * 
      * <pre>
      * StringUtils.replaceFirst(null, *, *)       = null
      * StringUtils.replaceFirst("any", (String) null, *)   = "any"
@@ -307,10 +303,6 @@ public final class RegExUtil {
      * @param replacement  the string to be substituted for the first match
      * @return  the text with the first replacement processed,
      *              {@code null} if null String input
-     *
-     * @throws  java.util.regex.PatternSyntaxException
-     *              if the regular expression's syntax is invalid
-     *
      * @see String#replaceFirst(String, String)
      * @see java.util.regex.Pattern
      * @see java.util.regex.Pattern#DOTALL
@@ -368,20 +360,20 @@ public final class RegExUtil {
     /**
      * <p>Replaces each substring of the text String that matches the given regular expression
      * with the given replacement.</p>
-     *
+     * 
      * This method is a {@code null} safe equivalent to:
      * <ul>
      *  <li>{@code text.replaceAll(regex, replacement)}</li>
      *  <li>{@code Pattern.compile(regex).matcher(text).replaceAll(replacement)}</li>
      * </ul>
-     *
+     * 
      * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
+     * 
      * <p>Unlike in the {@link #replacePattern(String, String, String)} method, the {@link Pattern#DOTALL} option
      * is NOT automatically added.
      * To use the DOTALL option prepend <code>"(?s)"</code> to the regex.
      * DOTALL is also known as single-line mode in Perl.</p>
-     *
+     * 
      * <pre>
      * StringUtils.replaceAll(null, *, *)       = null
      * StringUtils.replaceAll("any", (String) null, *)   = "any"
@@ -403,10 +395,6 @@ public final class RegExUtil {
      * @param replacement  the string to be substituted for each match
      * @return  the text with any replacements processed,
      *              {@code null} if null String input
-     *
-     * @throws  java.util.regex.PatternSyntaxException
-     *              if the regular expression's syntax is invalid
-     *
      * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
      * @see java.util.regex.Pattern

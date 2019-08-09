@@ -35,25 +35,43 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class EchoServlet.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class EchoServlet extends AbstractHttpServlet {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8506987801604338536L;
 
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
+    /** The Constant IS_GET_FIRST. */
     public static final String IS_GET_FIRST = "isGetFirst";
+
+    /** The is get first. */
     private boolean isGetFirst;
 
+    /**
+     * Inits the.
+     *
+     * @throws ServletException the servlet exception
+     */
     @Override
     public void init() throws ServletException {
         super.init();
     }
 
+    /**
+     * Inits the.
+     *
+     * @param config the config
+     * @throws ServletException the servlet exception
+     */
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
@@ -61,26 +79,57 @@ public class EchoServlet extends AbstractHttpServlet {
         isGetFirst = Boolean.valueOf(getInitParameter(config, IS_GET_FIRST));
     }
 
+    /**
+     * Do get.
+     *
+     * @param req the req
+     * @param resp the resp
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         execute(req, resp);
     }
 
+    /**
+     * Do post.
+     *
+     * @param req the req
+     * @param resp the resp
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         execute(req, resp);
     }
 
+    /**
+     * Do put.
+     *
+     * @param req the req
+     * @param resp the resp
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
         execute(req, resp);
     }
 
+    /**
+     * Do delete.
+     *
+     * @param req the req
+     * @param resp the resp
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
         execute(req, resp);
     }
 
+    /**
+     * Execute.
+     *
+     * @param request the request
+     * @param response the response
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     protected void execute(HttpServletRequest request, HttpServletResponse response) throws UncheckedIOException {
         final ContentFormat contentFormat = getContentFormat(request);
         Map<String, String[]> paramMap = null;

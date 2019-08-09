@@ -14,40 +14,83 @@
 
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class IndexedFloat.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class IndexedFloat extends AbstractIndexed {
+
+    /** The value. */
     private final float value;
 
+    /**
+     * Instantiates a new indexed float.
+     *
+     * @param index the index
+     * @param value the value
+     */
     IndexedFloat(long index, float value) {
         super(index);
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @param index the index
+     * @return the indexed float
+     */
     public static IndexedFloat of(float value, int index) {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedFloat(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @param index the index
+     * @return the indexed float
+     */
     public static IndexedFloat of(float value, long index) {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedFloat(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedFloat> of(final FloatIterator iter) {
         return of(iter, 0);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedFloat> of(final FloatIterator iter, final int startIndex) {
         return of(iter, (long) startIndex);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedFloat> of(final FloatIterator iter, final long startIndex) {
         if (startIndex < 0) {
             throw new IllegalArgumentException("Invalid start index: " + startIndex);
@@ -68,20 +111,41 @@ public final class IndexedFloat extends AbstractIndexed {
         };
     }
 
+    /**
+     * Value.
+     *
+     * @return the float
+     */
     public float value() {
         return value;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return (int) index + (int) (value * 31);
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return obj instanceof IndexedFloat && ((IndexedFloat) obj).index == index && N.equals(((IndexedFloat) obj).value, value);
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

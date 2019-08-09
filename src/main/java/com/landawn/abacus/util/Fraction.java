@@ -18,6 +18,7 @@ package com.landawn.abacus.util;
 
 import java.math.BigInteger;
 
+// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
@@ -36,9 +37,9 @@ import java.math.BigInteger;
  * Note that this class is intended for common use cases, it is <i>int</i> based and thus suffers from various overflow
  * issues. For a BigInteger based equivalent, please see the Commons Math BigFraction class.
  * </p>
- * 
- * @since 2.0
+ *
  * @version $Id: Fraction.java 1583482 2014-03-31 22:54:57Z niallp $
+ * @since 2.0
  */
 public final class Fraction extends Number implements Comparable<Fraction> {
 
@@ -137,10 +138,11 @@ public final class Fraction extends Number implements Comparable<Fraction> {
     }
 
     /**
-     * @param numerator
-     * @param denominator
-     * @return
-     * 
+     * Of.
+     *
+     * @param numerator the numerator
+     * @param denominator the denominator
+     * @return the fraction
      * @see #of(int, int, boolean)
      */
     public static Fraction of(int numerator, int denominator) {
@@ -205,12 +207,13 @@ public final class Fraction extends Number implements Comparable<Fraction> {
     }
 
     /**
+     * Of.
+     *
+     * @param whole the whole
+     * @param numerator the numerator
+     * @param denominator the denominator
+     * @return the fraction
      * @see {{@link #of(int, int, int, boolean)}
-     * 
-     * @param whole
-     * @param numerator
-     * @param denominator
-     * @return
      */
     public static Fraction of(final int whole, final int numerator, final int denominator) {
         return of(whole, numerator, denominator, false);
@@ -224,22 +227,13 @@ public final class Fraction extends Number implements Comparable<Fraction> {
      * <p>
      * The negative sign must be passed in on the whole number part.
      * </p>
-     * 
-     * @param whole
-     *            the whole number, for example the one in 'one and three sevenths'
-     * @param numerator
-     *            the numerator, for example the three in 'one and three sevenths'
-     * @param denominator
-     *            the denominator, for example the seven in 'one and three sevenths'
+     *
+     * @param whole            the whole number, for example the one in 'one and three sevenths'
+     * @param numerator            the numerator, for example the three in 'one and three sevenths'
+     * @param denominator            the denominator, for example the seven in 'one and three sevenths'
+     * @param reduce the reduce
      * @return a new fraction instance
-     * @throws ArithmeticException
-     *             if the denominator is <code>zero</code>
-     * @throws ArithmeticException
-     *             if the denominator is negative
-     * @throws ArithmeticException
-     *             if the numerator is negative
-     * @throws ArithmeticException
-     *             if the resulting numerator exceeds <code>Integer.MAX_VALUE</code>
+     * @throws ArithmeticException             if the resulting numerator exceeds <code>Integer.MAX_VALUE</code>
      */
     public static Fraction of(final int whole, final int numerator, final int denominator, boolean reduce) {
 
@@ -274,16 +268,10 @@ public final class Fraction extends Number implements Comparable<Fraction> {
      * This method uses the <a href="http://archives.math.utk.edu/articles/atuyl/confrac/"> continued fraction
      * algorithm</a>, computing a maximum of 25 convergents and bounding the denominator by 10,000.
      * </p>
-     * 
-     * @param value
-     *            the double value to convert
+     *
+     * @param value            the double value to convert
      * @return a new fraction instance that is close to the value
-     * @throws ArithmeticException
-     *             if <code>|value| &gt; Integer.MAX_VALUE</code> or <code>value = NaN</code>
-     * @throws ArithmeticException
-     *             if the calculated denominator is <code>zero</code>
-     * @throws ArithmeticException
-     *             if the the algorithm does not converge
+     * @throws ArithmeticException             if the the algorithm does not converge
      */
     public static Fraction of(double value) {
         final int sign = value < 0 ? -1 : 1;
@@ -420,6 +408,11 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         return numerator;
     }
 
+    /**
+     * Numerator.
+     *
+     * @return the int
+     */
     public int numerator() {
         return numerator;
     }
@@ -437,6 +430,11 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         return denominator;
     }
 
+    /**
+     * Denominator.
+     *
+     * @return the int
+     */
     public int denominator() {
         return denominator;
     }
@@ -464,6 +462,11 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         return Math.abs(numerator % denominator);
     }
 
+    /**
+     * Proper numerator.
+     *
+     * @return the int
+     */
     public int properNumerator() {
         return Math.abs(numerator % denominator);
     }
@@ -491,6 +494,11 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         return numerator / denominator;
     }
 
+    /**
+     * Proper whole.
+     *
+     * @return the int
+     */
     public int properWhole() {
         return numerator / denominator;
     }
@@ -942,16 +950,11 @@ public final class Fraction extends Number implements Comparable<Fraction> {
      * <p>
      * Divide the value of this fraction by another.
      * </p>
-     * 
-     * @param fraction
-     *            the fraction to divide by, must not be <code>null</code>
+     *
+     * @param fraction            the fraction to divide by, must not be <code>null</code>
      * @return a <code>Fraction</code> instance with the resulting values
-     * @throws IllegalArgumentException
-     *             if the fraction is <code>null</code>
-     * @throws ArithmeticException
-     *             if the fraction to divide by is zero
-     * @throws ArithmeticException
-     *             if the resulting numerator or denominator exceeds <code>Integer.MAX_VALUE</code>
+     * @throws IllegalArgumentException             if the fraction is <code>null</code>
+     * @throws ArithmeticException             if the resulting numerator or denominator exceeds <code>Integer.MAX_VALUE</code>
      */
     public Fraction dividedBy(final Fraction fraction) {
         if (fraction == null) {

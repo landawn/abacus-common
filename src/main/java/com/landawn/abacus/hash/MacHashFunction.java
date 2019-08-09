@@ -22,6 +22,7 @@ import javax.crypto.Mac;
 
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -30,12 +31,29 @@ import com.landawn.abacus.util.N;
  * @author Kurt Alfred Kluever
  */
 final class MacHashFunction extends AbstractStreamingHashFunction {
+
+    /** The prototype. */
     private final Mac prototype;
+
+    /** The key. */
     private final Key key;
+
+    /** The to string. */
     private final String toString;
+
+    /** The bits. */
     private final int bits;
+
+    /** The supports clone. */
     private final boolean supportsClone;
 
+    /**
+     * Instantiates a new mac hash function.
+     *
+     * @param algorithmName the algorithm name
+     * @param key the key
+     * @param toString the to string
+     */
     MacHashFunction(String algorithmName, Key key, String toString) {
         this.prototype = getMac(algorithmName, key);
         this.key = N.checkArgNotNull(key);
@@ -44,11 +62,22 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         this.supportsClone = supportsClone(prototype);
     }
 
+    /**
+     * Bits.
+     *
+     * @return the int
+     */
     @Override
     public int bits() {
         return bits;
     }
 
+    /**
+     * Supports clone.
+     *
+     * @param mac the mac
+     * @return true, if successful
+     */
     private static boolean supportsClone(Mac mac) {
         try {
             mac.clone();
@@ -58,6 +87,13 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         }
     }
 
+    /**
+     * Gets the mac.
+     *
+     * @param algorithmName the algorithm name
+     * @param key the key
+     * @return the mac
+     */
     private static Mac getMac(String algorithmName, Key key) {
         try {
             Mac mac = Mac.getInstance(algorithmName);
@@ -70,6 +106,11 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         }
     }
 
+    /**
+     * New hasher.
+     *
+     * @return the hasher
+     */
     @Override
     public Hasher newHasher() {
         if (supportsClone) {
@@ -82,6 +123,11 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         return new MacHasher(getMac(prototype.getAlgorithm(), key));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return toString;
@@ -91,35 +137,69 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
      * Hasher that updates a {@link Mac} (message authentication code).
      */
     private static final class MacHasher extends AbstractByteHasher {
+
+        /** The mac. */
         private final Mac mac;
+
+        /** The done. */
         private boolean done;
 
+        /**
+         * Instantiates a new mac hasher.
+         *
+         * @param mac the mac
+         */
         private MacHasher(Mac mac) {
             this.mac = mac;
         }
 
+        /**
+         * Update.
+         *
+         * @param b the b
+         */
         @Override
         protected void update(byte b) {
             checkNotDone();
             mac.update(b);
         }
 
+        /**
+         * Update.
+         *
+         * @param b the b
+         */
         @Override
         protected void update(byte[] b) {
             checkNotDone();
             mac.update(b);
         }
 
+        /**
+         * Update.
+         *
+         * @param b the b
+         * @param off the off
+         * @param len the len
+         */
         @Override
         protected void update(byte[] b, int off, int len) {
             checkNotDone();
             mac.update(b, off, len);
         }
 
+        /**
+         * Check not done.
+         */
         private void checkNotDone() {
             N.checkState(!done, "Cannot re-use a Hasher after calling hash() on it");
         }
 
+        /**
+         * Hash.
+         *
+         * @return the hash code
+         */
         @Override
         public HashCode hash() {
             checkNotDone();

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+// TODO: Auto-generated Javadoc
 /**
  * General File System utilities.
  * <p>
@@ -62,7 +63,7 @@ final class FileSystemUtil {
     /** The operating system flag. */
     private static final int OS;
 
-    /** The path to df */
+    /**  The path to df. */
     private static final String DF;
 
     static {
@@ -123,9 +124,9 @@ final class FileSystemUtil {
      *
      * @param path  the path to get free space for, not null, not empty on Unix
      * @return the amount of free drive space on the drive or volume in kilobytes
+     * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
-     * @throws IOException if an error occurs when finding the free space
      * @since 1.2, enhanced OS support in 1.3
      */
     public static long freeSpaceKb(final String path) throws IOException {
@@ -153,9 +154,9 @@ final class FileSystemUtil {
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free drive space on the drive or volume in kilobytes
+     * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
-     * @throws IOException if an error occurs when finding the free space
      * @since 2.0
      */
     public static long freeSpaceKb(final String path, final long timeout) throws IOException {
@@ -169,9 +170,10 @@ final class FileSystemUtil {
      * <pre>
      * freeSpaceKb(new File(".").getAbsolutePath())
      * </pre>
+     *
      * @return the amount of free drive space on the drive or volume in kilobytes
-     * @throws IllegalStateException if an error occurred in initialisation
      * @throws IOException if an error occurs when finding the free space
+     * @throws IllegalStateException if an error occurred in initialisation
      * @since 2.0
      */
     public static long freeSpaceKb() throws IOException {
@@ -185,11 +187,12 @@ final class FileSystemUtil {
      * <pre>
      * freeSpaceKb(new File(".").getAbsolutePath())
      * </pre>
+     *
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free drive space on the drive or volume in kilobytes
-     * @throws IllegalStateException if an error occurred in initialisation
      * @throws IOException if an error occurs when finding the free space
+     * @throws IllegalStateException if an error occurred in initialisation
      * @since 2.0
      */
     public static long freeSpaceKb(final long timeout) throws IOException {
@@ -213,9 +216,9 @@ final class FileSystemUtil {
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free drive space on the drive or volume
+     * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
-     * @throws IOException if an error occurs when finding the free space
      */
     long freeSpaceOS(final String path, final int os, final boolean kb, final long timeout) throws IOException {
         if (path == null) {
@@ -272,7 +275,7 @@ final class FileSystemUtil {
     }
 
     /**
-     * Parses the Windows dir response last line
+     * Parses the Windows dir response last line.
      *
      * @param line  the line to parse
      * @param path  the path that was sent

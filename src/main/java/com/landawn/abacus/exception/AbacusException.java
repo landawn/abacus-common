@@ -16,16 +16,16 @@ package com.landawn.abacus.exception;
 
 import java.sql.SQLException;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbacusException.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class AbacusException extends RuntimeException {
-    /**
-     * Field serialVersionUID
-     */
+
+    /** Field serialVersionUID. */
     private static final long serialVersionUID = -1206509526015359475L;
 
     /**
@@ -88,6 +88,12 @@ public class AbacusException extends RuntimeException {
         return getMessage();
     }
 
+    /**
+     * Gets the error msg.
+     *
+     * @param e the e
+     * @return the error msg
+     */
     public static String getErrorMsg(Throwable e) {
         if (e instanceof SQLException) {
             return e.getClass().getSimpleName() + "|" + ((SQLException) e).getErrorCode() + "|" + ((e.getMessage() == null) ? e.getCause() : e.getMessage());

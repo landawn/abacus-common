@@ -24,66 +24,112 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.WSSecurityUtil;
 
+// TODO: Auto-generated Javadoc
 /**
  * This class provides a solution for safety data transfer between server/client.
  * First, let other DTOs extends this class and call encrypt method before sending message to server.
  * Don't set userName/password/nonce/created properties manually. they will be set after encrypt method is called.
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class SecurityDTO implements Serializable {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -386078752923025834L;
 
+    /** The Constant jsc. */
     private static final JSONSerializationConfig jsc = JSC.of(false, false);
 
+    /** The user name. */
     private String userName;
+
+    /** The password. */
     private String password;
+
+    /** The nonce. */
     private String nonce;
+
+    /** The created. */
     private String created;
 
+    /**
+     * Gets the user name.
+     *
+     * @return the user name
+     */
     public String getUserName() {
         return userName;
     }
 
+    /**
+     * Sets the user name.
+     *
+     * @param userName the new user name
+     */
     public void setUserName(String userName) {
         this.userName = userName;
     }
 
+    /**
+     * Gets the password.
+     *
+     * @return the password
+     */
     public String getPassword() {
         return password;
     }
 
     /**
-     * The encrypted password will set after encrypt method is called
-     * @param password
+     * The encrypted password will set after encrypt method is called.
+     *
+     * @param password the new password
      */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * Gets the nonce.
+     *
+     * @return the nonce
+     */
     public String getNonce() {
         return nonce;
     }
 
+    /**
+     * Sets the nonce.
+     *
+     * @param nonce the new nonce
+     */
     public void setNonce(String nonce) {
         this.nonce = nonce;
     }
 
+    /**
+     * Gets the created.
+     *
+     * @return the created
+     */
     public String getCreated() {
         return created;
     }
 
+    /**
+     * Sets the created.
+     *
+     * @param created the new created
+     */
     public void setCreated(String created) {
         this.created = created;
     }
 
     /**
      * Encrypt this request with specified userName and password.
-     * 
-     * @param userName
-     * @param password
+     *
+     * @param userName the user name
+     * @param password the password
      */
     public void encrypt(final String userName, final String password) {
         encrypt(userName, password.getBytes(Charsets.UTF_8), MessageEncryption.NONE);
@@ -91,10 +137,10 @@ public abstract class SecurityDTO implements Serializable {
 
     /**
      * Encrypt this request with specified userName and password.
-     * 
-     * @param userName
-     * @param password
-     * @param msgEncryption
+     *
+     * @param userName the user name
+     * @param password the password
+     * @param msgEncryption the msg encryption
      */
     public void encrypt(final String userName, final byte[] password, final MessageEncryption msgEncryption) {
         setUserName(null);
@@ -149,10 +195,25 @@ public abstract class SecurityDTO implements Serializable {
         setCreated(created);
     }
 
+    /**
+     * Decrypt.
+     *
+     * @param userName the user name
+     * @param password the password
+     * @return true, if successful
+     */
     public boolean decrypt(final String userName, final String password) {
         return decrypt(userName, password.getBytes(Charsets.UTF_8), MessageEncryption.NONE);
     }
 
+    /**
+     * Decrypt.
+     *
+     * @param userName the user name
+     * @param password the password
+     * @param msgEncryption the msg encryption
+     * @return true, if successful
+     */
     public boolean decrypt(final String userName, final byte[] password, final MessageEncryption msgEncryption) {
         long now = System.currentTimeMillis();
         long ceratedTime = Long.valueOf(getCreated());
@@ -220,6 +281,11 @@ public abstract class SecurityDTO implements Serializable {
         }
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -232,6 +298,12 @@ public abstract class SecurityDTO implements Serializable {
         return result;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -247,6 +319,11 @@ public abstract class SecurityDTO implements Serializable {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "{userName=" + userName + ", password=" + password + ", nonce=" + nonce + ", created=" + created + "}";

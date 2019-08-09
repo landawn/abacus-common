@@ -14,11 +14,12 @@
 
 package com.landawn.abacus.exception;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.3.29
- * 
+ * The Class DuplicatedRecordException.
+ *
  * @author Haiyang Li
+ * @since 1.3.29
  */
 public class DuplicatedRecordException extends AbacusException {
     /**
@@ -35,8 +36,8 @@ public class DuplicatedRecordException extends AbacusException {
 
     /**
      * Constructor for EntityNotFoundException.
-     * 
-     * @param message
+     *
+     * @param message the message
      */
     public DuplicatedRecordException(String message) {
         super(message);
@@ -44,9 +45,9 @@ public class DuplicatedRecordException extends AbacusException {
 
     /**
      * Constructor for EntityNotFoundException.
-     * 
-     * @param message
-     * @param cause
+     *
+     * @param message the message
+     * @param cause the cause
      */
     public DuplicatedRecordException(String message, Throwable cause) {
         super(message, cause);
@@ -54,8 +55,8 @@ public class DuplicatedRecordException extends AbacusException {
 
     /**
      * Constructor for EntityNotFoundException.
-     * 
-     * @param cause
+     *
+     * @param cause the cause
      */
     public DuplicatedRecordException(Throwable cause) {
         super(cause);

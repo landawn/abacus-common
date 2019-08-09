@@ -18,24 +18,38 @@ import java.util.Set;
 
 import org.ehcache.Cache;
 
+// TODO: Auto-generated Javadoc
 /**
- * TODO
- * 
- * @param <K>
- * @param <V>
- * 
- * @since 0.8
- * 
+ * TODO.
+ *
  * @author haiyang li
+ * @param <K> the key type
+ * @param <V> the value type
+ * @since 0.8
  */
 public class Ehcache<K, V> extends AbstractCache<K, V> {
+
+    /** The cache impl. */
     private final Cache<K, V> cacheImpl;
+
+    /** The is closed. */
     private boolean isClosed = false;
 
+    /**
+     * Instantiates a new ehcache.
+     *
+     * @param cache the cache
+     */
     public Ehcache(Cache<K, V> cache) {
         this.cacheImpl = cache;
     }
 
+    /**
+     * Gets the t.
+     *
+     * @param k the k
+     * @return the t
+     */
     @Override
     public V gett(K k) {
         assertNotClosed();
@@ -43,6 +57,15 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
         return cacheImpl.get(k);
     }
 
+    /**
+     * Put.
+     *
+     * @param k the k
+     * @param v the v
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @return true, if successful
+     */
     @Override
     public boolean put(K k, V v, long liveTime, long maxIdleTime) {
         assertNotClosed();
@@ -52,6 +75,11 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
         return true;
     }
 
+    /**
+     * Removes the.
+     *
+     * @param k the k
+     */
     @Override
     public void remove(K k) {
         assertNotClosed();
@@ -59,6 +87,12 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
         cacheImpl.remove(k);
     }
 
+    /**
+     * Contains key.
+     *
+     * @param k the k
+     * @return true, if successful
+     */
     @Override
     public boolean containsKey(K k) {
         assertNotClosed();
@@ -66,16 +100,29 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
         return cacheImpl.containsKey(k);
     }
 
+    /**
+     * Key set.
+     *
+     * @return the sets the
+     */
     @Override
     public Set<K> keySet() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         assertNotClosed();
@@ -83,6 +130,9 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
         cacheImpl.clear();
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         assertNotClosed();
@@ -92,11 +142,19 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
         isClosed = true;
     }
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     @Override
     public boolean isClosed() {
         return isClosed;
     }
 
+    /**
+     * Assert not closed.
+     */
     protected void assertNotClosed() {
         if (isClosed) {
             throw new IllegalStateException("This object pool has been closed");

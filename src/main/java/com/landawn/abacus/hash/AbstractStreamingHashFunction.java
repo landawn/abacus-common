@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.function.BiConsumer;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -33,16 +34,38 @@ import com.landawn.abacus.util.function.BiConsumer;
  * @author Kevin Bourrillion
  */
 abstract class AbstractStreamingHashFunction implements HashFunction {
+
+    /**
+     * Hash.
+     *
+     * @param <T> the generic type
+     * @param instance the instance
+     * @param funnel the funnel
+     * @return the hash code
+     */
     @Override
     public <T> HashCode hash(T instance, BiConsumer<? super T, ? super Hasher> funnel) {
         return newHasher().put(instance, funnel).hash();
     }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @return the hash code
+     */
     @Override
     public HashCode hash(CharSequence input) {
         return newHasher().put(input).hash();
     }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @param charset the charset
+     * @return the hash code
+     */
     @Override
     public HashCode hash(CharSequence input, Charset charset) {
         return newHasher().put(input, charset).hash();
@@ -53,11 +76,23 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
     //        return hash(input == false ? 0 : 1);
     //    }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @return the hash code
+     */
     @Override
     public HashCode hash(int input) {
         return newHasher().put(input).hash();
     }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @return the hash code
+     */
     @Override
     public HashCode hash(long input) {
         return newHasher().put(input).hash();
@@ -73,16 +108,36 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
     //        return newHasher().put(input).hash();
     //    }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @return the hash code
+     */
     @Override
     public HashCode hash(byte[] input) {
         return newHasher().put(input).hash();
     }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @param off the off
+     * @param len the len
+     * @return the hash code
+     */
     @Override
     public HashCode hash(byte[] input, int off, int len) {
         return newHasher().put(input, off, len).hash();
     }
 
+    /**
+     * New hasher.
+     *
+     * @param expectedInputSize the expected input size
+     * @return the hasher
+     */
     @Override
     public Hasher newHasher(int expectedInputSize) {
         N.checkArgument(expectedInputSize >= 0);
@@ -99,7 +154,8 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
     // TODO(kevinb): this class still needs some design-and-document-for-inheritance love
 
     protected static abstract class AbstractStreamingHasher extends AbstractHasher {
-        /** Buffer via which we pass data to the hash algorithm (the implementor) */
+
+        /**  Buffer via which we pass data to the hash algorithm (the implementor). */
         private final ByteBuffer buffer;
 
         /** Number of bytes to be filled before process() invocation(s). */
@@ -141,14 +197,18 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
 
         /**
          * Processes the available bytes of the buffer (at most {@code chunk} bytes).
+         *
+         * @param bb the bb
          */
         protected abstract void process(ByteBuffer bb);
 
         /**
          * This is invoked for the last bytes of the input, which are not enough to fill a whole chunk.
          * The passed {@code ByteBuffer} is guaranteed to be non-empty.
-         *
+         * 
          * <p>This implementation simply pads with zeros and delegates to {@link #process(ByteBuffer)}.
+         *
+         * @param bb the bb
          */
         protected void processRemaining(ByteBuffer bb) {
             bb.position(bb.limit()); // move at the end
@@ -161,16 +221,36 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             process(bb);
         }
 
+        /**
+         * Put.
+         *
+         * @param bytes the bytes
+         * @return the hasher
+         */
         @Override
         public final Hasher put(byte[] bytes) {
             return put(bytes, 0, bytes.length);
         }
 
+        /**
+         * Put.
+         *
+         * @param bytes the bytes
+         * @param off the off
+         * @param len the len
+         * @return the hasher
+         */
         @Override
         public final Hasher put(byte[] bytes, int off, int len) {
             return putBytes(ByteBuffer.wrap(bytes, off, len).order(ByteOrder.LITTLE_ENDIAN));
         }
 
+        /**
+         * Put bytes.
+         *
+         * @param readBuffer the read buffer
+         * @return the hasher
+         */
         private Hasher putBytes(ByteBuffer readBuffer) {
             // If we have room for all of it, this is easy
             if (readBuffer.remaining() <= buffer.remaining()) {
@@ -196,6 +276,12 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             return this;
         }
 
+        /**
+         * Put.
+         *
+         * @param charSequence the char sequence
+         * @return the hasher
+         */
         @Override
         public final Hasher put(CharSequence charSequence) {
             for (int i = 0; i < charSequence.length(); i++) {
@@ -214,6 +300,12 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
          * at least for commonly used charsets like UTF-8.
          */
 
+        /**
+         * Put.
+         *
+         * @param b the b
+         * @return the hasher
+         */
         @Override
         public final Hasher put(byte b) {
             buffer.put(b);
@@ -221,6 +313,12 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             return this;
         }
 
+        /**
+         * Put.
+         *
+         * @param s the s
+         * @return the hasher
+         */
         @Override
         public final Hasher put(short s) {
             buffer.putShort(s);
@@ -228,6 +326,12 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             return this;
         }
 
+        /**
+         * Put.
+         *
+         * @param c the c
+         * @return the hasher
+         */
         @Override
         public final Hasher put(char c) {
             buffer.putChar(c);
@@ -235,6 +339,12 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             return this;
         }
 
+        /**
+         * Put.
+         *
+         * @param i the i
+         * @return the hasher
+         */
         @Override
         public final Hasher put(int i) {
             buffer.putInt(i);
@@ -242,6 +352,12 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             return this;
         }
 
+        /**
+         * Put.
+         *
+         * @param l the l
+         * @return the hasher
+         */
         @Override
         public final Hasher put(long l) {
             buffer.putLong(l);
@@ -249,12 +365,25 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             return this;
         }
 
+        /**
+         * Put.
+         *
+         * @param <T> the generic type
+         * @param instance the instance
+         * @param funnel the funnel
+         * @return the hasher
+         */
         @Override
         public final <T> Hasher put(T instance, BiConsumer<? super T, ? super Hasher> funnel) {
             funnel.accept(instance, this);
             return this;
         }
 
+        /**
+         * Hash.
+         *
+         * @return the hash code
+         */
         @Override
         public final HashCode hash() {
             munch();
@@ -265,8 +394,16 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             return makeHash();
         }
 
+        /**
+         * Make hash.
+         *
+         * @return the hash code
+         */
         abstract HashCode makeHash();
 
+        /**
+         * Munch if full.
+         */
         // Process pent-up data in chunks
         private void munchIfFull() {
             if (buffer.remaining() < 8) {
@@ -275,6 +412,9 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
             }
         }
 
+        /**
+         * Munch.
+         */
         private void munch() {
             buffer.flip();
             while (buffer.remaining() >= chunkSize) {

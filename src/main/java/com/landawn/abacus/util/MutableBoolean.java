@@ -19,6 +19,7 @@ package com.landawn.abacus.util;
 
 import java.io.Serializable;
 
+// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
@@ -28,10 +29,10 @@ import java.io.Serializable;
  * A mutable <code>boolean</code> wrapper.
  * <p>
  * Note that as MutableBoolean does not extend Boolean, it is not treated by String.format as a Boolean parameter. 
- * 
+ *
+ * @version $Id: MutableBoolean.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Boolean
  * @since 2.2
- * @version $Id: MutableBoolean.java 1669791 2015-03-28 15:22:59Z britter $
  */
 public final class MutableBoolean implements Mutable, Serializable, Comparable<MutableBoolean> {
 
@@ -62,10 +63,21 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @return the mutable boolean
+     */
     public static MutableBoolean of(final boolean value) {
         return new MutableBoolean(value);
     }
 
+    /**
+     * Value.
+     *
+     * @return true, if successful
+     */
     public boolean value() {
         return value;
     }
@@ -91,23 +103,45 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
         this.value = value;
     }
 
+    /**
+     * Gets the and set.
+     *
+     * @param value the value
+     * @return the and set
+     */
     public boolean getAndSet(final boolean value) {
         final boolean result = this.value;
         this.value = value;
         return result;
     }
 
+    /**
+     * Sets the and get.
+     *
+     * @param value the value
+     * @return true, if successful
+     */
     public boolean setAndGet(final boolean value) {
         this.value = value;
         return this.value;
     }
 
+    /**
+     * Gets the and invert.
+     *
+     * @return the and invert
+     */
     public boolean getAndInvert() {
         final boolean result = value;
         value = !value;
         return result;
     }
 
+    /**
+     * Invert and get.
+     *
+     * @return true, if successful
+     */
     public boolean invertAndGet() {
         value = !value;
         return this.value;
@@ -116,10 +150,12 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
-     * 
-     * @param newValue
+     *
+     * @param <E> the element type
+     * @param newValue the new value
      * @param predicate - test the current value.
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setIf(boolean newValue, Try.BooleanPredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
@@ -133,10 +169,12 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
-     * 
-     * @param newValue
+     *
+     * @param <E> the element type
+     * @param newValue the new value
      * @param predicate the first parameter is the current value, the second parameter is the new value.
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setIf(boolean newValue, Try.BooleanBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
@@ -186,6 +224,9 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
         return value == false;
     }
 
+    /**
+     * Invert.
+     */
     public void invert() {
         this.value = !this.value;
     }

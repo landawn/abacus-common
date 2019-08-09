@@ -16,6 +16,7 @@
  */
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
@@ -25,10 +26,10 @@ package com.landawn.abacus.util;
  * A mutable <code>double</code> wrapper.
  * <p>
  * Note that as MutableDouble does not extend Double, it is not treated by String.format as a Double parameter. 
- * 
+ *
+ * @version $Id: MutableDouble.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Double
  * @since 2.1
- * @version $Id: MutableDouble.java 1669791 2015-03-28 15:22:59Z britter $
  */
 public final class MutableDouble extends Number implements Comparable<MutableDouble>, Mutable {
 
@@ -59,10 +60,21 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @return the mutable double
+     */
     public static MutableDouble of(final double value) {
         return new MutableDouble(value);
     }
 
+    /**
+     * Value.
+     *
+     * @return the double
+     */
     public double value() {
         return value;
     }
@@ -88,12 +100,24 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
         this.value = value;
     }
 
+    /**
+     * Gets the and set.
+     *
+     * @param value the value
+     * @return the and set
+     */
     public double getAndSet(final double value) {
         final double result = this.value;
         this.value = value;
         return result;
     }
 
+    /**
+     * Sets the and get.
+     *
+     * @param value the value
+     * @return the double
+     */
     public double setAndGet(final double value) {
         this.value = value;
         return this.value;
@@ -102,10 +126,12 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
-     * 
-     * @param newValue
+     *
+     * @param <E> the element type
+     * @param newValue the new value
      * @param predicate - test the current value.
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setIf(double newValue, Try.DoublePredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
@@ -119,10 +145,12 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
-     * 
-     * @param newValue
+     *
+     * @param <E> the element type
+     * @param newValue the new value
      * @param predicate the first parameter is the current value, the second parameter is the new value.
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setIf(double newValue, Try.DoubleBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {

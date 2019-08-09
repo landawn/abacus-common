@@ -62,18 +62,25 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.SQLExecutor.JdbcSettings;
 import com.landawn.abacus.util.SQLExecutor.ResultExtractor;
 
+// TODO: Auto-generated Javadoc
 /**
+ * The Class PropertiesUtil.
  *
- * @since 0.8
- * 
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class PropertiesUtil {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
+    /** The Constant TYPE. */
     private static final String TYPE = "type";
+
+    /** The Constant xsc. */
     private static final XMLSerializationConfig xsc = XSC.of(true, true, DateTimeFormat.ISO_8601_DATETIME, Exclusion.NONE, null);
 
+    /** The Constant CONFIG_ENTITY_RESULT_SET_EXTRACTOR. */
     private static final ResultExtractor<ConfigEntity> CONFIG_ENTITY_RESULT_SET_EXTRACTOR = new ResultExtractor<ConfigEntity>() {
         @Override
         public ConfigEntity extractData(ResultSet rs, JdbcSettings jdbcSettings) throws SQLException {
@@ -119,6 +126,7 @@ public final class PropertiesUtil {
         }
     };
 
+    /** The Constant scheduledExecutor. */
     private static final ScheduledExecutorService scheduledExecutor;
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
@@ -126,6 +134,7 @@ public final class PropertiesUtil {
         scheduledExecutor = MoreExecutors.getExitingScheduledExecutorService(executor);
     }
 
+    /** The Constant registeredAutoRefreshProperties. */
     private static final Map<Resource, Properties<?, ?>> registeredAutoRefreshProperties = new ConcurrentHashMap<>(256);
 
     static {
@@ -269,22 +278,50 @@ public final class PropertiesUtil {
         scheduledExecutor.scheduleWithFixedDelay(refreshTask, 1000, 1000, TimeUnit.MICROSECONDS);
     }
 
+    /**
+     * Instantiates a new properties util.
+     */
     private PropertiesUtil() {
         // singleton.
     }
 
+    /**
+     * Find file.
+     *
+     * @param configFileName the config file name
+     * @return the file
+     */
     public static File findFile(String configFileName) {
         return Configuration.findFile(configFileName);
     }
 
+    /**
+     * Find dir.
+     *
+     * @param configDir the config dir
+     * @return the file
+     */
     public static File findDir(String configDir) {
         return Configuration.findDir(configDir);
     }
 
+    /**
+     * Load.
+     *
+     * @param file the file
+     * @return the properties
+     */
     public static Properties<String, String> load(File file) {
         return load(file, false);
     }
 
+    /**
+     * Load.
+     *
+     * @param file the file
+     * @param autoRefresh the auto refresh
+     * @return the properties
+     */
     public static Properties<String, String> load(File file, boolean autoRefresh) {
         Properties<String, String> properties = null;
 
@@ -316,10 +353,23 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Load.
+     *
+     * @param is the is
+     * @return the properties
+     */
     public static Properties<String, String> load(InputStream is) {
         return load(null, is);
     }
 
+    /**
+     * Load.
+     *
+     * @param targetProperties the target properties
+     * @param is the is
+     * @return the properties
+     */
     private static Properties<String, String> load(Properties<String, String> targetProperties, InputStream is) {
         java.util.Properties tmp = new java.util.Properties();
 
@@ -332,6 +382,12 @@ public final class PropertiesUtil {
         return create(targetProperties, tmp);
     }
 
+    /**
+     * Load.
+     *
+     * @param reader the reader
+     * @return the properties
+     */
     public static Properties<String, String> load(Reader reader) {
         java.util.Properties tmp = new java.util.Properties();
 
@@ -344,10 +400,27 @@ public final class PropertiesUtil {
         return create(null, tmp);
     }
 
+    /**
+     * Load.
+     *
+     * @param sqlExecutor the sql executor
+     * @param sql the sql
+     * @param autoRefresh the auto refresh
+     * @return the properties
+     */
     public static Properties<String, String> load(SQLExecutor sqlExecutor, String sql, boolean autoRefresh) {
         return load(null, sqlExecutor, sql, autoRefresh);
     }
 
+    /**
+     * Load.
+     *
+     * @param targetProperties the target properties
+     * @param sqlExecutor the sql executor
+     * @param sql the sql
+     * @param autoRefresh the auto refresh
+     * @return the properties
+     */
     private static Properties<String, String> load(Properties<String, String> targetProperties, SQLExecutor sqlExecutor, String sql, boolean autoRefresh) {
 
         ConfigEntity entity = sqlExecutor.query(sql, CONFIG_ENTITY_RESULT_SET_EXTRACTOR);
@@ -379,6 +452,13 @@ public final class PropertiesUtil {
         return properties;
     }
 
+    /**
+     * Creates the.
+     *
+     * @param targetProperties the target properties
+     * @param newProperties the new properties
+     * @return the properties
+     */
     private static Properties<String, String> create(Properties<String, String> targetProperties, java.util.Properties newProperties) {
         Properties<String, String> properties = null;
         if (targetProperties == null) {
@@ -410,32 +490,69 @@ public final class PropertiesUtil {
         return properties;
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param file the file
+     * @return the properties
+     */
     public static Properties<String, Object> loadFromXML(File file) {
         return loadFromXML(file, false);
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param file the file
+     * @param autoRefresh the auto refresh
+     * @return the properties
+     */
     public static Properties<String, Object> loadFromXML(File file, boolean autoRefresh) {
         return loadFromXML(Properties.class, file, autoRefresh);
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param is the is
+     * @return the properties
+     */
     public static Properties<String, Object> loadFromXML(InputStream is) {
         return loadFromXML(Properties.class, is);
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param sqlExecutor the sql executor
+     * @param sql the sql
+     * @param autoRefresh the auto refresh
+     * @return the properties
+     */
     public static Properties<String, String> loadFromXML(SQLExecutor sqlExecutor, String sql, boolean autoRefresh) {
         return loadFromXML(Properties.class, sqlExecutor, sql, autoRefresh);
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param file the file
+     * @return the t
+     */
     public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, File file) {
         return loadFromXML(targetClass, file, false);
     }
 
     /**
+     * Load from XML.
      *
-     * @param targetClass
-     * @param file
-     * @param autoRefresh
-     * @return
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param file the file
+     * @param autoRefresh the auto refresh
+     * @return the t
      */
     public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, File file, boolean autoRefresh) {
         T properties = null;
@@ -469,10 +586,28 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param is the is
+     * @return the t
+     */
     public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, InputStream is) {
         return loadFromXML(null, targetClass, is);
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sqlExecutor the sql executor
+     * @param sql the sql
+     * @param autoRefresh the auto refresh
+     * @return the t
+     */
     public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, SQLExecutor sqlExecutor, String sql, boolean autoRefresh) {
         ConfigEntity entity = sqlExecutor.query(sql, CONFIG_ENTITY_RESULT_SET_EXTRACTOR);
 
@@ -502,6 +637,15 @@ public final class PropertiesUtil {
         return properties;
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param <T> the generic type
+     * @param targetProperties the target properties
+     * @param targetClass the target class
+     * @param is the is
+     * @return the t
+     */
     private static <T extends Properties<String, Object>> T loadFromXML(Object targetProperties, Class<T> targetClass, InputStream is) {
         DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
 
@@ -518,6 +662,17 @@ public final class PropertiesUtil {
         return loadFromXML(targetProperties, targetClass, node, null, true);
     }
 
+    /**
+     * Load from XML.
+     *
+     * @param <T> the generic type
+     * @param targetProperties the target properties
+     * @param inputClass the input class
+     * @param node the node
+     * @param propSetMethod the prop set method
+     * @param isFirstCall the is first call
+     * @return the t
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static <T extends Properties<String, Object>> T loadFromXML(Object targetProperties, Class<T> inputClass, Node node, Method propSetMethod,
             boolean isFirstCall) {
@@ -635,6 +790,13 @@ public final class PropertiesUtil {
 
     }
 
+    /**
+     * Store.
+     *
+     * @param properties the properties
+     * @param file the file
+     * @param comments the comments
+     */
     public static void store(Properties<?, ?> properties, File file, String comments) {
         OutputStream os = null;
 
@@ -655,6 +817,13 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Store.
+     *
+     * @param properties the properties
+     * @param os the os
+     * @param comments the comments
+     */
     public static void store(Properties<?, ?> properties, OutputStream os, String comments) {
         BufferedWriter bw = Objectory.createBufferedWriter(os);
 
@@ -665,6 +834,13 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Store.
+     *
+     * @param properties the properties
+     * @param writer the writer
+     * @param comments the comments
+     */
     public static void store(Properties<?, ?> properties, Writer writer, String comments) {
         final java.util.Properties tmp = new java.util.Properties();
 
@@ -680,6 +856,14 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Store to XML.
+     *
+     * @param properties the properties
+     * @param file the file
+     * @param rootElementName the root element name
+     * @param ignoreTypeInfo the ignore type info
+     */
     public static void storeToXML(Properties<?, ?> properties, File file, String rootElementName, boolean ignoreTypeInfo) {
         OutputStream os = null;
 
@@ -700,6 +884,14 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Store to XML.
+     *
+     * @param properties the properties
+     * @param os the os
+     * @param rootElementName the root element name
+     * @param ignoreTypeInfo the ignore type info
+     */
     public static void storeToXML(Properties<?, ?> properties, OutputStream os, String rootElementName, boolean ignoreTypeInfo) {
         try {
             storeToXML(properties, os, rootElementName, ignoreTypeInfo, true);
@@ -708,6 +900,16 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Store to XML.
+     *
+     * @param properties the properties
+     * @param os the os
+     * @param rootElementName the root element name
+     * @param ignoreTypeInfo the ignore type info
+     * @param isFirstCall the is first call
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private static void storeToXML(Properties<?, ?> properties, OutputStream os, String rootElementName, boolean ignoreTypeInfo, boolean isFirstCall)
             throws IOException {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(os);
@@ -815,11 +1017,11 @@ public final class PropertiesUtil {
     /**
      * Generate java code by the specified xml.
      *
-     * @param xml
-     * @param srcPath
-     * @param packageName
-     * @param className
-     * @param isPublicField
+     * @param xml the xml
+     * @param srcPath the src path
+     * @param packageName the package name
+     * @param className the class name
+     * @param isPublicField the is public field
      */
     public static void xml2Java(String xml, String srcPath, String packageName, String className, boolean isPublicField) {
         xml2Java(IOUtil.string2InputStream(xml), srcPath, packageName, className, isPublicField);
@@ -828,11 +1030,11 @@ public final class PropertiesUtil {
     /**
      * Generate java code by the specified xml.
      *
-     * @param file
-     * @param srcPath
-     * @param packageName
-     * @param className
-     * @param isPublicField
+     * @param file the file
+     * @param srcPath the src path
+     * @param packageName the package name
+     * @param className the class name
+     * @param isPublicField the is public field
      */
     public static void xml2Java(File file, String srcPath, String packageName, String className, boolean isPublicField) {
         InputStream is = null;
@@ -851,11 +1053,11 @@ public final class PropertiesUtil {
     /**
      * Generate java code by the specified xml.
      *
-     * @param is
-     * @param srcPath
-     * @param packageName
-     * @param className
-     * @param isPublicField
+     * @param is the is
+     * @param srcPath the src path
+     * @param packageName the package name
+     * @param className the class name
+     * @param isPublicField the is public field
      */
     public static void xml2Java(InputStream is, String srcPath, String packageName, String className, boolean isPublicField) {
         DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
@@ -916,6 +1118,17 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Xml properties 2 java.
+     *
+     * @param node the node
+     * @param writer the writer
+     * @param className the class name
+     * @param isPublicField the is public field
+     * @param spaces the spaces
+     * @param isRoot the is root
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private static void xmlProperties2Java(Node node, Writer writer, String className, boolean isPublicField, String spaces, boolean isRoot)
             throws IOException {
         if (className == null) {
@@ -1064,6 +1277,12 @@ public final class PropertiesUtil {
         writer.write(spaces + "}" + IOUtil.LINE_SEPARATOR);
     }
 
+    /**
+     * Gets the import type.
+     *
+     * @param node the node
+     * @return the import type
+     */
     private static Set<String> getImportType(Node node) {
         Set<String> result = new LinkedHashSet<>();
         NodeList childNodes = node.getChildNodes();
@@ -1107,6 +1326,16 @@ public final class PropertiesUtil {
         return result;
     }
 
+    /**
+     * Write method.
+     *
+     * @param writer the writer
+     * @param spaces the spaces
+     * @param propName the prop name
+     * @param typeName the type name
+     * @param duplicatedPropNameSet the duplicated prop name set
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private static void writeMethod(Writer writer, String spaces, String propName, String typeName, Set<String> duplicatedPropNameSet) throws IOException {
         String listPropName = propName + "List";
         String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(Primitives.wrap(N.typeOf(typeName).clazz())) : typeName;
@@ -1159,6 +1388,13 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Gets the type name.
+     *
+     * @param node the node
+     * @param propName the prop name
+     * @return the type name
+     */
     private static String getTypeName(Node node, String propName) {
         String typeName = node.getChildNodes().getLength() > 1 ? StringUtil.capitalize(propName) : "String";
         String typeAttr = XMLUtil.getAttribute(node, TYPE);
@@ -1177,6 +1413,12 @@ public final class PropertiesUtil {
         return typeName;
     }
 
+    /**
+     * Checks for duplicated prop name.
+     *
+     * @param node the node
+     * @return true, if successful
+     */
     private static boolean hasDuplicatedPropName(Node node) {
         NodeList childNodes = node.getChildNodes();
 
@@ -1210,6 +1452,12 @@ public final class PropertiesUtil {
         return false;
     }
 
+    /**
+     * Gets the duplicated prop name set.
+     *
+     * @param node the node
+     * @return the duplicated prop name set
+     */
     private static Set<String> getDuplicatedPropNameSet(Node node) {
         NodeList childNodes = node.getChildNodes();
         if (childNodes == null || childNodes.getLength() == 0) {
@@ -1241,89 +1489,205 @@ public final class PropertiesUtil {
         return duplicatedPropNameSet;
     }
 
+    /**
+     * The Class ConfigEntity.
+     */
     static class ConfigEntity {
+
+        /** The id. */
         private long id;
+
+        /** The name. */
         private String name;
+
+        /** The content. */
         private String content;
+
+        /** The included servers. */
         private List<String> includedServers;
+
+        /** The excluded servers. */
         private List<String> excludedServers;
+
+        /** The status. */
         private Status status;
+
+        /** The description. */
         private String description;
+
+        /** The last update time. */
         private Timestamp lastUpdateTime;
+
+        /** The create time. */
         private Timestamp createTime;
 
+        /**
+         * Gets the id.
+         *
+         * @return the id
+         */
         public long getId() {
             return id;
         }
 
+        /**
+         * Sets the id.
+         *
+         * @param id the new id
+         */
         public void setId(long id) {
             this.id = id;
         }
 
+        /**
+         * Gets the name.
+         *
+         * @return the name
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Sets the name.
+         *
+         * @param name the new name
+         */
         public void setName(String name) {
             this.name = name;
         }
 
+        /**
+         * Gets the content.
+         *
+         * @return the content
+         */
         public String getContent() {
             return content;
         }
 
+        /**
+         * Sets the content.
+         *
+         * @param content the new content
+         */
         public void setContent(String content) {
             this.content = content;
         }
 
+        /**
+         * Gets the included servers.
+         *
+         * @return the included servers
+         */
         public List<String> getIncludedServers() {
             return includedServers;
         }
 
+        /**
+         * Sets the included servers.
+         *
+         * @param includedServers the new included servers
+         */
         public void setIncludedServers(List<String> includedServers) {
             this.includedServers = includedServers;
         }
 
+        /**
+         * Gets the excluded servers.
+         *
+         * @return the excluded servers
+         */
         public List<String> getExcludedServers() {
             return excludedServers;
         }
 
+        /**
+         * Sets the excluded servers.
+         *
+         * @param excludedServers the new excluded servers
+         */
         public void setExcludedServers(List<String> excludedServers) {
             this.excludedServers = excludedServers;
         }
 
+        /**
+         * Gets the status.
+         *
+         * @return the status
+         */
         public Status getStatus() {
             return status;
         }
 
+        /**
+         * Sets the status.
+         *
+         * @param status the new status
+         */
         public void setStatus(Status status) {
             this.status = status;
         }
 
+        /**
+         * Gets the description.
+         *
+         * @return the description
+         */
         public String getDescription() {
             return description;
         }
 
+        /**
+         * Sets the description.
+         *
+         * @param description the new description
+         */
         public void setDescription(String description) {
             this.description = description;
         }
 
+        /**
+         * Gets the last update time.
+         *
+         * @return the last update time
+         */
         public Timestamp getLastUpdateTime() {
             return lastUpdateTime;
         }
 
+        /**
+         * Sets the last update time.
+         *
+         * @param lastUpdateTime the new last update time
+         */
         public void setLastUpdateTime(Timestamp lastUpdateTime) {
             this.lastUpdateTime = lastUpdateTime;
         }
 
+        /**
+         * Gets the creates the time.
+         *
+         * @return the creates the time
+         */
         public Timestamp getCreateTime() {
             return createTime;
         }
 
+        /**
+         * Sets the creates the time.
+         *
+         * @param createTime the new creates the time
+         */
         public void setCreateTime(Timestamp createTime) {
             this.createTime = createTime;
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1340,6 +1704,12 @@ public final class PropertiesUtil {
             return result;
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(Object obj) {
             if (this == obj) {
@@ -1359,6 +1729,11 @@ public final class PropertiesUtil {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "{id=" + id + ", name=" + name + ", content=" + content + ", includedServers=" + includedServers + ", excludedServers=" + excludedServers
@@ -1367,20 +1742,53 @@ public final class PropertiesUtil {
 
     }
 
+    /**
+     * The Enum ResourceType.
+     */
     enum ResourceType {
-        PROPERTIES, XML
+
+        /** The properties. */
+        PROPERTIES,
+        /** The xml. */
+        XML
     }
 
+    /**
+     * The Class Resource.
+     */
     static class Resource {
+
+        /** The target class. */
         private final Class<?> targetClass;
+
+        /** The file. */
         private final File file;
+
+        /** The file path. */
         private final String filePath;
+
+        /** The sql executor. */
         private final SQLExecutor sqlExecutor;
+
+        /** The sql. */
         private final String sql;
+
+        /** The result extractor. */
         private final ResultExtractor<ConfigEntity> resultExtractor;
+
+        /** The last load time. */
         private long lastLoadTime;
+
+        /** The resource type. */
         private final ResourceType resourceType;
 
+        /**
+         * Instantiates a new resource.
+         *
+         * @param cls the cls
+         * @param file the file
+         * @param resourceType the resource type
+         */
         public Resource(Class<?> cls, File file, ResourceType resourceType) {
             this.targetClass = cls;
             this.file = file;
@@ -1391,6 +1799,15 @@ public final class PropertiesUtil {
             this.resourceType = resourceType;
         }
 
+        /**
+         * Instantiates a new resource.
+         *
+         * @param cls the cls
+         * @param sqlExecutor the sql executor
+         * @param sql the sql
+         * @param resultExtractor the result extractor
+         * @param resourceType the resource type
+         */
         public Resource(Class<?> cls, SQLExecutor sqlExecutor, String sql, ResultExtractor<ConfigEntity> resultExtractor, ResourceType resourceType) {
             this.targetClass = cls;
             this.file = null;
@@ -1401,34 +1818,74 @@ public final class PropertiesUtil {
             this.resourceType = resourceType;
         }
 
+        /**
+         * Gets the last load time.
+         *
+         * @return the last load time
+         */
         public long getLastLoadTime() {
             return lastLoadTime;
         }
 
+        /**
+         * Sets the last load time.
+         *
+         * @param lastLoadTime the new last load time
+         */
         public void setLastLoadTime(long lastLoadTime) {
             this.lastLoadTime = lastLoadTime;
         }
 
+        /**
+         * Gets the file.
+         *
+         * @return the file
+         */
         public File getFile() {
             return file;
         }
 
+        /**
+         * Gets the sql executor.
+         *
+         * @return the sql executor
+         */
         public SQLExecutor getSqlExecutor() {
             return sqlExecutor;
         }
 
+        /**
+         * Gets the sql.
+         *
+         * @return the sql
+         */
         public String getSql() {
             return sql;
         }
 
+        /**
+         * Gets the result set extractor.
+         *
+         * @return the result set extractor
+         */
         public ResultExtractor<ConfigEntity> getResultSetExtractor() {
             return resultExtractor;
         }
 
+        /**
+         * Gets the type.
+         *
+         * @return the type
+         */
         public ResourceType getType() {
             return resourceType;
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1439,6 +1896,12 @@ public final class PropertiesUtil {
             return result;
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(Object obj) {
             if (this == obj) {
@@ -1455,6 +1918,11 @@ public final class PropertiesUtil {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "{file=" + file + ", sql=" + sql + "}";

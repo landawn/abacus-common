@@ -18,6 +18,7 @@ import static com.landawn.abacus.hash.LittleEndianByteArray.load32;
 import static com.landawn.abacus.hash.LittleEndianByteArray.load64;
 import static java.lang.Long.rotateRight;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -39,22 +40,45 @@ import static java.lang.Long.rotateRight;
  */
 final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
 
+    /** The Constant K0. */
     // Some primes between 2^63 and 2^64 for various uses.
     private static final long K0 = 0xc3a5c85c97cb3127L;
+
+    /** The Constant K1. */
     private static final long K1 = 0xb492b66fbe98f273L;
+
+    /** The Constant K2. */
     private static final long K2 = 0x9ae16a3b2f90404fL;
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @param off the off
+     * @param len the len
+     * @return the hash code
+     */
     @Override
     public HashCode hash(byte[] input, int off, int len) {
         Util.checkPositionIndexes(off, off + len, input.length);
         return HashCode.fromLong(fingerprint(input, off, len));
     }
 
+    /**
+     * Bits.
+     *
+     * @return the int
+     */
     @Override
     public int bits() {
         return 64;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "Hashing.farmHashFingerprint64()";
@@ -62,6 +86,14 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
 
     // End of public functions.
 
+    /**
+     * Fingerprint.
+     *
+     * @param bytes the bytes
+     * @param offset the offset
+     * @param length the length
+     * @return the long
+     */
     static long fingerprint(byte[] bytes, int offset, int length) {
         if (length <= 32) {
             if (length <= 16) {
@@ -76,10 +108,24 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
         }
     }
 
+    /**
+     * Shift mix.
+     *
+     * @param val the val
+     * @return the long
+     */
     private static long shiftMix(long val) {
         return val ^ (val >>> 47);
     }
 
+    /**
+     * Hash length 16.
+     *
+     * @param u the u
+     * @param v the v
+     * @param mul the mul
+     * @return the long
+     */
     private static long hashLength16(long u, long v, long mul) {
         long a = (u ^ v) * mul;
         a ^= (a >>> 47);
@@ -93,6 +139,12 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
      * Computes intermediate hash of 32 bytes of byte array from the given offset. Results are
      * returned in the output array because when we last measured, this was 12% faster than allocating
      * new arrays every time.
+     *
+     * @param bytes the bytes
+     * @param offset the offset
+     * @param seedA the seed A
+     * @param seedB the seed B
+     * @param output the output
      */
     private static void weakHashLength32WithSeeds(byte[] bytes, int offset, long seedA, long seedB, long[] output) {
         long part1 = load64(bytes, offset);
@@ -110,6 +162,14 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
         output[1] = seedB + c;
     }
 
+    /**
+     * Hash length 0 to 16.
+     *
+     * @param bytes the bytes
+     * @param offset the offset
+     * @param length the length
+     * @return the long
+     */
     private static long hashLength0to16(byte[] bytes, int offset, int length) {
         if (length >= 8) {
             long mul = K2 + length * 2;
@@ -135,6 +195,14 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
         return K2;
     }
 
+    /**
+     * Hash length 17 to 32.
+     *
+     * @param bytes the bytes
+     * @param offset the offset
+     * @param length the length
+     * @return the long
+     */
     private static long hashLength17to32(byte[] bytes, int offset, int length) {
         long mul = K2 + length * 2;
         long a = load64(bytes, offset) * K1;
@@ -144,6 +212,14 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
         return hashLength16(rotateRight(a + b, 43) + rotateRight(c, 30) + d, a + rotateRight(b + K2, 18) + c, mul);
     }
 
+    /**
+     * Hash length 33 to 64.
+     *
+     * @param bytes the bytes
+     * @param offset the offset
+     * @param length the length
+     * @return the long
+     */
     private static long hashLength33To64(byte[] bytes, int offset, int length) {
         long mul = K2 + length * 2;
         long a = load64(bytes, offset) * K2;
@@ -159,6 +235,14 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
         return hashLength16(rotateRight(e + f, 43) + rotateRight(g, 30) + h, e + rotateRight(f + a, 18) + g, mul);
     }
 
+    /**
+     * Hash length 65 plus.
+     *
+     * @param bytes the bytes
+     * @param offset the offset
+     * @param length the length
+     * @return the long
+     */
     /*
      * Compute an 8-byte hash of a byte array of length greater than 64 bytes.
      */

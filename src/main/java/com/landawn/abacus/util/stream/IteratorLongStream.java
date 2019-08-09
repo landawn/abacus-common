@@ -1704,8 +1704,10 @@ class IteratorLongStream extends AbstractLongStream {
             return StreamSupport.longStream(Spliterators.spliteratorUnknownSize(spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL),
                     isParallel());
         } else {
-            return StreamSupport.longStream(Spliterators.spliteratorUnknownSize(spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL),
-                    isParallel()).onClose(() -> close(closeHandlers));
+            return StreamSupport
+                    .longStream(Spliterators.spliteratorUnknownSize(spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL),
+                            isParallel())
+                    .onClose(() -> close(closeHandlers));
         }
     }
 

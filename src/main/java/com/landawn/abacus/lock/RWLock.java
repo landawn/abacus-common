@@ -16,6 +16,12 @@ package com.landawn.abacus.lock;
 
 import javax.jws.WebService;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Interface RWLock.
+ *
+ * @param <T> the generic type
+ */
 @WebService
 /**
  * 
@@ -24,47 +30,51 @@ import javax.jws.WebService;
  * @author Haiyang Li
  */
 public interface RWLock<T> {
+
+    /** The Constant DEFAULT_TIMEOUT. */
     public static final long DEFAULT_TIMEOUT = 3600 * 1000L;
 
     /**
      * Method lockWriteOn.
-     * 
-     * @param target
+     *
+     * @param target the target
      */
     public void lockWriteOn(T target);
 
     /**
-     * 
-     * @param target
-     * @param timeout
+     * Lock write on.
+     *
+     * @param target the target
+     * @param timeout the timeout
      */
     public void lockWriteOn(T target, long timeout);
 
     /**
      * Method unlockWriteOn.
-     * 
-     * @param target
+     *
+     * @param target the target
      */
     public void unlockWriteOn(T target);
 
     /**
      * Method lockReadOn.
-     * 
-     * @param target
+     *
+     * @param target the target
      */
     public void lockReadOn(T target);
 
     /**
-     * 
-     * @param target
-     * @param timeout
+     * Lock read on.
+     *
+     * @param target the target
+     * @param timeout the timeout
      */
     public void lockReadOn(T target, long timeout);
 
     /**
      * Method unlockReadOn.
-     * 
-     * @param target
+     *
+     * @param target the target
      */
     public void unlockReadOn(T target);
 }

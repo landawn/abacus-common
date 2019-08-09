@@ -16,23 +16,26 @@ package com.landawn.abacus;
 
 import com.landawn.abacus.exception.UncheckedSQLException;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface Transaction.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface Transaction {
+
     /**
      * Returns the identifier of this transaction if it's supported.
-     * 
-     * @return
+     *
+     * @return the string
      */
     String id();
 
     /**
-     * 
-     * @return
+     * Isolation level.
+     *
+     * @return the isolation level
      */
     IsolationLevel isolationLevel();
 
@@ -44,28 +47,30 @@ public interface Transaction {
     Status status();
 
     /**
-     * 
-     * @return
+     * Checks if is active.
+     *
+     * @return true, if is active
      */
     boolean isActive();
 
     /**
      * Method commit.
-     * 
-     * @throws UncheckedSQLException
+     *
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     void commit() throws UncheckedSQLException;
 
     /**
      * Method rollback.
-     * 
-     * @throws UncheckedSQLException
+     *
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     void rollback() throws UncheckedSQLException;
 
     /**
+     * The Enum Status.
+     *
      * @author Haiyang Li
-     * 
      * @version $Revision: 0.8 $ 07/01/15
      */
     enum Status {
@@ -96,20 +101,16 @@ public interface Transaction {
     }
 
     /**
-     * 
+     * The Enum Action.
+     *
      * @author Haiyang Li
-     * 
      */
     enum Action {
 
-        /**
-         * 
-         */
+        /** The commit. */
         COMMIT,
 
-        /**
-         * 
-         */
+        /** The rollback. */
         ROLLBACK;
     }
 }

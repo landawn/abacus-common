@@ -18,40 +18,52 @@ import java.util.Map;
 
 import com.landawn.abacus.util.Properties;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface DataSourceManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface DataSourceManager {
+
     /**
-     * 
-     * @return
+     * Gets the data source selector.
+     *
+     * @return the data source selector
      */
     DataSourceSelector getDataSourceSelector();
 
     /**
      * Returns the first(primary) dataSource specified for the live env in the configuration.
-     * 
-     * @return
+     *
+     * @return the primary data source
      */
     DataSource getPrimaryDataSource();
 
     /**
      * Returns all the active data sources for the live env.
-     * 
-     * @return
+     *
+     * @return the active data sources
      */
     Map<String, DataSource> getActiveDataSources();
 
     /**
-     * 
+     * Gets the properties.
+     *
      * @return the properties used to manage the data source.
      */
     Properties<String, String> getProperties();
 
+    /**
+     * Close.
+     */
     void close();
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     boolean isClosed();
 }

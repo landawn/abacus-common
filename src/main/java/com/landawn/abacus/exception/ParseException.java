@@ -14,13 +14,16 @@
 
 package com.landawn.abacus.exception;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class ParseException.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class ParseException extends AbacusException {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 7678894353902496315L;
 
     /**
@@ -32,8 +35,8 @@ public class ParseException extends AbacusException {
 
     /**
      * Constructor for ParseException.
-     * 
-     * @param message
+     *
+     * @param message the message
      */
     public ParseException(String message) {
         super(message);
@@ -41,9 +44,9 @@ public class ParseException extends AbacusException {
 
     /**
      * Constructor for ParseException.
-     * 
-     * @param message
-     * @param cause
+     *
+     * @param message the message
+     * @param cause the cause
      */
     public ParseException(String message, Throwable cause) {
         super(message, cause);
@@ -51,8 +54,8 @@ public class ParseException extends AbacusException {
 
     /**
      * Constructor for ParseException.
-     * 
-     * @param cause
+     *
+     * @param cause the cause
      */
     public ParseException(Throwable cause) {
         super(cause);

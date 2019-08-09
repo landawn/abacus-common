@@ -21,6 +21,7 @@ import java.util.Collection;
 
 import com.landawn.abacus.util.u.Optional;
 
+// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
@@ -34,12 +35,15 @@ import com.landawn.abacus.util.u.Optional;
  * <p>
  * #ThreadSafe# if the objects and comparator are thread-safe
  * </p>
- * 
- * @since 3.0
+ *
  * @version $Id: Range.java 1565243 2014-02-06 13:37:12Z sebb $
+ * @param <T> the generic type
+ * @since 3.0
  */
 @SuppressWarnings("rawtypes")
 public final class Range<T extends Comparable> implements Serializable {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 545606166758706779L;
 
     /**
@@ -51,8 +55,16 @@ public final class Range<T extends Comparable> implements Serializable {
      */
     private final UpperEndpoint<T> upperEndpoint;
 
+    /** The bound type. */
     private final BoundType boundType;
 
+    /**
+     * Instantiates a new range.
+     *
+     * @param lowerEndpoint the lower endpoint
+     * @param upperEndpoint the upper endpoint
+     * @param boundType the bound type
+     */
     @SuppressWarnings("unchecked")
     private Range(final LowerEndpoint<T> lowerEndpoint, final UpperEndpoint<T> upperEndpoint, final BoundType boundType) {
         this.lowerEndpoint = lowerEndpoint;
@@ -81,10 +93,12 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * 
-     * @param min
-     * @param max
-     * @return
+     * Open.
+     *
+     * @param <T> the generic type
+     * @param min the min
+     * @param max the max
+     * @return the range
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
     public static <T extends Comparable<T>> Range<T> open(final T min, final T max) {
@@ -96,10 +110,12 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * 
-     * @param min
-     * @param max
-     * @return
+     * Open closed.
+     *
+     * @param <T> the generic type
+     * @param min the min
+     * @param max the max
+     * @return the range
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
     public static <T extends Comparable<T>> Range<T> openClosed(final T min, final T max) {
@@ -111,10 +127,12 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * 
-     * @param min
-     * @param max
-     * @return
+     * Closed open.
+     *
+     * @param <T> the generic type
+     * @param min the min
+     * @param max the max
+     * @return the range
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
     public static <T extends Comparable<T>> Range<T> closedOpen(final T min, final T max) {
@@ -126,10 +144,12 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * 
-     * @param min
-     * @param max
-     * @return
+     * Closed.
+     *
+     * @param <T> the generic type
+     * @param min the min
+     * @param max the max
+     * @return the range
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
     public static <T extends Comparable<T>> Range<T> closed(final T min, final T max) {
@@ -140,6 +160,11 @@ public final class Range<T extends Comparable> implements Serializable {
         return new Range<T>(new LowerEndpoint<T>(min, true), new UpperEndpoint<T>(max, true), BoundType.CLOSED_CLOSED);
     }
 
+    /**
+     * Bound type.
+     *
+     * @return the bound type
+     */
     public BoundType boundType() {
         return boundType;
     }
@@ -186,6 +211,12 @@ public final class Range<T extends Comparable> implements Serializable {
         return lowerEndpoint.includes(element) && upperEndpoint.includes(element);
     }
 
+    /**
+     * Contains all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean containsAll(Collection<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -419,13 +450,16 @@ public final class Range<T extends Comparable> implements Serializable {
      * <br />
      * Returns the minimal range that {@linkplain #encloses encloses} both this range and {@code
      * other}. For example, the span of {@code [1..3]} and {@code (5..7)} is {@code [1..7)}.
-     *
+     * 
      * <p><i>If</i> the input ranges are {@linkplain #isConnected connected}, the returned range can
      * also be called their <i>union</i>. If they are not, note that the span might contain values
      * that are not contained in either input range.
-     *
+     * 
      * <p>Like {@link #intersection(Range) intersection}, this operation is commutative, associative
      * and idempotent. Unlike it, it is always well-defined for any two input ranges.
+     *
+     * @param other the other
+     * @return the range
      */
     public Range<T> span(Range<T> other) {
         final LowerEndpoint<T> newLowerEndpoint = lowerEndpoint.includes(other.lowerEndpoint.value) ? lowerEndpoint : other.lowerEndpoint;
@@ -442,6 +476,11 @@ public final class Range<T extends Comparable> implements Serializable {
         return new Range<T>(newLowerEndpoint, newUpperEndpoint, boundType);
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     public boolean isEmpty() {
         if (lowerEndpoint.isClosed || upperEndpoint.isClosed || lowerEndpoint.compareTo(upperEndpoint.value) != 0) {
             return false;
@@ -499,41 +538,104 @@ public final class Range<T extends Comparable> implements Serializable {
         return result;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return lowerEndpoint.toString() + ", " + upperEndpoint.toString();
     }
 
+    /**
+     * The Enum BoundType.
+     */
     public static enum BoundType {
-        OPEN_OPEN, OPEN_CLOSED, CLOSED_OPEN, CLOSED_CLOSED
+
+        /** The open open. */
+        OPEN_OPEN,
+        /** The open closed. */
+        OPEN_CLOSED,
+        /** The closed open. */
+        CLOSED_OPEN,
+        /** The closed closed. */
+        CLOSED_CLOSED
     }
 
+    /**
+     * The Class Endpoint.
+     *
+     * @param <T> the generic type
+     */
     static abstract class Endpoint<T extends Comparable> implements Serializable {
+
+        /** The Constant serialVersionUID. */
         private static final long serialVersionUID = -1404748904424344410L;
 
+        /** The value. */
         final T value;
+
+        /** The is closed. */
         final boolean isClosed;
 
+        /**
+         * Instantiates a new endpoint.
+         *
+         * @param value the value
+         * @param isClosed the is closed
+         */
         protected Endpoint(final T value, boolean isClosed) {
             this.value = value;
             this.isClosed = isClosed;
         }
 
+        /**
+         * Compare to.
+         *
+         * @param value the value
+         * @return the int
+         */
         public int compareTo(T value) {
             return N.compare(this.value, value);
         }
 
+        /**
+         * Includes.
+         *
+         * @param value the value
+         * @return true, if successful
+         */
         public abstract boolean includes(T value);
 
     }
 
+    /**
+     * The Class LowerEndpoint.
+     *
+     * @param <T> the generic type
+     */
     static class LowerEndpoint<T extends Comparable> extends Endpoint<T> implements Serializable {
+
+        /** The Constant serialVersionUID. */
         private static final long serialVersionUID = -1369183906861608859L;
 
+        /**
+         * Instantiates a new lower endpoint.
+         *
+         * @param value the value
+         * @param isClosed the is closed
+         */
         LowerEndpoint(final T value, boolean isClosed) {
             super(value, isClosed);
         }
 
+        /**
+         * Includes.
+         *
+         * @param value the value
+         * @return true, if successful
+         */
         @Override
         public boolean includes(T value) {
             return isClosed ? N.compare(value, this.value) >= 0 : N.compare(value, this.value) > 0;
@@ -582,24 +684,53 @@ public final class Range<T extends Comparable> implements Serializable {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return (isClosed ? "[" : "(") + N.toString(value);
         }
     }
 
+    /**
+     * The Class UpperEndpoint.
+     *
+     * @param <T> the generic type
+     */
     static class UpperEndpoint<T extends Comparable> extends Endpoint<T> implements Serializable {
+
+        /** The Constant serialVersionUID. */
         private static final long serialVersionUID = 3180376045860768477L;
 
+        /**
+         * Instantiates a new upper endpoint.
+         *
+         * @param value the value
+         * @param isClosed the is closed
+         */
         UpperEndpoint(final T value, boolean isClosed) {
             super(value, isClosed);
         }
 
+        /**
+         * Includes.
+         *
+         * @param value the value
+         * @return true, if successful
+         */
         @Override
         public boolean includes(T value) {
             return isClosed ? N.compare(value, this.value) <= 0 : N.compare(value, this.value) < 0;
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             int result = isClosed ? 0 : 1;
@@ -607,6 +738,12 @@ public final class Range<T extends Comparable> implements Serializable {
             return result;
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(final Object obj) {
             if (obj == this) {
@@ -622,6 +759,11 @@ public final class Range<T extends Comparable> implements Serializable {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return N.toString(value) + (isClosed ? "]" : ")");

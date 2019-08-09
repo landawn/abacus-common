@@ -14,15 +14,18 @@
 
 package com.landawn.abacus.pool;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface Poolable.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface Poolable {
+
     /**
-     * 
+     * Activity print.
+     *
      * @return ActivityPrint
      */
     ActivityPrint activityPrint();
@@ -34,9 +37,10 @@ public interface Poolable {
 
     /**
      * Wrap the the source object with <code>Long.MAX_VALUE</code> <code>liveTime</code> and <code>Long.MAX_VALUE</code> <code>maxIdleTime</code>.
-     * 
-     * @param srcObject
-     * @return
+     *
+     * @param <T> the generic type
+     * @param srcObject the src object
+     * @return the poolable wrapper
      */
     public static <T> PoolableWrapper<T> wrap(T srcObject) {
         return PoolableWrapper.of(srcObject);
@@ -44,12 +48,12 @@ public interface Poolable {
 
     /**
      * Wrap the the source object with specified <code>liveTime</code> and <code>maxIdleTime</code>.
-     * 
-     * @param <T>
-     * @param srcObject
-     * @param liveTime
-     * @param maxIdleTime
-     * @return
+     *
+     * @param <T> the generic type
+     * @param srcObject the src object
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @return the poolable wrapper
      */
     public static <T> PoolableWrapper<T> wrap(T srcObject, long liveTime, long maxIdleTime) {
         return PoolableWrapper.of(srcObject, liveTime, maxIdleTime);

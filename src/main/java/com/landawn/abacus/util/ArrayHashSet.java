@@ -23,30 +23,51 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+// TODO: Auto-generated Javadoc
 /**
  * It's designed to supported primitive/object array.
  * The elements in the array must not be modified after the array is added into the set.
  *
- * @since 0.8
- *
  * @author Haiyang Li
+ * @param <E> the element type
+ * @since 0.8
  */
 public class ArrayHashSet<E> implements Set<E> {
+
+    /** The set. */
     private final Set<Wrapper<E>> set;
 
+    /**
+     * Instantiates a new array hash set.
+     */
     public ArrayHashSet() {
         this.set = new HashSet<>();
     }
 
+    /**
+     * Instantiates a new array hash set.
+     *
+     * @param initialCapacity the initial capacity
+     */
     public ArrayHashSet(final int initialCapacity) {
         this.set = new HashSet<>(initialCapacity);
     }
 
+    /**
+     * Instantiates a new array hash set.
+     *
+     * @param setType the set type
+     */
     @SuppressWarnings("rawtypes")
     public ArrayHashSet(final Class<? extends Set> setType) {
         this.set = N.newInstance(setType);
     }
 
+    /**
+     * Instantiates a new array hash set.
+     *
+     * @param coll the coll
+     */
     public ArrayHashSet(final Collection<? extends E> coll) {
         if (N.isNullOrEmpty(coll)) {
             set = new HashSet<>();
@@ -57,15 +78,32 @@ public class ArrayHashSet<E> implements Set<E> {
         addAll(coll);
     }
 
+    /**
+     * Instantiates a new array hash set.
+     *
+     * @param set the set
+     */
     ArrayHashSet(Set<Wrapper<E>> set) {
         this.set = set;
     }
 
+    /**
+     * Adds the.
+     *
+     * @param e the e
+     * @return true, if successful
+     */
     @Override
     public boolean add(E e) {
         return set.add(Wrapper.of(e));
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     @Override
     public boolean addAll(Collection<? extends E> c) {
         if (N.isNullOrEmpty(c)) {
@@ -81,11 +119,23 @@ public class ArrayHashSet<E> implements Set<E> {
         return result;
     }
 
+    /**
+     * Removes the.
+     *
+     * @param o the o
+     * @return true, if successful
+     */
     @Override
     public boolean remove(Object o) {
         return set.remove(Wrapper.of(o));
     }
 
+    /**
+     * Removes the all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     @Override
     public boolean removeAll(Collection<?> c) {
         if (N.isNullOrEmpty(c)) {
@@ -101,6 +151,12 @@ public class ArrayHashSet<E> implements Set<E> {
         return result;
     }
 
+    /**
+     * Retain all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     @Override
     public boolean retainAll(Collection<?> c) {
         if (N.isNullOrEmpty(c)) {
@@ -122,11 +178,23 @@ public class ArrayHashSet<E> implements Set<E> {
         return set.retainAll(list);
     }
 
+    /**
+     * Contains.
+     *
+     * @param o the o
+     * @return true, if successful
+     */
     @Override
     public boolean contains(Object o) {
         return set.contains(Wrapper.of(o));
     }
 
+    /**
+     * Contains all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     @Override
     public boolean containsAll(Collection<?> c) {
         if (N.isNullOrEmpty(c)) {
@@ -142,11 +210,21 @@ public class ArrayHashSet<E> implements Set<E> {
         return true;
     }
 
+    /**
+     * Iterator.
+     *
+     * @return the iterator
+     */
     @Override
     public Iterator<E> iterator() {
         return new Itr<E>(set.iterator());
     }
 
+    /**
+     * To array.
+     *
+     * @return the object[]
+     */
     @Override
     public Object[] toArray() {
         final int size = size();
@@ -165,6 +243,13 @@ public class ArrayHashSet<E> implements Set<E> {
         return result;
     }
 
+    /**
+     * To array.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @return the t[]
+     */
     @Override
     public <T> T[] toArray(T[] a) {
         final int size = size();
@@ -183,53 +268,107 @@ public class ArrayHashSet<E> implements Set<E> {
         return a;
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         return set.size();
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     @Override
     public boolean isEmpty() {
         return set.isEmpty();
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         set.clear();
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return set.hashCode();
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return obj == this || (obj instanceof ArrayHashSet && ((ArrayHashSet<E>) obj).set.equals(set));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return set.toString();
     }
 
+    /**
+     * The Class Itr.
+     *
+     * @param <T> the generic type
+     */
     static class Itr<T> implements Iterator<T> {
+
+        /** The it. */
         private final Iterator<Wrapper<T>> it;
 
+        /**
+         * Instantiates a new itr.
+         *
+         * @param it the it
+         */
         Itr(Iterator<Wrapper<T>> it) {
             this.it = it;
         }
 
+        /**
+         * Checks for next.
+         *
+         * @return true, if successful
+         */
         @Override
         public boolean hasNext() {
             return it.hasNext();
         }
 
+        /**
+         * Next.
+         *
+         * @return the t
+         */
         @Override
         public T next() {
             return it.next().value();
         }
 
+        /**
+         * Removes the.
+         */
         @Override
         public void remove() {
             it.remove();

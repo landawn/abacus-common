@@ -17,33 +17,34 @@ package com.landawn.abacus;
 import java.util.List;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
  * It's designed to support partitioning by tables.
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface SliceSelector {
+
     /**
      * Returns the new the sql for selected slice by the specified sql statement and parameters.
-     * 
-     * @param entityName
-     * @param sql
-     * @param parameters
+     *
+     * @param entityName the entity name
+     * @param sql the sql
+     * @param parameters the parameters
      * @param options the target data source may be specified by <code>com.landawn.abacus.util.Options.Query.QUERY_WITH_DATA_SOURCE</code>
-     * @return
+     * @return the string
      */
     String select(String entityName, String sql, Object[] parameters, Map<String, Object> options);
 
     /**
      * Returns the new the sql for selected slice by the specified sql statement and parameters for batch operation.
-     * 
-     * @param entityName
-     * @param sql
-     * @param parameters
+     *
+     * @param entityName the entity name
+     * @param sql the sql
+     * @param parameters the parameters
      * @param options the target data source may be specified by <code>com.landawn.abacus.util.Options.Query.QUERY_WITH_DATA_SOURCE</code>
-     * @return
+     * @return the string
      */
     String select(String entityName, String sql, List<?> parameters, Map<String, Object> options);
 }

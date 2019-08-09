@@ -17,41 +17,115 @@ package com.landawn.abacus.cache;
 import java.util.Collection;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface DistributedCacheClient.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public interface DistributedCacheClient<T> {
+
+    /** The Constant DEFAULT_TIMEOUT. */
     public static final long DEFAULT_TIMEOUT = 1000;
+
+    /** The Constant MEMCACHED. */
     public static final String MEMCACHED = "Memcached";
+
+    /** The Constant REDIS. */
     public static final String REDIS = "Redis";
 
+    /**
+     * Server url.
+     *
+     * @return the string
+     */
     String serverUrl();
 
+    /**
+     * Gets the.
+     *
+     * @param key the key
+     * @return the t
+     */
     T get(String key);
 
+    /**
+     * Gets the bulk.
+     *
+     * @param keys the keys
+     * @return the bulk
+     */
     Map<String, T> getBulk(String... keys);
 
+    /**
+     * Gets the bulk.
+     *
+     * @param keys the keys
+     * @return the bulk
+     */
     Map<String, T> getBulk(Collection<String> keys);
 
+    /**
+     * Sets the.
+     *
+     * @param key the key
+     * @param obj the obj
+     * @param liveTime the live time
+     * @return true, if successful
+     */
     boolean set(String key, T obj, long liveTime);
 
+    /**
+     * Delete.
+     *
+     * @param key the key
+     * @return true, if successful
+     */
     boolean delete(String key);
 
+    /**
+     * Incr.
+     *
+     * @param key the key
+     * @return the long
+     */
     long incr(String key);
 
+    /**
+     * Incr.
+     *
+     * @param key the key
+     * @param deta the deta
+     * @return the long
+     */
     long incr(String key, int deta);
 
+    /**
+     * Decr.
+     *
+     * @param key the key
+     * @return the long
+     */
     long decr(String key);
 
+    /**
+     * Decr.
+     *
+     * @param key the key
+     * @param deta the deta
+     * @return the long
+     */
     long decr(String key, int deta);
 
     /**
-     * Delete all the keys from all the servers
+     * Delete all the keys from all the servers.
      */
     void flushAll();
 
+    /**
+     * Disconnect.
+     */
     void disconnect();
 }

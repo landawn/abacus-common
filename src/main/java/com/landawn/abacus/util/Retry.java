@@ -22,20 +22,39 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class Retry.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public final class Retry<T> {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(Retry.class);
 
+    /** The retry times. */
     private final int retryTimes;
+
+    /** The retry interval. */
     private final long retryInterval;
+
+    /** The retry condition. */
     private final Predicate<? super Exception> retryCondition;
+
+    /** The retry condition 2. */
     private final BiPredicate<? super T, ? super Exception> retryCondition2;
 
+    /**
+     * Instantiates a new retry.
+     *
+     * @param retryTimes the retry times
+     * @param retryInterval the retry interval
+     * @param retryCondition the retry condition
+     * @param retryCondition2 the retry condition 2
+     */
     Retry(final int retryTimes, final long retryInterval, final Predicate<? super Exception> retryCondition,
             final BiPredicate<? super T, ? super Exception> retryCondition2) {
 
@@ -45,6 +64,14 @@ public final class Retry<T> {
         this.retryCondition2 = retryCondition2;
     }
 
+    /**
+     * Of.
+     *
+     * @param retryTimes the retry times
+     * @param retryInterval the retry interval
+     * @param retryCondition the retry condition
+     * @return the retry
+     */
     public static Retry<Void> of(final int retryTimes, final long retryInterval, final Predicate<? super Exception> retryCondition) {
         if (retryTimes < 0 || retryInterval < 0) {
             throw new IllegalArgumentException("'retryTimes' and 'retryInterval' can't be negative");
@@ -55,6 +82,15 @@ public final class Retry<T> {
         return new Retry<Void>(retryTimes, retryInterval, retryCondition, null);
     }
 
+    /**
+     * Of.
+     *
+     * @param <R> the generic type
+     * @param retryTimes the retry times
+     * @param retryInterval the retry interval
+     * @param retryCondition the retry condition
+     * @return the retry
+     */
     public static <R> Retry<R> of(final int retryTimes, final long retryInterval, final BiPredicate<? super R, ? super Exception> retryCondition) {
         if (retryTimes < 0 || retryInterval < 0) {
             throw new IllegalArgumentException("'retryTimes' and 'retryInterval' can't be negative");
@@ -65,6 +101,12 @@ public final class Retry<T> {
         return new Retry<R>(retryTimes, retryInterval, null, retryCondition);
     }
 
+    /**
+     * Run.
+     *
+     * @param cmd the cmd
+     * @throws Exception the exception
+     */
     public void run(final Try.Runnable<? extends Exception> cmd) throws Exception {
         try {
             cmd.run();
@@ -94,6 +136,13 @@ public final class Retry<T> {
         }
     }
 
+    /**
+     * Call.
+     *
+     * @param callable the callable
+     * @return the t
+     * @throws Exception the exception
+     */
     public T call(final Callable<T> callable) throws Exception {
         T result = null;
         int retriedTimes = 0;
@@ -147,9 +196,11 @@ public final class Retry<T> {
     }
 
     /**
-     * 
-     * @param iter
-     * @return
+     * Iterate.
+     *
+     * @param <E> the element type
+     * @param iter the iter
+     * @return the iterator
      * @deprecated replaced by {@code Retry#iterate(Iterator, int)}.
      */
     @Deprecated
@@ -157,6 +208,14 @@ public final class Retry<T> {
         return iterate(iter, Integer.MAX_VALUE);
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <E> the element type
+     * @param iter the iter
+     * @param totalRetryTimes the total retry times
+     * @return the iterator
+     */
     public <E> Iterator<E> iterate(final Iterator<E> iter, final int totalRetryTimes) {
         N.checkArgPositive(totalRetryTimes, "totalRetryTimes");
 

@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util;
 
-import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,6 +22,7 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+// TODO: Auto-generated Javadoc
 /**
  * 
  * Copyright (c) 2017,  Jackson Authors/Contributers.
@@ -35,6 +35,8 @@ import java.util.TimeZone;
  * @see <a href="http://www.w3.org/TR/NOTE-datetime">this specification</a>
  */
 public final class ISO8601Util {
+
+    /** The Constant DEF_8601_LEN. */
     protected final static int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
 
     /**
@@ -50,8 +52,8 @@ public final class ISO8601Util {
      */
 
     /**
-     * Format a date into 'yyyy-MM-ddThh:mm:ssZ' (default timezone, no milliseconds precision)
-     * 
+     * Format a date into 'yyyy-MM-ddThh:mm:ssZ' (default timezone, no milliseconds precision).
+     *
      * @param date the date to format
      * @return the date formatted as 'yyyy-MM-ddThh:mm:ssZ'
      */
@@ -70,6 +72,14 @@ public final class ISO8601Util {
         return format(date, millis, TIMEZONE_Z);
     }
 
+    /**
+     * Format.
+     *
+     * @param date the date
+     * @param millis the millis
+     * @param tz the tz
+     * @return the string
+     */
     @Deprecated // since 2.9
     public static String format(Date date, boolean millis, TimeZone tz) {
         return format(date, millis, tz, Locale.US);
@@ -77,12 +87,12 @@ public final class ISO8601Util {
 
     /**
      * Format date into yyyy-MM-ddThh:mm:ss[.sss][Z|[+-]hh:mm]
-     * 
+     *
      * @param date the date to format
      * @param millis true to include millis precision otherwise false
      * @param tz timezone to use for the formatting (UTC will produce 'Z')
+     * @param loc the loc
      * @return the date formatted as yyyy-MM-ddThh:mm:ss[.sss][Z|[+-]hh:mm]
-     *
      * @since 2.9
      */
     public static String format(Date date, boolean millis, TimeZone tz, Locale loc) {
@@ -114,6 +124,12 @@ public final class ISO8601Util {
     /**********************************************************
      */
 
+    /**
+     * Parses the.
+     *
+     * @param date the date
+     * @return the date
+     */
     public static Date parse(String date) {
         return parse(date, new ParsePosition(0));
     }
@@ -121,11 +137,10 @@ public final class ISO8601Util {
     /**
      * Parse a date from ISO-8601 formatted string. It expects a format
      * [yyyy-MM-dd|yyyyMMdd][T(hh:mm[:ss[.sss]]|hhmm[ss[.sss]])]?[Z|[+-]hh:mm]]
-     * 
+     *
      * @param date ISO string to parse in the appropriate format.
      * @param pos The position to start parsing from, updated to where parsing stopped.
      * @return the parsed date
-     * @throws ParseException if the date is not in the appropriate format
      */
     public static Date parse(String date, ParsePosition pos) {
         Exception fail = null;
@@ -288,8 +303,8 @@ public final class ISO8601Util {
     }
 
     /**
-     * Parse an integer located between 2 given offsets in a string
-     * 
+     * Parse an integer located between 2 given offsets in a string.
+     *
      * @param value the string to parse
      * @param beginIndex the start index for the integer in the string
      * @param endIndex the end index for the integer in the string
@@ -324,6 +339,10 @@ public final class ISO8601Util {
 
     /**
      * Returns the index of the first character in the string that is not a digit, starting at offset.
+     *
+     * @param string the string
+     * @param offset the offset
+     * @return the int
      */
     private static int indexOfNonDigit(String string, int offset) {
         for (int i = offset; i < string.length(); i++) {

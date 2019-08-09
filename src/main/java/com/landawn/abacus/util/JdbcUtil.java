@@ -154,30 +154,33 @@ import com.landawn.abacus.util.stream.IntStream.IntStreamEx;
 import com.landawn.abacus.util.stream.Stream;
 import com.landawn.abacus.util.stream.Stream.StreamEx;
 
+// TODO: Auto-generated Javadoc
 /**
+ * The Class JdbcUtil.
  *
- * @since 0.8
- * 
- * @author Haiyang Li 
- * 
+ * @author Haiyang Li
  * @see {@link com.landawn.abacus.annotation.ReadOnly}
  * @see {@link com.landawn.abacus.annotation.ReadOnlyId}
  * @see {@link com.landawn.abacus.annotation.NonUpdatable}
  * @see {@link com.landawn.abacus.annotation.Transient}
  * @see {@link com.landawn.abacus.annotation.Table}
  * @see {@link com.landawn.abacus.annotation.Column}
- * 
  * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html</a>
  * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html</a>
  * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html</a>
  * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html">http://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html</a>
+ * @since 0.8
  */
 public final class JdbcUtil {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(JdbcUtil.class);
 
+    /** The Constant CURRENT_DIR_PATH. */
     // ...
     private static final String CURRENT_DIR_PATH = "./";
 
+    /** The Constant DEFAULT_STMT_SETTER. */
     private static final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> DEFAULT_STMT_SETTER = new JdbcUtil.BiParametersSetter<PreparedStatement, Object[]>() {
         @Override
         public void accept(PreparedStatement stmt, Object[] parameters) throws SQLException {
@@ -187,6 +190,7 @@ public final class JdbcUtil {
         }
     };
 
+    /** The Constant sqlStateForTableNotExists. */
     private static final Set<String> sqlStateForTableNotExists = new HashSet<>();
 
     static {
@@ -195,10 +199,20 @@ public final class JdbcUtil {
         sqlStateForTableNotExists.add("42501"); // for HSQLDB.
     }
 
+    /**
+     * Instantiates a new jdbc util.
+     */
     private JdbcUtil() {
         // singleton
     }
 
+    /**
+     * Gets the DB version.
+     *
+     * @param conn the conn
+     * @return the DB version
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static DBVersion getDBVersion(final Connection conn) throws UncheckedSQLException {
         try {
             String dbProudctName = conn.getMetaData().getDatabaseProductName();
@@ -268,10 +282,12 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param dataSourceXmlFile
+     * Creates the data source manager.
+     *
+     * @param dataSourceXmlFile the data source xml file
      * @return DataSourceManager
-     * 
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see DataSource.xsd
      */
     public static DataSourceManager createDataSourceManager(final String dataSourceXmlFile) throws UncheckedIOException, UncheckedSQLException {
@@ -288,20 +304,33 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param dataSourceXmlInputStream
+     * Creates the data source manager.
+     *
+     * @param dataSourceXmlInputStream the data source xml input stream
      * @return DataSourceManager
-     * 
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see DataSource.xsd
      */
     public static DataSourceManager createDataSourceManager(final InputStream dataSourceXmlInputStream) throws UncheckedIOException, UncheckedSQLException {
         return createDataSourceManager(dataSourceXmlInputStream, CURRENT_DIR_PATH);
     }
 
+    /** The Constant PROPERTIES. */
     private static final String PROPERTIES = "properties";
 
+    /** The Constant RESOURCE. */
     private static final String RESOURCE = "resource";
 
+    /**
+     * Creates the data source manager.
+     *
+     * @param dataSourceXmlInputStream the data source xml input stream
+     * @param dataSourceXmlFile the data source xml file
+     * @return the data source manager
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     private static DataSourceManager createDataSourceManager(final InputStream dataSourceXmlInputStream, final String dataSourceXmlFile)
             throws UncheckedIOException, UncheckedSQLException {
         DocumentBuilder domParser = XMLUtil.createDOMParser();
@@ -357,11 +386,12 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param dataSourceFile
-     * @return
-     * @throws UncheckedIOException
-     * @throws UncheckedSQLException
+     * Creates the data source.
+     *
+     * @param dataSourceFile the data source file
+     * @return the data source
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see DataSource.xsd
      */
     public static DataSource createDataSource(final String dataSourceFile) throws UncheckedIOException, UncheckedSQLException {
@@ -377,17 +407,27 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param dataSourceInputStream
-     * @return
-     * @throws UncheckedIOException
-     * @throws UncheckedSQLException
+     * Creates the data source.
+     *
+     * @param dataSourceInputStream the data source input stream
+     * @return the data source
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see DataSource.xsd
      */
     public static DataSource createDataSource(final InputStream dataSourceInputStream) throws UncheckedIOException, UncheckedSQLException {
         return createDataSource(dataSourceInputStream, CURRENT_DIR_PATH);
     }
 
+    /**
+     * Creates the data source.
+     *
+     * @param dataSourceInputStream the data source input stream
+     * @param dataSourceFile the data source file
+     * @return the data source
+     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     private static DataSource createDataSource(final InputStream dataSourceInputStream, final String dataSourceFile)
             throws UncheckedIOException, UncheckedSQLException {
         final String dataSourceString = IOUtil.readString(dataSourceInputStream);
@@ -422,16 +462,45 @@ public final class JdbcUtil {
         return new SQLDataSource(newProps);
     }
 
+    /**
+     * Creates the data source.
+     *
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the data source
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static DataSource createDataSource(final String url, final String user, final String password) throws UncheckedSQLException {
         return createDataSource(getDriverClasssByUrl(url), url, user, password);
     }
 
+    /**
+     * Creates the data source.
+     *
+     * @param driver the driver
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the data source
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static DataSource createDataSource(final String driver, final String url, final String user, final String password) throws UncheckedSQLException {
         final Class<? extends Driver> driverClass = ClassUtil.forClass(driver);
 
         return createDataSource(driverClass, url, user, password);
     }
 
+    /**
+     * Creates the data source.
+     *
+     * @param driverClass the driver class
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the data source
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static DataSource createDataSource(final Class<? extends Driver> driverClass, final String url, final String user, final String password)
             throws UncheckedSQLException {
         final Map<String, Object> props = new HashMap<>();
@@ -445,9 +514,11 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
+     * Creates the data source.
+     *
      * @param props refer to Connection.xsd for the supported properties.
-     * @return
+     * @return the data source
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static DataSource createDataSource(final Map<String, ?> props) throws UncheckedSQLException {
         final String driver = (String) props.get(DRIVER);
@@ -470,20 +541,36 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param sqlDataSource
-     * @return
-     * @deprecated
+     * Wrap.
+     *
+     * @param sqlDataSource the sql data source
+     * @return the data source
+     * @deprecated 
      */
     @Deprecated
     public static DataSource wrap(final javax.sql.DataSource sqlDataSource) {
         return sqlDataSource instanceof DataSource ? ((DataSource) sqlDataSource) : new SimpleDataSource(sqlDataSource);
     }
 
+    /**
+     * Creates the connection.
+     *
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the connection
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static Connection createConnection(final String url, final String user, final String password) throws UncheckedSQLException {
         return createConnection(getDriverClasssByUrl(url), url, user, password);
     }
 
+    /**
+     * Gets the driver classs by url.
+     *
+     * @param url the url
+     * @return the driver classs by url
+     */
     private static Class<? extends Driver> getDriverClasssByUrl(final String url) {
         Class<? extends Driver> driverClass = null;
         // jdbc:mysql://localhost:3306/abacustest
@@ -514,12 +601,32 @@ public final class JdbcUtil {
         return driverClass;
     }
 
+    /**
+     * Creates the connection.
+     *
+     * @param driverClass the driver class
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the connection
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static Connection createConnection(final String driverClass, final String url, final String user, final String password)
             throws UncheckedSQLException {
         Class<? extends Driver> cls = ClassUtil.forClass(driverClass);
         return createConnection(cls, url, user, password);
     }
 
+    /**
+     * Creates the connection.
+     *
+     * @param driverClass the driver class
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the connection
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static Connection createConnection(final Class<? extends Driver> driverClass, final String url, final String user, final String password)
             throws UncheckedSQLException {
         try {
@@ -531,6 +638,7 @@ public final class JdbcUtil {
         }
     }
 
+    /** The is in spring. */
     private static boolean isInSpring = true;
 
     static {
@@ -545,9 +653,9 @@ public final class JdbcUtil {
      * Spring Transaction is supported and Integrated. 
      * If this method is called where a Spring transaction is started with the specified {@code DataSource}, 
      * the {@code Connection} started the Spring Transaction will be returned. Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be returned.
-     * 
-     * @param ds
-     * @return
+     *
+     * @param ds the ds
+     * @return the connection
      */
     public static Connection getConnection(final javax.sql.DataSource ds) {
         if (isInSpring) {
@@ -575,10 +683,9 @@ public final class JdbcUtil {
      * Spring Transaction is supported and Integrated. 
      * If this method is called where a Spring transaction is started with the specified {@code DataSource}, 
      * the specified {@code Connection} won't be returned to {@code DataSource}(Connection pool) until the transaction is committed or rolled back. Otherwise the specified {@code Connection} will be directly returned back to {@code DataSource}(Connection pool).
-     * 
-     * 
-     * @param conn
-     * @param ds
+     *
+     * @param conn the conn
+     * @param ds the ds
      */
     public static void releaseConnection(final Connection conn, final javax.sql.DataSource ds) {
         if (conn == null) {
@@ -597,6 +704,13 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Creates the close handler.
+     *
+     * @param conn the conn
+     * @param ds the ds
+     * @return the runnable
+     */
     static Runnable createCloseHandler(final Connection conn, final javax.sql.DataSource ds) {
         return new Runnable() {
             @Override
@@ -606,6 +720,12 @@ public final class JdbcUtil {
         };
     }
 
+    /**
+     * Close.
+     *
+     * @param rs the rs
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static void close(final ResultSet rs) throws UncheckedSQLException {
         if (rs != null) {
             try {
@@ -616,17 +736,25 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param rs the rs
+     * @param closeStatement the close statement
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static void close(final ResultSet rs, final boolean closeStatement) throws UncheckedSQLException {
         close(rs, closeStatement, false);
     }
 
     /**
-     * 
-     * @param rs
-     * @param closeStatement 
-     * @param closeConnection
+     * Close.
+     *
+     * @param rs the rs
+     * @param closeStatement the close statement
+     * @param closeConnection the close connection
      * @throws IllegalArgumentException if {@code closeStatement = false} while {@code closeConnection = true}.
-     * @throws UncheckedSQLException
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static void close(final ResultSet rs, final boolean closeStatement, final boolean closeConnection)
             throws IllegalArgumentException, UncheckedSQLException {
@@ -656,6 +784,12 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param stmt the stmt
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static void close(final Statement stmt) throws UncheckedSQLException {
         if (stmt != null) {
             try {
@@ -674,6 +808,12 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param conn the conn
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static void close(final Connection conn) throws UncheckedSQLException {
         if (conn != null) {
             try {
@@ -684,6 +824,13 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param rs the rs
+     * @param stmt the stmt
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static void close(final ResultSet rs, final Statement stmt) throws UncheckedSQLException {
         try {
             if (rs != null) {
@@ -709,6 +856,13 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param stmt the stmt
+     * @param conn the conn
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static void close(final Statement stmt, final Connection conn) throws UncheckedSQLException {
         try {
             if (stmt != null) {
@@ -734,6 +888,14 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param rs the rs
+     * @param stmt the stmt
+     * @param conn the conn
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static void close(final ResultSet rs, final Statement stmt, final Connection conn) throws UncheckedSQLException {
         try {
             if (rs != null) {
@@ -772,23 +934,31 @@ public final class JdbcUtil {
      * <p>
      * Equivalent to {@link ResultSet#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.
-     * 
-     * @param rs
+     *
+     * @param rs the rs
      */
     public static void closeQuietly(final ResultSet rs) {
         closeQuietly(rs, null, null);
     }
 
+    /**
+     * Close quietly.
+     *
+     * @param rs the rs
+     * @param closeStatement the close statement
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static void closeQuietly(final ResultSet rs, final boolean closeStatement) throws UncheckedSQLException {
         closeQuietly(rs, closeStatement, false);
     }
 
     /**
-     * 
-     * @param rs
-     * @param closeStatement 
-     * @param closeConnection
-     * @throws IllegalArgumentException if {@code closeStatement = false} while {@code closeConnection = true}. 
+     * Close quietly.
+     *
+     * @param rs the rs
+     * @param closeStatement the close statement
+     * @param closeConnection the close connection
+     * @throws IllegalArgumentException if {@code closeStatement = false} while {@code closeConnection = true}.
      */
     public static void closeQuietly(final ResultSet rs, final boolean closeStatement, final boolean closeConnection) throws IllegalArgumentException {
         if (closeConnection && closeStatement == false) {
@@ -822,8 +992,8 @@ public final class JdbcUtil {
      * <p>
      * Equivalent to {@link Statement#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.
-     * 
-     * @param stmt
+     *
+     * @param stmt the stmt
      */
     public static void closeQuietly(final Statement stmt) {
         closeQuietly(null, stmt, null);
@@ -834,8 +1004,8 @@ public final class JdbcUtil {
      * <p>
      * Equivalent to {@link Connection#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.
-     * 
-     * @param conn
+     *
+     * @param conn the conn
      */
     public static void closeQuietly(final Connection conn) {
         closeQuietly(null, null, conn);
@@ -846,9 +1016,9 @@ public final class JdbcUtil {
      * <p>
      * Equivalent to {@link ResultSet#close()}, {@link Statement#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.
-     * 
-     * @param rs
-     * @param stmt
+     *
+     * @param rs the rs
+     * @param stmt the stmt
      */
     public static void closeQuietly(final ResultSet rs, final Statement stmt) {
         closeQuietly(rs, stmt, null);
@@ -859,9 +1029,9 @@ public final class JdbcUtil {
      * <p>
      * Equivalent to {@link Statement#close()}, {@link Connection#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.
-     * 
-     * @param stmt
-     * @param conn
+     *
+     * @param stmt the stmt
+     * @param conn the conn
      */
     public static void closeQuietly(final Statement stmt, final Connection conn) {
         closeQuietly(null, stmt, conn);
@@ -872,10 +1042,10 @@ public final class JdbcUtil {
      * <p>
      * Equivalent to {@link ResultSet#close()}, {@link Statement#close()}, {@link Connection#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.
-     * 
-     * @param rs
-     * @param stmt
-     * @param conn
+     *
+     * @param rs the rs
+     * @param stmt the stmt
+     * @param conn the conn
      */
     public static void closeQuietly(final ResultSet rs, final Statement stmt, final Connection conn) {
         if (rs != null) {
@@ -912,22 +1082,24 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param rs
+     * Skip.
+     *
+     * @param rs the rs
      * @param n the count of row to move ahead.
      * @return the number skipped.
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      */
     public static int skip(final ResultSet rs, int n) throws SQLException {
         return skip(rs, (long) n);
     }
 
     /**
-     * 
-     * @param rs
+     * Skip.
+     *
+     * @param rs the rs
      * @param n the count of row to move ahead.
      * @return the number skipped.
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see {@link ResultSet#absolute(int)}
      */
     public static int skip(final ResultSet rs, long n) throws SQLException {
@@ -959,16 +1131,24 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Gets the column count.
+     *
+     * @param rs the rs
+     * @return the column count
+     * @throws SQLException the SQL exception
+     */
     public static int getColumnCount(ResultSet rs) throws SQLException {
         return rs.getMetaData().getColumnCount();
     }
 
     /**
-     * 
-     * @param conn
-     * @param tableName
-     * @return
-     * @throws SQLException
+     * Gets the column name list.
+     *
+     * @param conn the conn
+     * @param tableName the table name
+     * @return the column name list
+     * @throws SQLException the SQL exception
      */
     public static List<String> getColumnNameList(final Connection conn, final String tableName) throws SQLException {
         final String query = "SELECT * FROM " + tableName + " WHERE 1 > 2";
@@ -994,10 +1174,11 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param rs
-     * @return
-     * @throws SQLException
+     * Gets the column label list.
+     *
+     * @param rs the rs
+     * @return the column label list
+     * @throws SQLException the SQL exception
      */
     public static List<String> getColumnLabelList(ResultSet rs) throws SQLException {
         final ResultSetMetaData metaData = rs.getMetaData();
@@ -1011,12 +1192,28 @@ public final class JdbcUtil {
         return labelList;
     }
 
+    /**
+     * Gets the column label.
+     *
+     * @param rsmd the rsmd
+     * @param columnIndex the column index
+     * @return the column label
+     * @throws SQLException the SQL exception
+     */
     public static String getColumnLabel(final ResultSetMetaData rsmd, final int columnIndex) throws SQLException {
         final String result = rsmd.getColumnLabel(columnIndex);
 
         return N.isNullOrEmpty(result) ? rsmd.getColumnName(columnIndex) : result;
     }
 
+    /**
+     * Gets the column value.
+     *
+     * @param rs the rs
+     * @param columnIndex the column index
+     * @return the column value
+     * @throws SQLException the SQL exception
+     */
     public static Object getColumnValue(final ResultSet rs, final int columnIndex) throws SQLException {
         // Copied from JdbcUtils#getResultSetValue(ResultSet, int) in SpringJdbc under Apache License, Version 2.0.
         //    final Object obj = rs.getObject(columnIndex);
@@ -1054,6 +1251,14 @@ public final class JdbcUtil {
         return rs.getObject(columnIndex);
     }
 
+    /**
+     * Gets the column value.
+     *
+     * @param rs the rs
+     * @param columnLabel the column label
+     * @return the column value
+     * @throws SQLException the SQL exception
+     */
     public static Object getColumnValue(final ResultSet rs, final String columnLabel) throws SQLException {
         // Copied from JdbcUtils#getResultSetValue(ResultSet, int) in SpringJdbc under Apache License, Version 2.0.
         //    final Object obj = rs.getObject(columnLabel);
@@ -1099,19 +1304,40 @@ public final class JdbcUtil {
         return rs.getObject(columnLabel);
     }
 
+    /**
+     * Gets the column value.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param rs the rs
+     * @param columnIndex the column index
+     * @return the column value
+     * @throws SQLException the SQL exception
+     */
     public static <T> T getColumnValue(final Class<T> targetClass, final ResultSet rs, final int columnIndex) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnIndex);
     }
 
+    /**
+     * Gets the column value.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param rs the rs
+     * @param columnLabel the column label
+     * @return the column value
+     * @throws SQLException the SQL exception
+     */
     public static <T> T getColumnValue(final Class<T> targetClass, final ResultSet rs, final String columnLabel) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnLabel);
     }
 
     /**
      * Refer to: {@code beginTransaction(javax.sql.DataSource, IsolationLevel, boolean)}.
-     * @param dataSource
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param dataSource the data source
+     * @return the SQL transaction
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see {@link #beginTransaction(javax.sql.DataSource, IsolationLevel, boolean)}
      */
     public static SQLTransaction beginTransaction(final javax.sql.DataSource dataSource) throws UncheckedSQLException {
@@ -1120,10 +1346,11 @@ public final class JdbcUtil {
 
     /**
      * Refer to: {@code beginTransaction(javax.sql.DataSource, IsolationLevel, boolean)}.
-     * @param dataSource
-     * @param isolationLevel
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param dataSource the data source
+     * @param isolationLevel the isolation level
+     * @return the SQL transaction
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see {@link #beginTransaction(javax.sql.DataSource, IsolationLevel, boolean)}
      */
     public static SQLTransaction beginTransaction(final javax.sql.DataSource dataSource, final IsolationLevel isolationLevel) throws UncheckedSQLException {
@@ -1211,12 +1438,12 @@ public final class JdbcUtil {
      * }
      * </code>
      * </pre>
-     * 
-     * @param dataSource
-     * @param isolationLevel
-     * @param isForUpdateOnly
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param dataSource the data source
+     * @param isolationLevel the isolation level
+     * @param isForUpdateOnly the is for update only
+     * @return the SQL transaction
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see {@link #getConnection(javax.sql.DataSource)}
      * @see {@link #releaseConnection(Connection, javax.sql.DataSource)}
      * @see SQLExecutor#beginTransaction(IsolationLevel, boolean, JdbcSettings)
@@ -1256,6 +1483,12 @@ public final class JdbcUtil {
         return tran;
     }
 
+    /**
+     * Gets the SQL operation.
+     *
+     * @param sql the sql
+     * @return the SQL operation
+     */
     static SQLOperation getSQLOperation(String sql) {
         return StringUtil.startsWithIgnoreCase(sql.trim(), "select ") ? SQLOperation.SELECT : SQLOperation.UPDATE;
     }
@@ -1264,11 +1497,11 @@ public final class JdbcUtil {
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
-     * @param sql
-     * @return
-     * @throws SQLException
+     *
+     * @param ds the ds
+     * @param sql the sql
+     * @return the prepared query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1299,12 +1532,12 @@ public final class JdbcUtil {
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
-     * @param sql
-     * @param autoGeneratedKeys
-     * @return
-     * @throws SQLException
+     *
+     * @param ds the ds
+     * @param sql the sql
+     * @param autoGeneratedKeys the auto generated keys
+     * @return the prepared query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1331,6 +1564,15 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Prepare query.
+     *
+     * @param ds the ds
+     * @param sql the sql
+     * @param returnColumnIndexes the return column indexes
+     * @return the prepared query
+     * @throws SQLException the SQL exception
+     */
     public static PreparedQuery prepareQuery(final javax.sql.DataSource ds, final String sql, final int[] returnColumnIndexes) throws SQLException {
         final SQLOperation sqlOperation = JdbcUtil.getSQLOperation(sql);
         final SQLTransaction tran = SQLTransaction.getTransaction(ds, CreatedBy.JDBC_UTIL);
@@ -1354,6 +1596,15 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Prepare query.
+     *
+     * @param ds the ds
+     * @param sql the sql
+     * @param returnColumnNames the return column names
+     * @return the prepared query
+     * @throws SQLException the SQL exception
+     */
     public static PreparedQuery prepareQuery(final javax.sql.DataSource ds, final String sql, final String[] returnColumnNames) throws SQLException {
         final SQLOperation sqlOperation = JdbcUtil.getSQLOperation(sql);
         final SQLTransaction tran = SQLTransaction.getTransaction(ds, CreatedBy.JDBC_UTIL);
@@ -1377,17 +1628,18 @@ public final class JdbcUtil {
         }
     }
 
-    /** 
+    /**
+     *  
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
-     * @param sql
+     *
+     * @param ds the ds
+     * @param sql the sql
      * @param stmtCreator the created {@code PreparedStatement} will be closed after any execution methods in {@code PreparedQuery/PreparedCallableQuery} is called.
      * An execution method is a method which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/....
-     * @return
-     * @throws SQLException
+     * @return the prepared query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1422,11 +1674,11 @@ public final class JdbcUtil {
      * JdbcUtil.prepareQuery(dataSource.getConnection(), sql);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
-     * @param sql
-     * @return
-     * @throws SQLException
+     * @param sql the sql
+     * @return the prepared query
+     * @throws SQLException the SQL exception
      */
     public static PreparedQuery prepareQuery(final Connection conn, final String sql) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1435,19 +1687,20 @@ public final class JdbcUtil {
         return new PreparedQuery(conn.prepareStatement(sql));
     }
 
-    /** 
+    /**
+     *  
      * Never write below code because it will definitely cause {@code Connection} leak:
      * <pre>
      * <code>
      * JdbcUtil.prepareQuery(dataSource.getConnection(), sql, autoGeneratedKeys);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
-     * @param sql
-     * @param autoGeneratedKeys
-     * @return
-     * @throws SQLException
+     * @param sql the sql
+     * @param autoGeneratedKeys the auto generated keys
+     * @return the prepared query
+     * @throws SQLException the SQL exception
      */
     public static PreparedQuery prepareQuery(final Connection conn, final String sql, final boolean autoGeneratedKeys) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1463,12 +1716,12 @@ public final class JdbcUtil {
      * JdbcUtil.prepareQuery(dataSource.getConnection(), sql, returnColumnIndexes);
      * </code>
      * </pre>
-     * 
-     * @param conn
-     * @param sql
-     * @param returnColumnIndexes
-     * @return
-     * @throws SQLException
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param returnColumnIndexes the return column indexes
+     * @return the prepared query
+     * @throws SQLException the SQL exception
      */
     public static PreparedQuery prepareQuery(final Connection conn, final String sql, final int[] returnColumnIndexes) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1485,12 +1738,12 @@ public final class JdbcUtil {
      * JdbcUtil.prepareQuery(dataSource.getConnection(), sql, returnColumnNames);
      * </code>
      * </pre>
-     * 
-     * @param conn
-     * @param sql
-     * @param returnColumnNames
-     * @return
-     * @throws SQLException
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param returnColumnNames the return column names
+     * @return the prepared query
+     * @throws SQLException the SQL exception
      */
     public static PreparedQuery prepareQuery(final Connection conn, final String sql, final String[] returnColumnNames) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1507,13 +1760,13 @@ public final class JdbcUtil {
      * JdbcUtil.prepareQuery(dataSource.getConnection(), sql, stmtCreator);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
-     * @param sql
+     * @param sql the sql
      * @param stmtCreator the created {@code PreparedStatement} will be closed after any execution methods in {@code PreparedQuery/PreparedCallableQuery} is called.
      * An execution method is a method which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/....
-     * @return
-     * @throws SQLException
+     * @return the prepared query
+     * @throws SQLException the SQL exception
      * @see {@link JdbcUtil#prepareStatement(Connection, String, Object...)}
      */
     public static PreparedQuery prepareQuery(final Connection conn, final String sql,
@@ -1529,11 +1782,11 @@ public final class JdbcUtil {
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
+     *
+     * @param ds the ds
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
-     * @return
-     * @throws SQLException
+     * @return the named query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1564,12 +1817,12 @@ public final class JdbcUtil {
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
+     *
+     * @param ds the ds
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
-     * @param autoGeneratedKeys
-     * @return
-     * @throws SQLException
+     * @param autoGeneratedKeys the auto generated keys
+     * @return the named query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1600,12 +1853,12 @@ public final class JdbcUtil {
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
+     *
+     * @param ds the ds
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
-     * @param returnColumnIndexes
-     * @return
-     * @throws SQLException
+     * @param returnColumnIndexes the return column indexes
+     * @return the named query
+     * @throws SQLException the SQL exception
      */
     public static NamedQuery prepareNamedQuery(final javax.sql.DataSource ds, final String namedSql, final int[] returnColumnIndexes) throws SQLException {
         final SQLOperation sqlOperation = JdbcUtil.getSQLOperation(namedSql);
@@ -1634,12 +1887,12 @@ public final class JdbcUtil {
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
+     *
+     * @param ds the ds
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
-     * @param returnColumnNames
-     * @return
-     * @throws SQLException
+     * @param returnColumnNames the return column names
+     * @return the named query
+     * @throws SQLException the SQL exception
      */
     public static NamedQuery prepareNamedQuery(final javax.sql.DataSource ds, final String namedSql, final String[] returnColumnNames) throws SQLException {
         final SQLOperation sqlOperation = JdbcUtil.getSQLOperation(namedSql);
@@ -1664,17 +1917,18 @@ public final class JdbcUtil {
         }
     }
 
-    /** 
+    /**
+     *  
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
+     *
+     * @param ds the ds
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
      * @param stmtCreator the created {@code PreparedStatement} will be closed after any execution methods in {@code NamedQuery/PreparedCallableQuery} is called.
      * An execution method is a method which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/....
-     * @return
-     * @throws SQLException
+     * @return the named query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1709,11 +1963,11 @@ public final class JdbcUtil {
      * JdbcUtil.prepareNamedQuery(dataSource.getConnection(), namedSql);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
-     * @return
-     * @throws SQLException
+     * @return the named query
+     * @throws SQLException the SQL exception
      */
     public static NamedQuery prepareNamedQuery(final Connection conn, final String namedSql) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1724,19 +1978,20 @@ public final class JdbcUtil {
         return new NamedQuery(conn.prepareStatement(namedSQL.getParameterizedSQL()), namedSQL);
     }
 
-    /** 
+    /**
+     *  
      * Never write below code because it will definitely cause {@code Connection} leak:
      * <pre>
      * <code>
      * JdbcUtil.prepareNamedQuery(dataSource.getConnection(), namedSql, autoGeneratedKeys);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
-     * @param autoGeneratedKeys
-     * @return
-     * @throws SQLException
+     * @param autoGeneratedKeys the auto generated keys
+     * @return the named query
+     * @throws SQLException the SQL exception
      */
     public static NamedQuery prepareNamedQuery(final Connection conn, final String namedSql, final boolean autoGeneratedKeys) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1756,12 +2011,12 @@ public final class JdbcUtil {
      * JdbcUtil.prepareNamedQuery(dataSource.getConnection(), namedSql);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
-     * @param returnColumnIndexes
-     * @return
-     * @throws SQLException
+     * @param returnColumnIndexes the return column indexes
+     * @return the named query
+     * @throws SQLException the SQL exception
      */
     public static NamedQuery prepareNamedQuery(final Connection conn, final String namedSql, final int[] returnColumnIndexes) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1780,12 +2035,12 @@ public final class JdbcUtil {
      * JdbcUtil.prepareNamedQuery(dataSource.getConnection(), namedSql);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
-     * @param returnColumnNames
-     * @return
-     * @throws SQLException
+     * @param returnColumnNames the return column names
+     * @return the named query
+     * @throws SQLException the SQL exception
      */
     public static NamedQuery prepareNamedQuery(final Connection conn, final String namedSql, final String[] returnColumnNames) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1804,13 +2059,13 @@ public final class JdbcUtil {
      * JdbcUtil.prepareNamedQuery(dataSource.getConnection(), namedSql, stmtCreator);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
      * @param namedSql for example {@code SELECT first_name, last_name FROM account where id = :id}
      * @param stmtCreator the created {@code PreparedStatement} will be closed after any execution methods in {@code NamedQuery/PreparedCallableQuery} is called.
      * An execution method is a method which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/....
-     * @return
-     * @throws SQLException
+     * @return the named query
+     * @throws SQLException the SQL exception
      * @see {@link JdbcUtil#prepareStatement(Connection, String, Object...)}
      */
     public static NamedQuery prepareNamedQuery(final Connection conn, final String namedSql,
@@ -1824,6 +2079,12 @@ public final class JdbcUtil {
         return new NamedQuery(stmtCreator.apply(conn, namedSQL.getParameterizedSQL()), namedSQL);
     }
 
+    /**
+     * Creates the named SQL.
+     *
+     * @param namedSql the named sql
+     * @return the named SQL
+     */
     private static NamedSQL createNamedSQL(final String namedSql) {
         N.checkArgNotNullOrEmpty(namedSql, "namedSql");
 
@@ -1840,11 +2101,11 @@ public final class JdbcUtil {
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
-     * @param sql
-     * @return
-     * @throws SQLException
+     *
+     * @param ds the ds
+     * @param sql the sql
+     * @return the prepared callable query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1875,13 +2136,13 @@ public final class JdbcUtil {
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
      * the {@code Connection} started the Transaction will be used here. 
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
-     * 
-     * @param ds
-     * @param sql
+     *
+     * @param ds the ds
+     * @param sql the sql
      * @param stmtCreator the created {@code CallableStatement} will be closed after any execution methods in {@code PreparedQuery/PreparedCallableQuery} is called.
      * An execution method is a method which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/....
-     * @return
-     * @throws SQLException
+     * @return the prepared callable query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1916,11 +2177,11 @@ public final class JdbcUtil {
      * JdbcUtil.prepareCallableQuery(dataSource.getConnection(), sql);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
-     * @param sql
-     * @return
-     * @throws SQLException
+     * @param sql the sql
+     * @return the prepared callable query
+     * @throws SQLException the SQL exception
      * @see #getConnection(javax.sql.DataSource)
      * @see #releaseConnection(Connection, javax.sql.DataSource)
      */
@@ -1938,13 +2199,13 @@ public final class JdbcUtil {
      * JdbcUtil.prepareCallableQuery(dataSource.getConnection(), sql, stmtCreator);
      * </code>
      * </pre>
-     * 
+     *
      * @param conn the specified {@code conn} won't be close after this query is executed.
-     * @param sql
+     * @param sql the sql
      * @param stmtCreator the created {@code CallableStatement} will be closed after any execution methods in {@code PreparedQuery/PreparedCallableQuery} is called.
      * An execution method is a method which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/....
-     * @return
-     * @throws SQLException
+     * @return the prepared callable query
+     * @throws SQLException the SQL exception
      * @see {@link JdbcUtil#prepareCall(Connection, String, Object...)}
      */
     public static PreparedCallableQuery prepareCallableQuery(final Connection conn, final String sql,
@@ -1956,6 +2217,15 @@ public final class JdbcUtil {
         return new PreparedCallableQuery(stmtCreator.apply(conn, sql));
     }
 
+    /**
+     * Prepare statement.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the prepared statement
+     * @throws SQLException the SQL exception
+     */
     @SafeVarargs
     public static PreparedStatement prepareStatement(final Connection conn, final String sql, final Object... parameters) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1971,6 +2241,15 @@ public final class JdbcUtil {
         return stmt;
     }
 
+    /**
+     * Prepare call.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the callable statement
+     * @throws SQLException the SQL exception
+     */
     @SafeVarargs
     public static CallableStatement prepareCall(final Connection conn, final String sql, final Object... parameters) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -1986,6 +2265,15 @@ public final class JdbcUtil {
         return stmt;
     }
 
+    /**
+     * Batch prepare statement.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parametersList the parameters list
+     * @return the prepared statement
+     * @throws SQLException the SQL exception
+     */
     public static PreparedStatement batchPrepareStatement(final Connection conn, final String sql, final List<?> parametersList) throws SQLException {
         N.checkArgNotNull(conn, "conn");
         N.checkArgNotNull(sql, "sql");
@@ -2001,6 +2289,15 @@ public final class JdbcUtil {
         return stmt;
     }
 
+    /**
+     * Batch prepare call.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parametersList the parameters list
+     * @return the callable statement
+     * @throws SQLException the SQL exception
+     */
     public static CallableStatement batchPrepareCall(final Connection conn, final String sql, final List<?> parametersList) throws SQLException {
         N.checkArgNotNull(conn, "conn");
         N.checkArgNotNull(sql, "sql");
@@ -2016,6 +2313,15 @@ public final class JdbcUtil {
         return stmt;
     }
 
+    /**
+     * Execute query.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the data set
+     * @throws SQLException the SQL exception
+     */
     @SafeVarargs
     public static DataSet executeQuery(final Connection conn, final String sql, final Object... parameters) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -2037,6 +2343,13 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Execute query.
+     *
+     * @param stmt the stmt
+     * @return the data set
+     * @throws SQLException the SQL exception
+     */
     public static DataSet executeQuery(final PreparedStatement stmt) throws SQLException {
         ResultSet rs = null;
 
@@ -2049,6 +2362,15 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Execute update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the int
+     * @throws SQLException the SQL exception
+     */
     @SafeVarargs
     public static int executeUpdate(final Connection conn, final String sql, final Object... parameters) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -2066,12 +2388,13 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param conn
-     * @param sql
-     * @param listOfParameters
-     * @return
-     * @throws SQLException
+     * Execute batch update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param listOfParameters the list of parameters
+     * @return the int
+     * @throws SQLException the SQL exception
      */
     public static int executeBatchUpdate(final Connection conn, final String sql, final List<?> listOfParameters) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -2081,13 +2404,14 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param conn
-     * @param sql
-     * @param listOfParameters
-     * @param batchSize.
-     * @return 
-     * @throws SQLException
+     * Execute batch update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param listOfParameters the list of parameters
+     * @param batchSize the batch size
+     * @return the int
+     * @throws SQLException the SQL exception
      */
     public static int executeBatchUpdate(final Connection conn, final String sql, final List<?> listOfParameters, final int batchSize) throws SQLException {
         N.checkArgNotNull(conn);
@@ -2128,6 +2452,15 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Execute.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return true, if successful
+     * @throws SQLException the SQL exception
+     */
     @SafeVarargs
     public static boolean execute(final Connection conn, final String sql, final Object... parameters) throws SQLException {
         N.checkArgNotNull(conn, "conn");
@@ -2145,27 +2478,66 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param rs
-     * @return
-     * @throws SQLException
+     * Extract data.
+     *
+     * @param rs the rs
+     * @return the data set
+     * @throws SQLException the SQL exception
      */
     public static DataSet extractData(final ResultSet rs) throws SQLException {
         return extractData(rs, false);
     }
 
+    /**
+     * Extract data.
+     *
+     * @param rs the rs
+     * @param closeResultSet the close result set
+     * @return the data set
+     * @throws SQLException the SQL exception
+     */
     public static DataSet extractData(final ResultSet rs, final boolean closeResultSet) throws SQLException {
         return extractData(rs, 0, Integer.MAX_VALUE, closeResultSet);
     }
 
+    /**
+     * Extract data.
+     *
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @return the data set
+     * @throws SQLException the SQL exception
+     */
     public static DataSet extractData(final ResultSet rs, final int offset, final int count) throws SQLException {
         return extractData(rs, offset, count, false);
     }
 
+    /**
+     * Extract data.
+     *
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @param closeResultSet the close result set
+     * @return the data set
+     * @throws SQLException the SQL exception
+     */
     public static DataSet extractData(final ResultSet rs, final int offset, final int count, final boolean closeResultSet) throws SQLException {
         return extractData(rs, offset, count, RowFilter.ALWAYS_TRUE, closeResultSet);
     }
 
+    /**
+     * Extract data.
+     *
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param closeResultSet the close result set
+     * @return the data set
+     * @throws SQLException the SQL exception
+     */
     public static DataSet extractData(final ResultSet rs, int offset, int count, final RowFilter filter, final boolean closeResultSet) throws SQLException {
         N.checkArgNotNull(rs, "ResultSet");
         N.checkArgNotNegative(offset, "offset");
@@ -2205,6 +2577,13 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Does table exist.
+     *
+     * @param conn the conn
+     * @param tableName the table name
+     * @return true, if successful
+     */
     public static boolean doesTableExist(final Connection conn, final String tableName) {
         try {
             executeQuery(conn, "SELECT 1 FROM " + tableName + " WHERE 1 > 2");
@@ -2221,11 +2600,11 @@ public final class JdbcUtil {
 
     /**
      * Returns {@code true} if succeed to create table, otherwise {@code false} is returned.
-     * 
-     * @param conn
-     * @param tableName
-     * @param schema
-     * @return
+     *
+     * @param conn the conn
+     * @param tableName the table name
+     * @param schema the schema
+     * @return true, if successful
      */
     public static boolean createTableIfNotExists(final Connection conn, final String tableName, final String schema) {
         if (doesTableExist(conn, tableName)) {
@@ -2243,10 +2622,10 @@ public final class JdbcUtil {
 
     /**
      * Returns {@code true} if succeed to drop table, otherwise {@code false} is returned.
-     * 
-     * @param conn
-     * @param tableName
-     * @return
+     *
+     * @param conn the conn
+     * @param tableName the table name
+     * @return true, if successful
      */
     public static boolean dropTableIfExists(final Connection conn, final String tableName) {
         try {
@@ -2264,9 +2643,10 @@ public final class JdbcUtil {
 
     /**
      * Don't cache or reuse the returned {@code BiRowMapper} instance.
-     * 
-     * @param targetType Array/List/Map or Entity with getter/setter methods.
-     * @return
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @return the bi row mapper
      * @deprecated replaced by {@code BiRowMapper#to(Class)} in JDK 1.8 or above.
      */
     @Deprecated
@@ -2409,23 +2789,29 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Gets the named parameters.
+     *
+     * @param sql the sql
+     * @return the named parameters
+     */
     public static List<String> getNamedParameters(String sql) {
         return NamedSQL.parse(sql).getNamedParameters();
     }
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @return
-     * @throws UncheckedSQLException
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final Connection conn, final String insertSQL) throws UncheckedSQLException {
         return importData(dataset, dataset.columnNameList(), conn, insertSQL);
@@ -2433,18 +2819,18 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param selectColumnNames
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param selectColumnNames the select column names
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre> 
-     * @return
-     * @throws UncheckedSQLException
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final Collection<String> selectColumnNames, final Connection conn, final String insertSQL)
             throws UncheckedSQLException {
@@ -2453,20 +2839,20 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @return
-     * @throws UncheckedSQLException
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final Collection<String> selectColumnNames, final int offset, final int count, final Connection conn,
             final String insertSQL) throws UncheckedSQLException {
@@ -2475,22 +2861,22 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>  
-     * @param batchSize
-     * @param batchInterval
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final Collection<String> selectColumnNames, final int offset, final int count, final Connection conn,
             final String insertSQL, final int batchSize, final int batchInterval) throws UncheckedSQLException {
@@ -2499,23 +2885,25 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param selectColumnNames
-     * @param offset
-     * @param count
-     * @param filter
-     * @param conn
+     *
+     * @param <E> the element type
+     * @param dataset the dataset
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param batchSize
-     * @param batchInterval
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <E extends Exception> int importData(final DataSet dataset, final Collection<String> selectColumnNames, final int offset, final int count,
             final Try.Predicate<? super Object[], E> filter, final Connection conn, final String insertSQL, final int batchSize, final int batchInterval)
@@ -2535,18 +2923,18 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param columnTypeMap
-     * @return
-     * @throws UncheckedSQLException
+     * @param columnTypeMap the column type map
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SuppressWarnings("rawtypes")
     public static int importData(final DataSet dataset, final Connection conn, final String insertSQL, final Map<String, ? extends Type> columnTypeMap)
@@ -2556,20 +2944,20 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param columnTypeMap
-     * @return
-     * @throws UncheckedSQLException
+     * @param columnTypeMap the column type map
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SuppressWarnings("rawtypes")
     public static int importData(final DataSet dataset, final int offset, final int count, final Connection conn, final String insertSQL,
@@ -2579,22 +2967,22 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param batchSize
-     * @param batchInterval
-     * @param columnTypeMap
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SuppressWarnings("rawtypes")
     public static int importData(final DataSet dataset, final int offset, final int count, final Connection conn, final String insertSQL, final int batchSize,
@@ -2604,23 +2992,25 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
-     * @param filter
-     * @param conn
+     *
+     * @param <E> the element type
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param batchSize
-     * @param batchInterval
-     * @param columnTypeMap
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> int importData(final DataSet dataset, final int offset, final int count,
@@ -2641,18 +3031,18 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param stmtSetter
-     * @return
-     * @throws UncheckedSQLException
+     * @param stmtSetter the stmt setter
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final Connection conn, final String insertSQL,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter) throws UncheckedSQLException {
@@ -2661,20 +3051,20 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param stmtSetter
-     * @return
-     * @throws UncheckedSQLException
+     * @param stmtSetter the stmt setter
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final int offset, final int count, final Connection conn, final String insertSQL,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter) throws UncheckedSQLException {
@@ -2683,22 +3073,22 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
-     * @param conn
+     *
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final int offset, final int count, final Connection conn, final String insertSQL, final int batchSize,
             final int batchInterval, final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter) throws UncheckedSQLException {
@@ -2707,23 +3097,25 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
-     * @param filter
-     * @param conn
+     *
+     * @param <E> the element type
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param conn the conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
-        List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-        columnNameList.retainAll(yourSelectColumnNames);        
-        String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
+     *         columnNameList.retainAll(yourSelectColumnNames);        
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
      * </code></pre>
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <E extends Exception> int importData(final DataSet dataset, final int offset, final int count,
             final Try.Predicate<? super Object[], E> filter, final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
@@ -2743,11 +3135,11 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
+     *
+     * @param dataset the dataset
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @return
-     * @throws UncheckedSQLException
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final PreparedStatement stmt) throws UncheckedSQLException {
         return importData(dataset, dataset.columnNameList(), stmt);
@@ -2755,12 +3147,12 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param selectColumnNames
+     *
+     * @param dataset the dataset
+     * @param selectColumnNames the select column names
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @return
-     * @throws UncheckedSQLException
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final Collection<String> selectColumnNames, final PreparedStatement stmt) throws UncheckedSQLException {
         return importData(dataset, selectColumnNames, 0, dataset.size(), stmt);
@@ -2768,14 +3160,14 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param selectColumnNames
-     * @param offset
-     * @param count
+     *
+     * @param dataset the dataset
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @return
-     * @throws UncheckedSQLException
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final Collection<String> selectColumnNames, final int offset, final int count,
             final PreparedStatement stmt) throws UncheckedSQLException {
@@ -2784,14 +3176,16 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param selectColumnNames
-     * @param offset
-     * @param count
+     *
+     * @param dataset the dataset
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final Collection<String> selectColumnNames, final int offset, final int count,
             final PreparedStatement stmt, final int batchSize, final int batchInterval) throws UncheckedSQLException {
@@ -2800,16 +3194,19 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param selectColumnNames
-     * @param offset
-     * @param count
+     *
+     * @param <E> the element type
+     * @param dataset the dataset
+     * @param selectColumnNames the select column names
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @param batchSize
-     * @param batchInterval
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <E extends Exception> int importData(final DataSet dataset, final Collection<String> selectColumnNames, final int offset, final int count,
             final Try.Predicate<? super Object[], E> filter, final PreparedStatement stmt, final int batchSize, final int batchInterval)
@@ -2826,12 +3223,12 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
+     *
+     * @param dataset the dataset
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @param columnTypeMap
-     * @return
-     * @throws UncheckedSQLException
+     * @param columnTypeMap the column type map
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SuppressWarnings("rawtypes")
     public static int importData(final DataSet dataset, final PreparedStatement stmt, final Map<String, ? extends Type> columnTypeMap)
@@ -2841,14 +3238,14 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
+     *
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @param columnTypeMap
-     * @return
-     * @throws UncheckedSQLException
+     * @param columnTypeMap the column type map
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SuppressWarnings("rawtypes")
     public static int importData(final DataSet dataset, final int offset, final int count, final PreparedStatement stmt,
@@ -2858,15 +3255,16 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
+     *
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @param columnTypeMap
-     * @param filter
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SuppressWarnings("rawtypes")
     public static int importData(final DataSet dataset, final int offset, final int count, final PreparedStatement stmt, final int batchSize,
@@ -2876,17 +3274,19 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @param batchSize
-     * @param batchInterval
-     * @param columnTypeMap
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param columnTypeMap the column type map
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> int importData(final DataSet dataset, final int offset, final int count,
@@ -2966,6 +3366,15 @@ public final class JdbcUtil {
         return result;
     }
 
+    /**
+     * Import data.
+     *
+     * @param dataset the dataset
+     * @param stmt the stmt
+     * @param stmtSetter the stmt setter
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static int importData(final DataSet dataset, final PreparedStatement stmt,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter) throws UncheckedSQLException {
         return importData(dataset, 0, dataset.size(), stmt, stmtSetter);
@@ -2973,13 +3382,14 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
+     *
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @return
-     * @throws UncheckedSQLException
+     * @param stmtSetter the stmt setter
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final int offset, final int count, final PreparedStatement stmt,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter) throws UncheckedSQLException {
@@ -2988,16 +3398,16 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param columnTypeMap
-     * @param offset
-     * @param count
+     *
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @param filter
-     * @param stmtSetter
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static int importData(final DataSet dataset, final int offset, final int count, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter) throws UncheckedSQLException {
@@ -3006,18 +3416,19 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from <code>DataSet</code> to database. 
-     * 
-     * @param dataset
-     * @param offset
-     * @param count
-     * @param filter
+     *
+     * @param <E> the element type
+     * @param dataset the dataset
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter
-     * @param columnTypeMap
-     * @return
-     * @throws UncheckedSQLException
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <E extends Exception> int importData(final DataSet dataset, final int offset, final int count,
             final Try.Predicate<? super Object[], E> filter, final PreparedStatement stmt, final int batchSize, final int batchInterval,
@@ -3067,11 +3478,39 @@ public final class JdbcUtil {
         return result;
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final File file, final Connection conn, final String insertSQL,
             final Try.Function<String, Object[], E> func) throws UncheckedSQLException, E {
         return importData(file, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, func);
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final File file, final long offset, final long count, final Connection conn, final String insertSQL,
             final int batchSize, final int batchInterval, final Try.Function<String, Object[], E> func) throws UncheckedSQLException, E {
         PreparedStatement stmt = null;
@@ -3087,6 +3526,17 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param stmt the stmt
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final File file, final PreparedStatement stmt, final Try.Function<String, Object[], E> func)
             throws UncheckedSQLException, E {
         return importData(file, 0, Long.MAX_VALUE, stmt, 200, 0, func);
@@ -3094,16 +3544,18 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from file to database.
-     * 
-     * @param file
-     * @param offset
-     * @param count
-     * @param stmt
-     * @param batchSize
-     * @param batchInterval
-     * @param func convert line to the parameters for record insert. Returns a <code>null</code> array to skip the line. 
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param <E> the element type
+     * @param file the file
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param func convert line to the parameters for record insert. Returns a <code>null</code> array to skip the line.
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <E extends Exception> long importData(final File file, final long offset, final long count, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final Try.Function<String, Object[], E> func) throws UncheckedSQLException, E {
@@ -3120,11 +3572,39 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param is the is
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final InputStream is, final Connection conn, final String insertSQL,
             final Try.Function<String, Object[], E> func) throws UncheckedSQLException, E {
         return importData(is, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, func);
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param is the is
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final InputStream is, final long offset, final long count, final Connection conn,
             final String insertSQL, final int batchSize, final int batchInterval, final Try.Function<String, Object[], E> func)
             throws UncheckedSQLException, E {
@@ -3141,6 +3621,16 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param is the is
+     * @param stmt the stmt
+     * @param func the func
+     * @return the long
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final InputStream is, final PreparedStatement stmt, final Try.Function<String, Object[], E> func)
             throws E {
         return importData(is, 0, Long.MAX_VALUE, stmt, 200, 0, func);
@@ -3148,16 +3638,18 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from file to database.
-     * 
-     * @param is
-     * @param offset
-     * @param count
-     * @param stmt
-     * @param batchSize
-     * @param batchInterval
-     * @param func convert line to the parameters for record insert. Returns a <code>null</code> array to skip the line. 
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param <E> the element type
+     * @param is the is
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param func convert line to the parameters for record insert. Returns a <code>null</code> array to skip the line.
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <E extends Exception> long importData(final InputStream is, final long offset, final long count, final PreparedStatement stmt,
             final int batchSize, final int batchInterval, final Try.Function<String, Object[], E> func) throws UncheckedSQLException, E {
@@ -3166,11 +3658,39 @@ public final class JdbcUtil {
         return importData(reader, offset, count, stmt, batchSize, batchInterval, func);
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param reader the reader
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final Reader reader, final Connection conn, final String insertSQL,
             final Try.Function<String, Object[], E> func) throws UncheckedSQLException, E {
         return importData(reader, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, func);
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param reader the reader
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final Reader reader, final long offset, final long count, final Connection conn, final String insertSQL,
             final int batchSize, final int batchInterval, final Try.Function<String, Object[], E> func) throws UncheckedSQLException, E {
         PreparedStatement stmt = null;
@@ -3186,6 +3706,16 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Import data.
+     *
+     * @param <E> the element type
+     * @param reader the reader
+     * @param stmt the stmt
+     * @param func the func
+     * @return the long
+     * @throws E the e
+     */
     public static <E extends Exception> long importData(final Reader reader, final PreparedStatement stmt, final Try.Function<String, Object[], E> func)
             throws E {
         return importData(reader, 0, Long.MAX_VALUE, stmt, 200, 0, func);
@@ -3193,16 +3723,18 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from file to database.
-     * 
-     * @param reader
-     * @param offset
-     * @param count
-     * @param stmt
-     * @param batchSize
-     * @param batchInterval
-     * @param func convert line to the parameters for record insert. Returns a <code>null</code> array to skip the line. 
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param <E> the element type
+     * @param reader the reader
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param func convert line to the parameters for record insert. Returns a <code>null</code> array to skip the line.
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <E extends Exception> long importData(final Reader reader, long offset, final long count, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final Try.Function<String, Object[], E> func) throws UncheckedSQLException, E {
@@ -3258,11 +3790,41 @@ public final class JdbcUtil {
         return result;
     }
 
+    /**
+     * Import data.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <T, E extends Exception> long importData(final Iterator<T> iter, final Connection conn, final String insertSQL,
             final Try.Function<? super T, Object[], E> func) throws UncheckedSQLException, E {
         return importData(iter, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, func);
     }
 
+    /**
+     * Import data.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param func the func
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <T, E extends Exception> long importData(final Iterator<T> iter, final long offset, final long count, final Connection conn,
             final String insertSQL, final int batchSize, final int batchInterval, final Try.Function<? super T, Object[], E> func)
             throws UncheckedSQLException, E {
@@ -3279,6 +3841,17 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Import data.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param stmt the stmt
+     * @param func the func
+     * @return the long
+     * @throws E the e
+     */
     public static <T, E extends Exception> long importData(final Iterator<T> iter, final PreparedStatement stmt,
             final Try.Function<? super T, Object[], E> func) throws E {
         return importData(iter, 0, Long.MAX_VALUE, stmt, 200, 0, func);
@@ -3286,16 +3859,19 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from Iterator to database.
-     * 
-     * @param iter
-     * @param offset
-     * @param count
-     * @param stmt
-     * @param batchSize
-     * @param batchInterval
-     * @param func convert element to the parameters for record insert. Returns a <code>null</code> array to skip the line. 
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param func convert element to the parameters for record insert. Returns a <code>null</code> array to skip the line.
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <T, E extends Exception> long importData(final Iterator<T> iter, long offset, final long count, final PreparedStatement stmt,
             final int batchSize, final int batchInterval, final Try.Function<? super T, Object[], E> func) throws UncheckedSQLException, E {
@@ -3346,29 +3922,57 @@ public final class JdbcUtil {
         return result;
     }
 
+    /**
+     * Import data.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param stmtSetter the stmt setter
+     * @return the long
+     */
     public static <T> long importData(final Iterator<T> iter, final Connection conn, final String insertSQL,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) {
         return importData(iter, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, stmtSetter);
     }
 
+    /**
+     * Import data.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     */
     public static <T> long importData(final Iterator<T> iter, final long offset, final long count, final Connection conn, final String insertSQL,
             final int batchSize, final int batchInterval, final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) {
         return importData(iter, offset, count, Fn.alwaysTrue(), conn, insertSQL, batchSize, batchInterval, stmtSetter);
     }
 
     /**
-     * 
-     * @param iter
-     * @param offset
-     * @param count
-     * @param filter
-     * @param conn
-     * @param insertSQL
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter
-     * @return
-     * @throws UncheckedSQLException
+     * Import data.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param conn the conn
+     * @param insertSQL the insert SQL
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <T, E extends Exception> long importData(final Iterator<T> iter, final long offset, final long count,
             final Try.Predicate<? super T, E> filter, final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
@@ -3386,11 +3990,33 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Import data.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @param stmt the stmt
+     * @param stmtSetter the stmt setter
+     * @return the long
+     */
     public static <T> long importData(final Iterator<T> iter, final PreparedStatement stmt,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) {
         return importData(iter, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
+    /**
+     * Import data.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     */
     public static <T> long importData(final Iterator<T> iter, long offset, final long count, final PreparedStatement stmt, final int batchSize,
             final int batchInterval, final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) {
         return importData(iter, offset, count, Fn.alwaysTrue(), stmt, batchSize, batchInterval, stmtSetter);
@@ -3398,17 +4024,20 @@ public final class JdbcUtil {
 
     /**
      * Imports the data from Iterator to database.
-     * 
-     * @param iter
-     * @param offset
-     * @param count
-     * @param filter
-     * @param stmt
-     * @param batchSize
-     * @param batchInterval
-     * @param stmtSetter 
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param filter the filter
+     * @param stmt the stmt
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
      */
     public static <T, E extends Exception> long importData(final Iterator<T> iter, long offset, final long count, final Try.Predicate<? super T, E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
@@ -3455,26 +4084,90 @@ public final class JdbcUtil {
         return result;
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowParser the row parser
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final Connection conn, final String sql, final Try.Consumer<Object[], E> rowParser)
             throws UncheckedSQLException, E {
         parse(conn, sql, rowParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <E extends Exception, E2 extends Exception> void parse(final Connection conn, final String sql, final Try.Consumer<Object[], E> rowParser,
             final Try.Runnable<E2> onComplete) throws UncheckedSQLException, E, E2 {
         parse(conn, sql, 0, Long.MAX_VALUE, rowParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param conn the conn
+     * @param sql the sql
+     * @param offset the offset
+     * @param count the count
+     * @param rowParser the row parser
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final Connection conn, final String sql, final long offset, final long count,
             final Try.Consumer<Object[], E> rowParser) throws UncheckedSQLException, E {
         parse(conn, sql, offset, count, rowParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param offset the offset
+     * @param count the count
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <E extends Exception, E2 extends Exception> void parse(final Connection conn, final String sql, final long offset, final long count,
             final Try.Consumer<Object[], E> rowParser, final Try.Runnable<E2> onComplete) throws UncheckedSQLException, E, E2 {
         parse(conn, sql, offset, count, 0, 0, rowParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param conn the conn
+     * @param sql the sql
+     * @param offset the offset
+     * @param count the count
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param rowParser the row parser
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final Connection conn, final String sql, final long offset, final long count, final int processThreadNum,
             final int queueSize, final Try.Consumer<Object[], E> rowParser) throws UncheckedSQLException, E {
         parse(conn, sql, offset, count, processThreadNum, queueSize, rowParser, Fn.emptyAction());
@@ -3482,16 +4175,20 @@ public final class JdbcUtil {
 
     /**
      * Parse the ResultSet obtained by executing query with the specified Connection and sql.
-     * 
-     * @param conn
-     * @param sql
-     * @param offset
-     * @param count
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param offset the offset
+     * @param count the count
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param rowParser
-     * @param onComplete
-     * @throws UncheckedSQLException
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Connection conn, final String sql, final long offset, final long count,
             final int processThreadNum, final int queueSize, final Try.Consumer<Object[], E> rowParser, final Try.Runnable<E2> onComplete)
@@ -3512,25 +4209,83 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param stmt the stmt
+     * @param rowParser the row parser
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final PreparedStatement stmt, final Try.Consumer<Object[], E> rowParser) throws UncheckedSQLException, E {
         parse(stmt, rowParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param stmt the stmt
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <E extends Exception, E2 extends Exception> void parse(final PreparedStatement stmt, final Try.Consumer<Object[], E> rowParser,
             final Try.Runnable<E2> onComplete) throws UncheckedSQLException, E, E2 {
         parse(stmt, 0, Long.MAX_VALUE, rowParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param stmt the stmt
+     * @param offset the offset
+     * @param count the count
+     * @param rowParser the row parser
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final PreparedStatement stmt, final long offset, final long count, final Try.Consumer<Object[], E> rowParser)
             throws E {
         parse(stmt, offset, count, rowParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param stmt the stmt
+     * @param offset the offset
+     * @param count the count
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <E extends Exception, E2 extends Exception> void parse(final PreparedStatement stmt, final long offset, final long count,
             final Try.Consumer<Object[], E> rowParser, final Try.Runnable<E2> onComplete) throws UncheckedSQLException, E, E2 {
         parse(stmt, offset, count, 0, 0, rowParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param stmt the stmt
+     * @param offset the offset
+     * @param count the count
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param rowParser the row parser
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final PreparedStatement stmt, final long offset, final long count, final int processThreadNum,
             final int queueSize, final Try.Consumer<Object[], E> rowParser) throws UncheckedSQLException, E {
         parse(stmt, offset, count, processThreadNum, queueSize, rowParser, Fn.emptyAction());
@@ -3538,15 +4293,19 @@ public final class JdbcUtil {
 
     /**
      * Parse the ResultSet obtained by executing query with the specified PreparedStatement.
-     * 
-     * @param stmt
-     * @param offset
-     * @param count
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param stmt the stmt
+     * @param offset the offset
+     * @param count the count
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param rowParser
-     * @param onComplete
-     * @throws UncheckedSQLException
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
      */
     public static <E extends Exception, E2 extends Exception> void parse(final PreparedStatement stmt, final long offset, final long count,
             final int processThreadNum, final int queueSize, final Try.Consumer<Object[], E> rowParser, final Try.Runnable<E2> onComplete)
@@ -3564,25 +4323,84 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param rs the rs
+     * @param rowParser the row parser
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final ResultSet rs, final Try.Consumer<Object[], E> rowParser) throws UncheckedSQLException, E {
         parse(rs, rowParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param rs the rs
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <E extends Exception, E2 extends Exception> void parse(final ResultSet rs, final Try.Consumer<Object[], E> rowParser,
             final Try.Runnable<E2> onComplete) throws UncheckedSQLException, E, E2 {
         parse(rs, 0, Long.MAX_VALUE, rowParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @param rowParser the row parser
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final ResultSet rs, long offset, long count, final Try.Consumer<Object[], E> rowParser)
             throws UncheckedSQLException, E {
         parse(rs, offset, count, rowParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <E extends Exception, E2 extends Exception> void parse(final ResultSet rs, long offset, long count, final Try.Consumer<Object[], E> rowParser,
             final Try.Runnable<E2> onComplete) throws UncheckedSQLException, E, E2 {
         parse(rs, offset, count, 0, 0, rowParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <E> the element type
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param rowParser the row parser
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     */
     public static <E extends Exception> void parse(final ResultSet rs, long offset, long count, final int processThreadNum, final int queueSize,
             final Try.Consumer<Object[], E> rowParser) throws UncheckedSQLException, E {
         parse(rs, offset, count, processThreadNum, queueSize, rowParser, Fn.emptyAction());
@@ -3590,15 +4408,19 @@ public final class JdbcUtil {
 
     /**
      * Parse the ResultSet.
-     * 
-     * @param stmt
-     * @param offset
-     * @param count
+     *
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param rs the rs
+     * @param offset the offset
+     * @param count the count
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param rowParser
-     * @param onComplete
-     * @throws UncheckedSQLException
+     * @param rowParser the row parser
+     * @param onComplete the on complete
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @throws E the e
+     * @throws E2 the e2
      */
     public static <E extends Exception, E2 extends Exception> void parse(final ResultSet rs, long offset, long count, final int processThreadNum,
             final int queueSize, final Try.Consumer<Object[], E> rowParser, final Try.Runnable<E2> onComplete) throws UncheckedSQLException, E, E2 {
@@ -3644,26 +4466,37 @@ public final class JdbcUtil {
         Iterables.parse(iter, offset, count, processThreadNum, queueSize, rowParser, onComplete);
     }
 
+    /**
+     * Copy.
+     *
+     * @param sourceConn the source conn
+     * @param selectSql the select sql
+     * @param targetConn the target conn
+     * @param insertSql the insert sql
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static long copy(final Connection sourceConn, final String selectSql, final Connection targetConn, final String insertSql)
             throws UncheckedSQLException {
         return copy(sourceConn, selectSql, 200, 0, Integer.MAX_VALUE, targetConn, insertSql, DEFAULT_STMT_SETTER, 200, 0, false);
     }
 
     /**
-     * 
-     * @param sourceConn
-     * @param selectSql
-     * @param fetchSize
-     * @param offset
-     * @param count
-     * @param targetConn
-     * @param insertSql
-     * @param stmtSetter
-     * @param batchSize
-     * @param batchInterval
+     * Copy.
+     *
+     * @param sourceConn the source conn
+     * @param selectSql the select sql
+     * @param fetchSize the fetch size
+     * @param offset the offset
+     * @param count the count
+     * @param targetConn the target conn
+     * @param insertSql the insert sql
+     * @param stmtSetter the stmt setter
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
      * @param inParallel do the read and write in separated threads.
-     * @return
-     * @throws UncheckedSQLException
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static long copy(final Connection sourceConn, final String selectSql, final int fetchSize, final long offset, final long count,
             final Connection targetConn, final String insertSql, final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter,
@@ -3690,23 +4523,33 @@ public final class JdbcUtil {
         return result;
     }
 
+    /**
+     * Copy.
+     *
+     * @param selectStmt the select stmt
+     * @param insertStmt the insert stmt
+     * @param stmtSetter the stmt setter
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public static long copy(final PreparedStatement selectStmt, final PreparedStatement insertStmt,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter) throws UncheckedSQLException {
         return copy(selectStmt, 0, Integer.MAX_VALUE, insertStmt, stmtSetter, 200, 0, false);
     }
 
     /**
-     * 
-     * @param selectStmt
-     * @param offset
-     * @param count
-     * @param insertStmt
-     * @param stmtSetter
-     * @param batchSize
-     * @param batchInterval
+     * Copy.
+     *
+     * @param selectStmt the select stmt
+     * @param offset the offset
+     * @param count the count
+     * @param insertStmt the insert stmt
+     * @param stmtSetter the stmt setter
+     * @param batchSize the batch size
+     * @param batchInterval the batch interval
      * @param inParallel do the read and write in separated threads.
-     * @return
-     * @throws UncheckedSQLException
+     * @return the long
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static long copy(final PreparedStatement selectStmt, final long offset, final long count, final PreparedStatement insertStmt,
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super Object[]> stmtSetter, final int batchSize, final int batchInterval,
@@ -3763,6 +4606,12 @@ public final class JdbcUtil {
         return result.longValue();
     }
 
+    /**
+     * Checks if is table not exists exception.
+     *
+     * @param e the e
+     * @return true, if is table not exists exception
+     */
     static boolean isTableNotExistsException(final Throwable e) {
         if (e instanceof SQLException) {
             SQLException sqlException = (SQLException) e;
@@ -3787,8 +4636,15 @@ public final class JdbcUtil {
         return false;
     }
 
+    /** The Constant column2FieldNameMapPool. */
     private static final Map<Class<?>, Map<String, String>> column2FieldNameMapPool = new ConcurrentHashMap<>();
 
+    /**
+     * Gets the column 2 field name map.
+     *
+     * @param entityClass the entity class
+     * @return the column 2 field name map
+     */
     static Map<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
         Map<String, String> result = column2FieldNameMapPool.get(entityClass);
 
@@ -3836,9 +4692,10 @@ public final class JdbcUtil {
     }
 
     /**
-     * 
-     * @param propValue
-     * @return
+     * Checks if is default id prop value.
+     *
+     * @param propValue the prop value
+     * @return true, if is default id prop value
      * @deprecated for internal only.
      */
     @Deprecated
@@ -3858,26 +4715,52 @@ public final class JdbcUtil {
      * 
      * <br />
      * Remember: parameter/column index in {@code PreparedStatement/ResultSet} starts from 1, not 0.
-     * 
-     * @author haiyangl
      *
-     * @param <S>
-     * @param <Q>
+     * @author haiyangl
+     * @param <S> the generic type
+     * @param <Q> the generic type
      */
     static abstract class AbstractPreparedQuery<S extends PreparedStatement, Q extends AbstractPreparedQuery<S, Q>> implements AutoCloseable {
+
+        /** The async executor. */
         final AsyncExecutor asyncExecutor;
+
+        /** The stmt. */
         final S stmt;
+
+        /** The conn. */
         Connection conn;
+
+        /** The is fetch direction set. */
         boolean isFetchDirectionSet = false;
+
+        /** The is batch. */
         boolean isBatch = false;
+
+        /** The close after execution. */
         boolean closeAfterExecution = true;
+
+        /** The is closed. */
         boolean isClosed = false;
+
+        /** The close handler. */
         Runnable closeHandler;
 
+        /**
+         * Instantiates a new abstract prepared query.
+         *
+         * @param stmt the stmt
+         */
         AbstractPreparedQuery(S stmt) {
             this(stmt, null);
         }
 
+        /**
+         * Instantiates a new abstract prepared query.
+         *
+         * @param stmt the stmt
+         * @param asyncExecutor the async executor
+         */
         AbstractPreparedQuery(S stmt, AsyncExecutor asyncExecutor) {
             this.stmt = stmt;
             this.asyncExecutor = asyncExecutor;
@@ -3895,6 +4778,12 @@ public final class JdbcUtil {
         //            return Try.of((Q) this);
         //        }
 
+        /**
+         * Close after execution.
+         *
+         * @param closeAfterExecution the close after execution
+         * @return the q
+         */
         public Q closeAfterExecution(boolean closeAfterExecution) {
             assertNotClosed();
 
@@ -3903,14 +4792,20 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Close after execution.
+         *
+         * @return true, if successful
+         */
         public boolean closeAfterExecution() {
             return closeAfterExecution;
         }
 
         /**
-         * 
+         * On close.
+         *
          * @param closeHandler A task to execute after this {@code Query} is closed
-         * @return 
+         * @return the q
          */
         public Q onClose(final Runnable closeHandler) {
             checkArgNotNull(closeHandler, "closeHandler");
@@ -3937,11 +4832,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the null.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param sqlType
-         * @return
-         * @throws SQLException
+         * @param sqlType the sql type
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setNull(int parameterIndex, int sqlType) throws SQLException {
             stmt.setNull(parameterIndex, sqlType);
@@ -3950,12 +4846,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the null.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param sqlType
-         * @param typeName
-         * @return
-         * @throws SQLException
+         * @param sqlType the sql type
+         * @param typeName the type name
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setNull(int parameterIndex, int sqlType, String typeName) throws SQLException {
             stmt.setNull(parameterIndex, sqlType, typeName);
@@ -3964,11 +4861,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the boolean.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setBoolean(int parameterIndex, boolean x) throws SQLException {
             stmt.setBoolean(parameterIndex, x);
@@ -3976,6 +4874,14 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the boolean.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setBoolean(int parameterIndex, Boolean x) throws SQLException {
             stmt.setBoolean(parameterIndex, N.defaultIfNull(x));
 
@@ -3983,11 +4889,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the byte.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setByte(int parameterIndex, byte x) throws SQLException {
             stmt.setByte(parameterIndex, x);
@@ -3995,6 +4902,14 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the byte.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setByte(int parameterIndex, Byte x) throws SQLException {
             stmt.setByte(parameterIndex, N.defaultIfNull(x));
 
@@ -4002,11 +4917,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the short.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setShort(int parameterIndex, short x) throws SQLException {
             stmt.setShort(parameterIndex, x);
@@ -4014,6 +4930,14 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the short.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setShort(int parameterIndex, Short x) throws SQLException {
             stmt.setShort(parameterIndex, N.defaultIfNull(x));
 
@@ -4021,11 +4945,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the int.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setInt(int parameterIndex, int x) throws SQLException {
             stmt.setInt(parameterIndex, x);
@@ -4033,6 +4958,14 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the int.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setInt(int parameterIndex, Integer x) throws SQLException {
             stmt.setInt(parameterIndex, N.defaultIfNull(x));
 
@@ -4040,11 +4973,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the long.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setLong(int parameterIndex, long x) throws SQLException {
             stmt.setLong(parameterIndex, x);
@@ -4052,6 +4986,14 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the long.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setLong(int parameterIndex, Long x) throws SQLException {
             stmt.setLong(parameterIndex, N.defaultIfNull(x));
 
@@ -4059,11 +5001,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the float.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setFloat(int parameterIndex, float x) throws SQLException {
             stmt.setFloat(parameterIndex, x);
@@ -4071,6 +5014,14 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the float.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setFloat(int parameterIndex, Float x) throws SQLException {
             stmt.setFloat(parameterIndex, N.defaultIfNull(x));
 
@@ -4078,11 +5029,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the double.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setDouble(int parameterIndex, double x) throws SQLException {
             stmt.setDouble(parameterIndex, N.defaultIfNull(x));
@@ -4090,6 +5042,14 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the double.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setDouble(int parameterIndex, Double x) throws SQLException {
             stmt.setDouble(parameterIndex, x);
 
@@ -4097,11 +5057,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the big decimal.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
             stmt.setBigDecimal(parameterIndex, x);
@@ -4110,11 +5071,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the string.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setString(int parameterIndex, String x) throws SQLException {
             stmt.setString(parameterIndex, x);
@@ -4123,11 +5085,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the date.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setDate(int parameterIndex, java.sql.Date x) throws SQLException {
             stmt.setDate(parameterIndex, x);
@@ -4136,11 +5099,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the date.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setDate(int parameterIndex, java.util.Date x) throws SQLException {
             stmt.setDate(parameterIndex, x == null ? null : x instanceof java.sql.Date ? (java.sql.Date) x : new java.sql.Date(x.getTime()));
@@ -4149,11 +5113,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the time.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setTime(int parameterIndex, java.sql.Time x) throws SQLException {
             stmt.setTime(parameterIndex, x);
@@ -4162,11 +5127,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the time.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setTime(int parameterIndex, java.util.Date x) throws SQLException {
             stmt.setTime(parameterIndex, x == null ? null : x instanceof java.sql.Time ? (java.sql.Time) x : new java.sql.Time(x.getTime()));
@@ -4175,11 +5141,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the timestamp.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setTimestamp(int parameterIndex, java.sql.Timestamp x) throws SQLException {
             stmt.setTimestamp(parameterIndex, x);
@@ -4188,11 +5155,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the timestamp.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setTimestamp(int parameterIndex, java.util.Date x) throws SQLException {
             stmt.setTimestamp(parameterIndex,
@@ -4201,108 +5169,259 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the bytes.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setBytes(int parameterIndex, byte[] x) throws SQLException {
             stmt.setBytes(parameterIndex, x);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the ascii stream.
+         *
+         * @param parameterIndex the parameter index
+         * @param inputStream the input stream
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setAsciiStream(int parameterIndex, InputStream inputStream) throws SQLException {
             stmt.setAsciiStream(parameterIndex, inputStream);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the ascii stream.
+         *
+         * @param parameterIndex the parameter index
+         * @param inputStream the input stream
+         * @param length the length
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setAsciiStream(int parameterIndex, InputStream inputStream, long length) throws SQLException {
             stmt.setAsciiStream(parameterIndex, inputStream, length);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the binary stream.
+         *
+         * @param parameterIndex the parameter index
+         * @param inputStream the input stream
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setBinaryStream(int parameterIndex, InputStream inputStream) throws SQLException {
             stmt.setBinaryStream(parameterIndex, inputStream);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the binary stream.
+         *
+         * @param parameterIndex the parameter index
+         * @param inputStream the input stream
+         * @param length the length
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setBinaryStream(int parameterIndex, InputStream inputStream, long length) throws SQLException {
             stmt.setBinaryStream(parameterIndex, inputStream, length);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the character stream.
+         *
+         * @param parameterIndex the parameter index
+         * @param reader the reader
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
             stmt.setCharacterStream(parameterIndex, reader);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the character stream.
+         *
+         * @param parameterIndex the parameter index
+         * @param reader the reader
+         * @param length the length
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
             stmt.setCharacterStream(parameterIndex, reader, length);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the N character stream.
+         *
+         * @param parameterIndex the parameter index
+         * @param reader the reader
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setNCharacterStream(int parameterIndex, Reader reader) throws SQLException {
             stmt.setNCharacterStream(parameterIndex, reader);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the N character stream.
+         *
+         * @param parameterIndex the parameter index
+         * @param reader the reader
+         * @param length the length
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setNCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
             stmt.setNCharacterStream(parameterIndex, reader, length);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setBlob(int parameterIndex, java.sql.Blob x) throws SQLException {
             stmt.setBlob(parameterIndex, x);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterIndex the parameter index
+         * @param inputStream the input stream
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
             stmt.setBlob(parameterIndex, inputStream);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterIndex the parameter index
+         * @param inputStream the input stream
+         * @param length the length
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
             stmt.setBlob(parameterIndex, inputStream, length);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setClob(int parameterIndex, java.sql.Clob x) throws SQLException {
             stmt.setClob(parameterIndex, x);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterIndex the parameter index
+         * @param reader the reader
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setClob(int parameterIndex, Reader reader) throws SQLException {
             stmt.setClob(parameterIndex, reader);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterIndex the parameter index
+         * @param reader the reader
+         * @param length the length
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setClob(int parameterIndex, Reader reader, long length) throws SQLException {
             stmt.setClob(parameterIndex, reader, length);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setNClob(int parameterIndex, java.sql.NClob x) throws SQLException {
             stmt.setNClob(parameterIndex, x);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterIndex the parameter index
+         * @param reader the reader
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setNClob(int parameterIndex, Reader reader) throws SQLException {
             stmt.setNClob(parameterIndex, reader);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterIndex the parameter index
+         * @param reader the reader
+         * @param length the length
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
             stmt.setNClob(parameterIndex, reader, length);
 
@@ -4310,12 +5429,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * @param parameterIndex starts from 1, not 0.
-         * 
-         * @param parameterIndex
-         * @param x
-         * @return
-         * @throws SQLException
+         * Sets the URL.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setURL(int parameterIndex, URL x) throws SQLException {
             stmt.setURL(parameterIndex, x);
@@ -4324,12 +5443,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * @param parameterIndex starts from 1, not 0.
-         * 
-         * @param parameterIndex
-         * @param x
-         * @return
-         * @throws SQLException
+         * Sets the array.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setArray(int parameterIndex, java.sql.Array x) throws SQLException {
             stmt.setArray(parameterIndex, x);
@@ -4338,12 +5457,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * @param parameterIndex starts from 1, not 0.
-         * 
-         * @param parameterIndex
-         * @param x
-         * @return
-         * @throws SQLException
+         * Sets the SQLXML.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setSQLXML(int parameterIndex, java.sql.SQLXML x) throws SQLException {
             stmt.setSQLXML(parameterIndex, x);
@@ -4352,12 +5471,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * @param parameterIndex starts from 1, not 0.
-         * 
-         * @param parameterIndex
-         * @param x
-         * @return
-         * @throws SQLException
+         * Sets the ref.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setRef(int parameterIndex, java.sql.Ref x) throws SQLException {
             stmt.setRef(parameterIndex, x);
@@ -4366,12 +5485,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * @param parameterIndex starts from 1, not 0.
-         * 
-         * @param parameterIndex
-         * @param x
-         * @return
-         * @throws SQLException
+         * Sets the row id.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setRowId(int parameterIndex, java.sql.RowId x) throws SQLException {
             stmt.setRowId(parameterIndex, x);
@@ -4380,11 +5499,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the object.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setObject(int parameterIndex, Object x) throws SQLException {
             if (x == null) {
@@ -4397,12 +5517,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the object.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @param sqlType
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @param sqlType the sql type
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setObject(int parameterIndex, Object x, int sqlType) throws SQLException {
             stmt.setObject(parameterIndex, x, sqlType);
@@ -4411,13 +5532,14 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the object.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param x
-         * @param sqlType
-         * @param scaleOrLength
-         * @return
-         * @throws SQLException
+         * @param x the x
+         * @param sqlType the sql type
+         * @param scaleOrLength the scale or length
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setObject(int parameterIndex, Object x, int sqlType, int scaleOrLength) throws SQLException {
             stmt.setObject(parameterIndex, x, sqlType, scaleOrLength);
@@ -4426,12 +5548,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param x
-         * @param sqlType
-         * @return
-         * @throws SQLException
+         * Sets the object.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @param sqlType the sql type
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setObject(int parameterIndex, Object x, SQLType sqlType) throws SQLException {
             stmt.setObject(parameterIndex, x, sqlType);
@@ -4439,6 +5562,16 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterIndex the parameter index
+         * @param x the x
+         * @param sqlType the sql type
+         * @param scaleOrLength the scale or length
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setObject(int parameterIndex, Object x, SQLType sqlType, int scaleOrLength) throws SQLException {
             stmt.setObject(parameterIndex, x, sqlType, scaleOrLength);
 
@@ -4446,12 +5579,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, String param1, String param2) throws SQLException {
             stmt.setString(startParameterIndex++, param1);
@@ -4461,13 +5595,14 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, String param1, String param2, String param3) throws SQLException {
             stmt.setString(startParameterIndex++, param1);
@@ -4478,14 +5613,15 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param param4 
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @param param4 the param 4
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, String param1, String param2, String param3, String param4) throws SQLException {
             stmt.setString(startParameterIndex++, param1);
@@ -4497,15 +5633,16 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param param4
-         * @param param5
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @param param4 the param 4
+         * @param param5 the param 5
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, String param1, String param2, String param3, String param4, String param5) throws SQLException {
             stmt.setString(startParameterIndex++, param1);
@@ -4518,13 +5655,14 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, Object param1, Object param2, Object param3) throws SQLException {
             setObject(startParameterIndex++, param1);
@@ -4535,14 +5673,15 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param param4 
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @param param4 the param 4
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, Object param1, Object param2, Object param3, Object param4) throws SQLException {
             setObject(startParameterIndex++, param1);
@@ -4554,15 +5693,16 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param param4
-         * @param param5
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @param param4 the param 4
+         * @param param5 the param 5
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, Object param1, Object param2, Object param3, Object param4, Object param5) throws SQLException {
             setObject(startParameterIndex++, param1);
@@ -4575,16 +5715,17 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param param4
-         * @param param5
-         * @param param6 
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @param param4 the param 4
+         * @param param5 the param 5
+         * @param param6 the param 6
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, Object param1, Object param2, Object param3, Object param4, Object param5, Object param6)
                 throws SQLException {
@@ -4599,17 +5740,18 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param param4
-         * @param param5
-         * @param param6
-         * @param param7
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @param param4 the param 4
+         * @param param5 the param 5
+         * @param param6 the param 6
+         * @param param7 the param 7
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, Object param1, Object param2, Object param3, Object param4, Object param5, Object param6, Object param7)
                 throws SQLException {
@@ -4625,18 +5767,19 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param param4
-         * @param param5
-         * @param param6
-         * @param param7
-         * @param param8
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @param param4 the param 4
+         * @param param5 the param 5
+         * @param param6 the param 6
+         * @param param7 the param 7
+         * @param param8 the param 8
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, Object param1, Object param2, Object param3, Object param4, Object param5, Object param6, Object param7,
                 Object param8) throws SQLException {
@@ -4653,19 +5796,20 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param param4
-         * @param param5
-         * @param param6
-         * @param param7
-         * @param param8
-         * @param param9
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param param1 the param 1
+         * @param param2 the param 2
+         * @param param3 the param 3
+         * @param param4 the param 4
+         * @param param5 the param 5
+         * @param param6 the param 6
+         * @param param7 the param 7
+         * @param param8 the param 8
+         * @param param9 the param 9
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, Object param1, Object param2, Object param3, Object param4, Object param5, Object param6, Object param7,
                 Object param8, Object param9) throws SQLException {
@@ -4683,12 +5827,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param parameters 
-         * @return
+         * Sets the parameters.
+         *
+         * @param startParameterIndex the start parameter index
+         * @param parameters the parameters
+         * @return the q
          * @throws IllegalArgumentException if specified {@code parameters} or {@code type} is null.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(int startParameterIndex, Collection<?> parameters) throws IllegalArgumentException, SQLException {
             checkArgNotNull(parameters, "parameters");
@@ -4701,13 +5846,15 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param startParameterIndex
-         * @param parameters
-         * @param type
-         * @return
+         * Sets the parameters.
+         *
+         * @param <T> the generic type
+         * @param startParameterIndex the start parameter index
+         * @param parameters the parameters
+         * @param type the type
+         * @return the q
          * @throws IllegalArgumentException if specified {@code parameters} or {@code type} is null.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public <T> Q setParameters(int startParameterIndex, Collection<? extends T> parameters, Class<T> type) throws IllegalArgumentException, SQLException {
             checkArgNotNull(parameters, "parameters");
@@ -4723,10 +5870,11 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param paramSetter
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param paramSetter the param setter
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q setParameters(ParametersSetter<? super S> paramSetter) throws SQLException {
             checkArgNotNull(paramSetter, "paramSetter");
@@ -4747,10 +5895,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param paramSetter
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param <T> the generic type
+         * @param parameter the parameter
+         * @param paramSetter the param setter
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public <T> Q setParameters(final T parameter, final BiParametersSetter<? super S, ? super T> paramSetter) throws SQLException {
             checkArgNotNull(paramSetter, "paramSetter");
@@ -4771,10 +5922,11 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param paramSetter
-         * @return
-         * @throws SQLException
+         * Sett parameters.
+         *
+         * @param paramSetter the param setter
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public Q settParameters(ParametersSetter<? super Q> paramSetter) throws SQLException {
             checkArgNotNull(paramSetter, "paramSetter");
@@ -4795,10 +5947,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param paramSetter
-         * @return
-         * @throws SQLException
+         * Sett parameters.
+         *
+         * @param <T> the generic type
+         * @param parameter the parameter
+         * @param paramSetter the param setter
+         * @return the q
+         * @throws SQLException the SQL exception
          */
         public <T> Q settParameters(final T parameter, BiParametersSetter<? super Q, ? super T> paramSetter) throws SQLException {
             checkArgNotNull(paramSetter, "paramSetter");
@@ -4818,6 +5973,12 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Adds the batch.
+         *
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q addBatch() throws SQLException {
             stmt.addBatch();
             isBatch = true;
@@ -4826,11 +5987,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the fetch direction.
+         *
          * @param direction one of <code>ResultSet.FETCH_FORWARD</code>,
          * <code>ResultSet.FETCH_REVERSE</code>, or <code>ResultSet.FETCH_UNKNOWN</code>
-         * @return
-         * @throws SQLException
+         * @return the q
+         * @throws SQLException the SQL exception
          * @see {@link java.sql.Statement#setFetchDirection(int)}
          */
         public Q setFetchDirection(FetchDirection direction) throws SQLException {
@@ -4841,36 +6003,77 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
+        /**
+         * Sets the fetch size.
+         *
+         * @param rows the rows
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setFetchSize(int rows) throws SQLException {
             stmt.setFetchSize(rows);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the max rows.
+         *
+         * @param max the max
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setMaxRows(int max) throws SQLException {
             stmt.setMaxRows(max);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the large max rows.
+         *
+         * @param max the max
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setLargeMaxRows(long max) throws SQLException {
             stmt.setLargeMaxRows(max);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the max field size.
+         *
+         * @param max the max
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setMaxFieldSize(int max) throws SQLException {
             stmt.setMaxFieldSize(max);
 
             return (Q) this;
         }
 
+        /**
+         * Sets the query timeout.
+         *
+         * @param seconds the seconds
+         * @return the q
+         * @throws SQLException the SQL exception
+         */
         public Q setQueryTimeout(int seconds) throws SQLException {
             stmt.setQueryTimeout(seconds);
 
             return (Q) this;
         }
 
+        /**
+         * Query for boolean.
+         *
+         * @return the optional boolean
+         * @throws SQLException the SQL exception
+         */
         public OptionalBoolean queryForBoolean() throws SQLException {
             assertNotClosed();
 
@@ -4881,8 +6084,15 @@ public final class JdbcUtil {
             }
         }
 
+        /** The Constant charType. */
         private static final Type<Character> charType = TypeFactory.getType(char.class);
-        
+
+        /**
+         * Query for char.
+         *
+         * @return the optional char
+         * @throws SQLException the SQL exception
+         */
         public OptionalChar queryForChar() throws SQLException {
             assertNotClosed();
 
@@ -4897,6 +6107,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for byte.
+         *
+         * @return the optional byte
+         * @throws SQLException the SQL exception
+         */
         public OptionalByte queryForByte() throws SQLException {
             assertNotClosed();
 
@@ -4907,6 +6123,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for short.
+         *
+         * @return the optional short
+         * @throws SQLException the SQL exception
+         */
         public OptionalShort queryForShort() throws SQLException {
             assertNotClosed();
 
@@ -4917,6 +6139,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for int.
+         *
+         * @return the optional int
+         * @throws SQLException the SQL exception
+         */
         public OptionalInt queryForInt() throws SQLException {
             assertNotClosed();
 
@@ -4927,6 +6155,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for long.
+         *
+         * @return the optional long
+         * @throws SQLException the SQL exception
+         */
         public OptionalLong queryForLong() throws SQLException {
             assertNotClosed();
 
@@ -4937,6 +6171,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for float.
+         *
+         * @return the optional float
+         * @throws SQLException the SQL exception
+         */
         public OptionalFloat queryForFloat() throws SQLException {
             assertNotClosed();
 
@@ -4947,6 +6187,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for double.
+         *
+         * @return the optional double
+         * @throws SQLException the SQL exception
+         */
         public OptionalDouble queryForDouble() throws SQLException {
             assertNotClosed();
 
@@ -4957,6 +6203,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for string.
+         *
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         public Nullable<String> queryForString() throws SQLException {
             assertNotClosed();
 
@@ -4967,6 +6219,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query big decimal.
+         *
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         public Nullable<BigDecimal> queryBigDecimal() throws SQLException {
             assertNotClosed();
 
@@ -4977,6 +6235,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for date.
+         *
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         public Nullable<java.sql.Date> queryForDate() throws SQLException {
             assertNotClosed();
 
@@ -4987,6 +6251,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for time.
+         *
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         public Nullable<java.sql.Time> queryForTime() throws SQLException {
             assertNotClosed();
 
@@ -4997,6 +6267,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query for timestamp.
+         *
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         public Nullable<java.sql.Timestamp> queryForTimestamp() throws SQLException {
             assertNotClosed();
 
@@ -5009,10 +6285,11 @@ public final class JdbcUtil {
 
         /**
          * Returns a {@code Nullable} describing the value in the first row/column if it exists, otherwise return an empty {@code Nullable}.
-         * 
-         * @param targetClass
-         * @return
-         * @throws SQLException
+         *
+         * @param <V> the value type
+         * @param targetClass the target class
+         * @return the nullable
+         * @throws SQLException the SQL exception
          */
         public <V> Nullable<V> queryForSingleResult(Class<V> targetClass) throws SQLException {
             checkArgNotNull(targetClass, "targetClass");
@@ -5027,10 +6304,11 @@ public final class JdbcUtil {
 
         /**
          * Returns an {@code Optional} describing the value in the first row/column if it exists, otherwise return an empty {@code Optional}.
-         * 
-         * @param targetClass
-         * @return
-         * @throws SQLException
+         *
+         * @param <V> the value type
+         * @param targetClass the target class
+         * @return the optional
+         * @throws SQLException the SQL exception
          */
         public <V> Optional<V> queryForSingleNonNull(Class<V> targetClass) throws SQLException {
             checkArgNotNull(targetClass, "targetClass");
@@ -5046,11 +6324,12 @@ public final class JdbcUtil {
         /**
          * Returns a {@code Nullable} describing the value in the first row/column if it exists, otherwise return an empty {@code Nullable}.
          * And throws {@code DuplicatedResultException} if more than one record found.
-         * 
-         * @param targetClass
-         * @return
+         *
+         * @param <V> the value type
+         * @param targetClass the target class
+         * @return the nullable
          * @throws DuplicatedResultException if more than one record found.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public <V> Nullable<V> queryForUniqueResult(Class<V> targetClass) throws DuplicatedResultException, SQLException {
             checkArgNotNull(targetClass, "targetClass");
@@ -5073,11 +6352,12 @@ public final class JdbcUtil {
         /**
          * Returns an {@code Optional} describing the value in the first row/column if it exists, otherwise return an empty {@code Optional}.
          * And throws {@code DuplicatedResultException} if more than one record found.
-         * 
-         * @param targetClass
-         * @return
+         *
+         * @param <V> the value type
+         * @param targetClass the target class
+         * @return the optional
          * @throws DuplicatedResultException if more than one record found.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public <V> Optional<V> queryForUniqueNonNull(Class<V> targetClass) throws DuplicatedResultException, SQLException {
             checkArgNotNull(targetClass, "targetClass");
@@ -5097,16 +6377,39 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Gets the.
+         *
+         * @param <T> the generic type
+         * @param targetClass the target class
+         * @param rs the rs
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         private <T> T get(Class<T> targetClass, ResultSet rs) throws SQLException {
             final List<String> columnLabels = JdbcUtil.getColumnLabelList(rs);
 
             return BiRowMapper.to(targetClass).apply(rs, columnLabels);
         }
 
+        /**
+         * Query.
+         *
+         * @return the data set
+         * @throws SQLException the SQL exception
+         */
         public DataSet query() throws SQLException {
             return query(ResultExtractor.TO_DATA_SET);
         }
 
+        /**
+         * Query.
+         *
+         * @param <R> the generic type
+         * @param resultExtrator the result extrator
+         * @return the r
+         * @throws SQLException the SQL exception
+         */
         public <R> R query(final ResultExtractor<R> resultExtrator) throws SQLException {
             checkArgNotNull(resultExtrator, "resultExtrator");
             assertNotClosed();
@@ -5118,6 +6421,14 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Query.
+         *
+         * @param <R> the generic type
+         * @param resultExtrator the result extrator
+         * @return the r
+         * @throws SQLException the SQL exception
+         */
         public <R> R query(final BiResultExtractor<R> resultExtrator) throws SQLException {
             checkArgNotNull(resultExtrator, "resultExtrator");
             assertNotClosed();
@@ -5130,44 +6441,52 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param targetClass
-         * @return
+         * Gets the.
+         *
+         * @param <T> the generic type
+         * @param targetClass the target class
+         * @return the optional
          * @throws DuplicatedResultException If there are more than one record found by the query
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public <T> Optional<T> get(final Class<T> targetClass) throws DuplicatedResultException, SQLException {
             return Optional.ofNullable(gett(targetClass));
         }
 
         /**
-         * 
-         * @param rowMapper
-         * @return
+         * Gets the.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the optional
          * @throws DuplicatedResultException If there are more than one record found by the query
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public <T> Optional<T> get(RowMapper<T> rowMapper) throws DuplicatedResultException, SQLException {
             return Optional.ofNullable(gett(rowMapper));
         }
 
         /**
-         * 
-         * @param rowMapper
-         * @return
+         * Gets the.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the optional
          * @throws DuplicatedResultException If there are more than one record found by the query
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public <T> Optional<T> get(BiRowMapper<T> rowMapper) throws DuplicatedResultException, SQLException {
             return Optional.ofNullable(gett(rowMapper));
         }
 
         /**
-         * 
-         * @param targetClass
-         * @return
+         * Gets the t.
+         *
+         * @param <T> the generic type
+         * @param targetClass the target class
+         * @return the t
          * @throws DuplicatedResultException If there are more than one record found by the query
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public <T> T gett(final Class<T> targetClass) throws DuplicatedResultException, SQLException {
             checkArgNotNull(targetClass, "targetClass");
@@ -5191,11 +6510,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param rowMapper
-         * @return
+         * Gets the t.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the t
          * @throws DuplicatedResultException If there are more than one record found by the query
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         public <T> T gett(RowMapper<T> rowMapper) throws DuplicatedResultException, SQLException {
             checkArgNotNull(rowMapper, "rowMapper");
@@ -5220,11 +6541,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param rowMapper
-         * @return
+         * Gets the t.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the t
          * @throws DuplicatedResultException If there are more than one record found by the query
-         * @throws SQLException 
+         * @throws SQLException the SQL exception
          */
         public <T> T gett(BiRowMapper<T> rowMapper) throws DuplicatedResultException, SQLException {
             checkArgNotNull(rowMapper, "rowMapper");
@@ -5249,10 +6572,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param targetClass
-         * @return
-         * @throws SQLException
+         * Find first.
+         *
+         * @param <T> the generic type
+         * @param targetClass the target class
+         * @return the optional
+         * @throws SQLException the SQL exception
          */
         public <T> Optional<T> findFirst(final Class<T> targetClass) throws SQLException {
             checkArgNotNull(targetClass, "targetClass");
@@ -5269,6 +6594,14 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Find first.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         public <T> Optional<T> findFirst(RowMapper<T> rowMapper) throws SQLException {
             checkArgNotNull(rowMapper, "rowMapper");
             assertNotClosed();
@@ -5280,6 +6613,15 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Find first.
+         *
+         * @param <T> the generic type
+         * @param recordFilter the record filter
+         * @param rowMapper the row mapper
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         public <T> Optional<T> findFirst(final RowFilter recordFilter, RowMapper<T> rowMapper) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             checkArgNotNull(rowMapper, "rowMapper");
@@ -5298,6 +6640,14 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Find first.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         public <T> Optional<T> findFirst(BiRowMapper<T> rowMapper) throws SQLException {
             checkArgNotNull(rowMapper, "rowMapper");
             assertNotClosed();
@@ -5309,6 +6659,15 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Find first.
+         *
+         * @param <T> the generic type
+         * @param recordFilter the record filter
+         * @param rowMapper the row mapper
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         public <T> Optional<T> findFirst(final BiRowFilter recordFilter, BiRowMapper<T> rowMapper) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             checkArgNotNull(rowMapper, "rowMapper");
@@ -5329,26 +6688,79 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param targetClass the target class
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(final Class<T> targetClass) throws SQLException {
             return list(BiRowMapper.to(targetClass));
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param targetClass the target class
+         * @param maxResult the max result
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(final Class<T> targetClass, int maxResult) throws SQLException {
             return list(BiRowMapper.to(targetClass), maxResult);
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(RowMapper<T> rowMapper) throws SQLException {
             return list(rowMapper, Integer.MAX_VALUE);
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @param maxResult the max result
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(RowMapper<T> rowMapper, int maxResult) throws SQLException {
             return list(RowFilter.ALWAYS_TRUE, rowMapper, maxResult);
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param recordFilter the record filter
+         * @param rowMapper the row mapper
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(final RowFilter recordFilter, RowMapper<T> rowMapper) throws SQLException {
             return list(recordFilter, rowMapper, Integer.MAX_VALUE);
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param recordFilter the record filter
+         * @param rowMapper the row mapper
+         * @param maxResult the max result
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(final RowFilter recordFilter, RowMapper<T> rowMapper, int maxResult) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             checkArgNotNull(rowMapper, "rowMapper");
@@ -5371,18 +6783,54 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(BiRowMapper<T> rowMapper) throws SQLException {
             return list(rowMapper, Integer.MAX_VALUE);
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @param maxResult the max result
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(BiRowMapper<T> rowMapper, int maxResult) throws SQLException {
             return list(BiRowFilter.ALWAYS_TRUE, rowMapper, maxResult);
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param recordFilter the record filter
+         * @param rowMapper the row mapper
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(final BiRowFilter recordFilter, BiRowMapper<T> rowMapper) throws SQLException {
             return list(recordFilter, rowMapper, Integer.MAX_VALUE);
         }
 
+        /**
+         * List.
+         *
+         * @param <T> the generic type
+         * @param recordFilter the record filter
+         * @param rowMapper the row mapper
+         * @param maxResult the max result
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         public <T> List<T> list(final BiRowFilter recordFilter, BiRowMapper<T> rowMapper, int maxResult) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             checkArgNotNull(rowMapper, "rowMapper");
@@ -5406,10 +6854,26 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Stream.
+         *
+         * @param <T> the generic type
+         * @param targetClass the target class
+         * @return the exceptional stream
+         * @throws SQLException the SQL exception
+         */
         public <T> ExceptionalStream<T, SQLException> stream(final Class<T> targetClass) throws SQLException {
             return stream(BiRowMapper.to(targetClass));
         }
 
+        /**
+         * Stream.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the exceptional stream
+         * @throws SQLException the SQL exception
+         */
         public <T> ExceptionalStream<T, SQLException> stream(final RowMapper<T> rowMapper) throws SQLException {
             checkArgNotNull(rowMapper, "rowMapper");
             assertNotClosed();
@@ -5504,6 +6968,14 @@ public final class JdbcUtil {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <T> the generic type
+         * @param rowMapper the row mapper
+         * @return the exceptional stream
+         * @throws SQLException the SQL exception
+         */
         public <T> ExceptionalStream<T, SQLException> stream(final BiRowMapper<T> rowMapper) throws SQLException {
             checkArgNotNull(rowMapper, "rowMapper");
             assertNotClosed();
@@ -5605,9 +7077,9 @@ public final class JdbcUtil {
 
         /**
          * Note: using {@code select 1 from ...}, not {@code select count(*) from ...}.
-         * 
-         * @return
-         * @throws SQLException
+         *
+         * @return true, if successful
+         * @throws SQLException the SQL exception
          */
         public boolean exists() throws SQLException {
             assertNotClosed();
@@ -5619,6 +7091,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * If exists.
+         *
+         * @param rowConsumer the row consumer
+         * @throws SQLException the SQL exception
+         */
         public void ifExists(final RowConsumer rowConsumer) throws SQLException {
             checkArgNotNull(rowConsumer, "rowConsumer");
             assertNotClosed();
@@ -5632,6 +7110,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * If exists.
+         *
+         * @param rowConsumer the row consumer
+         * @throws SQLException the SQL exception
+         */
         public void ifExists(final BiRowConsumer rowConsumer) throws SQLException {
             checkArgNotNull(rowConsumer, "rowConsumer");
             assertNotClosed();
@@ -5646,10 +7130,11 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param rowConsumer
-         * @param orElseAction
-         * @throws SQLException 
+         * If exists or else.
+         *
+         * @param rowConsumer the row consumer
+         * @param orElseAction the or else action
+         * @throws SQLException the SQL exception
          */
         public void ifExistsOrElse(final RowConsumer rowConsumer, Try.Runnable<SQLException> orElseAction) throws SQLException {
             checkArgNotNull(rowConsumer, "rowConsumer");
@@ -5668,10 +7153,11 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param rowConsumer
-         * @param orElseAction
-         * @throws SQLException 
+         * If exists or else.
+         *
+         * @param rowConsumer the row consumer
+         * @param orElseAction the or else action
+         * @throws SQLException the SQL exception
          */
         public void ifExistsOrElse(final BiRowConsumer rowConsumer, Try.Runnable<SQLException> orElseAction) throws SQLException {
             checkArgNotNull(rowConsumer, "rowConsumer");
@@ -5691,9 +7177,9 @@ public final class JdbcUtil {
 
         /**
          * Note: using {@code select count(*) from ...}
-         * 
-         * @return
-         * @throws SQLException
+         *
+         * @return the int
+         * @throws SQLException the SQL exception
          * @deprecated may be misused and it's inefficient.
          */
         @Deprecated
@@ -5713,6 +7199,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Count.
+         *
+         * @param recordFilter the record filter
+         * @return the int
+         * @throws SQLException the SQL exception
+         */
         public int count(final RowFilter recordFilter) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             assertNotClosed();
@@ -5732,6 +7225,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Count.
+         *
+         * @param recordFilter the record filter
+         * @return the int
+         * @throws SQLException the SQL exception
+         */
         public int count(final BiRowFilter recordFilter) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             assertNotClosed();
@@ -5752,6 +7252,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Any match.
+         *
+         * @param recordFilter the record filter
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         public boolean anyMatch(final RowFilter recordFilter) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             assertNotClosed();
@@ -5769,6 +7276,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Any match.
+         *
+         * @param recordFilter the record filter
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         public boolean anyMatch(final BiRowFilter recordFilter) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             assertNotClosed();
@@ -5788,6 +7302,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * All match.
+         *
+         * @param recordFilter the record filter
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         public boolean allMatch(final RowFilter recordFilter) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             assertNotClosed();
@@ -5805,6 +7326,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * All match.
+         *
+         * @param recordFilter the record filter
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         public boolean allMatch(final BiRowFilter recordFilter) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             assertNotClosed();
@@ -5824,14 +7352,34 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * None match.
+         *
+         * @param recordFilter the record filter
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         public boolean noneMatch(final RowFilter recordFilter) throws SQLException {
             return anyMatch(recordFilter) == false;
         }
 
+        /**
+         * None match.
+         *
+         * @param recordFilter the record filter
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         public boolean noneMatch(final BiRowFilter recordFilter) throws SQLException {
             return anyMatch(recordFilter) == false;
         }
 
+        /**
+         * For each.
+         *
+         * @param rowConsumer the row consumer
+         * @throws SQLException the SQL exception
+         */
         public void forEach(final RowConsumer rowConsumer) throws SQLException {
             checkArgNotNull(rowConsumer, "rowConsumer");
             assertNotClosed();
@@ -5847,6 +7395,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * For each.
+         *
+         * @param recordFilter the record filter
+         * @param rowConsumer the row consumer
+         * @throws SQLException the SQL exception
+         */
         public void forEach(final RowFilter recordFilter, final RowConsumer rowConsumer) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             checkArgNotNull(rowConsumer, "rowConsumer");
@@ -5864,6 +7419,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * For each.
+         *
+         * @param rowConsumer the row consumer
+         * @throws SQLException the SQL exception
+         */
         public void forEach(final BiRowConsumer rowConsumer) throws SQLException {
             checkArgNotNull(rowConsumer, "rowConsumer");
             assertNotClosed();
@@ -5880,6 +7441,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * For each.
+         *
+         * @param recordFilter the record filter
+         * @param rowConsumer the row consumer
+         * @throws SQLException the SQL exception
+         */
         public void forEach(final BiRowFilter recordFilter, final BiRowConsumer rowConsumer) throws SQLException {
             checkArgNotNull(recordFilter, "recordFilter");
             checkArgNotNull(rowConsumer, "rowConsumer");
@@ -5899,6 +7467,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Execute query.
+         *
+         * @return the result set
+         * @throws SQLException the SQL exception
+         */
         private ResultSet executeQuery() throws SQLException {
             if (!isFetchDirectionSet) {
                 stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
@@ -5909,8 +7483,10 @@ public final class JdbcUtil {
 
         /**
          * Returns the generated key if it exists.
-         * 
-         * @return
+         *
+         * @param <ID> the generic type
+         * @return the optional
+         * @throws SQLException the SQL exception
          */
         public <ID> Optional<ID> insert() throws SQLException {
             assertNotClosed();
@@ -5927,10 +7503,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @return
-         * @throws SQLException
+         * Insert.
+         *
+         * @param <ID> the generic type
+         * @param autoGeneratedKeyExtractor the auto generated key extractor
+         * @return the optional
+         * @throws SQLException the SQL exception
          */
         public <ID> Optional<ID> insert(final RowMapper<ID> autoGeneratedKeyExtractor) throws SQLException {
             assertNotClosed();
@@ -5946,6 +7524,14 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Insert.
+         *
+         * @param <ID> the generic type
+         * @param autoGeneratedKeyExtractor the auto generated key extractor
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         public <ID> Optional<ID> insert(final BiRowMapper<ID> autoGeneratedKeyExtractor) throws SQLException {
             assertNotClosed();
 
@@ -5968,8 +7554,10 @@ public final class JdbcUtil {
 
         /**
          * Returns the generated key if it exists.
-         * 
-         * @return
+         *
+         * @param <ID> the generic type
+         * @return the list
+         * @throws SQLException the SQL exception
          */
         public <ID> List<ID> batchInsert() throws SQLException {
             assertNotClosed();
@@ -5982,10 +7570,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param autoGeneratedKeyExtractor
-         * @return
-         * @throws SQLException
+         * Batch insert.
+         *
+         * @param <ID> the generic type
+         * @param autoGeneratedKeyExtractor the auto generated key extractor
+         * @return the list
+         * @throws SQLException the SQL exception
          */
         public <ID> List<ID> batchInsert(final RowMapper<ID> autoGeneratedKeyExtractor) throws SQLException {
             assertNotClosed();
@@ -6010,10 +7600,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param autoGeneratedKeyExtractor
-         * @return
-         * @throws SQLException
+         * Batch insert.
+         *
+         * @param <ID> the generic type
+         * @param autoGeneratedKeyExtractor the auto generated key extractor
+         * @return the list
+         * @throws SQLException the SQL exception
          */
         public <ID> List<ID> batchInsert(final BiRowMapper<ID> autoGeneratedKeyExtractor) throws SQLException {
             assertNotClosed();
@@ -6041,11 +7633,13 @@ public final class JdbcUtil {
 
         /**
          * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         * 
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException
+         *
+         * @param <T> the generic type
+         * @param <ID> the generic type
+         * @param batchParameters the batch parameters
+         * @param parametersSetter the parameters setter
+         * @return the list
+         * @throws SQLException the SQL exception
          */
         public <T, ID> List<ID> batchInsert(final Collection<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter)
                 throws SQLException {
@@ -6055,10 +7649,13 @@ public final class JdbcUtil {
         /**
          * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
          *  
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException
+         *
+         * @param <T> the generic type
+         * @param <ID> the generic type
+         * @param batchParameters the batch parameters
+         * @param parametersSetter the parameters setter
+         * @return the list
+         * @throws SQLException the SQL exception
          */
         public <T, ID> List<ID> batchInsert(final Iterator<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
             checkArgNotNull(parametersSetter, "parametersSetter");
@@ -6077,6 +7674,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Execute batch insert.
+         *
+         * @param <ID> the generic type
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         private <ID> List<ID> executeBatchInsert() throws SQLException {
             stmt.executeBatch();
 
@@ -6093,6 +7697,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Update.
+         *
+         * @return the int
+         * @throws SQLException the SQL exception
+         */
         public int update() throws SQLException {
             assertNotClosed();
 
@@ -6103,6 +7713,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Batch update.
+         *
+         * @return the int[]
+         * @throws SQLException the SQL exception
+         */
         public int[] batchUpdate() throws SQLException {
             assertNotClosed();
 
@@ -6113,6 +7729,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Large upate.
+         *
+         * @return the long
+         * @throws SQLException the SQL exception
+         */
         public long largeUpate() throws SQLException {
             assertNotClosed();
 
@@ -6123,6 +7745,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Large batch update.
+         *
+         * @return the long[]
+         * @throws SQLException the SQL exception
+         */
         public long[] largeBatchUpdate() throws SQLException {
             assertNotClosed();
 
@@ -6137,11 +7765,12 @@ public final class JdbcUtil {
 
         /**
          * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         * 
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException
+         *
+         * @param <T> the generic type
+         * @param batchParameters the batch parameters
+         * @param parametersSetter the parameters setter
+         * @return the int
+         * @throws SQLException the SQL exception
          */
         public <T> int batchUpdate(final Collection<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
             return batchUpdate(batchParameters == null ? N.<T> emptyIterator() : batchParameters.iterator(), parametersSetter);
@@ -6150,10 +7779,12 @@ public final class JdbcUtil {
         /**
          * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
          *  
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException
+         *
+         * @param <T> the generic type
+         * @param batchParameters the batch parameters
+         * @param parametersSetter the parameters setter
+         * @return the int
+         * @throws SQLException the SQL exception
          */
         public <T> int batchUpdate(final Iterator<T> batchParameters, final BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
             checkArgNotNull(parametersSetter, "parametersSetter");
@@ -6172,6 +7803,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Execute batch update.
+         *
+         * @return the int[]
+         * @throws SQLException the SQL exception
+         */
         private int[] executeBatchUpdate() throws SQLException {
             try {
                 return stmt.executeBatch();
@@ -6180,6 +7817,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Execute.
+         *
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         public boolean execute() throws SQLException {
             assertNotClosed();
 
@@ -6190,6 +7833,14 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Execute then apply.
+         *
+         * @param <R> the generic type
+         * @param getter the getter
+         * @return the r
+         * @throws SQLException the SQL exception
+         */
         public <R> R executeThenApply(final Try.Function<? super S, ? extends R, SQLException> getter) throws SQLException {
             checkArgNotNull(getter, "getter");
             assertNotClosed();
@@ -6203,6 +7854,14 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Execute then apply.
+         *
+         * @param <R> the generic type
+         * @param getter the getter
+         * @return the r
+         * @throws SQLException the SQL exception
+         */
         public <R> R executeThenApply(final Try.BiFunction<Boolean, ? super S, ? extends R, SQLException> getter) throws SQLException {
             checkArgNotNull(getter, "getter");
             assertNotClosed();
@@ -6216,6 +7875,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Execute then accept.
+         *
+         * @param consumer the consumer
+         * @throws SQLException the SQL exception
+         */
         public void executeThenAccept(final Try.Consumer<? super S, SQLException> consumer) throws SQLException {
             checkArgNotNull(consumer, "consumer");
             assertNotClosed();
@@ -6229,6 +7894,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Execute then accept.
+         *
+         * @param consumer the consumer
+         * @throws SQLException the SQL exception
+         */
         public void executeThenAccept(final Try.BiConsumer<Boolean, ? super S, SQLException> consumer) throws SQLException {
             checkArgNotNull(consumer, "consumer");
             assertNotClosed();
@@ -6243,9 +7914,11 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param func
-         * @return
+         * Async apply.
+         *
+         * @param <R> the generic type
+         * @param func the func
+         * @return the continuable future
          * @deprecated {@code asyncExecutor.call(() -> JdbcUtil.prepareQuery(query)...query/update/execute(...)} is recommended.
          */
         @Deprecated
@@ -6275,10 +7948,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param func
-         * @param executor
-         * @return
+         * Async apply.
+         *
+         * @param <R> the generic type
+         * @param func the func
+         * @param executor the executor
+         * @return the continuable future
          * @deprecated {@code asyncExecutor.call(() -> JdbcUtil.prepareQuery(query)...query/update/execute(...)} is recommended.
          */
         @Deprecated
@@ -6298,9 +7973,10 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param action
-         * @return
+         * Async accept.
+         *
+         * @param action the action
+         * @return the continuable future
          * @deprecated {@code asyncExecutor.call(() -> JdbcUtil.prepareQuery(query)...query/update/execute(...)} is recommended.
          */
         @Deprecated
@@ -6331,10 +8007,11 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param action
-         * @param executor
-         * @return
+         * Async accept.
+         *
+         * @param action the action
+         * @param executor the executor
+         * @return the continuable future
          * @deprecated {@code asyncExecutor.call(() -> JdbcUtil.prepareQuery(query)...query/update/execute(...)} is recommended.
          */
         @Deprecated
@@ -6353,6 +8030,12 @@ public final class JdbcUtil {
             }, executor);
         }
 
+        /**
+         * Check arg not null.
+         *
+         * @param arg the arg
+         * @param argName the arg name
+         */
         protected void checkArgNotNull(Object arg, String argName) {
             if (arg == null) {
                 try {
@@ -6365,6 +8048,12 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Check arg.
+         *
+         * @param b the b
+         * @param errorMsg the error msg
+         */
         protected void checkArg(boolean b, String errorMsg) {
             if (b == false) {
                 try {
@@ -6377,6 +8066,9 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Close.
+         */
         @Override
         public void close() {
             if (isClosed) {
@@ -6406,12 +8098,20 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Close after execution if allowed.
+         *
+         * @throws SQLException the SQL exception
+         */
         void closeAfterExecutionIfAllowed() throws SQLException {
             if (closeAfterExecution) {
                 close();
             }
         }
 
+        /**
+         * Assert not closed.
+         */
         void assertNotClosed() {
             if (isClosed) {
                 throw new IllegalStateException();
@@ -6450,10 +8150,21 @@ public final class JdbcUtil {
      */
     public static class PreparedQuery extends AbstractPreparedQuery<PreparedStatement, PreparedQuery> {
 
+        /**
+         * Instantiates a new prepared query.
+         *
+         * @param stmt the stmt
+         */
         PreparedQuery(PreparedStatement stmt) {
             super(stmt);
         }
 
+        /**
+         * Instantiates a new prepared query.
+         *
+         * @param stmt the stmt
+         * @param asyncExecutor the async executor
+         */
         PreparedQuery(PreparedStatement stmt, AsyncExecutor asyncExecutor) {
             super(stmt, asyncExecutor);
         }
@@ -6490,276 +8201,633 @@ public final class JdbcUtil {
      */
     public static class PreparedCallableQuery extends AbstractPreparedQuery<CallableStatement, PreparedCallableQuery> {
 
+        /** The stmt. */
         final CallableStatement stmt;
 
+        /**
+         * Instantiates a new prepared callable query.
+         *
+         * @param stmt the stmt
+         */
         PreparedCallableQuery(CallableStatement stmt) {
             super(stmt);
             this.stmt = stmt;
         }
 
+        /**
+         * Instantiates a new prepared callable query.
+         *
+         * @param stmt the stmt
+         * @param asyncExecutor the async executor
+         */
         PreparedCallableQuery(CallableStatement stmt, AsyncExecutor asyncExecutor) {
             super(stmt, asyncExecutor);
             this.stmt = stmt;
         }
 
+        /**
+         * Sets the null.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setNull(String parameterName, int sqlType) throws SQLException {
             stmt.setNull(parameterName, sqlType);
 
             return this;
         }
 
+        /**
+         * Sets the null.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @param typeName the type name
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setNull(String parameterName, int sqlType, String typeName) throws SQLException {
             stmt.setNull(parameterName, sqlType, typeName);
 
             return this;
         }
 
+        /**
+         * Sets the boolean.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBoolean(String parameterName, boolean x) throws SQLException {
             stmt.setBoolean(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the boolean.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBoolean(String parameterName, Boolean x) throws SQLException {
             stmt.setBoolean(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the byte.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setByte(String parameterName, byte x) throws SQLException {
             stmt.setByte(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the byte.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setByte(String parameterName, Byte x) throws SQLException {
             stmt.setByte(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the short.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setShort(String parameterName, short x) throws SQLException {
             stmt.setShort(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the short.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setShort(String parameterName, Short x) throws SQLException {
             stmt.setShort(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the int.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setInt(String parameterName, int x) throws SQLException {
             stmt.setInt(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the int.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setInt(String parameterName, Integer x) throws SQLException {
             stmt.setInt(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the long.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setLong(String parameterName, long x) throws SQLException {
             stmt.setLong(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the long.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setLong(String parameterName, Long x) throws SQLException {
             stmt.setLong(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the float.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setFloat(String parameterName, float x) throws SQLException {
             stmt.setFloat(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the float.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setFloat(String parameterName, Float x) throws SQLException {
             stmt.setFloat(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the double.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setDouble(String parameterName, double x) throws SQLException {
             stmt.setDouble(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the double.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setDouble(String parameterName, Double x) throws SQLException {
             stmt.setDouble(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the big decimal.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBigDecimal(String parameterName, BigDecimal x) throws SQLException {
             stmt.setBigDecimal(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the string.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setString(String parameterName, String x) throws SQLException {
             stmt.setString(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the date.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setDate(String parameterName, java.sql.Date x) throws SQLException {
             stmt.setDate(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the date.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setDate(String parameterName, java.util.Date x) throws SQLException {
             stmt.setDate(parameterName, x == null ? null : x instanceof java.sql.Date ? (java.sql.Date) x : new java.sql.Date(x.getTime()));
 
             return this;
         }
 
+        /**
+         * Sets the time.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setTime(String parameterName, java.sql.Time x) throws SQLException {
             stmt.setTime(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the time.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setTime(String parameterName, java.util.Date x) throws SQLException {
             stmt.setTime(parameterName, x == null ? null : x instanceof java.sql.Time ? (java.sql.Time) x : new java.sql.Time(x.getTime()));
 
             return this;
         }
 
+        /**
+         * Sets the timestamp.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setTimestamp(String parameterName, java.sql.Timestamp x) throws SQLException {
             stmt.setTimestamp(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the timestamp.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setTimestamp(String parameterName, java.util.Date x) throws SQLException {
             stmt.setTimestamp(parameterName, x == null ? null : x instanceof java.sql.Timestamp ? (java.sql.Timestamp) x : new java.sql.Timestamp(x.getTime()));
 
             return this;
         }
 
+        /**
+         * Sets the bytes.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBytes(String parameterName, byte[] x) throws SQLException {
             stmt.setBytes(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the ascii stream.
+         *
+         * @param parameterName the parameter name
+         * @param inputStream the input stream
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setAsciiStream(String parameterName, InputStream inputStream) throws SQLException {
             stmt.setAsciiStream(parameterName, inputStream);
 
             return this;
         }
 
+        /**
+         * Sets the ascii stream.
+         *
+         * @param parameterName the parameter name
+         * @param inputStream the input stream
+         * @param length the length
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setAsciiStream(String parameterName, InputStream inputStream, long length) throws SQLException {
             stmt.setAsciiStream(parameterName, inputStream, length);
 
             return this;
         }
 
+        /**
+         * Sets the binary stream.
+         *
+         * @param parameterName the parameter name
+         * @param inputStream the input stream
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBinaryStream(String parameterName, InputStream inputStream) throws SQLException {
             stmt.setBinaryStream(parameterName, inputStream);
 
             return this;
         }
 
+        /**
+         * Sets the binary stream.
+         *
+         * @param parameterName the parameter name
+         * @param inputStream the input stream
+         * @param length the length
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBinaryStream(String parameterName, InputStream inputStream, long length) throws SQLException {
             stmt.setBinaryStream(parameterName, inputStream, length);
 
             return this;
         }
 
+        /**
+         * Sets the character stream.
+         *
+         * @param parameterName the parameter name
+         * @param reader the reader
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setCharacterStream(String parameterName, Reader reader) throws SQLException {
             stmt.setCharacterStream(parameterName, reader);
 
             return this;
         }
 
+        /**
+         * Sets the character stream.
+         *
+         * @param parameterName the parameter name
+         * @param reader the reader
+         * @param length the length
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
             stmt.setCharacterStream(parameterName, reader, length);
 
             return this;
         }
 
+        /**
+         * Sets the N character stream.
+         *
+         * @param parameterName the parameter name
+         * @param reader the reader
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setNCharacterStream(String parameterName, Reader reader) throws SQLException {
             stmt.setNCharacterStream(parameterName, reader);
 
             return this;
         }
 
+        /**
+         * Sets the N character stream.
+         *
+         * @param parameterName the parameter name
+         * @param reader the reader
+         * @param length the length
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setNCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
             stmt.setNCharacterStream(parameterName, reader, length);
 
             return this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBlob(String parameterName, java.sql.Blob x) throws SQLException {
             stmt.setBlob(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterName the parameter name
+         * @param inputStream the input stream
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBlob(String parameterName, InputStream inputStream) throws SQLException {
             stmt.setBlob(parameterName, inputStream);
 
             return this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterName the parameter name
+         * @param inputStream the input stream
+         * @param length the length
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setBlob(String parameterName, InputStream inputStream, long length) throws SQLException {
             stmt.setBlob(parameterName, inputStream, length);
 
             return this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setClob(String parameterName, java.sql.Clob x) throws SQLException {
             stmt.setClob(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterName the parameter name
+         * @param reader the reader
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setClob(String parameterName, Reader reader) throws SQLException {
             stmt.setClob(parameterName, reader);
 
             return this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterName the parameter name
+         * @param reader the reader
+         * @param length the length
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setClob(String parameterName, Reader reader, long length) throws SQLException {
             stmt.setClob(parameterName, reader, length);
 
             return this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setNClob(String parameterName, java.sql.NClob x) throws SQLException {
             stmt.setNClob(parameterName, x);
 
             return this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterName the parameter name
+         * @param reader the reader
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setNClob(String parameterName, Reader reader) throws SQLException {
             stmt.setNClob(parameterName, reader);
 
             return this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterName the parameter name
+         * @param reader the reader
+         * @param length the length
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setNClob(String parameterName, Reader reader, long length) throws SQLException {
             stmt.setNClob(parameterName, reader, length);
 
             return this;
         }
 
-        /** 
-         * 
-         * @param parameterName
-         * @param x
-         * @return
-         * @throws SQLException
+        /**
+         *  
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery setURL(String parameterName, URL x) throws SQLException {
             stmt.setURL(parameterName, x);
@@ -6767,12 +8835,13 @@ public final class JdbcUtil {
             return this;
         }
 
-        /** 
-         * 
-         * @param parameterName
-         * @param x
-         * @return
-         * @throws SQLException
+        /**
+         *  
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery setSQLXML(String parameterName, java.sql.SQLXML x) throws SQLException {
             stmt.setSQLXML(parameterName, x);
@@ -6780,12 +8849,13 @@ public final class JdbcUtil {
             return this;
         }
 
-        /** 
-         * 
-         * @param parameterName
-         * @param x
-         * @return
-         * @throws SQLException
+        /**
+         *  
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery setRowId(String parameterName, java.sql.RowId x) throws SQLException {
             stmt.setRowId(parameterName, x);
@@ -6793,6 +8863,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setObject(String parameterName, Object x) throws SQLException {
             if (x == null) {
                 stmt.setObject(parameterName, x);
@@ -6803,18 +8881,44 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param sqlType the sql type
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setObject(String parameterName, Object x, int sqlType) throws SQLException {
             stmt.setObject(parameterName, x, sqlType);
 
             return this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param sqlType the sql type
+         * @param scaleOrLength the scale or length
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setObject(String parameterName, Object x, int sqlType, int scaleOrLength) throws SQLException {
             stmt.setObject(parameterName, x, sqlType, scaleOrLength);
 
             return this;
         }
 
+        /**
+         * Sets the parameters.
+         *
+         * @param parameters the parameters
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery setParameters(Map<String, Object> parameters) throws SQLException {
             checkArgNotNull(parameters, "parameters");
 
@@ -6826,14 +8930,15 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param parameterNames
-         * @param entity
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param parameterNames the parameter names
+         * @param entity the entity
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          * @see {@link ClassUtil#getPropNameList(Class)}
          * @see {@link ClassUtil#getPropNameListExclusively(Class, Set)}
-         * @see {@link ClassUtil#getPropNameListExclusively(Class, Collection)} 
+         * @see {@link ClassUtil#getPropNameListExclusively(Class, Collection)}
          * @see {@link JdbcUtil#getNamedParameters(String)}
          */
         public PreparedCallableQuery setParameters(List<String> parameterNames, Object entity) throws SQLException {
@@ -6853,11 +8958,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Register out parameter.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param sqlType
-         * @return
-         * @throws SQLException
+         * @param sqlType the sql type
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery registerOutParameter(int parameterIndex, int sqlType) throws SQLException {
             stmt.registerOutParameter(parameterIndex, sqlType);
@@ -6866,12 +8972,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Register out parameter.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param sqlType
-         * @param scale
-         * @return
-         * @throws SQLException
+         * @param sqlType the sql type
+         * @param scale the scale
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery registerOutParameter(int parameterIndex, int sqlType, int scale) throws SQLException {
             stmt.registerOutParameter(parameterIndex, sqlType, scale);
@@ -6880,12 +8987,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Register out parameter.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param sqlType
-         * @param typeName
-         * @return
-         * @throws SQLException
+         * @param sqlType the sql type
+         * @param typeName the type name
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery registerOutParameter(int parameterIndex, int sqlType, String typeName) throws SQLException {
             stmt.registerOutParameter(parameterIndex, sqlType, typeName);
@@ -6893,18 +9001,44 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Register out parameter.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery registerOutParameter(String parameterName, int sqlType) throws SQLException {
             stmt.registerOutParameter(parameterName, sqlType);
 
             return this;
         }
 
+        /**
+         * Register out parameter.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @param scale the scale
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery registerOutParameter(String parameterName, int sqlType, int scale) throws SQLException {
             stmt.registerOutParameter(parameterName, sqlType, scale);
 
             return this;
         }
 
+        /**
+         * Register out parameter.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @param typeName the type name
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery registerOutParameter(String parameterName, int sqlType, String typeName) throws SQLException {
             stmt.registerOutParameter(parameterName, sqlType, typeName);
 
@@ -6912,11 +9046,12 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Register out parameter.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param sqlType
-         * @return
-         * @throws SQLException
+         * @param sqlType the sql type
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery registerOutParameter(int parameterIndex, SQLType sqlType) throws SQLException {
             stmt.registerOutParameter(parameterIndex, sqlType);
@@ -6925,12 +9060,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Register out parameter.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param sqlType
-         * @param scale
-         * @return
-         * @throws SQLException
+         * @param sqlType the sql type
+         * @param scale the scale
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery registerOutParameter(int parameterIndex, SQLType sqlType, int scale) throws SQLException {
             stmt.registerOutParameter(parameterIndex, sqlType, scale);
@@ -6939,12 +9075,13 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Register out parameter.
+         *
          * @param parameterIndex starts from 1, not 0.
-         * @param sqlType
-         * @param typeName
-         * @return
-         * @throws SQLException
+         * @param sqlType the sql type
+         * @param typeName the type name
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
          */
         public PreparedCallableQuery registerOutParameter(int parameterIndex, SQLType sqlType, String typeName) throws SQLException {
             stmt.registerOutParameter(parameterIndex, sqlType, typeName);
@@ -6952,24 +9089,57 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Register out parameter.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery registerOutParameter(String parameterName, SQLType sqlType) throws SQLException {
             stmt.registerOutParameter(parameterName, sqlType);
 
             return this;
         }
 
+        /**
+         * Register out parameter.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @param scale the scale
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery registerOutParameter(String parameterName, SQLType sqlType, int scale) throws SQLException {
             stmt.registerOutParameter(parameterName, sqlType, scale);
 
             return this;
         }
 
+        /**
+         * Register out parameter.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @param typeName the type name
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery registerOutParameter(String parameterName, SQLType sqlType, String typeName) throws SQLException {
             stmt.registerOutParameter(parameterName, sqlType, typeName);
 
             return this;
         }
 
+        /**
+         * Register out parameters.
+         *
+         * @param register the register
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public PreparedCallableQuery registerOutParameters(final ParametersSetter<? super CallableStatement> register) throws SQLException {
             checkArgNotNull(register, "register");
 
@@ -6988,6 +9158,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Register out parameters.
+         *
+         * @param <T> the generic type
+         * @param parameter the parameter
+         * @param register the register
+         * @return the prepared callable query
+         * @throws SQLException the SQL exception
+         */
         public <T> PreparedCallableQuery registerOutParameters(final T parameter, final BiParametersSetter<? super T, ? super CallableStatement> register)
                 throws SQLException {
             checkArgNotNull(register, "register");
@@ -7007,6 +9186,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Call.
+         *
+         * @param <R1> the generic type
+         * @param resultExtrator1 the result extrator 1
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         public <R1> Optional<R1> call(final ResultExtractor<R1> resultExtrator1) throws SQLException {
             checkArgNotNull(resultExtrator1, "resultExtrator1");
             assertNotClosed();
@@ -7026,6 +9213,16 @@ public final class JdbcUtil {
             return Optional.empty();
         }
 
+        /**
+         * Call.
+         *
+         * @param <R1> the generic type
+         * @param <R2> the generic type
+         * @param resultExtrator1 the result extrator 1
+         * @param resultExtrator2 the result extrator 2
+         * @return the tuple 2
+         * @throws SQLException the SQL exception
+         */
         public <R1, R2> Tuple2<Optional<R1>, Optional<R2>> call(final ResultExtractor<R1> resultExtrator1, final ResultExtractor<R2> resultExtrator2)
                 throws SQLException {
             checkArgNotNull(resultExtrator1, "resultExtrator1");
@@ -7057,6 +9254,18 @@ public final class JdbcUtil {
             return Tuple.of(result1, result2);
         }
 
+        /**
+         * Call.
+         *
+         * @param <R1> the generic type
+         * @param <R2> the generic type
+         * @param <R3> the generic type
+         * @param resultExtrator1 the result extrator 1
+         * @param resultExtrator2 the result extrator 2
+         * @param resultExtrator3 the result extrator 3
+         * @return the tuple 3
+         * @throws SQLException the SQL exception
+         */
         public <R1, R2, R3> Tuple3<Optional<R1>, Optional<R2>, Optional<R3>> call(final ResultExtractor<R1> resultExtrator1,
                 final ResultExtractor<R2> resultExtrator2, final ResultExtractor<R3> resultExtrator3) throws SQLException {
             checkArgNotNull(resultExtrator1, "resultExtrator1");
@@ -7097,6 +9306,20 @@ public final class JdbcUtil {
             return Tuple.of(result1, result2, result3);
         }
 
+        /**
+         * Call.
+         *
+         * @param <R1> the generic type
+         * @param <R2> the generic type
+         * @param <R3> the generic type
+         * @param <R4> the generic type
+         * @param resultExtrator1 the result extrator 1
+         * @param resultExtrator2 the result extrator 2
+         * @param resultExtrator3 the result extrator 3
+         * @param resultExtrator4 the result extrator 4
+         * @return the tuple 4
+         * @throws SQLException the SQL exception
+         */
         public <R1, R2, R3, R4> Tuple4<Optional<R1>, Optional<R2>, Optional<R3>, Optional<R4>> call(final ResultExtractor<R1> resultExtrator1,
                 final ResultExtractor<R2> resultExtrator2, final ResultExtractor<R3> resultExtrator3, final ResultExtractor<R4> resultExtrator4)
                 throws SQLException {
@@ -7147,6 +9370,22 @@ public final class JdbcUtil {
             return Tuple.of(result1, result2, result3, result4);
         }
 
+        /**
+         * Call.
+         *
+         * @param <R1> the generic type
+         * @param <R2> the generic type
+         * @param <R3> the generic type
+         * @param <R4> the generic type
+         * @param <R5> the generic type
+         * @param resultExtrator1 the result extrator 1
+         * @param resultExtrator2 the result extrator 2
+         * @param resultExtrator3 the result extrator 3
+         * @param resultExtrator4 the result extrator 4
+         * @param resultExtrator5 the result extrator 5
+         * @return the tuple 5
+         * @throws SQLException the SQL exception
+         */
         public <R1, R2, R3, R4, R5> Tuple5<Optional<R1>, Optional<R2>, Optional<R3>, Optional<R4>, Optional<R5>> call(final ResultExtractor<R1> resultExtrator1,
                 final ResultExtractor<R2> resultExtrator2, final ResultExtractor<R3> resultExtrator3, final ResultExtractor<R4> resultExtrator4,
                 final ResultExtractor<R5> resultExtrator5) throws SQLException {
@@ -7239,11 +9478,24 @@ public final class JdbcUtil {
      */
     public static class NamedQuery extends AbstractPreparedQuery<PreparedStatement, NamedQuery> {
 
+        /** The named SQL. */
         private final NamedSQL namedSQL;
+
+        /** The parameter names. */
         private final List<String> parameterNames;
+
+        /** The parameter count. */
         private final int parameterCount;
+
+        /** The param name index map. */
         private Map<String, IntList> paramNameIndexMap;
 
+        /**
+         * Instantiates a new named query.
+         *
+         * @param stmt the stmt
+         * @param namedSQL the named SQL
+         */
         NamedQuery(final PreparedStatement stmt, final NamedSQL namedSQL) {
             super(stmt);
             this.namedSQL = namedSQL;
@@ -7251,6 +9503,13 @@ public final class JdbcUtil {
             this.parameterCount = namedSQL.getParameterCount();
         }
 
+        /**
+         * Instantiates a new named query.
+         *
+         * @param stmt the stmt
+         * @param namedSQL the named SQL
+         * @param asyncExecutor the async executor
+         */
         NamedQuery(final PreparedStatement stmt, final NamedSQL namedSQL, AsyncExecutor asyncExecutor) {
             super(stmt, asyncExecutor);
             this.namedSQL = namedSQL;
@@ -7258,6 +9517,9 @@ public final class JdbcUtil {
             this.parameterCount = namedSQL.getParameterCount();
         }
 
+        /**
+         * Inits the param name index map.
+         */
         private void initParamNameIndexMap() {
             paramNameIndexMap = new HashMap<>(parameterCount);
             int index = 1;
@@ -7274,6 +9536,14 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Sets the null.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setNull(String parameterName, int sqlType) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7320,6 +9590,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the null.
+         *
+         * @param parameterName the parameter name
+         * @param sqlType the sql type
+         * @param typeName the type name
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setNull(String parameterName, int sqlType, String typeName) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7366,6 +9645,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the boolean.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBoolean(String parameterName, boolean x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7412,12 +9699,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the boolean.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBoolean(String parameterName, Boolean x) throws SQLException {
             setBoolean(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the byte.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setByte(String parameterName, byte x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7464,12 +9767,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the byte.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setByte(String parameterName, Byte x) throws SQLException {
             setByte(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the short.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setShort(String parameterName, short x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7516,12 +9835,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the short.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setShort(String parameterName, Short x) throws SQLException {
             setShort(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the int.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setInt(String parameterName, int x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7568,12 +9903,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the int.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setInt(String parameterName, Integer x) throws SQLException {
             setInt(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the long.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setLong(String parameterName, long x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7620,12 +9971,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the long.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setLong(String parameterName, Long x) throws SQLException {
             setLong(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the float.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setFloat(String parameterName, float x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7672,12 +10039,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the float.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setFloat(String parameterName, Float x) throws SQLException {
             setFloat(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the double.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setDouble(String parameterName, double x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7724,12 +10107,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the double.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setDouble(String parameterName, Double x) throws SQLException {
             setDouble(parameterName, N.defaultIfNull(x));
 
             return this;
         }
 
+        /**
+         * Sets the big decimal.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBigDecimal(String parameterName, BigDecimal x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7776,6 +10175,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the string.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setString(String parameterName, String x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7822,6 +10229,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the date.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setDate(String parameterName, java.sql.Date x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7868,12 +10283,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the date.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setDate(String parameterName, java.util.Date x) throws SQLException {
             setDate(parameterName, x == null ? null : x instanceof java.sql.Date ? (java.sql.Date) x : new java.sql.Date(x.getTime()));
 
             return this;
         }
 
+        /**
+         * Sets the time.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setTime(String parameterName, java.sql.Time x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7920,12 +10351,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the time.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setTime(String parameterName, java.util.Date x) throws SQLException {
             setTime(parameterName, x == null ? null : x instanceof java.sql.Time ? (java.sql.Time) x : new java.sql.Time(x.getTime()));
 
             return this;
         }
 
+        /**
+         * Sets the timestamp.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setTimestamp(String parameterName, java.sql.Timestamp x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -7972,12 +10419,28 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the timestamp.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setTimestamp(String parameterName, java.util.Date x) throws SQLException {
             setTimestamp(parameterName, x == null ? null : x instanceof java.sql.Timestamp ? (java.sql.Timestamp) x : new java.sql.Timestamp(x.getTime()));
 
             return this;
         }
 
+        /**
+         * Sets the bytes.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBytes(String parameterName, byte[] x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8024,6 +10487,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the ascii stream.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setAsciiStream(String parameterName, InputStream x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8070,6 +10541,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the ascii stream.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param length the length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8116,6 +10596,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the binary stream.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBinaryStream(String parameterName, InputStream x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8162,6 +10650,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the binary stream.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param length the length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBinaryStream(String parameterName, InputStream x, long length) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8208,6 +10705,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the character stream.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setCharacterStream(String parameterName, Reader x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8254,6 +10759,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the character stream.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param length the length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setCharacterStream(String parameterName, Reader x, long length) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8300,6 +10814,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the N character stream.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setNCharacterStream(String parameterName, Reader x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8346,6 +10868,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the N character stream.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param length the length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setNCharacterStream(String parameterName, Reader x, long length) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8392,6 +10923,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBlob(String parameterName, java.sql.Blob x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8438,6 +10977,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBlob(String parameterName, InputStream x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8484,6 +11031,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the blob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param length the length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setBlob(String parameterName, InputStream x, long length) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8530,6 +11086,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setClob(String parameterName, java.sql.Clob x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8576,6 +11140,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setClob(String parameterName, Reader x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8622,6 +11194,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the clob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param length the length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setClob(String parameterName, Reader x, long length) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8668,6 +11249,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setNClob(String parameterName, java.sql.NClob x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8714,6 +11303,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setNClob(String parameterName, Reader x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8760,6 +11357,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the N clob.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param length the length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setNClob(String parameterName, Reader x, long length) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -8806,12 +11412,13 @@ public final class JdbcUtil {
             return this;
         }
 
-        /** 
-         * 
-         * @param parameterName
-         * @param x
-         * @return
-         * @throws SQLException
+        /**
+         *  
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
          */
         public NamedQuery setURL(String parameterName, URL x) throws SQLException {
             if (parameterCount < 5) {
@@ -8859,12 +11466,13 @@ public final class JdbcUtil {
             return this;
         }
 
-        /** 
-         * 
-         * @param parameterName
-         * @param x
-         * @return
-         * @throws SQLException
+        /**
+         *  
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
          */
         public NamedQuery setSQLXML(String parameterName, java.sql.SQLXML x) throws SQLException {
             if (parameterCount < 5) {
@@ -8912,12 +11520,13 @@ public final class JdbcUtil {
             return this;
         }
 
-        /** 
-         * 
-         * @param parameterName
-         * @param x
-         * @return
-         * @throws SQLException
+        /**
+         *  
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
          */
         public NamedQuery setRowId(String parameterName, java.sql.RowId x) throws SQLException {
             if (parameterCount < 5) {
@@ -8965,12 +11574,13 @@ public final class JdbcUtil {
             return this;
         }
 
-        /** 
-         * 
-         * @param parameterName
-         * @param x
-         * @return
-         * @throws SQLException
+        /**
+         *  
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
          */
         public NamedQuery setRef(String parameterName, java.sql.Ref x) throws SQLException {
             if (parameterCount < 5) {
@@ -9018,12 +11628,13 @@ public final class JdbcUtil {
             return this;
         }
 
-        /** 
-         * 
-         * @param parameterName
-         * @param x
-         * @return
-         * @throws SQLException
+        /**
+         *  
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
          */
         public NamedQuery setArray(String parameterName, java.sql.Array x) throws SQLException {
             if (parameterCount < 5) {
@@ -9071,6 +11682,14 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setObject(String parameterName, Object x) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -9117,6 +11736,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param sqlType the sql type
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setObject(String parameterName, Object x, int sqlType) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -9163,6 +11791,16 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param sqlType the sql type
+         * @param scaleOrLength the scale or length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setObject(String parameterName, Object x, int sqlType, int scaleOrLength) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -9209,6 +11847,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param sqlType the sql type
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setObject(String parameterName, Object x, SQLType sqlType) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -9255,6 +11902,16 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the object.
+         *
+         * @param parameterName the parameter name
+         * @param x the x
+         * @param sqlType the sql type
+         * @param scaleOrLength the scale or length
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public NamedQuery setObject(String parameterName, Object x, SQLType sqlType, int scaleOrLength) throws SQLException {
             if (parameterCount < 5) {
                 int cnt = 0;
@@ -9302,10 +11959,11 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param parameters
-         * @return
-         * @throws SQLException
+         * Sets the parameters.
+         *
+         * @param parameters the parameters
+         * @return the named query
+         * @throws SQLException the SQL exception
          */
         public NamedQuery setParameters(final Map<String, ?> parameters) throws SQLException {
             checkArgNotNull(parameters, "parameters");
@@ -9320,10 +11978,11 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
+         * Sets the parameters.
+         *
          * @param entity with getter/setter methods
-         * @return
-         * @throws SQLException
+         * @return the named query
+         * @throws SQLException the SQL exception
          */
         public NamedQuery setParameters(final Object entity) throws SQLException {
             checkArgNotNull(entity, "entity");
@@ -9347,6 +12006,15 @@ public final class JdbcUtil {
             return this;
         }
 
+        /**
+         * Sets the parameters.
+         *
+         * @param <T> the generic type
+         * @param paramaters the paramaters
+         * @param parametersSetter the parameters setter
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         public <T> NamedQuery setParameters(final T paramaters, TriParametersSetter<NamedQuery, T> parametersSetter) throws SQLException {
             checkArgNotNull(parametersSetter, "parametersSetter");
 
@@ -9366,29 +12034,67 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * The Class SimpleTransaction.
+     */
     public static class SimpleTransaction {
+
+        /** The Constant logger. */
         private static final Logger logger = LoggerFactory.getLogger(SimpleTransaction.class);
 
+        /** The Constant threadTransacionMap. */
         private static final Map<String, SimpleTransaction> threadTransacionMap = new ConcurrentHashMap<>();
         // private static final Map<String, SimpleTransaction> attachedThreadTransacionMap = new ConcurrentHashMap<>();
 
+        /** The id. */
         private final String id;
+
+        /** The time id. */
         private final String timeId;
+
+        /** The ds. */
         private final javax.sql.DataSource ds;
+
+        /** The conn. */
         private final Connection conn;
+
+        /** The close connection. */
         private final boolean closeConnection;
+
+        /** The original auto commit. */
         private final boolean originalAutoCommit;
+
+        /** The original isolation level. */
         private final int originalIsolationLevel;
+
+        /** The auto shared by prepare query. */
         private final boolean autoSharedByPrepareQuery;
 
+        /** The isolation level. */
         private IsolationLevel isolationLevel;
+
+        /** The status. */
         private Transaction.Status status = Status.ACTIVE;
 
+        /** The ref count. */
         private final AtomicInteger refCount = new AtomicInteger();
+
+        /** The isolation level stack. */
         private final Stack<IsolationLevel> isolationLevelStack = new Stack<>();
 
+        /** The is marked by commit previously. */
         private boolean isMarkedByCommitPreviously = false;
 
+        /**
+         * Instantiates a new simple transaction.
+         *
+         * @param ds the ds
+         * @param conn the conn
+         * @param isolationLevel the isolation level
+         * @param closeConnection the close connection
+         * @param autoSharedByPrepareQuery the auto shared by prepare query
+         * @throws SQLException the SQL exception
+         */
         SimpleTransaction(final javax.sql.DataSource ds, final Connection conn, final IsolationLevel isolationLevel, final boolean closeConnection,
                 final boolean autoSharedByPrepareQuery) throws SQLException {
             N.checkArgNotNull(conn);
@@ -9412,22 +12118,47 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Id.
+         *
+         * @return the string
+         */
         public String id() {
             return timeId;
         }
 
+        /**
+         * Connection.
+         *
+         * @return the connection
+         */
         public Connection connection() {
             return conn;
         }
 
+        /**
+         * Isolation level.
+         *
+         * @return the isolation level
+         */
         public IsolationLevel isolationLevel() {
             return isolationLevel;
         }
 
+        /**
+         * Status.
+         *
+         * @return the transaction. status
+         */
         public Transaction.Status status() {
             return status;
         }
 
+        /**
+         * Checks if is active.
+         *
+         * @return true, if is active
+         */
         public boolean isActive() {
             return status == Status.ACTIVE;
         }
@@ -9467,6 +12198,11 @@ public final class JdbcUtil {
         //        attachedThreadTransacionMap.remove(targetTTID);
         //    }
 
+        /**
+         * Commit.
+         *
+         * @throws SQLException the SQL exception
+         */
         public void commit() throws SQLException {
             final int refCount = decrementAndGetRef();
             isMarkedByCommitPreviously = true;
@@ -9510,6 +12246,11 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Rollback if not committed.
+         *
+         * @throws UncheckedSQLException the unchecked SQL exception
+         */
         public void rollbackIfNotCommitted() throws UncheckedSQLException {
             if (isMarkedByCommitPreviously) { // Do nothing. It happened in finally block.
                 isMarkedByCommitPreviously = false;
@@ -9539,6 +12280,11 @@ public final class JdbcUtil {
             executeRollback();
         }
 
+        /**
+         * Execute rollback.
+         *
+         * @throws UncheckedSQLException the unchecked SQL exception
+         */
         private void executeRollback() throws UncheckedSQLException {
             logger.warn("Rolling back transaction(id={})", timeId);
 
@@ -9563,6 +12309,9 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Reset and close connection.
+         */
         private void resetAndCloseConnection() {
             try {
                 conn.setAutoCommit(originalAutoCommit);
@@ -9576,6 +12325,13 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Increment and get ref.
+         *
+         * @param isolationLevel the isolation level
+         * @return the int
+         * @throws UncheckedSQLException the unchecked SQL exception
+         */
         synchronized int incrementAndGetRef(final IsolationLevel isolationLevel) throws UncheckedSQLException {
             if (!status.equals(Status.ACTIVE)) {
                 throw new IllegalStateException("Transaction(id=" + timeId + ") is already: " + status);
@@ -9597,6 +12353,12 @@ public final class JdbcUtil {
             return refCount.incrementAndGet();
         }
 
+        /**
+         * Decrement and get ref.
+         *
+         * @return the int
+         * @throws UncheckedSQLException the unchecked SQL exception
+         */
         synchronized int decrementAndGetRef() throws UncheckedSQLException {
             final int res = refCount.decrementAndGet();
 
@@ -9618,59 +12380,139 @@ public final class JdbcUtil {
             return res;
         }
 
+        /**
+         * Auto shared by prepare query.
+         *
+         * @return true, if successful
+         */
         boolean autoSharedByPrepareQuery() {
             return autoSharedByPrepareQuery;
         }
 
+        /**
+         * Gets the transaction id.
+         *
+         * @param ds the ds
+         * @return the transaction id
+         */
         static String getTransactionId(final javax.sql.DataSource ds) {
             return Thread.currentThread().getName() + "_" + System.identityHashCode(ds);
         }
 
+        /**
+         * Gets the transaction thread id.
+         *
+         * @param conn the conn
+         * @return the transaction thread id
+         */
         static String getTransactionThreadId(final Connection conn) {
             return Thread.currentThread().getName() + "_" + System.identityHashCode(conn);
         }
 
+        /**
+         * Gets the transaction.
+         *
+         * @param ds the ds
+         * @return the transaction
+         */
         static SimpleTransaction getTransaction(final javax.sql.DataSource ds) {
             return threadTransacionMap.get(getTransactionId(ds));
         }
 
+        /**
+         * Gets the transaction.
+         *
+         * @param conn the conn
+         * @return the transaction
+         */
         static SimpleTransaction getTransaction(final Connection conn) {
             return threadTransacionMap.get(getTransactionThreadId(conn));
         }
 
+        /**
+         * Put transaction.
+         *
+         * @param ds the ds
+         * @param tran the tran
+         * @return the simple transaction
+         */
         static SimpleTransaction putTransaction(final javax.sql.DataSource ds, final SimpleTransaction tran) {
             return threadTransacionMap.put(getTransactionId(ds), tran);
         }
 
+        /**
+         * Put transaction.
+         *
+         * @param conn the conn
+         * @param tran the tran
+         * @return the simple transaction
+         */
         static SimpleTransaction putTransaction(final Connection conn, final SimpleTransaction tran) {
             return threadTransacionMap.put(getTransactionThreadId(conn), tran);
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             return timeId.hashCode();
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(Object obj) {
             return obj instanceof SimpleTransaction && timeId.equals(((SimpleTransaction) obj).timeId);
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "SimpleTransaction={id=" + timeId + "}";
         }
     }
 
+    /**
+     * The Enum FetchDirection.
+     */
     public static enum FetchDirection {
-        FORWARD(ResultSet.FETCH_FORWARD), REVERSE(ResultSet.FETCH_REVERSE), UNKNOWN(ResultSet.FETCH_UNKNOWN);
 
+        /** The forward. */
+        FORWARD(ResultSet.FETCH_FORWARD),
+        /** The reverse. */
+        REVERSE(ResultSet.FETCH_REVERSE),
+        /** The unknown. */
+        UNKNOWN(ResultSet.FETCH_UNKNOWN);
+
+        /** The int value. */
         private final int intValue;
 
+        /**
+         * Instantiates a new fetch direction.
+         *
+         * @param intValue the int value
+         */
         FetchDirection(int intValue) {
             this.intValue = intValue;
         }
 
+        /**
+         * Value of.
+         *
+         * @param intValue the int value
+         * @return the fetch direction
+         */
         public static FetchDirection valueOf(int intValue) {
             switch (intValue) {
                 case ResultSet.FETCH_FORWARD:
@@ -9688,27 +12530,80 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Int value.
+         *
+         * @return the int
+         */
         public int intValue() {
             return intValue;
         }
     }
 
+    /**
+     * The Interface ParametersSetter.
+     *
+     * @param <QS> the generic type
+     */
     public static interface ParametersSetter<QS> extends Try.Consumer<QS, SQLException> {
+
+        /**
+         * Accept.
+         *
+         * @param preparedQuery the prepared query
+         * @throws SQLException the SQL exception
+         */
         @Override
         void accept(QS preparedQuery) throws SQLException;
     }
 
+    /**
+     * The Interface BiParametersSetter.
+     *
+     * @param <QS> the generic type
+     * @param <T> the generic type
+     */
     public static interface BiParametersSetter<QS, T> extends Try.BiConsumer<QS, T, SQLException> {
+
+        /**
+         * Accept.
+         *
+         * @param preparedQuery the prepared query
+         * @param t the t
+         * @throws SQLException the SQL exception
+         */
         @Override
         void accept(QS preparedQuery, T t) throws SQLException;
     }
 
+    /**
+     * The Interface TriParametersSetter.
+     *
+     * @param <QS> the generic type
+     * @param <T> the generic type
+     */
     public static interface TriParametersSetter<QS, T> extends Try.TriConsumer<NamedSQL, QS, T, SQLException> {
+
+        /**
+         * Accept.
+         *
+         * @param namedSQL the named SQL
+         * @param preparedQuery the prepared query
+         * @param t the t
+         * @throws SQLException the SQL exception
+         */
         @Override
         void accept(NamedSQL namedSQL, QS preparedQuery, T t) throws SQLException;
     }
 
+    /**
+     * The Interface ResultExtractor.
+     *
+     * @param <T> the generic type
+     */
     public static interface ResultExtractor<T> extends Try.Function<ResultSet, T, SQLException> {
+
+        /** The Constant TO_DATA_SET. */
         public static final ResultExtractor<DataSet> TO_DATA_SET = new ResultExtractor<DataSet>() {
             @Override
             public DataSet apply(final ResultSet rs) throws SQLException {
@@ -9716,25 +12611,39 @@ public final class JdbcUtil {
             }
         };
 
+        /**
+         * Apply.
+         *
+         * @param rs the rs
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         @Override
         T apply(ResultSet rs) throws SQLException;
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @return the result extractor
          */
         public static <K, V> ResultExtractor<Map<K, V>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) {
             return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param supplier the supplier
+         * @return the result extractor
          */
         public static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
@@ -9742,11 +12651,14 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param mergeFunction
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param mergeFunction the merge function
+         * @return the result extractor
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -9757,12 +12669,16 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param mergeFunction
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param mergeFunction the merge function
+         * @param supplier the supplier
+         * @return the result extractor
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -9789,11 +12705,16 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param downstream
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <A> the generic type
+         * @param <D> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param downstream the downstream
+         * @return the result extractor
          */
         public static <K, V, A, D> ResultExtractor<Map<K, D>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream) {
@@ -9801,12 +12722,18 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param downstream
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <A> the generic type
+         * @param <D> the generic type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param downstream the downstream
+         * @param supplier the supplier
+         * @return the result extractor
          */
         public static <K, V, A, D, M extends Map<K, D>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream, final Supplier<? extends M> supplier) {
@@ -9849,10 +12776,31 @@ public final class JdbcUtil {
             };
         }
 
+        /**
+         * Group to.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @return the result extractor
+         * @throws SQLException the SQL exception
+         */
         public static <K, V> ResultExtractor<Map<K, List<V>>> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) throws SQLException {
             return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
         }
 
+        /**
+         * Group to.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param supplier the supplier
+         * @return the result extractor
+         */
         public static <K, V, M extends Map<K, List<V>>> ResultExtractor<M> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
@@ -9885,26 +12833,47 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * The Interface BiResultExtractor.
+     *
+     * @param <T> the generic type
+     */
     public static interface BiResultExtractor<T> extends Try.BiFunction<ResultSet, List<String>, T, SQLException> {
+
+        /**
+         * Apply.
+         *
+         * @param rs the rs
+         * @param columnLabels the column labels
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         @Override
         T apply(ResultSet rs, List<String> columnLabels) throws SQLException;
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @return the bi result extractor
          */
         public static <K, V> BiResultExtractor<Map<K, V>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor) {
             return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param supplier the supplier
+         * @return the bi result extractor
          */
         public static <K, V, M extends Map<K, V>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
@@ -9912,11 +12881,14 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param mergeFunction
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param mergeFunction the merge function
+         * @return the bi result extractor
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -9927,12 +12899,16 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param mergeFunction
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param mergeFunction the merge function
+         * @param supplier the supplier
+         * @return the bi result extractor
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -9959,11 +12935,16 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param downstream
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <A> the generic type
+         * @param <D> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param downstream the downstream
+         * @return the bi result extractor
          */
         public static <K, V, A, D> BiResultExtractor<Map<K, D>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream) {
@@ -9971,12 +12952,18 @@ public final class JdbcUtil {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param downstream
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <A> the generic type
+         * @param <D> the generic type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param downstream the downstream
+         * @param supplier the supplier
+         * @return the bi result extractor
          */
         public static <K, V, A, D, M extends Map<K, D>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream, final Supplier<? extends M> supplier) {
@@ -10019,11 +13006,32 @@ public final class JdbcUtil {
             };
         }
 
+        /**
+         * Group to.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @return the bi result extractor
+         * @throws SQLException the SQL exception
+         */
         public static <K, V> BiResultExtractor<Map<K, List<V>>> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor)
                 throws SQLException {
             return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
         }
 
+        /**
+         * Group to.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param supplier the supplier
+         * @return the bi result extractor
+         */
         public static <K, V, M extends Map<K, List<V>>> BiResultExtractor<M> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
@@ -10058,11 +13066,12 @@ public final class JdbcUtil {
     /**
      * Don't use {@code RowMapper} in {@link PreparedQuery#list(RowMapper)} or any place where multiple records will be retrieved by it, if column labels/count are used in {@link RowMapper#apply(ResultSet)}.
      * Consider using {@code BiRowMapper} instead because it's more efficient to retrieve multiple records when column labels/count are used.
-     * 
-     * @param <T>
+     *
+     * @param <T> the generic type
      */
     public static interface RowMapper<T> extends Try.Function<ResultSet, T, SQLException> {
 
+        /** The Constant GET_BOOLEAN. */
         public static final RowMapper<Boolean> GET_BOOLEAN = new RowMapper<Boolean>() {
             @Override
             public Boolean apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10070,6 +13079,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_BYTE. */
         public static final RowMapper<Byte> GET_BYTE = new RowMapper<Byte>() {
             @Override
             public Byte apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10077,6 +13087,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_SHORT. */
         public static final RowMapper<Short> GET_SHORT = new RowMapper<Short>() {
             @Override
             public Short apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10084,6 +13095,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_INT. */
         public static final RowMapper<Integer> GET_INT = new RowMapper<Integer>() {
             @Override
             public Integer apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10091,6 +13103,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_LONG. */
         public static final RowMapper<Long> GET_LONG = new RowMapper<Long>() {
             @Override
             public Long apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10098,6 +13111,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_FLOAT. */
         public static final RowMapper<Float> GET_FLOAT = new RowMapper<Float>() {
             @Override
             public Float apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10105,6 +13119,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_DOUBLE. */
         public static final RowMapper<Double> GET_DOUBLE = new RowMapper<Double>() {
             @Override
             public Double apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10112,6 +13127,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_BIG_DECIMAL. */
         public static final RowMapper<BigDecimal> GET_BIG_DECIMAL = new RowMapper<BigDecimal>() {
             @Override
             public BigDecimal apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10119,6 +13135,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_STRING. */
         public static final RowMapper<String> GET_STRING = new RowMapper<String>() {
             @Override
             public String apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10126,6 +13143,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_DATE. */
         public static final RowMapper<Date> GET_DATE = new RowMapper<Date>() {
             @Override
             public Date apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10133,6 +13151,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_TIME. */
         public static final RowMapper<Time> GET_TIME = new RowMapper<Time>() {
             @Override
             public Time apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10140,6 +13159,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_TIMESTAMP. */
         public static final RowMapper<Timestamp> GET_TIMESTAMP = new RowMapper<Timestamp>() {
             @Override
             public Timestamp apply(final ResultSet rs) throws SQLException, RuntimeException {
@@ -10147,6 +13167,13 @@ public final class JdbcUtil {
             }
         };
 
+        /**
+         * Apply.
+         *
+         * @param rs the rs
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         @Override
         T apply(ResultSet rs) throws SQLException;
 
@@ -10397,8 +13424,14 @@ public final class JdbcUtil {
         //}
     }
 
+    /**
+     * The Interface BiRowMapper.
+     *
+     * @param <T> the generic type
+     */
     public static interface BiRowMapper<T> extends Try.BiFunction<ResultSet, List<String>, T, SQLException> {
 
+        /** The Constant GET_BOOLEAN. */
         public static final BiRowMapper<Boolean> GET_BOOLEAN = new BiRowMapper<Boolean>() {
             @Override
             public Boolean apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10406,6 +13439,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_BYTE. */
         public static final BiRowMapper<Byte> GET_BYTE = new BiRowMapper<Byte>() {
             @Override
             public Byte apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10413,6 +13447,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_SHORT. */
         public static final BiRowMapper<Short> GET_SHORT = new BiRowMapper<Short>() {
             @Override
             public Short apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10420,6 +13455,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_INT. */
         public static final BiRowMapper<Integer> GET_INT = new BiRowMapper<Integer>() {
             @Override
             public Integer apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10427,6 +13463,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_LONG. */
         public static final BiRowMapper<Long> GET_LONG = new BiRowMapper<Long>() {
             @Override
             public Long apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10434,6 +13471,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_FLOAT. */
         public static final BiRowMapper<Float> GET_FLOAT = new BiRowMapper<Float>() {
             @Override
             public Float apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10441,6 +13479,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_DOUBLE. */
         public static final BiRowMapper<Double> GET_DOUBLE = new BiRowMapper<Double>() {
             @Override
             public Double apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10448,6 +13487,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_BIG_DECIMAL. */
         public static final BiRowMapper<BigDecimal> GET_BIG_DECIMAL = new BiRowMapper<BigDecimal>() {
             @Override
             public BigDecimal apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10455,6 +13495,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_STRING. */
         public static final BiRowMapper<String> GET_STRING = new BiRowMapper<String>() {
             @Override
             public String apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10462,6 +13503,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_DATE. */
         public static final BiRowMapper<Date> GET_DATE = new BiRowMapper<Date>() {
             @Override
             public Date apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10469,6 +13511,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_TIME. */
         public static final BiRowMapper<Time> GET_TIME = new BiRowMapper<Time>() {
             @Override
             public Time apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10476,12 +13519,15 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant GET_TIMESTAMP. */
         public static final BiRowMapper<Timestamp> GET_TIMESTAMP = new BiRowMapper<Timestamp>() {
             @Override
             public Timestamp apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getTimestamp(1);
             }
         };
+
+        /** The Constant TO_ARRAY. */
         public static final BiRowMapper<Object[]> TO_ARRAY = new BiRowMapper<Object[]>() {
             @Override
             public Object[] apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10496,6 +13542,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant TO_LIST. */
         public static final BiRowMapper<List<Object>> TO_LIST = new BiRowMapper<List<Object>>() {
             @Override
             public List<Object> apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10510,6 +13557,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant TO_MAP. */
         public static final BiRowMapper<Map<String, Object>> TO_MAP = new BiRowMapper<Map<String, Object>>() {
             @Override
             public Map<String, Object> apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10524,6 +13572,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant TO_LINKED_HASH_MAP. */
         public static final BiRowMapper<Map<String, Object>> TO_LINKED_HASH_MAP = new BiRowMapper<Map<String, Object>>() {
             @Override
             public Map<String, Object> apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10538,14 +13587,23 @@ public final class JdbcUtil {
             }
         };
 
+        /**
+         * Apply.
+         *
+         * @param rs the rs
+         * @param columnLabels the column labels
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         @Override
         T apply(ResultSet rs, List<String> columnLabels) throws SQLException;
 
         /**
          * Don't cache or reuse the returned {@code BiRowMapper} instance.
-         * 
-         * @param targetType Array/List/Map or Entity with getter/setter methods.
-         * @return
+         *
+         * @param <T> the generic type
+         * @param targetClass the target class
+         * @return the bi row mapper
          */
         public static <T> BiRowMapper<T> to(Class<? extends T> targetClass) {
             return JdbcUtil.createBiRowMapperByTargetClass(targetClass);
@@ -10558,11 +13616,29 @@ public final class JdbcUtil {
      * 
      */
     public static interface RowConsumer extends Try.Consumer<ResultSet, SQLException> {
+
+        /**
+         * Accept.
+         *
+         * @param rs the rs
+         * @throws SQLException the SQL exception
+         */
         @Override
         void accept(ResultSet rs) throws SQLException;
     }
 
+    /**
+     * The Interface BiRowConsumer.
+     */
     public static interface BiRowConsumer extends Try.BiConsumer<ResultSet, List<String>, SQLException> {
+
+        /**
+         * Accept.
+         *
+         * @param rs the rs
+         * @param columnLabels the column labels
+         * @throws SQLException the SQL exception
+         */
         @Override
         void accept(ResultSet rs, List<String> columnLabels) throws SQLException;
     }
@@ -10573,6 +13649,8 @@ public final class JdbcUtil {
      * 
      */
     public static interface RowFilter extends Try.Predicate<ResultSet, SQLException> {
+
+        /** The Constant ALWAYS_TRUE. */
         public static final RowFilter ALWAYS_TRUE = new RowFilter() {
             @Override
             public boolean test(ResultSet rs) throws SQLException, RuntimeException {
@@ -10580,6 +13658,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant ALWAYS_FALSE. */
         public static final RowFilter ALWAYS_FALSE = new RowFilter() {
             @Override
             public boolean test(ResultSet rs) throws SQLException, RuntimeException {
@@ -10587,11 +13666,23 @@ public final class JdbcUtil {
             }
         };
 
+        /**
+         * Test.
+         *
+         * @param rs the rs
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         @Override
         boolean test(ResultSet rs) throws SQLException;
     }
 
+    /**
+     * The Interface BiRowFilter.
+     */
     public static interface BiRowFilter extends Try.BiPredicate<ResultSet, List<String>, SQLException> {
+
+        /** The Constant ALWAYS_TRUE. */
         public static final BiRowFilter ALWAYS_TRUE = new BiRowFilter() {
             @Override
             public boolean test(ResultSet rs, List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10599,6 +13690,7 @@ public final class JdbcUtil {
             }
         };
 
+        /** The Constant ALWAYS_FALSE. */
         public static final BiRowFilter ALWAYS_FALSE = new BiRowFilter() {
             @Override
             public boolean test(ResultSet rs, List<String> columnLabels) throws SQLException, RuntimeException {
@@ -10606,10 +13698,19 @@ public final class JdbcUtil {
             }
         };
 
+        /**
+         * Test.
+         *
+         * @param rs the rs
+         * @param columnLabels the column labels
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         @Override
         boolean test(ResultSet rs, List<String> columnLabels) throws SQLException;
     }
 
+    /** The Constant daoPool. */
     private static final Map<Class<?>, JdbcUtil.Dao> daoPool = new ConcurrentHashMap<>();
 
     /**
@@ -10754,12 +13855,17 @@ public final class JdbcUtil {
      */
     public static interface Dao {
 
+        /**
+         * The Interface Select.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.METHOD)
         public static @interface Select {
+
             /**
-             * 
-             * @return
+             * Value.
+             *
+             * @return the string
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
              */
             @Deprecated
@@ -10767,25 +13873,41 @@ public final class JdbcUtil {
 
             default "";
 
+            /**
+             * Sql.
+             *
+             * @return the string
+             */
             String sql()
 
             default "";
 
+            /**
+             * Fetch size.
+             *
+             * @return the int
+             */
             int fetchSize() default -1;
 
             /**
              * Unit is seconds.
-             * @return
+             *
+             * @return the int
              */
             int queryTimeout() default -1;
         }
 
+        /**
+         * The Interface Insert.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.METHOD)
         public static @interface Insert {
+
             /**
-             * 
-             * @return
+             * Value.
+             *
+             * @return the string
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
              */
             @Deprecated
@@ -10793,21 +13915,32 @@ public final class JdbcUtil {
 
             default "";
 
+            /**
+             * Sql.
+             *
+             * @return the string
+             */
             String sql() default "";
 
             /**
              * Unit is seconds.
-             * @return
+             *
+             * @return the int
              */
             int queryTimeout() default -1;
         }
 
+        /**
+         * The Interface Update.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.METHOD)
         public static @interface Update {
+
             /**
-             * 
-             * @return
+             * Value.
+             *
+             * @return the string
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
              */
             @Deprecated
@@ -10815,21 +13948,32 @@ public final class JdbcUtil {
 
             default "";
 
+            /**
+             * Sql.
+             *
+             * @return the string
+             */
             String sql() default "";
 
             /**
              * Unit is seconds.
-             * @return
+             *
+             * @return the int
              */
             int queryTimeout() default -1;
         }
 
+        /**
+         * The Interface Delete.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.METHOD)
         public static @interface Delete {
+
             /**
-             * 
-             * @return
+             * Value.
+             *
+             * @return the string
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
              */
             @Deprecated
@@ -10837,21 +13981,32 @@ public final class JdbcUtil {
 
             default "";
 
+            /**
+             * Sql.
+             *
+             * @return the string
+             */
             String sql() default "";
 
             /**
              * Unit is seconds.
-             * @return
+             *
+             * @return the int
              */
             int queryTimeout() default -1;
         }
 
+        /**
+         * The Interface NamedSelect.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.METHOD)
         public static @interface NamedSelect {
+
             /**
-             * 
-             * @return
+             * Value.
+             *
+             * @return the string
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
              */
             @Deprecated
@@ -10859,25 +14014,41 @@ public final class JdbcUtil {
 
             default "";
 
+            /**
+             * Sql.
+             *
+             * @return the string
+             */
             String sql()
 
             default "";
 
+            /**
+             * Fetch size.
+             *
+             * @return the int
+             */
             int fetchSize() default -1;
 
             /**
              * Unit is seconds.
-             * @return
+             *
+             * @return the int
              */
             int queryTimeout() default -1;
         }
 
+        /**
+         * The Interface NamedInsert.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.METHOD)
         public static @interface NamedInsert {
+
             /**
-             * 
-             * @return
+             * Value.
+             *
+             * @return the string
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
              */
             @Deprecated
@@ -10885,21 +14056,32 @@ public final class JdbcUtil {
 
             default "";
 
+            /**
+             * Sql.
+             *
+             * @return the string
+             */
             String sql() default "";
 
             /**
              * Unit is seconds.
-             * @return
+             *
+             * @return the int
              */
             int queryTimeout() default -1;
         }
 
+        /**
+         * The Interface NamedUpdate.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.METHOD)
         public static @interface NamedUpdate {
+
             /**
-             * 
-             * @return
+             * Value.
+             *
+             * @return the string
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
              */
             @Deprecated
@@ -10907,21 +14089,32 @@ public final class JdbcUtil {
 
             default "";
 
+            /**
+             * Sql.
+             *
+             * @return the string
+             */
             String sql() default "";
 
             /**
              * Unit is seconds.
-             * @return
+             *
+             * @return the int
              */
             int queryTimeout() default -1;
         }
 
+        /**
+         * The Interface NamedDelete.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.METHOD)
         public static @interface NamedDelete {
+
             /**
-             * 
-             * @return
+             * Value.
+             *
+             * @return the string
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
              */
             @Deprecated
@@ -10929,21 +14122,41 @@ public final class JdbcUtil {
 
             default "";
 
+            /**
+             * Sql.
+             *
+             * @return the string
+             */
             String sql() default "";
 
             /**
              * Unit is seconds.
-             * @return
+             *
+             * @return the int
              */
             int queryTimeout() default -1;
         }
 
+        /**
+         * The Interface Bind.
+         */
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.PARAMETER)
         public static @interface Bind {
+
+            /**
+             * Value.
+             *
+             * @return the string
+             */
             String value() default "";
         }
 
+        /**
+         * Data source.
+         *
+         * @return the javax.sql. data source
+         */
         public javax.sql.DataSource dataSource();
 
         //    /**
@@ -11025,24 +14238,70 @@ public final class JdbcUtil {
         //        return tran;
         //    }
 
+        /**
+         * Prepare query.
+         *
+         * @param query the query
+         * @return the prepared query
+         * @throws SQLException the SQL exception
+         */
         PreparedQuery prepareQuery(final String query) throws SQLException;
 
+        /**
+         * Prepare query.
+         *
+         * @param query the query
+         * @param generateKeys the generate keys
+         * @return the prepared query
+         */
         PreparedQuery prepareQuery(final String query, final boolean generateKeys);
 
+        /**
+         * Prepare query.
+         *
+         * @param sql the sql
+         * @param stmtCreator the stmt creator
+         * @return the prepared query
+         * @throws SQLException the SQL exception
+         */
         PreparedQuery prepareQuery(final String sql, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator) throws SQLException;
 
+        /**
+         * Prepare named query.
+         *
+         * @param namedQuery the named query
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         NamedQuery prepareNamedQuery(final String namedQuery) throws SQLException;
 
+        /**
+         * Prepare named query.
+         *
+         * @param namedQuery the named query
+         * @param generateKeys the generate keys
+         * @return the named query
+         */
         NamedQuery prepareNamedQuery(final String namedQuery, final boolean generateKeys);
 
+        /**
+         * Prepare named query.
+         *
+         * @param namedQuery the named query
+         * @param stmtCreator the stmt creator
+         * @return the named query
+         * @throws SQLException the SQL exception
+         */
         NamedQuery prepareNamedQuery(final String namedQuery, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator)
                 throws SQLException;
 
         /**
-         * 
-         * @param daoInterface
-         * @param ds
-         * @return
+         * New instance.
+         *
+         * @param <T> the generic type
+         * @param daoInterface the dao interface
+         * @param ds the ds
+         * @return the t
          * @see SQLExecutor#createDao(Class)
          */
         public static <T extends Dao> T newInstance(final Class<T> daoInterface, final javax.sql.DataSource ds) {
@@ -11061,11 +14320,11 @@ public final class JdbcUtil {
     }
 
     /**
+     * The Interface CrudDao.
      *
-     * @param <T>
+     * @param <T> the generic type
      * @param <ID> use {@code Void} if there is no id defined/annotated with {@code @Id} in target entity class {@code T}.
      * @param <SB> {@code SQLBuilder} used to generate sql scripts. Only can be {@code SQLBulider.PSC/PAC/PLC}
-     * 
      * @see JdbcUtil#prepareQuery(javax.sql.DataSource, String)
      * @see JdbcUtil#prepareNamedQuery(javax.sql.DataSource, String)
      * @see JdbcUtil#beginTransaction(javax.sql.DataSource, IsolationLevel, boolean)
@@ -11073,189 +14332,450 @@ public final class JdbcUtil {
      * @see SQLExecutor.Mapper
      */
     public static interface CrudDao<T, ID, SB extends SQLBuilder> extends Dao {
+
+        /**
+         * Insert.
+         *
+         * @param entityToSave the entity to save
+         * @return the id
+         * @throws SQLException the SQL exception
+         */
         ID insert(T entityToSave) throws SQLException;
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         List<ID> batchInsert(Collection<T> entities) throws SQLException;
 
         /**
-         * 
-         * @param id
-         * @return
+         * Gets the.
+         *
+         * @param id the id
+         * @return the optional
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         Optional<T> get(ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param selectPropNames
-         * @param id
-         * @return
+         * Gets the.
+         *
+         * @param selectPropNames the select prop names
+         * @param id the id
+         * @return the optional
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         Optional<T> get(Collection<String> selectPropNames, ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param id
-         * @return
+         * Gets the t.
+         *
+         * @param id the id
+         * @return the t
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         T gett(ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param selectPropNames
-         * @param id
-         * @return
+         * Gets the t.
+         *
+         * @param selectPropNames the select prop names
+         * @param id the id
+         * @return the t
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         T gett(Collection<String> selectPropNames, ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param id
-         * @return
+         * Exists.
+         *
+         * @param id the id
+         * @return true, if successful
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         boolean exists(ID id) throws UnsupportedOperationException, SQLException;
 
+        /**
+         * Exists.
+         *
+         * @param cond the cond
+         * @return true, if successful
+         * @throws SQLException the SQL exception
+         */
         boolean exists(Condition cond) throws SQLException;
 
+        /**
+         * Count.
+         *
+         * @param cond the cond
+         * @return the int
+         * @throws SQLException the SQL exception
+         */
         int count(Condition cond) throws SQLException;
 
+        /**
+         * Find first.
+         *
+         * @param cond the cond
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         Optional<T> findFirst(Condition cond) throws SQLException;
 
+        /**
+         * Find first.
+         *
+         * @param selectPropNames the select prop names
+         * @param cond the cond
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         Optional<T> findFirst(Collection<String> selectPropNames, Condition cond) throws SQLException;
 
+        /**
+         * List.
+         *
+         * @param cond the cond
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         List<T> list(Condition cond) throws SQLException;
 
+        /**
+         * List.
+         *
+         * @param selectPropNames the select prop names
+         * @param cond the cond
+         * @return the list
+         * @throws SQLException the SQL exception
+         */
         List<T> list(Collection<String> selectPropNames, Condition cond) throws SQLException;
 
+        /**
+         * Query.
+         *
+         * @param cond the cond
+         * @return the data set
+         * @throws SQLException the SQL exception
+         */
         DataSet query(Condition cond) throws SQLException;
 
+        /**
+         * Query.
+         *
+         * @param selectPropNames the select prop names
+         * @param cond the cond
+         * @return the data set
+         * @throws SQLException the SQL exception
+         */
         DataSet query(Collection<String> selectPropNames, Condition cond) throws SQLException;
 
+        /**
+         * Query for boolean.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional boolean
+         * @throws SQLException the SQL exception
+         */
         OptionalBoolean queryForBoolean(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for char.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional char
+         * @throws SQLException the SQL exception
+         */
         OptionalChar queryForChar(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for byte.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional byte
+         * @throws SQLException the SQL exception
+         */
         OptionalByte queryForByte(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for short.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional short
+         * @throws SQLException the SQL exception
+         */
         OptionalShort queryForShort(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for int.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional int
+         * @throws SQLException the SQL exception
+         */
         OptionalInt queryForInt(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for long.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional long
+         * @throws SQLException the SQL exception
+         */
         OptionalLong queryForLong(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for float.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional float
+         * @throws SQLException the SQL exception
+         */
         OptionalFloat queryForFloat(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for double.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional double
+         * @throws SQLException the SQL exception
+         */
         OptionalDouble queryForDouble(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for string.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         Nullable<String> queryForString(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for date.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         Nullable<java.sql.Date> queryForDate(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for time.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         Nullable<java.sql.Time> queryForTime(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for timestamp.
+         *
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         Nullable<java.sql.Timestamp> queryForTimestamp(final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for single non null.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         <V> Optional<V> queryForSingleNonNull(final Class<V> targetValueClass, final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the nullable
+         * @throws SQLException the SQL exception
+         */
         <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Query for unique non null.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param cond the cond
+         * @return the optional
+         * @throws SQLException the SQL exception
+         */
         <V> Optional<V> queryForUniqueNonNull(final Class<V> targetValueClass, final String selectPropName, final Condition cond) throws SQLException;
 
+        /**
+         * Stream.
+         *
+         * @param cond the cond
+         * @return the exceptional stream
+         * @throws SQLException the SQL exception
+         */
         ExceptionalStream<T, SQLException> stream(Condition cond) throws SQLException;
 
+        /**
+         * Stream.
+         *
+         * @param selectPropNames the select prop names
+         * @param cond the cond
+         * @return the exceptional stream
+         * @throws SQLException the SQL exception
+         */
         ExceptionalStream<T, SQLException> stream(Collection<String> selectPropNames, Condition cond) throws SQLException;
 
         /**
-         * 
-         * @param entityToUpdate
-         * @return
+         * Update.
+         *
+         * @param entityToUpdate the entity to update
+         * @return the int
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         int update(T entityToUpdate) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param entityToUpdate
-         * @param propNamesToUpdate
-         * @return
+         * Update.
+         *
+         * @param entityToUpdate the entity to update
+         * @param propNamesToUpdate the prop names to update
+         * @return the int
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         int update(T entityToUpdate, Collection<String> propNamesToUpdate) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param updateProps
-         * @param id
-         * @return
+         * Update.
+         *
+         * @param updateProps the update props
+         * @param id the id
+         * @return the int
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         int update(Map<String, Object> updateProps, ID id) throws UnsupportedOperationException, SQLException;
 
+        /**
+         * Update.
+         *
+         * @param updateProps the update props
+         * @param cond the cond
+         * @return the int
+         * @throws SQLException the SQL exception
+         */
         int update(Map<String, Object> updateProps, Condition cond) throws SQLException;
 
         /**
-         * 
-         * @param entities
-         * @return
+         * Batch update.
+         *
+         * @param entities the entities
+         * @return the int
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         int batchUpdate(Collection<T> entities) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param entities
-         * @param propNamesToUpdate
-         * @return
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @return the int
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         int batchUpdate(Collection<T> entities, Collection<String> propNamesToUpdate) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param id
-         * @return
+         * Delete by id.
+         *
+         * @param id the id
+         * @return the int
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         int deleteById(ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * 
-         * @param entity
-         * @return
+         * Delete.
+         *
+         * @param entity the entity
+         * @return the int
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         int delete(T entity) throws UnsupportedOperationException, SQLException;
 
+        /**
+         * Delete.
+         *
+         * @param cond the cond
+         * @return the int
+         * @throws SQLException the SQL exception
+         */
         int delete(Condition cond) throws SQLException;
 
         /**
-         * 
-         * @param entities
-         * @return
+         * Batch delete.
+         *
+         * @param entities the entities
+         * @return the int
          * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
-         * @throws SQLException
+         * @throws SQLException the SQL exception
          */
         int batchDelete(Collection<? extends T> entities) throws UnsupportedOperationException, SQLException;
     }
 
+    /**
+     * New instance.
+     *
+     * @param <T> the generic type
+     * @param daoInterface the dao interface
+     * @param ds the ds
+     * @return the t
+     */
     @SuppressWarnings({ "rawtypes", "deprecation" })
     static <T extends Dao> T newInstance(final Class<T> daoInterface, final javax.sql.DataSource ds) {
         N.checkArgNotNull(daoInterface, "daoInterface");
@@ -12716,6 +16236,7 @@ public final class JdbcUtil {
         return N.newProxyInstance(interfaceClasses, h);
     }
 
+    /** The Constant sqlAnnoMap. */
     private static final Map<Class<? extends Annotation>, Function<Annotation, String>> sqlAnnoMap = new HashMap<>();
     static {
         sqlAnnoMap.put(Dao.Select.class, (Annotation anno) -> {
@@ -12792,6 +16313,7 @@ public final class JdbcUtil {
         });
     }
 
+    /** The Constant noLogMethods. */
     private static final Set<String> noLogMethods = new HashSet<>();
 
     static {
@@ -12801,6 +16323,12 @@ public final class JdbcUtil {
         noLogMethods.add("prepareCallableQuery");
     }
 
+    /**
+     * Creates the method handle.
+     *
+     * @param method the method
+     * @return the method handle
+     */
     static MethodHandle createMethodHandle(final Method method) {
         final Class<?> declaringClass = method.getDeclaringClass();
 
@@ -12824,6 +16352,13 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Creates the query function by method.
+     *
+     * @param <R> the generic type
+     * @param method the method
+     * @return the bi function
+     */
     @SuppressWarnings("rawtypes")
     static <R> BiFunction<AbstractPreparedQuery, Object[], R, Exception> createQueryFunctionByMethod(final Method method) {
         final Class<?>[] paramTypes = method.getParameterTypes();
@@ -12952,6 +16487,21 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * Prepare query.
+     *
+     * @param proxy the proxy
+     * @param query the query
+     * @param isNamedQuery the is named query
+     * @param fetchSize the fetch size
+     * @param queryTimeout the query timeout
+     * @param returnGeneratedKeys the return generated keys
+     * @param args the args
+     * @param paramSetter the param setter
+     * @return the abstract prepared query
+     * @throws SQLException the SQL exception
+     * @throws Exception the exception
+     */
     @SuppressWarnings("rawtypes")
     static AbstractPreparedQuery prepareQuery(final Dao proxy, final String query, final boolean isNamedQuery, final int fetchSize, final int queryTimeout,
             final boolean returnGeneratedKeys, final Object[] args, final BiParametersSetter<? super AbstractPreparedQuery, Object[]> paramSetter)
@@ -12975,6 +16525,12 @@ public final class JdbcUtil {
         return preparedQuery;
     }
 
+    /**
+     * Checks if is list query.
+     *
+     * @param method the method
+     * @return true, if is list query
+     */
     static boolean isListQuery(final Method method) {
         final Class<?>[] paramTypes = method.getParameterTypes();
         final Class<?> returnType = method.getReturnType();
@@ -13000,16 +16556,34 @@ public final class JdbcUtil {
         }
     }
 
+    /**
+     * The Class SimpleDataSource.
+     */
     static class SimpleDataSource implements DataSource {
+
+        /** The Constant PRIMARY. */
         static final String PRIMARY = "primary";
 
+        /** The sql data source. */
         private final javax.sql.DataSource sqlDataSource;
+
+        /** The props. */
         private final Properties<String, String> props = new Properties<>();
+
+        /** The slice selector. */
         private final SliceSelector sliceSelector = new NonSliceSelector();
 
+        /** The close method. */
         private final Method closeMethod;
+
+        /** The is closed. */
         private boolean isClosed = false;
 
+        /**
+         * Instantiates a new simple data source.
+         *
+         * @param sqlDataSource the sql data source
+         */
         public SimpleDataSource(final javax.sql.DataSource sqlDataSource) {
             this.sqlDataSource = sqlDataSource;
 
@@ -13024,46 +16598,104 @@ public final class JdbcUtil {
             closeMethod = method != null && Modifier.isPublic(method.getModifiers()) ? method : null;
         }
 
+        /**
+         * Gets the connection.
+         *
+         * @param username the username
+         * @param password the password
+         * @return the connection
+         * @throws SQLException the SQL exception
+         */
         @Override
         public Connection getConnection(final String username, final String password) throws SQLException {
             return sqlDataSource.getConnection(username, password);
         }
 
+        /**
+         * Gets the log writer.
+         *
+         * @return the log writer
+         * @throws SQLException the SQL exception
+         */
         @Override
         public PrintWriter getLogWriter() throws SQLException {
             return sqlDataSource.getLogWriter();
         }
 
+        /**
+         * Sets the log writer.
+         *
+         * @param out the new log writer
+         * @throws SQLException the SQL exception
+         */
         @Override
         public void setLogWriter(final PrintWriter out) throws SQLException {
             sqlDataSource.setLogWriter(out);
         }
 
+        /**
+         * Sets the login timeout.
+         *
+         * @param seconds the new login timeout
+         * @throws SQLException the SQL exception
+         */
         @Override
         public void setLoginTimeout(final int seconds) throws SQLException {
             sqlDataSource.setLoginTimeout(seconds);
         }
 
+        /**
+         * Gets the login timeout.
+         *
+         * @return the login timeout
+         * @throws SQLException the SQL exception
+         */
         @Override
         public int getLoginTimeout() throws SQLException {
             return sqlDataSource.getLoginTimeout();
         }
 
+        /**
+         * Gets the parent logger.
+         *
+         * @return the parent logger
+         * @throws SQLFeatureNotSupportedException the SQL feature not supported exception
+         */
         @Override
         public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
             return sqlDataSource.getParentLogger();
         }
 
+        /**
+         * Unwrap.
+         *
+         * @param <T> the generic type
+         * @param iface the iface
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         @Override
         public <T> T unwrap(final Class<T> iface) throws SQLException {
             return sqlDataSource.unwrap(iface);
         }
 
+        /**
+         * Checks if is wrapper for.
+         *
+         * @param iface the iface
+         * @return true, if is wrapper for
+         * @throws SQLException the SQL exception
+         */
         @Override
         public boolean isWrapperFor(final Class<?> iface) throws SQLException {
             return sqlDataSource.isWrapperFor(iface);
         }
 
+        /**
+         * Gets the connection.
+         *
+         * @return the connection
+         */
         @Override
         public Connection getConnection() {
             try {
@@ -13073,6 +16705,11 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Gets the read only connection.
+         *
+         * @return the read only connection
+         */
         @Override
         public Connection getReadOnlyConnection() {
             try {
@@ -13082,31 +16719,59 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Gets the slice selector.
+         *
+         * @return the slice selector
+         */
         @Override
         public SliceSelector getSliceSelector() {
             return sliceSelector;
         }
 
+        /**
+         * Gets the name.
+         *
+         * @return the name
+         */
         @Override
         public String getName() {
             return PRIMARY;
         }
 
+        /**
+         * Gets the properties.
+         *
+         * @return the properties
+         */
         @Override
         public Properties<String, String> getProperties() {
             return props;
         }
 
+        /**
+         * Gets the max active.
+         *
+         * @return the max active
+         */
         @Override
         public int getMaxActive() {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Gets the current active.
+         *
+         * @return the current active
+         */
         @Override
         public int getCurrentActive() {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Close.
+         */
         @Override
         public void close() {
             if (isClosed) {
@@ -13124,19 +16789,42 @@ public final class JdbcUtil {
             isClosed = true;
         }
 
+        /**
+         * Checks if is closed.
+         *
+         * @return true, if is closed
+         */
         @Override
         public boolean isClosed() {
             return isClosed;
         }
     }
 
+    /**
+     * The Class SimpleDataSourceManager.
+     */
     static class SimpleDataSourceManager implements DataSourceManager {
+
+        /** The primary data source. */
         private final DataSource primaryDataSource;
+
+        /** The active data sources. */
         private final Map<String, DataSource> activeDataSources;
+
+        /** The props. */
         private final Properties<String, String> props = new Properties<>();
+
+        /** The data source selector. */
         private final DataSourceSelector dataSourceSelector = new SimpleSourceSelector();
+
+        /** The is closed. */
         private boolean isClosed = false;
 
+        /**
+         * Instantiates a new simple data source manager.
+         *
+         * @param ds the ds
+         */
         public SimpleDataSourceManager(final DataSource ds) {
             this.primaryDataSource = ds;
 
@@ -13147,26 +16835,49 @@ public final class JdbcUtil {
             }
         }
 
+        /**
+         * Gets the primary data source.
+         *
+         * @return the primary data source
+         */
         @Override
         public DataSource getPrimaryDataSource() {
             return primaryDataSource;
         }
 
+        /**
+         * Gets the active data sources.
+         *
+         * @return the active data sources
+         */
         @Override
         public Map<String, DataSource> getActiveDataSources() {
             return activeDataSources;
         }
 
+        /**
+         * Gets the data source selector.
+         *
+         * @return the data source selector
+         */
         @Override
         public DataSourceSelector getDataSourceSelector() {
             return dataSourceSelector;
         }
 
+        /**
+         * Gets the properties.
+         *
+         * @return the properties
+         */
         @Override
         public Properties<String, String> getProperties() {
             return props;
         }
 
+        /**
+         * Close.
+         */
         @Override
         public void close() {
             if (isClosed) {
@@ -13178,6 +16889,11 @@ public final class JdbcUtil {
             isClosed = true;
         }
 
+        /**
+         * Checks if is closed.
+         *
+         * @return true, if is closed
+         */
         @Override
         public boolean isClosed() {
             return isClosed;

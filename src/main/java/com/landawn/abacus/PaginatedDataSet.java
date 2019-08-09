@@ -17,11 +17,12 @@ package com.landawn.abacus;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface PaginatedDataSet.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface PaginatedDataSet extends Iterable<DataSet> {
     /**
@@ -39,8 +40,9 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     DataSet previousPage();
 
     /**
-     * 
-     * @return
+     * Checks for next.
+     *
+     * @return true, if successful
      */
     boolean hasNext();
 
@@ -67,16 +69,18 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
 
     /**
      * Method getPage.
-     * 
-     * @param pageNum
-     * @throws IllegalArgumentException
+     *
+     * @param pageNum the page num
+     * @return the page
+     * @throws IllegalArgumentException the illegal argument exception
      */
     DataSet getPage(int pageNum);
 
     /**
      * Method absolute.
-     * 
-     * @param pageNum
+     *
+     * @param pageNum the page num
+     * @return the paginated data set
      */
     PaginatedDataSet absolute(int pageNum);
 
@@ -101,5 +105,10 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
      */
     int pageCount();
 
+    /**
+     * Stream.
+     *
+     * @return the stream
+     */
     Stream<DataSet> stream();
 }

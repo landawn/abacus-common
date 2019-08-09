@@ -35,17 +35,33 @@ import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 
+// TODO: Auto-generated Javadoc
 /**
- * @since 0.9
- * 
- * @author Haiyang Li 
+ * The Class Futures.
  *
+ * @author Haiyang Li
+ * @since 0.9
  */
 public final class Futures {
+
+    /**
+     * Instantiates a new futures.
+     */
     private Futures() {
         // singleton.
     }
 
+    /**
+     * Compose.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <R> the generic type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param zipFunctionForGet the zip function for get
+     * @return the continuable future
+     */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Try.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet) {
         return compose(cf1, cf2, zipFunctionForGet, new Try.Function<Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception>() {
@@ -56,6 +72,18 @@ public final class Futures {
         });
     }
 
+    /**
+     * Compose.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <R> the generic type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param zipFunctionForGet the zip function for get
+     * @param zipFunctionTimeoutGet the zip function timeout get
+     * @return the continuable future
+     */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Try.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet,
             final Try.Function<? super Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
@@ -74,6 +102,19 @@ public final class Futures {
         });
     }
 
+    /**
+     * Compose.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <R> the generic type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param cf3 the cf 3
+     * @param zipFunctionForGet the zip function for get
+     * @return the continuable future
+     */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
             final Try.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, R, Exception> zipFunctionForGet) {
         return compose(cf1, cf2, cf3, zipFunctionForGet, new Try.Function<Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, Exception>() {
@@ -84,6 +125,20 @@ public final class Futures {
         });
     }
 
+    /**
+     * Compose.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <R> the generic type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param cf3 the cf 3
+     * @param zipFunctionForGet the zip function for get
+     * @param zipFunctionTimeoutGet the zip function timeout get
+     * @return the continuable future
+     */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
             final Try.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, R, Exception> zipFunctionForGet,
             final Try.Function<? super Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
@@ -102,6 +157,16 @@ public final class Futures {
         });
     }
 
+    /**
+     * Compose.
+     *
+     * @param <T> the generic type
+     * @param <FC> the generic type
+     * @param <R> the generic type
+     * @param cfs the cfs
+     * @param zipFunctionForGet the zip function for get
+     * @return the continuable future
+     */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Try.Function<? super FC, R, Exception> zipFunctionForGet) {
         return compose(cfs, zipFunctionForGet, new Try.Function<Tuple3<FC, Long, TimeUnit>, R, Exception>() {
@@ -112,6 +177,17 @@ public final class Futures {
         });
     }
 
+    /**
+     * Compose.
+     *
+     * @param <T> the generic type
+     * @param <FC> the generic type
+     * @param <R> the generic type
+     * @param cfs the cfs
+     * @param zipFunctionForGet the zip function for get
+     * @param zipFunctionTimeoutGet the zip function timeout get
+     * @return the continuable future
+     */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Try.Function<? super FC, R, Exception> zipFunctionForGet,
             final Try.Function<? super Tuple3<FC, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
@@ -192,6 +268,16 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <E> the element type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @return the continuable future
+     */
     public static <T1, T2, E extends Exception> ContinuableFuture<Tuple2<T1, T2>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2) {
         return allOf(Arrays.asList(cf1, cf2)).map(new Try.Function<List<Object>, Tuple2<T1, T2>, E>() {
             @Override
@@ -201,6 +287,18 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <E> the element type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param cf3 the cf 3
+     * @return the continuable future
+     */
     public static <T1, T2, T3, E extends Exception> ContinuableFuture<Tuple3<T1, T2, T3>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3) {
         return allOf(Arrays.asList(cf1, cf2, cf3)).map(new Try.Function<List<Object>, Tuple3<T1, T2, T3>, E>() {
@@ -211,6 +309,20 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <T4> the generic type
+     * @param <E> the element type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param cf3 the cf 3
+     * @param cf4 the cf 4
+     * @return the continuable future
+     */
     public static <T1, T2, T3, T4, E extends Exception> ContinuableFuture<Tuple4<T1, T2, T3, T4>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4) {
         return allOf(Arrays.asList(cf1, cf2, cf3, cf4)).map(new Try.Function<List<Object>, Tuple4<T1, T2, T3, T4>, E>() {
@@ -221,6 +333,22 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <T4> the generic type
+     * @param <T5> the generic type
+     * @param <E> the element type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param cf3 the cf 3
+     * @param cf4 the cf 4
+     * @param cf5 the cf 5
+     * @return the continuable future
+     */
     public static <T1, T2, T3, T4, T5, E extends Exception> ContinuableFuture<Tuple5<T1, T2, T3, T4, T5>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5) {
         return allOf(Arrays.asList(cf1, cf2, cf3, cf4, cf5)).map(new Try.Function<List<Object>, Tuple5<T1, T2, T3, T4, T5>, E>() {
@@ -231,6 +359,24 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <T4> the generic type
+     * @param <T5> the generic type
+     * @param <T6> the generic type
+     * @param <E> the element type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param cf3 the cf 3
+     * @param cf4 the cf 4
+     * @param cf5 the cf 5
+     * @param cf6 the cf 6
+     * @return the continuable future
+     */
     public static <T1, T2, T3, T4, T5, T6, E extends Exception> ContinuableFuture<Tuple6<T1, T2, T3, T4, T5, T6>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
             final Future<? extends T6> cf6) {
@@ -242,6 +388,26 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <T4> the generic type
+     * @param <T5> the generic type
+     * @param <T6> the generic type
+     * @param <T7> the generic type
+     * @param <E> the element type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param cf3 the cf 3
+     * @param cf4 the cf 4
+     * @param cf5 the cf 5
+     * @param cf6 the cf 6
+     * @param cf7 the cf 7
+     * @return the continuable future
+     */
     public static <T1, T2, T3, T4, T5, T6, T7, E extends Exception> ContinuableFuture<Tuple7<T1, T2, T3, T4, T5, T6, T7>> combine(
             final Future<? extends T1> cf1, final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4,
             final Future<? extends T5> cf5, final Future<? extends T6> cf6, final Future<? extends T7> cf7) {
@@ -253,6 +419,18 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param action the action
+     * @return the continuable future
+     */
     public static <T1, T2, R, E extends Exception> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Try.BiFunction<? super T1, ? super T2, R, E> action) {
         return allOf(Arrays.asList(cf1, cf2)).map(new Try.Function<List<Object>, R, E>() {
@@ -263,6 +441,20 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param cf1 the cf 1
+     * @param cf2 the cf 2
+     * @param cf3 the cf 3
+     * @param action the action
+     * @return the continuable future
+     */
     public static <T1, T2, T3, R, E extends Exception> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final TriFunction<? super T1, ? super T2, ? super T3, R, E> action) {
         return allOf(Arrays.asList(cf1, cf2, cf3)).map(new Try.Function<List<Object>, R, E>() {
@@ -273,6 +465,16 @@ public final class Futures {
         });
     }
 
+    /**
+     * Combine.
+     *
+     * @param <T> the generic type
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param cfs the cfs
+     * @param action the action
+     * @return the continuable future
+     */
     public static <T, R, E extends Exception> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
             final Try.Function<List<T>, R, E> action) {
         final ContinuableFuture<List<T>> f = allOf(cfs);
@@ -289,9 +491,10 @@ public final class Futures {
      * the given Futures complete. If any of the given
      * Futures complete exceptionally, then the returned
      * Future also does so.
-     * 
-     * @param cfs
-     * @return
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the continuable future
      */
     @SafeVarargs
     public static <T> ContinuableFuture<List<T>> allOf(final Future<? extends T>... cfs) {
@@ -303,14 +506,22 @@ public final class Futures {
      * the given Futures complete. If any of the given
      * Futures complete exceptionally, then the returned
      * Future also does so.
-     * 
-     * @param cfs
-     * @return
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the continuable future
      */
     public static <T> ContinuableFuture<List<T>> allOf(final Collection<? extends Future<? extends T>> cfs) {
         return allOf2(cfs);
     }
 
+    /**
+     * All of 2.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the continuable future
+     */
     private static <T> ContinuableFuture<List<T>> allOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notNullOrEmpty(cfs), "'cfs' can't be null or empty");
 
@@ -392,9 +603,10 @@ public final class Futures {
     /**
      * Returns a new Future that, when any of the given Futures complete normally. 
      * If all of the given Futures complete exceptionally, then the returned Future also does so.
-     * 
-     * @param cfs
-     * @return
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the continuable future
      */
     @SafeVarargs
     public static <T> ContinuableFuture<T> anyOf(final Future<? extends T>... cfs) {
@@ -404,14 +616,22 @@ public final class Futures {
     /**
      * Returns a new Future that, when any of the given Futures complete normally. 
      * If all of the given Futures complete exceptionally, then the returned Future also does so.
-     * 
-     * @param cfs
-     * @return
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the continuable future
      */
     public static <T> ContinuableFuture<T> anyOf(final Collection<? extends Future<? extends T>> cfs) {
         return anyOf2(cfs);
     }
 
+    /**
+     * Any of 2.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the continuable future
+     */
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notNullOrEmpty(cfs), "'cfs' can't be null or empty");
 
@@ -496,31 +716,63 @@ public final class Futures {
         });
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the obj iterator
+     */
     @SafeVarargs
     public static <T> ObjIterator<T> iterate(final Future<? extends T>... cfs) {
         return iterate02(Arrays.asList(cfs));
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs);
     }
 
     /**
-     * 
-     * @param cfs 
-     * @param totalTimeoutForAll
-     * @param unit
-     * @return
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @param totalTimeoutForAll the total timeout for all
+     * @param unit the unit
+     * @return the obj iterator
      * @see {@code ExecutorCompletionService}
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return iterate02(cfs, totalTimeoutForAll, unit);
     }
 
+    /**
+     * Iterate 02.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the obj iterator
+     */
     private static <T> ObjIterator<T> iterate02(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Iterate 02.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @param totalTimeoutForAll the total timeout for all
+     * @param unit the unit
+     * @return the obj iterator
+     */
     private static <T> ObjIterator<T> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return new ObjIterator<T>() {
             private final Iterator<Pair<T, Exception>> iter = iterate22(cfs, totalTimeoutForAll, unit);
@@ -543,21 +795,37 @@ public final class Futures {
         };
     }
 
+    /**
+     * Iteratte.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the obj iterator
+     */
     @SafeVarargs
     public static <T> ObjIterator<Pair<T, Exception>> iteratte(final Future<? extends T>... cfs) {
         return iterate22(Arrays.asList(cfs));
     }
 
+    /**
+     * Iteratte.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the obj iterator
+     */
     public static <T> ObjIterator<Pair<T, Exception>> iteratte(final Collection<? extends Future<? extends T>> cfs) {
         return iterate22(cfs);
     }
 
     /**
-     * 
-     * @param cfs 
-     * @param totalTimeoutForAll
-     * @param unit
-     * @return
+     * Iteratte.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @param totalTimeoutForAll the total timeout for all
+     * @param unit the unit
+     * @return the obj iterator
      * @see {@code ExecutorCompletionService}
      */
     public static <T> ObjIterator<Pair<T, Exception>> iteratte(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll,
@@ -565,10 +833,26 @@ public final class Futures {
         return iterate22(cfs, totalTimeoutForAll, unit);
     }
 
+    /**
+     * Iterate 22.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @return the obj iterator
+     */
     private static <T> ObjIterator<Pair<T, Exception>> iterate22(final Collection<? extends Future<? extends T>> cfs) {
         return iterate22(cfs, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Iterate 22.
+     *
+     * @param <T> the generic type
+     * @param cfs the cfs
+     * @param totalTimeoutForAll the total timeout for all
+     * @param unit the unit
+     * @return the obj iterator
+     */
     private static <T> ObjIterator<Pair<T, Exception>> iterate22(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll,
             final TimeUnit unit) {
         N.checkArgPositive(totalTimeoutForAll, "totalTimeoutForAll");
@@ -617,6 +901,15 @@ public final class Futures {
         };
     }
 
+    /**
+     * Handle.
+     *
+     * @param <R> the generic type
+     * @param result the result
+     * @return the r
+     * @throws InterruptedException the interrupted exception
+     * @throws ExecutionException the execution exception
+     */
     private static <R> R handle(final Pair<R, Exception> result) throws InterruptedException, ExecutionException {
         if (result.right != null) {
             if (result.right instanceof InterruptedException) {

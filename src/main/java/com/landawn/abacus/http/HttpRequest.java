@@ -14,26 +14,52 @@
 
 package com.landawn.abacus.http;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.3
- * 
+ * The Class HttpRequest.
+ *
  * @author Haiyang Li
+ * @since 1.3
  */
 public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
 
+    /**
+     * Instantiates a new http request.
+     *
+     * @param httpClient the http client
+     */
     HttpRequest(HttpClient httpClient) {
         super(httpClient);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param httpClient the http client
+     * @return the http request
+     */
     public static HttpRequest create(final HttpClient httpClient) {
         return new HttpRequest(httpClient);
     }
 
+    /**
+     * Url.
+     *
+     * @param url the url
+     * @return the http request
+     */
     public static HttpRequest url(final String url) {
         return url(url, AbstractHttpClient.DEFAULT_CONNECTION_TIMEOUT, AbstractHttpClient.DEFAULT_READ_TIMEOUT);
     }
 
+    /**
+     * Url.
+     *
+     * @param url the url
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @return the http request
+     */
     public static HttpRequest url(final String url, final long connTimeout, final long readTimeout) {
         return new HttpRequest(HttpClient.create(url, 1, connTimeout, readTimeout));
     }

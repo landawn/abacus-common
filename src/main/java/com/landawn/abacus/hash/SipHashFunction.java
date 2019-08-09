@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -35,15 +36,24 @@ import com.landawn.abacus.util.N;
  */
 final class SipHashFunction extends AbstractStreamingHashFunction implements Serializable {
 
+    /** The c. */
     // The number of compression rounds.
     private final int c;
+
+    /** The d. */
     // The number of finalization rounds.
     private final int d;
+
+    /** The k 0. */
     // Two 64-bit keys (represent a single 128-bit key).
     private final long k0;
+
+    /** The k 1. */
     private final long k1;
 
     /**
+     * Instantiates a new sip hash function.
+     *
      * @param c the number of compression rounds (must be positive)
      * @param d the number of finalization rounds (must be positive)
      * @param k0 the first half of the key
@@ -58,11 +68,21 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         this.k1 = k1;
     }
 
+    /**
+     * Bits.
+     *
+     * @return the int
+     */
     @Override
     public int bits() {
         return 64;
     }
 
+    /**
+     * New hasher.
+     *
+     * @return the hasher
+     */
     @Override
     public Hasher newHasher() {
         return new SipHasher(c, d, k0, k1);
@@ -70,11 +90,22 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
 
     // TODO(kak): Implement and benchmark the hashFoo() shortcuts.
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "Hashing.sipHash" + c + "" + d + "(" + k0 + ", " + k1 + ")";
     }
 
+    /**
+     * Equals.
+     *
+     * @param object the object
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object object) {
         if (object instanceof SipHashFunction) {
@@ -84,35 +115,65 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         return false;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return (int) (getClass().hashCode() ^ c ^ d ^ k0 ^ k1);
     }
 
+    /**
+     * The Class SipHasher.
+     */
     private static final class SipHasher extends AbstractStreamingHasher {
+
+        /** The Constant CHUNK_SIZE. */
         private static final int CHUNK_SIZE = 8;
 
+        /** The c. */
         // The number of compression rounds.
         private final int c;
+
+        /** The d. */
         // The number of finalization rounds.
         private final int d;
 
         // Four 64-bit words of internal state.
         // The initial state corresponds to the ASCII string "somepseudorandomlygeneratedbytes",
         // big-endian encoded. There is nothing special about this value; the only requirement
+        /** The v 0. */
         // was some asymmetry so that the initial v0 and v1 differ from v2 and v3.
         private long v0 = 0x736f6d6570736575L;
+
+        /** The v 1. */
         private long v1 = 0x646f72616e646f6dL;
+
+        /** The v 2. */
         private long v2 = 0x6c7967656e657261L;
+
+        /** The v 3. */
         private long v3 = 0x7465646279746573L;
 
+        /** The b. */
         // The number of bytes in the input.
         private long b = 0;
 
         // The final 64-bit chunk includes the last 0 through 7 bytes of m followed by null bytes
+        /** The final M. */
         // and ending with a byte encoding the positive integer b mod 256.
         private long finalM = 0;
 
+        /**
+         * Instantiates a new sip hasher.
+         *
+         * @param c the c
+         * @param d the d
+         * @param k0 the k 0
+         * @param k1 the k 1
+         */
         SipHasher(int c, int d, long k0, long k1) {
             super(CHUNK_SIZE);
             this.c = c;
@@ -123,12 +184,22 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
             this.v3 ^= k1;
         }
 
+        /**
+         * Process.
+         *
+         * @param buffer the buffer
+         */
         @Override
         protected void process(ByteBuffer buffer) {
             b += CHUNK_SIZE;
             processM(buffer.getLong());
         }
 
+        /**
+         * Process remaining.
+         *
+         * @param buffer the buffer
+         */
         @Override
         protected void processRemaining(ByteBuffer buffer) {
             b += buffer.remaining();
@@ -137,6 +208,11 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
             }
         }
 
+        /**
+         * Make hash.
+         *
+         * @return the hash code
+         */
         @Override
         public HashCode makeHash() {
             // End with a byte encoding the positive integer b mod 256.
@@ -149,12 +225,22 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
             return HashCode.fromLong(v0 ^ v1 ^ v2 ^ v3);
         }
 
+        /**
+         * Process M.
+         *
+         * @param m the m
+         */
         private void processM(long m) {
             v3 ^= m;
             sipRound(c);
             v0 ^= m;
         }
 
+        /**
+         * Sip round.
+         *
+         * @param iterations the iterations
+         */
         private void sipRound(int iterations) {
             for (int i = 0; i < iterations; i++) {
                 v0 += v1;
@@ -175,5 +261,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         }
     }
 
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 0L;
 }

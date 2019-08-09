@@ -21,33 +21,68 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.SortedSet;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class ImmutableSet.
+ *
  * @author Haiyang Li
+ * @param <E> the element type
+ * @since 0.8
  */
 public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
+    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ImmutableSet EMPTY = new ImmutableSet(Collections.EMPTY_SET);
 
+    /**
+     * Instantiates a new immutable set.
+     *
+     * @param set the set
+     */
     ImmutableSet(Set<? extends E> set) {
         super(Collections.unmodifiableSet(set));
     }
 
+    /**
+     * Empty.
+     *
+     * @param <E> the element type
+     * @return the immutable set
+     */
     public static <E> ImmutableSet<E> empty() {
         return EMPTY;
     }
 
+    /**
+     * Just.
+     *
+     * @param <E> the element type
+     * @param e the e
+     * @return the immutable set
+     */
     public static <E> ImmutableSet<E> just(E e) {
         return new ImmutableSet<>(Collections.singleton(e));
     }
 
+    /**
+     * Of.
+     *
+     * @param <E> the element type
+     * @param e the e
+     * @return the immutable set
+     */
     public static <E> ImmutableSet<E> of(E e) {
         return new ImmutableSet<>(Collections.singleton(e));
     }
 
+    /**
+     * Of.
+     *
+     * @param <E> the element type
+     * @param a the a
+     * @return the immutable set
+     */
     @SafeVarargs
     public static <E> ImmutableSet<E> of(E... a) {
         if (N.isNullOrEmpty(a)) {
@@ -58,9 +93,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * 
+     * Of.
+     *
+     * @param <E> the element type
      * @param set the elements in this <code>Set</code> are shared by the returned ImmutableSet.
-     * @return
+     * @return the immutable set
      */
     public static <E> ImmutableSet<E> of(final Set<? extends E> set) {
         if (set == null) {
@@ -73,9 +110,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * 
-     * @param set
-     * @return
+     * Copy of.
+     *
+     * @param <E> the element type
+     * @param set the set
+     * @return the immutable set
      */
     public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> set) {
         if (N.isNullOrEmpty(set)) {

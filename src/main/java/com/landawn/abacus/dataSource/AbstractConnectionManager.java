@@ -63,19 +63,32 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbstractConnectionManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 abstract class AbstractConnectionManager implements ConnectionManager {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(AbstractConnectionManager.class);
 
+    /** The properties. */
     protected final Map<String, String> properties;
+
+    /** The connection properties. */
     protected final Properties connectionProperties;
+
+    /** The last SQL execution failure time. */
     protected volatile long lastSQLExecutionFailureTime;
 
+    /**
+     * Instantiates a new abstract connection manager.
+     *
+     * @param props the props
+     */
     public AbstractConnectionManager(Map<String, ?> props) {
         properties = new HashMap<>();
         connectionProperties = new Properties();
@@ -230,21 +243,40 @@ abstract class AbstractConnectionManager implements ConnectionManager {
         }
     }
 
+    /**
+     * Gets the properties.
+     *
+     * @return the properties
+     */
     @Override
     public Map<String, String> getProperties() {
         return properties;
     }
 
+    /**
+     * Gets the connection properties.
+     *
+     * @return the connection properties
+     */
     @Override
     public Properties getConnectionProperties() {
         return connectionProperties;
     }
 
+    /**
+     * Update last SQL execution failure time.
+     */
     @Override
     public synchronized void updateLastSQLExecutionFailureTime() {
         lastSQLExecutionFailureTime = System.currentTimeMillis();
     }
 
+    /**
+     * Creates the JNDI data source.
+     *
+     * @param properties the properties
+     * @return the data source
+     */
     protected DataSource createJNDIDataSource(Map<String, String> properties) {
         String jndiName = connectionProperties.getProperty(JNDI_NAME);
 
@@ -267,6 +299,11 @@ abstract class AbstractConnectionManager implements ConnectionManager {
         }
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -277,6 +314,12 @@ abstract class AbstractConnectionManager implements ConnectionManager {
         return result;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -292,6 +335,11 @@ abstract class AbstractConnectionManager implements ConnectionManager {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "{properties=" + properties + ", connectionProperties=" + connectionProperties + "}";

@@ -14,40 +14,83 @@
 
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class IndexedByte.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class IndexedByte extends AbstractIndexed {
+
+    /** The value. */
     private final byte value;
 
+    /**
+     * Instantiates a new indexed byte.
+     *
+     * @param index the index
+     * @param value the value
+     */
     IndexedByte(long index, byte value) {
         super(index);
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @param index the index
+     * @return the indexed byte
+     */
     public static IndexedByte of(byte value, int index) {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedByte(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @param index the index
+     * @return the indexed byte
+     */
     public static IndexedByte of(byte value, long index) {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedByte(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedByte> of(final ByteIterator iter) {
         return of(iter, 0);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedByte> of(final ByteIterator iter, final int startIndex) {
         return of(iter, (long) startIndex);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedByte> of(final ByteIterator iter, final long startIndex) {
         if (startIndex < 0) {
             throw new IllegalArgumentException("Invalid start index: " + startIndex);
@@ -68,20 +111,41 @@ public final class IndexedByte extends AbstractIndexed {
         };
     }
 
+    /**
+     * Value.
+     *
+     * @return the byte
+     */
     public byte value() {
         return value;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return (int) index + value * 31;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return obj instanceof IndexedByte && ((IndexedByte) obj).index == index && N.equals(((IndexedByte) obj).value, value);
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

@@ -14,14 +14,19 @@
 
 package com.landawn.abacus.cache;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.0.4
- * 
+ * The Class ChronicleMap.
+ *
  * @author Haiyang Li
  * @see <a href="https://github.com/OpenHFT/Chronicle-Map">Chronicle-Map</a>
+ * @since 1.0.4
  */
 public class ChronicleMap {
+
+    /**
+     * Instantiates a new chronicle map.
+     */
     private ChronicleMap() {
         // TODO
     }

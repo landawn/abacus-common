@@ -14,11 +14,12 @@
 
 package com.landawn.abacus.exception;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class UncheckedException.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class UncheckedException extends AbacusException {
     /**
@@ -35,8 +36,8 @@ public class UncheckedException extends AbacusException {
 
     /**
      * Constructor for UncheckedIOException.
-     * 
-     * @param message
+     *
+     * @param message the message
      */
     UncheckedException(String message) {
         super(message);
@@ -44,9 +45,9 @@ public class UncheckedException extends AbacusException {
 
     /**
      * Constructor for UncheckedIOException.
-     * 
-     * @param message
-     * @param cause
+     *
+     * @param message the message
+     * @param cause the cause
      */
     public UncheckedException(String message, Throwable cause) {
         super(message, cause);
@@ -54,8 +55,8 @@ public class UncheckedException extends AbacusException {
 
     /**
      * Constructor for UncheckedIOException.
-     * 
-     * @param cause
+     *
+     * @param cause the cause
      */
     public UncheckedException(Throwable cause) {
         super(cause);

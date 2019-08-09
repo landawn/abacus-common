@@ -22,19 +22,20 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.landawn.abacus.annotation.Internal;
 
+// TODO: Auto-generated Javadoc
 /**
  * Memo of the signed and modified properties in this entity instance.
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 @JsonIgnoreProperties({ "dirty" })
 public interface DirtyMarker {
+
     /**
      * Returns the entity name of the simple class name.
-     * 
-     * @return
+     *
+     * @return the string
      */
     String entityName();
 
@@ -58,8 +59,8 @@ public interface DirtyMarker {
 
     /**
      * Check if the specified property is modified.
-     * 
-     * @param propName
+     *
+     * @param propName the prop name
      * @return boolean
      */
     @XmlTransient
@@ -69,18 +70,18 @@ public interface DirtyMarker {
 
     /**
      * Set the dirty status for all signed properties.
-     * 
-     * @param isDirty
+     *
+     * @param isDirty the is dirty
      */
     @Internal
     @Deprecated
     void markDirty(boolean isDirty);
 
     /**
-     * Set the dirty status for the specified property
-     * 
-     * @param propName
-     * @param isDirty
+     * Set the dirty status for the specified property.
+     *
+     * @param propName the prop name
+     * @param isDirty the is dirty
      */
     @Internal
     @Deprecated
@@ -88,9 +89,9 @@ public interface DirtyMarker {
 
     /**
      * Set the dirty status for the specified properties.
-     * 
-     * @param propNames
-     * @param isDirty
+     *
+     * @param propNames the prop names
+     * @param isDirty the is dirty
      */
     @Internal
     @Deprecated
@@ -125,8 +126,8 @@ public interface DirtyMarker {
 
     /**
      * Method frozen.
-     * 
-     * @return
+     *
+     * @return true, if successful
      */
     @XmlTransient
     boolean frozen();

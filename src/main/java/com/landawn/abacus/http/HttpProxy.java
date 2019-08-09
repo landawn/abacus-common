@@ -60,46 +60,112 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.function.Function;
 
+// TODO: Auto-generated Javadoc
 /**
  * The client and server communicate by xml/json(may compressed by lz4/snappy/gzip)
  * through http. There are two ways to send the request: <li>1, Send the request
  * with the url. The target web method is identified by request type.</li> <li>
  * 2, Send the request with the url+'/'+operationName. The target web method is
  * identified by operation name in the url.</li>
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class HttpProxy {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(HttpProxy.class);
 
+    /** The Constant DEFAULT_MAX_CONNECTION. */
     private static final int DEFAULT_MAX_CONNECTION = AbstractHttpClient.DEFAULT_MAX_CONNECTION;
+
+    /** The Constant DEFAULT_CONNECTION_TIMEOUT. */
     private static final int DEFAULT_CONNECTION_TIMEOUT = AbstractHttpClient.DEFAULT_CONNECTION_TIMEOUT;
+
+    /** The Constant DEFAULT_READ_TIMEOUT. */
     private static final int DEFAULT_READ_TIMEOUT = AbstractHttpClient.DEFAULT_READ_TIMEOUT;
 
+    /** The Constant PARAM. */
     // Upper and lower characters, digits, underscores, and hyphens, starting with a character.
     private static final String PARAM = "[a-zA-Z][a-zA-Z0-9_-]*";
+
+    /** The Constant PARAM_NAME_REGEX. */
     private static final Pattern PARAM_NAME_REGEX = Pattern.compile(PARAM);
+
+    /** The Constant PARAM_URL_REGEX. */
     private static final Pattern PARAM_URL_REGEX = Pattern.compile("\\{(" + PARAM + ")\\}");
 
+    /**
+     * Creates the client proxy.
+     *
+     * @param <T> the generic type
+     * @param interfaceClass the interface class
+     * @param contentFormat the content format
+     * @param url the url
+     * @return the t
+     */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url) {
         return createClientProxy(interfaceClass, contentFormat, url, DEFAULT_MAX_CONNECTION, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
+    /**
+     * Creates the client proxy.
+     *
+     * @param <T> the generic type
+     * @param interfaceClass the interface class
+     * @param contentFormat the content format
+     * @param url the url
+     * @param config the config
+     * @return the t
+     */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final Config config) {
         return createClientProxy(interfaceClass, contentFormat, url, DEFAULT_MAX_CONNECTION, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT, config);
     }
 
+    /**
+     * Creates the client proxy.
+     *
+     * @param <T> the generic type
+     * @param interfaceClass the interface class
+     * @param contentFormat the content format
+     * @param url the url
+     * @param maxConnection the max connection
+     * @return the t
+     */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection) {
         return createClientProxy(interfaceClass, contentFormat, url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
+    /**
+     * Creates the client proxy.
+     *
+     * @param <T> the generic type
+     * @param interfaceClass the interface class
+     * @param contentFormat the content format
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @return the t
+     */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection,
             final long connTimeout, final long readTimeout) {
         return createClientProxy(interfaceClass, contentFormat, url, maxConnection, connTimeout, readTimeout, null);
     }
 
+    /**
+     * Creates the client proxy.
+     *
+     * @param <T> the generic type
+     * @param interfaceClass the interface class
+     * @param contentFormat the content format
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param config the config
+     * @return the t
+     */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection,
             final long connTimeout, final long readTimeout, final Config config) {
 
@@ -684,6 +750,9 @@ public final class HttpProxy {
     /**
      * Gets the set of unique path parameters used in the given URI. If a parameter is used twice
      * in the URI, it will only show up once in the set.
+     *
+     * @param path the path
+     * @return the sets the
      */
     static Set<String> parsePathParameters(final String path) {
         Matcher m = PARAM_URL_REGEX.matcher(path);
@@ -694,144 +763,298 @@ public final class HttpProxy {
         return patterns;
     }
 
+    /**
+     * The Class Config.
+     */
     public static final class Config {
+
+        /** The parser. */
         private Parser<SerializationConfig<?>, DeserializationConfig<?>> parser;
+
+        /** The sc. */
         private SerializationConfig<?> sc;
+
+        /** The dc. */
         private DeserializationConfig<?> dc;
+
+        /** The handler. */
         private Handler handler;
 
+        /** The executed by thread pool. */
         private boolean executedByThreadPool;
+
+        /** The async executor. */
         private Executor asyncExecutor;
 
+        /** The request settings. */
         private HttpSettings requestSettings;
 
+        /** The operation configs. */
         private Map<String, OperationConfig> operationConfigs;
+
+        /** The request by operatio name. */
         private boolean requestByOperatioName;
+
+        /** The request url naming policy. */
         private NamingPolicy requestUrlNamingPolicy;
+
+        /** The request param naming policy. */
         private NamingPolicy requestParamNamingPolicy;
+
+        /** The encryption user name. */
         private String encryptionUserName;
+
+        /** The encryption password. */
         private byte[] encryptionPassword;
+
+        /** The encryption message. */
         private MessageEncryption encryptionMessage;
 
+        /**
+         * Gets the parser.
+         *
+         * @return the parser
+         */
         public Parser<SerializationConfig<?>, DeserializationConfig<?>> getParser() {
             return parser;
         }
 
+        /**
+         * Sets the parser.
+         *
+         * @param parser the parser
+         * @return the config
+         */
         public Config setParser(final Parser<SerializationConfig<?>, DeserializationConfig<?>> parser) {
             this.parser = parser;
 
             return this;
         }
 
+        /**
+         * Gets the serialization config.
+         *
+         * @return the serialization config
+         */
         public SerializationConfig<?> getSerializationConfig() {
             return sc;
         }
 
+        /**
+         * Sets the serialization config.
+         *
+         * @param sc the sc
+         * @return the config
+         */
         public Config setSerializationConfig(final SerializationConfig<?> sc) {
             this.sc = sc;
 
             return this;
         }
 
+        /**
+         * Gets the deserialization config.
+         *
+         * @return the deserialization config
+         */
         public DeserializationConfig<?> getDeserializationConfig() {
             return dc;
         }
 
+        /**
+         * Sets the deserialization config.
+         *
+         * @param dc the dc
+         * @return the config
+         */
         public Config setDeserializationConfig(final DeserializationConfig<?> dc) {
             this.dc = dc;
 
             return this;
         }
 
+        /**
+         * Checks if is executed by thread pool.
+         *
+         * @return true, if is executed by thread pool
+         */
         public boolean isExecutedByThreadPool() {
             return executedByThreadPool;
         }
 
+        /**
+         * Sets the executed by thread pool.
+         *
+         * @param executedByThreadPool the executed by thread pool
+         * @return the config
+         */
         public Config setExecutedByThreadPool(final boolean executedByThreadPool) {
             this.executedByThreadPool = executedByThreadPool;
 
             return this;
         }
 
+        /**
+         * Gets the async executor.
+         *
+         * @return the async executor
+         */
         public Executor getAsyncExecutor() {
             return asyncExecutor;
         }
 
+        /**
+         * Sets the async executor.
+         *
+         * @param asyncExecutor the async executor
+         * @return the config
+         */
         public Config setAsyncExecutor(final Executor asyncExecutor) {
             this.asyncExecutor = asyncExecutor;
 
             return this;
         }
 
+        /**
+         * Gets the handler.
+         *
+         * @return the handler
+         */
         public Handler getHandler() {
             return handler;
         }
 
+        /**
+         * Sets the handler.
+         *
+         * @param handler the handler
+         * @return the config
+         */
         public Config setHandler(final Handler handler) {
             this.handler = handler;
 
             return this;
         }
 
+        /**
+         * Gets the request settings.
+         *
+         * @return the request settings
+         */
         public HttpSettings getRequestSettings() {
             return requestSettings;
         }
 
+        /**
+         * Sets the request settings.
+         *
+         * @param requestSettings the request settings
+         * @return the config
+         */
         public Config setRequestSettings(final HttpSettings requestSettings) {
             this.requestSettings = requestSettings;
 
             return this;
         }
 
+        /**
+         * Checks if is request by operatio name.
+         *
+         * @return true, if is request by operatio name
+         */
         public boolean isRequestByOperatioName() {
             return requestByOperatioName;
         }
 
+        /**
+         * Sets the request by operatio name.
+         *
+         * @param requestByOperatioName the request by operatio name
+         * @return the config
+         */
         public Config setRequestByOperatioName(final boolean requestByOperatioName) {
             this.requestByOperatioName = requestByOperatioName;
 
             return this;
         }
 
+        /**
+         * Gets the request url naming policy.
+         *
+         * @return the request url naming policy
+         */
         public NamingPolicy getRequestUrlNamingPolicy() {
             return requestUrlNamingPolicy;
         }
 
+        /**
+         * Sets the request url naming policy.
+         *
+         * @param requestUrlNamingPolicy the request url naming policy
+         * @return the config
+         */
         public Config setRequestUrlNamingPolicy(final NamingPolicy requestUrlNamingPolicy) {
             this.requestUrlNamingPolicy = requestUrlNamingPolicy;
 
             return this;
         }
 
+        /**
+         * Gets the request param naming policy.
+         *
+         * @return the request param naming policy
+         */
         public NamingPolicy getRequestParamNamingPolicy() {
             return requestParamNamingPolicy;
         }
 
+        /**
+         * Sets the request param naming policy.
+         *
+         * @param requestParamNamingPolicy the request param naming policy
+         * @return the config
+         */
         public Config setRequestParamNamingPolicy(final NamingPolicy requestParamNamingPolicy) {
             this.requestParamNamingPolicy = requestParamNamingPolicy;
 
             return this;
         }
 
+        /**
+         * Gets the operation configs.
+         *
+         * @return the operation configs
+         */
         public Map<String, OperationConfig> getOperationConfigs() {
             return operationConfigs;
         }
 
+        /**
+         * Sets the operation configs.
+         *
+         * @param operationConfigs the operation configs
+         * @return the config
+         */
         public Config setOperationConfigs(final Map<String, OperationConfig> operationConfigs) {
             this.operationConfigs = operationConfigs;
 
             return this;
         }
 
+        /**
+         * Gets the encryption user name.
+         *
+         * @return the encryption user name
+         */
         public String getEncryptionUserName() {
             return encryptionUserName;
         }
 
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
-         * 
-         * @param encryptionUserName
-         * @return
+         *
+         * @param encryptionUserName the encryption user name
+         * @return the config
          * @see SecurityDTO#encrypt(String, String)
          */
         public Config setEncryptionUserName(final String encryptionUserName) {
@@ -840,15 +1063,20 @@ public final class HttpProxy {
             return this;
         }
 
+        /**
+         * Gets the encryption password.
+         *
+         * @return the encryption password
+         */
         public byte[] getEncryptionPassword() {
             return encryptionPassword;
         }
 
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
-         * 
-         * @param encryptionPassword
-         * @return
+         *
+         * @param encryptionPassword the encryption password
+         * @return the config
          * @see SecurityDTO#encrypt(String, String)
          */
         public Config setEncryptionPassword(final byte[] encryptionPassword) {
@@ -857,15 +1085,20 @@ public final class HttpProxy {
             return this;
         }
 
+        /**
+         * Gets the encryption message.
+         *
+         * @return the encryption message
+         */
         public MessageEncryption getEncryptionMessage() {
             return encryptionMessage;
         }
 
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
-         * 
-         * @param encryptionMessage
-         * @return
+         *
+         * @param encryptionMessage the encryption message
+         * @return the config
          * @see SecurityDTO#encrypt(String, String)
          */
         public Config setEncryptionMessage(final MessageEncryption encryptionMessage) {
@@ -874,6 +1107,11 @@ public final class HttpProxy {
             return this;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "{parser=" + parser + ", sc=" + sc + ", dc=" + dc + ", handler=" + handler + ", executedByThreadPool=" + executedByThreadPool
@@ -883,30 +1121,74 @@ public final class HttpProxy {
         }
     }
 
+    /**
+     * The Class OperationConfig.
+     */
     public static class OperationConfig {
+
+        /** The request url. */
         private String requestUrl;
+
+        /** The http method. */
         private HttpMethod httpMethod;
+
+        /** The request settings. */
         private HttpSettings requestSettings;
+
+        /** The retry times. */
         private int retryTimes;
+
+        /** The retry interval. */
         private long retryInterval;
+
+        /** The if retry. */
         private Function<Throwable, Boolean> ifRetry;
+
+        /** The encryption user name. */
         private String encryptionUserName;
+
+        /** The encryption password. */
         private byte[] encryptionPassword;
+
+        /** The encryption message. */
         private MessageEncryption encryptionMessage;
 
+        /** The request entity name. */
         String requestEntityName;
+
+        /** The response entity name. */
         String responseEntityName;
 
+        /** The request url param names. */
         Map<String, String> requestUrlParamNames;
+
+        /** The param types. */
         Type<?>[] paramTypes;
+
+        /** The param fields. */
         Field[] paramFields;
+
+        /** The param paths. */
         Path[] paramPaths;
+
+        /** The param name type map. */
         Map<String, Type<?>> paramNameTypeMap;
 
+        /**
+         * Gets the request url.
+         *
+         * @return the request url
+         */
         public String getRequestUrl() {
             return requestUrl;
         }
 
+        /**
+         * Sets the request url.
+         *
+         * @param requestUrl the request url
+         * @return the operation config
+         */
         public OperationConfig setRequestUrl(final String requestUrl) {
             this.requestUrl = requestUrl;
             requestUrlParamNames = new LinkedHashMap<>();
@@ -919,65 +1201,125 @@ public final class HttpProxy {
             return this;
         }
 
+        /**
+         * Gets the http method.
+         *
+         * @return the http method
+         */
         public HttpMethod getHttpMethod() {
             return httpMethod;
         }
 
+        /**
+         * Sets the http method.
+         *
+         * @param httpMethod the http method
+         * @return the operation config
+         */
         public OperationConfig setHttpMethod(final HttpMethod httpMethod) {
             this.httpMethod = httpMethod;
 
             return this;
         }
 
+        /**
+         * Gets the request settings.
+         *
+         * @return the request settings
+         */
         public HttpSettings getRequestSettings() {
             return requestSettings;
         }
 
+        /**
+         * Sets the request settings.
+         *
+         * @param requestSettings the request settings
+         * @return the operation config
+         */
         public OperationConfig setRequestSettings(final HttpSettings requestSettings) {
             this.requestSettings = requestSettings;
 
             return this;
         }
 
+        /**
+         * Gets the retry times.
+         *
+         * @return the retry times
+         */
         public int getRetryTimes() {
             return retryTimes;
         }
 
+        /**
+         * Sets the retry times.
+         *
+         * @param retryTimes the retry times
+         * @return the operation config
+         */
         public OperationConfig setRetryTimes(final int retryTimes) {
             this.retryTimes = retryTimes;
 
             return this;
         }
 
+        /**
+         * Gets the retry interval.
+         *
+         * @return the retry interval
+         */
         public long getRetryInterval() {
             return retryInterval;
         }
 
+        /**
+         * Sets the retry interval.
+         *
+         * @param retryInterval the retry interval
+         * @return the operation config
+         */
         public OperationConfig setRetryInterval(final long retryInterval) {
             this.retryInterval = retryInterval;
 
             return this;
         }
 
+        /**
+         * Gets the if retry.
+         *
+         * @return the if retry
+         */
         public Function<Throwable, Boolean> getIfRetry() {
             return ifRetry;
         }
 
+        /**
+         * Sets the if retry.
+         *
+         * @param ifRetry the if retry
+         * @return the operation config
+         */
         public OperationConfig setIfRetry(final Function<Throwable, Boolean> ifRetry) {
             this.ifRetry = ifRetry;
 
             return this;
         }
 
+        /**
+         * Gets the encryption user name.
+         *
+         * @return the encryption user name
+         */
         public String getEncryptionUserName() {
             return encryptionUserName;
         }
 
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
-         * 
-         * @param encryptionUserName
-         * @return
+         *
+         * @param encryptionUserName the encryption user name
+         * @return the operation config
          * @see SecurityDTO#encrypt(String, String)
          */
         public OperationConfig setEncryptionUserName(final String encryptionUserName) {
@@ -986,15 +1328,20 @@ public final class HttpProxy {
             return this;
         }
 
+        /**
+         * Gets the encryption password.
+         *
+         * @return the encryption password
+         */
         public byte[] getEncryptionPassword() {
             return encryptionPassword;
         }
 
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
-         * 
-         * @param encryptionPassword
-         * @return
+         *
+         * @param encryptionPassword the encryption password
+         * @return the operation config
          * @see SecurityDTO#encrypt(String, String)
          */
         public OperationConfig setEncryptionPassword(final byte[] encryptionPassword) {
@@ -1003,15 +1350,20 @@ public final class HttpProxy {
             return this;
         }
 
+        /**
+         * Gets the encryption message.
+         *
+         * @return the encryption message
+         */
         public MessageEncryption getEncryptionMessage() {
             return encryptionMessage;
         }
 
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
-         * 
-         * @param encryptionMessage
-         * @return
+         *
+         * @param encryptionMessage the encryption message
+         * @return the operation config
          * @see SecurityDTO#encrypt(String, String)
          */
         public OperationConfig setEncryptionMessage(final MessageEncryption encryptionMessage) {
@@ -1022,9 +1374,8 @@ public final class HttpProxy {
 
         /**
          * copied from retrofit under the Apache License, Version 2.0 (the "License");
-         * 
-         * @param index
-         * @param name
+         *
+         * @param name the name
          */
         void validatePathName(final String name) {
             if (!PARAM_NAME_REGEX.matcher(name).matches()) {
@@ -1037,6 +1388,11 @@ public final class HttpProxy {
             }
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1053,6 +1409,12 @@ public final class HttpProxy {
             return result;
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(final Object obj) {
             if (this == obj) {
@@ -1071,6 +1433,11 @@ public final class HttpProxy {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "{httpMethod=" + httpMethod + ", requestUrl=" + requestUrl + ", requestSettings=" + requestSettings + ", retryTimes=" + retryTimes
@@ -1078,9 +1445,28 @@ public final class HttpProxy {
         }
     }
 
+    /**
+     * The Interface Handler.
+     */
     public static interface Handler {
+
+        /**
+         * Pre invoke.
+         *
+         * @param method the method
+         * @param args the args
+         */
         void preInvoke(final Method method, final Object... args);
 
+        /**
+         * Post invoke.
+         *
+         * @param e the e
+         * @param result the result
+         * @param method the method
+         * @param args the args
+         * @return the object
+         */
         Object postInvoke(final Throwable e, final Object result, final Method method, final Object... args);
     }
 }

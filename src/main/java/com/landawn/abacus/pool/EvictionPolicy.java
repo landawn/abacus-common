@@ -14,11 +14,12 @@
 
 package com.landawn.abacus.pool;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Enum EvictionPolicy.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public enum EvictionPolicy {
     /**

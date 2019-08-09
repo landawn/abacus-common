@@ -17,37 +17,38 @@ package com.landawn.abacus;
 import java.util.List;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
  * It's designed to support distributed data source.
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface DataSourceSelector {
+
     /**
      * select data source by sql statement and parameters. 
      * Generally, the <code>DataSource</code> specified by option <code>QUERY_WITH_DATA_SOURCE</code> should be checked/returned first if it exists.
-     * 
-     * @param dataSourceManager
-     * @param entityName
-     * @param sql
-     * @param parameters
+     *
+     * @param dataSourceManager the data source manager
+     * @param entityName the entity name
+     * @param sql the sql
+     * @param parameters the parameters
      * @param options the target data source may be specified by <code>com.landawn.abacus.util.Options.Query.QUERY_WITH_DATA_SOURCE</code>
-     * @return
+     * @return the data source
      */
     DataSource select(DataSourceManager dataSourceManager, String entityName, String sql, Object[] parameters, Map<String, Object> options);
 
     /**
      * select data source by sql statement and parameters for batch operation.
      * Generally, the <code>DataSource</code> specified by option <code>QUERY_WITH_DATA_SOURCE</code> should be checked/returned first if it exists.
-     * 
-     * @param dataSourceManager
-     * @param entityName
-     * @param sql
-     * @param parameters
+     *
+     * @param dataSourceManager the data source manager
+     * @param entityName the entity name
+     * @param sql the sql
+     * @param parameters the parameters
      * @param options the target data source may be specified by <code>com.landawn.abacus.util.Options.Query.QUERY_WITH_DATA_SOURCE</code>
-     * @return
+     * @return the data source
      */
     DataSource select(DataSourceManager dataSourceManager, String entityName, String sql, List<?> parameters, Map<String, Object> options);
 }

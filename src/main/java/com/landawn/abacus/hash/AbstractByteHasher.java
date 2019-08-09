@@ -23,6 +23,7 @@ import com.landawn.abacus.hash.Util.Longs;
 import com.landawn.abacus.hash.Util.Shorts;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -32,15 +33,21 @@ import com.landawn.abacus.util.N;
  * @author Colin Decker
  */
 abstract class AbstractByteHasher extends AbstractHasher {
+
+    /** The scratch. */
     private final ByteBuffer scratch = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
 
     /**
      * Updates this hasher with the given byte.
+     *
+     * @param b the b
      */
     protected abstract void update(byte b);
 
     /**
      * Updates this hasher with the given bytes.
+     *
+     * @param b the b
      */
     protected void update(byte[] b) {
         update(b, 0, b.length);
@@ -48,6 +55,10 @@ abstract class AbstractByteHasher extends AbstractHasher {
 
     /**
      * Updates this hasher with {@code len} bytes starting at {@code off} in the given buffer.
+     *
+     * @param b the b
+     * @param off the off
+     * @param len the len
      */
     protected void update(byte[] b, int off, int len) {
         for (int i = off; i < off + len; i++) {
@@ -55,12 +66,24 @@ abstract class AbstractByteHasher extends AbstractHasher {
         }
     }
 
+    /**
+     * Put.
+     *
+     * @param b the b
+     * @return the hasher
+     */
     @Override
     public Hasher put(byte b) {
         update(b);
         return this;
     }
 
+    /**
+     * Put.
+     *
+     * @param bytes the bytes
+     * @return the hasher
+     */
     @Override
     public Hasher put(byte[] bytes) {
         N.checkArgNotNull(bytes);
@@ -68,6 +91,14 @@ abstract class AbstractByteHasher extends AbstractHasher {
         return this;
     }
 
+    /**
+     * Put.
+     *
+     * @param bytes the bytes
+     * @param off the off
+     * @param len the len
+     * @return the hasher
+     */
     @Override
     public Hasher put(byte[] bytes, int off, int len) {
         Util.checkPositionIndexes(off, off + len, bytes.length);
@@ -78,6 +109,9 @@ abstract class AbstractByteHasher extends AbstractHasher {
 
     /**
      * Updates the sink with the given number of bytes from the buffer.
+     *
+     * @param bytes the bytes
+     * @return the hasher
      */
     private Hasher update(int bytes) {
         try {
@@ -88,24 +122,48 @@ abstract class AbstractByteHasher extends AbstractHasher {
         return this;
     }
 
+    /**
+     * Put.
+     *
+     * @param s the s
+     * @return the hasher
+     */
     @Override
     public Hasher put(short s) {
         scratch.putShort(s);
         return update(Shorts.BYTES);
     }
 
+    /**
+     * Put.
+     *
+     * @param i the i
+     * @return the hasher
+     */
     @Override
     public Hasher put(int i) {
         scratch.putInt(i);
         return update(Ints.BYTES);
     }
 
+    /**
+     * Put.
+     *
+     * @param l the l
+     * @return the hasher
+     */
     @Override
     public Hasher put(long l) {
         scratch.putLong(l);
         return update(Longs.BYTES);
     }
 
+    /**
+     * Put.
+     *
+     * @param c the c
+     * @return the hasher
+     */
     @Override
     public Hasher put(char c) {
         scratch.putChar(c);

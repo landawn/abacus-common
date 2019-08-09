@@ -37,41 +37,64 @@ import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
+// TODO: Auto-generated Javadoc
 /**
  * the sql scripts are configured in xml file and mapped to short ids referenced in program. for example: <br>
  * {@code <sqlMapper>} <br>
  * {@code <sql id="findAccountById">select * from account where id=1</sql>} <br>
  * {@code <sql id="updateAccountNameById">update account set name=? where id=?</sql>} <br>
  * {@code </sqlMapper>}
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class SQLMapper {
+
+    /** The Constant SQL_MAPPER. */
     public static final String SQL_MAPPER = "sqlMapper";
+
+    /** The Constant SQL. */
     public static final String SQL = "sql";
+
+    /** The Constant ID. */
     public static final String ID = "id";
+
+    /** The Constant BATCH_SIZE. */
     public static final String BATCH_SIZE = "batchSize";
+
+    /** The Constant FETCH_SIZE. */
     public static final String FETCH_SIZE = "fetchSize";
 
+    /** The Constant RESULT_SET_TYPE. */
     public static final String RESULT_SET_TYPE = "resultSetType";
+
+    /** The Constant RESULT_SET_TYPE_MAP. */
     public static final Map<String, Integer> RESULT_SET_TYPE_MAP = ImmutableMap.of("FORWARD_ONLY", ResultSet.TYPE_FORWARD_ONLY, "SCROLL_INSENSITIVE",
             ResultSet.TYPE_SCROLL_INSENSITIVE, "SCROLL_SENSITIVE", ResultSet.TYPE_SCROLL_SENSITIVE);
 
+    /** The Constant TIMEOUT. */
     public static final String TIMEOUT = "timeout";
 
+    /** The Constant MAX_ID_LENGTH. */
     public static final int MAX_ID_LENGTH = 64;
 
+    /** The named SQL map. */
     private final Map<String, NamedSQL> namedSQLMap = new LinkedHashMap<>();
+
+    /** The attrs map. */
     private final Map<String, Map<String, String>> attrsMap = new HashMap<>();
 
+    /**
+     * Instantiates a new SQL mapper.
+     */
     public SQLMapper() {
     }
 
     /**
-     * 
+     * From file.
+     *
      * @param filePath it could be multiple file paths separated by ',' or ';'
+     * @return the SQL mapper
      */
     public static SQLMapper fromFile(String filePath) {
         String[] filePaths = Splitter.with(WD.COMMA).trim(true).splitToArray(filePath);
@@ -116,10 +139,21 @@ public final class SQLMapper {
         return sqlMapper;
     }
 
+    /**
+     * Key set.
+     *
+     * @return the sets the
+     */
     public Set<String> keySet() {
         return namedSQLMap.keySet();
     }
 
+    /**
+     * Gets the.
+     *
+     * @param id the id
+     * @return the named SQL
+     */
     public NamedSQL get(String id) {
         if (N.isNullOrEmpty(id) || id.length() > MAX_ID_LENGTH) {
             return null;
@@ -128,6 +162,12 @@ public final class SQLMapper {
         return namedSQLMap.get(id);
     }
 
+    /**
+     * Gets the attrs.
+     *
+     * @param id the id
+     * @return the attrs
+     */
     public Map<String, String> getAttrs(String id) {
         if (N.isNullOrEmpty(id) || id.length() > MAX_ID_LENGTH) {
             return null;
@@ -136,12 +176,26 @@ public final class SQLMapper {
         return attrsMap.get(id);
     }
 
+    /**
+     * Adds the.
+     *
+     * @param id the id
+     * @param namedSQL the named SQL
+     * @return the named SQL
+     */
     public NamedSQL add(String id, NamedSQL namedSQL) {
         checkId(id);
 
         return namedSQLMap.put(id, namedSQL);
     }
 
+    /**
+     * Adds the.
+     *
+     * @param id the id
+     * @param sql the sql
+     * @param attrs the attrs
+     */
     public void add(String id, String sql, Map<String, String> attrs) {
         checkId(id);
 
@@ -149,6 +203,11 @@ public final class SQLMapper {
         attrsMap.put(id, ImmutableMap.copyOf(attrs));
     }
 
+    /**
+     * Check id.
+     *
+     * @param id the id
+     */
     private void checkId(String id) {
         N.checkArgNotNullOrEmpty(id, "id");
 
@@ -161,6 +220,11 @@ public final class SQLMapper {
         }
     }
 
+    /**
+     * Removes the.
+     *
+     * @param id the id
+     */
     public void remove(String id) {
         if (N.isNullOrEmpty(id) || id.length() > MAX_ID_LENGTH) {
             return;
@@ -169,6 +233,11 @@ public final class SQLMapper {
         namedSQLMap.remove(id);
     }
 
+    /**
+     * Save to.
+     *
+     * @param file the file
+     */
     public void saveTo(File file) {
         OutputStream os = null;
 
@@ -211,16 +280,32 @@ public final class SQLMapper {
         }
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return namedSQLMap.hashCode();
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return this == obj || (obj instanceof SQLMapper && N.equals(((SQLMapper) obj).namedSQLMap, namedSQLMap));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return namedSQLMap.toString();

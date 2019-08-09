@@ -21,13 +21,16 @@ import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.ByteStream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class ByteIterator.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class ByteIterator extends ImmutableIterator<Byte> {
+
+    /** The Constant EMPTY. */
     public static final ByteIterator EMPTY = new ByteIterator() {
         @Override
         public boolean hasNext() {
@@ -40,15 +43,34 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         }
     };
 
+    /**
+     * Empty.
+     *
+     * @return the byte iterator
+     */
     public static ByteIterator empty() {
         return EMPTY;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the byte iterator
+     */
     @SafeVarargs
     public static ByteIterator of(final byte... a) {
         return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the byte iterator
+     */
     public static ByteIterator of(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -87,9 +109,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param iteratorSupplier
-     * @return
+     *
+     * @param iteratorSupplier the iterator supplier
+     * @return the byte iterator
      */
     public static ByteIterator of(final Supplier<? extends ByteIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -127,9 +149,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param arraySupplier
-     * @return
+     *
+     * @param arraySupplier the array supplier
+     * @return the byte iterator
      */
     public static ByteIterator oF(final Supplier<byte[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -174,9 +196,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      * Returns an infinite {@code ByteIterator}.
-     * 
-     * @param supplier
-     * @return
+     *
+     * @param supplier the supplier
+     * @return the byte iterator
      */
     public static ByteIterator generate(final ByteSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -195,10 +217,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * 
-     * @param hasNext
-     * @param supplier
-     * @return
+     * Generate.
+     *
+     * @param hasNext the has next
+     * @param supplier the supplier
+     * @return the byte iterator
      */
     public static ByteIterator generate(final BooleanSupplier hasNext, final ByteSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -222,7 +245,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * 
+     * Next.
+     *
+     * @return the byte
      * @Deprecated use <code>nextByte()</code> instead.
      */
     @Deprecated
@@ -231,12 +256,27 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         return nextByte();
     }
 
+    /**
+     * Next byte.
+     *
+     * @return the byte
+     */
     public abstract byte nextByte();
 
+    /**
+     * To array.
+     *
+     * @return the byte[]
+     */
     public byte[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * To list.
+     *
+     * @return the byte list
+     */
     public ByteList toList() {
         final ByteList list = new ByteList();
 
@@ -247,10 +287,22 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         return list;
     }
 
+    /**
+     * Stream.
+     *
+     * @return the byte stream
+     */
     public ByteStream stream() {
         return ByteStream.of(this);
     }
 
+    /**
+     * Foreach remaining.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void foreachRemaining(Try.ByteConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -259,6 +311,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         }
     }
 
+    /**
+     * For each remaining.
+     *
+     * @param action the action
+     */
     @Override
     @Deprecated
     public void forEachRemaining(java.util.function.Consumer<? super Byte> action) {

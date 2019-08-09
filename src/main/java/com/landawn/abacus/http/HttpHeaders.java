@@ -21,11 +21,12 @@ import java.util.Set;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class HttpHeaders.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class HttpHeaders {
 
@@ -33,6 +34,10 @@ public final class HttpHeaders {
      * Copied from Google Guava under Apache License v2.
      */
     public static final class Names {
+
+        /**
+         * Instantiates a new names.
+         */
         private Names() {
             // singleton.
         }
@@ -404,7 +409,14 @@ public final class HttpHeaders {
 
     }
 
+    /**
+     * The Class Values.
+     */
     public static final class Values {
+
+        /**
+         * Instantiates a new values.
+         */
         private Values() {
             // singleton.
         }
@@ -414,14 +426,32 @@ public final class HttpHeaders {
          * The default HTML form content type.
          */
         public static final String APPLICATION_URL_ENCODED = "application/x-www-form-urlencoded";
+
+        /** The Constant APPLICATION_XML. */
         public static final String APPLICATION_XML = "application/xml";
+
+        /** The Constant APPLICATION_JSON. */
         public static final String APPLICATION_JSON = "application/json";
+
+        /** The Constant APPLICATION_KRYO. */
         public static final String APPLICATION_KRYO = "application/kryo";
+
+        /** The Constant TEXT_HTML. */
         public static final String TEXT_HTML = "text/html";
+
+        /** The Constant TEXT_JSON. */
         public static final String TEXT_JSON = "text/json";
+
+        /** The Constant TEXT_XML. */
         public static final String TEXT_XML = "text/xml";
+
+        /** The Constant IMAGE_GIF. */
         public static final String IMAGE_GIF = "image/gif";
+
+        /** The Constant IMAGE_JPG. */
         public static final String IMAGE_JPG = "image/jpg";
+
+        /** The Constant UTF_8. */
         public static final String UTF_8 = "UTF-8";
 
     }
@@ -437,69 +467,144 @@ public final class HttpHeaders {
      * @since 23.4
      */
     public static final class ReferrerPolicyValues {
+
+        /**
+         * Instantiates a new referrer policy values.
+         */
         private ReferrerPolicyValues() {
         }
 
+        /** The Constant NO_REFERRER. */
         public static final String NO_REFERRER = "no-referrer";
+
+        /** The Constant NO_REFFERER_WHEN_DOWNGRADE. */
         public static final String NO_REFFERER_WHEN_DOWNGRADE = "no-referrer-when-downgrade";
+
+        /** The Constant SAME_ORIGIN. */
         public static final String SAME_ORIGIN = "same-origin";
+
+        /** The Constant ORIGIN. */
         public static final String ORIGIN = "origin";
+
+        /** The Constant STRICT_ORIGIN. */
         public static final String STRICT_ORIGIN = "strict-origin";
+
+        /** The Constant ORIGIN_WHEN_CROSS_ORIGIN. */
         public static final String ORIGIN_WHEN_CROSS_ORIGIN = "origin-when-cross-origin";
+
+        /** The Constant STRICT_ORIGIN_WHEN_CROSS_ORIGIN. */
         public static final String STRICT_ORIGIN_WHEN_CROSS_ORIGIN = "strict-origin-when-cross-origin";
+
+        /** The Constant UNSAFE_URL. */
         public static final String UNSAFE_URL = "unsafe-url";
     }
 
+    /** The map. */
     final Map<String, Object> map;
 
+    /**
+     * Instantiates a new http headers.
+     */
     HttpHeaders() {
         this.map = new HashMap<>();
     }
 
+    /**
+     * Instantiates a new http headers.
+     *
+     * @param headers the headers
+     */
     HttpHeaders(final Map<String, Object> headers) {
         this.map = headers;
     }
 
+    /**
+     * Creates the.
+     *
+     * @return the http headers
+     */
     public static HttpHeaders create() {
         return new HttpHeaders();
     }
 
+    /**
+     * Of.
+     *
+     * @param headers the headers
+     * @return the http headers
+     */
     public static HttpHeaders of(final Map<String, Object> headers) {
         N.checkArgNotNull(headers);
 
         return new HttpHeaders(headers);
     }
 
+    /**
+     * Copy of.
+     *
+     * @param headers the headers
+     * @return the http headers
+     */
     public static HttpHeaders copyOf(final Map<String, Object> headers) {
         N.checkArgNotNull(headers);
 
         return new HttpHeaders(new HashMap<>(headers));
     }
 
+    /**
+     * Sets the accept charset.
+     *
+     * @param acceptCharset the accept charset
+     * @return the http headers
+     */
     public HttpHeaders setAcceptCharset(String acceptCharset) {
         set(Names.ACCEPT_CHARSET, acceptCharset);
 
         return this;
     }
 
+    /**
+     * Sets the accept encoding.
+     *
+     * @param acceptEncoding the accept encoding
+     * @return the http headers
+     */
     public HttpHeaders setAcceptEncoding(String acceptEncoding) {
         set(Names.ACCEPT_ENCODING, acceptEncoding);
 
         return this;
     }
 
+    /**
+     * Sets the accept language.
+     *
+     * @param acceptLanguage the accept language
+     * @return the http headers
+     */
     public HttpHeaders setAcceptLanguage(String acceptLanguage) {
         set(Names.ACCEPT_LANGUAGE, acceptLanguage);
 
         return this;
     }
 
+    /**
+     * Sets the accept ranges.
+     *
+     * @param acceptRanges the accept ranges
+     * @return the http headers
+     */
     public HttpHeaders setAcceptRanges(String acceptRanges) {
         set(Names.ACCEPT_RANGES, acceptRanges);
 
         return this;
     }
 
+    /**
+     * Sets the content type.
+     *
+     * @param contentType the content type
+     * @return the http headers
+     */
     public HttpHeaders setContentType(String contentType) {
         //    if (hasHeader(HTTP.CONTENT_FORMAT)) {
         //        throw new IllegalArgumentException("The parameter 'contentFormat' has already been set");
@@ -510,82 +615,171 @@ public final class HttpHeaders {
         return this;
     }
 
+    /**
+     * Sets the content encoding.
+     *
+     * @param acceptEncoding the accept encoding
+     * @return the http headers
+     */
     public HttpHeaders setContentEncoding(String acceptEncoding) {
         set(Names.CONTENT_ENCODING, acceptEncoding);
 
         return this;
     }
 
+    /**
+     * Sets the content language.
+     *
+     * @param acceptLanguage the accept language
+     * @return the http headers
+     */
     public HttpHeaders setContentLanguage(String acceptLanguage) {
         set(Names.CONTENT_LANGUAGE, acceptLanguage);
 
         return this;
     }
 
+    /**
+     * Sets the content length.
+     *
+     * @param contentLength the content length
+     * @return the http headers
+     */
     public HttpHeaders setContentLength(long contentLength) {
         set(Names.CONTENT_LENGTH, contentLength);
 
         return this;
     }
 
+    /**
+     * Sets the user agent.
+     *
+     * @param userAgent the user agent
+     * @return the http headers
+     */
     public HttpHeaders setUserAgent(String userAgent) {
         set(Names.USER_AGENT, userAgent);
 
         return this;
     }
 
+    /**
+     * Sets the cookie.
+     *
+     * @param cookie the cookie
+     * @return the http headers
+     */
     public HttpHeaders setCookie(String cookie) {
         set(Names.COOKIE, cookie);
 
         return this;
     }
 
+    /**
+     * Sets the.
+     *
+     * @param name the name
+     * @param value the value
+     * @return the http headers
+     */
     public HttpHeaders set(String name, Object value) {
         map.put(name, value);
 
         return this;
     }
 
+    /**
+     * Sets the all.
+     *
+     * @param m the m
+     * @return the http headers
+     */
     public HttpHeaders setAll(Map<? extends String, ? extends Object> m) {
         map.putAll(m);
 
         return this;
     }
 
+    /**
+     * Gets the.
+     *
+     * @param headerName the header name
+     * @return the object
+     */
     public Object get(String headerName) {
         return map.get(headerName);
     }
 
+    /**
+     * Removes the.
+     *
+     * @param headerName the header name
+     * @return the object
+     */
     public Object remove(String headerName) {
         return map.remove(headerName);
     }
 
+    /**
+     * Header name set.
+     *
+     * @return the sets the
+     */
     public Set<String> headerNameSet() {
         return map.keySet();
     }
 
+    /**
+     * Clear.
+     */
     public void clear() {
         map.clear();
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    /**
+     * Copy.
+     *
+     * @return the http headers
+     */
     public HttpHeaders copy() {
         return new HttpHeaders().setAll(this.map);
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return map.hashCode();
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return obj instanceof HttpHeaders && this.map.equals(((HttpHeaders) obj).map);
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return map.toString();

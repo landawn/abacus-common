@@ -31,6 +31,7 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -41,28 +42,56 @@ import java.nio.ByteOrder;
  * @author Dimitris Andreou
  */
 final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implements Serializable {
+
+    /** The seed. */
     // TODO(user): when the shortcuts are implemented, update BloomFilterStrategies
     private final int seed;
 
+    /**
+     * Instantiates a new murmur 3 128 hash function.
+     *
+     * @param seed the seed
+     */
     Murmur3_128HashFunction(int seed) {
         this.seed = seed;
     }
 
+    /**
+     * Bits.
+     *
+     * @return the int
+     */
     @Override
     public int bits() {
         return 128;
     }
 
+    /**
+     * New hasher.
+     *
+     * @return the hasher
+     */
     @Override
     public Hasher newHasher() {
         return new Murmur3_128Hasher(seed);
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "Hashing.murmur3_128(" + seed + ")";
     }
 
+    /**
+     * Equals.
+     *
+     * @param object the object
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object object) {
         if (object instanceof Murmur3_128HashFunction) {
@@ -72,19 +101,44 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         return false;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return getClass().hashCode() ^ seed;
     }
 
+    /**
+     * The Class Murmur3_128Hasher.
+     */
     private static final class Murmur3_128Hasher extends AbstractStreamingHasher {
+
+        /** The Constant CHUNK_SIZE. */
         private static final int CHUNK_SIZE = 16;
+
+        /** The Constant C1. */
         private static final long C1 = 0x87c37b91114253d5L;
+
+        /** The Constant C2. */
         private static final long C2 = 0x4cf5ad432745937fL;
+
+        /** The h 1. */
         private long h1;
+
+        /** The h 2. */
         private long h2;
+
+        /** The length. */
         private int length;
 
+        /**
+         * Instantiates a new murmur 3 128 hasher.
+         *
+         * @param seed the seed
+         */
         Murmur3_128Hasher(int seed) {
             super(CHUNK_SIZE);
             this.h1 = seed;
@@ -92,6 +146,11 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
             this.length = 0;
         }
 
+        /**
+         * Process.
+         *
+         * @param bb the bb
+         */
         @Override
         protected void process(ByteBuffer bb) {
             long k1 = bb.getLong();
@@ -100,6 +159,12 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
             length += CHUNK_SIZE;
         }
 
+        /**
+         * Bmix 64.
+         *
+         * @param k1 the k 1
+         * @param k2 the k 2
+         */
         private void bmix64(long k1, long k2) {
             h1 ^= mixK1(k1);
 
@@ -114,6 +179,11 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
             h2 = h2 * 5 + 0x38495ab5;
         }
 
+        /**
+         * Process remaining.
+         *
+         * @param bb the bb
+         */
         @Override
         protected void processRemaining(ByteBuffer bb) {
             long k1 = 0;
@@ -159,6 +229,11 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
             h2 ^= mixK2(k2);
         }
 
+        /**
+         * Make hash.
+         *
+         * @return the hash code
+         */
         @Override
         public HashCode makeHash() {
             h1 ^= length;
@@ -176,6 +251,12 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
             return HashCode.fromBytesNoCopy(ByteBuffer.wrap(new byte[CHUNK_SIZE]).order(ByteOrder.LITTLE_ENDIAN).putLong(h1).putLong(h2).array());
         }
 
+        /**
+         * Fmix 64.
+         *
+         * @param k the k
+         * @return the long
+         */
         private static long fmix64(long k) {
             k ^= k >>> 33;
             k *= 0xff51afd7ed558ccdL;
@@ -185,6 +266,12 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
             return k;
         }
 
+        /**
+         * Mix K 1.
+         *
+         * @param k1 the k 1
+         * @return the long
+         */
         private static long mixK1(long k1) {
             k1 *= C1;
             k1 = Long.rotateLeft(k1, 31);
@@ -192,6 +279,12 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
             return k1;
         }
 
+        /**
+         * Mix K 2.
+         *
+         * @param k2 the k 2
+         * @return the long
+         */
         private static long mixK2(long k2) {
             k2 *= C2;
             k2 = Long.rotateLeft(k2, 33);
@@ -200,5 +293,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         }
     }
 
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 0L;
 }

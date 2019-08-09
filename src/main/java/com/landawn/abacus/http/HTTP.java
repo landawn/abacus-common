@@ -39,27 +39,47 @@ import com.landawn.abacus.util.LZ4BlockOutputStream;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class HTTP.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 @Internal
 public final class HTTP {
 
+    /** The Constant JSON. */
     static final String JSON = "json";
+
+    /** The Constant XML. */
     static final String XML = "xml";
+
+    /** The Constant GZIP. */
     static final String GZIP = "gzip";
+
+    /** The Constant SNAPPY. */
     static final String SNAPPY = "snappy";
+
+    /** The Constant LZ4. */
     static final String LZ4 = "lz4";
+
+    /** The Constant KRYO. */
     static final String KRYO = "kryo";
+
+    /** The Constant URL_ENCODED. */
     static final String URL_ENCODED = "urlencoded";
 
+    /** The Constant jsonParser. */
     static final JSONParser jsonParser = ParserFactory.createJSONParser();
+
+    /** The Constant xmlParser. */
     static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
+
+    /** The Constant kryoParser. */
     static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
+    /** The Constant contentFormat2Parser. */
     private static final Map<ContentFormat, Parser<?, ?>> contentFormat2Parser = new EnumMap<ContentFormat, Parser<?, ?>>(ContentFormat.class);
 
     static {
@@ -80,6 +100,7 @@ public final class HTTP {
         contentFormat2Parser.put(ContentFormat.GZIP, jsonParser);
     }
 
+    /** The Constant contentFormat2Type. */
     private static final Map<ContentFormat, String> contentFormat2Type = new EnumMap<ContentFormat, String>(ContentFormat.class);
 
     static {
@@ -94,6 +115,7 @@ public final class HTTP {
         contentFormat2Type.put(ContentFormat.KRYO, HttpHeaders.Values.APPLICATION_KRYO);
     }
 
+    /** The Constant contentFormat2Encoding. */
     private static final Map<ContentFormat, String> contentFormat2Encoding = new EnumMap<ContentFormat, String>(ContentFormat.class);
 
     static {
@@ -109,6 +131,7 @@ public final class HTTP {
         contentFormat2Encoding.put(ContentFormat.KRYO, KRYO);
     }
 
+    /** The Constant contentTypeEncoding2Format. */
     private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ObjectPool<String, Map<String, ContentFormat>>(64);
 
     static {
@@ -148,6 +171,12 @@ public final class HTTP {
         contentEncoding2Format.put(N.EMPTY_STRING, ContentFormat.NONE);
     }
 
+    /**
+     * Gets the content type.
+     *
+     * @param contentFormat the content format
+     * @return the content type
+     */
     public static String getContentType(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
             return null;
@@ -156,6 +185,12 @@ public final class HTTP {
         return contentFormat2Type.get(contentFormat);
     }
 
+    /**
+     * Gets the content encoding.
+     *
+     * @param contentFormat the content format
+     * @return the content encoding
+     */
     public static String getContentEncoding(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
             return null;
@@ -164,6 +199,13 @@ public final class HTTP {
         return contentFormat2Encoding.get(contentFormat);
     }
 
+    /**
+     * Gets the content format.
+     *
+     * @param contentType the content type
+     * @param contentEncoding the content encoding
+     * @return the content format
+     */
     public static ContentFormat getContentFormat(String contentType, String contentEncoding) {
         if (contentType == null) {
             contentType = N.EMPTY_STRING;
@@ -190,10 +232,24 @@ public final class HTTP {
         return N.defaultIfNull(contentEncoding2Format.get(contentEncoding), ContentFormat.NONE);
     }
 
+    /**
+     * Gets the content format.
+     *
+     * @param connection the connection
+     * @return the content format
+     */
     public static ContentFormat getContentFormat(final HttpURLConnection connection) {
         return getContentFormat(connection.getHeaderField(HttpHeaders.Names.CONTENT_TYPE), connection.getHeaderField(HttpHeaders.Names.CONTENT_ENCODING));
     }
 
+    /**
+     * Gets the parser.
+     *
+     * @param <SC> the generic type
+     * @param <DC> the generic type
+     * @param contentFormat the content format
+     * @return the parser
+     */
     public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(ContentFormat contentFormat) {
         if (contentFormat == null) {
             return (Parser<SC, DC>) jsonParser;
@@ -208,6 +264,13 @@ public final class HTTP {
         return parser;
     }
 
+    /**
+     * Wrap input stream.
+     *
+     * @param is the is
+     * @param contentFormat the content format
+     * @return the input stream
+     */
     public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE || is == null) {
             return is;
@@ -224,6 +287,13 @@ public final class HTTP {
         }
     }
 
+    /**
+     * Wrap output stream.
+     *
+     * @param os the os
+     * @param contentFormat the content format
+     * @return the output stream
+     */
     public static OutputStream wrapOutputStream(final OutputStream os, final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE || os == null) {
             return os;
@@ -240,10 +310,28 @@ public final class HTTP {
         }
     }
 
+    /**
+     * Gets the output stream.
+     *
+     * @param connection the connection
+     * @param contentFormat the content format
+     * @return the output stream
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat) throws IOException {
         return getOutputStream(connection, contentFormat, HTTP.getContentType(contentFormat), HTTP.getContentEncoding(contentFormat));
     }
 
+    /**
+     * Gets the output stream.
+     *
+     * @param connection the connection
+     * @param contentFormat the content format
+     * @param contentType the content type
+     * @param contentEncoding the content encoding
+     * @return the output stream
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat, String contentType,
             String contentEncoding) throws IOException {
 
@@ -266,18 +354,48 @@ public final class HTTP {
         return wrapOutputStream(connection.getOutputStream(), contentFormat);
     }
 
+    /**
+     * Gets the input stream.
+     *
+     * @param connection the connection
+     * @return the input stream
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public static InputStream getInputStream(final HttpURLConnection connection) throws IOException {
         return getInputStream(connection, getContentFormat(connection));
     }
 
+    /**
+     * Gets the input stream.
+     *
+     * @param connection the connection
+     * @param contentFormat the content format
+     * @return the input stream
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public static InputStream getInputStream(final HttpURLConnection connection, ContentFormat contentFormat) throws IOException {
         return wrapInputStream(connection.getInputStream(), contentFormat);
     }
 
+    /**
+     * Gets the input or error stream.
+     *
+     * @param connection the connection
+     * @return the input or error stream
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public static InputStream getInputOrErrorStream(final HttpURLConnection connection) throws IOException {
         return getInputOrErrorStream(connection, getContentFormat(connection));
     }
 
+    /**
+     * Gets the input or error stream.
+     *
+     * @param connection the connection
+     * @param contentFormat the content format
+     * @return the input or error stream
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public static InputStream getInputOrErrorStream(final HttpURLConnection connection, ContentFormat contentFormat) throws IOException {
         try {
             return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
@@ -286,6 +404,12 @@ public final class HTTP {
         }
     }
 
+    /**
+     * Flush.
+     *
+     * @param os the os
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public static void flush(OutputStream os) throws IOException {
         if (os instanceof LZ4BlockOutputStream) {
             ((LZ4BlockOutputStream) os).finish();
@@ -296,6 +420,12 @@ public final class HTTP {
         os.flush();
     }
 
+    /**
+     * Gets the charset.
+     *
+     * @param headers the headers
+     * @return the charset
+     */
     public static Charset getCharset(HttpHeaders headers) {
         Charset charset = Charsets.UTF_8;
 
@@ -310,6 +440,12 @@ public final class HTTP {
         return charset;
     }
 
+    /**
+     * Gets the charset.
+     *
+     * @param headers the headers
+     * @return the charset
+     */
     public static Charset getCharset(Map<String, ?> headers) {
         Charset charset = Charsets.UTF_8;
 
@@ -335,6 +471,12 @@ public final class HTTP {
         return charset;
     }
 
+    /**
+     * Gets the charset.
+     *
+     * @param contentType the content type
+     * @return the charset
+     */
     public static Charset getCharset(String contentType) {
         if (N.notNullOrEmpty(contentType)) {
             return Charsets.UTF_8;

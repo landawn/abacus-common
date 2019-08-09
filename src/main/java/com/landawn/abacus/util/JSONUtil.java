@@ -30,27 +30,37 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class JSONUtil.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class JSONUtil {
 
+    /**
+     * Instantiates a new JSON util.
+     */
     private JSONUtil() {
         // singleton.
     }
 
+    /**
+     * Wrap.
+     *
+     * @param map the map
+     * @return the JSON object
+     */
     public static JSONObject wrap(final Map<String, Object> map) {
         return new JSONObject(map);
     }
 
     /**
      * wrap(entity) -> wrap(Maps.deepEntity2Map(entity, true))
-     * 
-     * @param entity
-     * @return
+     *
+     * @param entity the entity
+     * @return the JSON object
      * @see Maps#deepEntity2Map(Object)
      */
     @SuppressWarnings("unchecked")
@@ -58,54 +68,148 @@ public final class JSONUtil {
         return new JSONObject(entity instanceof Map ? (Map<String, Object>) entity : Maps.deepEntity2Map(entity, true));
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final boolean[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final char[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final byte[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final short[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final int[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final long[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final float[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final double[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param array the array
+     * @return the JSON array
+     * @throws JSONException the JSON exception
+     */
     public static JSONArray wrap(final Object[] array) throws JSONException {
         return new JSONArray(array);
     }
 
+    /**
+     * Wrap.
+     *
+     * @param coll the coll
+     * @return the JSON array
+     */
     public static JSONArray wrap(final Collection<?> coll) {
         return new JSONArray(coll);
     }
 
+    /**
+     * Unwrap.
+     *
+     * @param jsonObject the json object
+     * @return the map
+     * @throws JSONException the JSON exception
+     */
     public static Map<String, Object> unwrap(final JSONObject jsonObject) throws JSONException {
         return unwrap(Map.class, jsonObject);
     }
 
+    /**
+     * Unwrap.
+     *
+     * @param <T> the generic type
+     * @param cls the cls
+     * @param jsonObject the json object
+     * @return the t
+     * @throws JSONException the JSON exception
+     */
     public static <T> T unwrap(final Class<? extends T> cls, final JSONObject jsonObject) throws JSONException {
         return unwrap(N.<T> typeOf(cls), jsonObject);
     }
 
+    /**
+     * Unwrap.
+     *
+     * @param <T> the generic type
+     * @param type the type
+     * @param jsonObject the json object
+     * @return the t
+     * @throws JSONException the JSON exception
+     */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(Type<? extends T> type, final JSONObject jsonObject) throws JSONException {
         type = type.clazz().equals(Object.class) ? N.<T> typeOf("Map<String, Object>") : type;
@@ -170,21 +274,40 @@ public final class JSONUtil {
         }
     }
 
+    /**
+     * Unwrap.
+     *
+     * @param <T> the generic type
+     * @param jsonArray the json array
+     * @return the list
+     * @throws JSONException the JSON exception
+     */
     public static <T> List<T> unwrap(final JSONArray jsonArray) throws JSONException {
         return unwrap(List.class, jsonArray);
     }
 
     /**
-     * 
-     * @param cls
-     *            array or collection class
-     * @param jsonArray
-     * @return
+     * Unwrap.
+     *
+     * @param <T> the generic type
+     * @param cls            array or collection class
+     * @param jsonArray the json array
+     * @return the t
+     * @throws JSONException the JSON exception
      */
     public static <T> T unwrap(final Class<? extends T> cls, final JSONArray jsonArray) throws JSONException {
         return unwrap(N.<T> typeOf(cls), jsonArray);
     }
 
+    /**
+     * Unwrap.
+     *
+     * @param <T> the generic type
+     * @param type the type
+     * @param jsonArray the json array
+     * @return the t
+     * @throws JSONException the JSON exception
+     */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(Type<? extends T> type, final JSONArray jsonArray) throws JSONException {
         type = type.clazz().equals(Object.class) ? N.<T> typeOf("List<Object>") : type;

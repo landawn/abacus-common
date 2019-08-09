@@ -21,13 +21,16 @@ import com.landawn.abacus.util.function.FloatSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.FloatStream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class FloatIterator.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class FloatIterator extends ImmutableIterator<Float> {
+
+    /** The Constant EMPTY. */
     public static final FloatIterator EMPTY = new FloatIterator() {
         @Override
         public boolean hasNext() {
@@ -40,15 +43,34 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         }
     };
 
+    /**
+     * Empty.
+     *
+     * @return the float iterator
+     */
     public static FloatIterator empty() {
         return EMPTY;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the float iterator
+     */
     @SafeVarargs
     public static FloatIterator of(final float... a) {
         return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the float iterator
+     */
     public static FloatIterator of(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -87,9 +109,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param iteratorSupplier
-     * @return
+     *
+     * @param iteratorSupplier the iterator supplier
+     * @return the float iterator
      */
     public static FloatIterator of(final Supplier<? extends FloatIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -127,9 +149,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param arraySupplier
-     * @return
+     *
+     * @param arraySupplier the array supplier
+     * @return the float iterator
      */
     public static FloatIterator oF(final Supplier<float[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -174,9 +196,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
      * Returns an infinite {@code FloatIterator}.
-     * 
-     * @param supplier
-     * @return
+     *
+     * @param supplier the supplier
+     * @return the float iterator
      */
     public static FloatIterator generate(final FloatSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -195,10 +217,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * 
-     * @param hasNext
-     * @param supplier
-     * @return
+     * Generate.
+     *
+     * @param hasNext the has next
+     * @param supplier the supplier
+     * @return the float iterator
      */
     public static FloatIterator generate(final BooleanSupplier hasNext, final FloatSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -222,7 +245,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * 
+     * Next.
+     *
+     * @return the float
      * @Deprecated use <code>nextFloat()</code> instead.
      */
     @Deprecated
@@ -231,12 +256,27 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         return nextFloat();
     }
 
+    /**
+     * Next float.
+     *
+     * @return the float
+     */
     public abstract float nextFloat();
 
+    /**
+     * To array.
+     *
+     * @return the float[]
+     */
     public float[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * To list.
+     *
+     * @return the float list
+     */
     public FloatList toList() {
         final FloatList list = new FloatList();
 
@@ -247,10 +287,22 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         return list;
     }
 
+    /**
+     * Stream.
+     *
+     * @return the float stream
+     */
     public FloatStream stream() {
         return FloatStream.of(this);
     }
 
+    /**
+     * Foreach remaining.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void foreachRemaining(Try.FloatConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -259,6 +311,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         }
     }
 
+    /**
+     * For each remaining.
+     *
+     * @param action the action
+     */
     @Override
     @Deprecated
     public void forEachRemaining(java.util.function.Consumer<? super Float> action) {

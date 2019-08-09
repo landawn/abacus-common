@@ -31,6 +31,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 
+// TODO: Auto-generated Javadoc
 /**
  * 
  * Factory utility class for Comparator.
@@ -40,6 +41,7 @@ import com.landawn.abacus.util.function.ToShortFunction;
  */
 public abstract class Comparators {
 
+    /** The Constant NULL_FIRST_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     static final Comparator NULL_FIRST_COMPARATOR = new Comparator<Comparable>() {
         @Override
@@ -48,6 +50,7 @@ public abstract class Comparators {
         }
     };
 
+    /** The Constant NULL_LAST_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     static final Comparator NULL_LAST_COMPARATOR = new Comparator<Comparable>() {
         @Override
@@ -56,12 +59,15 @@ public abstract class Comparators {
         }
     };
 
+    /** The Constant NATURAL_ORDER. */
     @SuppressWarnings("rawtypes")
     static final Comparator NATURAL_ORDER = NULL_FIRST_COMPARATOR;
 
+    /** The Constant REVERSED_ORDER. */
     @SuppressWarnings("rawtypes")
     static final Comparator REVERSED_ORDER = Collections.reverseOrder(NATURAL_ORDER);
 
+    /** The Constant COMPARING_IGNORE_CASE. */
     static final Comparator<String> COMPARING_IGNORE_CASE = new Comparator<String>() {
         @Override
         public int compare(String a, String b) {
@@ -69,6 +75,7 @@ public abstract class Comparators {
         }
     };
 
+    /** The Constant COMPARING_BY_LENGTH. */
     static final Comparator<CharSequence> COMPARING_BY_LENGTH = new Comparator<CharSequence>() {
         @Override
         public int compare(CharSequence a, CharSequence b) {
@@ -76,6 +83,7 @@ public abstract class Comparators {
         }
     };
 
+    /** The Constant COMPARING_BY_SIZE. */
     @SuppressWarnings("rawtypes")
     static final Comparator<Collection> COMPARING_BY_SIZE = new Comparator<Collection>() {
         @Override
@@ -84,6 +92,7 @@ public abstract class Comparators {
         }
     };
 
+    /** The Constant COMPARING_BY_SIZEE. */
     @SuppressWarnings("rawtypes")
     static final Comparator<Map> COMPARING_BY_SIZEE = new Comparator<Map>() {
         @Override
@@ -92,19 +101,41 @@ public abstract class Comparators {
         }
     };
 
+    /**
+     * Instantiates a new comparators.
+     */
     Comparators() {
         // Singleton
     }
 
+    /**
+     * Natural order.
+     *
+     * @param <T> the generic type
+     * @return the comparator
+     */
     @SuppressWarnings("unchecked")
     public static <T> Comparator<T> naturalOrder() {
         return NATURAL_ORDER;
     }
 
+    /**
+     * Reversed order.
+     *
+     * @param <T> the generic type
+     * @return the comparator
+     */
     public static <T> Comparator<T> reversedOrder() {
         return REVERSED_ORDER;
     }
 
+    /**
+     * Reversed order.
+     *
+     * @param <T> the generic type
+     * @param cmp the cmp
+     * @return the comparator
+     */
     public static <T> Comparator<T> reversedOrder(final Comparator<T> cmp) {
         if (cmp == null || cmp == NATURAL_ORDER) {
             return REVERSED_ORDER;
@@ -115,10 +146,23 @@ public abstract class Comparators {
         return Collections.reverseOrder(cmp);
     }
 
+    /**
+     * Nulls first.
+     *
+     * @param <T> the generic type
+     * @return the comparator
+     */
     public static <T> Comparator<T> nullsFirst() {
         return NULL_FIRST_COMPARATOR;
     }
 
+    /**
+     * Nulls first.
+     *
+     * @param <T> the generic type
+     * @param cmp the cmp
+     * @return the comparator
+     */
     public static <T> Comparator<T> nullsFirst(final Comparator<T> cmp) {
         if (cmp == null || cmp == NULL_FIRST_COMPARATOR) {
             return NULL_FIRST_COMPARATOR;
@@ -132,10 +176,23 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Nulls last.
+     *
+     * @param <T> the generic type
+     * @return the comparator
+     */
     public static <T> Comparator<T> nullsLast() {
         return NULL_LAST_COMPARATOR;
     }
 
+    /**
+     * Nulls last.
+     *
+     * @param <T> the generic type
+     * @param cmp the cmp
+     * @return the comparator
+     */
     public static <T> Comparator<T> nullsLast(final Comparator<T> cmp) {
         if (cmp == null || cmp == NULL_LAST_COMPARATOR) {
             return NULL_LAST_COMPARATOR;
@@ -149,6 +206,14 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing by.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper) {
         N.checkArgNotNull(keyMapper);
@@ -161,6 +226,14 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Reversed comparing by.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyMapper) {
         N.checkArgNotNull(keyMapper);
@@ -173,6 +246,15 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing by.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param keyMapper the key mapper
+     * @param keyComparator the key comparator
+     * @return the comparator
+     */
     public static <T, U> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper, final Comparator<? super U> keyComparator) {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(keyComparator);
@@ -185,6 +267,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing boolean.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingBoolean(final ToBooleanFunction<? super T> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -196,6 +285,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing char.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingChar(final ToCharFunction<? super T> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -207,6 +303,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing byte.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingByte(final ToByteFunction<? super T> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -218,6 +321,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing short.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingShort(final ToShortFunction<? super T> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -229,6 +339,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing int.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingInt(final ToIntFunction<? super T> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -240,6 +357,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing long.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingLong(final ToLongFunction<? super T> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -251,6 +375,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing float.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingFloat(final ToFloatFunction<? super T> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -262,6 +393,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing double.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingDouble(final ToDoubleFunction<? super T> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -273,10 +411,22 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing ignore case.
+     *
+     * @return the comparator
+     */
     public static Comparator<String> comparingIgnoreCase() {
         return COMPARING_IGNORE_CASE;
     }
 
+    /**
+     * Comparing ignore case.
+     *
+     * @param <T> the generic type
+     * @param keyMapper the key mapper
+     * @return the comparator
+     */
     public static <T> Comparator<T> comparingIgnoreCase(final Function<? super T, String> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
@@ -288,6 +438,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing by key.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return the comparator
+     */
     @SuppressWarnings("rawtypes")
     public static <K extends Comparable, V> Comparator<Map.Entry<K, V>> comparingByKey() {
         return new Comparator<Map.Entry<K, V>>() {
@@ -298,6 +455,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Reversed comparing by key.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return the comparator
+     */
     @SuppressWarnings("rawtypes")
     public static <K extends Comparable, V> Comparator<Map.Entry<K, V>> reversedComparingByKey() {
         return new Comparator<Map.Entry<K, V>>() {
@@ -308,6 +472,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing by value.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return the comparator
+     */
     @SuppressWarnings("rawtypes")
     public static <K, V extends Comparable> Comparator<Map.Entry<K, V>> comparingByValue() {
         return new Comparator<Map.Entry<K, V>>() {
@@ -318,6 +489,13 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Reversed comparing by value.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return the comparator
+     */
     @SuppressWarnings("rawtypes")
     public static <K, V extends Comparable> Comparator<Map.Entry<K, V>> reversedComparingByValue() {
         return new Comparator<Map.Entry<K, V>>() {
@@ -328,6 +506,14 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing by key.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param cmp the cmp
+     * @return the comparator
+     */
     public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(final Comparator<? super K> cmp) {
         N.checkArgNotNull(cmp);
 
@@ -339,6 +525,14 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing by value.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param cmp the cmp
+     * @return the comparator
+     */
     public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(final Comparator<? super V> cmp) {
         N.checkArgNotNull(cmp);
 
@@ -350,6 +544,14 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Reversed comparing by key.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param cmp the cmp
+     * @return the comparator
+     */
     @Deprecated
     public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> cmp) {
         N.checkArgNotNull(cmp);
@@ -362,6 +564,14 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Reversed comparing by value.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param cmp the cmp
+     * @return the comparator
+     */
     @Deprecated
     public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> cmp) {
         N.checkArgNotNull(cmp);
@@ -374,15 +584,33 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * Comparing by length.
+     *
+     * @param <T> the generic type
+     * @return the comparator
+     */
     public static <T extends CharSequence> Comparator<T> comparingByLength() {
         return (Comparator<T>) COMPARING_BY_LENGTH;
     }
 
+    /**
+     * Comparing by size.
+     *
+     * @param <T> the generic type
+     * @return the comparator
+     */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> Comparator<T> comparingBySize() {
         return (Comparator<T>) COMPARING_BY_SIZE;
     }
 
+    /**
+     * Comparing by sizee.
+     *
+     * @param <T> the generic type
+     * @return the comparator
+     */
     @SuppressWarnings("rawtypes")
     static <T extends Map> Comparator<T> comparingBySizee() {
         return (Comparator<T>) COMPARING_BY_SIZEE;

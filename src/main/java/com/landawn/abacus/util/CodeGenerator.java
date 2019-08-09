@@ -34,11 +34,12 @@ import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeType;
 
+// TODO: Auto-generated Javadoc
 /**
+ * The Class CodeGenerator.
  *
- * @since 0.8
- * 
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class CodeGenerator {
     /**
@@ -46,6 +47,7 @@ public final class CodeGenerator {
      */
     public static final Class<?> _N = _N.class;
 
+    /** The Constant POSTFIX_OF_JAVA_FILE. */
     private static final String POSTFIX_OF_JAVA_FILE = ".java";
 
     /**
@@ -67,6 +69,7 @@ public final class CodeGenerator {
         USUAL_TYPES.add(HBaseColumn.class.getCanonicalName());
     }
 
+    /** The java type prop name. */
     private static Map<String, String> JAVA_TYPE_PROP_NAME = new HashMap<>();
 
     static {
@@ -88,6 +91,12 @@ public final class CodeGenerator {
         // No instance.
     }
 
+    /**
+     * Gets the simple prop name table class name.
+     *
+     * @param className the class name
+     * @return the simple prop name table class name
+     */
     protected static String getSimplePropNameTableClassName(final String className) {
         String simpleClassName = className;
         int index = className.lastIndexOf(WD._PERIOD);
@@ -109,9 +118,9 @@ public final class CodeGenerator {
      * 
      * <=====
      * </pre>
-     * 
-     * @param srcDir
-     * @param cls
+     *
+     * @param srcDir the src dir
+     * @param cls the cls
      */
     public static void writeClassMethod(final File srcDir, final Class<?> cls) {
         writeClassMethod(srcDir, cls, false, false, false, null, null, Objects.class);
@@ -127,14 +136,14 @@ public final class CodeGenerator {
      * 
      * <=====
      * </pre>
-     * 
-     * @param srcDir
-     * @param cls
+     *
+     * @param srcDir the src dir
+     * @param cls the cls
      * @param constructor generate constructor
      * @param copyMethod generate the copy method.
-     * @param fluentSetter
-     * @param ignoreFieldNames
-     * @param fieldName2MethodName
+     * @param fluentSetter the fluent setter
+     * @param ignoreFieldNames the ignore field names
+     * @param fieldName2MethodName the field name 2 method name
      * @param utilClassForHashEqualsToString is <code>Objects.class</code> by default. It can also be <code>N.class</code> or any classes else which provide the {@code hashCode/equals/toString} method.
      *      Or specify <code>CodeGenerator._N</code> or your own utility class to generate entity classes which not dependent on abacus-util.jar for Methods {@code hashCode/equals/toString}.
      */
@@ -155,15 +164,16 @@ public final class CodeGenerator {
      * <=====
      * </pre>
      *  
-     * @param srcDir
-     * @param cls
-     * @param constructor
-     * @param copyMethod
-     * @param fluentSetter
-     * @param ignoreFieldNames
-     * @param fieldName2MethodName
-     * @param parentPropertyModeForHashEquals
-     * @param parentPropertyModeForToString
+     *
+     * @param srcDir the src dir
+     * @param cls the cls
+     * @param constructor the constructor
+     * @param copyMethod the copy method
+     * @param fluentSetter the fluent setter
+     * @param ignoreFieldNames the ignore field names
+     * @param fieldName2MethodName the field name 2 method name
+     * @param parentPropertyModeForHashEquals the parent property mode for hash equals
+     * @param parentPropertyModeForToString the parent property mode for to string
      * @param utilClassForHashEqualsToString is <code>Objects.class</code> by default. It can also be <code>N.class</code> or any classes else which provide the {@code hashCode/equals/toString} method.
      *      Or specify <code>CodeGenerator._N</code> or your own utility class to generate entity classes which not dependent on abacus-util.jar for Methods {@code hashCode/equals/toString}.
      */
@@ -542,6 +552,26 @@ public final class CodeGenerator {
     //        }
     //    }
 
+    /**
+     * Write class method.
+     *
+     * @param cls the cls
+     * @param className the class name
+     * @param parentClass the parent class
+     * @param pkgName the pkg name
+     * @param fieldTypes the field types
+     * @param constructor the constructor
+     * @param copyMethod the copy method
+     * @param fluentSetter the fluent setter
+     * @param parentPropertyModeForHashEquals the parent property mode for hash equals
+     * @param parentPropertyModeForToString the parent property mode for to string
+     * @param fieldName2MethodName the field name 2 method name
+     * @param importedClasses the imported classes
+     * @param utilClass the util class
+     * @param writer the writer
+     * @throws NoSuchFieldException the no such field exception
+     * @throws SecurityException the security exception
+     */
     private static void writeClassMethod(Class<?> cls, final String className, final Class<?> parentClass, final String pkgName,
             final Map<String, Type<?>> fieldTypes, final boolean constructor, final boolean copyMethod, final boolean fluentSetter,
             ParentPropertyMode parentPropertyModeForHashEquals, ParentPropertyMode parentPropertyModeForToString, Map<String, String> fieldName2MethodName,
@@ -907,6 +937,13 @@ public final class CodeGenerator {
         }
     }
 
+    /**
+     * Gets the parameter type name.
+     *
+     * @param pkgName the pkg name
+     * @param entry the entry
+     * @return the parameter type name
+     */
     private static String getParameterTypeName(final String pkgName, Map.Entry<String, Method> entry) {
         String paraTypeName = ClassUtil.getParameterizedTypeNameByMethod(entry.getValue());
 
@@ -937,19 +974,21 @@ public final class CodeGenerator {
     }
 
     /**
-     * 
-     * @param srcDir
-     * @param pkgName
+     * Write util class for hash equals to string.
+     *
+     * @param srcDir the src dir
+     * @param pkgName the pkg name
      */
     public static void writeUtilClassForHashEqualsToString(final File srcDir, final String pkgName) {
         writeUtilClassForHashEqualsToString(srcDir, pkgName, "_N");
     }
 
     /**
-     * 
-     * @param srcDir
-     * @param pkgName
-     * @param utilClassName
+     * Write util class for hash equals to string.
+     *
+     * @param srcDir the src dir
+     * @param pkgName the pkg name
+     * @param utilClassName the util class name
      */
     public static void writeUtilClassForHashEqualsToString(final File srcDir, final String pkgName, final String utilClassName) {
         final String utilClassFilePath = srcDir.getAbsolutePath()
@@ -968,10 +1007,23 @@ public final class CodeGenerator {
         }
     }
 
+    /**
+     * Prints the transfer method.
+     *
+     * @param sourceClass the source class
+     * @param targetClass the target class
+     */
     public static void printTransferMethod(final Class<?> sourceClass, final Class<?> targetClass) {
         printTransferMethod(sourceClass, targetClass, null);
     }
 
+    /**
+     * Prints the transfer method.
+     *
+     * @param sourceClass the source class
+     * @param targetClass the target class
+     * @param propNameMapping the prop name mapping
+     */
     public static void printTransferMethod(final Class<?> sourceClass, final Class<?> targetClass, final Map<String, String> propNameMapping) {
         final String iden = "    ";
         final String srcClassName = sourceClass.getSimpleName();
@@ -1023,6 +1075,14 @@ public final class CodeGenerator {
         System.out.println(IOUtil.LINE_SEPARATOR);
     }
 
+    /**
+     * Gets the simple type.
+     *
+     * @param type the type
+     * @param pkgName the pkg name
+     * @param importedClasses the imported classes
+     * @return the simple type
+     */
     private static String getSimpleType(Type<?> type, final String pkgName, final Map<String, Class<?>> importedClasses) {
         final Class<?> typeClass = type.clazz();
 
@@ -1085,10 +1145,20 @@ public final class CodeGenerator {
         return typeName;
     }
 
+    /**
+     * The Enum ParentPropertyMode.
+     */
     public enum ParentPropertyMode {
-        NONE, FIRST, LAST
+
+        /** The none. */
+        NONE,
+        /** The first. */
+        FIRST,
+        /** The last. */
+        LAST
     }
 
+    /** The Constant _N_STRING. */
     private static final String _N_STRING = "/*\r\n" + " * Licensed to the Apache Software Foundation (ASF) under one or more\r\n"
             + " * contributor license agreements.  See the NOTICE file distributed with\r\n"
             + " * this work for additional information regarding copyright ownership.\r\n"

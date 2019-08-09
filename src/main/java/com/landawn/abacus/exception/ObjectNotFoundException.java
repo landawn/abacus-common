@@ -14,16 +14,16 @@
 
 package com.landawn.abacus.exception;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.3.29
- * 
+ * The Class ObjectNotFoundException.
+ *
  * @author Haiyang Li
+ * @since 1.3.29
  */
 public class ObjectNotFoundException extends AbacusException {
-    /**
-     * serialVersionUID
-     */
+
+    /** serialVersionUID. */
     private static final long serialVersionUID = -1806452586200243492L;
 
     /**
@@ -35,8 +35,8 @@ public class ObjectNotFoundException extends AbacusException {
 
     /**
      * Constructor for EntityNotFoundException.
-     * 
-     * @param message
+     *
+     * @param message the message
      */
     public ObjectNotFoundException(String message) {
         super(message);
@@ -44,9 +44,9 @@ public class ObjectNotFoundException extends AbacusException {
 
     /**
      * Constructor for EntityNotFoundException.
-     * 
-     * @param message
-     * @param cause
+     *
+     * @param message the message
+     * @param cause the cause
      */
     public ObjectNotFoundException(String message, Throwable cause) {
         super(message, cause);
@@ -54,8 +54,8 @@ public class ObjectNotFoundException extends AbacusException {
 
     /**
      * Constructor for EntityNotFoundException.
-     * 
-     * @param cause
+     *
+     * @param cause the cause
      */
     public ObjectNotFoundException(Throwable cause) {
         super(cause);

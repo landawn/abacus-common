@@ -14,23 +14,41 @@
 
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbstractIndexed.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 abstract class AbstractIndexed {
+
+    /** The index. */
     protected final long index;
 
+    /**
+     * Instantiates a new abstract indexed.
+     *
+     * @param index the index
+     */
     protected AbstractIndexed(long index) {
         this.index = index;
     }
 
+    /**
+     * Index.
+     *
+     * @return the int
+     */
     public int index() {
         return (int) index;
     }
 
+    /**
+     * Long index.
+     *
+     * @return the long
+     */
     public long longIndex() {
         return index;
     }

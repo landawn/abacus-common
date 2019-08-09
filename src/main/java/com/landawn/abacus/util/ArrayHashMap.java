@@ -23,25 +23,42 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+// TODO: Auto-generated Javadoc
 /**
  * It's designed to supported primitive/object array key.
  * The elements in the array must not be modified after the array is put into the map as key.
  *
- * @since 0.8
- *
  * @author Haiyang Li
+ * @param <K> the key type
+ * @param <V> the value type
+ * @since 0.8
  */
 public class ArrayHashMap<K, V> implements Map<K, V> {
+
+    /** The map. */
     private final Map<Wrapper<K>, V> map;
 
+    /**
+     * Instantiates a new array hash map.
+     */
     public ArrayHashMap() {
         map = new HashMap<>();
     }
 
+    /**
+     * Instantiates a new array hash map.
+     *
+     * @param initialCapacity the initial capacity
+     */
     public ArrayHashMap(final int initialCapacity) {
         map = new HashMap<>(initialCapacity);
     }
 
+    /**
+     * Instantiates a new array hash map.
+     *
+     * @param mapType the map type
+     */
     @SuppressWarnings("rawtypes")
     public ArrayHashMap(final Class<? extends Map> mapType) {
         //  StackOverflowError
@@ -69,6 +86,11 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         }
     }
 
+    /**
+     * Instantiates a new array hash map.
+     *
+     * @param m the m
+     */
     public ArrayHashMap(final Map<? extends K, ? extends V> m) {
         if (N.isNullOrEmpty(m)) {
             map = new HashMap<>();
@@ -79,16 +101,34 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         putAll(m);
     }
 
+    /**
+     * Gets the.
+     *
+     * @param key the key
+     * @return the v
+     */
     @Override
     public V get(Object key) {
         return map.get(Wrapper.of(key));
     }
 
+    /**
+     * Put.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the v
+     */
     @Override
     public V put(K key, V value) {
         return map.put(Wrapper.of(key), value);
     }
 
+    /**
+     * Put all.
+     *
+     * @param m the m
+     */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         if (N.isNullOrEmpty(m)) {
@@ -100,103 +140,220 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         }
     }
 
+    /**
+     * Removes the.
+     *
+     * @param key the key
+     * @return the v
+     */
     @Override
     public V remove(Object key) {
         return map.remove(Wrapper.of(key));
     }
 
+    /**
+     * Contains key.
+     *
+     * @param key the key
+     * @return true, if successful
+     */
     @Override
     public boolean containsKey(Object key) {
         return map.containsKey(Wrapper.of(key));
     }
 
+    /**
+     * Contains value.
+     *
+     * @param value the value
+     * @return true, if successful
+     */
     @Override
     public boolean containsValue(Object value) {
         return map.containsValue(value);
     }
 
+    /**
+     * Key set.
+     *
+     * @return the sets the
+     */
     @Override
     public Set<K> keySet() {
         return new ArrayHashSet<>(map.keySet());
     }
 
+    /**
+     * Values.
+     *
+     * @return the collection
+     */
     @Override
     public Collection<V> values() {
         return map.values();
     }
 
+    /**
+     * Entry set.
+     *
+     * @return the sets the
+     */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
         return new ArrayEntrySet<>(map.entrySet());
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         return map.size();
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         map.clear();
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return map.hashCode();
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return obj == this || (obj instanceof ArrayHashMap && ((ArrayHashMap<K, V>) obj).map.equals(map));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return map.toString();
     }
 
+    /**
+     * The Class ArrayEntrySet.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     */
     static class ArrayEntrySet<K, V> implements Set<Map.Entry<K, V>> {
+
+        /** The set. */
         private final Set<Map.Entry<Wrapper<K>, V>> set;
 
+        /**
+         * Instantiates a new array entry set.
+         *
+         * @param set the set
+         */
         ArrayEntrySet(Set<Map.Entry<Wrapper<K>, V>> set) {
             this.set = set;
         }
 
+        /**
+         * Adds the.
+         *
+         * @param e the e
+         * @return true, if successful
+         */
         @Override
         public boolean add(java.util.Map.Entry<K, V> e) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Adds the all.
+         *
+         * @param c the c
+         * @return true, if successful
+         */
         @Override
         public boolean addAll(Collection<? extends java.util.Map.Entry<K, V>> c) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Removes the.
+         *
+         * @param o the o
+         * @return true, if successful
+         */
         @Override
         public boolean remove(Object o) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Contains all.
+         *
+         * @param c the c
+         * @return true, if successful
+         */
         @Override
         public boolean containsAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Removes the all.
+         *
+         * @param c the c
+         * @return true, if successful
+         */
         @Override
         public boolean removeAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Retain all.
+         *
+         * @param c the c
+         * @return true, if successful
+         */
         @Override
         public boolean retainAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Contains.
+         *
+         * @param o the o
+         * @return true, if successful
+         */
         @Override
         public boolean contains(Object o) {
             if (o instanceof Map.Entry) {
@@ -208,11 +365,21 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
             return false;
         }
 
+        /**
+         * Iterator.
+         *
+         * @return the iterator
+         */
         @Override
         public Iterator<java.util.Map.Entry<K, V>> iterator() {
             return new ArrayEntryIterator<>(set.iterator());
         }
 
+        /**
+         * To array.
+         *
+         * @return the object[]
+         */
         @Override
         public Object[] toArray() {
             final int size = size();
@@ -231,6 +398,13 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
             return result;
         }
 
+        /**
+         * To array.
+         *
+         * @param <T> the generic type
+         * @param a the a
+         * @return the t[]
+         */
         @Override
         public <T> T[] toArray(T[] a) {
             final int size = size();
@@ -249,92 +423,192 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
             return a;
         }
 
+        /**
+         * Size.
+         *
+         * @return the int
+         */
         @Override
         public int size() {
             return set.size();
         }
 
+        /**
+         * Checks if is empty.
+         *
+         * @return true, if is empty
+         */
         @Override
         public boolean isEmpty() {
             return set.isEmpty();
         }
 
+        /**
+         * Clear.
+         */
         @Override
         public void clear() {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             return set.hashCode();
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(Object obj) {
             return obj == this || (obj instanceof ArrayEntrySet && ((ArrayEntrySet<K, V>) obj).set.equals(set));
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return set.toString();
         }
     }
 
+    /**
+     * The Class ArrayEntryIterator.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     */
     static class ArrayEntryIterator<K, V> implements Iterator<java.util.Map.Entry<K, V>> {
+
+        /** The it. */
         private final Iterator<Map.Entry<Wrapper<K>, V>> it;
 
+        /**
+         * Instantiates a new array entry iterator.
+         *
+         * @param it the it
+         */
         ArrayEntryIterator(Iterator<Map.Entry<Wrapper<K>, V>> it) {
             this.it = it;
         }
 
+        /**
+         * Checks for next.
+         *
+         * @return true, if successful
+         */
         @Override
         public boolean hasNext() {
             return it.hasNext();
         }
 
+        /**
+         * Next.
+         *
+         * @return the java.util. map. entry
+         */
         @Override
         public java.util.Map.Entry<K, V> next() {
             return new ArrayEntry<>(it.next());
         }
 
+        /**
+         * Removes the.
+         */
         @Override
         public void remove() {
             it.remove();
         }
     }
 
+    /**
+     * The Class ArrayEntry.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     */
     static class ArrayEntry<K, V> implements Map.Entry<K, V> {
+
+        /** The entry. */
         private final Map.Entry<Wrapper<K>, V> entry;
 
+        /**
+         * Instantiates a new array entry.
+         *
+         * @param entry the entry
+         */
         ArrayEntry(Map.Entry<Wrapper<K>, V> entry) {
             this.entry = entry;
         }
 
+        /**
+         * Gets the key.
+         *
+         * @return the key
+         */
         @Override
         public K getKey() {
             return entry.getKey().value();
         }
 
+        /**
+         * Gets the value.
+         *
+         * @return the value
+         */
         @Override
         public V getValue() {
             return entry.getValue();
         }
 
+        /**
+         * Sets the value.
+         *
+         * @param value the value
+         * @return the v
+         */
         @Override
         public V setValue(V value) {
             return entry.setValue(value);
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             return entry.hashCode();
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(Object obj) {
             return obj == this || (obj instanceof ArrayEntry && ((ArrayEntry<K, V>) obj).entry.equals(entry));
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return entry.toString();

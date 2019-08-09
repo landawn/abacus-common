@@ -30,10 +30,9 @@ package com.landawn.abacus.util;
  * A typical use case would be to enable a primitive or string to be passed to a method and allow that method to
  * effectively change the value of the primitive/string. Another use case is to store a frequently changing primitive in
  * a collection (for example a total in a map) without needing to create new Integer/Long wrapper objects.
- * 
- * @param <T> the type to set and get 
- * @since 2.1
+ *
  * @version $Id: Mutable.java 1478488 2013-05-02 19:05:44Z ggregory $
+ * @since 2.1
  */
 public interface Mutable {
 

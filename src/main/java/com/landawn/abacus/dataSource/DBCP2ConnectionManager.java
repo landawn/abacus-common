@@ -43,18 +43,29 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class DBCP2ConnectionManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 class DBCP2ConnectionManager extends AbstractConnectionManager {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(DBCP2ConnectionManager.class);
 
+    /** The ds. */
     private final DataSource ds;
+
+    /** The bds. */
     private final org.apache.commons.dbcp2.BasicDataSource bds;
 
+    /**
+     * Instantiates a new DBCP 2 connection manager.
+     *
+     * @param props the props
+     */
     public DBCP2ConnectionManager(Map<String, ?> props) {
         super(props);
 
@@ -95,16 +106,31 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Gets the max active.
+     *
+     * @return the max active
+     */
     @Override
     public int getMaxActive() {
         return bds.getMaxTotal();
     }
 
+    /**
+     * Gets the num active.
+     *
+     * @return the num active
+     */
     @Override
     public int getNumActive() {
         return bds.getNumActive();
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     @Override
     public Connection getConnection() {
         try {
@@ -114,6 +140,11 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Close connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void closeConnection(Connection conn) {
         if (conn != null) {
@@ -125,11 +156,19 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Detroy connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void detroyConnection(Connection conn) {
         closeConnection(conn);
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (bds != null) {

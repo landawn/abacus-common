@@ -21,10 +21,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 
- * @since 0.8
- * 
+ * The Interface Test.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

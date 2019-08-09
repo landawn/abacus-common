@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -90,6 +88,7 @@ import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
  * SQLExecutor is a simple sql/jdbc utility class. SQL is supported with different format: <br />
  * 
@@ -173,32 +172,33 @@ import com.landawn.abacus.util.stream.Stream;
  * 
  * 
  * SQLExecutor is tread-safe.<br /><br />
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
- * 
  * @see <a href="./JdbcUtil.html">JdbcUtil</a>
- * 
  * @see {@link com.landawn.abacus.annotation.ReadOnly}
  * @see {@link com.landawn.abacus.annotation.ReadOnlyId}
  * @see {@link com.landawn.abacus.annotation.NonUpdatable}
  * @see {@link com.landawn.abacus.annotation.Transient}
  * @see {@link com.landawn.abacus.annotation.Table}
  * @see {@link com.landawn.abacus.annotation.Column}
- * 
  * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html</a>
  * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html</a>
  * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html</a>
  * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html">http://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html</a>
+ * @since 0.8
  */
-public class SQLExecutor implements Closeable {
+public class SQLExecutor {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(SQLExecutor.class);
 
+    /** The Constant ID. */
     static final String ID = "id";
 
+    /** The Constant QUERY_WITH_DATA_SOURCE. */
     static final String QUERY_WITH_DATA_SOURCE = "queryWithDataSource";
 
+    /** The Constant EXISTS_RESULT_SET_EXTRACTOR. */
     private static final ResultExtractor<Boolean> EXISTS_RESULT_SET_EXTRACTOR = new ResultExtractor<Boolean>() {
         @Override
         public Boolean extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -208,6 +208,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant COUNT_RESULT_SET_EXTRACTOR. */
     private static final ResultExtractor<Integer> COUNT_RESULT_SET_EXTRACTOR = new ResultExtractor<Integer>() {
         @Override
         public Integer extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -223,6 +224,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_BOOLEAN_EXTRACTOR. */
     private static final ResultExtractor<OptionalBoolean> SINGLE_BOOLEAN_EXTRACTOR = new ResultExtractor<OptionalBoolean>() {
         @Override
         public OptionalBoolean extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -236,8 +238,10 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant charType. */
     private static final Type<Character> charType = TypeFactory.getType(char.class);
 
+    /** The Constant SINGLE_CHAR_EXTRACTOR. */
     private static final ResultExtractor<OptionalChar> SINGLE_CHAR_EXTRACTOR = new ResultExtractor<OptionalChar>() {
         @Override
         public OptionalChar extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -251,6 +255,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_BYTE_EXTRACTOR. */
     private static final ResultExtractor<OptionalByte> SINGLE_BYTE_EXTRACTOR = new ResultExtractor<OptionalByte>() {
         @Override
         public OptionalByte extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -264,6 +269,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_SHORT_EXTRACTOR. */
     private static final ResultExtractor<OptionalShort> SINGLE_SHORT_EXTRACTOR = new ResultExtractor<OptionalShort>() {
         @Override
         public OptionalShort extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -277,6 +283,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_INT_EXTRACTOR. */
     private static final ResultExtractor<OptionalInt> SINGLE_INT_EXTRACTOR = new ResultExtractor<OptionalInt>() {
         @Override
         public OptionalInt extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -290,6 +297,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_LONG_EXTRACTOR. */
     private static final ResultExtractor<OptionalLong> SINGLE_LONG_EXTRACTOR = new ResultExtractor<OptionalLong>() {
         @Override
         public OptionalLong extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -303,6 +311,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_FLOAT_EXTRACTOR. */
     private static final ResultExtractor<OptionalFloat> SINGLE_FLOAT_EXTRACTOR = new ResultExtractor<OptionalFloat>() {
         @Override
         public OptionalFloat extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -316,6 +325,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_DOUBLE_EXTRACTOR. */
     private static final ResultExtractor<OptionalDouble> SINGLE_DOUBLE_EXTRACTOR = new ResultExtractor<OptionalDouble>() {
         @Override
         public OptionalDouble extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -329,6 +339,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_BIG_DECIMAL_EXTRACTOR. */
     private static final ResultExtractor<Nullable<BigDecimal>> SINGLE_BIG_DECIMAL_EXTRACTOR = new ResultExtractor<Nullable<BigDecimal>>() {
         @Override
         public Nullable<BigDecimal> extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -342,6 +353,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_STRING_EXTRACTOR. */
     private static final ResultExtractor<Nullable<String>> SINGLE_STRING_EXTRACTOR = new ResultExtractor<Nullable<String>>() {
         @Override
         public Nullable<String> extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -355,6 +367,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_DATE_EXTRACTOR. */
     private static final ResultExtractor<Nullable<Date>> SINGLE_DATE_EXTRACTOR = new ResultExtractor<Nullable<Date>>() {
         @Override
         public Nullable<Date> extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -368,6 +381,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_TIME_EXTRACTOR. */
     private static final ResultExtractor<Nullable<Time>> SINGLE_TIME_EXTRACTOR = new ResultExtractor<Nullable<Time>>() {
         @Override
         public Nullable<Time> extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -381,6 +395,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_TIMESTAMP_EXTRACTOR. */
     private static final ResultExtractor<Nullable<Timestamp>> SINGLE_TIMESTAMP_EXTRACTOR = new ResultExtractor<Nullable<Timestamp>>() {
         @Override
         public Nullable<Timestamp> extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -394,6 +409,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant NO_GENERATED_KEY_EXTRACTOR. */
     private static final JdbcUtil.RowMapper<Object> NO_GENERATED_KEY_EXTRACTOR = new JdbcUtil.RowMapper<Object>() {
         @Override
         public Object apply(final ResultSet rs) throws SQLException {
@@ -401,6 +417,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_GENERATED_KEY_EXTRACTOR. */
     private static final JdbcUtil.RowMapper<Object> SINGLE_GENERATED_KEY_EXTRACTOR = new JdbcUtil.RowMapper<Object>() {
         @Override
         public Object apply(final ResultSet rs) throws SQLException {
@@ -408,6 +425,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant MULTI_GENERATED_KEY_EXTRACTOR. */
     private static final JdbcUtil.RowMapper<Object> MULTI_GENERATED_KEY_EXTRACTOR = new JdbcUtil.RowMapper<Object>() {
         @Override
         public Object apply(final ResultSet rs) throws SQLException {
@@ -421,6 +439,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant NO_BI_GENERATED_KEY_EXTRACTOR. */
     private static final JdbcUtil.BiRowMapper<Object> NO_BI_GENERATED_KEY_EXTRACTOR = new JdbcUtil.BiRowMapper<Object>() {
         @Override
         public Object apply(final ResultSet rs, final List<String> columnLabels) throws SQLException {
@@ -428,6 +447,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant SINGLE_BI_GENERATED_KEY_EXTRACTOR. */
     private static final JdbcUtil.BiRowMapper<Object> SINGLE_BI_GENERATED_KEY_EXTRACTOR = new JdbcUtil.BiRowMapper<Object>() {
         @Override
         public Object apply(final ResultSet rs, final List<String> columnLabels) throws SQLException {
@@ -435,6 +455,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant MULTI_BI_GENERATED_KEY_EXTRACTOR. */
     private static final JdbcUtil.BiRowMapper<Object> MULTI_BI_GENERATED_KEY_EXTRACTOR = new JdbcUtil.BiRowMapper<Object>() {
         @Override
         public Object apply(final ResultSet rs, final List<String> columnLabels) throws SQLException {
@@ -448,6 +469,7 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant RESULT_SET_EXTRACTOR. */
     private static final ResultExtractor<ResultSet> RESULT_SET_EXTRACTOR = new ResultExtractor<ResultSet>() {
         @Override
         public ResultSet extractData(ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
@@ -455,32 +477,67 @@ public class SQLExecutor implements Closeable {
         }
     };
 
+    /** The Constant factor. */
     private static final int factor = Math.min(Math.max(1, IOUtil.MAX_MEMORY_IN_MB / 1024), 8);
+
+    /** The Constant CACHED_SQL_LENGTH. */
     private static final int CACHED_SQL_LENGTH = 1024 * factor;
+
+    /** The Constant SQL_CACHE_SIZE. */
     private static final int SQL_CACHE_SIZE = 1000 * factor;
 
+    /** The Constant _sqlColumnLabelPool. */
     private static final Map<String, List<String>> _sqlColumnLabelPool = new ConcurrentHashMap<>();
+
+    /** The table column name pool. */
     private final Map<String, List<String>> _tableColumnNamePool = new ConcurrentHashMap<>();
 
+    /** The ds. */
     private final DataSource _ds;
+
+    /** The dsm. */
     private final DataSourceManager _dsm;
+
+    /** The dss. */
     private final DataSourceSelector _dss;
+
+    /** The jdbc settings. */
     private final JdbcSettings _jdbcSettings;
+
+    /** The sql mapper. */
     private final SQLMapper _sqlMapper;
+
+    /** The naming policy. */
     private final NamingPolicy _namingPolicy;
+
+    /** The async executor. */
     private final AsyncExecutor _asyncExecutor;
+
+    /** The is read only. */
     private final boolean _isReadOnly;
+
+    /** The db proudct name. */
     private final String _dbProudctName;
+
+    /** The db proudct version. */
     private final String _dbProudctVersion;
+
+    /** The db version. */
     private final DBVersion _dbVersion;
+
+    /** The default isolation level. */
     private final IsolationLevel _defaultIsolationLevel;
+
+    /** The async SQL executor. */
     private final AsyncSQLExecutor _asyncSQLExecutor;
 
+    /** The mapper pool. */
     private final Map<Class<?>, Mapper<?, ?>> mapperPool = new ConcurrentHashMap<>();
 
     /**
-     * 
-     * @param dataSource
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSource the data source
      * @see JdbcUtil#createDataSource(String)
      * @see JdbcUtil#createDataSource(java.io.InputStream)
      */
@@ -489,9 +546,10 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSource
-     * @param jdbcSettings
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSource the data source
+     * @param jdbcSettings the jdbc settings
      * @see JdbcUtil#createDataSource(String)
      * @see JdbcUtil#createDataSource(java.io.InputStream)
      */
@@ -500,10 +558,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSource
-     * @param jdbcSettings
-     * @param sqlMapper
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSource the data source
+     * @param jdbcSettings the jdbc settings
+     * @param sqlMapper the sql mapper
      * @see JdbcUtil#createDataSource(String)
      * @see JdbcUtil#createDataSource(java.io.InputStream)
      */
@@ -512,11 +571,12 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSource
-     * @param jdbcSettings
-     * @param sqlMapper
-     * @param namingPolicy
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSource the data source
+     * @param jdbcSettings the jdbc settings
+     * @param sqlMapper the sql mapper
+     * @param namingPolicy the naming policy
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -525,11 +585,13 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSource
-     * @param jdbcSettings
-     * @param sqlMapper
-     * @param asyncExecutor
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSource the data source
+     * @param jdbcSettings the jdbc settings
+     * @param sqlMapper the sql mapper
+     * @param namingPolicy the naming policy
+     * @param asyncExecutor the async executor
      * @see JdbcUtil#createDataSource(String)
      * @see JdbcUtil#createDataSource(java.io.InputStream)
      */
@@ -539,8 +601,9 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSourceManager
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSourceManager the data source manager
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -549,9 +612,10 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSourceManager
-     * @param jdbcSettings
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSourceManager the data source manager
+     * @param jdbcSettings the jdbc settings
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -560,10 +624,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSourceManager
-     * @param jdbcSettings
-     * @param sqlMapper
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSourceManager the data source manager
+     * @param jdbcSettings the jdbc settings
+     * @param sqlMapper the sql mapper
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -572,11 +637,12 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSourceManager
-     * @param jdbcSettings
-     * @param sqlMapper
-     * @param namingPolicy
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSourceManager the data source manager
+     * @param jdbcSettings the jdbc settings
+     * @param sqlMapper the sql mapper
+     * @param namingPolicy the naming policy
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -585,11 +651,13 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param dataSourceManager
-     * @param jdbcSettings
-     * @param sqlMapper
-     * @param asyncExecutor
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSourceManager the data source manager
+     * @param jdbcSettings the jdbc settings
+     * @param sqlMapper the sql mapper
+     * @param namingPolicy the naming policy
+     * @param asyncExecutor the async executor
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -598,6 +666,17 @@ public class SQLExecutor implements Closeable {
         this(dataSourceManager, null, jdbcSettings, sqlMapper, namingPolicy, asyncExecutor, false);
     }
 
+    /**
+     * Instantiates a new SQL executor.
+     *
+     * @param dataSourceManager the data source manager
+     * @param dataSource the data source
+     * @param jdbcSettings the jdbc settings
+     * @param sqlMapper the sql mapper
+     * @param namingPolicy the naming policy
+     * @param asyncExecutor the async executor
+     * @param isReadOnly the is read only
+     */
     protected SQLExecutor(final DataSourceManager dataSourceManager, final DataSource dataSource, final JdbcSettings jdbcSettings, final SQLMapper sqlMapper,
             final NamingPolicy namingPolicy, final AsyncExecutor asyncExecutor, final boolean isReadOnly) {
 
@@ -682,25 +761,54 @@ public class SQLExecutor implements Closeable {
     //        return _sqlMapper;
     //    }
 
+    /**
+     * W.
+     *
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the SQL executor
+     */
     @Beta
     public static SQLExecutor w(final String url, final String user, final String password) {
         return new SQLExecutor(JdbcUtil.createDataSource(url, user, password));
     }
 
+    /**
+     * W.
+     *
+     * @param driver the driver
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the SQL executor
+     */
     @Beta
     public static SQLExecutor w(final String driver, final String url, final String user, final String password) {
         return new SQLExecutor(JdbcUtil.createDataSource(driver, url, user, password));
     }
 
+    /**
+     * W.
+     *
+     * @param driverClass the driver class
+     * @param url the url
+     * @param user the user
+     * @param password the password
+     * @return the SQL executor
+     */
     @Beta
     public static SQLExecutor w(final Class<? extends Driver> driverClass, final String url, final String user, final String password) {
         return new SQLExecutor(JdbcUtil.createDataSource(driverClass, url, user, password));
     }
 
     /**
-     * 
-     * @param targetClass
-     * @return
+     * Mapper.
+     *
+     * @param <T> the generic type
+     * @param <ID> the generic type
+     * @param targetClass the target class
+     * @return the mapper
      */
     public <T, ID> Mapper<T, ID> mapper(final Class<T> targetClass) {
         Mapper<T, ID> mapper = (Mapper<T, ID>) mapperPool.get(targetClass);
@@ -718,73 +826,199 @@ public class SQLExecutor implements Closeable {
         return mapper;
     }
 
+    /**
+     * Async.
+     *
+     * @return the async SQL executor
+     */
     public AsyncSQLExecutor async() {
         return _asyncSQLExecutor;
     }
 
+    /**
+     * Data source.
+     *
+     * @return the data source
+     */
     public DataSource dataSource() {
         return _ds;
     }
 
+    /**
+     * Jdbc settings.
+     *
+     * @return the jdbc settings
+     */
     public JdbcSettings jdbcSettings() {
         return _jdbcSettings;
     }
 
+    /**
+     * Db proudct name.
+     *
+     * @return the string
+     */
     public String dbProudctName() {
         return _dbProudctName;
     }
 
+    /**
+     * Db proudct version.
+     *
+     * @return the string
+     */
     public String dbProudctVersion() {
         return _dbProudctVersion;
     }
 
+    /**
+     * Db version.
+     *
+     * @return the DB version
+     */
     public DBVersion dbVersion() {
         return _dbVersion;
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final <ID> ID insert(final String sql, final Object... parameters) throws UncheckedSQLException {
         return insert(sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final <ID> ID insert(final String sql, final StatementSetter statementSetter, final Object... parameters) throws UncheckedSQLException {
         return insert(sql, statementSetter, null, parameters);
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final <ID> ID insert(final String sql, final JdbcSettings jdbcSettings, final Object... parameters) throws UncheckedSQLException {
         return insert(sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final <ID> ID insert(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final Object... parameters)
             throws UncheckedSQLException {
         return insert(sql, statementSetter, (JdbcUtil.RowMapper<ID>) getGeneratedKeyExtractor(jdbcSettings), jdbcSettings, parameters);
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param autoGeneratedKeyExtractor the auto generated key extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final <ID> ID insert(final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<ID> autoGeneratedKeyExtractor,
             final JdbcSettings jdbcSettings, final Object... parameters) throws UncheckedSQLException {
         return insert(null, sql, statementSetter, autoGeneratedKeyExtractor, jdbcSettings, parameters);
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final <ID> ID insert(final Connection conn, final String sql, final Object... parameters) throws UncheckedSQLException {
         return insert(conn, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final <ID> ID insert(final Connection conn, final String sql, final StatementSetter statementSetter, final Object... parameters)
             throws UncheckedSQLException {
         return insert(conn, sql, statementSetter, null, parameters);
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public final <ID> ID insert(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final Object... parameters)
             throws UncheckedSQLException {
         return insert(conn, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
+    /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final <ID> ID insert(final Connection conn, final String sql, StatementSetter statementSetter, JdbcSettings jdbcSettings, final Object... parameters)
             throws UncheckedSQLException {
@@ -792,6 +1026,17 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param autoGeneratedKeyExtractor the auto generated key extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the id
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see #batchInsert(Connection, String, StatementSetter, JdbcSettings, String, Object[])
      */
     @SuppressWarnings({ "unchecked", "deprecation" })
@@ -848,6 +1093,13 @@ public class SQLExecutor implements Closeable {
         return (ID) result;
     }
 
+    /**
+     * Gets the generated key extractor.
+     *
+     * @param <ID> the generic type
+     * @param jdbcSettings the jdbc settings
+     * @return the generated key extractor
+     */
     private <ID> JdbcUtil.RowMapper<ID> getGeneratedKeyExtractor(JdbcSettings jdbcSettings) {
         if (jdbcSettings != null && ((N.notNullOrEmpty(jdbcSettings.getReturnedColumnIndexes()) && jdbcSettings.getReturnedColumnIndexes().length > 1)
                 || (N.notNullOrEmpty(jdbcSettings.getReturnedColumnNames()) && jdbcSettings.getReturnedColumnNames().length > 1))) {
@@ -857,6 +1109,13 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Gets the bi generated key extractor.
+     *
+     * @param <ID> the generic type
+     * @param jdbcSettings the jdbc settings
+     * @return the bi generated key extractor
+     */
     private <ID> JdbcUtil.BiRowMapper<ID> getBiGeneratedKeyExtractor(JdbcSettings jdbcSettings) {
         if (jdbcSettings != null && ((N.notNullOrEmpty(jdbcSettings.getReturnedColumnIndexes()) && jdbcSettings.getReturnedColumnIndexes().length > 1)
                 || (N.notNullOrEmpty(jdbcSettings.getReturnedColumnNames()) && jdbcSettings.getReturnedColumnNames().length > 1))) {
@@ -866,6 +1125,15 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Check generated keys extractor.
+     *
+     * @param <ID> the generic type
+     * @param autoGeneratedKeyExtractor the auto generated key extractor
+     * @param namedSQL the named SQL
+     * @param parameters the parameters
+     * @return the jdbc util. row mapper
+     */
     @SuppressWarnings("rawtypes")
     static <ID> JdbcUtil.RowMapper<ID> checkGeneratedKeysExtractor(JdbcUtil.RowMapper<ID> autoGeneratedKeyExtractor, final NamedSQL namedSQL,
             final Object[] parameters) {
@@ -910,6 +1178,15 @@ public class SQLExecutor implements Closeable {
         return autoGeneratedKeyExtractor;
     }
 
+    /**
+     * Check bi generated keys extractor.
+     *
+     * @param <ID> the generic type
+     * @param autoGeneratedKeyExtractor the auto generated key extractor
+     * @param namedSQL the named SQL
+     * @param parameters the parameters
+     * @return the jdbc util. bi row mapper
+     */
     @SuppressWarnings("rawtypes")
     static <ID> JdbcUtil.BiRowMapper<ID> checkBiGeneratedKeysExtractor(JdbcUtil.BiRowMapper<ID> autoGeneratedKeyExtractor, final NamedSQL namedSQL,
             final Object... parameters) {
@@ -954,6 +1231,13 @@ public class SQLExecutor implements Closeable {
         return autoGeneratedKeyExtractor;
     }
 
+    /**
+     * Sets the ids.
+     *
+     * @param ids the ids
+     * @param entity the entity
+     * @param namedSQL the named SQL
+     */
     @SuppressWarnings("deprecation")
     static void setIds(final Object ids, final Object entity, final NamedSQL namedSQL) {
         final Class<?> entityClass = entity.getClass();
@@ -1001,6 +1285,17 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Execute insert.
+     *
+     * @param <ID> the generic type
+     * @param namedSQL the named SQL
+     * @param stmt the stmt
+     * @param autoGeneratedKeyExtractor the auto generated key extractor
+     * @param autoGeneratedKeys the auto generated keys
+     * @return the id
+     * @throws SQLException the SQL exception
+     */
     protected <ID> ID executeInsert(final NamedSQL namedSQL, final PreparedStatement stmt, final JdbcUtil.RowMapper<ID> autoGeneratedKeyExtractor,
             final boolean autoGeneratedKeys) throws SQLException {
         if (_isReadOnly) {
@@ -1027,47 +1322,156 @@ public class SQLExecutor implements Closeable {
         return id;
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final String sql, final List<?> parametersList) throws UncheckedSQLException {
         return batchInsert(sql, StatementSetter.DEFAULT, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final String sql, final StatementSetter statementSetter, final List<?> parametersList) throws UncheckedSQLException {
         return batchInsert(sql, statementSetter, null, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final String sql, final JdbcSettings jdbcSettings, final List<?> parametersList) throws UncheckedSQLException {
         return batchInsert(sql, StatementSetter.DEFAULT, jdbcSettings, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final List<?> parametersList)
             throws UncheckedSQLException {
         return batchInsert(sql, statementSetter, (JdbcUtil.BiRowMapper<ID>) getBiGeneratedKeyExtractor(jdbcSettings), jdbcSettings, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param autoGeneratedKeyExtractor the auto generated key extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<ID> autoGeneratedKeyExtractor,
             final JdbcSettings jdbcSettings, final List<?> parametersList) throws UncheckedSQLException {
         return batchInsert(null, sql, statementSetter, autoGeneratedKeyExtractor, jdbcSettings, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, final List<?> parametersList) throws UncheckedSQLException {
         return batchInsert(conn, sql, StatementSetter.DEFAULT, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, final StatementSetter statementSetter, final List<?> parametersList)
             throws UncheckedSQLException {
         return batchInsert(conn, sql, statementSetter, null, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final List<?> parametersList)
             throws UncheckedSQLException {
         return batchInsert(conn, sql, StatementSetter.DEFAULT, jdbcSettings, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, StatementSetter statementSetter, JdbcSettings jdbcSettings,
             final List<?> parametersList) throws UncheckedSQLException {
         return batchInsert(conn, sql, statementSetter, (JdbcUtil.BiRowMapper<ID>) getBiGeneratedKeyExtractor(jdbcSettings), jdbcSettings, parametersList);
     }
 
+    /**
+     * Batch insert.
+     *
+     * @param <ID> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param autoGeneratedKeyExtractor the auto generated key extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the list
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SuppressWarnings("deprecation")
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, StatementSetter statementSetter,
             JdbcUtil.BiRowMapper<ID> autoGeneratedKeyExtractor, JdbcSettings jdbcSettings, final List<?> parametersList) throws UncheckedSQLException {
@@ -1201,6 +1605,13 @@ public class SQLExecutor implements Closeable {
         return resultIdList;
     }
 
+    /**
+     * Sets the isolation level.
+     *
+     * @param jdbcSettings the jdbc settings
+     * @param localConn the local conn
+     * @throws SQLException the SQL exception
+     */
     private void setIsolationLevel(JdbcSettings jdbcSettings, Connection localConn) throws SQLException {
         final int isolationLevel = jdbcSettings.getIsolationLevel() == null || jdbcSettings.getIsolationLevel() == IsolationLevel.DEFAULT
                 ? _defaultIsolationLevel.intValue()
@@ -1213,6 +1624,17 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Execute batch insert.
+     *
+     * @param <ID> the generic type
+     * @param resultIdList the result id list
+     * @param namedSQL the named SQL
+     * @param stmt the stmt
+     * @param autoGeneratedKeyExtractor the auto generated key extractor
+     * @param autoGeneratedKeys the auto generated keys
+     * @throws SQLException the SQL exception
+     */
     protected <ID> void executeBatchInsert(final List<ID> resultIdList, final NamedSQL namedSQL, final PreparedStatement stmt,
             final JdbcUtil.BiRowMapper<ID> autoGeneratedKeyExtractor, final boolean autoGeneratedKeys) throws SQLException {
         if (_isReadOnly) {
@@ -1241,44 +1663,118 @@ public class SQLExecutor implements Closeable {
         stmt.clearBatch();
     }
 
+    /**
+     * Update.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final int update(final String sql, final Object... parameters) throws UncheckedSQLException {
         return update(sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Update.
+     *
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final int update(final String sql, final StatementSetter statementSetter, final Object... parameters) throws UncheckedSQLException {
         return update(sql, statementSetter, null, parameters);
     }
 
+    /**
+     * Update.
+     *
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final int update(final String sql, final JdbcSettings jdbcSettings, final Object... parameters) throws UncheckedSQLException {
         return update(sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
+    /**
+     * Update.
+     *
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final int update(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final Object... parameters)
             throws UncheckedSQLException {
         return update(null, sql, statementSetter, jdbcSettings, parameters);
     }
 
+    /**
+     * Update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final int update(final Connection conn, final String sql, final Object... parameters) throws UncheckedSQLException {
         return update(conn, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final int update(final Connection conn, final String sql, final StatementSetter statementSetter, final Object... parameters)
             throws UncheckedSQLException {
         return update(conn, sql, statementSetter, null, parameters);
     }
 
+    /**
+     * Update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     @SafeVarargs
     public final int update(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) throws UncheckedSQLException {
         return update(conn, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
     /**
+     * Update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see #batchUpdate(Connection, String, StatementSetter, JdbcSettings, Object[])
      */
     @SafeVarargs
@@ -1317,6 +1813,14 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Execute update.
+     *
+     * @param namedSQL the named SQL
+     * @param stmt the stmt
+     * @return the int
+     * @throws SQLException the SQL exception
+     */
     protected int executeUpdate(final NamedSQL namedSQL, final PreparedStatement stmt) throws SQLException {
         if (_isReadOnly) {
             throw new AbacusException("This SQL Executor is configured for read-only");
@@ -1325,38 +1829,112 @@ public class SQLExecutor implements Closeable {
         return stmt.executeUpdate();
     }
 
+    /**
+     * Batch update.
+     *
+     * @param sql the sql
+     * @param parametersList the parameters list
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public int batchUpdate(final String sql, final List<?> parametersList) throws UncheckedSQLException {
         return batchUpdate(sql, StatementSetter.DEFAULT, parametersList);
     }
 
+    /**
+     * Batch update.
+     *
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parametersList the parameters list
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public int batchUpdate(final String sql, final StatementSetter statementSetter, final List<?> parametersList) throws UncheckedSQLException {
         return batchUpdate(sql, statementSetter, null, parametersList);
     }
 
+    /**
+     * Batch update.
+     *
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public int batchUpdate(final String sql, final JdbcSettings jdbcSettings, final List<?> parametersList) throws UncheckedSQLException {
         return batchUpdate(sql, StatementSetter.DEFAULT, jdbcSettings, parametersList);
     }
 
+    /**
+     * Batch update.
+     *
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public int batchUpdate(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final List<?> parametersList)
             throws UncheckedSQLException {
         return batchUpdate(null, sql, statementSetter, jdbcSettings, parametersList);
     }
 
+    /**
+     * Batch update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parametersList the parameters list
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public int batchUpdate(final Connection conn, final String sql, final List<?> parametersList) throws UncheckedSQLException {
         return batchUpdate(conn, sql, StatementSetter.DEFAULT, parametersList);
     }
 
+    /**
+     * Batch update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parametersList the parameters list
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public int batchUpdate(final Connection conn, final String sql, final StatementSetter statementSetter, final List<?> parametersList)
             throws UncheckedSQLException {
         return batchUpdate(conn, sql, statementSetter, null, parametersList);
     }
 
+    /**
+     * Batch update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public int batchUpdate(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final List<?> parametersList)
             throws UncheckedSQLException {
         return batchUpdate(conn, sql, StatementSetter.DEFAULT, jdbcSettings, parametersList);
     }
 
     /**
+     * Batch update.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parametersList the parameters list
+     * @return the int
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see #batchUpdate(Connection, String, StatementSetter, JdbcSettings, Object[])
      */
     public int batchUpdate(final Connection conn, final String sql, StatementSetter statementSetter, JdbcSettings jdbcSettings, final List<?> parametersList)
@@ -1467,6 +2045,14 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Execute batch update.
+     *
+     * @param namedSQL the named SQL
+     * @param stmt the stmt
+     * @return the int
+     * @throws SQLException the SQL exception
+     */
     protected int executeBatchUpdate(final NamedSQL namedSQL, final PreparedStatement stmt) throws SQLException {
         if (_isReadOnly) {
             throw new AbacusException("This SQL Executor is configured for read-only");
@@ -1576,22 +2162,38 @@ public class SQLExecutor implements Closeable {
     //        return query(conn, sp.sql, StatementSetter.DEFAULT, EXISTS_RESULT_SET_EXTRACTOR, null, sp.parameters);
     //    }
 
+    /**
+     * Exists.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return true, if successful
+     */
     @SafeVarargs
     public final boolean exists(final String sql, final Object... parameters) {
         return exists(null, sql, parameters);
     }
 
+    /**
+     * Exists.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return true, if successful
+     */
     @SafeVarargs
     public final boolean exists(final Connection conn, final String sql, final Object... parameters) {
         return query(conn, sql, StatementSetter.DEFAULT, EXISTS_RESULT_SET_EXTRACTOR, null, parameters);
     }
 
     /**
-     * 
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Count.
+     *
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the int
      * @deprecated may be misused and it's inefficient.
      */
     @Deprecated
@@ -1601,12 +2203,13 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param conn
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Count.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the int
      * @deprecated may be misused and it's inefficient.
      */
     @Deprecated
@@ -1616,12 +2219,14 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1630,13 +2235,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param statementSetter
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1646,13 +2253,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1662,14 +2271,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1679,13 +2290,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1695,14 +2308,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1712,14 +2327,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1729,15 +2346,17 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1747,12 +2366,14 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * v
-     * @param sql
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * v.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1761,13 +2382,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <T> Optional<T> get(final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<T> rowMapper, final Object... parameters)
@@ -1776,13 +2399,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param sql
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <T> Optional<T> get(final String sql, final JdbcUtil.RowMapper<T> rowMapper, final JdbcSettings jdbcSettings, final Object... parameters)
@@ -1792,13 +2417,15 @@ public class SQLExecutor implements Closeable {
 
     /**
      *  
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1809,12 +2436,14 @@ public class SQLExecutor implements Closeable {
 
     /**
      *  
-     * @param conn
-     * @param sql
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1824,14 +2453,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1841,14 +2472,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param conn
-     * @param sql
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1859,14 +2492,16 @@ public class SQLExecutor implements Closeable {
 
     /**
      *  
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1876,12 +2511,14 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1890,13 +2527,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param statementSetter
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1906,13 +2545,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1922,14 +2563,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1939,13 +2582,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1954,14 +2599,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1971,14 +2618,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -1988,15 +2637,17 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Gets the t.
      *
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SuppressWarnings("unchecked")
@@ -2018,12 +2669,14 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param sql
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2032,13 +2685,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2048,13 +2703,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param sql
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2064,14 +2721,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2081,13 +2740,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param conn
-     * @param sql
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2097,14 +2758,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <T> T gett(final Connection conn, final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<T> rowMapper,
@@ -2113,14 +2776,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param conn
-     * @param sql
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Gets the t.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <T> T gett(final Connection conn, final String sql, final JdbcUtil.RowMapper<T> rowMapper, JdbcSettings jdbcSettings,
@@ -2129,15 +2794,17 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     *v
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * v.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SuppressWarnings("unchecked")
@@ -2172,37 +2839,109 @@ public class SQLExecutor implements Closeable {
         return query(conn, sql, statementSetter, resultExtractor, jdbcSettings, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final String sql, final Object... parameters) {
         return findFirst(targetClass, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final Object... parameters) {
         return findFirst(targetClass, sql, statementSetter, null, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
         return findFirst(targetClass, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return findFirst(targetClass, null, sql, statementSetter, jdbcSettings, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final Connection conn, final String sql, final Object... parameters) {
         return findFirst(targetClass, conn, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the optional
+     */
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final Connection conn, final String sql, final StatementSetter statementSetter,
             final Object... parameters) {
         return findFirst(targetClass, conn, sql, statementSetter, null, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the optional
+     */
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final Connection conn, final String sql, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return findFirst(targetClass, conn, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
@@ -2212,17 +2951,18 @@ public class SQLExecutor implements Closeable {
      * Just fetch the result in the 1st row. {@code null} is returned if no result is found. This method will try to
      * convert the column value to the type of mapping entity property if the mapping entity property is not assignable
      * from column value.
-     *
+     * 
      * Remember to add {@code limit} condition if big result will be returned by the query.
      *
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -2242,56 +2982,128 @@ public class SQLExecutor implements Closeable {
         return findFirst(conn, sql, statementSetter, rowMapper, jdbcSettings, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final String sql, final JdbcUtil.RowMapper<T> rowMapper, final Object... parameters) {
         return findFirst(sql, StatementSetter.DEFAULT, rowMapper, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<T> rowMapper,
             final Object... parameters) {
         return findFirst(sql, statementSetter, rowMapper, null, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final String sql, final JdbcUtil.RowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return findFirst(sql, StatementSetter.DEFAULT, rowMapper, jdbcSettings, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<T> rowMapper,
             final JdbcSettings jdbcSettings, final Object... parameters) {
         return findFirst(null, sql, statementSetter, rowMapper, jdbcSettings, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters the parameters
+     * @return the optional
+     */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Connection conn, final String sql, final JdbcUtil.RowMapper<T> rowMapper, final Object... parameters) {
         return findFirst(conn, sql, StatementSetter.DEFAULT, rowMapper, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters the parameters
+     * @return the optional
+     */
     public final <T> Optional<T> findFirst(final Connection conn, final String sql, final StatementSetter statementSetter,
             final JdbcUtil.RowMapper<T> rowMapper, final Object... parameters) {
         return findFirst(conn, sql, statementSetter, rowMapper, null, parameters);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the optional
+     */
     public final <T> Optional<T> findFirst(final Connection conn, final String sql, final JdbcUtil.RowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return findFirst(conn, sql, StatementSetter.DEFAULT, rowMapper, jdbcSettings, parameters);
     }
 
     /**
-     *
      * Remember to add {@code limit} condition if big result will be returned by the query.
      *
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the optional
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -2315,52 +3127,126 @@ public class SQLExecutor implements Closeable {
         return Optional.ofNullable(query(conn, sql, statementSetter, resultExtractor, jdbcSettings, parameters));
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final String sql, final Object... parameters) {
         return list(targetClass, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final Object... parameters) {
         return list(targetClass, sql, statementSetter, null, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
         return list(targetClass, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return list(targetClass, null, sql, statementSetter, jdbcSettings, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final Connection conn, final String sql, final Object... parameters) {
         return list(targetClass, conn, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the list
+     */
     public final <T> List<T> list(final Class<T> targetClass, final Connection conn, final String sql, final StatementSetter statementSetter,
             final Object... parameters) {
         return list(targetClass, conn, sql, statementSetter, null, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the list
+     */
     public final <T> List<T> list(final Class<T> targetClass, final Connection conn, final String sql, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return list(targetClass, conn, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
     /**
+     * List.
      *
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -2369,53 +3255,127 @@ public class SQLExecutor implements Closeable {
         return list(conn, sql, statementSetter, BiRowMapper.to(targetClass), jdbcSettings, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final Object... parameters) {
         return list(sql, StatementSetter.DEFAULT, rowMapper, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
             final Object... parameters) {
         return list(sql, statementSetter, rowMapper, null, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings, final Object... parameters) {
         return list(sql, StatementSetter.DEFAULT, rowMapper, jdbcSettings, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
             final JdbcSettings jdbcSettings, final Object... parameters) {
         return list(null, sql, statementSetter, rowMapper, jdbcSettings, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters the parameters
+     * @return the list
+     */
     @SafeVarargs
     public final <T> List<T> list(final Connection conn, final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final Object... parameters) {
         return list(conn, sql, StatementSetter.DEFAULT, rowMapper, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters the parameters
+     * @return the list
+     */
     public final <T> List<T> list(final Connection conn, final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
             final Object... parameters) {
         return list(conn, sql, statementSetter, rowMapper, null, parameters);
     }
 
+    /**
+     * List.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the list
+     */
     public final <T> List<T> list(final Connection conn, final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return list(conn, sql, StatementSetter.DEFAULT, rowMapper, jdbcSettings, parameters);
     }
 
     /**
+     * List.
      *
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -2450,13 +3410,14 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param targetClass
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SafeVarargs
     public final <T> List<T> listAll(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -2466,14 +3427,15 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param targetClass
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SafeVarargs
     public final <T> List<T> listAll(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -2484,13 +3446,14 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param targetClass
-     * @param sqls
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sqls the sqls
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SafeVarargs
     public final <T> List<T> listAll(final Class<T> targetClass, final List<String> sqls, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -2500,14 +3463,15 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param targetClass
-     * @param sqls
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sqls the sqls
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SafeVarargs
     public final <T> List<T> listAll(final Class<T> targetClass, final List<String> sqls, final StatementSetter statementSetter,
@@ -2518,13 +3482,14 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sql
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SafeVarargs
     public final <T> List<T> listAll(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -2534,14 +3499,15 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SafeVarargs
     public final <T> List<T> listAll(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -2584,6 +3550,11 @@ public class SQLExecutor implements Closeable {
         return N.concat(resultList);
     }
 
+    /**
+     * Check jdbc settings for all query.
+     *
+     * @param jdbcSettings the jdbc settings
+     */
     private void checkJdbcSettingsForAllQuery(JdbcSettings jdbcSettings) {
         if (jdbcSettings != null && (jdbcSettings.getOffset() != 0 || jdbcSettings.getCount() != Integer.MAX_VALUE)) {
             throw new IllegalArgumentException("Can't set 'offset' or 'count' for findAll/queryAll/streamAll methods");
@@ -2593,13 +3564,14 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sqls
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sqls the sqls
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SafeVarargs
     public final <T> List<T> listAll(final List<String> sqls, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
@@ -2610,14 +3582,15 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sqls
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sqls the sqls
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the list
      */
     @SafeVarargs
     public final <T> List<T> listAll(final List<String> sqls, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -2647,6 +3620,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for boolean.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional boolean
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2655,7 +3633,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for char.
      *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional char
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2664,6 +3646,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for byte.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional byte
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2672,6 +3659,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for short.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional short
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2680,6 +3672,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for int.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional int
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2688,6 +3685,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for long.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional long
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2696,6 +3698,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for float.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional float
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2704,6 +3711,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for double.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the optional double
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2712,6 +3724,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for big decimal.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the nullable
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2720,6 +3737,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for string.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the nullable
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -2728,6 +3750,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for date.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the nullable
      * @see SQLExecutor#queryForSingleResult(Class, String, Object...).
      */
     @SafeVarargs
@@ -2736,6 +3763,11 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Query for time.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the nullable
      * @see SQLExecutor#queryForSingleResult(Class, String, Object...).
      */
     @SafeVarargs
@@ -2744,46 +3776,123 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-    * @see SQLExecutor#queryForSingleResult(Class, String, Object...).
-    */
+     * Query for timestamp.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the nullable
+     * @see SQLExecutor#queryForSingleResult(Class, String, Object...).
+     */
     @SafeVarargs
     public final Nullable<Timestamp> queryForTimestamp(final String sql, final Object... parameters) {
         return query(sql, StatementSetter.DEFAULT, SINGLE_TIMESTAMP_EXTRACTOR, null, parameters);
     }
 
+    /**
+     * Query for single result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the nullable
+     */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final String sql, final Object... parameters) {
         return queryForSingleResult(targetClass, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Query for single result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the nullable
+     */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final String sql, final StatementSetter statementSetter,
             final Object... parameters) {
         return queryForSingleResult(targetClass, sql, statementSetter, null, parameters);
     }
 
+    /**
+     * Query for single result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the nullable
+     */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final String sql, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return queryForSingleResult(targetClass, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
+    /**
+     * Query for single result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the nullable
+     */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final String sql, final StatementSetter statementSetter,
             final JdbcSettings jdbcSettings, final Object... parameters) {
         return queryForSingleResult(targetClass, null, sql, statementSetter, jdbcSettings, parameters);
     }
 
+    /**
+     * Query for single result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the nullable
+     */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final Connection conn, final String sql, final Object... parameters) {
         return queryForSingleResult(targetClass, conn, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Query for single result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the nullable
+     */
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final Connection conn, final String sql,
             final StatementSetter statementSetter, final Object... parameters) {
         return queryForSingleResult(targetClass, conn, sql, statementSetter, null, parameters);
     }
 
+    /**
+     * Query for single result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the nullable
+     */
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final Connection conn, final String sql, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return queryForSingleResult(targetClass, conn, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
@@ -2792,22 +3901,23 @@ public class SQLExecutor implements Closeable {
     /**
      * Returns a {@code Nullable} describing the value in the first row/column if it exists, otherwise return an empty {@code Nullable}.
      * <br />
-     *
+     * 
      * Special note for type conversion for {@code boolean} or {@code Boolean} type: {@code true} is returned if the
      * {@code String} value of the target column is {@code "true"}, case insensitive. or it's an integer with value > 0.
      * Otherwise, {@code false} is returned.
-     *
+     * 
      * Remember to add {@code limit} condition if big result will be returned by the query.
      *
-     * @param targetClass
-     *            set result type to avoid the NullPointerException if result is null and T is primitive type
+     * @param <V> the value type
+     * @param targetClass            set result type to avoid the NullPointerException if result is null and T is primitive type
      *            "int, long. short ... char, boolean..".
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
+     * @return the nullable
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -2816,8 +3926,16 @@ public class SQLExecutor implements Closeable {
         return query(conn, sql, statementSetter, createSingleResultExtractor(targetClass), jdbcSettings, parameters);
     }
 
+    /** The single result extractor pool. */
     private final ObjectPool<Class<?>, ResultExtractor<Nullable<?>>> singleResultExtractorPool = new ObjectPool<>(64);
 
+    /**
+     * Creates the single result extractor.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @return the result extractor
+     */
     private <V> ResultExtractor<Nullable<V>> createSingleResultExtractor(final Class<V> targetClass) {
         @SuppressWarnings("rawtypes")
         ResultExtractor result = singleResultExtractorPool.get(targetClass);
@@ -2843,12 +3961,14 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Query for unique result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the nullable
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2858,13 +3978,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param statementSetter
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Query for unique result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the nullable
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2874,13 +3996,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Query for unique result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the nullable
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2890,14 +4014,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Query for unique result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the nullable
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2907,13 +4033,15 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Query for unique result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the nullable
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2923,14 +4051,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Query for unique result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the nullable
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <V> Nullable<V> queryForUniqueResult(final Class<V> targetClass, final Connection conn, final String sql,
@@ -2939,14 +4069,16 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
-     * @param targetClass
-     * @param conn
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * Query for unique result.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the nullable
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <V> Nullable<V> queryForUniqueResult(final Class<V> targetClass, final Connection conn, final String sql, final JdbcSettings jdbcSettings,
@@ -2958,22 +4090,23 @@ public class SQLExecutor implements Closeable {
      * Returns a {@code Nullable} describing the value in the first row/column if it exists, otherwise return an empty {@code Nullable}.
      * And throws {@code DuplicatedResultException} if more than one record found.
      * <br />
-     *
+     * 
      * Special note for type conversion for {@code boolean} or {@code Boolean} type: {@code true} is returned if the
      * {@code String} value of the target column is {@code "true"}, case insensitive. or it's an integer with value > 0.
      * Otherwise, {@code false} is returned.
-     *
+     * 
      * Remember to add {@code limit} condition if big result will be returned by the query.
      *
-     * @param targetClass
-     *            set result type to avoid the NullPointerException if result is null and T is primitive type
+     * @param <V> the value type
+     * @param targetClass            set result type to avoid the NullPointerException if result is null and T is primitive type
      *            "int, long. short ... char, boolean..".
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
+     * @return the nullable
      * @throws DuplicatedResultException if more than one record found.
      */
     @SuppressWarnings("unchecked")
@@ -2983,8 +4116,16 @@ public class SQLExecutor implements Closeable {
         return query(conn, sql, statementSetter, createUniqueResultExtractor(targetClass), jdbcSettings, parameters);
     }
 
+    /** The unique result extractor pool. */
     private final ObjectPool<Class<?>, ResultExtractor<Nullable<?>>> uniqueResultExtractorPool = new ObjectPool<>(64);
 
+    /**
+     * Creates the unique result extractor.
+     *
+     * @param <V> the value type
+     * @param targetClass the target class
+     * @return the result extractor
+     */
     private <V> ResultExtractor<Nullable<V>> createUniqueResultExtractor(final Class<V> targetClass) {
         @SuppressWarnings("rawtypes")
         ResultExtractor result = uniqueResultExtractorPool.get(targetClass);
@@ -3016,42 +4157,104 @@ public class SQLExecutor implements Closeable {
         return result;
     }
 
+    /**
+     * Query.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the data set
+     */
     @SafeVarargs
     public final DataSet query(final String sql, final Object... parameters) {
         return query(sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the data set
+     */
     @SafeVarargs
     public final DataSet query(final String sql, final StatementSetter statementSetter, final Object... parameters) {
         return query(sql, statementSetter, (JdbcSettings) null, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the data set
+     */
     @SafeVarargs
     public final DataSet query(final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
         return query(sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the data set
+     */
     @SafeVarargs
     public final DataSet query(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final Object... parameters) {
         return query(sql, statementSetter, ResultExtractor.DATA_SET, jdbcSettings, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param resultExtractor the result extractor
+     * @param parameters the parameters
+     * @return the t
+     */
     @SafeVarargs
     public final <T> T query(final String sql, final ResultExtractor<T> resultExtractor, final Object... parameters) {
         return query(sql, StatementSetter.DEFAULT, resultExtractor, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param resultExtractor the result extractor
+     * @param parameters the parameters
+     * @return the t
+     */
     @SafeVarargs
     public final <T> T query(final String sql, final StatementSetter statementSetter, final ResultExtractor<T> resultExtractor, final Object... parameters) {
         return query(sql, statementSetter, resultExtractor, null, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param resultExtractor the result extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the t
+     */
     @SafeVarargs
     public final <T> T query(final String sql, final ResultExtractor<T> resultExtractor, final JdbcSettings jdbcSettings, final Object... parameters) {
         return query(sql, StatementSetter.DEFAULT, resultExtractor, jdbcSettings, parameters);
     }
 
-    /** 
+    /**
+     *  
      * Remember to close the <code>ResultSet</code>, <code>Statement</code> and <code>Connection</code> if the return type <code>T</code> is <code>ResultSet</code> or <code>RowIterator</code>.
      * 
      * If <code>T</code> is <code>RowIterator</code>, call <code>rowIterator.close()</code> to close <code>ResultSet</code>, <code>Statement</code> and <code>Connection</code>.
@@ -3073,14 +4276,15 @@ public class SQLExecutor implements Closeable {
      * }
      * </code>
      * </pre>
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param resultExtractor
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param resultExtractor the result extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      */
     @SafeVarargs
     public final <T> T query(final String sql, final StatementSetter statementSetter, final ResultExtractor<T> resultExtractor, final JdbcSettings jdbcSettings,
@@ -3088,38 +4292,106 @@ public class SQLExecutor implements Closeable {
         return query(null, sql, statementSetter, resultExtractor, jdbcSettings, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters the parameters
+     * @return the data set
+     */
     @SafeVarargs
     public final DataSet query(final Connection conn, final String sql, final Object... parameters) {
         return query(conn, sql, StatementSetter.DEFAULT, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters the parameters
+     * @return the data set
+     */
     @SafeVarargs
     public final DataSet query(final Connection conn, final String sql, final StatementSetter statementSetter, final Object... parameters) {
         return query(conn, sql, statementSetter, (JdbcSettings) null, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the data set
+     */
     @SafeVarargs
     public final DataSet query(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
         return query(conn, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the data set
+     */
     @SafeVarargs
     public final DataSet query(final Connection conn, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
             final Object... parameters) {
         return query(conn, sql, statementSetter, ResultExtractor.DATA_SET, jdbcSettings, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param resultExtractor the result extractor
+     * @param parameters the parameters
+     * @return the t
+     */
     @SafeVarargs
     public final <T> T query(final Connection conn, final String sql, final ResultExtractor<T> resultExtractor, final Object... parameters) {
         return query(conn, sql, StatementSetter.DEFAULT, resultExtractor, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param resultExtractor the result extractor
+     * @param parameters the parameters
+     * @return the t
+     */
     @SafeVarargs
     public final <T> T query(final Connection conn, final String sql, final StatementSetter statementSetter, final ResultExtractor<T> resultExtractor,
             final Object... parameters) {
         return query(conn, sql, statementSetter, resultExtractor, null, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param resultExtractor the result extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the t
+     */
     @SafeVarargs
     public final <T> T query(final Connection conn, final String sql, final ResultExtractor<T> resultExtractor, final JdbcSettings jdbcSettings,
             final Object... parameters) {
@@ -3149,14 +4421,16 @@ public class SQLExecutor implements Closeable {
      * </code>
      * </pre>
      *  
-     * @param conn
-     * @param sql
-     * @param statementSetter
-     * @param resultExtractor
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param resultExtractor the result extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the t
      */
     @SafeVarargs
     public final <T> T query(final Connection conn, final String sql, final StatementSetter statementSetter, final ResultExtractor<T> resultExtractor,
@@ -3170,6 +4444,19 @@ public class SQLExecutor implements Closeable {
         }, jdbcSettings, parameters);
     }
 
+    /**
+     * Query.
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param conn the conn
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param resultExtractor the result extractor
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     * @return the t
+     */
     protected <T> T query(final Class<T> targetClass, final Connection conn, final String sql, StatementSetter statementSetter,
             ResultSetExtractor<T> resultExtractor, JdbcSettings jdbcSettings, final Object... parameters) {
         final NamedSQL namedSQL = getNamedSQL(sql);
@@ -3230,12 +4517,12 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the data set
      */
     @SafeVarargs
     public final DataSet queryAll(final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3245,13 +4532,13 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the data set
      */
     @SafeVarargs
     public final DataSet queryAll(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3298,12 +4585,12 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sqls
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param sqls the sqls
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the data set
      */
     @SafeVarargs
     public final DataSet queryAll(final List<String> sqls, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3313,13 +4600,13 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sqls
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param sqls the sqls
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the data set
      */
     @SafeVarargs
     public final DataSet queryAll(final List<String> sqls, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3347,14 +4634,16 @@ public class SQLExecutor implements Closeable {
         }
     }
 
-    /** 
+    /**
+     *  
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-     * 
-     * @param targetClass
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final Class<T> targetClass, final String sql, final Object... parameters) {
@@ -3363,13 +4652,14 @@ public class SQLExecutor implements Closeable {
 
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-     * 
-     * @param targetClass
-     * @param sql
-     * @param statementSetter
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final Object... parameters) {
@@ -3378,13 +4668,14 @@ public class SQLExecutor implements Closeable {
 
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-     * 
-     * @param targetClass
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     public final <T> Stream<T> stream(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
         return stream(targetClass, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
@@ -3392,13 +4683,15 @@ public class SQLExecutor implements Closeable {
 
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -3408,12 +4701,13 @@ public class SQLExecutor implements Closeable {
 
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-     * 
-     * @param sql
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final Object... parameters) {
@@ -3422,13 +4716,14 @@ public class SQLExecutor implements Closeable {
 
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -3438,29 +4733,32 @@ public class SQLExecutor implements Closeable {
 
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-     * 
-     * @param sql
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings, final Object... parameters) {
         return stream(sql, StatementSetter.DEFAULT, rowMapper, jdbcSettings, parameters);
     }
 
-    /** 
+    /**
+     *  
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -3612,13 +4910,14 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param targetClass
-     * @param sql
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3628,13 +4927,15 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -3645,13 +4946,14 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sql
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
@@ -3662,13 +4964,15 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
-     * 
-     * @param sql
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sql the sql
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -3702,13 +5006,14 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition. 
-     * 
-     * @param targetClass
-     * @param sqls
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sqls the sqls
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final Class<T> targetClass, final List<String> sqls, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3718,13 +5023,15 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition. 
-     * 
-     * @param sqls
-     * @param statementSetter
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param targetClass the target class
+     * @param sqls the sqls
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final Class<T> targetClass, final List<String> sqls, final StatementSetter statementSetter,
@@ -3735,13 +5042,14 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition. 
-     * 
-     * @param sqls
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sqls the sqls
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final List<String> sqls, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
@@ -3752,14 +5060,15 @@ public class SQLExecutor implements Closeable {
     /**
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition. 
-     * 
-     * @param sqls
-     * @param statementSetter
-     * @param rowMapper
-     * @param jdbcSettings
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param <T> the generic type
+     * @param sqls the sqls
+     * @param statementSetter the statement setter
+     * @param rowMapper the row mapper
+     * @param jdbcSettings the jdbc settings
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return
+     * @return the stream
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final List<String> sqls, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -3783,18 +5092,25 @@ public class SQLExecutor implements Closeable {
         });
     }
 
+    /**
+     * Execute.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     public final void execute(final String sql, final Object... parameters) throws UncheckedSQLException {
         execute(null, sql, parameters);
     }
 
     /**
      * Execute the sql with the specified parameters.
-     * 
-     * @param conn
-     * @param sql
-     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query. 
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * 
+     * @throws UncheckedSQLException the unchecked SQL exception
      * @see java.sql.PreparedStatement#execute()
      */
     @SafeVarargs
@@ -3827,42 +5143,45 @@ public class SQLExecutor implements Closeable {
 
     /**
      * Refer to {@code beginTransaction(IsolationLevel, boolean, JdbcSettings)}.
-     * 
-     * @return
+     *
+     * @return the SQL transaction
      * @see #beginTransaction(IsolationLevel, boolean, JdbcSettings)
      */
     public SQLTransaction beginTransaction() {
         return beginTransaction(IsolationLevel.DEFAULT);
     }
 
-    /**  
+    /**
+     *   
      * Refer to {@code beginTransaction(IsolationLevel, boolean, JdbcSettings)}.
-     * 
-     * @param isolationLevel
-     * @return
+     *
+     * @param isolationLevel the isolation level
+     * @return the SQL transaction
      * @see #beginTransaction(IsolationLevel, boolean, JdbcSettings)
      */
     public SQLTransaction beginTransaction(final IsolationLevel isolationLevel) {
         return beginTransaction(isolationLevel, false);
     }
 
-    /** 
+    /**
+     *  
      * Refer to {@code beginTransaction(IsolationLevel, boolean, JdbcSettings)}.
-     * 
-     * @param forUpdateOnly
-     * @return
+     *
+     * @param forUpdateOnly the for update only
+     * @return the SQL transaction
      * @see #beginTransaction(IsolationLevel, boolean, JdbcSettings)
      */
     public SQLTransaction beginTransaction(final boolean forUpdateOnly) {
         return beginTransaction(IsolationLevel.DEFAULT, forUpdateOnly);
     }
 
-    /** 
+    /**
+     *  
      * Refer to {@code beginTransaction(IsolationLevel, boolean, JdbcSettings)}.
-     * 
-     * @param isolationLevel
-     * @param forUpdateOnly
-     * @return
+     *
+     * @param isolationLevel the isolation level
+     * @param forUpdateOnly the for update only
+     * @return the SQL transaction
      * @see #beginTransaction(IsolationLevel, boolean, JdbcSettings)
      */
     public SQLTransaction beginTransaction(IsolationLevel isolationLevel, boolean forUpdateOnly) {
@@ -3885,13 +5204,13 @@ public class SQLExecutor implements Closeable {
      * DON'T close it again by calling the close method.
      * <br />
      * <br />
-    <<<<<<< .working
+     *     <<<<<<< .working
      * The transaction will be shared cross the instances of {@code SQLExecutor} by the methods called with same {@code DataSource} in the same thread.
-    ||||||| .merge-left.r3730
+     *     ||||||| .merge-left.r3730
      * The transaction will be shared cross the instances of {@code SQLExecutor} by the methods called in the same thread with same {@code DataSource}.
-    =======
+     *     =======
      * The transaction will be shared cross the instances of {@code SQLExecutor/JdbcUtil.Dao/CrudDao} by the methods called in the same thread with same {@code DataSource}.
-    >>>>>>> .merge-right.r3729
+     *     >>>>>>> .merge-right.r3729
      * 
      * <br />
      * <br />
@@ -3906,7 +5225,7 @@ public class SQLExecutor implements Closeable {
      *       // sqlExecutor.insert(...);
      *       // sqlExecutor.update(...);
      *       // sqlExecutor.query(...);
-     *
+     * 
      *       tran.commit();
      *   } finally {
      *       // The connection will be automatically closed after the transaction is committed or rolled back.            
@@ -3914,12 +5233,11 @@ public class SQLExecutor implements Closeable {
      *   }
      * </code>
      * </pre>
-     * 
-     * 
-     * @param isolationLevel
-     * @param forUpdateOnly
-     * @param jdbcSettings
-     * @return
+     *
+     * @param isolationLevel the isolation level
+     * @param forUpdateOnly the for update only
+     * @param jdbcSettings the jdbc settings
+     * @return the SQL transaction
      */
     public SQLTransaction beginTransaction(final IsolationLevel isolationLevel, final boolean forUpdateOnly, final JdbcSettings jdbcSettings) {
         N.checkArgNotNull(isolationLevel, "isolationLevel");
@@ -3963,33 +5281,46 @@ public class SQLExecutor implements Closeable {
         return tran;
     }
 
+    /**
+     * Gets the DB sequence.
+     *
+     * @param tableName the table name
+     * @param seqName the seq name
+     * @return the DB sequence
+     */
     public DBSequence getDBSequence(final String tableName, final String seqName) {
         return new DBSequence(this, tableName, seqName, 0, 1000);
     }
 
     /**
      * Supports global sequence by db table.
-     * 
-     * @param tableName
-     * @param seqName
-     * @param startVal
+     *
+     * @param tableName the table name
+     * @param seqName the seq name
+     * @param startVal the start val
      * @param seqBufferSize the numbers to allocate/reserve from database table when cached numbers are used up.
-     * @return
+     * @return the DB sequence
      */
     public DBSequence getDBSequence(final String tableName, final String seqName, final long startVal, final int seqBufferSize) {
         return new DBSequence(this, tableName, seqName, startVal, seqBufferSize);
     }
 
     /**
-     * Supports global lock by db table
-     * 
-     * @param tableName
-     * @return
+     * Supports global lock by db table.
+     *
+     * @param tableName the table name
+     * @return the DB lock
      */
     public DBLock getDBLock(final String tableName) {
         return new DBLock(this, tableName);
     }
 
+    /**
+     * Does table exist.
+     *
+     * @param tableName the table name
+     * @return true, if successful
+     */
     public boolean doesTableExist(final String tableName) {
         Connection conn = getConnection();
 
@@ -4003,9 +5334,9 @@ public class SQLExecutor implements Closeable {
     /**
      * Returns {@code true} if succeed to create table, otherwise {@code false} is returned.
      *
-     * @param tableName
-     * @param schema
-     * @return
+     * @param tableName the table name
+     * @param schema the schema
+     * @return true, if successful
      */
     public boolean createTableIfNotExists(final String tableName, final String schema) {
         Connection conn = getConnection();
@@ -4020,8 +5351,8 @@ public class SQLExecutor implements Closeable {
     /**
      * Returns {@code true} if succeed to drop table, otherwise {@code false} is returned.
      *
-     * @param tableName
-     * @return
+     * @param tableName the table name
+     * @return true, if successful
      */
     public boolean dropTableIfExists(final String tableName) {
         Connection conn = getConnection();
@@ -4034,9 +5365,10 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
+     * Gets the column name list.
      *
-     * @param tableName
-     * @return
+     * @param tableName the table name
+     * @return the column name list
      */
     public List<String> getColumnNameList(final String tableName) {
         List<String> columnNameList = _tableColumnNamePool.get(tableName);
@@ -4057,14 +5389,32 @@ public class SQLExecutor implements Closeable {
         return columnNameList;
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     public Connection getConnection() {
         return getConnection(_ds);
     }
 
+    /**
+     * Close connection.
+     *
+     * @param conn the conn
+     */
     public void closeConnection(final Connection conn) {
         close(conn, _ds);
     }
 
+    /**
+     * Gets the data source.
+     *
+     * @param sql the sql
+     * @param parameters the parameters
+     * @param jdbcSettings the jdbc settings
+     * @return the data source
+     */
     protected DataSource getDataSource(final String sql, final Object[] parameters, final JdbcSettings jdbcSettings) {
         if (_dsm == null || _dss == null) {
             if ((jdbcSettings != null) && (jdbcSettings.getQueryWithDataSource() != null || N.notNullOrEmpty(jdbcSettings.getQueryWithDataSources()))) {
@@ -4083,6 +5433,14 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Gets the data source.
+     *
+     * @param sql the sql
+     * @param parametersList the parameters list
+     * @param jdbcSettings the jdbc settings
+     * @return the data source
+     */
     protected DataSource getDataSource(final String sql, final List<?> parametersList, final JdbcSettings jdbcSettings) {
         if (_dsm == null || _dss == null) {
             if ((jdbcSettings != null) && (jdbcSettings.getQueryWithDataSource() != null || N.notNullOrEmpty(jdbcSettings.getQueryWithDataSources()))) {
@@ -4101,6 +5459,15 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @param inputConn the input conn
+     * @param ds the ds
+     * @param jdbcSettings the jdbc settings
+     * @param op the op
+     * @return the connection
+     */
     protected Connection getConnection(final Connection inputConn, final DataSource ds, final JdbcSettings jdbcSettings, final SQLOperation op) {
         if (inputConn != null) {
             return inputConn;
@@ -4119,10 +5486,30 @@ public class SQLExecutor implements Closeable {
         return getConnection(ds);
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @param ds the ds
+     * @return the connection
+     */
     protected Connection getConnection(final DataSource ds) {
         return JdbcUtil.getConnection(ds);
     }
 
+    /**
+     * Prepare statement.
+     *
+     * @param ds the ds
+     * @param localConn the local conn
+     * @param namedSQL the named SQL
+     * @param statementSetter the statement setter
+     * @param jdbcSettings the jdbc settings
+     * @param autoGeneratedKeys the auto generated keys
+     * @param isBatch the is batch
+     * @param parameters the parameters
+     * @return the prepared statement
+     * @throws SQLException the SQL exception
+     */
     protected PreparedStatement prepareStatement(final DataSource ds, final Connection localConn, final NamedSQL namedSQL,
             final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final boolean autoGeneratedKeys, final boolean isBatch,
             final Object... parameters) throws SQLException {
@@ -4147,6 +5534,16 @@ public class SQLExecutor implements Closeable {
         return stmt;
     }
 
+    /**
+     * Prepare statement.
+     *
+     * @param conn the conn
+     * @param sql the sql
+     * @param autoGeneratedKeys the auto generated keys
+     * @param jdbcSettings the jdbc settings
+     * @return the prepared statement
+     * @throws SQLException the SQL exception
+     */
     protected PreparedStatement prepareStatement(final Connection conn, String sql, final boolean autoGeneratedKeys, final JdbcSettings jdbcSettings)
             throws SQLException {
         PreparedStatement stmt = null;
@@ -4272,6 +5669,16 @@ public class SQLExecutor implements Closeable {
     //        return stmt;
     //    }
 
+    /**
+     * Sets the parameters.
+     *
+     * @param namedSQL the named SQL
+     * @param stmt the stmt
+     * @param statementSetter the statement setter
+     * @param isBatch the is batch
+     * @param parameters the parameters
+     * @throws SQLException the SQL exception
+     */
     protected void setParameters(final NamedSQL namedSQL, final PreparedStatement stmt, final StatementSetter statementSetter, final boolean isBatch,
             final Object... parameters) throws SQLException {
         if (isBatch || N.isNullOrEmpty(parameters)) {
@@ -4281,6 +5688,13 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Log SQL.
+     *
+     * @param sql the sql
+     * @param jdbcSettings the jdbc settings
+     * @param parameters the parameters
+     */
     protected void logSQL(String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
         if ((jdbcSettings != null) && (jdbcSettings.isLogSQL() || jdbcSettings.isLogSQLWithParameters()) && logger.isInfoEnabled()) {
             if (jdbcSettings.isLogSQLWithParameters()) {
@@ -4291,18 +5705,41 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param rs the rs
+     */
     protected void close(final ResultSet rs) {
         JdbcUtil.closeQuietly(rs);
     }
 
+    /**
+     * Close.
+     *
+     * @param stmt the stmt
+     */
     protected void close(final PreparedStatement stmt) {
         JdbcUtil.closeQuietly(stmt);
     }
 
+    /**
+     * Close.
+     *
+     * @param rs the rs
+     * @param stmt the stmt
+     */
     protected void close(final ResultSet rs, final PreparedStatement stmt) {
         JdbcUtil.closeQuietly(rs, stmt);
     }
 
+    /**
+     * Close.
+     *
+     * @param localConn the local conn
+     * @param inputConn the input conn
+     * @param ds the ds
+     */
     protected void close(final Connection localConn, final Connection inputConn, final DataSource ds) {
         if (inputConn == null) {
             SQLTransaction tran = SQLTransaction.getTransaction(ds, CreatedBy.SQL_EXECUTOR);
@@ -4319,15 +5756,20 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param conn the conn
+     * @param ds the ds
+     */
     protected void close(final Connection conn, final DataSource ds) {
         JdbcUtil.releaseConnection(conn, ds);
     }
 
     /**
-     * Close the underline data source
+     * Close the underline data source. 
      */
-    @Override
-    public void close() throws IOException {
+    public void close() {
         try {
             if (_ds != null && _ds instanceof com.landawn.abacus.DataSource) {
                 final com.landawn.abacus.DataSource ds = (com.landawn.abacus.DataSource) _ds;
@@ -4343,10 +5785,23 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Gets the batch size.
+     *
+     * @param jdbcSettings the jdbc settings
+     * @return the batch size
+     */
     protected int getBatchSize(final JdbcSettings jdbcSettings) {
         return ((jdbcSettings == null) || (jdbcSettings.getBatchSize() < 0)) ? JdbcSettings.DEFAULT_BATCH_SIZE : jdbcSettings.getBatchSize();
     }
 
+    /**
+     * Check statement setter.
+     *
+     * @param namedSQL the named SQL
+     * @param statementSetter the statement setter
+     * @return the statement setter
+     */
     protected StatementSetter checkStatementSetter(final NamedSQL namedSQL, StatementSetter statementSetter) {
         if (statementSetter == null) {
             statementSetter = StatementSetter.DEFAULT;
@@ -4355,6 +5810,14 @@ public class SQLExecutor implements Closeable {
         return statementSetter;
     }
 
+    /**
+     * Check result set extractor.
+     *
+     * @param <T> the generic type
+     * @param namedSQL the named SQL
+     * @param resultExtractor the result extractor
+     * @return the result set extractor
+     */
     @SuppressWarnings("unchecked")
     protected <T> ResultSetExtractor<T> checkResultSetExtractor(final NamedSQL namedSQL, ResultSetExtractor<T> resultExtractor) {
         if (resultExtractor == null) {
@@ -4364,6 +5827,14 @@ public class SQLExecutor implements Closeable {
         return resultExtractor;
     }
 
+    /**
+     * Check jdbc settings.
+     *
+     * @param jdbcSettings the jdbc settings
+     * @param namedSQL the named SQL
+     * @param attrs the attrs
+     * @return the jdbc settings
+     */
     protected JdbcSettings checkJdbcSettings(final JdbcSettings jdbcSettings, final NamedSQL namedSQL, final Map<String, String> attrs) {
         JdbcSettings newJdbcSettings = null;
 
@@ -4380,6 +5851,14 @@ public class SQLExecutor implements Closeable {
         return newJdbcSettings;
     }
 
+    /**
+     * Sets the jdbc settings for named SQL.
+     *
+     * @param jdbcSettings the jdbc settings
+     * @param namedSQL the named SQL
+     * @param attrs the attrs
+     * @return the jdbc settings
+     */
     protected JdbcSettings setJdbcSettingsForNamedSQL(JdbcSettings jdbcSettings, final NamedSQL namedSQL, final Map<String, String> attrs) {
         if ((namedSQL == null) || N.isNullOrEmpty(attrs)) {
             return jdbcSettings;
@@ -4416,6 +5895,12 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * Gets the named SQL.
+     *
+     * @param sql the sql
+     * @return the named SQL
+     */
     protected NamedSQL getNamedSQL(final String sql) {
         N.checkArgNotNull(sql, "sql");
 
@@ -4433,11 +5918,12 @@ public class SQLExecutor implements Closeable {
     }
 
     /**
-     * 
+     * Gets the column label list.
+     *
      * @param sql should be prepared sql because it will be cached.
-     * @param rs
-     * @return
-     * @throws SQLException
+     * @param rs the rs
+     * @return the column label list
+     * @throws SQLException the SQL exception
      */
     protected static List<String> getColumnLabelList(final String sql, final ResultSet rs) throws SQLException {
         List<String> labelList = N.notNullOrEmpty(sql) ? _sqlColumnLabelPool.get(sql) : null;
@@ -4458,6 +5944,13 @@ public class SQLExecutor implements Closeable {
         return labelList;
     }
 
+    /**
+     * Checks if is entity or map parameter.
+     *
+     * @param namedSQL the named SQL
+     * @param parameters the parameters
+     * @return true, if is entity or map parameter
+     */
     protected static boolean isEntityOrMapParameter(final NamedSQL namedSQL, final Object... parameters) {
         if (N.isNullOrEmpty(namedSQL.getNamedParameters())) {
             return false;
@@ -4474,18 +5967,17 @@ public class SQLExecutor implements Closeable {
         return false;
     }
 
-    /** 
+    /**
+     *  
      *
-     * @param <T>
-     * @param <ID>
-     * 
+     * @param <T> the generic type
+     * @param <ID> the generic type
      * @see {@link com.landawn.abacus.annotation.ReadOnly}
      * @see {@link com.landawn.abacus.annotation.ReadOnlyId}
      * @see {@link com.landawn.abacus.annotation.NonUpdatable}
      * @see {@link com.landawn.abacus.annotation.Transient}
      * @see {@link com.landawn.abacus.annotation.Table}
-     * @see {@link com.landawn.abacus.annotation.Column} 
-     * 
+     * @see {@link com.landawn.abacus.annotation.Column}
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html</a>
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html</a>
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html</a>
@@ -4493,30 +5985,75 @@ public class SQLExecutor implements Closeable {
      */
     public static final class Mapper<T, ID> {
 
+        /** The Constant EXISTS_SELECT_PROP_NAMES. */
         static final List<String> EXISTS_SELECT_PROP_NAMES = ImmutableList.of(NSC._1);
+
+        /** The Constant COUNT_SELECT_PROP_NAMES. */
         static final List<String> COUNT_SELECT_PROP_NAMES = ImmutableList.of(NSC.COUNT_ALL);
 
+        /** The target class. */
         private final Class<T> targetClass;
+
+        /** The target type. */
         private final Type<T> targetType;
+
+        /** The prop name list. */
         private final List<String> propNameList;
+
+        /** The prop name set. */
         private final Set<String> propNameSet;
+
+        /** The default select prop name list. */
         private final List<String> defaultSelectPropNameList;
+
+        /** The id prop name. */
         private final String idPropName;
+
+        /** The id prop name list. */
         private final List<String> idPropNameList;
+
+        /** The id prop name set. */
         private final Set<String> idPropNameSet;
+
+        /** The sql executor. */
         private final SQLExecutor sqlExecutor;
+
+        /** The naming policy. */
         private final NamingPolicy namingPolicy;
+
+        /** The id cond. */
         private final Condition idCond;
+
+        /** The sql exists by id. */
         private final String sql_exists_by_id;
+
+        /** The sql get by id. */
         private final String sql_get_by_id;
+
+        /** The sql insert with id. */
         private final String sql_insert_with_id;
+
+        /** The sql insert without id. */
         private final String sql_insert_without_id;
+
+        /** The sql update by id. */
         private final String sql_update_by_id;
+
+        /** The sql delete by id. */
         private final String sql_delete_by_id;
+
+        /** The async mapper. */
         private final AsyncMapper<T, ID> asyncMapper;
 
         // TODO cache more sqls to improve performance.
 
+        /**
+         * Instantiates a new mapper.
+         *
+         * @param targetClass the target class
+         * @param sqlExecutor the sql executor
+         * @param namingPolicy the naming policy
+         */
         Mapper(final Class<T> targetClass, final SQLExecutor sqlExecutor, final NamingPolicy namingPolicy) {
             this.sqlExecutor = sqlExecutor;
             this.namingPolicy = namingPolicy;
@@ -4566,38 +6103,74 @@ public class SQLExecutor implements Closeable {
             this.asyncMapper = new AsyncMapper<T, ID>(this, sqlExecutor._asyncExecutor);
         }
 
+        /**
+         * Target class.
+         *
+         * @return the class
+         */
         Class<T> targetClass() {
             return targetClass;
         }
 
+        /**
+         * Target type.
+         *
+         * @return the type
+         */
         Type<T> targetType() {
             return targetType;
         }
 
+        /**
+         * Id prop name list.
+         *
+         * @return the list
+         */
         List<String> idPropNameList() {
             return idPropNameList;
         }
 
+        /**
+         * Id prop name set.
+         *
+         * @return the sets the
+         */
         Set<String> idPropNameSet() {
             return idPropNameSet;
         }
 
+        /**
+         * Prop name list.
+         *
+         * @return the list
+         */
         List<String> propNameList() {
             return propNameList;
         }
 
+        /**
+         * Prop name set.
+         *
+         * @return the sets the
+         */
         Set<String> propNameSet() {
             return propNameSet;
         }
 
+        /**
+         * Async.
+         *
+         * @return the async mapper
+         */
         public AsyncMapper<T, ID> async() {
             return asyncMapper;
         }
 
         /**
-         * 
+         * Exists.
+         *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @return
+         * @return true, if successful
          */
         public boolean exists(final ID id) {
             checkId(id);
@@ -4605,26 +6178,59 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.queryForInt(sql_exists_by_id, id).orElse(0) > 0;
         }
 
+        /**
+         * Exists.
+         *
+         * @param whereCause the where cause
+         * @return true, if successful
+         */
         public boolean exists(final Condition whereCause) {
             return exists(null, whereCause);
         }
 
+        /**
+         * Exists.
+         *
+         * @param conn the conn
+         * @param id the id
+         * @return true, if successful
+         */
         public boolean exists(final Connection conn, final ID id) {
             checkId(id);
 
             return sqlExecutor.queryForSingleResult(int.class, conn, sql_exists_by_id, id).orElse(0) > 0;
         }
 
+        /**
+         * Exists.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return true, if successful
+         */
         public boolean exists(final Connection conn, final Condition whereCause) {
             final SP sp = prepareQuery(EXISTS_SELECT_PROP_NAMES, whereCause, 1);
 
             return sqlExecutor.exists(conn, sp.sql, sp.parameters.toArray());
         }
 
+        /**
+         * Count.
+         *
+         * @param whereCause the where cause
+         * @return the int
+         */
         public int count(final Condition whereCause) {
             return count(null, whereCause);
         }
 
+        /**
+         * Count.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the int
+         */
         public int count(final Connection conn, final Condition whereCause) {
             final SP sp = prepareQuery(COUNT_SELECT_PROP_NAMES, whereCause);
 
@@ -4632,9 +6238,10 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
+         * Gets the.
+         *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @return
+         * @return the optional
          * @throws DuplicatedResultException if two or more records are found.
          */
         public Optional<T> get(final ID id) throws DuplicatedResultException {
@@ -4655,10 +6262,11 @@ public class SQLExecutor implements Closeable {
         //    }
 
         /**
-         * 
+         * Gets the.
+         *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @param selectPropNames
-         * @return
+         * @param selectPropNames the select prop names
+         * @return the optional
          * @throws DuplicatedResultException if two or more records are found.
          */
         public Optional<T> get(final ID id, final Collection<String> selectPropNames) throws DuplicatedResultException {
@@ -4666,11 +6274,12 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param conn
+         * Gets the.
+         *
+         * @param conn the conn
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @param selectPropNames
-         * @return
+         * @param selectPropNames the select prop names
+         * @return the optional
          * @throws DuplicatedResultException if two or more records are found.
          */
         public Optional<T> get(final Connection conn, final ID id, final Collection<String> selectPropNames) throws DuplicatedResultException {
@@ -4678,9 +6287,10 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
+         * Gets the t.
+         *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @return
+         * @return the t
          * @throws DuplicatedResultException if two or more records are found.
          */
         public T gett(final ID id) throws DuplicatedResultException {
@@ -4701,10 +6311,11 @@ public class SQLExecutor implements Closeable {
         //    }
 
         /**
-         * 
+         * Gets the t.
+         *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @param selectPropNames
-         * @return
+         * @param selectPropNames the select prop names
+         * @return the t
          * @throws DuplicatedResultException if two or more records are found.
          */
         public T gett(final ID id, final Collection<String> selectPropNames) throws DuplicatedResultException {
@@ -4712,11 +6323,12 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param conn
+         * Gets the t.
+         *
+         * @param conn the conn
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @param selectPropNames
-         * @return
+         * @param selectPropNames the select prop names
+         * @return the t
          * @throws DuplicatedResultException if two or more records are found.
          */
         public T gett(final Connection conn, final ID id, final Collection<String> selectPropNames) throws DuplicatedResultException {
@@ -4730,43 +6342,47 @@ public class SQLExecutor implements Closeable {
             }
         }
 
-        /** 
-         * 
-         * @param ids
-         * @return 
+        /**
+         *  
+         *
+         * @param ids the ids
+         * @return the list
          */
         public List<T> batchGet(final List<ID> ids) {
             return batchGet(ids, (Collection<String>) null);
         }
 
-        /** 
-         * 
-         * @param ids
-         * @param selectPropNames
-         * @return 
+        /**
+         *  
+         *
+         * @param ids the ids
+         * @param selectPropNames the select prop names
+         * @return the list
          */
         public List<T> batchGet(final List<ID> ids, final Collection<String> selectPropNames) {
             return batchGet(ids, selectPropNames, JdbcSettings.DEFAULT_BATCH_SIZE);
         }
 
         /**
-         * 
-         * @param ids
-         * @param selectPropNames
-         * @param batchSize
-         * @return
+         * Batch get.
+         *
+         * @param ids the ids
+         * @param selectPropNames the select prop names
+         * @param batchSize the batch size
+         * @return the list
          */
         public List<T> batchGet(final List<ID> ids, final Collection<String> selectPropNames, final int batchSize) {
             return batchGet(null, ids, selectPropNames, batchSize);
         }
 
-        /** 
-         * 
-         * @param conn
-         * @param ids
-         * @param selectPropNames
-         * @param batchSize
-         * @return 
+        /**
+         *  
+         *
+         * @param conn the conn
+         * @param ids the ids
+         * @param selectPropNames the select prop names
+         * @param batchSize the batch size
+         * @return the list
          */
         public List<T> batchGet(final Connection conn, final List<ID> ids, final Collection<String> selectPropNames, final int batchSize) {
             N.checkArgPositive(batchSize, "batchSize");
@@ -4837,26 +6453,71 @@ public class SQLExecutor implements Closeable {
             return entities;
         }
 
+        /**
+         * Find first.
+         *
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public Optional<T> findFirst(final Condition whereCause) {
             return findFirst((Collection<String>) null, whereCause);
         }
 
+        /**
+         * Find first.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public Optional<T> findFirst(final Collection<String> selectPropNames, final Condition whereCause) {
             return findFirst(selectPropNames, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public Optional<T> findFirst(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return findFirst(null, selectPropNames, whereCause, jdbcSettings);
         }
 
+        /**
+         * Find first.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public Optional<T> findFirst(final Connection conn, final Condition whereCause) {
             return findFirst(conn, null, whereCause);
         }
 
+        /**
+         * Find first.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public Optional<T> findFirst(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return findFirst(conn, selectPropNames, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public Optional<T> findFirst(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
@@ -4864,56 +6525,176 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.findFirst(targetClass, conn, sp.sql, StatementSetter.DEFAULT, jdbcSettings, sp.parameters.toArray());
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(selectPropName, rowMapper, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return findFirst(null, selectPropName, rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(final Connection conn, String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(conn, selectPropName, rowMapper, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(final Connection conn, String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return findFirst(conn, Arrays.asList(selectPropName), rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(selectPropName, rowMapper, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return findFirst(null, selectPropName, rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(final Connection conn, String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(conn, selectPropName, rowMapper, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(final Connection conn, String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return findFirst(conn, Arrays.asList(selectPropName), rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(selectPropNames, rowMapper, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return findFirst(null, selectPropNames, rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
             return findFirst(conn, selectPropNames, rowMapper, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
@@ -4921,20 +6702,60 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.findFirst(conn, sp.sql, StatementSetter.DEFAULT, rowMapper, jdbcSettings, sp.parameters.toArray());
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(selectPropNames, rowMapper, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return findFirst(null, selectPropNames, rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
             return findFirst(conn, selectPropNames, rowMapper, whereCause, null);
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the optional
+         */
         public <R> Optional<R> findFirst(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
@@ -4955,79 +6776,244 @@ public class SQLExecutor implements Closeable {
             return Optional.ofNullable(sqlExecutor.query(conn, sp.sql, StatementSetter.DEFAULT, resultExtractor, jdbcSettings, sp.parameters.toArray()));
         }
 
+        /**
+         * List.
+         *
+         * @param whereCause the where cause
+         * @return the list
+         */
         public List<T> list(final Condition whereCause) {
             return list((Collection<String>) null, whereCause);
         }
 
+        /**
+         * List.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the list
+         */
         public List<T> list(final Collection<String> selectPropNames, final Condition whereCause) {
             return list(selectPropNames, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public List<T> list(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return list(null, selectPropNames, whereCause, jdbcSettings);
         }
 
+        /**
+         * List.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the list
+         */
         public List<T> list(final Connection conn, final Condition whereCause) {
             return list(conn, null, whereCause);
         }
 
+        /**
+         * List.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the list
+         */
         public List<T> list(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return list(conn, selectPropNames, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public List<T> list(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
 
             return sqlExecutor.list(targetClass, conn, sp.sql, StatementSetter.DEFAULT, jdbcSettings, sp.parameters.toArray());
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the list
+         */
         public <R> List<R> list(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return list(selectPropName, rowMapper, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public <R> List<R> list(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return list(null, selectPropName, rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the list
+         */
         public <R> List<R> list(final Connection conn, String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return list(conn, selectPropName, rowMapper, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public <R> List<R> list(final Connection conn, String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return list(conn, Arrays.asList(selectPropName), rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the list
+         */
         public <R> List<R> list(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return list(selectPropName, rowMapper, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public <R> List<R> list(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return list(null, selectPropName, rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the list
+         */
         public <R> List<R> list(final Connection conn, String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return list(conn, selectPropName, rowMapper, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public <R> List<R> list(final Connection conn, String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return list(conn, Arrays.asList(selectPropName), rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the list
+         */
         public <R> List<R> list(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return list(selectPropNames, rowMapper, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public <R> List<R> list(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return list(null, selectPropNames, rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the list
+         */
         public <R> List<R> list(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return list(conn, selectPropNames, rowMapper, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public <R> List<R> list(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             N.checkArgNotNull(rowMapper);
@@ -5042,20 +7028,60 @@ public class SQLExecutor implements Closeable {
             return list(conn, selectPropNames, biRowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the list
+         */
         public <R> List<R> list(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return list(selectPropNames, rowMapper, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public <R> List<R> list(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return list(null, selectPropNames, rowMapper, whereCause, jdbcSettings);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the list
+         */
         public <R> List<R> list(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
             return list(conn, selectPropNames, rowMapper, whereCause, null);
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
+         */
         public <R> List<R> list(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
@@ -5066,10 +7092,10 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
          * @see SQLExecutor#listAll(Class, String, StatementSetter, JdbcSettings, Object...)
          */
         public List<T> listAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -5079,11 +7105,11 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropNames
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
          * @see SQLExecutor#listAll(Class, String, StatementSetter, JdbcSettings, Object...)
          */
         public List<T> listAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -5095,12 +7121,13 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropName
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
          */
         public <R> List<R> listAll(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return listAll(Arrays.asList(selectPropName), rowMapper, whereCause, jdbcSettings);
@@ -5109,12 +7136,13 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropName
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
          */
         public <R> List<R> listAll(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5124,12 +7152,13 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropNames
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
          */
         public <R> List<R> listAll(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5148,12 +7177,13 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropNames
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the list
          */
         public <R> List<R> listAll(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5164,9 +7194,9 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param whereCause
-         * @return
+         *
+         * @param whereCause the where cause
+         * @return the stream
          */
         public Stream<T> stream(final Condition whereCause) {
             return stream((Collection<String>) null, whereCause);
@@ -5174,10 +7204,10 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropNames
-         * @param whereCause
-         * @return
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the stream
          */
         public Stream<T> stream(final Collection<String> selectPropNames, final Condition whereCause) {
             return stream(selectPropNames, whereCause, null);
@@ -5185,11 +7215,11 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropNames
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public Stream<T> stream(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
@@ -5199,11 +7229,12 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropName
-         * @param rowMapper
-         * @param whereCause
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the stream
          */
         public <R> Stream<R> stream(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return stream(selectPropName, rowMapper, whereCause, null);
@@ -5211,12 +7242,13 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropName
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public <R> Stream<R> stream(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return stream(Arrays.asList(selectPropName), rowMapper, whereCause, jdbcSettings);
@@ -5224,11 +7256,12 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropName
-         * @param rowMapper
-         * @param whereCause
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the stream
          */
         public <R> Stream<R> stream(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return stream(selectPropName, rowMapper, whereCause, null);
@@ -5236,12 +7269,13 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropName
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public <R> Stream<R> stream(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5250,11 +7284,12 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropNames
-         * @param rowMapper
-         * @param whereCause
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the stream
          */
         public <R> Stream<R> stream(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return stream(selectPropNames, rowMapper, whereCause, null);
@@ -5262,12 +7297,13 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropNames
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public <R> Stream<R> stream(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5285,11 +7321,12 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropNames
-         * @param rowMapper
-         * @param whereCause
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the stream
          */
         public <R> Stream<R> stream(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return stream(selectPropNames, rowMapper, whereCause, null);
@@ -5297,12 +7334,13 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
-         * 
-         * @param selectPropNames
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public <R> Stream<R> stream(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5314,10 +7352,10 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          * @see SQLExecutor#streamAll(Class, String, StatementSetter, JdbcSettings, Object...)
          */
         public Stream<T> streamAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -5327,11 +7365,11 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition.
-         * 
-         * @param selectPropNames
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          * @see SQLExecutor#streamAll(Class, String, StatementSetter, JdbcSettings, Object...)
          */
         public Stream<T> streamAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -5343,12 +7381,13 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropName
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public <R> Stream<R> streamAll(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5358,12 +7397,13 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropName
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public <R> Stream<R> streamAll(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5373,12 +7413,13 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropNames
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public <R> Stream<R> streamAll(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5398,11 +7439,13 @@ public class SQLExecutor implements Closeable {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *  
-         * @param selectPropNames
-         * @param rowMapper
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the stream
          */
         public <R> Stream<R> streamAll(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -5411,26 +7454,71 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.streamAll(sp.sql, StatementSetter.DEFAULT, rowMapper, jdbcSettings, sp.parameters.toArray());
         }
 
+        /**
+         * Query.
+         *
+         * @param whereCause the where cause
+         * @return the data set
+         */
         public DataSet query(final Condition whereCause) {
             return query((Collection<String>) null, whereCause);
         }
 
+        /**
+         * Query.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the data set
+         */
         public DataSet query(final Collection<String> selectPropNames, final Condition whereCause) {
             return query(selectPropNames, whereCause, null);
         }
 
+        /**
+         * Query.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the data set
+         */
         public DataSet query(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return query(null, selectPropNames, whereCause, jdbcSettings);
         }
 
+        /**
+         * Query.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the data set
+         */
         public DataSet query(final Connection conn, final Condition whereCause) {
             return query(conn, null, whereCause);
         }
 
+        /**
+         * Query.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the data set
+         */
         public DataSet query(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return query(conn, selectPropNames, whereCause, null);
         }
 
+        /**
+         * Query.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the data set
+         */
         public DataSet query(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
 
@@ -5440,10 +7528,10 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the data set
          * @see SQLExecutor#queryAll(String, StatementSetter, JdbcSettings, Object...)
          */
         public DataSet queryAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -5453,11 +7541,11 @@ public class SQLExecutor implements Closeable {
         /**
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
-         * 
-         * @param selectPropNames
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the data set
          * @see SQLExecutor#queryAll(String, StatementSetter, JdbcSettings, Object...)
          */
         public DataSet queryAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -5467,10 +7555,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for boolean.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the optional boolean
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalBoolean queryForBoolean(final String selectPropName, final Condition whereCause) {
@@ -5480,10 +7569,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for char.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the optional char
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalChar queryForChar(final String selectPropName, final Condition whereCause) {
@@ -5493,10 +7583,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for byte.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the optional byte
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalByte queryForByte(final String selectPropName, final Condition whereCause) {
@@ -5506,10 +7597,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for short.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the optional short
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalShort queryForShort(final String selectPropName, final Condition whereCause) {
@@ -5519,10 +7611,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for int.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the optional int
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalInt queryForInt(final String selectPropName, final Condition whereCause) {
@@ -5532,10 +7625,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for long.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the optional long
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalLong queryForLong(final String selectPropName, final Condition whereCause) {
@@ -5545,10 +7639,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for float.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the optional float
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalFloat queryForFloat(final String selectPropName, final Condition whereCause) {
@@ -5558,10 +7653,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for double.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the optional double
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalDouble queryForDouble(final String selectPropName, final Condition whereCause) {
@@ -5571,10 +7667,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for big decimal.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<BigDecimal> queryForBigDecimal(final String selectPropName, final Condition whereCause) {
@@ -5584,10 +7681,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for string.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<String> queryForString(final String selectPropName, final Condition whereCause) {
@@ -5597,10 +7695,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for date.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<java.sql.Date> queryForDate(final String selectPropName, final Condition whereCause) {
@@ -5610,10 +7709,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for time.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<java.sql.Time> queryForTime(final String selectPropName, final Condition whereCause) {
@@ -5623,10 +7723,11 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for timestamp.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<java.sql.Timestamp> queryForTimestamp(final String selectPropName, final Condition whereCause) {
@@ -5636,11 +7737,13 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param selectPropName
-         * @param id
-         * @return
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param id the id
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final ID id) {
@@ -5648,11 +7751,13 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause) {
@@ -5660,12 +7765,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param selectPropName
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause,
@@ -5674,12 +7781,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param conn
-         * @param selectPropName
-         * @param id
-         * @return
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param id the id
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName, final ID id) {
@@ -5687,12 +7796,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param conn
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
@@ -5702,13 +7813,14 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Returns a {@code Nullable} describing the value in the first row/column if it exists, otherwise return an empty {@code Nullable}.
-         * 
-         * @param targetValueClass
-         * @param conn
-         * @param selectPropName
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the nullable
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
@@ -5719,11 +7831,13 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param selectPropName
-         * @param id
-         * @return
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param id the id
+         * @return the nullable
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final ID id)
@@ -5732,12 +7846,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param selectPropName
-         * @param whereCause
-         * @return
-         * @throws DuplicatedResultException
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
+         * @throws DuplicatedResultException the duplicated result exception
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause)
                 throws DuplicatedResultException {
@@ -5745,12 +7861,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param selectPropName
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the nullable
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause,
@@ -5759,12 +7877,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param conn
-         * @param selectPropName
-         * @param id
-         * @return
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param id the id
+         * @return the nullable
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName, final ID id)
@@ -5773,12 +7893,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param conn
-         * @param selectPropName
-         * @param whereCause
-         * @return
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the nullable
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
@@ -5787,13 +7909,15 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param targetValueClass
-         * @param conn
-         * @param selectPropName
-         * @param whereCause
-         * @param jdbcSettings
-         * @return
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the nullable
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
@@ -5803,10 +7927,25 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.queryForUniqueResult(targetValueClass, conn, sp.sql, StatementSetter.DEFAULT, jdbcSettings, sp.parameters.toArray());
         }
 
+        /**
+         * Prepare query.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the sp
+         */
         private SP prepareQuery(final Collection<String> selectPropNames, final Condition whereCause) {
             return prepareQuery(selectPropNames, whereCause, 0);
         }
 
+        /**
+         * Prepare query.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param count the count
+         * @return the sp
+         */
         private SP prepareQuery(Collection<String> selectPropNames, final Condition whereCause, final int count) {
             if (N.isNullOrEmpty(selectPropNames)) {
                 selectPropNames = defaultSelectPropNameList;
@@ -5864,31 +8003,54 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Insert the specified entity into data store, and set back the auto-generated id to the specified entity if there is the auto-generated id.
-         * 
-         * @param entity
+         *
+         * @param entity the entity
          * @return the auto-generated id or null if there is no auto-generated id.
          */
         public ID insert(final T entity) {
             return insert(null, entity);
         }
 
+        /**
+         * Insert.
+         *
+         * @param entity the entity
+         * @param propNamesToInsert the prop names to insert
+         * @return the id
+         */
         public ID insert(final T entity, final Collection<String> propNamesToInsert) {
             return insert(null, entity, propNamesToInsert);
         }
 
         /**
-         * 
-         * @param props
+         * Insert.
+         *
+         * @param props the props
          * @return the auto-generated id or null if there is no auto-generated id.
          */
         public ID insert(final Map<String, Object> props) {
             return insert(null, props);
         }
 
+        /**
+         * Insert.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @return the id
+         */
         public ID insert(final Connection conn, final T entity) {
             return insert(conn, entity, null);
         }
 
+        /**
+         * Insert.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @param propNamesToInsert the prop names to insert
+         * @return the id
+         */
         public ID insert(final Connection conn, final T entity, final Collection<String> propNamesToInsert) {
             N.checkArgNotNull(entity);
 
@@ -5898,8 +8060,10 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * @param conn
-         * @param props
+         * Insert.
+         *
+         * @param conn the conn
+         * @param props the props
          * @return the auto-generated id or null if there is no auto-generated id.
          */
         public ID insert(final Connection conn, final Map<String, Object> props) {
@@ -5910,40 +8074,83 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.insert(conn, sql, props);
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @return the list
+         */
         public List<ID> batchInsert(final Collection<? extends T> entities) {
             return batchInsert(entities, JdbcSettings.DEFAULT_BATCH_SIZE);
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the list
+         */
         public List<ID> batchInsert(final Collection<? extends T> entities, final int batchSize) {
             return batchInsert(entities, batchSize, IsolationLevel.DEFAULT);
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the list
+         */
         public List<ID> batchInsert(final Collection<? extends T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return batchInsert(entities, null, batchSize, isolationLevel);
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @param propNamesToInsert the prop names to insert
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the list
+         */
         public List<ID> batchInsert(final Collection<? extends T> entities, final Collection<String> propNamesToInsert, final int batchSize,
                 final IsolationLevel isolationLevel) {
             return batchInsert(null, entities, propNamesToInsert, batchSize, isolationLevel);
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @return the list
+         */
         public List<ID> batchInsert(final Connection conn, final Collection<? extends T> entities) {
             return batchInsert(conn, entities, JdbcSettings.DEFAULT_BATCH_SIZE);
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the list
+         */
         public List<ID> batchInsert(final Connection conn, final Collection<? extends T> entities, final int batchSize) {
             return batchInsert(conn, entities, null, batchSize);
         }
 
         /**
          * Insert All the records by batch operation. And set back auto-generated ids to the specified entities if there are the auto-generated ids.
-         * 
-         * @param conn
-         * @param entities which must have the same properties set for insertion.
-         * @param batchSize Default value is 200.
-         * @param entities
-         * @param propNamesToInsert
-         * @param batchSize
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param propNamesToInsert the prop names to insert
+         * @param batchSize the batch size
          * @return the auto-generated id list or an empty list if there is no auto-generated id.
          */
         public List<ID> batchInsert(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToInsert,
@@ -5951,6 +8158,16 @@ public class SQLExecutor implements Closeable {
             return batchInsert(conn, entities, propNamesToInsert, batchSize, IsolationLevel.DEFAULT);
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param propNamesToInsert the prop names to insert
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the list
+         */
         @SuppressWarnings("deprecation")
         private List<ID> batchInsert(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToInsert,
                 final int batchSize, final IsolationLevel isolationLevel) {
@@ -5991,6 +8208,13 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.batchInsert(conn, sql, StatementSetter.DEFAULT, jdbcSettings, parametersList);
         }
 
+        /**
+         * Prepare insert sql.
+         *
+         * @param entity the entity
+         * @param propNamesToInsert the prop names to insert
+         * @return the string
+         */
         @SuppressWarnings("deprecation")
         private String prepareInsertSql(final T entity, final Collection<String> propNamesToInsert) {
             checkEntity(entity);
@@ -6018,12 +8242,24 @@ public class SQLExecutor implements Closeable {
             return prepareInsertSql(insertingPropNames);
         }
 
+        /**
+         * Prepare insert sql.
+         *
+         * @param props the props
+         * @return the string
+         */
         private String prepareInsertSql(final Map<String, Object> props) {
             N.checkArgument(N.notNullOrEmpty(props), "props");
 
             return prepareInsertSql(props.keySet());
         }
 
+        /**
+         * Prepare insert sql.
+         *
+         * @param insertingPropNames the inserting prop names
+         * @return the string
+         */
         private String prepareInsertSql(final Collection<String> insertingPropNames) {
             N.checkArgument(N.notNullOrEmpty(insertingPropNames), "insertingPropNames");
 
@@ -6044,9 +8280,9 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Execute {@code add} and return the added entity if the record doesn't, otherwise, {@code update} is executed and updated db record is returned. 
-         * 
-         * @param entity
-         * @return  
+         *
+         * @param entity the entity
+         * @return the t
          */
         public T upsert(final T entity) {
             final T dbEntity = idPropNameList.size() == 1 ? gett((ID) ClassUtil.getPropValue(entity, idPropName)) : gett((ID) entity);
@@ -6063,10 +8299,10 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Execute {@code add} and return the added entity if the record doesn't, otherwise, {@code update} is executed and updated db record is returned. 
-         * 
-         * @param entity
+         *
+         * @param entity the entity
          * @param whereCause to verify if the record exists or not.
-         * @return
+         * @return the t
          */
         public T upsert(final T entity, final Condition whereCause) {
             N.checkArgNotNull(whereCause, "whereCause");
@@ -6083,6 +8319,12 @@ public class SQLExecutor implements Closeable {
             }
         }
 
+        /**
+         * Refresh.
+         *
+         * @param entity the entity
+         * @return true, if successful
+         */
         public boolean refresh(final T entity) {
             final Collection<String> propNamesToRefresh = DirtyMarkerUtil.isDirtyMarker(entity.getClass())
                     ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity)
@@ -6092,9 +8334,10 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param entity
-         * @param propNamesToRefresh
+         * Refresh.
+         *
+         * @param entity the entity
+         * @param propNamesToRefresh the prop names to refresh
          * @return {@code false} if no record found by the ids in the specified {@code entity}.
          */
         public boolean refresh(final T entity, Collection<String> propNamesToRefresh) {
@@ -6118,26 +8361,68 @@ public class SQLExecutor implements Closeable {
             }
         }
 
+        /**
+         * Update.
+         *
+         * @param entity the entity
+         * @return the int
+         */
         public int update(final T entity) {
             return update(entity, (Collection<String>) null);
         }
 
+        /**
+         * Update.
+         *
+         * @param entity the entity
+         * @param propNamesToUpdate the prop names to update
+         * @return the int
+         */
         public int update(final T entity, final Collection<String> propNamesToUpdate) {
             return update((Connection) null, entity, propNamesToUpdate);
         }
 
+        /**
+         * Update.
+         *
+         * @param props the props
+         * @param id the id
+         * @return the int
+         */
         public int update(final Map<String, Object> props, final ID id) {
             return update((Connection) null, props, id);
         }
 
+        /**
+         * Update.
+         *
+         * @param props the props
+         * @param whereCause the where cause
+         * @return the int
+         */
         public int update(final Map<String, Object> props, final Condition whereCause) {
             return update((Connection) null, props, whereCause);
         }
 
+        /**
+         * Update.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @return the int
+         */
         public int update(final Connection conn, final T entity) {
             return update(conn, entity, (Collection<String>) null);
         }
 
+        /**
+         * Update.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @param propNamesToUpdate the prop names to update
+         * @return the int
+         */
         public int update(final Connection conn, final T entity, final Collection<String> propNamesToUpdate) {
             N.checkArgNotNull(entity);
 
@@ -6154,12 +8439,28 @@ public class SQLExecutor implements Closeable {
             return updateCount;
         }
 
+        /**
+         * Update.
+         *
+         * @param conn the conn
+         * @param props the props
+         * @param id the id
+         * @return the int
+         */
         public int update(final Connection conn, final Map<String, Object> props, final ID id) {
             N.checkArgNotNull(id);
 
             return update(conn, props, id2Cond(id, false));
         }
 
+        /**
+         * Update.
+         *
+         * @param conn the conn
+         * @param props the props
+         * @param whereCause the where cause
+         * @return the int
+         */
         public int update(final Connection conn, final Map<String, Object> props, final Condition whereCause) {
             N.checkArgNotNull(props);
             N.checkArgNotNull(whereCause);
@@ -6175,65 +8476,132 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Update All the records by batch operation.
-         * 
+         *
          * @param entities which must have the same properties set for update.
-         * @return
+         * @return the int
          */
         public int batchUpdate(final Collection<? extends T> entities) {
             return batchUpdate(entities, (Collection<String>) null);
         }
 
         /**
-         * 
-         * @param entities
-         * @param propNamesToUpdate
-         * @return
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @return the int
          */
         public int batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate) {
             return batchUpdate(entities, propNamesToUpdate, JdbcSettings.DEFAULT_BATCH_SIZE);
         }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the int
+         */
         public int batchUpdate(final Collection<? extends T> entities, final int batchSize) {
             return batchUpdate(entities, (Collection<String>) null, batchSize);
         }
 
         /**
          * Update All the records by batch operation.
-         * 
+         *
          * @param entities which must have the same properties set for update.
-         * @param propNamesToUpdate
+         * @param propNamesToUpdate the prop names to update
          * @param batchSize Default value is 200.
-         * @return
+         * @return the int
          */
         public int batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize) {
             return batchUpdate(entities, propNamesToUpdate, batchSize, IsolationLevel.DEFAULT);
         }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the int
+         */
         public int batchUpdate(final Collection<? extends T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return batchUpdate(entities, (Collection<String>) null, batchSize, isolationLevel);
         }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the int
+         */
         public int batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize,
                 final IsolationLevel isolationLevel) {
             return batchUpdate((Connection) null, entities, propNamesToUpdate, batchSize, isolationLevel);
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @return the int
+         */
         public int batchUpdate(final Connection conn, final Collection<? extends T> entities) {
             return batchUpdate(conn, entities, (Collection<String>) null);
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @return the int
+         */
         public int batchUpdate(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToUpdate) {
             return batchUpdate(conn, entities, propNamesToUpdate, JdbcSettings.DEFAULT_BATCH_SIZE);
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the int
+         */
         public int batchUpdate(final Connection conn, final Collection<? extends T> entities, final int batchSize) {
             return batchUpdate(conn, entities, (Collection<String>) null, batchSize);
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @param batchSize the batch size
+         * @return the int
+         */
         public int batchUpdate(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize) {
             return batchUpdate(conn, entities, propNamesToUpdate, batchSize, IsolationLevel.DEFAULT);
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the int
+         */
         @SuppressWarnings("deprecation")
         private int batchUpdate(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize,
                 final IsolationLevel isolationLevel) {
@@ -6271,6 +8639,13 @@ public class SQLExecutor implements Closeable {
             return updateCount;
         }
 
+        /**
+         * Prepare update sql.
+         *
+         * @param entity the entity
+         * @param propNamesToUpdate the prop names to update
+         * @return the string
+         */
         private String prepareUpdateSql(final T entity, final Collection<String> propNamesToUpdate) {
             checkEntity(entity);
 
@@ -6288,6 +8663,13 @@ public class SQLExecutor implements Closeable {
             return prepareUpdateSql(updatingpropNames);
         }
 
+        /**
+         * Prepare update.
+         *
+         * @param props the props
+         * @param whereCause the where cause
+         * @return the sp
+         */
         private SP prepareUpdate(final Map<String, Object> props, final Condition whereCause) {
             N.checkArgument(N.notNullOrEmpty(props), "props");
 
@@ -6306,6 +8688,12 @@ public class SQLExecutor implements Closeable {
             }
         }
 
+        /**
+         * Prepare update sql.
+         *
+         * @param propNamesToUpdate the prop names to update
+         * @return the string
+         */
         private String prepareUpdateSql(final Collection<String> propNamesToUpdate) {
             N.checkArgument(N.notNullOrEmpty(propNamesToUpdate), "propNamesToUpdate");
 
@@ -6349,10 +8737,23 @@ public class SQLExecutor implements Closeable {
         //        }
         //    }
 
+        /**
+         * Delete.
+         *
+         * @param whereCause the where cause
+         * @return the int
+         */
         public int delete(final Condition whereCause) {
             return delete(null, whereCause);
         }
 
+        /**
+         * Delete.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the int
+         */
         public int delete(final Connection conn, final Condition whereCause) {
             N.checkArgNotNull(whereCause);
 
@@ -6367,19 +8768,21 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param entity
-         * @return 
+         * Delete.
+         *
+         * @param entity the entity
+         * @return the int
          */
         public int delete(final T entity) {
             return delete(null, entity);
         }
 
         /**
-         * 
-         * @param conn
-         * @param entity
-         * @return 
+         * Delete.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @return the int
          */
         public int delete(final Connection conn, final T entity) {
             N.checkArgNotNull(entity);
@@ -6390,9 +8793,9 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param entities
-         * @return 
+         *
+         * @param entities the entities
+         * @return the int
          */
         public int batchDelete(final Collection<T> entities) {
             return batchDelete(entities, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -6400,10 +8803,10 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param entities
+         *
+         * @param entities the entities
          * @param batchSize Default value is 200.
-         * @return
+         * @return the int
          */
         public int batchDelete(final Collection<T> entities, final int batchSize) {
             return batchDelete(entities, batchSize, IsolationLevel.DEFAULT);
@@ -6411,11 +8814,11 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param entities
+         *
+         * @param entities the entities
          * @param batchSize Default value is 200.
-         * @param isolationLevel
-         * @return
+         * @param isolationLevel the isolation level
+         * @return the int
          */
         public int batchDelete(final Collection<T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return batchDelete(null, entities, batchSize, isolationLevel);
@@ -6423,10 +8826,10 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param conn
-         * @param entities
-         * @return
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @return the int
          */
         public int batchDelete(final Connection conn, final Collection<T> entities) {
             return batchDelete(conn, entities, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -6434,16 +8837,25 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param conn
-         * @param entities
-         * @param batchSize
-         * @return 
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the int
          */
         public int batchDelete(final Connection conn, final Collection<T> entities, final int batchSize) {
             return batchDelete(conn, entities, batchSize, IsolationLevel.DEFAULT);
         }
 
+        /**
+         * Batch delete.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the int
+         */
         private int batchDelete(final Connection conn, final Collection<T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             N.checkArgPositive(batchSize, "batchSize");
 
@@ -6457,6 +8869,12 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.batchUpdate(conn, sql_delete_by_id, jdbcSettings, ids);
         }
 
+        /**
+         * Prepare delete.
+         *
+         * @param whereCause the where cause
+         * @return the sp
+         */
         private SP prepareDelete(final Condition whereCause) {
             SP sp = null;
 
@@ -6483,10 +8901,23 @@ public class SQLExecutor implements Closeable {
             return sp;
         }
 
+        /**
+         * Delete by id.
+         *
+         * @param id the id
+         * @return the int
+         */
         public int deleteById(final ID id) {
             return deleteById(null, id);
         }
 
+        /**
+         * Delete by id.
+         *
+         * @param conn the conn
+         * @param id the id
+         * @return the int
+         */
         public int deleteById(final Connection conn, final ID id) {
             N.checkArgNotNull(id);
             checkId(id);
@@ -6496,9 +8927,9 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param ids
-         * @return
+         *
+         * @param ids the ids
+         * @return the int
          */
         public int batchDeleteByIds(final Collection<ID> ids) {
             return batchDeleteByIds(ids, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -6506,10 +8937,10 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param ids
+         *
+         * @param ids the ids
          * @param batchSize Default value is 200.
-         * @return
+         * @return the int
          */
         public int batchDeleteByIds(final Collection<ID> ids, final int batchSize) {
             return batchDeleteByIds(ids, batchSize, IsolationLevel.DEFAULT);
@@ -6517,11 +8948,11 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param ids
+         *
+         * @param ids the ids
          * @param batchSize Default value is 200.
-         * @param isolationLevel
-         * @return
+         * @param isolationLevel the isolation level
+         * @return the int
          */
         public int batchDeleteByIds(final Collection<ID> ids, final int batchSize, final IsolationLevel isolationLevel) {
             return batchDeleteByIds(null, ids, batchSize, isolationLevel);
@@ -6529,10 +8960,10 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param conn
-         * @param ids
-         * @return
+         *
+         * @param conn the conn
+         * @param ids the ids
+         * @return the int
          */
         public int batchDeleteByIds(final Connection conn, final Collection<ID> ids) {
             return batchDeleteByIds(conn, ids, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -6540,16 +8971,25 @@ public class SQLExecutor implements Closeable {
 
         /**
          * Delete all the records by batch operation.
-         * 
-         * @param conn
-         * @param ids
-         * @param batchSize
-         * @return
+         *
+         * @param conn the conn
+         * @param ids the ids
+         * @param batchSize the batch size
+         * @return the int
          */
         public int batchDeleteByIds(final Connection conn, final Collection<ID> ids, final int batchSize) {
             return batchDeleteByIds(conn, ids, batchSize, IsolationLevel.DEFAULT);
         }
 
+        /**
+         * Batch delete by ids.
+         *
+         * @param conn the conn
+         * @param ids the ids
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the int
+         */
         private int batchDeleteByIds(final Connection conn, final Collection<ID> ids, final int batchSize, final IsolationLevel isolationLevel) {
             N.checkArgPositive(batchSize, "batchSize");
 
@@ -6566,14 +9006,32 @@ public class SQLExecutor implements Closeable {
             return sqlExecutor.batchUpdate(conn, sql_delete_by_id, jdbcSettings, listOfIds);
         }
 
+        /**
+         * Check id.
+         *
+         * @param id the id
+         */
         private void checkId(final Object id) {
             N.checkArgument(idPropNameList.size() > 1 || !(id instanceof Map || isEntity(id)), "Input 'id' can not be Map or entity for single id ");
         }
 
+        /**
+         * Checks if is entity.
+         *
+         * @param obj the obj
+         * @return true, if is entity
+         */
         private boolean isEntity(Object obj) {
             return obj != null && ClassUtil.isEntity(obj.getClass());
         }
 
+        /**
+         * Id 2 cond.
+         *
+         * @param id the id
+         * @param isIdOrEntity the is id or entity
+         * @return the condition
+         */
         private Condition id2Cond(final Object id, boolean isIdOrEntity) {
             if (isIdOrEntity == false) {
                 checkId(id);
@@ -6598,6 +9056,11 @@ public class SQLExecutor implements Closeable {
             }
         }
 
+        /**
+         * Check entity.
+         *
+         * @param entity the entity
+         */
         private void checkEntity(final Object entity) {
             final Class<?> cls = entity.getClass();
 
@@ -6606,20 +9069,47 @@ public class SQLExecutor implements Closeable {
             }
         }
 
+        /**
+         * To stirng.
+         *
+         * @return the string
+         */
         public String toStirng() {
             return "Mapper[" + ClassUtil.getCanonicalClassName(targetClass) + "]";
         }
     }
 
+    /**
+     * The Class AsyncMapper.
+     *
+     * @param <T> the generic type
+     * @param <ID> the generic type
+     */
     public static final class AsyncMapper<T, ID> {
+
+        /** The mapper. */
         private final Mapper<T, ID> mapper;
+
+        /** The async executor. */
         private final AsyncExecutor asyncExecutor;
 
+        /**
+         * Instantiates a new async mapper.
+         *
+         * @param mapper the mapper
+         * @param asyncExecutor the async executor
+         */
         AsyncMapper(Mapper<T, ID> mapper, AsyncExecutor asyncExecutor) {
             this.mapper = mapper;
             this.asyncExecutor = asyncExecutor;
         }
 
+        /**
+         * Exists.
+         *
+         * @param id the id
+         * @return the continuable future
+         */
         public ContinuableFuture<Boolean> exists(final ID id) {
             return asyncExecutor.execute(new Callable<Boolean>() {
                 @Override
@@ -6629,6 +9119,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Exists.
+         *
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Boolean> exists(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Boolean>() {
                 @Override
@@ -6638,6 +9134,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Exists.
+         *
+         * @param conn the conn
+         * @param id the id
+         * @return the continuable future
+         */
         public ContinuableFuture<Boolean> exists(final Connection conn, final ID id) {
             return asyncExecutor.execute(new Callable<Boolean>() {
                 @Override
@@ -6647,6 +9150,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Exists.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Boolean> exists(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Boolean>() {
                 @Override
@@ -6656,6 +9166,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Count.
+         *
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> count(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -6665,6 +9181,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Count.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> count(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -6674,6 +9197,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Gets the.
+         *
+         * @param id the id
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> get(final ID id) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
                 @Override
@@ -6701,6 +9230,13 @@ public class SQLExecutor implements Closeable {
         //        });
         //    }
 
+        /**
+         * Gets the.
+         *
+         * @param id the id
+         * @param selectPropNames the select prop names
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> get(final ID id, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
                 @Override
@@ -6710,6 +9246,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Gets the.
+         *
+         * @param conn the conn
+         * @param id the id
+         * @param selectPropNames the select prop names
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> get(final Connection conn, final ID id, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
                 @Override
@@ -6719,6 +9263,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Gets the t.
+         *
+         * @param id the id
+         * @return the t
+         */
         public ContinuableFuture<T> gett(final ID id) {
             return asyncExecutor.execute(new Callable<T>() {
                 @Override
@@ -6746,6 +9296,13 @@ public class SQLExecutor implements Closeable {
         //        });
         //    }
 
+        /**
+         * Gets the t.
+         *
+         * @param id the id
+         * @param selectPropNames the select prop names
+         * @return the t
+         */
         public ContinuableFuture<T> gett(final ID id, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<T>() {
                 @Override
@@ -6755,6 +9312,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Gets the t.
+         *
+         * @param conn the conn
+         * @param id the id
+         * @param selectPropNames the select prop names
+         * @return the t
+         */
         public ContinuableFuture<T> gett(final Connection conn, final ID id, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<T>() {
                 @Override
@@ -6764,6 +9329,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch get.
+         *
+         * @param ids the ids
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> batchGet(final List<ID> ids) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -6790,6 +9361,13 @@ public class SQLExecutor implements Closeable {
         //        });
         //    }
 
+        /**
+         * Batch get.
+         *
+         * @param ids the ids
+         * @param selectPropNames the select prop names
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> batchGet(final List<ID> ids, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -6799,6 +9377,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch get.
+         *
+         * @param ids the ids
+         * @param selectPropNames the select prop names
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> batchGet(final List<ID> ids, final Collection<String> selectPropNames, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -6808,6 +9394,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch get.
+         *
+         * @param conn the conn
+         * @param ids the ids
+         * @param selectPropNames the select prop names
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> batchGet(final Connection conn, final List<ID> ids, final Collection<String> selectPropNames, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -6817,6 +9412,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> findFirst(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
                 @Override
@@ -6826,6 +9427,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> findFirst(final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
                 @Override
@@ -6835,6 +9443,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> findFirst(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
                 @Override
@@ -6844,6 +9460,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> findFirst(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
                 @Override
@@ -6853,6 +9476,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> findFirst(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
                 @Override
@@ -6862,6 +9493,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<Optional<T>> findFirst(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -6872,6 +9512,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
                 @Override
@@ -6881,6 +9530,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6891,6 +9550,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6901,6 +9570,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6911,6 +9591,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6921,6 +9610,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6931,6 +9630,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final Collection<String> selectPropNames,
                 final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6941,6 +9650,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final Collection<String> selectPropNames,
                 final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6951,6 +9671,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
                 @Override
@@ -6960,6 +9689,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6970,6 +9709,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6980,6 +9729,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -6990,6 +9750,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -7000,6 +9769,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -7010,6 +9789,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final Collection<String> selectPropNames,
                 final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -7020,6 +9809,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Find first.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final Collection<String> selectPropNames,
                 final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -7030,6 +9830,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> list(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -7039,6 +9845,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> list(final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -7048,6 +9861,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> list(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -7057,6 +9878,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> list(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -7066,6 +9894,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> list(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -7075,6 +9911,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> list(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -7085,6 +9930,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
                 @Override
@@ -7094,6 +9948,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7104,6 +9968,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7114,6 +9988,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7124,6 +10009,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7134,6 +10028,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7144,6 +10048,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7154,6 +10068,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7164,6 +10089,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
                 @Override
@@ -7173,6 +10107,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7183,6 +10127,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7193,6 +10147,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7203,6 +10168,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7213,6 +10187,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7223,6 +10207,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7233,6 +10227,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List.
+         *
+         * @param <R> the generic type
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7243,6 +10248,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List all.
+         *
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> listAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -7252,6 +10264,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List all.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<List<T>> listAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<T>>() {
                 @Override
@@ -7261,6 +10281,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List all.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> listAll(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7271,6 +10301,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List all.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> listAll(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7281,6 +10321,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List all.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> listAll(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7291,6 +10341,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * List all.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<List<R>> listAll(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -7301,6 +10361,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Stream<T>> stream(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
                 @Override
@@ -7310,6 +10376,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Stream<T>> stream(final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
                 @Override
@@ -7319,6 +10392,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<Stream<T>> stream(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
                 @Override
@@ -7328,6 +10409,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> stream(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
                 @Override
@@ -7337,6 +10427,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> stream(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7347,6 +10447,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> stream(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7357,6 +10466,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> stream(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7367,6 +10486,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> stream(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
                 @Override
@@ -7376,6 +10504,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> stream(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7386,6 +10524,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> stream(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7396,6 +10543,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> stream(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7406,6 +10563,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream all.
+         *
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<Stream<T>> streamAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
                 @Override
@@ -7415,6 +10579,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream all.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<Stream<T>> streamAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
                 @Override
@@ -7424,6 +10596,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream all.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> streamAll(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7434,6 +10616,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream all.
+         *
+         * @param <R> the generic type
+         * @param selectPropName the select prop name
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> streamAll(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7444,6 +10636,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream all.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> streamAll(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7454,6 +10656,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Stream all.
+         *
+         * @param <R> the generic type
+         * @param selectPropNames the select prop names
+         * @param rowMapper the row mapper
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <R> ContinuableFuture<Stream<R>> streamAll(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -7464,6 +10676,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query.
+         *
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<DataSet> query(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<DataSet>() {
                 @Override
@@ -7473,6 +10691,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<DataSet> query(final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<DataSet>() {
                 @Override
@@ -7482,6 +10707,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<DataSet> query(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<DataSet>() {
                 @Override
@@ -7491,6 +10724,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<DataSet> query(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<DataSet>() {
                 @Override
@@ -7500,6 +10740,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<DataSet> query(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<DataSet>() {
                 @Override
@@ -7509,6 +10757,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query.
+         *
+         * @param conn the conn
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<DataSet> query(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<DataSet>() {
@@ -7519,6 +10776,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query all.
+         *
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<DataSet> queryAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<DataSet>() {
                 @Override
@@ -7528,6 +10792,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query all.
+         *
+         * @param selectPropNames the select prop names
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public ContinuableFuture<DataSet> queryAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<DataSet>() {
                 @Override
@@ -7537,6 +10809,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for boolean.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<OptionalBoolean> queryForBoolean(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalBoolean>() {
                 @Override
@@ -7546,6 +10825,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for byte.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<OptionalByte> queryForByte(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalByte>() {
                 @Override
@@ -7555,6 +10841,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for short.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<OptionalShort> queryForShort(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalShort>() {
                 @Override
@@ -7564,6 +10857,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for int.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<OptionalInt> queryForInt(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalInt>() {
                 @Override
@@ -7573,6 +10873,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for long.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<OptionalLong> queryForLong(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalLong>() {
                 @Override
@@ -7582,6 +10889,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for float.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<OptionalFloat> queryForFloat(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalFloat>() {
                 @Override
@@ -7591,6 +10905,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for double.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<OptionalDouble> queryForDouble(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalDouble>() {
                 @Override
@@ -7600,6 +10921,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for big decimal.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Nullable<BigDecimal>> queryForBigDecimal(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<BigDecimal>>() {
                 @Override
@@ -7609,6 +10937,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for string.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Nullable<String>> queryForString(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<String>>() {
                 @Override
@@ -7618,6 +10953,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for date.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Nullable<java.sql.Date>> queryForDate(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<java.sql.Date>>() {
                 @Override
@@ -7627,6 +10969,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for time.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Nullable<java.sql.Time>> queryForTime(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<java.sql.Time>>() {
                 @Override
@@ -7636,6 +10985,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for timestamp.
+         *
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Nullable<java.sql.Timestamp>> queryForTimestamp(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<java.sql.Timestamp>>() {
                 @Override
@@ -7645,6 +11001,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param id the id
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final ID id) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
                 @Override
@@ -7654,6 +11019,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7664,6 +11038,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7674,6 +11058,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param id the id
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final ID id) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7684,6 +11078,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7694,6 +11098,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for single result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7704,6 +11119,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param id the id
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final ID id) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
                 @Override
@@ -7713,6 +11137,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7723,6 +11156,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7733,6 +11176,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param id the id
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final ID id) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7743,6 +11196,16 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7753,6 +11216,17 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Query for unique result.
+         *
+         * @param <V> the value type
+         * @param targetValueClass the target value class
+         * @param conn the conn
+         * @param selectPropName the select prop name
+         * @param whereCause the where cause
+         * @param jdbcSettings the jdbc settings
+         * @return the continuable future
+         */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -7763,6 +11237,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Insert.
+         *
+         * @param entity the entity
+         * @return the continuable future
+         */
         public ContinuableFuture<ID> insert(final T entity) {
             return asyncExecutor.execute(new Callable<ID>() {
                 @Override
@@ -7772,6 +11252,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Insert.
+         *
+         * @param entity the entity
+         * @param propNamesToInsert the prop names to insert
+         * @return the continuable future
+         */
         public ContinuableFuture<ID> insert(final T entity, final Collection<String> propNamesToInsert) {
             return asyncExecutor.execute(new Callable<ID>() {
                 @Override
@@ -7781,6 +11268,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Insert.
+         *
+         * @param props the props
+         * @return the continuable future
+         */
         public ContinuableFuture<ID> insert(final Map<String, Object> props) {
             return asyncExecutor.execute(new Callable<ID>() {
                 @Override
@@ -7790,6 +11283,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Insert.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @return the continuable future
+         */
         public ContinuableFuture<ID> insert(final Connection conn, final T entity) {
             return asyncExecutor.execute(new Callable<ID>() {
                 @Override
@@ -7799,6 +11299,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Insert.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @param propNamesToInsert the prop names to insert
+         * @return the continuable future
+         */
         public ContinuableFuture<ID> insert(final Connection conn, final T entity, final Collection<String> propNamesToInsert) {
             return asyncExecutor.execute(new Callable<ID>() {
                 @Override
@@ -7808,6 +11316,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Insert.
+         *
+         * @param conn the conn
+         * @param props the props
+         * @return the continuable future
+         */
         public ContinuableFuture<ID> insert(final Connection conn, final Map<String, Object> props) {
             return asyncExecutor.execute(new Callable<ID>() {
                 @Override
@@ -7847,6 +11362,12 @@ public class SQLExecutor implements Closeable {
         //            });
         //        }
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @return the continuable future
+         */
         public ContinuableFuture<List<ID>> batchInsert(final Collection<? extends T> entities) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
                 @Override
@@ -7856,6 +11377,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<List<ID>> batchInsert(final Collection<? extends T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
                 @Override
@@ -7865,6 +11393,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the continuable future
+         */
         public ContinuableFuture<List<ID>> batchInsert(final Collection<? extends T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
                 @Override
@@ -7874,6 +11410,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param entities the entities
+         * @param propNamesToInsert the prop names to insert
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the continuable future
+         */
         public ContinuableFuture<List<ID>> batchInsert(final Collection<? extends T> entities, final Collection<String> propNamesToInsert, final int batchSize,
                 final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
@@ -7884,6 +11429,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @return the continuable future
+         */
         public ContinuableFuture<List<ID>> batchInsert(final Connection conn, final Collection<? extends T> entities) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
                 @Override
@@ -7893,6 +11445,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<List<ID>> batchInsert(final Connection conn, final Collection<? extends T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
                 @Override
@@ -7902,6 +11462,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch insert.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param propNamesToInsert the prop names to insert
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<List<ID>> batchInsert(final Connection conn, final Collection<? extends T> entities,
                 final Collection<String> propNamesToInsert, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
@@ -7912,6 +11481,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Upsert.
+         *
+         * @param entity the entity
+         * @return the continuable future
+         */
         public ContinuableFuture<T> upsert(final T entity) {
             return asyncExecutor.execute(new Callable<T>() {
                 @Override
@@ -7921,6 +11496,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Upsert.
+         *
+         * @param entity the entity
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<T> upsert(final T entity, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<T>() {
                 @Override
@@ -7930,6 +11512,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Refresh.
+         *
+         * @param entity the entity
+         * @return the continuable future
+         */
         public ContinuableFuture<Boolean> refresh(final T entity) {
             return asyncExecutor.execute(new Callable<Boolean>() {
                 @Override
@@ -7939,6 +11527,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Refresh.
+         *
+         * @param entity the entity
+         * @param propNamesToUpdate the prop names to update
+         * @return the continuable future
+         */
         public ContinuableFuture<Boolean> refresh(final T entity, final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Boolean>() {
                 @Override
@@ -7948,6 +11543,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Update.
+         *
+         * @param entity the entity
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> update(final T entity) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -7957,6 +11558,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Update.
+         *
+         * @param entity the entity
+         * @param propNamesToUpdate the prop names to update
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> update(final T entity, final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -7966,6 +11574,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Update.
+         *
+         * @param props the props
+         * @param id the id
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> update(final Map<String, Object> props, final ID id) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -7975,6 +11590,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Update.
+         *
+         * @param props the props
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> update(final Map<String, Object> props, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -7984,6 +11606,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Update.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> update(final Connection conn, final T entity) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -7993,6 +11622,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Update.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @param propNamesToUpdate the prop names to update
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> update(final Connection conn, final T entity, final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8002,6 +11639,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Update.
+         *
+         * @param conn the conn
+         * @param props the props
+         * @param id the id
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> update(final Connection conn, final Map<String, Object> props, final ID id) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8011,6 +11656,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Update.
+         *
+         * @param conn the conn
+         * @param props the props
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> update(final Connection conn, final Map<String, Object> props, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8081,6 +11734,12 @@ public class SQLExecutor implements Closeable {
         //            });
         //        }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8090,6 +11749,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8099,6 +11765,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8108,6 +11781,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8117,6 +11798,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8126,6 +11815,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize,
                 final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -8136,6 +11834,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Connection conn, final Collection<? extends T> entities) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8145,6 +11850,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Connection conn, final Collection<? extends T> entities,
                 final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -8155,6 +11868,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Connection conn, final Collection<? extends T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8164,6 +11885,15 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch update.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param propNamesToUpdate the prop names to update
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchUpdate(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToUpdate,
                 final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -8174,6 +11904,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Delete.
+         *
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> delete(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8183,6 +11919,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Delete.
+         *
+         * @param conn the conn
+         * @param whereCause the where cause
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> delete(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8192,6 +11935,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Delete.
+         *
+         * @param entity the entity
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> delete(final T entity) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8201,6 +11950,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Delete.
+         *
+         * @param conn the conn
+         * @param entity the entity
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> delete(final Connection conn, final T entity) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8210,6 +11966,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete.
+         *
+         * @param entities the entities
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDelete(final Collection<T> entities) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8219,6 +11981,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDelete(final Collection<T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8228,6 +11997,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete.
+         *
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDelete(final Collection<T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8237,6 +12014,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDelete(final Connection conn, final Collection<T> entities) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8246,6 +12030,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete.
+         *
+         * @param conn the conn
+         * @param entities the entities
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDelete(final Connection conn, final Collection<T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8255,6 +12047,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Delete by id.
+         *
+         * @param id the id
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> deleteById(final ID id) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8264,6 +12062,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Delete by id.
+         *
+         * @param conn the conn
+         * @param id the id
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> deleteById(final Connection conn, final ID id) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8273,6 +12078,12 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete by ids.
+         *
+         * @param ids the ids
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDeleteByIds(final Collection<ID> ids) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8282,6 +12093,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete by ids.
+         *
+         * @param ids the ids
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDeleteByIds(final Collection<ID> ids, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8291,6 +12109,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete by ids.
+         *
+         * @param ids the ids
+         * @param batchSize the batch size
+         * @param isolationLevel the isolation level
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDeleteByIds(final Collection<ID> ids, final int batchSize, final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8300,6 +12126,13 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete by ids.
+         *
+         * @param conn the conn
+         * @param ids the ids
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDeleteByIds(final Connection conn, final Collection<ID> ids) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8309,6 +12142,14 @@ public class SQLExecutor implements Closeable {
             });
         }
 
+        /**
+         * Batch delete by ids.
+         *
+         * @param conn the conn
+         * @param ids the ids
+         * @param batchSize the batch size
+         * @return the continuable future
+         */
         public ContinuableFuture<Integer> batchDeleteByIds(final Connection conn, final Collection<ID> ids, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
                 @Override
@@ -8326,6 +12167,8 @@ public class SQLExecutor implements Closeable {
      *
      */
     public static interface StatementSetter {
+
+        /** The Constant DEFAULT. */
         public static final StatementSetter DEFAULT = new AbstractStatementSetter() {
             @SuppressWarnings("rawtypes")
             @Override
@@ -8347,6 +12190,14 @@ public class SQLExecutor implements Closeable {
             }
         };
 
+        /**
+         * Sets the parameters.
+         *
+         * @param namedSQL the named SQL
+         * @param stmt the stmt
+         * @param parameters the parameters
+         * @throws SQLException the SQL exception
+         */
         public void setParameters(final NamedSQL namedSQL, final PreparedStatement stmt, final Object... parameters) throws SQLException;
     }
 
@@ -8354,9 +12205,11 @@ public class SQLExecutor implements Closeable {
      * Refer to http://landawn.com/introduction-to-jdbc.html about how to read columns/rows from <code>java.sql.ResultSet</code>
      *
      * @author Haiyang Li
-     *
+     * @param <T> the generic type
      */
     public static interface ResultExtractor<T> {
+
+        /** The Constant DATA_SET. */
         public static final ResultExtractor<DataSet> DATA_SET = new AbstractResultExtractor<DataSet>() {
             @Override
             protected DataSet convert(DataSet dataSet) {
@@ -8364,24 +12217,39 @@ public class SQLExecutor implements Closeable {
             }
         };
 
+        /**
+         * Extract data.
+         *
+         * @param rs the rs
+         * @param jdbcSettings the jdbc settings
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         public T extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException;
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @return the result extractor
          */
         public static <K, V> ResultExtractor<Map<K, V>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) {
             return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param supplier the supplier
+         * @return the result extractor
          */
         public static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
@@ -8389,11 +12257,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param mergeFunction
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param mergeFunction the merge function
+         * @return the result extractor
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -8404,12 +12275,16 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param mergeFunction
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param mergeFunction the merge function
+         * @param supplier the supplier
+         * @return the result extractor
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -8441,11 +12316,16 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param downstream
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <A> the generic type
+         * @param <D> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param downstream the downstream
+         * @return the result extractor
          */
         public static <K, V, A, D> ResultExtractor<Map<K, D>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream) {
@@ -8453,12 +12333,18 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param downstream
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <A> the generic type
+         * @param <D> the generic type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param downstream the downstream
+         * @param supplier the supplier
+         * @return the result extractor
          */
         public static <K, V, A, D, M extends Map<K, D>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream, final Supplier<? extends M> supplier) {
@@ -8506,21 +12392,28 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @return the result extractor
          */
         public static <K, V> ResultExtractor<Map<K, V>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor) {
             return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param supplier the supplier
+         * @return the result extractor
          */
         public static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
@@ -8528,11 +12421,14 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param mergeFunction
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param mergeFunction the merge function
+         * @return the result extractor
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -8543,12 +12439,16 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param mergeFunction
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param mergeFunction the merge function
+         * @param supplier the supplier
+         * @return the result extractor
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -8581,11 +12481,16 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param downstream
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <A> the generic type
+         * @param <D> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param downstream the downstream
+         * @return the result extractor
          */
         public static <K, V, A, D> ResultExtractor<Map<K, D>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream) {
@@ -8593,12 +12498,18 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param keyExtractor
-         * @param valueExtractor
-         * @param downstream
-         * @param supplier
-         * @return
+         * To map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <A> the generic type
+         * @param <D> the generic type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param downstream the downstream
+         * @param supplier the supplier
+         * @return the result extractor
          */
         public static <K, V, A, D, M extends Map<K, D>> ResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream, final Supplier<? extends M> supplier) {
@@ -8646,10 +12557,30 @@ public class SQLExecutor implements Closeable {
             };
         }
 
+        /**
+         * Group to.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @return the result extractor
+         */
         public static <K, V> ResultExtractor<Map<K, List<V>>> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) {
             return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
         }
 
+        /**
+         * Group to.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param supplier the supplier
+         * @return the result extractor
+         */
         public static <K, V, M extends Map<K, List<V>>> ResultExtractor<M> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
@@ -8685,10 +12616,30 @@ public class SQLExecutor implements Closeable {
             };
         }
 
+        /**
+         * Group to.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @return the result extractor
+         */
         public static <K, V> ResultExtractor<Map<K, List<V>>> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor) {
             return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
         }
 
+        /**
+         * Group to.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyExtractor the key extractor
+         * @param valueExtractor the value extractor
+         * @param supplier the supplier
+         * @return the result extractor
+         */
         public static <K, V, M extends Map<K, List<V>>> ResultExtractor<M> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
@@ -8730,13 +12681,36 @@ public class SQLExecutor implements Closeable {
      * Refer to http://landawn.com/introduction-to-jdbc.html about how to read columns/rows from <code>java.sql.ResultSet</code>
      *
      * @author Haiyang Li
-     *
+     * @param <T> the generic type
      */
     static interface ResultSetExtractor<T> {
+
+        /**
+         * Extract data.
+         *
+         * @param targetClass the target class
+         * @param namedSQL the named SQL
+         * @param rs the rs
+         * @param jdbcSettings the jdbc settings
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         public T extractData(final Class<?> targetClass, final NamedSQL namedSQL, final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException;
     }
 
+    /**
+     * The Class AbstractStatementSetter.
+     */
     public static abstract class AbstractStatementSetter implements StatementSetter {
+
+        /**
+         * Sets the parameters.
+         *
+         * @param namedSQL the named SQL
+         * @param stmt the stmt
+         * @param parameters the parameters
+         * @throws SQLException the SQL exception
+         */
         @SuppressWarnings("rawtypes")
         @Override
         public void setParameters(final NamedSQL namedSQL, final PreparedStatement stmt, final Object... parameters) throws SQLException {
@@ -8794,9 +12768,25 @@ public class SQLExecutor implements Closeable {
             setParameters(stmt, parameterCount, parameterValues, parameterTypes);
         }
 
+        /**
+         * Sets the parameters.
+         *
+         * @param stmt the stmt
+         * @param parameterCount the parameter count
+         * @param parameters the parameters
+         * @param parameterTypes the parameter types
+         * @throws SQLException the SQL exception
+         */
         @SuppressWarnings("rawtypes")
         protected abstract void setParameters(PreparedStatement stmt, int parameterCount, Object[] parameters, Type[] parameterTypes) throws SQLException;
 
+        /**
+         * Gets the parameter values.
+         *
+         * @param namedSQL the named SQL
+         * @param parameters the parameters
+         * @return the parameter values
+         */
         protected Object[] getParameterValues(final NamedSQL namedSQL, final Object... parameters) {
             if ((parameters.length == 1) && (parameters[0] != null)) {
                 if (parameters[0] instanceof Object[] && ((((Object[]) parameters[0]).length) >= namedSQL.getParameterCount())) {
@@ -8811,55 +12801,147 @@ public class SQLExecutor implements Closeable {
         }
     }
 
+    /**
+     * The Class AbstractResultExtractor.
+     *
+     * @param <T> the generic type
+     */
     public static abstract class AbstractResultExtractor<T> implements ResultExtractor<T> {
+
+        /**
+         * Extract data.
+         *
+         * @param rs the rs
+         * @param jdbcSettings the jdbc settings
+         * @return the t
+         * @throws SQLException the SQL exception
+         */
         @Override
         public T extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException {
             return convert(JdbcUtil.extractData(rs, jdbcSettings.getOffset(), jdbcSettings.getCount(), false));
         }
 
+        /**
+         * Convert.
+         *
+         * @param dataSet the data set
+         * @return the t
+         */
         protected abstract T convert(final DataSet dataSet);
     }
 
+    /**
+     * The Class JdbcSettings.
+     */
     public static class JdbcSettings {
+
+        /** The Constant DEFAULT_GENERATED_ID_PROP_NAME. */
         public static final String DEFAULT_GENERATED_ID_PROP_NAME = "id";
+
+        /** The Constant DEFAULT_BATCH_SIZE. */
         public static final int DEFAULT_BATCH_SIZE = 200;
+
+        /** The Constant DEFAULT_NO_GENERATED_KEYS. */
         public static final int DEFAULT_NO_GENERATED_KEYS = Statement.NO_GENERATED_KEYS;
+
+        /** The Constant DEFAULT_FETCH_DIRECTION. */
         public static final int DEFAULT_FETCH_DIRECTION = ResultSet.FETCH_FORWARD;
+
+        /** The Constant DEFAULT_RESULT_SET_TYPE. */
         public static final int DEFAULT_RESULT_SET_TYPE = ResultSet.TYPE_FORWARD_ONLY;
+
+        /** The Constant DEFAULT_RESULT_SET_CONCURRENCY. */
         public static final int DEFAULT_RESULT_SET_CONCURRENCY = ResultSet.CONCUR_READ_ONLY;
+
+        /** The Constant DEFAULT_RESULT_SET_HOLDABILITY. */
         public static final int DEFAULT_RESULT_SET_HOLDABILITY = ResultSet.HOLD_CURSORS_OVER_COMMIT;
+
+        /** The log SQL. */
         private boolean logSQL = false;
+
+        /** The log SQL with parameters. */
         private boolean logSQLWithParameters = false;
+
+        /** The batch size. */
         private int batchSize = -1;
+
+        /** The query timeout. */
         private int queryTimeout = -1;
+
+        /** The auto generated keys. */
         private boolean autoGeneratedKeys = false;
+
+        /** The returned column indexes. */
         private int[] returnedColumnIndexes = null;
+
+        /** The returned column names. */
         private String[] returnedColumnNames = null;
+
+        /** The max rows. */
         private int maxRows = -1;
+
+        /** The max field size. */
         private int maxFieldSize = -1;
+
+        /** The fetch size. */
         private int fetchSize = -1;
+
+        /** The fetch direction. */
         private int fetchDirection = -1;
+
+        /** The result set type. */
         private int resultSetType = -1;
+
+        /** The result set concurrency. */
         private int resultSetConcurrency = -1;
+
+        /** The result set holdability. */
         private int resultSetHoldability = -1;
+
+        /** The offset. */
         private int offset = 0;
+
+        /** The count. */
         private int count = Integer.MAX_VALUE;
+
+        /** The query with data source. */
         private String queryWithDataSource;
+
+        /** The query with data sources. */
         private Collection<String> queryWithDataSources;
+
+        /** The query in parallel. */
         private boolean queryInParallel = false;
+
+        /** The isolation level. */
         private IsolationLevel isolationLevel = null;
 
+        /** The stream transaction independent. */
         private boolean streamTransactionIndependent = false;
 
+        /** The fozen. */
         private boolean fozen = false;
 
+        /**
+         * Instantiates a new jdbc settings.
+         */
         protected JdbcSettings() {
         }
 
+        /**
+         * Creates the.
+         *
+         * @return the jdbc settings
+         */
         public static JdbcSettings create() {
             return new JdbcSettings();
         }
 
+        /**
+         * Copy.
+         *
+         * @return the jdbc settings
+         */
         public JdbcSettings copy() {
             JdbcSettings copy = new JdbcSettings();
             copy.logSQL = this.logSQL;
@@ -8886,10 +12968,21 @@ public class SQLExecutor implements Closeable {
             return copy;
         }
 
+        /**
+         * Checks if is log SQL.
+         *
+         * @return true, if is log SQL
+         */
         public boolean isLogSQL() {
             return logSQL;
         }
 
+        /**
+         * Sets the log SQL.
+         *
+         * @param logSQL the log SQL
+         * @return the jdbc settings
+         */
         public JdbcSettings setLogSQL(final boolean logSQL) {
             assertNotFrozen();
 
@@ -8898,10 +12991,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Checks if is log SQL with parameters.
+         *
+         * @return true, if is log SQL with parameters
+         */
         public boolean isLogSQLWithParameters() {
             return logSQLWithParameters;
         }
 
+        /**
+         * Sets the log SQL with parameters.
+         *
+         * @param logSQLWithParameters the log SQL with parameters
+         * @return the jdbc settings
+         */
         public JdbcSettings setLogSQLWithParameters(final boolean logSQLWithParameters) {
             assertNotFrozen();
 
@@ -8910,10 +13014,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the batch size.
+         *
+         * @return the batch size
+         */
         public int getBatchSize() {
             return batchSize;
         }
 
+        /**
+         * Sets the batch size.
+         *
+         * @param batchSize the batch size
+         * @return the jdbc settings
+         */
         public JdbcSettings setBatchSize(final int batchSize) {
             assertNotFrozen();
 
@@ -8922,10 +13037,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the query timeout.
+         *
+         * @return the query timeout
+         */
         public int getQueryTimeout() {
             return queryTimeout;
         }
 
+        /**
+         * Sets the query timeout.
+         *
+         * @param queryTimeout the query timeout
+         * @return the jdbc settings
+         */
         public JdbcSettings setQueryTimeout(final int queryTimeout) {
             assertNotFrozen();
 
@@ -8934,10 +13060,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Checks if is auto generated keys.
+         *
+         * @return true, if is auto generated keys
+         */
         public boolean isAutoGeneratedKeys() {
             return autoGeneratedKeys;
         }
 
+        /**
+         * Sets the auto generated keys.
+         *
+         * @param autoGeneratedKeys the auto generated keys
+         * @return the jdbc settings
+         */
         public JdbcSettings setAutoGeneratedKeys(final boolean autoGeneratedKeys) {
             assertNotFrozen();
 
@@ -8947,8 +13084,9 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @return
+         * Gets the returned column indexes.
+         *
+         * @return the returned column indexes
          * @see {@link Connection#prepareStatement(String, int[])}
          */
         public int[] getReturnedColumnIndexes() {
@@ -8956,9 +13094,10 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param columnIndexes
-         * @return
+         * Sets the returned column indexes.
+         *
+         * @param columnIndexes the column indexes
+         * @return the jdbc settings
          * @see {@link Connection#prepareStatement(String, int[])}
          */
         public JdbcSettings setReturnedColumnIndexes(final int[] columnIndexes) {
@@ -8970,8 +13109,9 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @return
+         * Gets the returned column names.
+         *
+         * @return the returned column names
          * @see {@link Connection#prepareStatement(String, String[])}
          */
         public String[] getReturnedColumnNames() {
@@ -8979,9 +13119,10 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @param columnNames
-         * @return
+         * Sets the returned column names.
+         *
+         * @param columnNames the column names
+         * @return the jdbc settings
          * @see {@link Connection#prepareStatement(String, String[])}
          */
         public JdbcSettings setReturnedColumnNames(final String[] columnNames) {
@@ -8992,10 +13133,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the max rows.
+         *
+         * @return the max rows
+         */
         public int getMaxRows() {
             return maxRows;
         }
 
+        /**
+         * Sets the max rows.
+         *
+         * @param maxRows the max rows
+         * @return the jdbc settings
+         */
         public JdbcSettings setMaxRows(final int maxRows) {
             assertNotFrozen();
 
@@ -9004,10 +13156,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the max field size.
+         *
+         * @return the max field size
+         */
         public int getMaxFieldSize() {
             return maxFieldSize;
         }
 
+        /**
+         * Sets the max field size.
+         *
+         * @param maxFieldSize the max field size
+         * @return the jdbc settings
+         */
         public JdbcSettings setMaxFieldSize(final int maxFieldSize) {
             assertNotFrozen();
 
@@ -9016,10 +13179,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the fetch size.
+         *
+         * @return the fetch size
+         */
         public int getFetchSize() {
             return fetchSize;
         }
 
+        /**
+         * Sets the fetch size.
+         *
+         * @param fetchSize the fetch size
+         * @return the jdbc settings
+         */
         public JdbcSettings setFetchSize(final int fetchSize) {
             assertNotFrozen();
 
@@ -9028,10 +13202,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the fetch direction.
+         *
+         * @return the fetch direction
+         */
         public int getFetchDirection() {
             return fetchDirection;
         }
 
+        /**
+         * Sets the fetch direction.
+         *
+         * @param fetchDirection the fetch direction
+         * @return the jdbc settings
+         */
         public JdbcSettings setFetchDirection(final int fetchDirection) {
             assertNotFrozen();
 
@@ -9040,10 +13225,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the result set type.
+         *
+         * @return the result set type
+         */
         public int getResultSetType() {
             return resultSetType;
         }
 
+        /**
+         * Sets the result set type.
+         *
+         * @param resultSetType the result set type
+         * @return the jdbc settings
+         */
         public JdbcSettings setResultSetType(final int resultSetType) {
             assertNotFrozen();
 
@@ -9052,10 +13248,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the result set concurrency.
+         *
+         * @return the result set concurrency
+         */
         public int getResultSetConcurrency() {
             return resultSetConcurrency;
         }
 
+        /**
+         * Sets the result set concurrency.
+         *
+         * @param resultSetConcurrency the result set concurrency
+         * @return the jdbc settings
+         */
         public JdbcSettings setResultSetConcurrency(final int resultSetConcurrency) {
             assertNotFrozen();
 
@@ -9064,10 +13271,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the result set holdability.
+         *
+         * @return the result set holdability
+         */
         public int getResultSetHoldability() {
             return resultSetHoldability;
         }
 
+        /**
+         * Sets the result set holdability.
+         *
+         * @param resultSetHoldability the result set holdability
+         * @return the jdbc settings
+         */
         public JdbcSettings setResultSetHoldability(final int resultSetHoldability) {
             assertNotFrozen();
 
@@ -9076,10 +13294,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the offset.
+         *
+         * @return the offset
+         */
         public int getOffset() {
             return offset;
         }
 
+        /**
+         * Sets the offset.
+         *
+         * @param offset the offset
+         * @return the jdbc settings
+         */
         public JdbcSettings setOffset(final int offset) {
             assertNotFrozen();
 
@@ -9088,10 +13317,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the count.
+         *
+         * @return the count
+         */
         public int getCount() {
             return count;
         }
 
+        /**
+         * Sets the count.
+         *
+         * @param count the count
+         * @return the jdbc settings
+         */
         public JdbcSettings setCount(final int count) {
             assertNotFrozen();
 
@@ -9100,10 +13340,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the query with data source.
+         *
+         * @return the query with data source
+         */
         public String getQueryWithDataSource() {
             return queryWithDataSource;
         }
 
+        /**
+         * Sets the query with data source.
+         *
+         * @param queryWithDataSource the query with data source
+         * @return the jdbc settings
+         */
         public JdbcSettings setQueryWithDataSource(final String queryWithDataSource) {
             assertNotFrozen();
 
@@ -9112,10 +13363,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the query with data sources.
+         *
+         * @return the query with data sources
+         */
         public Collection<String> getQueryWithDataSources() {
             return queryWithDataSources;
         }
 
+        /**
+         * Sets the query with data sources.
+         *
+         * @param queryWithDataSources the query with data sources
+         * @return the jdbc settings
+         */
         public JdbcSettings setQueryWithDataSources(final Collection<String> queryWithDataSources) {
             assertNotFrozen();
 
@@ -9124,10 +13386,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Checks if is query in parallel.
+         *
+         * @return true, if is query in parallel
+         */
         public boolean isQueryInParallel() {
             return queryInParallel;
         }
 
+        /**
+         * Sets the query in parallel.
+         *
+         * @param queryInParallel the query in parallel
+         * @return the jdbc settings
+         */
         public JdbcSettings setQueryInParallel(final boolean queryInParallel) {
             assertNotFrozen();
 
@@ -9136,10 +13409,21 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Gets the isolation level.
+         *
+         * @return the isolation level
+         */
         public IsolationLevel getIsolationLevel() {
             return isolationLevel;
         }
 
+        /**
+         * Sets the isolation level.
+         *
+         * @param isolationLevel the isolation level
+         * @return the jdbc settings
+         */
         public JdbcSettings setIsolationLevel(IsolationLevel isolationLevel) {
             assertNotFrozen();
 
@@ -9149,8 +13433,9 @@ public class SQLExecutor implements Closeable {
         }
 
         /**
-         * 
-         * @return
+         * Stream transaction independent.
+         *
+         * @return true, if successful
          */
         boolean streamTransactionIndependent() {
             return streamTransactionIndependent;
@@ -9158,9 +13443,9 @@ public class SQLExecutor implements Closeable {
 
         /**
          * {@code streamTransactionIndependent = true} means the query executed by {@code stream/streamAll(...)} methods won't be in any transaction(using connection started by transaction), even the {@code stream/streamAll(...)} methods are invoked inside of a transaction block. 
-         * 
-         * @param streamTransactionIndependent
-         * @return
+         *
+         * @param streamTransactionIndependent the stream transaction independent
+         * @return the jdbc settings
          */
         JdbcSettings setStreamTransactionIndependent(final boolean streamTransactionIndependent) {
             assertNotFrozen();
@@ -9170,16 +13455,27 @@ public class SQLExecutor implements Closeable {
             return this;
         }
 
+        /**
+         * Freeze.
+         */
         void freeze() {
             fozen = true;
         }
 
+        /**
+         * Assert not frozen.
+         */
         void assertNotFrozen() {
             if (fozen) {
                 throw new AbacusException("It's finalized. No change is allowed");
             }
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -9209,6 +13505,12 @@ public class SQLExecutor implements Closeable {
             return result;
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(final Object obj) {
             if (this == obj) {
@@ -9232,6 +13534,11 @@ public class SQLExecutor implements Closeable {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "{logSQL=" + logSQL + ", logSQLWithParameters=" + logSQLWithParameters + ", batchSize=" + batchSize + ", queryTimeout=" + queryTimeout

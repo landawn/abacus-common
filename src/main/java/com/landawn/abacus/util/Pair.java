@@ -23,81 +23,153 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
- * @author Haiyang Li
+ * The Class Pair.
  *
- * @param <L>
- * @param <R>
+ * @author Haiyang Li
+ * @param <L> the generic type
+ * @param <R> the generic type
+ * @since 0.8
  */
-public final class Pair<L, R> { // implements Map.Entry<L, R> {
+public final class Pair<L, R> {
+    /** The left. */
+    // implements Map.Entry<L, R> {
     public L left;
+
+    /** The right. */
     public R right;
 
+    /**
+     * Instantiates a new pair.
+     */
     public Pair() {
     }
 
+    /**
+     * Instantiates a new pair.
+     *
+     * @param l the l
+     * @param r the r
+     */
     Pair(final L l, final R r) {
         this.left = l;
         this.right = r;
     }
 
+    /**
+     * Of.
+     *
+     * @param <L> the generic type
+     * @param <R> the generic type
+     * @param l the l
+     * @param r the r
+     * @return the pair
+     */
     public static <L, R> Pair<L, R> of(final L l, final R r) {
         return new Pair<>(l, r);
     }
 
+    /**
+     * From.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param entry the entry
+     * @return the pair
+     */
     public static <K, V> Pair<K, V> from(final Map.Entry<K, V> entry) {
         return new Pair<>(entry.getKey(), entry.getValue());
     }
 
     /**
-     * 
-     * @return 
+     * Gets the left.
+     *
+     * @return the left
      */
     public L getLeft() {
         return left;
     }
 
+    /**
+     * Sets the left.
+     *
+     * @param left the new left
+     */
     public void setLeft(final L left) {
         this.left = left;
     }
 
     /**
-     * 
-     * @return 
+     * Gets the right.
+     *
+     * @return the right
      */
     public R getRight() {
         return right;
     }
 
+    /**
+     * Sets the right.
+     *
+     * @param right the new right
+     */
     public void setRight(final R right) {
         this.right = right;
     }
 
+    /**
+     * Sets the.
+     *
+     * @param left the left
+     * @param right the right
+     */
     public void set(final L left, final R right) {
         this.left = left;
         this.right = right;
     }
 
+    /**
+     * Gets the and set left.
+     *
+     * @param newLeft the new left
+     * @return the and set left
+     */
     public L getAndSetLeft(L newLeft) {
         final L res = left;
         left = newLeft;
         return res;
     }
 
+    /**
+     * Sets the and get left.
+     *
+     * @param newLeft the new left
+     * @return the l
+     */
     public L setAndGetLeft(L newLeft) {
         left = newLeft;
         return left;
     }
 
+    /**
+     * Gets the and set right.
+     *
+     * @param newRight the new right
+     * @return the and set right
+     */
     public R getAndSetRight(R newRight) {
         final R res = newRight;
         right = newRight;
         return res;
     }
 
+    /**
+     * Sets the and get right.
+     *
+     * @param newRight the new right
+     * @return the r
+     */
     public R setAndGetRight(R newRight) {
         right = newRight;
         return right;
@@ -107,11 +179,13 @@ public final class Pair<L, R> { // implements Map.Entry<L, R> {
      * Set to the specified <code>newLeft</code> and returns <code>true</code>
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the value to new value.
-     * 
-     * @param newLeft
+     *
+     * @param <E> the element type
+     * @param newLeft the new left
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newLeft</code>
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setLeftIf(final L newLeft, Try.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
         if (predicate.test(this, newLeft)) {
@@ -126,11 +200,13 @@ public final class Pair<L, R> { // implements Map.Entry<L, R> {
      * Set to the specified <code>newRight</code> and returns <code>true</code>
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the value to new value.
-     * 
-     * @param newRight
+     *
+     * @param <E> the element type
+     * @param newRight the new right
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newRight</code>
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setRightIf(final R newRight, Try.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
         if (predicate.test(this, newRight)) {
@@ -145,12 +221,14 @@ public final class Pair<L, R> { // implements Map.Entry<L, R> {
      * Set to the specified <code>newLeft</code> and <code>newRight</code> and returns <code>true</code>
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the left/right to new values.
-     * 
-     * @param newLeft
-     * @param newRight
+     *
+     * @param <E> the element type
+     * @param newLeft the new left
+     * @param newRight the new right
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newLeft</code>, the third parameter is the <code>newRight</code>.
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setIf(final L newLeft, final R newRight, Try.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate)
             throws E {
@@ -225,14 +303,31 @@ public final class Pair<L, R> { // implements Map.Entry<L, R> {
         return new Pair<>(this.right, this.left);
     }
 
+    /**
+     * Copy.
+     *
+     * @return the pair
+     */
     public Pair<L, R> copy() {
         return new Pair<>(this.left, this.right);
     }
 
+    /**
+     * To array.
+     *
+     * @return the object[]
+     */
     public Object[] toArray() {
         return new Object[] { left, right };
     }
 
+    /**
+     * To array.
+     *
+     * @param <A> the generic type
+     * @param a the a
+     * @return the a[]
+     */
     public <A> A[] toArray(A[] a) {
         if (a.length < 2) {
             a = N.copyOf(a, 2);
@@ -244,6 +339,13 @@ public final class Pair<L, R> { // implements Map.Entry<L, R> {
         return a;
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param comsumer the comsumer
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(Try.Consumer<?, E> comsumer) throws E {
         final Try.Consumer<Object, E> objComsumer = (Try.Consumer<Object, E>) comsumer;
 
@@ -251,38 +353,101 @@ public final class Pair<L, R> { // implements Map.Entry<L, R> {
         objComsumer.accept(right);
     }
 
+    /**
+     * Accept.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void accept(final Try.BiConsumer<? super L, ? super R, E> action) throws E {
         action.accept(left, right);
     }
 
+    /**
+     * Accept.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void accept(final Try.Consumer<? super Pair<L, R>, E> action) throws E {
         action.accept(this);
     }
 
+    /**
+     * Map.
+     *
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the u
+     * @throws E the e
+     */
     public <U, E extends Exception> U map(final Try.BiFunction<? super L, ? super R, U, E> mapper) throws E {
         return mapper.apply(left, right);
     }
 
+    /**
+     * Map.
+     *
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the u
+     * @throws E the e
+     */
     public <U, E extends Exception> U map(final Try.Function<? super Pair<L, R>, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Try.BiPredicate<? super L, ? super R, E> predicate) throws E {
         return predicate.test(left, right) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Try.Predicate<? super Pair<L, R>, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
     }
 
+    /**
+     * Stream.
+     *
+     * @return the stream
+     */
     public Stream<Pair<L, R>> stream() {
         return Stream.of(this);
     }
 
+    /**
+     * To tuple.
+     *
+     * @return the tuple 2
+     */
     public Tuple2<L, R> toTuple() {
         return Tuple.of(left, right);
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -292,6 +457,12 @@ public final class Pair<L, R> { // implements Map.Entry<L, R> {
         return result;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -307,6 +478,11 @@ public final class Pair<L, R> { // implements Map.Entry<L, R> {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(right) + "]";

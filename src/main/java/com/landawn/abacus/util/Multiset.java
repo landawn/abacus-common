@@ -40,10 +40,11 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
  * A collection that supports order-independent equality, like {@link Set}, but
  * may have duplicate elements.
- *
+ * 
  * <p>Elements of a Multiset that are equal to one another are referred to as
  * <i>occurrences</i> of the same single element. The total number of
  * occurrences of an element in a Multiset is called the <i>count</i> of that
@@ -52,13 +53,13 @@ import com.landawn.abacus.util.stream.Stream;
  * int}, a Multiset may never contain more than {@link MutableInt#MAX_VALUE}
  * occurrences of any one element.
  *
- * @param <T>
- *
- * @since 0.8
- *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public final class Multiset<T> implements Iterable<T> {
+
+    /** The Constant cmpByCount. */
     private static final Comparator<Map.Entry<?, MutableInt>> cmpByCount = new Comparator<Map.Entry<?, MutableInt>>() {
         @Override
         public int compare(Entry<?, MutableInt> a, Entry<?, MutableInt> b) {
@@ -66,29 +67,55 @@ public final class Multiset<T> implements Iterable<T> {
         }
     };
 
+    /** The map supplier. */
     final Supplier<Map<T, MutableInt>> mapSupplier;
+
+    /** The value map. */
     final Map<T, MutableInt> valueMap;
 
+    /**
+     * Instantiates a new multiset.
+     */
     public Multiset() {
         this(HashMap.class);
     }
 
+    /**
+     * Instantiates a new multiset.
+     *
+     * @param initialCapacity the initial capacity
+     */
     public Multiset(int initialCapacity) {
         this.mapSupplier = Suppliers.ofMap();
         this.valueMap = new HashMap<T, MutableInt>(initialCapacity);
     }
 
+    /**
+     * Instantiates a new multiset.
+     *
+     * @param c the c
+     */
     public Multiset(final Collection<? extends T> c) {
         this();
 
         addAll(c);
     }
 
+    /**
+     * Instantiates a new multiset.
+     *
+     * @param valueMapType the value map type
+     */
     @SuppressWarnings("rawtypes")
     public Multiset(final Class<? extends Map> valueMapType) {
         this(Maps.mapType2Supplier(valueMapType));
     }
 
+    /**
+     * Instantiates a new multiset.
+     *
+     * @param mapSupplier the map supplier
+     */
     @SuppressWarnings("rawtypes")
     public Multiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
         this.mapSupplier = (Supplier) mapSupplier;
@@ -96,6 +123,7 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
+     * Instantiates a new multiset.
      *
      * @param valueMap The valueMap and this Multiset share the same data; any changes to one will appear in the other.
      */
@@ -105,6 +133,13 @@ public final class Multiset<T> implements Iterable<T> {
         this.valueMap = valueMap;
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @return the multiset
+     */
     @SafeVarargs
     public static <T> Multiset<T> of(final T... a) {
         if (N.isNullOrEmpty(a)) {
@@ -120,10 +155,24 @@ public final class Multiset<T> implements Iterable<T> {
         return multiset;
     }
 
+    /**
+     * From.
+     *
+     * @param <T> the generic type
+     * @param coll the coll
+     * @return the multiset
+     */
     public static <T> Multiset<T> from(final Collection<? extends T> coll) {
         return new Multiset<>(coll);
     }
 
+    /**
+     * From.
+     *
+     * @param <T> the generic type
+     * @param m the m
+     * @return the multiset
+     */
     public static <T> Multiset<T> from(final Map<? extends T, Integer> m) {
         if (N.isNullOrEmpty(m)) {
             return new Multiset<T>();
@@ -137,8 +186,9 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
+     * Gets the.
      *
-     * @param e
+     * @param e the e
      * @return the occurrences of the specified object. zero is returned if it's not in this set.
      */
     public int get(final Object e) {
@@ -148,9 +198,10 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param e
-     * @param defaultValue
+     * Gets the or default.
+     *
+     * @param e the e
+     * @param defaultValue the default value
      * @return the occurrences of the specified object. the specified defaultValue is returned if it's not in this set.
      */
     public int getOrDefault(final Object e, int defaultValue) {
@@ -161,10 +212,10 @@ public final class Multiset<T> implements Iterable<T> {
 
     /**
      * The element will be removed if the specified count is 0.
-     * 
-     * @param e
-     * @param occurrences
-     * @return
+     *
+     * @param e the e
+     * @param occurrences the occurrences
+     * @return the and set
      */
     public int getAndSet(final T e, final int occurrences) {
         checkOccurrences(occurrences);
@@ -189,10 +240,10 @@ public final class Multiset<T> implements Iterable<T> {
 
     /**
      * The element will be removed if the specified count is 0.
-     * 
-     * @param e
-     * @param occurrences
-     * @return
+     *
+     * @param e the e
+     * @param occurrences the occurrences
+     * @return the int
      */
     public int setAndGet(final T e, final int occurrences) {
         checkOccurrences(occurrences);
@@ -217,8 +268,8 @@ public final class Multiset<T> implements Iterable<T> {
     /**
      * The element will be removed if the specified count is 0.
      *
-     * @param e
-     * @param occurrences
+     * @param e the e
+     * @param occurrences the occurrences
      * @return this Multiset.
      * @throws IllegalArgumentException if the occurrences of element is less than 0
      */
@@ -240,6 +291,13 @@ public final class Multiset<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Sets the all.
+     *
+     * @param c the c
+     * @param occurrences the occurrences
+     * @return the multiset
+     */
     public Multiset<T> setAll(final Collection<? extends T> c, final int occurrences) {
         checkOccurrences(occurrences);
 
@@ -253,8 +311,9 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param m
+     * Sets the all.
+     *
+     * @param m the m
      * @return this Multiset.
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
@@ -273,8 +332,9 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param m
+     * Sets the all.
+     *
+     * @param multiset the multiset
      * @return this Multiset.
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
@@ -288,10 +348,21 @@ public final class Multiset<T> implements Iterable<T> {
         return this;
     }
 
+    /**
+     * Occurrences of.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int occurrencesOf(final Object e) {
         return get(e);
     }
 
+    /**
+     * Min occurrences.
+     *
+     * @return the optional
+     */
     public Optional<Pair<T, Integer>> minOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -314,6 +385,11 @@ public final class Multiset<T> implements Iterable<T> {
         return Optional.of(Pair.of(minCountElement, minCount));
     }
 
+    /**
+     * Max occurrences.
+     *
+     * @return the optional
+     */
     public Optional<Pair<T, Integer>> maxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -336,6 +412,11 @@ public final class Multiset<T> implements Iterable<T> {
         return Optional.of(Pair.of(maxCountElement, maxCount));
     }
 
+    /**
+     * All min occurrences.
+     *
+     * @return the optional
+     */
     public Optional<Pair<List<T>, Integer>> allMinOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -360,6 +441,11 @@ public final class Multiset<T> implements Iterable<T> {
         return Optional.of(Pair.of(res, min));
     }
 
+    /**
+     * All max occurrences.
+     *
+     * @return the optional
+     */
     public Optional<Pair<List<T>, Integer>> allMaxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -385,8 +471,9 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @return
+     * Sum of occurrences.
+     *
+     * @return the long
      * @throws ArithmeticException if total occurrences overflows the maximum value of int.
      */
     public long sumOfOccurrences() {
@@ -399,6 +486,11 @@ public final class Multiset<T> implements Iterable<T> {
         return sum;
     }
 
+    /**
+     * Average of occurrences.
+     *
+     * @return the optional double
+     */
     public OptionalDouble averageOfOccurrences() {
         if (size() == 0) {
             return OptionalDouble.empty();
@@ -410,8 +502,9 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
+     * Adds the.
      *
-     * @param e
+     * @param e the e
      * @return always true
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
@@ -420,9 +513,10 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
+     * Adds the.
      *
-     * @param e
-     * @param occurrences
+     * @param e the e
+     * @param occurrences the occurrences
      * @return true if the specified occurrences is bigger than 0.
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
@@ -448,21 +542,23 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param e
+     * Adds the if absent.
+     *
+     * @param e the e
      * @return true if the specified element is absent.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException the illegal argument exception
      */
     public boolean addIfAbsent(final T e) throws IllegalArgumentException {
         return addIfAbsent(e, 1);
     }
 
     /**
-     * 
-     * @param e
-     * @param occurrences
+     * Adds the if absent.
+     *
+     * @param e the e
+     * @param occurrences the occurrences
      * @return true if the specified element is absent and occurrences is bigger than 0.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException the illegal argument exception
      */
     public boolean addIfAbsent(final T e, final int occurrences) throws IllegalArgumentException {
         checkOccurrences(occurrences);
@@ -479,10 +575,23 @@ public final class Multiset<T> implements Iterable<T> {
         return false;
     }
 
+    /**
+     * Adds the and get.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int addAndGet(final T e) {
         return addAndGet(e, 1);
     }
 
+    /**
+     * Adds the and get.
+     *
+     * @param e the e
+     * @param occurrences the occurrences
+     * @return the int
+     */
     public int addAndGet(final T e, final int occurrences) {
         checkOccurrences(occurrences);
 
@@ -504,10 +613,23 @@ public final class Multiset<T> implements Iterable<T> {
         return count == null ? 0 : count.value();
     }
 
+    /**
+     * Gets the and add.
+     *
+     * @param e the e
+     * @return the and add
+     */
     public int getAndAdd(final T e) {
         return getAndAdd(e, 1);
     }
 
+    /**
+     * Gets the and add.
+     *
+     * @param e the e
+     * @param occurrences the occurrences
+     * @return the and add
+     */
     public int getAndAdd(final T e, final int occurrences) {
         checkOccurrences(occurrences);
 
@@ -532,8 +654,10 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param c
+     * Adds the all.
+     *
+     * @param c the c
+     * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
     public boolean addAll(final Collection<? extends T> c) throws IllegalArgumentException {
@@ -545,9 +669,11 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param c
-     * @param occurrences
+     * Adds the all.
+     *
+     * @param c the c
+     * @param occurrences the occurrences
+     * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
     public boolean addAll(final Collection<? extends T> c, final int occurrences) throws IllegalArgumentException {
@@ -565,8 +691,10 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param m
+     * Adds the all.
+     *
+     * @param m the m
+     * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
     public boolean addAll(final Map<? extends T, Integer> m) throws IllegalArgumentException {
@@ -592,8 +720,10 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param m
+     * Adds the all.
+     *
+     * @param multiset the multiset
+     * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public boolean addAll(final Multiset<? extends T> multiset) throws IllegalArgumentException {
@@ -608,10 +738,22 @@ public final class Multiset<T> implements Iterable<T> {
         return true;
     }
 
+    /**
+     * Contains.
+     *
+     * @param o the o
+     * @return true, if successful
+     */
     public boolean contains(final Object o) {
         return valueMap.containsKey(o);
     }
 
+    /**
+     * Contains all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean containsAll(final Collection<?> c) {
         return valueMap.keySet().containsAll(c);
     }
@@ -620,9 +762,8 @@ public final class Multiset<T> implements Iterable<T> {
      * Remove one occurrence from the specified elements. 
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
-     * @param e
-     * @param occurrences
-     * @return
+     * @param e the e
+     * @return true, if successful
      */
     public boolean remove(final Object e) {
         return remove(e, 1);
@@ -632,9 +773,9 @@ public final class Multiset<T> implements Iterable<T> {
      * Remove the specified occurrences from the specified element. 
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
-     * @param e
-     * @param occurrences
-     * @return
+     * @param e the e
+     * @param occurrences the occurrences
+     * @return true, if successful
      */
     public boolean remove(final Object e, final int occurrences) {
         checkOccurrences(occurrences);
@@ -654,10 +795,23 @@ public final class Multiset<T> implements Iterable<T> {
         }
     }
 
+    /**
+     * Removes the and get.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int removeAndGet(final Object e) {
         return removeAndGet(e, 1);
     }
 
+    /**
+     * Removes the and get.
+     *
+     * @param e the e
+     * @param occurrences the occurrences
+     * @return the int
+     */
     public int removeAndGet(final Object e, final int occurrences) {
         checkOccurrences(occurrences);
 
@@ -676,10 +830,23 @@ public final class Multiset<T> implements Iterable<T> {
         }
     }
 
+    /**
+     * Gets the and remove.
+     *
+     * @param e the e
+     * @return the and remove
+     */
     public int getAndRemove(final Object e) {
         return getAndRemove(e, 1);
     }
 
+    /**
+     * Gets the and remove.
+     *
+     * @param e the e
+     * @param occurrences the occurrences
+     * @return the and remove
+     */
     public int getAndRemove(final Object e, final int occurrences) {
         checkOccurrences(occurrences);
 
@@ -698,8 +865,9 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param e
+     * Removes the all occurrences.
+     *
+     * @param e the e
      * @return the occurrences of the specified element before it's removed.
      */
     public int removeAllOccurrences(final Object e) {
@@ -708,6 +876,14 @@ public final class Multiset<T> implements Iterable<T> {
         return count == null ? 0 : count.value();
     }
 
+    /**
+     * Removes the all occurrences if.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean removeAllOccurrencesIf(Try.Predicate<? super T, E> predicate) throws E {
         Set<T> removingKeys = null;
 
@@ -730,6 +906,14 @@ public final class Multiset<T> implements Iterable<T> {
         return true;
     }
 
+    /**
+     * Removes the all occurrences if.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean removeAllOccurrencesIf(Try.BiPredicate<? super T, ? super Integer, E> predicate) throws E {
         Set<T> removingKeys = null;
 
@@ -752,6 +936,15 @@ public final class Multiset<T> implements Iterable<T> {
         return true;
     }
 
+    /**
+     * Removes the if.
+     *
+     * @param <E> the element type
+     * @param occurrences the occurrences
+     * @param predicate the predicate
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean removeIf(final int occurrences, Try.Predicate<? super T, E> predicate) throws E {
         checkOccurrences(occurrences);
 
@@ -776,6 +969,15 @@ public final class Multiset<T> implements Iterable<T> {
         return true;
     }
 
+    /**
+     * Removes the if.
+     *
+     * @param <E> the element type
+     * @param occurrences the occurrences
+     * @param predicate the predicate
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean removeIf(final int occurrences, Try.BiPredicate<? super T, ? super Integer, E> predicate) throws E {
         checkOccurrences(occurrences);
 
@@ -806,8 +1008,8 @@ public final class Multiset<T> implements Iterable<T> {
      * this Multiset will contain no elements in common with the specified
      * collection. This method ignores how often any element might appear in
      * {@code c}, and only cares whether or not an element appears at all.
-     * 
-     * @param c
+     *
+     * @param c the c
      * @return <tt>true</tt> if this set changed as a result of the call
      * @see Collection#removeAll(Collection)
      */
@@ -833,9 +1035,8 @@ public final class Multiset<T> implements Iterable<T> {
      * Remove the specified occurrences from the specified elements. 
      * The elements will be removed from this set if the occurrences equals to or less than 0 after the operation.
      *
-     * @param c
-     * @param occurrences
-     *            the occurrences to remove if the element is in the specified collection <code>c</code>.
+     * @param c the c
+     * @param occurrences            the occurrences to remove if the element is in the specified collection <code>c</code>.
      * @return <tt>true</tt> if this set changed as a result of the call
      */
     public boolean removeAll(final Collection<?> c, final int occurrences) {
@@ -859,9 +1060,10 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param m
-     * @return
+     * Removes the all.
+     *
+     * @param m the m
+     * @return true, if successful
      */
     public boolean removeAll(final Map<?, Integer> m) {
         if (N.isNullOrEmpty(m)) {
@@ -886,8 +1088,11 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * 
-     * @param m
+     * Removes the all.
+     *
+     * @param multiset the multiset
+     * @return true, if successful
+     * @throws IllegalArgumentException the illegal argument exception
      */
     public boolean removeAll(final Multiset<?> multiset) throws IllegalArgumentException {
         if (N.isNullOrEmpty(multiset)) {
@@ -901,6 +1106,15 @@ public final class Multiset<T> implements Iterable<T> {
         return true;
     }
 
+    /**
+     * Replace if.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @param newOccurrences the new occurrences
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean replaceIf(Try.Predicate<? super T, E> predicate, final int newOccurrences) throws E {
         checkOccurrences(newOccurrences);
 
@@ -936,6 +1150,15 @@ public final class Multiset<T> implements Iterable<T> {
         return modified;
     }
 
+    /**
+     * Replace if.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @param newOccurrences the new occurrences
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean replaceIf(Try.BiPredicate<? super T, ? super Integer, E> predicate, final int newOccurrences) throws E {
         checkOccurrences(newOccurrences);
 
@@ -973,8 +1196,10 @@ public final class Multiset<T> implements Iterable<T> {
 
     /**
      * The associated elements will be removed if zero or negative occurrences are returned by the specified <code>function</code>.
-     * 
-     * @param function
+     *
+     * @param <E> the element type
+     * @param function the function
+     * @throws E the e
      */
     public <E extends Exception> void replaceAll(Try.BiFunction<? super T, ? super Integer, Integer, E> function) throws E {
         List<T> keyToRemove = null;
@@ -1007,7 +1232,7 @@ public final class Multiset<T> implements Iterable<T> {
      * this collection all of its elements that are not contained in the
      * specified collection.
      *
-     * @param c
+     * @param c the c
      * @return <tt>true</tt> if this set changed as a result of the call
      * @see Collection#retainAll(Collection)
      */
@@ -1033,6 +1258,11 @@ public final class Multiset<T> implements Iterable<T> {
         return N.isNullOrEmpty(others) ? false : removeAll(others, Integer.MAX_VALUE);
     }
 
+    /**
+     * Copy.
+     *
+     * @return the multiset
+     */
     public Multiset<T> copy() {
         final Multiset<T> copy = new Multiset<T>(mapSupplier);
 
@@ -1041,22 +1271,45 @@ public final class Multiset<T> implements Iterable<T> {
         return copy;
     }
 
+    /**
+     * Elements.
+     *
+     * @return the sets the
+     */
     public Set<T> elements() {
         return ImmutableSet.of(valueMap.keySet());
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     public int size() {
         return valueMap.size();
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     public boolean isEmpty() {
         return valueMap.isEmpty();
     }
 
+    /**
+     * Clear.
+     */
     public void clear() {
         valueMap.clear();
     }
 
+    /**
+     * Iterator.
+     *
+     * @return the iterator
+     */
     @Override
     public Iterator<T> iterator() {
         return valueMap.keySet().iterator();
@@ -1066,14 +1319,31 @@ public final class Multiset<T> implements Iterable<T> {
     //        return valueMap.entrySet();
     //    }
 
+    /**
+     * To array.
+     *
+     * @return the object[]
+     */
     public Object[] toArray() {
         return valueMap.keySet().toArray();
     }
 
+    /**
+     * To array.
+     *
+     * @param <A> the generic type
+     * @param a the a
+     * @return the a[]
+     */
     public <A> A[] toArray(final A[] a) {
         return valueMap.keySet().toArray(a);
     }
 
+    /**
+     * To map.
+     *
+     * @return the map
+     */
     public Map<T, Integer> toMap() {
         final Map<T, Integer> result = Maps.newOrderingMap(valueMap);
 
@@ -1084,6 +1354,13 @@ public final class Multiset<T> implements Iterable<T> {
         return result;
     }
 
+    /**
+     * To map.
+     *
+     * @param <M> the generic type
+     * @param supplier the supplier
+     * @return the m
+     */
     public <M extends Map<T, Integer>> M toMap(final IntFunction<? extends M> supplier) {
         final M result = supplier.apply(size());
 
@@ -1094,11 +1371,22 @@ public final class Multiset<T> implements Iterable<T> {
         return result;
     }
 
+    /**
+     * To map sorted by occurrences.
+     *
+     * @return the map
+     */
     @SuppressWarnings("rawtypes")
     public Map<T, Integer> toMapSortedByOccurrences() {
         return toMapSortedBy((Comparator) cmpByCount);
     }
 
+    /**
+     * To map sorted by occurrences.
+     *
+     * @param cmp the cmp
+     * @return the map
+     */
     public Map<T, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) {
         return toMapSortedBy(new Comparator<Map.Entry<T, MutableInt>>() {
             @Override
@@ -1108,6 +1396,12 @@ public final class Multiset<T> implements Iterable<T> {
         });
     }
 
+    /**
+     * To map sorted by key.
+     *
+     * @param cmp the cmp
+     * @return the map
+     */
     public Map<T, Integer> toMapSortedByKey(final Comparator<? super T> cmp) {
         return toMapSortedBy(new Comparator<Map.Entry<T, MutableInt>>() {
             @Override
@@ -1117,6 +1411,12 @@ public final class Multiset<T> implements Iterable<T> {
         });
     }
 
+    /**
+     * To map sorted by.
+     *
+     * @param cmp the cmp
+     * @return the map
+     */
     Map<T, Integer> toMapSortedBy(final Comparator<Map.Entry<T, MutableInt>> cmp) {
         if (N.isNullOrEmpty(valueMap)) {
             return new LinkedHashMap<>();
@@ -1134,10 +1434,21 @@ public final class Multiset<T> implements Iterable<T> {
         return sortedValues;
     }
 
+    /**
+     * To immutable map.
+     *
+     * @return the immutable map
+     */
     public ImmutableMap<T, Integer> toImmutableMap() {
         return ImmutableMap.of(toMap());
     }
 
+    /**
+     * To immutable map.
+     *
+     * @param mapSupplier the map supplier
+     * @return the immutable map
+     */
     public ImmutableMap<T, Integer> toImmutableMap(final IntFunction<? extends Map<T, Integer>> mapSupplier) {
         return ImmutableMap.of(toMap(mapSupplier));
     }
@@ -1148,8 +1459,9 @@ public final class Multiset<T> implements Iterable<T> {
     //    }
 
     /**
-     * 
-     * @return a list with all elements, each of them is repeated with the occurrences in this <code>Multiset</code>   
+     * Flatten.
+     *
+     * @return a list with all elements, each of them is repeated with the occurrences in this <code>Multiset</code>
      */
     public List<T> flatten() {
         final long totalOccurrences = sumOfOccurrences();
@@ -1173,6 +1485,14 @@ public final class Multiset<T> implements Iterable<T> {
         return N.asList((T[]) a);
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return the multiset
+     * @throws E the e
+     */
     public <E extends Exception> Multiset<T> filter(Try.Predicate<? super T, E> filter) throws E {
         final Multiset<T> result = new Multiset<>(mapSupplier.get());
 
@@ -1185,6 +1505,14 @@ public final class Multiset<T> implements Iterable<T> {
         return result;
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return the multiset
+     * @throws E the e
+     */
     public <E extends Exception> Multiset<T> filter(Try.BiPredicate<? super T, Integer, E> filter) throws E {
         final Multiset<T> result = new Multiset<>(mapSupplier.get());
 
@@ -1197,6 +1525,13 @@ public final class Multiset<T> implements Iterable<T> {
         return result;
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(final Try.Consumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -1205,6 +1540,13 @@ public final class Multiset<T> implements Iterable<T> {
         }
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(final Try.ObjIntConsumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -1231,10 +1573,12 @@ public final class Multiset<T> implements Iterable<T> {
      * 
      * return newValue;
      * </pre>
-     * 
-     * @param e
-     * @param mappingFunction
-     * @return
+     *
+     * @param <E> the element type
+     * @param e the e
+     * @param mappingFunction the mapping function
+     * @return the int
+     * @throws E the e
      */
     public <E extends Exception> int computeIfAbsent(T e, Try.Function<? super T, Integer, E> mappingFunction) throws E {
         N.checkArgNotNull(mappingFunction);
@@ -1274,10 +1618,12 @@ public final class Multiset<T> implements Iterable<T> {
      * 
      * return newValue;
      * </pre>
-     * 
-     * @param e
-     * @param remappingFunction
-     * @return
+     *
+     * @param <E> the element type
+     * @param e the e
+     * @param remappingFunction the remapping function
+     * @return the int
+     * @throws E the e
      */
     public <E extends Exception> int computeIfPresent(T e, Try.BiFunction<? super T, Integer, Integer, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
@@ -1316,10 +1662,12 @@ public final class Multiset<T> implements Iterable<T> {
      * 
      * return newValue;
      * </pre>
-     * 
-     * @param key
-     * @param remappingFunction
-     * @return
+     *
+     * @param <E> the element type
+     * @param key the key
+     * @param remappingFunction the remapping function
+     * @return the int
+     * @throws E the e
      */
     public <E extends Exception> int compute(T key, Try.BiFunction<? super T, Integer, Integer, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
@@ -1355,11 +1703,13 @@ public final class Multiset<T> implements Iterable<T> {
      * 
      * return newValue;
      * </pre>
-     * 
-     * @param key
-     * @param value
-     * @param remappingFunction
-     * @return
+     *
+     * @param <E> the element type
+     * @param key the key
+     * @param value the value
+     * @param remappingFunction the remapping function
+     * @return the int
+     * @throws E the e
      */
     public <E extends Exception> int merge(T key, int value, Try.BiFunction<Integer, Integer, Integer, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
@@ -1379,10 +1729,20 @@ public final class Multiset<T> implements Iterable<T> {
         return newValue;
     }
 
+    /**
+     * Stream.
+     *
+     * @return the stream
+     */
     public Stream<T> stream() {
         return Stream.of(valueMap.keySet());
     }
 
+    /**
+     * Flat stream.
+     *
+     * @return the stream
+     */
     public Stream<T> flatStream() {
         final Iterator<Map.Entry<T, MutableInt>> entryIter = valueMap.entrySet().iterator();
 
@@ -1421,6 +1781,7 @@ public final class Multiset<T> implements Iterable<T> {
         return Stream.of(iter);
     }
 
+    /** The Constant TO_INT. */
     private static final Function<MutableInt, Integer> TO_INT = new Function<MutableInt, Integer>() {
         @Override
         public Integer apply(MutableInt t) {
@@ -1428,43 +1789,101 @@ public final class Multiset<T> implements Iterable<T> {
         }
     };
 
+    /**
+     * Entry stream.
+     *
+     * @return the entry stream
+     */
     public EntryStream<T, Integer> entryStream() {
         return EntryStream.of(valueMap).mapValue(TO_INT);
     }
 
+    /**
+     * Apply.
+     *
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param func the func
+     * @return the r
+     * @throws E the e
+     */
     public <R, E extends Exception> R apply(Try.Function<? super Multiset<T>, R, E> func) throws E {
         return func.apply(this);
     }
 
+    /**
+     * Apply if not empty.
+     *
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param func the func
+     * @return the optional
+     * @throws E the e
+     */
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super Multiset<T>, R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
+    /**
+     * Accept.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void accept(Try.Consumer<? super Multiset<T>, E> action) throws E {
         action.accept(this);
     }
 
+    /**
+     * Accept if not empty.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super Multiset<T>, E> action) throws E {
         if (size() > 0) {
             action.accept(this);
         }
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return valueMap.hashCode();
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(final Object obj) {
         return obj == this || (obj instanceof Multiset && valueMap.equals(((Multiset<T>) obj).valueMap));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return valueMap.toString();
     }
 
+    /**
+     * Check occurrences.
+     *
+     * @param occurrences the occurrences
+     */
     private static void checkOccurrences(final int occurrences) {
         if (occurrences < 0) {
             throw new IllegalArgumentException("The specified 'occurrences' can not be negative");

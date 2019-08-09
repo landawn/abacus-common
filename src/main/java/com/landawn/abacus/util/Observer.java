@@ -38,20 +38,23 @@ import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Predicate;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * 
- * @since 0.9
- * 
+ * The Class Observer.
+ *
  * @author Haiyang Li
- * 
+ * @param <T> the generic type
+ * @since 0.9
  */
 public abstract class Observer<T> {
 
+    /** The Constant COMPLETE_FLAG. */
     private static final Object COMPLETE_FLAG = new Object();
 
+    /** The Constant INTERVAL_FACTOR. */
     protected static final double INTERVAL_FACTOR = 3;
 
+    /** The Constant EMPTY_ACTION. */
     protected static final Runnable EMPTY_ACTION = new Runnable() {
         @Override
         public void run() {
@@ -59,6 +62,7 @@ public abstract class Observer<T> {
         }
     };
 
+    /** The Constant ON_ERROR_MISSING. */
     protected static final Consumer<Exception> ON_ERROR_MISSING = new Consumer<Exception>() {
         @Override
         public void accept(Exception t) {
@@ -66,6 +70,7 @@ public abstract class Observer<T> {
         }
     };
 
+    /** The Constant asyncExecutor. */
     protected static final Executor asyncExecutor;
 
     static {
@@ -77,39 +82,79 @@ public abstract class Observer<T> {
         }
     }
 
+    /** The Constant scheduler. */
     protected static final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(IOUtil.IS_PLATFORM_ANDROID ? IOUtil.CPU_CORES : 32);
 
     static {
         scheduler.setRemoveOnCancelPolicy(true);
     }
 
+    /** The scheduled futures. */
     protected final Map<ScheduledFuture<?>, Long> scheduledFutures = new LinkedHashMap<>();
+
+    /** The dispatcher. */
     protected final Dispatcher<Object> dispatcher;
+
+    /** The has more. */
     protected boolean hasMore = true;
 
+    /**
+     * Instantiates a new observer.
+     */
     protected Observer() {
         this(new Dispatcher<>());
     }
 
+    /**
+     * Instantiates a new observer.
+     *
+     * @param dispatcher the dispatcher
+     */
     protected Observer(Dispatcher<Object> dispatcher) {
         this.dispatcher = dispatcher;
     }
 
+    /**
+     * Complete.
+     *
+     * @param queue the queue
+     */
     @SuppressWarnings("rawtypes")
     public static void complete(BlockingQueue<?> queue) {
         ((Queue) queue).offer(COMPLETE_FLAG);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param queue the queue
+     * @return the observer
+     */
     public static <T> Observer<T> of(final BlockingQueue<T> queue) {
         N.checkArgNotNull(queue, "queue");
 
         return new BlockingQueueObserver<>(queue);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @return the observer
+     */
     public static <T> Observer<T> of(final Collection<T> c) {
         return of(N.isNullOrEmpty(c) ? ObjIterator.<T> empty() : c.iterator());
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param iter the iter
+     * @return the observer
+     */
     public static <T> Observer<T> of(final Iterator<T> iter) {
         N.checkArgNotNull(iter, "iterator");
 
@@ -118,8 +163,9 @@ public abstract class Observer<T> {
 
     /**
      *  
-     * @param delayInMillis
-     * @return
+     *
+     * @param delayInMillis the delay in millis
+     * @return the observer
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
     public static Observer<Long> timer(long delayInMillis) {
@@ -128,9 +174,10 @@ public abstract class Observer<T> {
 
     /**
      *  
-     * @param delay
-     * @param unit
-     * @return
+     *
+     * @param delay the delay
+     * @param unit the unit
+     * @return the observer
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
     public static Observer<Long> timer(long delay, TimeUnit unit) {
@@ -142,8 +189,9 @@ public abstract class Observer<T> {
 
     /**
      *   
-     * @param periodInMillis
-     * @return
+     *
+     * @param periodInMillis the period in millis
+     * @return the observer
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(long periodInMillis) {
@@ -151,9 +199,11 @@ public abstract class Observer<T> {
     }
 
     /**
-     * @param initialDelayInMillis
-     * @param periodInMillis
-     * @return
+     * Interval.
+     *
+     * @param initialDelayInMillis the initial delay in millis
+     * @param periodInMillis the period in millis
+     * @return the observer
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(long initialDelayInMillis, long periodInMillis) {
@@ -162,9 +212,10 @@ public abstract class Observer<T> {
 
     /**
      *   
-     * @param period
-     * @param unit
-     * @return
+     *
+     * @param period the period
+     * @param unit the unit
+     * @return the observer
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(long period, TimeUnit unit) {
@@ -173,10 +224,11 @@ public abstract class Observer<T> {
 
     /**
      *  
-     * @param initialDelay
-     * @param period
-     * @param unit
-     * @return
+     *
+     * @param initialDelay the initial delay
+     * @param period the period
+     * @param unit the unit
+     * @return the observer
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(long initialDelay, long period, TimeUnit unit) {
@@ -188,8 +240,9 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param intervalDurationInMillis
+     * Debounce.
+     *
+     * @param intervalDurationInMillis the interval duration in millis
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
@@ -198,9 +251,10 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param intervalDuration
-     * @param unit
+     * Debounce.
+     *
+     * @param intervalDuration the interval duration
+     * @param unit the unit
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
@@ -274,8 +328,9 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param intervalDurationInMillis
+     * Throttle first.
+     *
+     * @param intervalDurationInMillis the interval duration in millis
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
@@ -284,9 +339,10 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param intervalDuration
-     * @param unit
+     * Throttle first.
+     *
+     * @param intervalDuration the interval duration
+     * @param unit the unit
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
@@ -345,8 +401,9 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param intervalDurationInMillis
+     * Throttle last.
+     *
+     * @param intervalDurationInMillis the interval duration in millis
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
@@ -355,9 +412,10 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param intervalDuration
-     * @param unit
+     * Throttle last.
+     *
+     * @param intervalDuration the interval duration
+     * @param unit the unit
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
@@ -418,8 +476,9 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param delayInMillis
+     * Delay.
+     *
+     * @param delayInMillis the delay in millis
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
@@ -428,9 +487,10 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param delayInMillis
-     * @param unit
+     * Delay.
+     *
+     * @param delay the delay
+     * @param unit the unit
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
@@ -463,7 +523,8 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
+     * Time interval.
+     *
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timeInterval()">RxJava#timeInterval</a>
      */
@@ -487,7 +548,8 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
+     * Timestamp.
+     *
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timestamp()">RxJava#timestamp</a>
      */
@@ -504,6 +566,12 @@ public abstract class Observer<T> {
         return (Observer<Timed<T>>) this;
     }
 
+    /**
+     * Skip.
+     *
+     * @param n the n
+     * @return the observer
+     */
     public Observer<T> skip(final long n) {
         N.checkArgNotNegative(n, "n");
 
@@ -523,6 +591,12 @@ public abstract class Observer<T> {
         return this;
     }
 
+    /**
+     * Limit.
+     *
+     * @param maxSize the max size
+     * @return the observer
+     */
     public Observer<T> limit(final long maxSize) {
         N.checkArgNotNegative(maxSize, "maxSize");
 
@@ -543,8 +617,9 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @return
+     * Distinct.
+     *
+     * @return the observer
      */
     public Observer<T> distinct() {
         dispatcher.append(new Dispatcher<Object>() {
@@ -562,9 +637,10 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @return
+     * Distinct by.
+     *
+     * @param keyMapper the key mapper
+     * @return the observer
      */
     public Observer<T> distinctBy(final Function<? super T, ?> keyMapper) {
         dispatcher.append(new Dispatcher<Object>() {
@@ -581,6 +657,12 @@ public abstract class Observer<T> {
         return this;
     }
 
+    /**
+     * Filter.
+     *
+     * @param filter the filter
+     * @return the observer
+     */
     public Observer<T> filter(final Predicate<? super T> filter) {
         dispatcher.append(new Dispatcher<Object>() {
             @Override
@@ -594,6 +676,13 @@ public abstract class Observer<T> {
         return this;
     }
 
+    /**
+     * Map.
+     *
+     * @param <U> the generic type
+     * @param map the map
+     * @return the observer
+     */
     public <U> Observer<U> map(final Function<? super T, U> map) {
         dispatcher.append(new Dispatcher<Object>() {
             @Override
@@ -607,6 +696,13 @@ public abstract class Observer<T> {
         return (Observer<U>) this;
     }
 
+    /**
+     * Flat map.
+     *
+     * @param <U> the generic type
+     * @param map the map
+     * @return the observer
+     */
     public <U> Observer<U> flatMap(final Function<? super T, Collection<U>> map) {
         dispatcher.append(new Dispatcher<Object>() {
             @Override
@@ -627,9 +723,10 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param timespan
-     * @param unit
+     * Buffer.
+     *
+     * @param timespan the timespan
+     * @param unit the unit
      * @return this instance
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit)">RxJava#window(long, java.util.concurrent.TimeUnit)</a>
      */
@@ -638,9 +735,11 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param timespan
-     * @param unit
+     * Buffer.
+     *
+     * @param timespan the timespan
+     * @param unit the unit
+     * @param count the count
      * @return this instance
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit,%20int)">RxJava#window(long, java.util.concurrent.TimeUnit, int)</a>
      */
@@ -693,11 +792,12 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param timespan
-     * @param timeskip
-     * @param unit
-     * @return
+     * Buffer.
+     *
+     * @param timespan the timespan
+     * @param timeskip the timeskip
+     * @param unit the unit
+     * @return the observer
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#window(long, long, java.util.concurrent.TimeUnit)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit) {
@@ -705,12 +805,13 @@ public abstract class Observer<T> {
     }
 
     /**
-     * 
-     * @param timespan
-     * @param timeskip
-     * @param unit
-     * @param count
-     * @return
+     * Buffer.
+     *
+     * @param timespan the timespan
+     * @param timeskip the timeskip
+     * @param unit the unit
+     * @param count the count
+     * @return the observer
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#window(long, long, java.util.concurrent.TimeUnit)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit, final int count) {
@@ -766,16 +867,37 @@ public abstract class Observer<T> {
         return (Observer<List<T>>) this;
     }
 
+    /**
+     * Observe.
+     *
+     * @param action the action
+     */
     public void observe(final Consumer<? super T> action) {
         observe(action, ON_ERROR_MISSING);
     }
 
+    /**
+     * Observe.
+     *
+     * @param action the action
+     * @param onError the on error
+     */
     public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) {
         observe(action, onError, EMPTY_ACTION);
     }
 
+    /**
+     * Observe.
+     *
+     * @param action the action
+     * @param onError the on error
+     * @param onComplete the on complete
+     */
     public abstract void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete);
 
+    /**
+     * Cancel scheduled futures.
+     */
     void cancelScheduledFutures() {
         final long startTime = System.currentTimeMillis();
 
@@ -791,24 +913,58 @@ public abstract class Observer<T> {
         }
     }
 
+    /**
+     * The Class Node.
+     *
+     * @param <T> the generic type
+     */
     protected static class Node<T> {
+
+        /** The value. */
         public final T value;
+
+        /** The next. */
         public Node<T> next;
 
+        /**
+         * Instantiates a new node.
+         *
+         * @param value the value
+         */
         public Node(final T value) {
             this(value, null);
         }
 
+        /**
+         * Instantiates a new node.
+         *
+         * @param value the value
+         * @param next the next
+         */
         public Node(final T value, Node<T> next) {
             this.value = value;
             this.next = next;
         }
     }
 
+    /**
+     * The Class Dispatcher.
+     *
+     * @param <T> the generic type
+     */
     protected static class Dispatcher<T> {
+
+        /** The holder. */
         protected final Holder<Object> holder = Holder.of(N.NULL_MASK);
+
+        /** The down dispatcher. */
         protected Dispatcher<T> downDispatcher;
 
+        /**
+         * On next.
+         *
+         * @param value the value
+         */
         public void onNext(@NonNull final T value) {
             if (downDispatcher != null) {
                 downDispatcher.onNext(value);
@@ -834,6 +990,11 @@ public abstract class Observer<T> {
             }
         }
 
+        /**
+         * Append.
+         *
+         * @param downDispatcher the down dispatcher
+         */
         public void append(Dispatcher<T> downDispatcher) {
             Dispatcher<T> tmp = this;
 
@@ -845,39 +1006,95 @@ public abstract class Observer<T> {
         }
     }
 
+    /**
+     * The Class DispatcherBase.
+     *
+     * @param <T> the generic type
+     */
     protected static abstract class DispatcherBase<T> extends Dispatcher<T> {
+
+        /** The on error. */
         private final Consumer<? super Exception> onError;
+
+        /** The on complete. */
         private final Runnable onComplete;
 
+        /**
+         * Instantiates a new dispatcher base.
+         *
+         * @param onError the on error
+         * @param onComplete the on complete
+         */
         protected DispatcherBase(final Consumer<? super Exception> onError, final Runnable onComplete) {
             this.onError = onError;
             this.onComplete = onComplete;
         }
 
+        /**
+         * On error.
+         *
+         * @param error the error
+         */
         @Override
         public void onError(final Exception error) {
             onError.accept(error);
         }
 
+        /**
+         * On complete.
+         */
         @Override
         public void onComplete() {
             onComplete.run();
         }
     }
 
+    /**
+     * The Class ObserverBase.
+     *
+     * @param <T> the generic type
+     */
     protected static abstract class ObserverBase<T> extends Observer<T> {
+
+        /**
+         * Instantiates a new observer base.
+         */
         protected ObserverBase() {
 
         }
     }
 
+    /**
+     * An asynchronous update interface for receiving notifications
+     * about BlockingQueue information as the BlockingQueue is constructed.
+     *
+     * @param <T> the generic type
+     */
     static final class BlockingQueueObserver<T> extends ObserverBase<T> {
+
+        /** The queue. */
         private final BlockingQueue<T> queue;
 
+        /**
+         * This method is called when information about an BlockingQueue
+         * which was previously requested using an asynchronous
+         * interface becomes available.
+         *
+         * @param queue the queue
+         */
         BlockingQueueObserver(final BlockingQueue<T> queue) {
             this.queue = queue;
         }
 
+        /**
+         * This method is called when information about an BlockingQueue
+         * which was previously requested using an asynchronous
+         * interface becomes available.
+         *
+         * @param action the action
+         * @param onError the on error
+         * @param onComplete the on complete
+         */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete) {
             N.checkArgNotNull(action, "action");
@@ -921,13 +1138,37 @@ public abstract class Observer<T> {
         }
     }
 
+    /**
+     * An asynchronous update interface for receiving notifications
+     * about Iterator information as the Iterator is constructed.
+     *
+     * @param <T> the generic type
+     */
     static final class IteratorObserver<T> extends ObserverBase<T> {
+
+        /** The iter. */
         private final Iterator<T> iter;
 
+        /**
+         * This method is called when information about an Iterator
+         * which was previously requested using an asynchronous
+         * interface becomes available.
+         *
+         * @param iter the iter
+         */
         IteratorObserver(final Iterator<T> iter) {
             this.iter = iter;
         }
 
+        /**
+         * This method is called when information about an Iterator
+         * which was previously requested using an asynchronous
+         * interface becomes available.
+         *
+         * @param action the action
+         * @param onError the on error
+         * @param onComplete the on complete
+         */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete) {
             N.checkArgNotNull(action, "action");
@@ -971,15 +1212,42 @@ public abstract class Observer<T> {
 
     }
 
+    /**
+     * An asynchronous update interface for receiving notifications
+     * about Timer information as the Timer is constructed.
+     *
+     * @param <T> the generic type
+     */
     static final class TimerObserver<T> extends ObserverBase<T> {
+
+        /** The delay. */
         private final long delay;
+
+        /** The unit. */
         private final TimeUnit unit;
 
+        /**
+         * This method is called when information about an Timer
+         * which was previously requested using an asynchronous
+         * interface becomes available.
+         *
+         * @param delay the delay
+         * @param unit the unit
+         */
         TimerObserver(long delay, TimeUnit unit) {
             this.delay = delay;
             this.unit = unit;
         }
 
+        /**
+         * This method is called when information about an Timer
+         * which was previously requested using an asynchronous
+         * interface becomes available.
+         *
+         * @param action the action
+         * @param onError the on error
+         * @param onComplete the on complete
+         */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete) {
             N.checkArgNotNull(action, "action");
@@ -1006,18 +1274,50 @@ public abstract class Observer<T> {
         }
     }
 
+    /**
+     * An asynchronous update interface for receiving notifications
+     * about Interval information as the Interval is constructed.
+     *
+     * @param <T> the generic type
+     */
     static final class IntervalObserver<T> extends ObserverBase<T> {
+
+        /** The initial delay. */
         private final long initialDelay;
+
+        /** The period. */
         private final long period;
+
+        /** The unit. */
         private final TimeUnit unit;
+
+        /** The future. */
         private ScheduledFuture<?> future = null;
 
+        /**
+         * This method is called when information about an Interval
+         * which was previously requested using an asynchronous
+         * interface becomes available.
+         *
+         * @param initialDelay the initial delay
+         * @param period the period
+         * @param unit the unit
+         */
         IntervalObserver(long initialDelay, long period, TimeUnit unit) {
             this.initialDelay = initialDelay;
             this.period = period;
             this.unit = unit;
         }
 
+        /**
+         * This method is called when information about an Interval
+         * which was previously requested using an asynchronous
+         * interface becomes available.
+         *
+         * @param action the action
+         * @param onError the on error
+         * @param onComplete the on complete
+         */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete) {
             N.checkArgNotNull(action, "action");

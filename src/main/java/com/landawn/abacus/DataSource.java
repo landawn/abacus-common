@@ -18,21 +18,26 @@ import java.sql.Connection;
 
 import com.landawn.abacus.util.Properties;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface DataSource.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface DataSource extends javax.sql.DataSource {
+
     /**
-     * 
-     * @return
+     * Gets the slice selector.
+     *
+     * @return the slice selector
      */
     SliceSelector getSliceSelector();
 
     /**
      * Returns the connection for write/read operation.
+     *
+     * @return the connection
      */
     @Override
     Connection getConnection();
@@ -40,32 +45,36 @@ public interface DataSource extends javax.sql.DataSource {
     /**
      * Returns the read-only connection if it's configured in Abacus.xml file, otherwise the same connection as
      * {@code getConnection()} is returned
+     *
+     * @return the read only connection
      */
     Connection getReadOnlyConnection();
 
     /**
-     * 
+     * Gets the name.
+     *
      * @return the name of the data source if it's configured, otherwise, {@code null} is returned.
      */
     String getName();
 
     /**
-     * 
+     * Gets the properties.
+     *
      * @return the properties used to manage the connection.
      */
     Properties<String, String> getProperties();
 
     /**
      * Returns the maximum number of active connections that can be allocated from this pool.
-     * 
-     * @return
+     *
+     * @return the max active
      */
     int getMaxActive();
 
     /**
      * Returns the number of allocated collection.
-     * 
-     * @return
+     *
+     * @return the current active
      */
     int getCurrentActive();
 
@@ -74,5 +83,10 @@ public interface DataSource extends javax.sql.DataSource {
      */
     void close();
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     boolean isClosed();
 }

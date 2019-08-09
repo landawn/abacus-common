@@ -14,40 +14,80 @@
 
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
  * It's designed for performance improvement by only hash/compare {@code key} in {@code hashCode/equals} method.
- * 
- * @author HaiYang Li
  *
- * @param <K>
- * @param <T>
+ * @author HaiYang Li
+ * @param <K> the key type
+ * @param <T> the generic type
  */
 public class Keyed<K, T> {
+
+    /** The key. */
     private final K key;
+
+    /** The val. */
     private final T val;
 
+    /**
+     * Instantiates a new keyed.
+     *
+     * @param key the key
+     * @param val the val
+     */
     Keyed(K key, T val) {
         this.key = key;
         this.val = val;
     }
 
+    /**
+     * Of.
+     *
+     * @param <K> the key type
+     * @param <T> the generic type
+     * @param key the key
+     * @param val the val
+     * @return the keyed
+     */
     public static <K, T> Keyed<K, T> of(final K key, final T val) {
         return new Keyed<>(key, val);
     }
 
+    /**
+     * Key.
+     *
+     * @return the k
+     */
     public K key() {
         return key;
     }
 
+    /**
+     * Val.
+     *
+     * @return the t
+     */
     public T val() {
         return val;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return N.hashCode(key);
     }
 
+    /**
+     * Equals.
+     *
+     * @param val the val
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object val) {
         if (val == this) {
@@ -62,6 +102,11 @@ public class Keyed<K, T> {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "{key=" + N.toString(key) + ", val=" + val + "}";

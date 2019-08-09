@@ -16,20 +16,32 @@ package com.landawn.abacus.lock;
 
 import com.landawn.abacus.LockMode;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbstractXLock.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public abstract class AbstractXLock<T> implements XLock<T> {
 
+    /**
+     * Check target object.
+     *
+     * @param target the target
+     */
     protected void checkTargetObject(T target) {
         if (target == null) {
             throw new NullPointerException("The target object can't be null");
         }
     }
 
+    /**
+     * Check lock mode.
+     *
+     * @param lockMode the lock mode
+     */
     protected void checkLockMode(LockMode lockMode) {
         if (lockMode == null) {
             throw new NullPointerException("The lockMode parameter can't be null");

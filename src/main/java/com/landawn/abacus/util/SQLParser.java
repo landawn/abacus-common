@@ -20,15 +20,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class SQLParser.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class SQLParser {
+
+    /** The Constant TAB. */
     private static final char TAB = '\t';
+
+    /** The Constant ENTER. */
     private static final char ENTER = '\n';
+
+    /** The Constant seperators. */
     private static final Set<Object> seperators = new HashSet<>();
 
     static {
@@ -117,6 +124,7 @@ public final class SQLParser {
         seperators.add("|*=");
     }
 
+    /** The Constant compositeWords. */
     private static final Map<String, String[]> compositeWords = new ObjectPool<String, String[]>(64);
 
     static {
@@ -161,9 +169,18 @@ public final class SQLParser {
         }
     }
 
+    /**
+     * Instantiates a new SQL parser.
+     */
     private SQLParser() {
     }
 
+    /**
+     * Parses the.
+     *
+     * @param sql the sql
+     * @return the list
+     */
     public static List<String> parse(String sql) {
         final int sqlLength = sql.length();
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -227,6 +244,15 @@ public final class SQLParser {
         return words;
     }
 
+    /**
+     * Index word.
+     *
+     * @param sql the sql
+     * @param word the word
+     * @param fromIndex the from index
+     * @param caseSensitive the case sensitive
+     * @return the int
+     */
     public static int indexWord(String sql, String word, int fromIndex, boolean caseSensitive) {
         String[] subWords = compositeWords.get(word);
 
@@ -344,6 +370,13 @@ public final class SQLParser {
         }
     }
 
+    /**
+     * Next word.
+     *
+     * @param sql the sql
+     * @param fromIndex the from index
+     * @return the string
+     */
     public static String nextWord(String sql, int fromIndex) {
         final int sqlLength = sql.length();
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -393,12 +426,22 @@ public final class SQLParser {
         return st;
     }
 
+    /**
+     * Register seperator.
+     *
+     * @param seperator the seperator
+     */
     public static void registerSeperator(char seperator) {
         N.checkArgPositive(seperator, "seperator");
 
         seperators.add(seperator);
     }
 
+    /**
+     * Register seperator.
+     *
+     * @param seperator the seperator
+     */
     public static void registerSeperator(String seperator) {
         N.checkArgNotNull(seperator, "seperator");
 
@@ -409,6 +452,15 @@ public final class SQLParser {
         }
     }
 
+    /**
+     * Checks if is seperator.
+     *
+     * @param str the str
+     * @param len the len
+     * @param index the index
+     * @param ch the ch
+     * @return true, if is seperator
+     */
     public static boolean isSeperator(String str, int len, int index, char ch) {
         // for Ibatis/Mybatis
         if (ch == '#' && index < len - 1 && str.charAt(index + 1) == '{') {
@@ -418,6 +470,14 @@ public final class SQLParser {
         return seperators.contains(ch);
     }
 
+    /**
+     * Checks if is function name.
+     *
+     * @param words the words
+     * @param len the len
+     * @param index the index
+     * @return true, if is function name
+     */
     public static boolean isFunctionName(final List<String> words, int len, int index) {
         //    return (i < len - 1 && words.get(i + 1).charAt(0) == WD._PARENTHESES_L)
         //            || (i < len - 2 && WD.SPACE.equals(words.get(i + 1)) && words.get(i + 2).charAt(0) == WD._PARENTHESES_L);

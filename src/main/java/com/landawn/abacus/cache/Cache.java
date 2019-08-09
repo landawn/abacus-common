@@ -21,118 +21,137 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.u.Optional;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface Cache.
+ *
  * @author Haiyang Li
+ * @param <K> the key type
+ * @param <V> the value type
+ * @since 0.8
  */
 public interface Cache<K, V> extends Closeable {
+
+    /** The Constant DEFAULT_LIVE_TIME. */
     public static final long DEFAULT_LIVE_TIME = 3 * 60 * 60 * 1000L;
+
+    /** The Constant DEFAULT_MAX_IDLE_TIME. */
     public static final long DEFAULT_MAX_IDLE_TIME = 30 * 60 * 1000L;
 
     /**
-     * 
-     * @param k
+     * Gets the.
+     *
+     * @param k the k
      * @return V
      */
     Optional<V> get(final K k);
 
     /**
-     * 
-     * @param k
+     * Gets the t.
+     *
+     * @param k the k
      * @return V
      */
     V gett(final K k);
 
     /**
-     * 
-     * @param k
-     * @return
+     * Async get.
+     *
+     * @param k the k
+     * @return the continuable future
      */
     ContinuableFuture<Optional<V>> asyncGet(final K k);
 
     /**
-     * 
-     * @param k
-     * @return
+     * Async gett.
+     *
+     * @param k the k
+     * @return the continuable future
      */
     ContinuableFuture<V> asyncGett(final K k);
 
     /**
-     * 
-     * @param k
-     * @param v
-     * @return
+     * Put.
+     *
+     * @param k the k
+     * @param v the v
+     * @return true, if successful
      */
     boolean put(final K k, final V v);
 
     /**
-     * 
-     * @param k
-     * @param v
-     * @return
+     * Async put.
+     *
+     * @param k the k
+     * @param v the v
+     * @return the continuable future
      */
     ContinuableFuture<Boolean> asyncPut(final K k, final V v);
 
     /**
-     * 
-     * @param k
-     * @param v
-     * @param liveTime
-     *            unit is milliseconds
-     * @param maxIdleTime
-     *            unit is milliseconds
-     * @return
+     * Put.
+     *
+     * @param k the k
+     * @param v the v
+     * @param liveTime            unit is milliseconds
+     * @param maxIdleTime            unit is milliseconds
+     * @return true, if successful
      */
     boolean put(final K k, final V v, long liveTime, long maxIdleTime);
 
     /**
-     * 
-     * @param k
-     * @param v
-     * @param liveTime
-     * @param maxIdleTime
-     * @return
+     * Async put.
+     *
+     * @param k the k
+     * @param v the v
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @return the continuable future
      */
     ContinuableFuture<Boolean> asyncPut(final K k, final V v, long liveTime, long maxIdleTime);
 
     /**
-     * 
-     * @param k
+     * Removes the.
+     *
+     * @param k the k
      */
     void remove(final K k);
 
     /**
-     * 
-     * @param k
-     * @return
+     * Async remove.
+     *
+     * @param k the k
+     * @return the continuable future
      */
     ContinuableFuture<Void> asyncRemove(final K k);
 
     /**
-     * 
-     * @param k
+     * Contains key.
+     *
+     * @param k the k
      * @return boolean
      */
     boolean containsKey(final K k);
 
     /**
-     * 
-     * @param k
-     * @return
+     * Async contains key.
+     *
+     * @param k the k
+     * @return the continuable future
      */
     ContinuableFuture<Boolean> asyncContainsKey(final K k);
 
     /**
+     * Key set.
+     *
      * @return Set<K>
      */
     Set<K> keySet();
 
     /**
-     * Method size
-     * 
-     * @return
+     * Method size.
+     *
+     * @return the int
      */
     int size();
 
@@ -148,39 +167,44 @@ public interface Cache<K, V> extends Closeable {
     void close();
 
     /**
-     * method isClosed
-     * 
-     * @return
+     * method isClosed.
+     *
+     * @return true, if is closed
      */
     boolean isClosed();
 
     /**
+     * Gets the properties.
      *
-     * @return
+     * @return the properties
      */
     Properties<String, Object> getProperties();
 
     /**
+     * Gets the property.
      *
-     * @param propName
-     * @return
+     * @param <T> the generic type
+     * @param propName the prop name
+     * @return the property
      */
     <T> T getProperty(String propName);
 
     /**
      * Returns the old value associated with the property by the {@code propName}, {@code null} if it doesn't exist.
      *
-     * @param propName
-     * @param propValue
-     * @return
+     * @param <T> the generic type
+     * @param propName the prop name
+     * @param propValue the prop value
+     * @return the t
      */
     <T> T setProperty(String propName, Object propValue);
 
     /**
      * Returns value of the property which is to be removed, {@code null} if it doesn't exist.
      *
-     * @param propName
-     * @return
+     * @param <T> the generic type
+     * @param propName the prop name
+     * @return the t
      */
     <T> T removeProperty(String propName);
 }

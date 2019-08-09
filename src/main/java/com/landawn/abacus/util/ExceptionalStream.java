@@ -58,31 +58,63 @@ import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
- * 
- * @since 1.3
- * 
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @param <E> the element type
+ * @since 1.3
  */
 @SequentialOnly
 public class ExceptionalStream<T, E extends Exception> implements AutoCloseable {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
 
+    /** The elements. */
     private final ExceptionalIterator<T, E> elements;
+
+    /** The sorted. */
     private final boolean sorted;
+
+    /** The comparator. */
     private final Comparator<? super T> comparator;
+
+    /** The close handlers. */
     private final Deque<Try.Runnable<? extends E>> closeHandlers;
+
+    /** The is closed. */
     private boolean isClosed = false;
 
+    /**
+     * Instantiates a new exceptional stream.
+     *
+     * @param iter the iter
+     */
     ExceptionalStream(final ExceptionalIterator<T, E> iter) {
         this(iter, false, null, null);
     }
 
+    /**
+     * Instantiates a new exceptional stream.
+     *
+     * @param iter the iter
+     * @param closeHandlers the close handlers
+     */
     ExceptionalStream(final ExceptionalIterator<T, E> iter, final Deque<Try.Runnable<? extends E>> closeHandlers) {
         this(iter, false, null, closeHandlers);
     }
 
+    /**
+     * Instantiates a new exceptional stream.
+     *
+     * @param iter the iter
+     * @param sorted the sorted
+     * @param comparator the comparator
+     * @param closeHandlers the close handlers
+     */
     ExceptionalStream(final ExceptionalIterator<T, E> iter, final boolean sorted, final Comparator<? super T> comparator,
             final Deque<Try.Runnable<? extends E>> closeHandlers) {
         this.elements = iter;
@@ -91,14 +123,37 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         this.closeHandlers = closeHandlers;
     }
 
+    /**
+     * Empty.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> empty() {
         return new ExceptionalStream<>(ExceptionalIterator.EMPTY);
     }
 
+    /**
+     * Just.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param e the e
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> just(final T e) {
         return of(e);
     }
 
+    /**
+     * Of nullable.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param e the e
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> ofNullable(final T e) {
         if (e == null) {
             return empty();
@@ -107,6 +162,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return of(e);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final T... a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
@@ -149,6 +212,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
             return empty();
@@ -157,6 +228,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return of(c.iterator());
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterator<? extends T> iter) {
         if (iter == null) {
             return empty();
@@ -175,6 +254,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterable the iterable
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterable<? extends T> iterable) {
         if (iterable == null) {
             return empty();
@@ -183,6 +270,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return of(iterable.iterator());
     }
 
+    /**
+     * Of.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param m the m
+     * @return the exceptional stream
+     */
     public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m) {
         if (m == null) {
             return empty();
@@ -191,6 +287,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return of(m.entrySet());
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param stream the stream
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream) {
         if (stream == null) {
             return empty();
@@ -260,26 +364,81 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param exceptionType the exception type
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c, final Class<E> exceptionType) {
         return of(c);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param exceptionType the exception type
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterator<? extends T> iter, final Class<E> exceptionType) {
         return of(iter);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterable the iterable
+     * @param exceptionType the exception type
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterable<? extends T> iterable, final Class<E> exceptionType) {
         return of(iterable);
     }
 
+    /**
+     * Of.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param m the m
+     * @param exceptionType the exception type
+     * @return the exceptional stream
+     */
     public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m, final Class<E> exceptionType) {
         return of(m);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param stream the stream
+     * @param exceptionType the exception type
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream, final Class<E> exceptionType) {
         return of(stream);
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param hasNext the has next
+     * @param next the next
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> iterate(final Try.BooleanSupplier<? extends E> hasNext,
             final Try.Supplier<? extends T, E> next) {
         N.checkArgNotNull(hasNext, "hasNext");
@@ -309,6 +468,16 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param init the init
+     * @param hasNext the has next
+     * @param f the f
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> iterate(final T init, final Try.BooleanSupplier<? extends E> hasNext,
             final Try.UnaryOperator<T, ? extends E> f) {
         N.checkArgNotNull(hasNext, "hasNext");
@@ -340,6 +509,16 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param init the init
+     * @param hasNext the has next
+     * @param f the f
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> iterate(final T init, final Try.Predicate<? super T, ? extends E> hasNext,
             final Try.UnaryOperator<T, ? extends E> f) {
         N.checkArgNotNull(hasNext, "hasNext");
@@ -379,6 +558,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Iterate.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param init the init
+     * @param f the f
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> iterate(final T init, final Try.UnaryOperator<T, ? extends E> f) {
         N.checkArgNotNull(f, "f");
 
@@ -398,10 +586,23 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Lines.
+     *
+     * @param file the file
+     * @return the exceptional stream
+     */
     public static ExceptionalStream<String, IOException> lines(final File file) {
         return lines(file, Charsets.UTF_8);
     }
 
+    /**
+     * Lines.
+     *
+     * @param file the file
+     * @param charset the charset
+     * @return the exceptional stream
+     */
     public static ExceptionalStream<String, IOException> lines(final File file, final Charset charset) {
         N.checkArgNotNull(file, "file");
 
@@ -415,10 +616,23 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Lines.
+     *
+     * @param path the path
+     * @return the exceptional stream
+     */
     public static ExceptionalStream<String, IOException> lines(final Path path) {
         return lines(path, Charsets.UTF_8);
     }
 
+    /**
+     * Lines.
+     *
+     * @param path the path
+     * @param charset the charset
+     * @return the exceptional stream
+     */
     public static ExceptionalStream<String, IOException> lines(final Path path, final Charset charset) {
         N.checkArgNotNull(path, "path");
 
@@ -432,12 +646,28 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Lines.
+     *
+     * @param reader the reader
+     * @return the exceptional stream
+     */
     public static ExceptionalStream<String, IOException> lines(final Reader reader) {
         N.checkArgNotNull(reader, "reader");
 
         return newStream(createLazyLineIterator(null, null, Charsets.UTF_8, reader, false));
     }
 
+    /**
+     * Creates the lazy line iterator.
+     *
+     * @param file the file
+     * @param path the path
+     * @param charset the charset
+     * @param reader the reader
+     * @param closeReader the close reader
+     * @return the exceptional iterator
+     */
     private static ExceptionalIterator<String, IOException> createLazyLineIterator(final File file, final Path path, final Charset charset, final Reader reader,
             final boolean closeReader) {
         return ExceptionalIterator.of(new Try.Supplier<ExceptionalIterator<String, IOException>, IOException>() {
@@ -506,20 +736,21 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
-     * @param resultSet
-     * @return
+     *
+     * @param resultSet the result set
+     * @return the exceptional stream
      */
     public static ExceptionalStream<Object[], SQLException> rows(final ResultSet resultSet) {
         return rows(Object[].class, resultSet);
     }
 
     /**
-     * 
-     * @param resultSet
-     * @param closeResultSet
-     * @return
-     * @deprecated
+     * Rows.
+     *
+     * @param resultSet the result set
+     * @param closeResultSet the close result set
+     * @return the exceptional stream
+     * @deprecated 
      */
     @Deprecated
     static ExceptionalStream<Object[], SQLException> rows(final ResultSet resultSet, final boolean closeResultSet) {
@@ -528,10 +759,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
+     *
+     * @param <T> the generic type
      * @param targetClass Array/List/Map or Entity with getter/setter methods.
-     * @param resultSet
-     * @return
+     * @param resultSet the result set
+     * @return the exceptional stream
      */
     public static <T> ExceptionalStream<T, SQLException> rows(final Class<T> targetClass, final ResultSet resultSet) {
         N.checkArgNotNull(targetClass, "targetClass");
@@ -541,12 +773,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
+     * Rows.
+     *
+     * @param <T> the generic type
      * @param targetClass Array/List/Map or Entity with getter/setter methods.
-     * @param resultSet
-     * @param closeResultSet
-     * @return
-     * @deprecated
+     * @param resultSet the result set
+     * @param closeResultSet the close result set
+     * @return the exceptional stream
+     * @deprecated 
      */
     @Deprecated
     static <T> ExceptionalStream<T, SQLException> rows(final Class<T> targetClass, final ResultSet resultSet, final boolean closeResultSet) {
@@ -567,10 +801,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
-     * @param resultSet
-     * @param rowMapper
-     * @return
+     *
+     * @param <T> the generic type
+     * @param resultSet the result set
+     * @param rowMapper the row mapper
+     * @return the exceptional stream
      */
     public static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final JdbcUtil.RowMapper<T> rowMapper) {
         N.checkArgNotNull(resultSet, "resultSet");
@@ -616,10 +851,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
-     * @param resultSet
-     * @param rowMapper
-     * @return
+     *
+     * @param <T> the generic type
+     * @param resultSet the result set
+     * @param rowMapper the row mapper
+     * @return the exceptional stream
      */
     public static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final JdbcUtil.BiRowMapper<T> rowMapper) {
         N.checkArgNotNull(resultSet, "resultSet");
@@ -681,10 +917,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
-     * @param resultSet
+     *
+     * @param <T> the generic type
+     * @param resultSet the result set
      * @param columnIndex starts from 0, not 1.
-     * @return
+     * @return the exceptional stream
      */
     public static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final int columnIndex) {
         N.checkArgNotNull(resultSet, "resultSet");
@@ -730,12 +967,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param resultSet
+     * Rows.
+     *
+     * @param <T> the generic type
+     * @param resultSet the result set
      * @param columnIndex starts from 0, not 1.
-     * @param closeResultSet
-     * @return
-     * @deprecated
+     * @param closeResultSet the close result set
+     * @return the exceptional stream
+     * @deprecated 
      */
     @Deprecated
     static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final int columnIndex, final boolean closeResultSet) {
@@ -756,11 +995,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
-     * @param resultSet
-     * @param columnName
-     * @return
-     * @throws UncheckedSQLException
+     *
+     * @param <T> the generic type
+     * @param resultSet the result set
+     * @param columnName the column name
+     * @return the exceptional stream
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
     public static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final String columnName) throws UncheckedSQLException {
         N.checkArgNotNull(resultSet, "resultSet");
@@ -808,13 +1048,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param resultSet
-     * @param columnName
-     * @param closeResultSet
-     * @return
-     * @deprecated
-     * @throws UncheckedSQLException
+     * Rows.
+     *
+     * @param <T> the generic type
+     * @param resultSet the result set
+     * @param columnName the column name
+     * @param closeResultSet the close result set
+     * @return the exceptional stream
+     * @throws UncheckedSQLException the unchecked SQL exception
+     * @deprecated 
      */
     @Deprecated
     static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final String columnName, final boolean closeResultSet)
@@ -834,6 +1076,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Gets the column index.
+     *
+     * @param resultSet the result set
+     * @param columnName the column name
+     * @return the column index
+     * @throws UncheckedSQLException the unchecked SQL exception
+     */
     private static int getColumnIndex(final ResultSet resultSet, final String columnName) throws UncheckedSQLException {
         int columnIndex = -1;
 
@@ -856,6 +1106,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return columnIndex;
     }
 
+    /**
+     * Concat.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @return the exceptional stream
+     */
     @SafeVarargs
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final ExceptionalStream<? extends T, E>... a) {
         if (N.isNullOrEmpty(a)) {
@@ -865,6 +1123,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return concat(N.asList(a));
     }
 
+    /**
+     * Concat.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @return the exceptional stream
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Collection<? extends ExceptionalStream<? extends T, E>> c) {
         if (N.isNullOrEmpty(c)) {
             return empty();
@@ -908,6 +1174,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Filter.
+     *
+     * @param predicate the predicate
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> filter(final Try.Predicate<? super T, ? extends E> predicate) {
         checkArgNotNull(predicate, "predicate");
 
@@ -941,6 +1213,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, sorted, comparator, closeHandlers);
     }
 
+    /**
+     * Take while.
+     *
+     * @param predicate the predicate
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> takeWhile(final Try.Predicate<? super T, ? extends E> predicate) {
         checkArgNotNull(predicate, "predicate");
 
@@ -977,6 +1255,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, sorted, comparator, closeHandlers);
     }
 
+    /**
+     * Drop while.
+     *
+     * @param predicate the predicate
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> dropWhile(final Try.Predicate<? super T, ? extends E> predicate) {
         checkArgNotNull(predicate, "predicate");
 
@@ -1024,9 +1308,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * Distinct and filter by occurrences.
-     * 
-     * @param occurrencesFilter
-     * @return
+     *
+     * @return the exceptional stream
      */
     public ExceptionalStream<T, E> distinct() {
         final Set<Object> set = new HashSet<>();
@@ -1040,10 +1323,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Distinct by the value mapped from <code>keyMapper</code> 
-     * 
+     * Distinct by the value mapped from <code>keyMapper</code> .
+     *
      * @param keyMapper don't change value of the input parameter.
-     * @return
+     * @return the exceptional stream
      */
     public ExceptionalStream<T, E> distinctBy(final Try.Function<? super T, ?, ? extends E> keyMapper) {
         checkArgNotNull(keyMapper, "keyMapper");
@@ -1058,6 +1341,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Map.
+     *
+     * @param <U> the generic type
+     * @param mapper the mapper
+     * @return the exceptional stream
+     */
     public <U> ExceptionalStream<U, E> map(final Try.Function<? super T, ? extends U, ? extends E> mapper) {
         checkArgNotNull(mapper, "mapper");
 
@@ -1074,6 +1364,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Flat map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> flatMap(final Try.Function<? super T, ? extends ExceptionalStream<? extends R, ? extends E>, ? extends E> mapper) {
         checkArgNotNull(mapper, "mapper");
 
@@ -1143,6 +1440,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return newStream(iter, newCloseHandlers);
     }
 
+    /**
+     * Flatt map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> flattMap(final Try.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
         checkArgNotNull(mapper, "mapper");
 
@@ -1154,14 +1458,38 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Sliding map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> slidingMap(Try.BiFunction<? super T, ? super T, R, E> mapper) {
         return slidingMap(mapper, 1);
     }
 
+    /**
+     * Sliding map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @param increment the increment
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> slidingMap(Try.BiFunction<? super T, ? super T, R, E> mapper, int increment) {
         return slidingMap(mapper, increment, false);
     }
 
+    /**
+     * Sliding map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @param increment the increment
+     * @param ignoreNotPaired the ignore not paired
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> slidingMap(final Try.BiFunction<? super T, ? super T, R, E> mapper, final int increment, final boolean ignoreNotPaired) {
         final int windowSize = 2;
 
@@ -1213,14 +1541,38 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Sliding map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> slidingMap(Try.TriFunction<? super T, ? super T, ? super T, R, E> mapper) {
         return slidingMap(mapper, 1);
     }
 
+    /**
+     * Sliding map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @param increment the increment
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> slidingMap(Try.TriFunction<? super T, ? super T, ? super T, R, E> mapper, int increment) {
         return slidingMap(mapper, increment, false);
     }
 
+    /**
+     * Sliding map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @param increment the increment
+     * @param ignoreNotPaired the ignore not paired
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> slidingMap(final Try.TriFunction<? super T, ? super T, ? super T, R, E> mapper, final int increment,
             final boolean ignoreNotPaired) {
         final int windowSize = 3;
@@ -1290,19 +1642,23 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @return
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param keyMapper the key mapper
+     * @return the exceptional stream
      */
     public <K> ExceptionalStream<Map.Entry<K, List<T>>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper) {
         return groupBy(keyMapper, Suppliers.<K, List<T>> ofMap());
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param mapFactory
-     * @return
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param keyMapper the key mapper
+     * @param mapFactory the map factory
+     * @return the exceptional stream
      */
     public <K> ExceptionalStream<Map.Entry<K, List<T>>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory) {
@@ -1310,10 +1666,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @return
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @return the exceptional stream
      * @see Collectors#toMultimap(Function, Function)
      */
     public <K, V> ExceptionalStream<Map.Entry<K, List<V>>, E> groupBy(Try.Function<? super T, ? extends K, ? extends E> keyMapper,
@@ -1322,11 +1681,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @param mapFactory
-     * @return
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mapFactory the map factory
+     * @return the exceptional stream
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public <K, V> ExceptionalStream<Map.Entry<K, List<V>>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
@@ -1359,18 +1721,31 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     }
 
+    /**
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @return the exceptional stream
+     */
     public <K, V> ExceptionalStream<Map.Entry<K, V>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, Try.BinaryOperator<V, ? extends E> mergeFunction) {
         return groupBy(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @param mapFactory
-     * @return
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @param mapFactory the map factory
+     * @return the exceptional stream
      * @see {@link Fn.FN#throwingMerger()}
      * @see {@link Fn.FN#replacingMerger()}
      * @see {@link Fn.FN#ignoringMerger()}
@@ -1406,21 +1781,74 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @return the exceptional stream
+     * @throws E the e
+     */
     public <K, A, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, A, D> downstream) throws E {
         return groupBy(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
+    /**
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @param mapFactory the map factory
+     * @return the exceptional stream
+     * @throws E the e
+     */
     public <K, A, D, M extends Map<K, D>> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E {
         return groupBy(keyMapper, Fn.FN.<T, E> identity(), downstream, mapFactory);
     }
 
+    /**
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param downstream the downstream
+     * @return the exceptional stream
+     * @throws E the e
+     */
     public <K, V, A, D, M extends Map<K, D>> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream) throws E {
         return groupBy(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
+    /**
+     * Group by.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param downstream the downstream
+     * @param mapFactory the map factory
+     * @return the exceptional stream
+     * @throws E the e
+     */
     public <K, V, A, D, M extends Map<K, D>> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream,
             final Supplier<? extends M> mapFactory) throws E {
@@ -1452,6 +1880,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Collapse.
+     *
+     * @param collapsible the collapsible
+     * @return the exceptional stream
+     */
     public ExceptionalStream<Stream<T>, E> collapse(final Try.BiPredicate<? super T, ? super T, ? extends E> collapsible) {
         checkArgNotNull(collapsible, "collapsible");
 
@@ -1488,6 +1922,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Collapse.
+     *
+     * @param <C> the generic type
+     * @param collapsible the collapsible
+     * @param supplier the supplier
+     * @return the exceptional stream
+     */
     public <C extends Collection<T>> ExceptionalStream<C, E> collapse(final Try.BiPredicate<? super T, ? super T, ? extends E> collapsible,
             final Supplier<? extends C> supplier) {
         checkArgNotNull(collapsible, "collapsible");
@@ -1543,10 +1985,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * 
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
-     * @param collapsible
-     * @param mergeFunction
-     * @return
+     *
+     * @param collapsible the collapsible
+     * @param mergeFunction the merge function
+     * @return the exceptional stream
      */
     public ExceptionalStream<T, E> collapse(final Try.BiPredicate<? super T, ? super T, ? extends E> collapsible,
             final Try.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) {
@@ -1581,6 +2023,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Collapse.
+     *
+     * @param <U> the generic type
+     * @param collapsible the collapsible
+     * @param init the init
+     * @param op the op
+     * @return the exceptional stream
+     */
     public <U> ExceptionalStream<U, E> collapse(final Try.BiPredicate<? super T, ? super T, ? extends E> collapsible, final U init,
             final Try.BiFunction<U, ? super T, U, ? extends E> op) {
         checkArgNotNull(collapsible, "collapsible");
@@ -1614,6 +2065,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Collapse.
+     *
+     * @param <R> the generic type
+     * @param collapsible the collapsible
+     * @param supplier the supplier
+     * @param accumulator the accumulator
+     * @return the exceptional stream
+     */
     public <R> ExceptionalStream<R, E> collapse(final Try.BiPredicate<? super T, ? super T, ? extends E> collapsible, final Try.Supplier<R, E> supplier,
             final Try.BiConsumer<? super R, ? super T, ? extends E> accumulator) {
         checkArgNotNull(collapsible, "collapsible");
@@ -1649,6 +2109,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Collapse.
+     *
+     * @param <R> the generic type
+     * @param <A> the generic type
+     * @param collapsible the collapsible
+     * @param collector the collector
+     * @return the exceptional stream
+     */
     public <R, A> ExceptionalStream<R, E> collapse(final Try.BiPredicate<? super T, ? super T, ? extends E> collapsible,
             final Collector<? super T, A, R> collector) {
         checkArgNotNull(collapsible, "collapsible");
@@ -1687,6 +2156,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Scan.
+     *
+     * @param accumulator the accumulator
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> scan(final Try.BiFunction<? super T, ? super T, T, E> accumulator) {
         final ExceptionalIterator<T, E> iter = elements;
 
@@ -1711,6 +2186,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Scan.
+     *
+     * @param <U> the generic type
+     * @param init the init
+     * @param accumulator the accumulator
+     * @return the exceptional stream
+     */
     public <U> ExceptionalStream<U, E> scan(final U init, final Try.BiFunction<U, ? super T, U, E> accumulator) {
         final ExceptionalIterator<T, E> iter = elements;
 
@@ -1729,6 +2212,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Scan.
+     *
+     * @param <U> the generic type
+     * @param init the init
+     * @param accumulator the accumulator
+     * @param initIncluded the init included
+     * @return the exceptional stream
+     */
     public <U> ExceptionalStream<U, E> scan(final U init, final Try.BiFunction<U, ? super T, U, E> accumulator, final boolean initIncluded) {
         if (initIncluded == false) {
             return scan(init, accumulator);
@@ -1757,14 +2249,33 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Prepend.
+     *
+     * @param s the s
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> prepend(ExceptionalStream<T, E> s) {
         return concat(s, this);
     }
 
+    /**
+     * Append.
+     *
+     * @param s the s
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> append(ExceptionalStream<T, E> s) {
         return concat(this, s);
     }
 
+    /**
+     * Append if empty.
+     *
+     * @param supplier the supplier
+     * @return the exceptional stream
+     * @throws E the e
+     */
     public ExceptionalStream<T, E> appendIfEmpty(Supplier<? extends ExceptionalStream<T, E>> supplier) throws E {
         if (elements.hasNext() == false) {
             return append(supplier.get());
@@ -1773,6 +2284,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Peek.
+     *
+     * @param action the action
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> peek(final Try.Consumer<? super T, ? extends E> action) {
         checkArgNotNull(action, "action");
 
@@ -1791,6 +2308,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, sorted, comparator, closeHandlers);
     }
 
+    /**
+     * Split.
+     *
+     * @param chunkSize the chunk size
+     * @return the exceptional stream
+     */
     public ExceptionalStream<Stream<T>, E> split(final int chunkSize) {
         return splitToList(chunkSize).map(new Try.Function<List<T>, Stream<T>, E>() {
             @Override
@@ -1803,8 +2326,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     /**
      * Returns ExceptionalStream of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
+     *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return
+     * @return the exceptional stream
      */
     public ExceptionalStream<List<T>, E> splitToList(final int chunkSize) {
         return split(chunkSize, Factory.<T> ofList());
@@ -1813,8 +2337,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     /**
      * Returns ExceptionalStream of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
+     *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return
+     * @return the exceptional stream
      */
     public ExceptionalStream<Set<T>, E> splitToSet(final int chunkSize) {
         return split(chunkSize, Factory.<T> ofSet());
@@ -1823,9 +2348,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     /**
      * Returns ExceptionalStream of {@code C} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
+     *
+     * @param <C> the generic type
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @param collectionSupplier
-     * @return
+     * @param collectionSupplier the collection supplier
+     * @return the exceptional stream
      */
     public <C extends Collection<T>> ExceptionalStream<C, E> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier) {
         checkArgPositive(chunkSize, "chunkSize");
@@ -1869,10 +2396,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
+     * Split.
+     *
+     * @param <R> the generic type
+     * @param <A> the generic type
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @param collector
-     * @return
+     * @param collector the collector
+     * @return the exceptional stream
      */
     public <R, A> ExceptionalStream<R, E> split(final int chunkSize, final Collector<? super T, A, R> collector) {
         checkArgPositive(chunkSize, "chunkSize");
@@ -1919,6 +2449,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Sliding.
+     *
+     * @param windowSize the window size
+     * @param increment the increment
+     * @return the exceptional stream
+     */
     public ExceptionalStream<Stream<T>, E> sliding(final int windowSize, final int increment) {
         return slidingToList(windowSize, increment).map(new Try.Function<List<T>, Stream<T>, E>() {
             @Override
@@ -1928,14 +2465,37 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Sliding to list.
+     *
+     * @param windowSize the window size
+     * @param increment the increment
+     * @return the exceptional stream
+     */
     public ExceptionalStream<List<T>, E> slidingToList(final int windowSize, final int increment) {
         return sliding(windowSize, increment, Factory.<T> ofList());
     }
 
+    /**
+     * Sliding to set.
+     *
+     * @param windowSize the window size
+     * @param increment the increment
+     * @return the exceptional stream
+     */
     public ExceptionalStream<Set<T>, E> slidingToSet(final int windowSize, final int increment) {
         return sliding(windowSize, increment, Factory.<T> ofSet());
     }
 
+    /**
+     * Sliding.
+     *
+     * @param <C> the generic type
+     * @param windowSize the window size
+     * @param increment the increment
+     * @param collectionSupplier the collection supplier
+     * @return the exceptional stream
+     */
     public <C extends Collection<T>> ExceptionalStream<C, E> sliding(final int windowSize, final int increment,
             final IntFunction<? extends C> collectionSupplier) {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -2065,6 +2625,16 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Sliding.
+     *
+     * @param <A> the generic type
+     * @param <R> the generic type
+     * @param windowSize the window size
+     * @param increment the increment
+     * @param collector the collector
+     * @return the exceptional stream
+     */
     public <A, R> ExceptionalStream<R, E> sliding(final int windowSize, final int increment, final Collector<? super T, A, R> collector) {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collector, "collector");
@@ -2197,6 +2767,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    /**
+     * Skip.
+     *
+     * @param n the n
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> skip(final long n) {
         checkArgNotNegative(n, "n");
 
@@ -2225,6 +2801,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, sorted, comparator, closeHandlers);
     }
 
+    /**
+     * Limit.
+     *
+     * @param maxSize the max size
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> limit(final long maxSize) {
         checkArgNotNegative(maxSize, "maxSize");
 
@@ -2249,6 +2831,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, sorted, comparator, closeHandlers);
     }
 
+    /**
+     * Slice.
+     *
+     * @param from the from
+     * @param to the to
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> slice(final long from, final long to) {
         checkArgNotNegative(from, "from");
         checkArgNotNegative(to, "to");
@@ -2257,14 +2846,30 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return from == 0 ? limit(to) : skip(from).limit(to - from);
     }
 
+    /**
+     * Sorted.
+     *
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> sorted() {
         return sorted(Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * Reverse sorted.
+     *
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> reverseSorted() {
         return sorted(Comparators.REVERSED_ORDER);
     }
 
+    /**
+     * Sorted.
+     *
+     * @param comparator the comparator
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> sorted(final Comparator<? super T> comparator) {
         final Comparator<? super T> cmp = comparator == null ? Comparators.NATURAL_ORDER : comparator;
 
@@ -2282,6 +2887,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, true, cmp);
     }
 
+    /**
+     * Sorted by.
+     *
+     * @param keyMapper the key mapper
+     * @return the exceptional stream
+     */
     @SuppressWarnings("rawtypes")
     public ExceptionalStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) {
         final Comparator<? super T> comparator = new Comparator<T>() {
@@ -2294,6 +2905,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return sorted(comparator);
     }
 
+    /**
+     * Lazy load.
+     *
+     * @param op the op
+     * @param sorted the sorted
+     * @param cmp the cmp
+     * @return the exceptional stream
+     */
     private ExceptionalStream<T, E> lazyLoad(final Function<Object[], Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
         return newStream(new ExceptionalIterator<T, E>() {
             private boolean initialized = false;
@@ -2353,6 +2972,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, sorted, cmp, closeHandlers);
     }
 
+    /**
+     * For each.
+     *
+     * @param action the action
+     * @throws E the e
+     */
     public void forEach(Try.Consumer<? super T, ? extends E> action) throws E {
         checkArgNotNull(action, "action");
         assertNotClosed();
@@ -2366,6 +2991,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * For each.
+     *
+     * @param <E2> the generic type
+     * @param action the action
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <E2 extends Exception> void forEach(final Try.Consumer<? super T, E> action, final Try.Runnable<E2> onComplete) throws E, E2 {
         checkArgNotNull(action, "action");
         checkArgNotNull(onComplete, "onComplete");
@@ -2382,6 +3016,16 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * For each.
+     *
+     * @param <U> the generic type
+     * @param <E2> the generic type
+     * @param flatMapper the flat mapper
+     * @param action the action
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <U, E2 extends Exception> void forEach(final Try.Function<? super T, ? extends Collection<U>, E> flatMapper,
             final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
         checkArgNotNull(flatMapper, "flatMapper");
@@ -2407,6 +3051,20 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * For each.
+     *
+     * @param <T2> the generic type
+     * @param <T3> the generic type
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param flatMapper the flat mapper
+     * @param flatMapper2 the flat mapper 2
+     * @param action the action
+     * @throws E the e
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <T2, T3, E2 extends Exception, E3 extends Exception> void forEach(final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper,
             final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2, final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action)
             throws E, E2, E3 {
@@ -2441,10 +3099,23 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * For each pair.
+     *
+     * @param action the action
+     * @throws E the e
+     */
     public void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action) throws E {
         forEachPair(action, 1);
     }
 
+    /**
+     * For each pair.
+     *
+     * @param action the action
+     * @param increment the increment
+     * @throws E the e
+     */
     public void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
         final int windowSize = 2;
         checkArgPositive(increment, "increment");
@@ -2480,10 +3151,23 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * For each triple.
+     *
+     * @param action the action
+     * @throws E the e
+     */
     public void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
         forEachTriple(action, 1);
     }
 
+    /**
+     * For each triple.
+     *
+     * @param action the action
+     * @param increment the increment
+     * @throws E the e
+     */
     public void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
         final int windowSize = 3;
         checkArgPositive(increment, "increment");
@@ -2525,6 +3209,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Min.
+     *
+     * @param comparator the comparator
+     * @return the optional
+     * @throws E the e
+     */
     public Optional<T> min(Comparator<? super T> comparator) throws E {
         assertNotClosed();
 
@@ -2552,6 +3243,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Min by.
+     *
+     * @param keyMapper the key mapper
+     * @return the optional
+     * @throws E the e
+     */
     @SuppressWarnings("rawtypes")
 
     public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) throws E {
@@ -2567,6 +3265,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Max.
+     *
+     * @param comparator the comparator
+     * @return the optional
+     * @throws E the e
+     */
     public Optional<T> max(Comparator<? super T> comparator) throws E {
         assertNotClosed();
 
@@ -2601,6 +3306,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Max by.
+     *
+     * @param keyMapper the key mapper
+     * @return the optional
+     * @throws E the e
+     */
     @SuppressWarnings("rawtypes")
 
     public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) throws E {
@@ -2616,6 +3328,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Any match.
+     *
+     * @param predicate the predicate
+     * @return true, if successful
+     * @throws E the e
+     */
     public boolean anyMatch(final Try.Predicate<? super T, ? extends E> predicate) throws E {
         checkArgNotNull(predicate, "predicate");
         assertNotClosed();
@@ -2633,6 +3352,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * All match.
+     *
+     * @param predicate the predicate
+     * @return true, if successful
+     * @throws E the e
+     */
     public boolean allMatch(final Try.Predicate<? super T, ? extends E> predicate) throws E {
         checkArgNotNull(predicate, "predicate");
         assertNotClosed();
@@ -2650,6 +3376,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * None match.
+     *
+     * @param predicate the predicate
+     * @return true, if successful
+     * @throws E the e
+     */
     public boolean noneMatch(final Try.Predicate<? super T, ? extends E> predicate) throws E {
         checkArgNotNull(predicate, "predicate");
         assertNotClosed();
@@ -2667,6 +3400,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Find first.
+     *
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
     public Optional<T> findFirst(final Try.Predicate<? super T, ? extends E> predicate) throws E {
         checkArgNotNull(predicate, "predicate");
         assertNotClosed();
@@ -2686,6 +3426,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Find last.
+     *
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
     public Optional<T> findLast(final Try.Predicate<? super T, ? extends E> predicate) throws E {
         checkArgNotNull(predicate, "predicate");
         assertNotClosed();
@@ -2714,6 +3461,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * First.
+     *
+     * @return the optional
+     * @throws E the e
+     */
     public Optional<T> first() throws E {
         assertNotClosed();
 
@@ -2728,6 +3481,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Last.
+     *
+     * @return the optional
+     * @throws E the e
+     */
     public Optional<T> last() throws E {
         assertNotClosed();
 
@@ -2748,6 +3507,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * To array.
+     *
+     * @return the object[]
+     * @throws E the e
+     */
     public Object[] toArray() throws E {
         assertNotClosed();
 
@@ -2758,6 +3523,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * To array.
+     *
+     * @param <A> the generic type
+     * @param generator the generator
+     * @return the a[]
+     * @throws E the e
+     */
     public <A> A[] toArray(IntFunction<A[]> generator) throws E {
         checkArgNotNull(generator, "generator");
         assertNotClosed();
@@ -2771,6 +3544,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * To list.
+     *
+     * @return the list
+     * @throws E the e
+     */
     public List<T> toList() throws E {
         assertNotClosed();
 
@@ -2787,6 +3566,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * To set.
+     *
+     * @return the sets the
+     * @throws E the e
+     */
     public Set<T> toSet() throws E {
         assertNotClosed();
 
@@ -2803,6 +3588,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * To collection.
+     *
+     * @param <C> the generic type
+     * @param supplier the supplier
+     * @return the c
+     * @throws E the e
+     */
     public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws E {
         checkArgNotNull(supplier, "supplier");
         assertNotClosed();
@@ -2821,11 +3614,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @return
-     * @throws E
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @return the map
+     * @throws E the e
      * @throws IllegalStateException if there are duplicated keys.
      * @see {@link Fn.FN#throwingMerger()}
      * @see {@link Fn.FN#replacingMerger()}
@@ -2837,12 +3633,16 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @param mapFactory
-     * @return
-     * @throws E
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
      * @throws IllegalStateException if there are duplicated keys.
      * @see {@link Fn.FN#throwingMerger()}
      * @see {@link Fn.FN#replacingMerger()}
@@ -2854,12 +3654,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @return
-     * @throws E
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @return the map
+     * @throws E the e
      * @see {@link Fn.FN#throwingMerger()}
      * @see {@link Fn.FN#replacingMerger()}
      * @see {@link Fn.FN#ignoringMerger()}
@@ -2870,13 +3673,17 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @param mapFactory
-     * @return
-     * @throws E
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
      * @see {@link Fn.FN#throwingMerger()}
      * @see {@link Fn.FN#replacingMerger()}
      * @see {@link Fn.FN#ignoringMerger()}
@@ -2906,23 +3713,32 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param downstream
-     * @return
-     * @throws E 
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @return the map
+     * @throws E the e
      */
     public <K, A, D> Map<K, D> toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper, final Collector<? super T, A, D> downstream) throws E {
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
-     * @throws E 
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>> M toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E {
@@ -2930,12 +3746,17 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @param downstream
-     * @return
-     * @throws E 
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param downstream the downstream
+     * @return the map
+     * @throws E the e
      */
     public <K, V, A, D> Map<K, D> toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream) throws E {
@@ -2943,13 +3764,19 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
-     * @throws E 
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param downstream the downstream
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
      */
     public <K, V, A, D, M extends Map<K, D>> M toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream,
@@ -2995,9 +3822,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @return
+     * Group to.
+     *
+     * @param <K> the key type
+     * @param keyMapper the key mapper
+     * @return the map
+     * @throws E the e
      * @see Collectors#groupingBy(Function)
      */
     public <K> Map<K, List<T>> groupTo(Try.Function<? super T, ? extends K, ? extends E> keyMapper) throws E {
@@ -3005,10 +3835,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param mapFactory
-     * @return
+     * Group to.
+     *
+     * @param <K> the key type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
      * @see Collectors#groupingBy(Function, Supplier)
      */
     public <K, M extends Map<K, List<T>>> M groupTo(final Try.Function<? super T, ? extends K, ? extends E> keyMapper, final Supplier<? extends M> mapFactory)
@@ -3018,17 +3852,32 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return groupTo(keyMapper, valueMapper, mapFactory);
     }
 
+    /**
+     * Group to.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @return the map
+     * @throws E the e
+     */
     public <K, V> Map<K, List<V>> groupTo(Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             Try.Function<? super T, ? extends V, ? extends E> valueMapper) throws E {
         return groupTo(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
     }
 
     /**
-     * 
-     * @param keyMapper
-     * @param valueMapper
-     * @param mapFactory
-     * @return
+     * Group to.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public <K, V, M extends Map<K, List<V>>> M groupTo(Try.Function<? super T, ? extends K, ? extends E> keyMapper,
@@ -3060,6 +3909,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Count.
+     *
+     * @return the long
+     * @throws E the e
+     */
     public long count() throws E {
         assertNotClosed();
 
@@ -3071,10 +3926,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
-     * @return
+     * Only one.
+     *
+     * @return the optional
      * @throws DuplicatedResultException if there are more than one elements.
-     * @throws E
+     * @throws E the e
      */
     public Optional<T> onlyOne() throws DuplicatedResultException, E {
         assertNotClosed();
@@ -3096,6 +3952,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Sum int.
+     *
+     * @param func the func
+     * @return the optional int
+     * @throws E the e
+     */
     public OptionalInt sumInt(Try.ToIntFunction<? super T, E> func) throws E {
         assertNotClosed();
 
@@ -3116,6 +3979,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Sum long.
+     *
+     * @param func the func
+     * @return the optional long
+     * @throws E the e
+     */
     public OptionalLong sumLong(Try.ToLongFunction<? super T, E> func) throws E {
         assertNotClosed();
 
@@ -3136,6 +4006,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Sum double.
+     *
+     * @param func the func
+     * @return the optional double
+     * @throws E the e
+     */
     public OptionalDouble sumDouble(Try.ToDoubleFunction<? super T, E> func) throws E {
         assertNotClosed();
 
@@ -3156,6 +4033,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Average int.
+     *
+     * @param func the func
+     * @return the optional double
+     * @throws E the e
+     */
     public OptionalDouble averageInt(Try.ToIntFunction<? super T, E> func) throws E {
         assertNotClosed();
 
@@ -3178,6 +4062,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Average long.
+     *
+     * @param func the func
+     * @return the optional double
+     * @throws E the e
+     */
     public OptionalDouble averageLong(Try.ToLongFunction<? super T, E> func) throws E {
         assertNotClosed();
 
@@ -3200,6 +4091,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Average double.
+     *
+     * @param func the func
+     * @return the optional double
+     * @throws E the e
+     */
     public OptionalDouble averageDouble(Try.ToDoubleFunction<? super T, E> func) throws E {
         assertNotClosed();
 
@@ -3220,6 +4118,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Reduce.
+     *
+     * @param accumulator the accumulator
+     * @return the optional
+     * @throws E the e
+     */
     public Optional<T> reduce(Try.BinaryOperator<T, ? extends E> accumulator) throws E {
         checkArgNotNull(accumulator, "accumulator");
         assertNotClosed();
@@ -3241,6 +4146,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Reduce.
+     *
+     * @param <U> the generic type
+     * @param identity the identity
+     * @param accumulator the accumulator
+     * @return the u
+     * @throws E the e
+     */
     public <U> U reduce(final U identity, final Try.BiFunction<U, ? super T, U, E> accumulator) throws E {
         checkArgNotNull(accumulator, "accumulator");
         assertNotClosed();
@@ -3258,6 +4172,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Collect.
+     *
+     * @param <R> the generic type
+     * @param supplier the supplier
+     * @param accumulator the accumulator
+     * @return the r
+     * @throws E the e
+     */
     public <R> R collect(Try.Supplier<R, E> supplier, final Try.BiConsumer<? super R, ? super T, ? extends E> accumulator) throws E {
         checkArgNotNull(supplier, "supplier");
         checkArgNotNull(accumulator, "accumulator");
@@ -3276,6 +4199,17 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Collect.
+     *
+     * @param <R> the generic type
+     * @param <RR> the generic type
+     * @param supplier the supplier
+     * @param accumulator the accumulator
+     * @param finisher the finisher
+     * @return the rr
+     * @throws E the e
+     */
     public <R, RR> RR collect(Try.Supplier<R, E> supplier, final Try.BiConsumer<? super R, ? super T, ? extends E> accumulator,
             final Try.Function<? super R, ? extends RR, E> finisher) throws E {
         checkArgNotNull(supplier, "supplier");
@@ -3296,6 +4230,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Collect.
+     *
+     * @param <R> the generic type
+     * @param <A> the generic type
+     * @param collector the collector
+     * @return the r
+     * @throws E the e
+     */
     public <R, A> R collect(final Collector<? super T, A, R> collector) throws E {
         checkArgNotNull(collector, "collector");
         assertNotClosed();
@@ -3314,6 +4257,15 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Collect.
+     *
+     * @param <R> the generic type
+     * @param <A> the generic type
+     * @param collector the collector
+     * @return the r
+     * @throws E the e
+     */
     public <R, A> R collect(java.util.stream.Collector<? super T, A, R> collector) throws E {
         checkArgNotNull(collector, "collector");
         assertNotClosed();
@@ -3332,6 +4284,17 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Collect and then.
+     *
+     * @param <R> the generic type
+     * @param <RR> the generic type
+     * @param <A> the generic type
+     * @param collector the collector
+     * @param func the func
+     * @return the rr
+     * @throws E the e
+     */
     public <R, RR, A> RR collectAndThen(final Collector<? super T, A, R> collector, final Try.Function<? super R, ? extends RR, E> func) throws E {
         checkArgNotNull(collector, "collector");
         checkArgNotNull(func, "func");
@@ -3340,6 +4303,17 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return func.apply(collect(collector));
     }
 
+    /**
+     * Collect and then.
+     *
+     * @param <R> the generic type
+     * @param <RR> the generic type
+     * @param <A> the generic type
+     * @param collector the collector
+     * @param func the func
+     * @return the rr
+     * @throws E the e
+     */
     public <R, RR, A> RR collectAndThen(final java.util.stream.Collector<? super T, A, R> collector, final Try.Function<? super R, ? extends RR, E> func)
             throws E {
         checkArgNotNull(collector, "collector");
@@ -3349,6 +4323,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return func.apply(collect(collector));
     }
 
+    /**
+     * Unchecked.
+     *
+     * @return the stream
+     */
     public Stream<T> unchecked() {
         if (N.isNullOrEmpty(this.closeHandlers)) {
             return Stream.of(new ObjIteratorEx<T>() {
@@ -3548,16 +4527,25 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     //        }, sorted, comparator, newCloseHandlers);
     //    }
 
+    /**
+     * .
+     *
+     * @param <R> the generic type
+     * @param transfer the transfer
+     * @return the r
+     * @throws E the e
+     */
     public <R> R __(Try.Function<? super ExceptionalStream<T, E>, R, ? extends E> transfer) throws E {
         checkArgNotNull(transfer, "transfer");
 
         return transfer.apply(this);
     }
 
-    /** 
-     * 
+    /**
+     *  
+     *
      * @param action a terminal operation should be called.
-     * @return
+     * @return the continuable future
      */
     @Beta
     public ContinuableFuture<Void> asyncRun(final Try.Consumer<? super ExceptionalStream<T, E>, E> action) {
@@ -3572,10 +4560,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
+     * Async run.
+     *
      * @param action a terminal operation should be called.
-     * @param executor
-     * @return
+     * @param executor the executor
+     * @return the continuable future
      */
     @Beta
     public ContinuableFuture<Void> asyncRun(final Try.Consumer<? super ExceptionalStream<T, E>, E> action, final Executor executor) {
@@ -3591,9 +4580,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
+     * Async call.
+     *
+     * @param <R> the generic type
      * @param action a terminal operation should be called.
-     * @return
+     * @return the continuable future
      */
     @Beta
     public <R> ContinuableFuture<R> asyncCall(final Try.Function<? super ExceptionalStream<T, E>, R, E> action) {
@@ -3608,10 +4599,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * 
+     * Async call.
+     *
+     * @param <R> the generic type
      * @param action a terminal operation should be called.
-     * @param executor
-     * @return
+     * @param executor the executor
+     * @return the continuable future
      */
     @Beta
     public <R> ContinuableFuture<R> asyncCall(final Try.Function<? super ExceptionalStream<T, E>, R, E> action, final Executor executor) {
@@ -3626,6 +4619,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, executor);
     }
 
+    /**
+     * On close.
+     *
+     * @param closeHandler the close handler
+     * @return the exceptional stream
+     */
     public ExceptionalStream<T, E> onClose(final Try.Runnable<? extends E> closeHandler) {
         checkArgNotNull(closeHandler, "closeHandler");
 
@@ -3652,6 +4651,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return newStream(elements, newCloseHandlers);
     }
 
+    /**
+     * Close.
+     *
+     * @throws E the e
+     */
     @Override
     public synchronized void close() throws E {
         if (isClosed) {
@@ -3700,12 +4704,22 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Assert not closed.
+     */
     void assertNotClosed() {
         if (isClosed) {
             throw new IllegalStateException("This stream has been closed");
         }
     }
 
+    /**
+     * Check arg positive.
+     *
+     * @param arg the arg
+     * @param argNameOrErrorMsg the arg name or error msg
+     * @return the int
+     */
     private int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
             try {
@@ -3722,6 +4736,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return arg;
     }
 
+    /**
+     * Check arg not negative.
+     *
+     * @param arg the arg
+     * @param argNameOrErrorMsg the arg name or error msg
+     * @return the long
+     */
     private long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
             try {
@@ -3738,6 +4759,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return arg;
     }
 
+    /**
+     * Check arg not null.
+     *
+     * @param <ARG> the generic type
+     * @param obj the obj
+     * @param errorMessage the error message
+     * @return the arg
+     */
     private <ARG> ARG checkArgNotNull(final ARG obj, final String errorMessage) {
         if (obj == null) {
             try {
@@ -3754,6 +4783,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return obj;
     }
 
+    /**
+     * Check argument.
+     *
+     * @param b the b
+     * @param errorMessage the error message
+     */
     private void checkArgument(boolean b, String errorMessage) {
         if (!b) {
             try {
@@ -3768,6 +4803,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * Check argument.
+     *
+     * @param b the b
+     * @param errorMessageTemplate the error message template
+     * @param p1 the p 1
+     * @param p2 the p 2
+     */
     private void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2) {
         if (!b) {
             try {
@@ -3782,36 +4825,99 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    /**
+     * New stream.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @return the exceptional stream
+     */
     static <T, E extends Exception> ExceptionalStream<T, E> newStream(final ExceptionalIterator<T, E> iter) {
         return new ExceptionalStream<>(iter, null);
     }
 
+    /**
+     * New stream.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param closeHandlers the close handlers
+     * @return the exceptional stream
+     */
     static <T, E extends Exception> ExceptionalStream<T, E> newStream(final ExceptionalIterator<T, E> iter,
             final Deque<Try.Runnable<? extends E>> closeHandlers) {
         return new ExceptionalStream<>(iter, closeHandlers);
     }
 
+    /**
+     * New stream.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param sorted the sorted
+     * @param comparator the comparator
+     * @param closeHandlers the close handlers
+     * @return the exceptional stream
+     */
     static <T, E extends Exception> ExceptionalStream<T, E> newStream(final ExceptionalIterator<T, E> iter, final boolean sorted,
             final Comparator<? super T> comparator, final Deque<Try.Runnable<? extends E>> closeHandlers) {
         return new ExceptionalStream<>(iter, sorted, comparator, closeHandlers);
     }
 
+    /**
+     * Hash key.
+     *
+     * @param obj the obj
+     * @return the object
+     */
     static Object hashKey(Object obj) {
         return obj == null || obj.getClass().isArray() == false ? obj : Wrapper.of(obj);
     }
 
+    /**
+     * Checks if is same comparator.
+     *
+     * @param a the a
+     * @param b the b
+     * @return true, if is same comparator
+     */
     static boolean isSameComparator(Comparator<?> a, Comparator<?> b) {
         return a == b || (a == null && b == Comparators.NATURAL_ORDER) || (b == null && a == Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * The Class StreamE.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     */
     public static final class StreamE<T, E extends Exception> extends ExceptionalStream<T, E> {
+
+        /**
+         * Instantiates a new stream E.
+         *
+         * @param iter the iter
+         * @param sorted the sorted
+         * @param comparator the comparator
+         * @param closeHandlers the close handlers
+         */
         StreamE(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Try.Runnable<? extends E>> closeHandlers) {
             super(iter, sorted, comparator, closeHandlers);
         }
     }
 
+    /**
+     * The Class ExceptionalIterator.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     */
     static abstract class ExceptionalIterator<T, E extends Exception> {
 
+        /** The Constant EMPTY. */
         @SuppressWarnings("rawtypes")
         private static final ExceptionalIterator EMPTY = new ExceptionalIterator() {
             @Override
@@ -3827,9 +4933,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
         /**
          * Lazy evaluation.
-         * 
-         * @param iteratorSupplier
-         * @return
+         *
+         * @param <T> the generic type
+         * @param <E> the element type
+         * @param iteratorSupplier the iterator supplier
+         * @return the exceptional iterator
          */
         public static <T, E extends Exception> ExceptionalIterator<T, E> of(final Try.Supplier<ExceptionalIterator<T, E>, E> iteratorSupplier) {
             N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -3896,9 +5004,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
         /**
          * Lazy evaluation.
-         * 
-         * @param arraySupplier
-         * @return
+         *
+         * @param <T> the generic type
+         * @param <E> the element type
+         * @param arraySupplier the array supplier
+         * @return the exceptional iterator
          */
         public static <T, E extends Exception> ExceptionalIterator<T, E> oF(final Try.Supplier<T[], E> arraySupplier) {
             N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -3967,10 +5077,28 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             };
         }
 
+        /**
+         * Checks for next.
+         *
+         * @return true, if successful
+         * @throws E the e
+         */
         public abstract boolean hasNext() throws E;
 
+        /**
+         * Next.
+         *
+         * @return the t
+         * @throws E the e
+         */
         public abstract T next() throws E;
 
+        /**
+         * Skip.
+         *
+         * @param n the n
+         * @throws E the e
+         */
         public void skip(long n) throws E {
             N.checkArgNotNegative(n, "n");
 
@@ -3979,6 +5107,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             }
         }
 
+        /**
+         * Count.
+         *
+         * @return the long
+         * @throws E the e
+         */
         public long count() throws E {
             long result = 0;
 
@@ -3990,6 +5124,11 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return result;
         }
 
+        /**
+         * Close.
+         *
+         * @throws E the e
+         */
         public void close() throws E {
             // Nothing to do by default.
         }

@@ -16,21 +16,40 @@ package com.landawn.abacus.pool;
 
 import java.io.Serializable;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class ActivityPrint.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class ActivityPrint implements Cloneable, Serializable {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -45207875951748322L;
 
+    /** The create time. */
     private long createTime;
+
+    /** The live time. */
     private long liveTime;
+
+    /** The max idle time. */
     private long maxIdleTime;
+
+    /** The last access time. */
     private long lastAccessTime;
+
+    /** The access count. */
     private int accessCount;
 
+    /**
+     * Instantiates a new activity print.
+     *
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @throws IllegalArgumentException the illegal argument exception
+     */
     public ActivityPrint(long liveTime, long maxIdleTime) throws IllegalArgumentException {
         if (liveTime <= 0) {
             throw new IllegalArgumentException("Illegal liveTime[" + liveTime + "]. ");
@@ -49,14 +68,33 @@ public final class ActivityPrint implements Cloneable, Serializable {
         this.accessCount = 0;
     }
 
+    /**
+     * Value of.
+     *
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @return the activity print
+     */
     public static ActivityPrint valueOf(long liveTime, long maxIdleTime) {
         return new ActivityPrint(liveTime, maxIdleTime);
     }
 
+    /**
+     * Gets the live time.
+     *
+     * @return the live time
+     */
     public long getLiveTime() {
         return liveTime;
     }
 
+    /**
+     * Sets the live time.
+     *
+     * @param liveTime the live time
+     * @return the activity print
+     * @throws IllegalArgumentException the illegal argument exception
+     */
     public ActivityPrint setLiveTime(long liveTime) throws IllegalArgumentException {
         if (liveTime < 0) {
             throw new IllegalArgumentException("Illegal live time: " + liveTime);
@@ -67,10 +105,22 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return this;
     }
 
+    /**
+     * Gets the max idle time.
+     *
+     * @return the max idle time
+     */
     public long getMaxIdleTime() {
         return maxIdleTime;
     }
 
+    /**
+     * Sets the max idle time.
+     *
+     * @param maxIdleTime the max idle time
+     * @return the activity print
+     * @throws IllegalArgumentException the illegal argument exception
+     */
     public ActivityPrint setMaxIdleTime(long maxIdleTime) throws IllegalArgumentException {
         if (maxIdleTime < 0) {
             throw new IllegalArgumentException("Illegal idle time: " + maxIdleTime);
@@ -81,42 +131,84 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return this;
     }
 
+    /**
+     * Gets the creates the time.
+     *
+     * @return the creates the time
+     */
     public long getCreateTime() {
         return createTime;
     }
 
+    /**
+     * Sets the create time.
+     *
+     * @param createTime the create time
+     * @return the activity print
+     */
     ActivityPrint setCreateTime(long createTime) {
         this.createTime = createTime;
 
         return this;
     }
 
+    /**
+     * Gets the last access time.
+     *
+     * @return the last access time
+     */
     public long getLastAccessTime() {
         return lastAccessTime;
     }
 
+    /**
+     * Update last access time.
+     */
     public void updateLastAccessTime() {
         lastAccessTime = System.currentTimeMillis();
     }
 
+    /**
+     * Gets the access count.
+     *
+     * @return the access count
+     */
     public int getAccessCount() {
         return accessCount;
     }
 
+    /**
+     * Update access count.
+     */
     public void updateAccessCount() {
         accessCount++;
     }
 
+    /**
+     * Gets the expiration time.
+     *
+     * @return the expiration time
+     */
     public long getExpirationTime() {
         return ((Long.MAX_VALUE - createTime) < liveTime) ? Long.MAX_VALUE : (createTime + liveTime);
     }
 
+    /**
+     * Checks if is expired.
+     *
+     * @return true, if is expired
+     */
     public boolean isExpired() {
         long now = System.currentTimeMillis();
 
         return (maxIdleTime < (now - lastAccessTime)) || (liveTime < (now - createTime));
     }
 
+    /**
+     * Clone.
+     *
+     * @return the object
+     */
     @Override
     public Object clone() {
         ActivityPrint result = null;
@@ -130,6 +222,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return result;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         long h = 7;
@@ -142,6 +239,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return (int) h;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -158,6 +261,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "{createTime=" + createTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessedTime=" + lastAccessTime

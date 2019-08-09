@@ -22,15 +22,20 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.MemcachedLock;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class MemcachedXLock.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public class MemcachedXLock<T> extends AbstractXLock<T> {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(MemcachedXLock.class);
 
+    /** The Constant DEFAULT_LIVE_TIME. */
     static final long DEFAULT_LIVE_TIME = 3600 * 1000L;
 
     /**
@@ -49,16 +54,37 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
      */
     private final String keyPrefix;
 
+    /** The m lock. */
     private final MemcachedLock<String, Object> mLock;
 
+    /**
+     * Instantiates a new memcached X lock.
+     *
+     * @param servers the servers
+     */
     public MemcachedXLock(String servers) {
         this(servers, N.EMPTY_STRING, DEFAULT_LIVE_TIME, DEFAULT_TIMEOUT);
     }
 
+    /**
+     * Instantiates a new memcached X lock.
+     *
+     * @param servers the servers
+     * @param keyPrefix the key prefix
+     * @param liveTime the live time
+     */
     public MemcachedXLock(String servers, String keyPrefix, String liveTime) {
         this(servers, keyPrefix, Long.valueOf(liveTime), DEFAULT_TIMEOUT);
     }
 
+    /**
+     * Instantiates a new memcached X lock.
+     *
+     * @param servers the servers
+     * @param keyPrefix the key prefix
+     * @param liveTime the live time
+     * @param timeout the timeout
+     */
     public MemcachedXLock(String servers, String keyPrefix, long liveTime, long timeout) {
         this.mLock = new MemcachedLock<String, Object>(servers);
 
@@ -68,11 +94,28 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
         this.keyPrefix = keyPrefix;
     }
 
+    /**
+     * Lock.
+     *
+     * @param target the target
+     * @param lockMode the lock mode
+     * @param refLockCode the ref lock code
+     * @return the string
+     */
     @Override
     public String lock(T target, LockMode lockMode, String refLockCode) {
         return lock(target, lockMode, refLockCode, timeout);
     }
 
+    /**
+     * Lock.
+     *
+     * @param target the target
+     * @param lockMode the lock mode
+     * @param refLockCode the ref lock code
+     * @param timeout the timeout
+     * @return the string
+     */
     @Override
     public String lock(T target, LockMode lockMode, String refLockCode, long timeout) {
         checkTargetObject(target);
@@ -134,6 +177,14 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
         //        return null;
     }
 
+    /**
+     * Checks if is locked.
+     *
+     * @param target the target
+     * @param requiredLockMode the required lock mode
+     * @param refLockCode the ref lock code
+     * @return true, if is locked
+     */
     @Override
     public boolean isLocked(T target, LockMode requiredLockMode, String refLockCode) {
         checkTargetObject(target);
@@ -152,6 +203,13 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
         return lockMode != null && lockMode.isXLockOf(requiredLockMode);
     }
 
+    /**
+     * Unlock.
+     *
+     * @param target the target
+     * @param refLockCode the ref lock code
+     * @return true, if successful
+     */
     @Override
     public boolean unlock(T target, String refLockCode) {
         checkTargetObject(target);
@@ -183,19 +241,32 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
         }
     }
 
+    /**
+     * Generate key.
+     *
+     * @param keyPrefix the key prefix
+     * @param obj the obj
+     * @return the string
+     */
     protected String generateKey(String keyPrefix, T obj) {
         return N.isNullOrEmpty(keyPrefix) ? N.base64Encode(N.stringOf(obj).getBytes()) : (keyPrefix + N.base64Encode(N.stringOf(obj).getBytes()));
     }
 
     /**
+     * The Class LockInfo.
+     *
      * @author Haiyang Li
-     * 
      * @version $Revision: 0.8 $ 07/09/08
      */
     private static class LockInfo implements Serializable {
+
+        /** The Constant serialVersionUID. */
         private static final long serialVersionUID = -8960408497897352419L;
 
+        /** The lock code. */
         private String lockCode;
+
+        /** The lock mode. */
         private LockMode lockMode;
     }
 }

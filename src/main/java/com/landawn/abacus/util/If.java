@@ -19,6 +19,7 @@ import java.util.Map;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.Supplier;
 
+// TODO: Auto-generated Javadoc
 /**
  * This class is mainly designed for functional programming. 
  * Generally the traditional "{@code if-else}" or ternary operator: "{@code ? : }" is preferred over this class.
@@ -28,168 +29,394 @@ import com.landawn.abacus.util.function.Supplier;
  */
 @Beta
 public final class If {
+
+    /** The Constant TRUE. */
     private static final If TRUE = new If(true);
+
+    /** The Constant FALSE. */
     private static final If FALSE = new If(false);
 
+    /** The b. */
     private final boolean b;
 
+    /**
+     * Instantiates a new if.
+     *
+     * @param b the b
+     */
     If(boolean b) {
         this.b = b;
     }
 
+    /**
+     * Checks if is.
+     *
+     * @param b the b
+     * @return the if
+     */
     public static If is(final boolean b) {
         return b ? TRUE : FALSE;
     }
 
+    /**
+     * Not.
+     *
+     * @param b the b
+     * @return the if
+     */
     public static If not(final boolean b) {
         return b ? FALSE : TRUE;
     }
 
     /**
      * {@code true} for {@code index >= 0}, {@code false} for {@code index < 0}.
-     * 
-     * @param index
-     * @return 
+     *
+     * @param index the index
+     * @return the if
      */
     public static If exists(final int index) {
         return index >= 0 ? TRUE : FALSE;
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param s the s
+     * @return the if
+     */
     public static If isNullOrEmpty(final CharSequence s) {
         return is(N.isNullOrEmpty(s));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final boolean[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final char[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final byte[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final short[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final int[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final long[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final float[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final double[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If isNullOrEmpty(final Object[] a) {
         return is(N.isNullOrEmpty(a));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param c the c
+     * @return the if
+     */
     public static If isNullOrEmpty(final Collection<?> c) {
         return is(N.isNullOrEmpty(c));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param m the m
+     * @return the if
+     */
     public static If isNullOrEmpty(final Map<?, ?> m) {
         return is(N.isNullOrEmpty(m));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param list the list
+     * @return the if
+     */
     @SuppressWarnings("rawtypes")
     public static If isNullOrEmpty(final PrimitiveList list) {
         return is(N.isNullOrEmpty(list));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param s the s
+     * @return the if
+     */
     public static If isNullOrEmpty(final Multiset<?> s) {
         return is(N.isNullOrEmpty(s));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param s the s
+     * @return the if
+     */
     public static If isNullOrEmpty(final LongMultiset<?> s) {
         return is(N.isNullOrEmpty(s));
     }
 
+    /**
+     * Checks if is null or empty.
+     *
+     * @param m the m
+     * @return the if
+     */
     public static If isNullOrEmpty(final Multimap<?, ?, ?> m) {
         return is(N.isNullOrEmpty(m));
     }
 
+    /**
+     * Checks if is null or empty or blank.
+     *
+     * @param s the s
+     * @return the if
+     */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu. 
     public static If isNullOrEmptyOrBlank(final CharSequence s) {
         return is(N.isNullOrEmptyOrBlank(s));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param s the s
+     * @return the if
+     */
     public static If notNullOrEmpty(final CharSequence s) {
         return is(N.notNullOrEmpty(s));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final boolean[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final char[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final byte[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final short[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final int[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final long[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final float[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final double[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param a the a
+     * @return the if
+     */
     public static If notNullOrEmpty(final Object[] a) {
         return is(N.notNullOrEmpty(a));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param c the c
+     * @return the if
+     */
     public static If notNullOrEmpty(final Collection<?> c) {
         return is(N.notNullOrEmpty(c));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param m the m
+     * @return the if
+     */
     public static If notNullOrEmpty(final Map<?, ?> m) {
         return is(N.notNullOrEmpty(m));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param list the list
+     * @return the if
+     */
     @SuppressWarnings("rawtypes")
     public static If notNullOrEmpty(final PrimitiveList list) {
         return is(N.notNullOrEmpty(list));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param s the s
+     * @return the if
+     */
     public static If notNullOrEmpty(final Multiset<?> s) {
         return is(N.notNullOrEmpty(s));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param s the s
+     * @return the if
+     */
     public static If notNullOrEmpty(final LongMultiset<?> s) {
         return is(N.notNullOrEmpty(s));
     }
 
+    /**
+     * Not null or empty.
+     *
+     * @param m the m
+     * @return the if
+     */
     public static If notNullOrEmpty(final Multimap<?, ?, ?> m) {
         return is(N.notNullOrEmpty(m));
     }
 
+    /**
+     * Not null or empty or blank.
+     *
+     * @param s the s
+     * @return the if
+     */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu. 
     public static If notNullOrEmptyOrBlank(final CharSequence s) {
         return is(N.notNullOrEmptyOrBlank(s));
@@ -215,10 +442,23 @@ public final class If {
     //        return b ? Nullable.of(func.apply(init)) : Nullable.<R> empty();
     //    }
 
+    /**
+     * Then do nothing.
+     *
+     * @return the or
+     */
     public Or thenDoNothing() {
         return Or.of(b);
     }
 
+    /**
+     * Then.
+     *
+     * @param <E> the element type
+     * @param cmd the cmd
+     * @return the or
+     * @throws E the e
+     */
     public <E extends Exception> Or then(final Try.Runnable<E> cmd) throws E {
         N.checkArgNotNull(cmd);
 
@@ -229,6 +469,16 @@ public final class If {
         return Or.of(b);
     }
 
+    /**
+     * Then.
+     *
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param init the init
+     * @param action the action
+     * @return the or
+     * @throws E the e
+     */
     public <U, E extends Exception> Or then(final U init, final Try.Consumer<? super U, E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -239,6 +489,14 @@ public final class If {
         return Or.of(b);
     }
 
+    /**
+     * Then throw.
+     *
+     * @param <E> the element type
+     * @param exceptionSupplier the exception supplier
+     * @return the or
+     * @throws E the e
+     */
     public <E extends Exception> Or thenThrow(final Supplier<? extends E> exceptionSupplier) throws E {
         N.checkArgNotNull(exceptionSupplier);
 
@@ -257,24 +515,53 @@ public final class If {
     //        return b ? Nullable.of(func.apply(init)) : Nullable.<R> empty();
     //    }
 
+    /**
+     * The Class Or.
+     */
     public static final class Or {
+
+        /** The Constant TRUE. */
         private static final Or TRUE = new Or(true);
+
+        /** The Constant FALSE. */
         private static final Or FALSE = new Or(false);
 
+        /** The b. */
         private final boolean b;
 
+        /**
+         * Instantiates a new or.
+         *
+         * @param b the b
+         */
         Or(final boolean b) {
             this.b = b;
         }
 
+        /**
+         * Of.
+         *
+         * @param b the b
+         * @return the or
+         */
         static Or of(boolean b) {
             return b ? TRUE : FALSE;
         }
 
+        /**
+         * Or else do nothing.
+         */
         void orElseDoNothing() {
             // Do nothing.
         }
 
+        /**
+         * Or else.
+         *
+         * @param <E> the element type
+         * @param cmd the cmd
+         * @throws E the e
+         */
         public <E extends Exception> void orElse(final Try.Runnable<E> cmd) throws E {
             N.checkArgNotNull(cmd);
 
@@ -283,6 +570,15 @@ public final class If {
             }
         }
 
+        /**
+         * Or else.
+         *
+         * @param <U> the generic type
+         * @param <E> the element type
+         * @param init the init
+         * @param action the action
+         * @throws E the e
+         */
         public <U, E extends Exception> void orElse(final U init, final Try.Consumer<? super U, E> action) throws E {
             N.checkArgNotNull(action);
 
@@ -291,6 +587,13 @@ public final class If {
             }
         }
 
+        /**
+         * Or else throw.
+         *
+         * @param <E> the element type
+         * @param exceptionSupplier the exception supplier
+         * @throws E the e
+         */
         public <E extends Exception> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
             N.checkArgNotNull(exceptionSupplier);
 

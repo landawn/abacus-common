@@ -23,14 +23,19 @@ import java.util.Set;
 
 import com.landawn.abacus.util.function.Supplier;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.9
- * 
+ * The Class ImmutableIterator.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.9
  */
 abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
+
     /**
+     * Removes the.
+     *
      * @deprecated - UnsupportedOperationException
      */
     @Deprecated
@@ -39,6 +44,11 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * To set.
+     *
+     * @return the sets the
+     */
     public Set<T> toSet() {
         final Set<T> set = new HashSet<>();
 
@@ -49,6 +59,13 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
         return set;
     }
 
+    /**
+     * To collection.
+     *
+     * @param <C> the generic type
+     * @param supplier the supplier
+     * @return the c
+     */
     public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) {
         final C c = supplier.get();
 
@@ -59,15 +76,52 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
         return c;
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <E> the element type
+     * @param keyMapper the key mapper
+     * @return the map
+     * @throws E the e
+     */
     public <K, E extends Exception> Map<K, T> toMap(final Try.Function<? super T, K, E> keyMapper) throws E {
         return Iterators.toMap(this, keyMapper);
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param keyMapper the key mapper
+     * @param valueExtractor the value extractor
+     * @return the map
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(final Try.Function<? super T, K, E> keyMapper,
             final Try.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
         return Iterators.toMap(this, keyMapper, valueExtractor);
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param keyMapper the key mapper
+     * @param valueExtractor the value extractor
+     * @param mapSupplier the map supplier
+     * @return the m
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Try.Function<? super T, K, E> keyMapper,
             final Try.Function<? super T, ? extends V, E2> valueExtractor, final Supplier<? extends M> mapSupplier) throws E, E2 {
         return Iterators.toMap(this, keyMapper, valueExtractor, mapSupplier);

@@ -21,32 +21,50 @@ import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class MemcachedLock.
+ *
  * @author Haiyang Li
+ * @param <K> the key type
+ * @param <V> the value type
+ * @since 0.8
  */
 public final class MemcachedLock<K, V> {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(MemcachedLock.class);
 
+    /** The mc. */
     private final SpyMemcached<V> mc;
 
+    /**
+     * Instantiates a new memcached lock.
+     *
+     * @param serverUrl the server url
+     */
     public MemcachedLock(String serverUrl) {
         mc = new SpyMemcached<V>(serverUrl);
     }
 
+    /**
+     * Lock.
+     *
+     * @param target the target
+     * @param liveTime the live time
+     * @return true, if successful
+     */
     public boolean lock(K target, long liveTime) {
         return lock(target, (V) N.EMPTY_BYTE_ARRAY, liveTime);
     }
 
     /**
-     * 
-     * @param target
-     * @param value
-     * @param liveTime
-     *            unit is milliseconds
-     * @return
+     * Lock.
+     *
+     * @param target the target
+     * @param value the value
+     * @param liveTime            unit is milliseconds
+     * @return true, if successful
      */
     public boolean lock(K target, V value, long liveTime) {
         String key = toKey(target);
@@ -58,16 +76,34 @@ public final class MemcachedLock<K, V> {
         }
     }
 
+    /**
+     * Checks if is locked.
+     *
+     * @param target the target
+     * @return true, if is locked
+     */
     public boolean isLocked(K target) {
         return mc.get(toKey(target)) != null;
     }
 
+    /**
+     * Gets the.
+     *
+     * @param target the target
+     * @return the v
+     */
     public V get(K target) {
         Object value = mc.get(toKey(target));
 
         return (V) (value instanceof byte[] && ((byte[]) value).length == 0 ? null : value);
     }
 
+    /**
+     * Unlock.
+     *
+     * @param target the target
+     * @return true, if successful
+     */
     public boolean unlock(K target) {
         try {
             return mc.delete(toKey(target));
@@ -76,10 +112,21 @@ public final class MemcachedLock<K, V> {
         }
     }
 
+    /**
+     * To key.
+     *
+     * @param target the target
+     * @return the string
+     */
     protected String toKey(K target) {
         return N.stringOf(target);
     }
 
+    /**
+     * Client.
+     *
+     * @return the spy memcached
+     */
     public SpyMemcached<V> client() {
         return mc;
     }

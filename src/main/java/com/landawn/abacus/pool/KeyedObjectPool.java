@@ -17,52 +17,56 @@ package com.landawn.abacus.pool;
 import java.util.Collection;
 import java.util.Set;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface KeyedObjectPool.
+ *
  * @author Haiyang Li
+ * @param <K> the key type
+ * @param <E> the element type
+ * @since 0.8
  */
 public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
+
     /**
      * Method put.
-     * 
-     * @param key
-     * @param e
+     *
+     * @param key the key
+     * @param e the e
      * @return boolean
      */
     boolean put(K key, E e);
 
     /**
      * Method put.
-     * 
-     * @param key
-     * @param e
-     * @param autoDestroyOnFailedToPut
+     *
+     * @param key the key
+     * @param e the e
+     * @param autoDestroyOnFailedToPut the auto destroy on failed to put
      * @return boolean
      */
     boolean put(K key, E e, boolean autoDestroyOnFailedToPut);
 
     /**
      * Method get.
-     * 
-     * @param key
+     *
+     * @param key the key
      * @return E
      */
     E get(K key);
 
     /**
      * Method remove.
-     * 
-     * @param key
+     *
+     * @param key the key
      * @return E
      */
     E remove(K key);
 
     /**
      * Get but don't update last access time.
-     * 
-     * @param key
+     *
+     * @param key the key
      * @return E
      */
     E peek(K key);
@@ -83,21 +87,35 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
      * Method containsKey.
-     * 
-     * @param key
+     *
+     * @param key the key
      * @return boolean
      */
     boolean containsKey(K key);
 
     /**
      * Method containsValue.
-     * 
-     * @param e
+     *
+     * @param e the e
      * @return boolean
      */
     boolean containsValue(E e);
 
+    /**
+     * The Interface MemoryMeasure.
+     *
+     * @param <K> the key type
+     * @param <E> the element type
+     */
     public static interface MemoryMeasure<K, E> {
+
+        /**
+         * Size of.
+         *
+         * @param key the key
+         * @param e the e
+         * @return the long
+         */
         long sizeOf(K key, E e);
     }
 }

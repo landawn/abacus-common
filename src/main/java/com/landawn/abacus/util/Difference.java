@@ -22,64 +22,152 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class Difference.
+ *
  * @author Haiyang Li
+ * @param <L> the generic type
+ * @param <R> the generic type
+ * @since 0.8
  */
 public class Difference<L, R> {
+
+    /** The common. */
     final L common;
+
+    /** The left only. */
     final L leftOnly;
+
+    /** The right only. */
     final R rightOnly;
 
+    /**
+     * Instantiates a new difference.
+     *
+     * @param common the common
+     * @param leftOnly the left only
+     * @param rightOnly the right only
+     */
     Difference(L common, L leftOnly, R rightOnly) {
         this.common = common;
         this.leftOnly = leftOnly;
         this.rightOnly = rightOnly;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Boolean>, List<Boolean>> of(boolean[] a, boolean[] b) {
         return of(BooleanList.of(a), BooleanList.of(b));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Character>, List<Character>> of(char[] a, char[] b) {
         return of(CharList.of(a), CharList.of(b));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Byte>, List<Byte>> of(byte[] a, byte[] b) {
         return of(ByteList.of(a), ByteList.of(b));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Short>, List<Short>> of(short[] a, short[] b) {
         return of(ShortList.of(a), ShortList.of(b));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Integer>, List<Integer>> of(int[] a, int[] b) {
         return of(IntList.of(a), IntList.of(b));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Long>, List<Long>> of(long[] a, long[] b) {
         return of(LongList.of(a), LongList.of(b));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Float>, List<Float>> of(float[] a, float[] b) {
         return of(FloatList.of(a), FloatList.of(b));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Double>, List<Double>> of(double[] a, double[] b) {
         return of(DoubleList.of(a), DoubleList.of(b));
     }
 
+    /**
+     * Of.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <L> the generic type
+     * @param <R> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(T1[] a, T2[] b) {
         return of(Arrays.asList(a), Arrays.asList(b));
     }
 
     /**
-     * 
-     * @param a
-     * @param b
-     * @return
+     * Of.
+     *
+     * @param <T1> the generic type
+     * @param <T2> the generic type
+     * @param <L> the generic type
+     * @param <R> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the difference
      */
     public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(Collection<? extends T1> a, Collection<? extends T2> b) {
         List<T1> common = new ArrayList<>();
@@ -119,6 +207,13 @@ public class Difference<L, R> {
         return new Difference<>((L) common, (L) leftOnly, (R) rightOnly);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Boolean>, List<Boolean>> of(BooleanList a, BooleanList b) {
         List<Boolean> common = new ArrayList<>();
         List<Boolean> leftOnly = new ArrayList<>();
@@ -162,6 +257,13 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Character>, List<Character>> of(CharList a, CharList b) {
         List<Character> common = new ArrayList<>();
         List<Character> leftOnly = new ArrayList<>();
@@ -205,6 +307,13 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Byte>, List<Byte>> of(ByteList a, ByteList b) {
         List<Byte> common = new ArrayList<>();
         List<Byte> leftOnly = new ArrayList<>();
@@ -248,6 +357,13 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Short>, List<Short>> of(ShortList a, ShortList b) {
         List<Short> common = new ArrayList<>();
         List<Short> leftOnly = new ArrayList<>();
@@ -291,6 +407,13 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Integer>, List<Integer>> of(IntList a, IntList b) {
         List<Integer> common = new ArrayList<>();
         List<Integer> leftOnly = new ArrayList<>();
@@ -334,6 +457,13 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Long>, List<Long>> of(LongList a, LongList b) {
         List<Long> common = new ArrayList<>();
         List<Long> leftOnly = new ArrayList<>();
@@ -377,6 +507,13 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Float>, List<Float>> of(FloatList a, FloatList b) {
         List<Float> common = new ArrayList<>();
         List<Float> leftOnly = new ArrayList<>();
@@ -420,6 +557,13 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the difference
+     */
     public static Difference<List<Double>, List<Double>> of(DoubleList a, DoubleList b) {
         List<Double> common = new ArrayList<>();
         List<Double> leftOnly = new ArrayList<>();
@@ -463,42 +607,92 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * In common.
+     *
+     * @return the l
+     */
     public L inCommon() {
         return common;
     }
 
+    /**
+     * On left only.
+     *
+     * @return the l
+     */
     public L onLeftOnly() {
         return leftOnly;
     }
 
+    /**
+     * On right only.
+     *
+     * @return the r
+     */
     public R onRightOnly() {
         return rightOnly;
     }
 
+    /**
+     * Are equal.
+     *
+     * @return true, if successful
+     */
     @SuppressWarnings("rawtypes")
     public boolean areEqual() {
         return (leftOnly instanceof Map && (((Map) leftOnly).isEmpty() && ((Map) rightOnly).isEmpty()))
                 || (leftOnly instanceof Collection && (((Collection) leftOnly).isEmpty() && ((Collection) rightOnly).isEmpty()));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "{inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + "}";
     }
 
+    /**
+     * The Class MapDifference.
+     *
+     * @param <L> the generic type
+     * @param <R> the generic type
+     * @param <D> the generic type
+     */
     public static final class MapDifference<L, R, D> extends Difference<L, R> {
+
+        /** The diff values. */
         private final D diffValues;
 
+        /**
+         * Instantiates a new map difference.
+         *
+         * @param common the common
+         * @param leftOnly the left only
+         * @param rightOnly the right only
+         * @param diff the diff
+         */
         MapDifference(L common, L leftOnly, R rightOnly, D diff) {
             super(common, leftOnly, rightOnly);
             this.diffValues = diff;
         }
 
         /**
-         * 
-         * @param map1
-         * @param map2
-         * @return
+         * Of.
+         *
+         * @param <K1> the generic type
+         * @param <V1> the generic type
+         * @param <K2> the generic type
+         * @param <V2> the generic type
+         * @param <L> the generic type
+         * @param <R> the generic type
+         * @param <D> the generic type
+         * @param map1 the map 1
+         * @param map2 the map 2
+         * @return the map difference
          */
         @SuppressWarnings("unlikely-arg-type")
         public static <K1, V1, K2, V2, L extends Map<K1, V1>, R extends Map<K2, V2>, D extends Map<?, Pair<V1, V2>>> MapDifference<L, R, D> of(
@@ -553,10 +747,11 @@ public class Difference<L, R> {
         }
 
         /**
-         * 
-         * @param entity1
-         * @param entity2
-         * @return
+         * Of.
+         *
+         * @param entity1 the entity 1
+         * @param entity2 the entity 2
+         * @return the map difference
          */
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(Object entity1, Object entity2) {
             if (ClassUtil.isEntity(entity1.getClass()) == false || ClassUtil.isEntity(entity2.getClass()) == false) {
@@ -569,18 +764,29 @@ public class Difference<L, R> {
 
         /**
          * Returns the entries that appear in both maps, but with different values.
-         * @return
+         *
+         * @return the d
          */
         public D withDifferentValues() {
             return diffValues;
         }
 
+        /**
+         * Are equal.
+         *
+         * @return true, if successful
+         */
         @Override
         @SuppressWarnings("rawtypes")
         public boolean areEqual() {
             return super.areEqual() && ((Map) diffValues).isEmpty();
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "{inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + ", withDifferentValues=" + diffValues + "}";

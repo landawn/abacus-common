@@ -31,35 +31,87 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class GenericKeyedObjectPool.
+ *
  * @author Haiyang Li
+ * @param <K> the key type
+ * @param <E> the element type
+ * @since 0.8
  */
 public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool implements KeyedObjectPool<K, E> {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 2208516321399679864L;
+
+    /** The max memory size. */
     private final long maxMemorySize;
+
+    /** The memory measure. */
     private final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure;
+
+    /** The used memory size. */
     private volatile long usedMemorySize = 0;
 
+    /** The pool. */
     final Map<K, E> pool;
+
+    /** The cmp. */
     final Comparator<Map.Entry<K, E>> cmp;
+
+    /** The schedule future. */
     ScheduledFuture<?> scheduleFuture;
 
+    /**
+     * Instantiates a new generic keyed object pool.
+     *
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
+     * @param evictionPolicy the eviction policy
+     */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
         this(capacity, evictDelay, evictionPolicy, 0, null);
     }
 
+    /**
+     * Instantiates a new generic keyed object pool.
+     *
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
+     * @param evictionPolicy the eviction policy
+     * @param maxMemorySize the max memory size
+     * @param memoryMeasure the memory measure
+     */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, long maxMemorySize,
             KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
+    /**
+     * Instantiates a new generic keyed object pool.
+     *
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
+     * @param evictionPolicy the eviction policy
+     * @param autoBalance the auto balance
+     * @param balanceFactor the balance factor
+     */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
         this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
+    /**
+     * Instantiates a new generic keyed object pool.
+     *
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
+     * @param evictionPolicy the eviction policy
+     * @param autoBalance the auto balance
+     * @param balanceFactor the balance factor
+     * @param maxMemorySize the max memory size
+     * @param memoryMeasure the memory measure
+     */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor, long maxMemorySize,
             KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
@@ -124,6 +176,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Put.
+     *
+     * @param key the key
+     * @param e the e
+     * @return true, if successful
+     */
     @Override
     public boolean put(K key, E e) {
         assertNotClosed();
@@ -173,6 +232,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Put.
+     *
+     * @param key the key
+     * @param e the e
+     * @param autoDestroyOnFailedToPut the auto destroy on failed to put
+     * @return true, if successful
+     */
     @Override
     public boolean put(K key, E e, boolean autoDestroyOnFailedToPut) {
         boolean sucess = false;
@@ -188,6 +255,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return sucess;
     }
 
+    /**
+     * Gets the.
+     *
+     * @param key the key
+     * @return the e
+     */
     @Override
     public E get(K key) {
         assertNotClosed();
@@ -215,6 +288,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Removes the.
+     *
+     * @param key the key
+     * @return the e
+     */
     @Override
     public E remove(K key) {
         assertNotClosed();
@@ -244,6 +323,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Peek.
+     *
+     * @param key the key
+     * @return the e
+     */
     @Override
     public E peek(K key) {
         assertNotClosed();
@@ -257,6 +342,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Contains key.
+     *
+     * @param key the key
+     * @return true, if successful
+     */
     @Override
     public boolean containsKey(K key) {
         assertNotClosed();
@@ -270,6 +361,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Contains value.
+     *
+     * @param e the e
+     * @return true, if successful
+     */
     @Override
     public boolean containsValue(E e) {
         assertNotClosed();
@@ -283,6 +380,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Key set.
+     *
+     * @return the sets the
+     */
     @Override
     public Set<K> keySet() {
         assertNotClosed();
@@ -296,6 +398,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Values.
+     *
+     * @return the collection
+     */
     @Override
     public Collection<E> values() {
         assertNotClosed();
@@ -309,6 +416,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         assertNotClosed();
@@ -316,6 +426,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         removeAll();
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (isClosed) {
@@ -333,6 +446,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Vacate.
+     */
     @Override
     public void vacate() {
         assertNotClosed();
@@ -348,6 +464,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         // assertNotClosed();
@@ -355,22 +476,43 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return pool.size();
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return pool.hashCode();
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
         return this == obj || (obj instanceof GenericKeyedObjectPool && N.equals(((GenericKeyedObjectPool<K, E>) obj).pool, pool));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return pool.toString();
     }
 
+    /**
+     * Vacate.
+     *
+     * @param vacationNumber the vacation number
+     */
     protected void vacate(int vacationNumber) {
         int size = pool.size();
 
@@ -437,6 +579,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Destroy.
+     *
+     * @param key the key
+     * @param value the value
+     */
     protected void destroy(K key, E value) {
         evictionCount.incrementAndGet();
 
@@ -460,6 +608,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Destroy all.
+     *
+     * @param map the map
+     */
     protected void destroyAll(Map<K, E> map) {
         if (N.notNullOrEmpty(map)) {
             for (Map.Entry<K, E> entry : map.entrySet()) {
@@ -468,6 +621,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Removes the all.
+     */
     private void removeAll() {
         lock.lock();
 
@@ -482,6 +638,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Write object.
+     *
+     * @param os the os
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private void writeObject(java.io.ObjectOutputStream os) throws java.io.IOException {
         lock.lock();
 
@@ -492,6 +654,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * Read object.
+     *
+     * @param is the is
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ClassNotFoundException the class not found exception
+     */
     private void readObject(java.io.ObjectInputStream is) throws java.io.IOException, ClassNotFoundException {
         lock.lock();
 

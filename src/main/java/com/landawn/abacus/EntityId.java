@@ -20,31 +20,70 @@ import java.util.Set;
 
 import com.landawn.abacus.core.Seid;
 
+// TODO: Auto-generated Javadoc
 /**
- * Identity of an entity
- * 
- * @since 0.8
- * 
+ * Identity of an entity.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface EntityId {
 
+    /**
+     * Of.
+     *
+     * @param entityName the entity name
+     * @return the entity id
+     */
     public static EntityId of(String entityName) {
         return Seid.of(entityName);
     }
 
+    /**
+     * Of.
+     *
+     * @param propName the prop name
+     * @param propValue the prop value
+     * @return the entity id
+     */
     public static EntityId of(String propName, Object propValue) {
         return Seid.of(propName, propValue);
     }
 
+    /**
+     * Of.
+     *
+     * @param propName1 the prop name 1
+     * @param propValue1 the prop value 1
+     * @param propName2 the prop name 2
+     * @param propValue2 the prop value 2
+     * @return the entity id
+     */
     public static EntityId of(String propName1, Object propValue1, String propName2, Object propValue2) {
         return Seid.of(propName1, propValue1, propName2, propValue2);
     }
 
+    /**
+     * Of.
+     *
+     * @param propName1 the prop name 1
+     * @param propValue1 the prop value 1
+     * @param propName2 the prop name 2
+     * @param propValue2 the prop value 2
+     * @param propName3 the prop name 3
+     * @param propValue3 the prop value 3
+     * @return the entity id
+     */
     public static EntityId of(String propName1, Object propValue1, String propName2, Object propValue2, String propName3, Object propValue3) {
         return Seid.of(propName1, propValue1, propName2, propValue2, propName3, propValue3);
     }
 
+    /**
+     * Of.
+     *
+     * @param nameValues the name values
+     * @return the entity id
+     */
     public static EntityId of(Map<String, Object> nameValues) {
         return Seid.of(nameValues);
     }
@@ -58,56 +97,59 @@ public interface EntityId {
 
     /**
      * Method get.
-     * 
-     * @param propName
+     *
+     * @param <T> the generic type
+     * @param propName the prop name
      * @return T
-     * @throws NullPonterException
-     *             if the property is null and {@code T} is primitive type.
      */
     <T> T get(String propName);
 
     /**
      * Method get.
-     * 
-     * @param clazz
-     * @param propName
+     *
+     * @param <T> the generic type
+     * @param clazz the clazz
+     * @param propName the prop name
      * @return T
      */
     <T> T get(Class<T> clazz, String propName);
 
     /**
      * Method set.
-     * 
-     * @param propName
-     * @param propValue
-     * @return
+     *
+     * @param propName the prop name
+     * @param propValue the prop value
+     * @return the entity id
      */
     EntityId set(String propName, Object propValue);
 
     /**
-     * 
-     * @param nameValues
+     * Sets the.
+     *
+     * @param nameValues the name values
      */
     void set(Map<String, Object> nameValues);
 
     /**
      * Method remove.
-     * 
-     * @param propName
-     * @return
+     *
+     * @param propName the prop name
+     * @return the object
      */
     Object remove(String propName);
 
     /**
-     * 
-     * @param propNames
+     * Removes the all.
+     *
+     * @param propNames the prop names
      */
     void removeAll(Collection<String> propNames);
 
     /**
-     * 
-     * @param containsKey
-     * @return
+     * Contains key.
+     *
+     * @param propName the prop name
+     * @return true, if successful
      */
     boolean containsKey(String propName);
 
@@ -119,25 +161,34 @@ public interface EntityId {
     Set<String> keySet();
 
     /**
-     * 
-     * @return
+     * Entry set.
+     *
+     * @return the sets the
      */
     Set<Map.Entry<String, Object>> entrySet();
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     int size();
 
     /**
-     * 
-     * @return
+     * Checks if is empty.
+     *
+     * @return true, if is empty
      */
     boolean isEmpty();
 
     /**
+     * Clear.
      */
     void clear();
 
     /**
-     * 
+     * Copy.
+     *
      * @return EntityId
      */
     EntityId copy();

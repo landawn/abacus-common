@@ -54,38 +54,84 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 
+// TODO: Auto-generated Javadoc
 /**
  * Any header can be set into the parameter <code>settings</code>
  * 
  * <br>HttpClient is thread safe.</br>
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class OKHttpClient extends AbstractHttpClient {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(OKHttpClient.class);
 
+    /** The Constant mediaTypePool. */
     private static final Map<String, MediaType> mediaTypePool = new ConcurrentHashMap<>();
+
+    /** The client. */
     private final OkHttpClient client;
+
+    /** The active connection counter. */
     private final AtomicInteger _activeConnectionCounter;
 
+    /**
+     * Instantiates a new OK http client.
+     *
+     * @param url the url
+     */
     protected OKHttpClient(String url) {
         this(url, DEFAULT_MAX_CONNECTION);
     }
 
+    /**
+     * Instantiates a new OK http client.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     */
     protected OKHttpClient(String url, int maxConnection) {
         this(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
+    /**
+     * Instantiates a new OK http client.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     */
     protected OKHttpClient(String url, int maxConnection, long connTimeout, long readTimeout) {
         this(url, maxConnection, connTimeout, readTimeout, null);
     }
 
+    /**
+     * Instantiates a new OK http client.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     protected OKHttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
         this(url, maxConnection, connTimeout, readTimeout, settings, new AtomicInteger(0));
     }
 
+    /**
+     * Instantiates a new OK http client.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param settings the settings
+     * @param sharedActiveConnectionCounter the shared active connection counter
+     */
     protected OKHttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
         super(url, maxConnection, connTimeout, readTimeout, settings);
@@ -105,64 +151,189 @@ public final class OKHttpClient extends AbstractHttpClient {
         this._activeConnectionCounter = sharedActiveConnectionCounter;
     }
 
+    /**
+     * Instantiates a new OK http client.
+     *
+     * @param client the client
+     * @param url the url
+     * @param maxConnection the max connection
+     */
     protected OKHttpClient(OkHttpClient client, String url, int maxConnection) {
         this(client, url, maxConnection, null);
     }
 
+    /**
+     * Instantiates a new OK http client.
+     *
+     * @param client the client
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     protected OKHttpClient(OkHttpClient client, String url, int maxConnection, HttpSettings settings) throws UncheckedIOException {
         this(client, url, maxConnection, settings, new AtomicInteger(0));
     }
 
+    /**
+     * Instantiates a new OK http client.
+     *
+     * @param client the client
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param settings the settings
+     * @param sharedActiveConnectionCounter the shared active connection counter
+     */
     protected OKHttpClient(OkHttpClient client, String url, int maxConnection, HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
         super(url, maxConnection, client.connectTimeoutMillis(), client.readTimeoutMillis(), settings);
         this.client = client;
         this._activeConnectionCounter = sharedActiveConnectionCounter;
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @return the OK http client
+     */
     public static OKHttpClient create(String url) {
         return new OKHttpClient(url);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @return the OK http client
+     */
     public static OKHttpClient create(String url, int maxConnection) {
         return new OKHttpClient(url, maxConnection);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @return the OK http client
+     */
     public static OKHttpClient create(String url, long connTimeout, long readTimeout) {
         return new OKHttpClient(url, DEFAULT_MAX_CONNECTION, connTimeout, readTimeout);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @return the OK http client
+     */
     public static OKHttpClient create(String url, int maxConnection, long connTimeout, long readTimeout) {
         return new OKHttpClient(url, maxConnection, connTimeout, readTimeout);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param settings the settings
+     * @return the OK http client
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static OKHttpClient create(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
         return new OKHttpClient(url, maxConnection, connTimeout, readTimeout, settings);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param connTimeout the conn timeout
+     * @param readTimeout the read timeout
+     * @param settings the settings
+     * @param sharedActiveConnectionCounter the shared active connection counter
+     * @return the OK http client
+     */
     public static OKHttpClient create(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
         return new OKHttpClient(url, maxConnection, connTimeout, readTimeout, settings, sharedActiveConnectionCounter);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param client the client
+     * @param url the url
+     * @param maxConnection the max connection
+     * @return the OK http client
+     */
     public static OKHttpClient create(OkHttpClient client, String url, int maxConnection) {
         return new OKHttpClient(client, url, maxConnection);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param client the client
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param settings the settings
+     * @return the OK http client
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     public static OKHttpClient create(OkHttpClient client, String url, int maxConnection, HttpSettings settings) throws UncheckedIOException {
         return new OKHttpClient(client, url, maxConnection, settings);
     }
 
+    /**
+     * Creates the.
+     *
+     * @param client the client
+     * @param url the url
+     * @param maxConnection the max connection
+     * @param settings the settings
+     * @param sharedActiveConnectionCounter the shared active connection counter
+     * @return the OK http client
+     */
     public static OKHttpClient create(OkHttpClient client, String url, int maxConnection, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
         return new OKHttpClient(client, url, maxConnection, settings, sharedActiveConnectionCounter);
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param resultClass the result class
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @return the t
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @Override
     public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request, final HttpSettings settings)
             throws UncheckedIOException {
         return execute(resultClass, null, null, httpMethod, request, settings);
     }
 
+    /**
+     * Execute.
+     *
+     * @param output the output
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @Override
     public void execute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         OutputStream os = null;
@@ -177,16 +348,47 @@ public final class OKHttpClient extends AbstractHttpClient {
         }
     }
 
+    /**
+     * Execute.
+     *
+     * @param output the output
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @Override
     public void execute(final OutputStream output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         execute(null, output, null, httpMethod, request, settings);
     }
 
+    /**
+     * Execute.
+     *
+     * @param output the output
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     @Override
     public void execute(final Writer output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         execute(null, null, output, httpMethod, request, settings);
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param resultClass the result class
+     * @param outputStream the output stream
+     * @param outputWriter the output writer
+     * @param httpMethod the http method
+     * @param request the request
+     * @param settings the settings
+     * @return the t
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     private <T> T execute(final Class<T> resultClass, final OutputStream outputStream, final Writer outputWriter, final HttpMethod httpMethod,
             final Object request, final HttpSettings settings) throws UncheckedIOException {
 
@@ -361,6 +563,13 @@ public final class OKHttpClient extends AbstractHttpClient {
         }
     }
 
+    /**
+     * Sets the headers.
+     *
+     * @param requestBuilder the request builder
+     * @param settings the settings
+     * @throws UncheckedIOException the unchecked IO exception
+     */
     private void setHeaders(okhttp3.Request.Builder requestBuilder, HttpSettings settings) throws UncheckedIOException {
         final HttpHeaders headers = settings.headers();
 

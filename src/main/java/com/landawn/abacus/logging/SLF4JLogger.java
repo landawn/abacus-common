@@ -23,18 +23,29 @@ import org.slf4j.spi.LocationAwareLogger;
 import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.util.function.Supplier;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class SLF4JLogger.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 class SLF4JLogger extends AbstractLogger {
+
+    /** The Constant FQCN. */
     private static final String FQCN = SLF4JLogger.class.getName();
 
+    /** The logger impl. */
     private final org.slf4j.Logger loggerImpl;
+
+    /** The location aware logger. */
     private final LocationAwareLogger locationAwareLogger;
 
+    /**
+     * Instantiates a new SLF 4 J logger.
+     *
+     * @param name the name
+     */
     public SLF4JLogger(String name) {
         super(name);
         if (org.slf4j.LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory) {
@@ -45,56 +56,114 @@ class SLF4JLogger extends AbstractLogger {
         locationAwareLogger = loggerImpl instanceof LocationAwareLogger ? ((LocationAwareLogger) loggerImpl) : null;
     }
 
+    /**
+     * Checks if is trace enabled.
+     *
+     * @return true, if is trace enabled
+     */
     @Override
     public boolean isTraceEnabled() {
         return loggerImpl.isTraceEnabled();
     }
 
+    /**
+     * Trace.
+     *
+     * @param msg the msg
+     */
     @Override
     public void trace(String msg) {
         loggerImpl.trace(msg);
     }
 
+    /**
+     * Trace.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void trace(String msg, Throwable t) {
         loggerImpl.trace(msg, t);
     }
 
+    /**
+     * Checks if is debug enabled.
+     *
+     * @return true, if is debug enabled
+     */
     @Override
     public boolean isDebugEnabled() {
         return loggerImpl.isDebugEnabled();
     }
 
+    /**
+     * Debug.
+     *
+     * @param msg the msg
+     */
     @Override
     public void debug(String msg) {
         loggerImpl.debug(msg);
     }
 
+    /**
+     * Debug.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void debug(String msg, Throwable t) {
         loggerImpl.debug(msg, t);
     }
 
+    /**
+     * Checks if is info enabled.
+     *
+     * @return true, if is info enabled
+     */
     @Override
     public boolean isInfoEnabled() {
         return loggerImpl.isInfoEnabled();
     }
 
+    /**
+     * Info.
+     *
+     * @param msg the msg
+     */
     @Override
     public void info(String msg) {
         loggerImpl.info(msg);
     }
 
+    /**
+     * Info.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void info(String msg, Throwable t) {
         loggerImpl.info(msg, t);
     }
 
+    /**
+     * Checks if is warn enabled.
+     *
+     * @return true, if is warn enabled
+     */
     @Override
     public boolean isWarnEnabled() {
         return loggerImpl.isWarnEnabled();
     }
 
+    /**
+     * Warn.
+     *
+     * @param msg the msg
+     */
     @Override
     public void warn(String msg) {
         if (locationAwareLogger == null) {
@@ -104,6 +173,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void warn(String msg, Throwable t) {
         if (locationAwareLogger == null) {
@@ -113,11 +188,21 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Checks if is error enabled.
+     *
+     * @return true, if is error enabled
+     */
     @Override
     public boolean isErrorEnabled() {
         return loggerImpl.isErrorEnabled();
     }
 
+    /**
+     * Error.
+     *
+     * @param msg the msg
+     */
     @Override
     public void error(String msg) {
         if (locationAwareLogger == null) {
@@ -127,6 +212,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void error(String msg, Throwable t) {
         if (locationAwareLogger == null) {
@@ -136,6 +227,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void trace(String template, Object arg) {
         if (isTraceEnabled()) {
@@ -143,6 +240,13 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void trace(String template, Object arg1, Object arg2) {
         if (isTraceEnabled()) {
@@ -150,6 +254,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void trace(String template, Object arg1, Object arg2, Object arg3) {
         if (isTraceEnabled()) {
@@ -157,6 +269,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param template the template
+     * @param args the args
+     */
     @Override
     @SafeVarargs
     public final void trace(String template, Object... args) {
@@ -165,11 +283,24 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     @Override
     public void trace(Throwable t, String msg) {
         trace(msg, t);
     }
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void trace(Throwable t, String template, Object arg) {
         if (isTraceEnabled()) {
@@ -177,6 +308,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void trace(Throwable t, String template, Object arg1, Object arg2) {
         if (isTraceEnabled()) {
@@ -184,6 +323,15 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void trace(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
         if (isTraceEnabled()) {
@@ -191,6 +339,11 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param supplier the supplier
+     */
     @Override
     public void trace(Supplier<String> supplier) {
         if (isTraceEnabled()) {
@@ -198,6 +351,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param supplier the supplier
+     * @param t the t
+     */
     @Override
     public void trace(Supplier<String> supplier, Throwable t) {
         if (isTraceEnabled()) {
@@ -205,6 +364,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Trace.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     @Override
     public void trace(Throwable t, Supplier<String> supplier) {
         if (isTraceEnabled()) {
@@ -212,6 +377,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void debug(String template, Object arg) {
         if (isDebugEnabled()) {
@@ -219,6 +390,13 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void debug(String template, Object arg1, Object arg2) {
         if (isDebugEnabled()) {
@@ -226,6 +404,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void debug(String template, Object arg1, Object arg2, Object arg3) {
         if (isDebugEnabled()) {
@@ -233,6 +419,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param template the template
+     * @param args the args
+     */
     @Override
     @SafeVarargs
     public final void debug(String template, Object... args) {
@@ -241,11 +433,24 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     @Override
     public void debug(Throwable t, String msg) {
         debug(msg, t);
     }
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void debug(Throwable t, String template, Object arg) {
         if (isDebugEnabled()) {
@@ -253,6 +458,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void debug(Throwable t, String template, Object arg1, Object arg2) {
         if (isDebugEnabled()) {
@@ -260,6 +473,15 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void debug(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
         if (isDebugEnabled()) {
@@ -267,6 +489,11 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param supplier the supplier
+     */
     @Override
     public void debug(Supplier<String> supplier) {
         if (isDebugEnabled()) {
@@ -274,6 +501,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param supplier the supplier
+     * @param t the t
+     */
     @Override
     public void debug(Supplier<String> supplier, Throwable t) {
         if (isDebugEnabled()) {
@@ -281,6 +514,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     @Override
     public void debug(Throwable t, Supplier<String> supplier) {
         if (isDebugEnabled()) {
@@ -288,6 +527,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void info(String template, Object arg) {
         if (isInfoEnabled()) {
@@ -295,6 +540,13 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void info(String template, Object arg1, Object arg2) {
         if (isInfoEnabled()) {
@@ -302,6 +554,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void info(String template, Object arg1, Object arg2, Object arg3) {
         if (isInfoEnabled()) {
@@ -309,6 +569,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param template the template
+     * @param args the args
+     */
     @Override
     @SafeVarargs
     public final void info(String template, Object... args) {
@@ -317,11 +583,24 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     @Override
     public void info(Throwable t, String msg) {
         info(msg, t);
     }
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void info(Throwable t, String template, Object arg) {
         if (isInfoEnabled()) {
@@ -329,6 +608,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void info(Throwable t, String template, Object arg1, Object arg2) {
         if (isInfoEnabled()) {
@@ -336,6 +623,15 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void info(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
         if (isInfoEnabled()) {
@@ -343,6 +639,11 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param supplier the supplier
+     */
     @Override
     public void info(Supplier<String> supplier) {
         if (isInfoEnabled()) {
@@ -350,6 +651,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param supplier the supplier
+     * @param t the t
+     */
     @Override
     public void info(Supplier<String> supplier, Throwable t) {
         if (isInfoEnabled()) {
@@ -357,6 +664,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Info.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     @Override
     public void info(Throwable t, Supplier<String> supplier) {
         if (isInfoEnabled()) {
@@ -364,6 +677,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void warn(String template, Object arg) {
         if (isWarnEnabled()) {
@@ -371,6 +690,13 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void warn(String template, Object arg1, Object arg2) {
         if (isWarnEnabled()) {
@@ -378,6 +704,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void warn(String template, Object arg1, Object arg2, Object arg3) {
         if (isWarnEnabled()) {
@@ -385,6 +719,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param template the template
+     * @param args the args
+     */
     @Override
     @SafeVarargs
     public final void warn(String template, Object... args) {
@@ -393,11 +733,24 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     @Override
     public void warn(Throwable t, String msg) {
         warn(msg, t);
     }
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void warn(Throwable t, String template, Object arg) {
         if (isWarnEnabled()) {
@@ -405,6 +758,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void warn(Throwable t, String template, Object arg1, Object arg2) {
         if (isWarnEnabled()) {
@@ -412,6 +773,15 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void warn(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
         if (isWarnEnabled()) {
@@ -419,6 +789,11 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param supplier the supplier
+     */
     @Override
     public void warn(Supplier<String> supplier) {
         if (isWarnEnabled()) {
@@ -426,6 +801,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param supplier the supplier
+     * @param t the t
+     */
     @Override
     public void warn(Supplier<String> supplier, Throwable t) {
         if (isWarnEnabled()) {
@@ -433,6 +814,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Warn.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     @Override
     public void warn(Throwable t, Supplier<String> supplier) {
         if (isWarnEnabled()) {
@@ -440,6 +827,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void error(String template, Object arg) {
         if (isErrorEnabled()) {
@@ -447,6 +840,13 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void error(String template, Object arg1, Object arg2) {
         if (isErrorEnabled()) {
@@ -454,6 +854,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void error(String template, Object arg1, Object arg2, Object arg3) {
         if (isErrorEnabled()) {
@@ -461,6 +869,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param template the template
+     * @param args the args
+     */
     @Override
     @SafeVarargs
     public final void error(String template, Object... args) {
@@ -469,11 +883,24 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param msg the msg
+     */
     @Override
     public void error(Throwable t, String msg) {
         error(msg, t);
     }
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg the arg
+     */
     @Override
     public void error(Throwable t, String template, Object arg) {
         if (isErrorEnabled()) {
@@ -481,6 +908,14 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     */
     @Override
     public void error(Throwable t, String template, Object arg1, Object arg2) {
         if (isErrorEnabled()) {
@@ -488,6 +923,15 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param template the template
+     * @param arg1 the arg 1
+     * @param arg2 the arg 2
+     * @param arg3 the arg 3
+     */
     @Override
     public void error(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
         if (isErrorEnabled()) {
@@ -495,6 +939,11 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param supplier the supplier
+     */
     @Override
     public void error(Supplier<String> supplier) {
         if (isErrorEnabled()) {
@@ -502,6 +951,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param supplier the supplier
+     * @param t the t
+     */
     @Override
     public void error(Supplier<String> supplier, Throwable t) {
         if (isErrorEnabled()) {
@@ -509,6 +964,12 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Error.
+     *
+     * @param t the t
+     * @param supplier the supplier
+     */
     @Override
     public void error(Throwable t, Supplier<String> supplier) {
         if (isErrorEnabled()) {

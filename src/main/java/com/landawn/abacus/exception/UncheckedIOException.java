@@ -16,19 +16,22 @@ package com.landawn.abacus.exception;
 
 import java.io.IOException;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class UncheckedIOException.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class UncheckedIOException extends UncheckedException {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8702336402043331418L;
 
     /**
      * Constructor for UncheckedIOException.
-     * 
-     * @param cause
+     *
+     * @param cause the cause
      */
     public UncheckedIOException(IOException cause) {
         super(cause);
@@ -36,9 +39,9 @@ public class UncheckedIOException extends UncheckedException {
 
     /**
      * Constructor for UncheckedIOException.
-     * 
-     * @param message
-     * @param cause
+     *
+     * @param message the message
+     * @param cause the cause
      */
     public UncheckedIOException(String message, IOException cause) {
         super(message, cause);

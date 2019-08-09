@@ -48,25 +48,32 @@ import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
  * It's an extension and wrapper for Google Guava.
- * 
+ *
+ * @author Haiyang Li
  * @since 1.2.7
- * 
- * @author Haiyang Li 
  */
 public final class Iterables {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(Iterables.class);
 
+    /**
+     * Instantiates a new iterables.
+     */
     private Iterables() {
         // singleton.
     }
 
     /**
-     * 
-     * @param a
-     * @param b
-     * @return
+     * Different set.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the sets the
      */
     public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
         if (N.isNullOrEmpty(a)) {
@@ -83,10 +90,12 @@ public final class Iterables {
     }
 
     /**
-     * 
-     * @param a
-     * @param b
-     * @return
+     * Symmetric different set.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the sets the
      */
     public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
         if (N.isNullOrEmpty(a)) {
@@ -114,10 +123,12 @@ public final class Iterables {
     }
 
     /**
-     * 
-     * @param a
-     * @param b
-     * @return
+     * Common set.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the sets the
      */
     public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
@@ -127,6 +138,13 @@ public final class Iterables {
         return commonSet(N.asList(a, (Collection<? extends T>) b));
     }
 
+    /**
+     * Common set.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @return the sets the
+     */
     public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
         if (N.isNullOrEmpty(c)) {
             return new HashSet<>();
@@ -186,6 +204,13 @@ public final class Iterables {
         return result;
     }
 
+    /**
+     * Removes the all.
+     *
+     * @param c the c
+     * @param objsToRemove the objs to remove
+     * @return true, if successful
+     */
     public static boolean removeAll(Collection<?> c, Collection<?> objsToRemove) {
         if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToRemove)) {
             return false;
@@ -208,6 +233,13 @@ public final class Iterables {
         }
     }
 
+    /**
+     * Retain all.
+     *
+     * @param c the c
+     * @param objsToKeep the objs to keep
+     * @return true, if successful
+     */
     public static boolean retainAll(Collection<?> c, Collection<?> objsToKeep) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -224,10 +256,11 @@ public final class Iterables {
     }
 
     /**
-     * 
-     * @param iterable
-     * @return
-     * throws DuplicatedResultException if there are more than one elements in the specified {@code iterable}.
+     * Gets the only element.
+     *
+     * @param <T> the generic type
+     * @param iterable the iterable
+     * @return throws DuplicatedResultException if there are more than one elements in the specified {@code iterable}.
      */
     public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> iterable) {
         if (iterable == null) {
@@ -238,10 +271,11 @@ public final class Iterables {
     }
 
     /**
-     * 
-     * @param c
-     * @param objToFind
-     * @return
+     * Index of.
+     *
+     * @param c the c
+     * @param objToFind the obj to find
+     * @return the optional int
      */
     public static OptionalInt indexOf(final Collection<?> c, final Object objToFind) {
         if (N.isNullOrEmpty(c)) {
@@ -262,10 +296,11 @@ public final class Iterables {
     }
 
     /**
-     * 
-     * @param c
-     * @param objToFind
-     * @return
+     * Last index of.
+     *
+     * @param c the c
+     * @param objToFind the obj to find
+     * @return the optional int
      */
     public static OptionalInt lastIndexOf(final Collection<?> c, final Object objToFind) {
         if (N.isNullOrEmpty(c)) {
@@ -317,6 +352,16 @@ public final class Iterables {
         }
     }
 
+    /**
+     * Find first index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return OptionalInt.empty();
@@ -331,6 +376,16 @@ public final class Iterables {
         return OptionalInt.empty();
     }
 
+    /**
+     * Find first index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
@@ -349,6 +404,16 @@ public final class Iterables {
         return OptionalInt.empty();
     }
 
+    /**
+     * Find last index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return OptionalInt.empty();
@@ -363,6 +428,16 @@ public final class Iterables {
         return OptionalInt.empty();
     }
 
+    /**
+     * Find last index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
@@ -413,6 +488,16 @@ public final class Iterables {
         }
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the nullable
+     * @throws E the e
+     */
     public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Nullable.empty();
@@ -427,6 +512,16 @@ public final class Iterables {
         return Nullable.empty();
     }
 
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the nullable
+     * @throws E the e
+     */
     public static <T, E extends Exception> Nullable<T> findFirst(final Collection<T> c, Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Nullable.empty();
@@ -441,6 +536,16 @@ public final class Iterables {
         return Nullable.empty();
     }
 
+    /**
+     * Find last.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the nullable
+     * @throws E the e
+     */
     public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Nullable.empty();
@@ -455,10 +560,30 @@ public final class Iterables {
         return Nullable.empty();
     }
 
+    /**
+     * Find last.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the nullable
+     * @throws E the e
+     */
     public static <T, E extends Exception> Nullable<T> findLast(final Collection<T> c, Try.Predicate<? super T, E> predicate) throws E {
         return findLast(c, predicate, false);
     }
 
+    /**
+     * Find first non null.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
     public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Optional.empty();
@@ -473,6 +598,16 @@ public final class Iterables {
         return Optional.empty();
     }
 
+    /**
+     * Find first non null.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
     public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<T> c, Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Optional.empty();
@@ -487,6 +622,16 @@ public final class Iterables {
         return Optional.empty();
     }
 
+    /**
+     * Find last non null.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
     public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Optional.empty();
@@ -501,10 +646,32 @@ public final class Iterables {
         return Optional.empty();
     }
 
+    /**
+     * Find last non null.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
     public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<T> c, Try.Predicate<? super T, E> predicate) throws E {
         return findLast(c, predicate, true);
     }
 
+    /**
+     * Find last.
+     *
+     * @param <T> the generic type
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @param isForNonNull the is for non null
+     * @return the r
+     * @throws E the e
+     */
     private static <T, R, E extends Exception> R findLast(final Collection<T> c, Try.Predicate<? super T, E> predicate, boolean isForNonNull) throws E {
         if (N.isNullOrEmpty(c)) {
             return (R) (isForNonNull ? Optional.empty() : Nullable.empty());
@@ -561,6 +728,13 @@ public final class Iterables {
         }
     }
 
+    /**
+     * Rollup.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @return the list
+     */
     public static <T> List<List<T>> rollup(Collection<? extends T> c) {
         final List<List<T>> res = new ArrayList<>();
         res.add(new ArrayList<T>());
@@ -585,22 +759,23 @@ public final class Iterables {
      * Returns the set of all possible subsets of {@code set}. For example,
      * {@code powerSet(ImmutableSet.of(1, 2))} returns the set {@code {{},
      * {1}, {2}, {1, 2}}}.
-     *
+     * 
      * <p>Elements appear in these subsets in the same iteration order as they
      * appeared in the input set. The order in which these subsets appear in the
      * outer set is undefined. Note that the power set of the empty set is not the
      * empty set, but a one-element set containing the empty set.
-     *
+     * 
      * <p>The returned set and its constituent sets use {@code equals} to decide
      * whether two elements are identical, even if the input set uses a different
      * concept of equivalence.
-     *
+     * 
      * <p><i>Performance notes:</i> while the power set of a set with size {@code
      * n} is of size {@code 2^n}, its memory usage is only {@code O(n)}. When the
      * power set is constructed, the input set is merely copied. Only as the
      * power set is iterated are the individual subsets created, and these subsets
      * themselves occupy only a small constant amount of memory.
      *
+     * @param <E> the element type
      * @param set the set of elements to construct a power set from
      * @return the power set, as an immutable set of immutable sets
      * @throws IllegalArgumentException if {@code set} has more than 30 unique
@@ -619,16 +794,17 @@ public final class Iterables {
      * 
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Collection}.
-     *
+     * 
      * <p><i>Notes:</i> This is an implementation of the Plain Changes algorithm
      * for permutations generation, described in Knuth's "The Art of Computer
      * Programming", Volume 4, Chapter 7, Section 7.2.1.2.
-     *
+     * 
      * <p>If the input list contains equal elements, some of the generated
      * permutations will be equal.
-     *
+     * 
      * <p>An empty collection has only one permutation, which is an empty list.
      *
+     * @param <E> the element type
      * @param elements the original collection whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original collection.
@@ -645,23 +821,24 @@ public final class Iterables {
      * 
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Iterable}.
-     *
+     * 
      * <p><i>Notes:</i> This is an implementation of the algorithm for
      * Lexicographical Permutations Generation, described in Knuth's "The Art of
      * Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2. The
      * iteration order follows the lexicographical order. This means that
      * the first permutation will be in ascending order, and the last will be in
      * descending order.
-     *
+     * 
      * <p>Duplicate elements are considered equal. For example, the list [1, 1]
      * will have only one permutation, instead of two. This is why the elements
      * have to implement {@link Comparable}.
-     *
+     * 
      * <p>An empty iterable has only one permutation, which is an empty list.
-     *
+     * 
      * <p>This method is equivalent to
      * {@code Collections2.orderedPermutations(list, Ordering.natural())}.
      *
+     * @param <E> the element type
      * @param elements the original iterable whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original iterable.
@@ -679,9 +856,9 @@ public final class Iterables {
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Iterable} using the specified {@link Comparator} for establishing
      * the lexicographical ordering.
-     *
+     * 
      * <p>Examples: <pre>   {@code
-     *
+     * 
      *   for (List<String> perm : orderedPermutations(asList("b", "c", "a"))) {
      *     println(perm);
      *   }
@@ -691,7 +868,7 @@ public final class Iterables {
      *   // -> ["b", "c", "a"]
      *   // -> ["c", "a", "b"]
      *   // -> ["c", "b", "a"]
-     *
+     * 
      *   for (List<Integer> perm : orderedPermutations(asList(1, 2, 2, 1))) {
      *     println(perm);
      *   }
@@ -701,19 +878,20 @@ public final class Iterables {
      *   // -> [2, 1, 1, 2]
      *   // -> [2, 1, 2, 1]
      *   // -> [2, 2, 1, 1]}</pre>
-     *
+     * 
      * <p><i>Notes:</i> This is an implementation of the algorithm for
      * Lexicographical Permutations Generation, described in Knuth's "The Art of
      * Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2. The
      * iteration order follows the lexicographical order. This means that
      * the first permutation will be in ascending order, and the last will be in
      * descending order.
-     *
+     * 
      * <p>Elements that compare equal are considered equal and no new permutations
      * are created by swapping them.
-     *
+     * 
      * <p>An empty iterable has only one permutation, which is an empty list.
      *
+     * @param <E> the element type
      * @param elements the original iterable whose elements have to be permuted.
      * @param comparator a comparator for the iterable's elements.
      * @return an immutable {@link Collection} containing all the different
@@ -733,13 +911,13 @@ public final class Iterables {
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
      * product</a>" of the lists. For example: <pre>   {@code
-     *
+     * 
      *   Lists.cartesianProduct(ImmutableList.of(
      *       ImmutableList.of(1, 2),
      *       ImmutableList.of("A", "B", "C")))}</pre>
-     *
+     * 
      * <p>returns a list containing six lists in the following order:
-     *
+     * 
      * <ul>
      * <li>{@code ImmutableList.of(1, "A")}
      * <li>{@code ImmutableList.of(1, "B")}
@@ -748,11 +926,11 @@ public final class Iterables {
      * <li>{@code ImmutableList.of(2, "B")}
      * <li>{@code ImmutableList.of(2, "C")}
      * </ul>
-     *
+     * 
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
      * <pre>   {@code
-     *
+     * 
      *   for (B b0 : lists.get(0)) {
      *     for (B b1 : lists.get(1)) {
      *       ...
@@ -760,23 +938,23 @@ public final class Iterables {
      *       // operate on tuple
      *     }
      *   }}</pre>
-     *
+     * 
      * <p>Note that if any input list is empty, the Cartesian product will also be
      * empty. If no lists at all are provided (an empty list), the resulting
      * Cartesian product has one element, an empty list (counter-intuitive, but
      * mathematically consistent).
-     *
+     * 
      * <p><i>Performance notes:</i> while the cartesian product of lists of size
      * {@code m, n, p} is a list of size {@code m x n x p}, its actual memory
      * consumption is much smaller. When the cartesian product is constructed, the
      * input lists are merely copied. Only as the resulting list is iterated are
      * the individual lists created, and these are not retained after iteration.
      *
+     * @param <E> any common base class shared by all axes (often just {@link
+     *     Object})
      * @param cs the lists to choose elements from, in the order that
      *     the elements chosen from those lists should appear in the resulting
      *     lists
-     * @param <E> any common base class shared by all axes (often just {@link
-     *     Object})
      * @return the Cartesian product, as an immutable list containing immutable
      *     lists
      * @throws IllegalArgumentException if the size of the cartesian product would
@@ -797,13 +975,13 @@ public final class Iterables {
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
      * product</a>" of the lists. For example: <pre>   {@code
-     *
+     * 
      *   Lists.cartesianProduct(ImmutableList.of(
      *       ImmutableList.of(1, 2),
      *       ImmutableList.of("A", "B", "C")))}</pre>
-     *
+     * 
      * <p>returns a list containing six lists in the following order:
-     *
+     * 
      * <ul>
      * <li>{@code ImmutableList.of(1, "A")}
      * <li>{@code ImmutableList.of(1, "B")}
@@ -812,11 +990,11 @@ public final class Iterables {
      * <li>{@code ImmutableList.of(2, "B")}
      * <li>{@code ImmutableList.of(2, "C")}
      * </ul>
-     *
+     * 
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
      * <pre>   {@code
-     *
+     * 
      *   for (B b0 : lists.get(0)) {
      *     for (B b1 : lists.get(1)) {
      *       ...
@@ -824,23 +1002,23 @@ public final class Iterables {
      *       // operate on tuple
      *     }
      *   }}</pre>
-     *
+     * 
      * <p>Note that if any input list is empty, the Cartesian product will also be
      * empty. If no lists at all are provided (an empty list), the resulting
      * Cartesian product has one element, an empty list (counter-intuitive, but
      * mathematically consistent).
-     *
+     * 
      * <p><i>Performance notes:</i> while the cartesian product of lists of size
      * {@code m, n, p} is a list of size {@code m x n x p}, its actual memory
      * consumption is much smaller. When the cartesian product is constructed, the
      * input lists are merely copied. Only as the resulting list is iterated are
      * the individual lists created, and these are not retained after iteration.
      *
+     * @param <E> any common base class shared by all axes (often just {@link
+     *     Object})
      * @param cs the lists to choose elements from, in the order that
      *     the elements chosen from those lists should appear in the resulting
      *     lists
-     * @param <E> any common base class shared by all axes (often just {@link
-     *     Object})
      * @return the Cartesian product, as an immutable list containing immutable
      *     lists
      * @throws IllegalArgumentException if the size of the cartesian product would
@@ -854,6 +1032,10 @@ public final class Iterables {
 
     /**
      * Returns {@code true} if the second list is a permutation of the first.
+     *
+     * @param a the a
+     * @param b the b
+     * @return true, if is permutations
      */
     private static boolean isPermutations(Collection<?> a, Collection<?> b) {
         if (a.size() != b.size()) {
@@ -863,24 +1045,51 @@ public final class Iterables {
         return N.difference(a, b).size() == 0;
     }
 
+    /**
+     * The Class PowerSet.
+     *
+     * @param <E> the element type
+     */
     private static final class PowerSet<E> extends AbstractSet<Set<E>> {
+
+        /** The input set. */
         final ImmutableMap<E, Integer> inputSet;
 
+        /**
+         * Instantiates a new power set.
+         *
+         * @param input the input
+         */
         PowerSet(Set<E> input) {
             this.inputSet = indexMap(input);
             N.checkArgument(inputSet.size() <= 30, "Too many elements to create power set: %s > 30", inputSet.size());
         }
 
+        /**
+         * Size.
+         *
+         * @return the int
+         */
         @Override
         public int size() {
             return 1 << inputSet.size();
         }
 
+        /**
+         * Checks if is empty.
+         *
+         * @return true, if is empty
+         */
         @Override
         public boolean isEmpty() {
             return false;
         }
 
+        /**
+         * Iterator.
+         *
+         * @return the iterator
+         */
         @Override
         public Iterator<Set<E>> iterator() {
             return new Iterator<Set<E>>() {
@@ -908,6 +1117,12 @@ public final class Iterables {
             };
         }
 
+        /**
+         * Contains.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean contains(Object obj) {
             if (obj instanceof Set) {
@@ -917,6 +1132,12 @@ public final class Iterables {
             return false;
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof PowerSet) {
@@ -926,6 +1147,11 @@ public final class Iterables {
             return super.equals(obj);
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             /*
@@ -936,6 +1162,11 @@ public final class Iterables {
             return inputSet.keySet().hashCode() << (inputSet.size() - 1);
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "powerSet(" + inputSet + ")";
@@ -943,6 +1174,10 @@ public final class Iterables {
 
         /**
          * Returns a map from the ith element of list to i.
+         *
+         * @param <E> the element type
+         * @param c the c
+         * @return the immutable map
          */
         private static <E> ImmutableMap<E, Integer> indexMap(Collection<E> c) {
             final Map<E, Integer> map = new LinkedHashMap<>();
@@ -957,17 +1192,39 @@ public final class Iterables {
         }
     }
 
+    /**
+     * The Class SubSet.
+     *
+     * @param <E> the element type
+     */
     private static final class SubSet<E> extends AbstractSet<E> {
+
+        /** The input set. */
         private final ImmutableMap<E, Integer> inputSet;
+
+        /** The elements. */
         private final ImmutableList<E> elements;
+
+        /** The mask. */
         private final int mask;
 
+        /**
+         * Instantiates a new sub set.
+         *
+         * @param inputSet the input set
+         * @param mask the mask
+         */
         SubSet(ImmutableMap<E, Integer> inputSet, int mask) {
             this.inputSet = inputSet;
             this.elements = ImmutableList.of((E[]) inputSet.keySet().toArray());
             this.mask = mask;
         }
 
+        /**
+         * Iterator.
+         *
+         * @return the iterator
+         */
         @Override
         public Iterator<E> iterator() {
             return new Iterator<E>() {
@@ -995,11 +1252,22 @@ public final class Iterables {
             };
         }
 
+        /**
+         * Size.
+         *
+         * @return the int
+         */
         @Override
         public int size() {
             return Integer.bitCount(mask);
         }
 
+        /**
+         * Contains.
+         *
+         * @param o the o
+         * @return true, if successful
+         */
         @Override
         public boolean contains(Object o) {
             Integer index = inputSet.get(o);
@@ -1007,28 +1275,61 @@ public final class Iterables {
         }
     }
 
+    /**
+     * The Class PermutationCollection.
+     *
+     * @param <E> the element type
+     */
     private static final class PermutationCollection<E> extends AbstractCollection<List<E>> {
+
+        /** The input list. */
         final List<E> inputList;
 
+        /**
+         * Instantiates a new permutation collection.
+         *
+         * @param input the input
+         */
         PermutationCollection(Collection<E> input) {
             this.inputList = new ArrayList<>(input);
         }
 
+        /**
+         * Size.
+         *
+         * @return the int
+         */
         @Override
         public int size() {
             return Matth.factorial(inputList.size());
         }
 
+        /**
+         * Checks if is empty.
+         *
+         * @return true, if is empty
+         */
         @Override
         public boolean isEmpty() {
             return false;
         }
 
+        /**
+         * Iterator.
+         *
+         * @return the iterator
+         */
         @Override
         public Iterator<List<E>> iterator() {
             return PermutationIterator.of(inputList);
         }
 
+        /**
+         * Contains.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean contains(Object obj) {
             if (obj instanceof Collection) {
@@ -1038,17 +1339,39 @@ public final class Iterables {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "permutations(" + inputList + ")";
         }
     }
 
+    /**
+     * The Class OrderedPermutationCollection.
+     *
+     * @param <E> the element type
+     */
     private static final class OrderedPermutationCollection<E> extends AbstractCollection<List<E>> {
+
+        /** The input list. */
         final List<E> inputList;
+
+        /** The comparator. */
         final Comparator<? super E> comparator;
+
+        /** The size. */
         final int size;
 
+        /**
+         * Instantiates a new ordered permutation collection.
+         *
+         * @param input the input
+         * @param comparator the comparator
+         */
         OrderedPermutationCollection(Collection<E> input, Comparator<? super E> comparator) {
             this.inputList = new ArrayList<E>(input);
             N.sort(inputList, comparator);
@@ -1056,21 +1379,42 @@ public final class Iterables {
             this.size = calculateSize(inputList, comparator);
         }
 
+        /**
+         * Size.
+         *
+         * @return the int
+         */
         @Override
         public int size() {
             return size;
         }
 
+        /**
+         * Checks if is empty.
+         *
+         * @return true, if is empty
+         */
         @Override
         public boolean isEmpty() {
             return false;
         }
 
+        /**
+         * Iterator.
+         *
+         * @return the iterator
+         */
         @Override
         public Iterator<List<E>> iterator() {
             return PermutationIterator.ordered(inputList, comparator);
         }
 
+        /**
+         * Contains.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean contains(Object obj) {
             if (obj instanceof Collection) {
@@ -1079,6 +1423,11 @@ public final class Iterables {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return "orderedPermutationCollection(" + inputList + ")";
@@ -1092,6 +1441,11 @@ public final class Iterables {
          * <li>When r numbers are added to a list of n-r elements, the number of
          * permutations is increased by a factor of (n choose r).</li>
          * </ul>
+         *
+         * @param <E> the element type
+         * @param sortedInputList the sorted input list
+         * @param comparator the comparator
+         * @return the int
          */
         private static <E> int calculateSize(List<E> sortedInputList, Comparator<? super E> comparator) {
             long permutations = 1;
@@ -1122,15 +1476,35 @@ public final class Iterables {
             return (int) permutations;
         }
 
+        /**
+         * Checks if is positive int.
+         *
+         * @param n the n
+         * @return true, if is positive int
+         */
         private static boolean isPositiveInt(long n) {
             return n >= 0 && n <= Integer.MAX_VALUE;
         }
     }
 
+    /**
+     * The Class CartesianList.
+     *
+     * @param <E> the element type
+     */
     private static final class CartesianList<E> extends AbstractList<List<E>> implements RandomAccess {
+
+        /** The axes. */
         private final transient Object[][] axes;
+
+        /** The axes size product. */
         private final transient int[] axesSizeProduct;
 
+        /**
+         * Instantiates a new cartesian list.
+         *
+         * @param cs the cs
+         */
         CartesianList(final Collection<? extends Collection<? extends E>> cs) {
             final Iterator<? extends Collection<? extends E>> iter = cs.iterator();
             this.axes = new Object[cs.size()][];
@@ -1151,6 +1525,12 @@ public final class Iterables {
             }
         }
 
+        /**
+         * Gets the.
+         *
+         * @param index the index
+         * @return the list
+         */
         @Override
         public List<E> get(final int index) {
             N.checkArgument(index < size(), "Invalid index %s. It must be less than the size %s", index, size());
@@ -1164,11 +1544,22 @@ public final class Iterables {
             return result;
         }
 
+        /**
+         * Size.
+         *
+         * @return the int
+         */
         @Override
         public int size() {
             return axesSizeProduct[0];
         }
 
+        /**
+         * Contains.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean contains(Object obj) {
             if (!(obj instanceof Collection)) {
@@ -1200,30 +1591,96 @@ public final class Iterables {
             return true;
         }
 
+        /**
+         * Gets the axis index for product index.
+         *
+         * @param index the index
+         * @param axis the axis
+         * @return the axis index for product index
+         */
         private int getAxisIndexForProductIndex(int index, int axis) {
             return (index / axesSizeProduct[axis + 1]) % axes[axis].length;
         }
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param elementParser the element parser
+     * @throws E the e
+     */
     public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, final Try.Consumer<? super T, E> elementParser) throws E {
         parse(iter, elementParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iter the iter
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, final Try.Consumer<? super T, E> elementParser,
             final Try.Runnable<E2> onComplete) throws E, E2 {
         parse(iter, 0, Long.MAX_VALUE, elementParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param elementParser the element parser
+     * @throws E the e
+     */
     public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, final long offset, final long count,
             final Try.Consumer<? super T, E> elementParser) throws E {
         parse(iter, offset, count, elementParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, final long offset, final long count,
             final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
         parse(iter, offset, count, 0, 0, elementParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param elementParser the element parser
+     * @throws E the e
+     */
     public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, long offset, long count, final int processThreadNum,
             final int queueSize, final Try.Consumer<? super T, E> elementParser) throws E {
         parse(iter, offset, count, processThreadNum, queueSize, elementParser, Fn.emptyAction());
@@ -1231,52 +1688,142 @@ public final class Iterables {
 
     /**
      * Parse the elements in the specified iterators one by one.
-     * 
-     * @param iter
-     * @param offset
-     * @param count
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param elementParser.
-     * @param onComplete
-     * @param onError
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, long offset, long count,
             final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
         parse(N.asList(iter), offset, count, 0, processThreadNum, queueSize, elementParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterators the iterators
+     * @param elementParser the element parser
+     * @throws E the e
+     */
     public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
             final Try.Consumer<? super T, E> elementParser) throws E {
         parse(iterators, elementParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iterators the iterators
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
             final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
         parse(iterators, 0, Long.MAX_VALUE, elementParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterators the iterators
+     * @param offset the offset
+     * @param count the count
+     * @param elementParser the element parser
+     * @throws E the e
+     */
     public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
             final Try.Consumer<? super T, E> elementParser) throws E {
         parse(iterators, offset, count, elementParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iterators the iterators
+     * @param offset the offset
+     * @param count the count
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
             final long count, final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
         parse(iterators, offset, count, 0, 0, 0, elementParser, onComplete);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterators the iterators
+     * @param readThreadNum the read thread num
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param elementParser the element parser
+     * @throws E the e
+     */
     public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser) throws E {
         parse(iterators, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iterators the iterators
+     * @param readThreadNum the read thread num
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser,
             final Try.Runnable<E2> onComplete) throws E {
         parse(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementParser);
     }
 
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterators the iterators
+     * @param offset the offset
+     * @param count the count
+     * @param readThreadNum the read thread num
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param elementParser the element parser
+     * @throws E the e
+     */
     public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser) throws E {
         parse(iterators, offset, count, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
@@ -1284,15 +1831,20 @@ public final class Iterables {
 
     /**
      * Parse the elements in the specified iterators one by one.
-     * 
-     * @param iterators
-     * @param offset
-     * @param count
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iterators the iterators
+     * @param offset the offset
+     * @param count the count
      * @param readThreadNum new threads started to parse/process the lines/records
      * @param processThreadNum new threads started to parse/process the lines/records
      * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param elementParser.
-     * @param onComplete
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
             final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser,
@@ -1391,12 +1943,13 @@ public final class Iterables {
      * splitByCount(5, 7, false, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
      * </code>
      * </pre>
-     * 
-     * @param maxCount
-     * @param totalSize
-     * @param smallerFirst
-     * @param func
-     * @return
+     *
+     * @param <T> the generic type
+     * @param maxCount the max count
+     * @param totalSize the total size
+     * @param smallerFirst the smaller first
+     * @param func the func
+     * @return the stream
      */
     public static <T> Stream<T> splitByCount(final int maxCount, final int totalSize, final boolean smallerFirst, final IntBiFunction<T> func) {
         if (smallerFirst) {
@@ -1415,10 +1968,11 @@ public final class Iterables {
      * </code>
      * </pre>
      *
-     * @param maxCount
-     * @param totalSize
-     * @param func
-     * @return 
+     * @param <T> the generic type
+     * @param maxCount the max count
+     * @param totalSize the total size
+     * @param func the func
+     * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerFirst(final int maxCount, final int totalSize, final IntBiFunction<T> func) {
         N.checkArgPositive(maxCount, "maxCount");
@@ -1479,10 +2033,11 @@ public final class Iterables {
      * </code>
      * </pre>
      *
-     * @param maxCount
-     * @param totalSize
-     * @param func
-     * @return
+     * @param <T> the generic type
+     * @param maxCount the max count
+     * @param totalSize the total size
+     * @param func the func
+     * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerLast(final int maxCount, final int totalSize, final IntBiFunction<T> func) {
         N.checkArgPositive(maxCount, "maxCount");

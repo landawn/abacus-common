@@ -16,13 +16,13 @@ package com.landawn.abacus;
 
 import java.sql.Connection;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Enum IsolationLevel.
+ *
  * @author Haiyang Li
- * 
  * @see <a href="http://docs.oracle.com/javase/tutorial/jdbc/basics/transactions.html">http://docs.oracle.com/javase/tutorial/jdbc/basics/transactions.html</a>
+ * @since 0.8
  */
 public enum IsolationLevel {
     /**
@@ -64,16 +64,16 @@ public enum IsolationLevel {
 
     /**
      * Constructor.
-     * 
-     * @param intValue
+     *
+     * @param intValue the int value
      */
     IsolationLevel(int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * Method intValue
-     * 
+     * Method intValue.
+     *
      * @return int
      */
     public int intValue() {
@@ -81,9 +81,9 @@ public enum IsolationLevel {
     }
 
     /**
-     * Method valueOf
-     * 
-     * @param intValue
+     * Method valueOf.
+     *
+     * @param intValue the int value
      * @return IsolationLevel
      */
     public static IsolationLevel valueOf(int intValue) {

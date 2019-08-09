@@ -42,18 +42,29 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class DBCPConnectionManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 class DBCPConnectionManager extends AbstractConnectionManager {
+
+    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(DBCPConnectionManager.class);
 
+    /** The ds. */
     private final DataSource ds;
+
+    /** The bds. */
     private final org.apache.commons.dbcp.BasicDataSource bds;
 
+    /**
+     * Instantiates a new DBCP connection manager.
+     *
+     * @param props the props
+     */
     public DBCPConnectionManager(Map<String, ?> props) {
         super(props);
 
@@ -94,16 +105,31 @@ class DBCPConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Gets the max active.
+     *
+     * @return the max active
+     */
     @Override
     public int getMaxActive() {
         return bds.getMaxActive();
     }
 
+    /**
+     * Gets the num active.
+     *
+     * @return the num active
+     */
     @Override
     public int getNumActive() {
         return bds.getNumActive();
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     @Override
     public Connection getConnection() {
         try {
@@ -113,6 +139,11 @@ class DBCPConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Close connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void closeConnection(Connection conn) {
         if (conn != null) {
@@ -124,11 +155,19 @@ class DBCPConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Detroy connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void detroyConnection(Connection conn) {
         closeConnection(conn);
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (bds != null) {

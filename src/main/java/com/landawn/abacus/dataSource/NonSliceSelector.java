@@ -19,18 +19,38 @@ import java.util.Map;
 
 import com.landawn.abacus.SliceSelector;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class NonSliceSelector.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class NonSliceSelector implements SliceSelector {
+
+    /**
+     * Select.
+     *
+     * @param entityName the entity name
+     * @param sql the sql
+     * @param parameters the parameters
+     * @param options the options
+     * @return the string
+     */
     @Override
     public String select(String entityName, String sql, Object[] parameters, Map<String, Object> options) {
         return sql;
     }
 
+    /**
+     * Select.
+     *
+     * @param entityName the entity name
+     * @param sql the sql
+     * @param parameters the parameters
+     * @param options the options
+     * @return the string
+     */
     @Override
     public String select(String entityName, String sql, List<?> parameters, Map<String, Object> options) {
         return sql;

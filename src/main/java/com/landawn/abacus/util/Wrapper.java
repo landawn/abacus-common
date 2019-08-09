@@ -20,13 +20,17 @@ import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.ToIntFunction;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class Wrapper.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public final class Wrapper<T> {
+
+    /** The Constant arrayHashFunction. */
     static final ToIntFunction<Object> arrayHashFunction = new ToIntFunction<Object>() {
         @Override
         public int applyAsInt(Object value) {
@@ -34,6 +38,7 @@ public final class Wrapper<T> {
         }
     };
 
+    /** The Constant arrayEqualsFunction. */
     static final BiPredicate<Object, Object> arrayEqualsFunction = new BiPredicate<Object, Object>() {
         @Override
         public boolean test(Object t, Object u) {
@@ -41,16 +46,40 @@ public final class Wrapper<T> {
         }
     };
 
+    /** The value. */
     private final T value;
+
+    /** The hash function. */
     private final ToIntFunction<? super T> hashFunction;
+
+    /** The equals function. */
     private final BiPredicate<? super T, ? super T> equalsFunction;
+
+    /** The to string function. */
     private final Function<? super T, String> toStringFunction;
+
+    /** The hash code. */
     private int hashCode;
 
+    /**
+     * Instantiates a new wrapper.
+     *
+     * @param value the value
+     * @param hashFunction the hash function
+     * @param equalsFunction the equals function
+     */
     private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction) {
         this(value, hashFunction, equalsFunction, null);
     }
 
+    /**
+     * Instantiates a new wrapper.
+     *
+     * @param value the value
+     * @param hashFunction the hash function
+     * @param equalsFunction the equals function
+     * @param toStringFunction the to string function
+     */
     private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
             Function<? super T, String> toStringFunction) {
         this.value = value;
@@ -60,11 +89,27 @@ public final class Wrapper<T> {
 
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param array the array
+     * @return the wrapper
+     */
     public static <T> Wrapper<T> of(T array) {
         // return new Wrapper<T>(checkArray(array), arrayHashFunction, arrayEqualsFunction);
         return new Wrapper<T>(array, arrayHashFunction, arrayEqualsFunction);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param value the value
+     * @param hashFunction the hash function
+     * @param equalsFunction the equals function
+     * @return the wrapper
+     */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction) {
         N.checkArgNotNull(hashFunction, "hashFunction");
         N.checkArgNotNull(equalsFunction, "equalsFunction");
@@ -72,6 +117,16 @@ public final class Wrapper<T> {
         return new Wrapper<T>(value, hashFunction, equalsFunction);
     }
 
+    /**
+     * Of.
+     *
+     * @param <T> the generic type
+     * @param value the value
+     * @param hashFunction the hash function
+     * @param equalsFunction the equals function
+     * @param toStringFunction the to string function
+     * @return the wrapper
+     */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
             Function<? super T, String> toStringFunction) {
         N.checkArgNotNull(hashFunction, "hashFunction");
@@ -81,6 +136,11 @@ public final class Wrapper<T> {
         return new Wrapper<T>(value, hashFunction, equalsFunction, toStringFunction);
     }
 
+    /**
+     * Value.
+     *
+     * @return the t
+     */
     public T value() {
         return value;
     }
@@ -93,6 +153,11 @@ public final class Wrapper<T> {
     //        return a;
     //    }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         if (hashCode == 0) {
@@ -102,11 +167,22 @@ public final class Wrapper<T> {
         return hashCode;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(((Wrapper<T>) obj).value, value));
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         if (toStringFunction == null) {

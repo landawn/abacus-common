@@ -19,24 +19,38 @@ import java.util.Set;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * TODO
- * 
- * @param <K>
- * @param <V>
- * 
- * @since 0.9
- * 
+ * TODO.
+ *
  * @author haiyang li
+ * @param <K> the key type
+ * @param <V> the value type
+ * @since 0.9
  */
 public class CaffeineCache<K, V> extends AbstractCache<K, V> {
+
+    /** The cache impl. */
     private final Cache<K, V> cacheImpl;
+
+    /** The is closed. */
     private boolean isClosed = false;
 
+    /**
+     * Instantiates a new caffeine cache.
+     *
+     * @param cache the cache
+     */
     public CaffeineCache(Cache<K, V> cache) {
         this.cacheImpl = cache;
     }
 
+    /**
+     * Gets the t.
+     *
+     * @param k the k
+     * @return the t
+     */
     @Override
     public V gett(K k) {
         assertNotClosed();
@@ -44,6 +58,15 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
         return cacheImpl.getIfPresent(k);
     }
 
+    /**
+     * Put.
+     *
+     * @param k the k
+     * @param v the v
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @return true, if successful
+     */
     @Override
     public boolean put(K k, V v, long liveTime, long maxIdleTime) {
         assertNotClosed();
@@ -53,6 +76,11 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
         return true;
     }
 
+    /**
+     * Removes the.
+     *
+     * @param k the k
+     */
     @Override
     public void remove(K k) {
         assertNotClosed();
@@ -60,6 +88,12 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
         cacheImpl.invalidate(k);
     }
 
+    /**
+     * Contains key.
+     *
+     * @param k the k
+     * @return true, if successful
+     */
     @Override
     public boolean containsKey(K k) {
         assertNotClosed();
@@ -67,11 +101,21 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
         return get(k).isPresent();
     }
 
+    /**
+     * Key set.
+     *
+     * @return the sets the
+     */
     @Override
     public Set<K> keySet() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         assertNotClosed();
@@ -79,6 +123,9 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
         return N.toIntExact(cacheImpl.estimatedSize());
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         assertNotClosed();
@@ -86,6 +133,9 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
         cacheImpl.cleanUp();
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         assertNotClosed();
@@ -95,11 +145,19 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
         isClosed = true;
     }
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     @Override
     public boolean isClosed() {
         return isClosed;
     }
 
+    /**
+     * Assert not closed.
+     */
     protected void assertNotClosed() {
         if (isClosed) {
             throw new IllegalStateException("This object pool has been closed");

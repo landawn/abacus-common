@@ -29,15 +29,19 @@ import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
- *
- * @since 0.8
+ * The Class Splitter.
  *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class Splitter {
+
+    /** The Constant WHITE_SPACE_PATTERN. */
     public static final Pattern WHITE_SPACE_PATTERN = Pattern.compile("\\s+");
 
+    /** The Constant defaultSubStringFunc. */
     private static final SubStringFunc defaultSubStringFunc = new SubStringFunc() {
         @Override
         public String subString(CharSequence source, int start, int end) {
@@ -45,6 +49,7 @@ public final class Splitter {
         }
     };
 
+    /** The Constant trimSubStringFunc. */
     private static final SubStringFunc trimSubStringFunc = new SubStringFunc() {
         @Override
         public String subString(CharSequence source, int start, int end) {
@@ -60,6 +65,7 @@ public final class Splitter {
         }
     };
 
+    /** The Constant stripSubStringFunc. */
     private static final SubStringFunc stripSubStringFunc = new SubStringFunc() {
         @Override
         public String subString(CharSequence source, int start, int end) {
@@ -75,25 +81,45 @@ public final class Splitter {
         }
     };
 
+    /** The strategy. */
     private final Strategy strategy;
+
+    /** The omit empty strings. */
     private boolean omitEmptyStrings = false;
+
+    /** The trim. */
     private boolean trim = false;
+
+    /** The strip. */
     private boolean strip = false;
+
+    /** The limit. */
     private int limit = Integer.MAX_VALUE;
 
+    /**
+     * Instantiates a new splitter.
+     *
+     * @param strategy the strategy
+     */
     Splitter(Strategy strategy) {
         this.strategy = strategy;
     }
 
     /**
-     * Returns the Splitter with the default delimiter: <code>", "</code>
+     * Returns the Splitter with the default delimiter: <code>", "</code>.
      *
-     * @return
+     * @return the splitter
      */
     public static Splitter defauLt() {
         return with(Joiner.DEFAULT_DELIMITER);
     }
 
+    /**
+     * With.
+     *
+     * @param delimiter the delimiter
+     * @return the splitter
+     */
     public static Splitter with(final char delimiter) {
         return new Splitter(new Strategy() {
             @Override
@@ -161,9 +187,10 @@ public final class Splitter {
     }
 
     /**
+     * With.
      *
-     * @param delimiter
-     * @return
+     * @param delimiter the delimiter
+     * @return the splitter
      * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty.
      */
     public static Splitter with(final CharSequence delimiter) throws IllegalArgumentException {
@@ -261,9 +288,10 @@ public final class Splitter {
     }
 
     /**
+     * With.
      *
-     * @param delimiter
-     * @return
+     * @param delimiter the delimiter
+     * @return the splitter
      * @throws IllegalArgumentException if the specified {@code delimiter} is null, or empty string may be matched by it.
      */
     public static Splitter with(final Pattern delimiter) throws IllegalArgumentException {
@@ -344,9 +372,10 @@ public final class Splitter {
     }
 
     /**
+     * Pattern.
      *
-     * @param delimiterRegex
-     * @return
+     * @param delimiterRegex the delimiter regex
+     * @return the splitter
      * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty, or empty string may be matched by it.
      */
     public static Splitter pattern(CharSequence delimiterRegex) throws IllegalArgumentException {
@@ -355,12 +384,24 @@ public final class Splitter {
         return with(Pattern.compile(delimiterRegex.toString()));
     }
 
+    /**
+     * Omit empty strings.
+     *
+     * @param omitEmptyStrings the omit empty strings
+     * @return the splitter
+     */
     public Splitter omitEmptyStrings(boolean omitEmptyStrings) {
         this.omitEmptyStrings = omitEmptyStrings;
 
         return this;
     }
 
+    /**
+     * Trim.
+     *
+     * @param trim the trim
+     * @return the splitter
+     */
     public Splitter trim(boolean trim) {
         this.trim = trim;
 
@@ -370,8 +411,8 @@ public final class Splitter {
     /**
      * Removes the starting and ending white space characters if {@code strip} is true.
      *
-     * @param strip
-     * @return
+     * @param strip the strip
+     * @return the splitter
      * @see Character#isWhitespace(char)
      */
     public Splitter strip(boolean strip) {
@@ -380,6 +421,12 @@ public final class Splitter {
         return this;
     }
 
+    /**
+     * Limit.
+     *
+     * @param limit the limit
+     * @return the splitter
+     */
     public Splitter limit(int limit) {
         N.checkArgPositive(limit, "limit");
 
@@ -388,12 +435,26 @@ public final class Splitter {
         return this;
     }
 
+    /**
+     * Split.
+     *
+     * @param source the source
+     * @return the list
+     */
     public List<String> split(final CharSequence source) {
         final List<String> result = new ArrayList<>();
         split(result, source);
         return result;
     }
 
+    /**
+     * Split.
+     *
+     * @param <T> the generic type
+     * @param targetType the target type
+     * @param source the source
+     * @return the list
+     */
     public <T> List<T> split(Class<T> targetType, final CharSequence source) {
         N.checkArgNotNull(targetType, "targetType");
 
@@ -402,6 +463,14 @@ public final class Splitter {
         return split(type, source);
     }
 
+    /**
+     * Split.
+     *
+     * @param <T> the generic type
+     * @param targetType the target type
+     * @param source the source
+     * @return the list
+     */
     public <T> List<T> split(Type<T> targetType, final CharSequence source) {
         N.checkArgNotNull(targetType, "targetType");
 
@@ -410,6 +479,14 @@ public final class Splitter {
         return result;
     }
 
+    /**
+     * Split.
+     *
+     * @param <C> the generic type
+     * @param output the output
+     * @param source the source
+     * @return the c
+     */
     public <C extends Collection<String>> C split(final C output, final CharSequence source) {
         N.checkArgNotNull(output, "output");
 
@@ -422,6 +499,16 @@ public final class Splitter {
         return output;
     }
 
+    /**
+     * Split.
+     *
+     * @param <T> the generic type
+     * @param <C> the generic type
+     * @param output the output
+     * @param targetType the target type
+     * @param source the source
+     * @return the c
+     */
     public <T, C extends Collection<T>> C split(final C output, Class<T> targetType, final CharSequence source) {
         N.checkArgNotNull(output, "output");
         N.checkArgNotNull(targetType, "targetType");
@@ -431,6 +518,16 @@ public final class Splitter {
         return split(output, type, source);
     }
 
+    /**
+     * Split.
+     *
+     * @param <T> the generic type
+     * @param <C> the generic type
+     * @param output the output
+     * @param targetType the target type
+     * @param source the source
+     * @return the c
+     */
     public <T, C extends Collection<T>> C split(final C output, Type<T> targetType, final CharSequence source) {
         N.checkArgNotNull(output, "output");
         N.checkArgNotNull(targetType, "targetType");
@@ -444,24 +541,66 @@ public final class Splitter {
         return output;
     }
 
+    /**
+     * Split.
+     *
+     * @param <C> the generic type
+     * @param source the source
+     * @param supplier the supplier
+     * @return the c
+     */
     public <C extends Collection<String>> C split(final CharSequence source, final Supplier<? extends C> supplier) {
         return split(supplier.get(), source);
     }
 
+    /**
+     * Split.
+     *
+     * @param <T> the generic type
+     * @param <C> the generic type
+     * @param targetType the target type
+     * @param source the source
+     * @param supplier the supplier
+     * @return the c
+     */
     public <T, C extends Collection<T>> C split(Class<T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
         return split(supplier.get(), targetType, source);
     }
 
+    /**
+     * Split.
+     *
+     * @param <T> the generic type
+     * @param <C> the generic type
+     * @param targetType the target type
+     * @param source the source
+     * @param supplier the supplier
+     * @return the c
+     */
     public <T, C extends Collection<T>> C split(Type<T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
         return split(supplier.get(), targetType, source);
     }
 
+    /**
+     * Split to array.
+     *
+     * @param source the source
+     * @return the string[]
+     */
     public String[] splitToArray(final CharSequence source) {
         final List<String> substrs = split(source);
 
         return substrs.toArray(new String[substrs.size()]);
     }
 
+    /**
+     * Split to array.
+     *
+     * @param <T> the generic type
+     * @param arrayType the array type
+     * @param source the source
+     * @return the t
+     */
     public <T> T splitToArray(Class<T> arrayType, final CharSequence source) {
         N.checkArgNotNull(arrayType, "arrayType");
 
@@ -491,43 +630,79 @@ public final class Splitter {
         }
     }
 
+    /**
+     * Split to stream.
+     *
+     * @param source the source
+     * @return the stream
+     */
     public Stream<String> splitToStream(final CharSequence source) {
         return Stream.of(iterate(source));
     }
 
+    /**
+     * Split and then.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param source the source
+     * @param converter the converter
+     * @return the t
+     * @throws E the e
+     */
     public <T, E extends Exception> T splitAndThen(final CharSequence source, Try.Function<? super List<String>, T, E> converter) throws E {
         N.checkArgNotNull(converter, "converter");
 
         return converter.apply(split(source));
     }
 
+    /**
+     * Iterate.
+     *
+     * @param source the source
+     * @return the obj iterator
+     */
     ObjIterator<String> iterate(final CharSequence source) {
         return strategy.split(source, omitEmptyStrings, trim, strip, limit);
     }
 
+    /**
+     * The Class MapSplitter.
+     */
     public static final class MapSplitter {
+
+        /** The entry splitter. */
         private final Splitter entrySplitter;
+
+        /** The key value splitter. */
         private final Splitter keyValueSplitter;
 
+        /**
+         * Instantiates a new map splitter.
+         *
+         * @param entrySplitter the entry splitter
+         * @param keyValueSplitter the key value splitter
+         */
         MapSplitter(Splitter entrySplitter, Splitter keyValueSplitter) {
             this.entrySplitter = entrySplitter;
             this.keyValueSplitter = keyValueSplitter;
         }
 
         /**
-         * Returns the Map Splitter with the default entry and key/value delimiter: <code>", "</code> and <code>"="</code>
+         * Returns the Map Splitter with the default entry and key/value delimiter: <code>", "</code> and <code>"="</code>.
          *
-         * @return
+         * @return the map splitter
          */
         public static MapSplitter defauLt() {
             return with(Joiner.DEFAULT_DELIMITER, Joiner.DEFAULT_KEY_VALUE_DELIMITER);
         }
 
         /**
+         * With.
          *
-         * @param entryDelimiter
-         * @param keyValueDelimiter
-         * @return
+         * @param entryDelimiter the entry delimiter
+         * @param keyValueDelimiter the key value delimiter
+         * @return the map splitter
          * @throws IllegalArgumentException if the specified {@code entryDelimiter/keyValueDelimiter} is null or empty.
          * @see Splitter#with(CharSequence)
          */
@@ -536,10 +711,11 @@ public final class Splitter {
         }
 
         /**
+         * With.
          *
-         * @param entryDelimiter
-         * @param keyValueDelimiter
-         * @return
+         * @param entryDelimiter the entry delimiter
+         * @param keyValueDelimiter the key value delimiter
+         * @return the map splitter
          * @throws IllegalArgumentException if the specified {@code entryDelimiter/keyValueDelimiter} is null, or empty string may be matched by one of them.
          * @see Splitter#with(Pattern)
          */
@@ -548,10 +724,11 @@ public final class Splitter {
         }
 
         /**
+         * Pattern.
          *
-         * @param entryDelimiterRegex
-         * @param keyValueDelimiterRegex
-         * @return
+         * @param entryDelimiterRegex the entry delimiter regex
+         * @param keyValueDelimiterRegex the key value delimiter regex
+         * @return the map splitter
          * @throws IllegalArgumentException if the specified {@code entryDelimiterRegex/keyValueDelimiterRegex} is null or empty, or empty string may be matched by one of them.
          * @see Splitter#pattern(CharSequence)
          */
@@ -559,12 +736,24 @@ public final class Splitter {
             return new MapSplitter(Splitter.pattern(entryDelimiterRegex), Splitter.pattern(keyValueDelimiterRegex));
         }
 
+        /**
+         * Omit empty strings.
+         *
+         * @param omitEmptyStrings the omit empty strings
+         * @return the map splitter
+         */
         public MapSplitter omitEmptyStrings(boolean omitEmptyStrings) {
             keyValueSplitter.omitEmptyStrings(omitEmptyStrings);
 
             return this;
         }
 
+        /**
+         * Trim.
+         *
+         * @param trim the trim
+         * @return the map splitter
+         */
         public MapSplitter trim(boolean trim) {
             entrySplitter.trim(trim);
             keyValueSplitter.trim(trim);
@@ -575,8 +764,8 @@ public final class Splitter {
         /**
          * Removes the starting and ending white space characters if {@code strip} is true.
          *
-         * @param strip
-         * @return
+         * @param strip the strip
+         * @return the map splitter
          * @see Character#isWhitespace(char)
          */
         public MapSplitter strip(boolean strip) {
@@ -586,6 +775,12 @@ public final class Splitter {
             return this;
         }
 
+        /**
+         * Limit.
+         *
+         * @param limit the limit
+         * @return the map splitter
+         */
         public MapSplitter limit(int limit) {
             N.checkArgPositive(limit, "limit");
 
@@ -594,10 +789,26 @@ public final class Splitter {
             return this;
         }
 
+        /**
+         * Split.
+         *
+         * @param source the source
+         * @return the map
+         */
         public Map<String, String> split(final CharSequence source) {
             return split(new LinkedHashMap<String, String>(), source);
         }
 
+        /**
+         * Split.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyType the key type
+         * @param valueType the value type
+         * @param source the source
+         * @return the map
+         */
         public <K, V> Map<K, V> split(Class<K> keyType, Class<V> valueType, final CharSequence source) {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
@@ -608,6 +819,16 @@ public final class Splitter {
             return split(typeOfKey, typeOfValue, source);
         }
 
+        /**
+         * Split.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyType the key type
+         * @param valueType the value type
+         * @param source the source
+         * @return the map
+         */
         public <K, V> Map<K, V> split(Type<K> keyType, Type<V> valueType, final CharSequence source) {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
@@ -615,6 +836,14 @@ public final class Splitter {
             return split(new LinkedHashMap<K, V>(), keyType, valueType, source);
         }
 
+        /**
+         * Split.
+         *
+         * @param <M> the generic type
+         * @param output the output
+         * @param source the source
+         * @return the m
+         */
         public <M extends Map<String, String>> M split(final M output, final CharSequence source) {
             N.checkArgNotNull(output, "output");
 
@@ -651,6 +880,18 @@ public final class Splitter {
             return output;
         }
 
+        /**
+         * Split.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param output the output
+         * @param keyType the key type
+         * @param valueType the value type
+         * @param source the source
+         * @return the m
+         */
         public <K, V, M extends Map<K, V>> M split(final M output, Class<K> keyType, Class<V> valueType, final CharSequence source) {
             N.checkArgNotNull(output, "output");
             N.checkArgNotNull(keyType, "keyType");
@@ -662,6 +903,18 @@ public final class Splitter {
             return split(output, typeOfKey, typeOfValue, source);
         }
 
+        /**
+         * Split.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param output the output
+         * @param keyType the key type
+         * @param valueType the value type
+         * @param source the source
+         * @return the m
+         */
         public <K, V, M extends Map<K, V>> M split(final M output, Type<K> keyType, Type<V> valueType, final CharSequence source) {
             N.checkArgNotNull(output, "output");
             N.checkArgNotNull(keyType, "keyType");
@@ -700,20 +953,58 @@ public final class Splitter {
             return output;
         }
 
+        /**
+         * Split.
+         *
+         * @param <M> the generic type
+         * @param source the source
+         * @param supplier the supplier
+         * @return the m
+         */
         public <M extends Map<String, String>> M split(final CharSequence source, final Supplier<? extends M> supplier) {
             return split(supplier.get(), source);
         }
 
+        /**
+         * Split.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyType the key type
+         * @param valueType the value type
+         * @param source the source
+         * @param supplier the supplier
+         * @return the m
+         */
         public <K, V, M extends Map<K, V>> M split(final Class<K> keyType, final Class<V> valueType, final CharSequence source,
                 final Supplier<? extends M> supplier) {
             return split(supplier.get(), keyType, valueType, source);
         }
 
+        /**
+         * Split.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M> the generic type
+         * @param keyType the key type
+         * @param valueType the value type
+         * @param source the source
+         * @param supplier the supplier
+         * @return the m
+         */
         public <K, V, M extends Map<K, V>> M split(final Type<K> keyType, final Type<V> valueType, final CharSequence source,
                 final Supplier<? extends M> supplier) {
             return split(supplier.get(), keyType, valueType, source);
         }
 
+        /**
+         * Split to stream.
+         *
+         * @param source the source
+         * @return the stream
+         */
         public Stream<Map.Entry<String, String>> splitToStream(final CharSequence source) {
             entrySplitter.omitEmptyStrings(true);
             keyValueSplitter.limit(2);
@@ -768,20 +1059,62 @@ public final class Splitter {
             });
         }
 
+        /**
+         * Split to entry stream.
+         *
+         * @param source the source
+         * @return the entry stream
+         */
         public EntryStream<String, String> splitToEntryStream(final CharSequence source) {
             return splitToStream(source).mapToEntry(Fn.<Map.Entry<String, String>> identity());
         }
 
+        /**
+         * Split and then.
+         *
+         * @param <T> the generic type
+         * @param <E> the element type
+         * @param source the source
+         * @param converter the converter
+         * @return the t
+         * @throws E the e
+         */
         public <T, E extends Exception> T splitAndThen(final CharSequence source, Try.Function<? super Map<String, String>, T, E> converter) throws E {
             return converter.apply(split(source));
         }
     }
 
+    /**
+     * The Interface Strategy.
+     */
     static interface Strategy {
+
+        /**
+         * Split.
+         *
+         * @param toSplit the to split
+         * @param omitEmptyStrings the omit empty strings
+         * @param trim the trim
+         * @param strip the strip
+         * @param limit the limit
+         * @return the obj iterator
+         */
         ObjIterator<String> split(CharSequence toSplit, boolean omitEmptyStrings, boolean trim, final boolean strip, int limit);
     }
 
+    /**
+     * The Interface SubStringFunc.
+     */
     static interface SubStringFunc {
+
+        /**
+         * Sub string.
+         *
+         * @param source the source
+         * @param start the start
+         * @param end the end
+         * @return the string
+         */
         String subString(CharSequence source, int start, int end);
     }
 }

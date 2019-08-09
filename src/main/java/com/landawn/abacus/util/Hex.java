@@ -17,26 +17,24 @@
 
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: copied from Apache commons-codec: https://commons.apache.org/proper/commons-codec.
  * 
  * Converts hexadecimal Strings. The charset used for certain operation can be set, the default is set in
  * {@link #DEFAULT_CHARSET_NAME}
- *
+ * 
  * This class is thread-safe.
  *
- * @since 1.1
  * @version $Id: Hex.java 1619948 2014-08-22 22:53:55Z ggregory $
+ * @since 1.1
  */
 public class Hex {
-    /**
-     * Used to build output as Hex
-     */
+
+    /** Used to build output as Hex. */
     private static final char[] DIGITS_LOWER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
-    /**
-     * Used to build output as Hex
-     */
+    /** Used to build output as Hex. */
     private static final char[] DIGITS_UPPER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
     /**
@@ -119,6 +117,13 @@ public class Hex {
         return out;
     }
 
+    /**
+     * Decode.
+     *
+     * @param data the data
+     * @return the byte[]
+     * @throws IllegalArgumentException the illegal argument exception
+     */
     public static byte[] decode(final String data) throws IllegalArgumentException {
         return decode(data.toCharArray());
     }
@@ -128,11 +133,9 @@ public class Hex {
      * returned array will be half the length of the passed array, as it takes two characters to represent any given
      * byte. An exception is thrown if the passed char array has an odd number of elements.
      *
-     * @param data
-     *            An array of characters containing hexadecimal digits
+     * @param data            An array of characters containing hexadecimal digits
      * @return A byte array containing binary data decoded from the supplied char array.
-     * @throws DecoderException
-     *             Thrown if an odd number or illegal of characters is supplied
+     * @throws IllegalArgumentException the illegal argument exception
      */
     public static byte[] decode(final char[] data) throws IllegalArgumentException {
 
@@ -159,13 +162,10 @@ public class Hex {
     /**
      * Converts a hexadecimal character to an integer.
      *
-     * @param ch
-     *            A character to convert to an integer digit
-     * @param index
-     *            The index of the character in the source
+     * @param ch            A character to convert to an integer digit
+     * @param index            The index of the character in the source
      * @return An integer
-     * @throws DecoderException
-     *             Thrown if ch is an illegal hex character
+     * @throws IllegalArgumentException the illegal argument exception
      */
     protected static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         final int digit = Character.digit(ch, 16);

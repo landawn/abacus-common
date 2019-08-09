@@ -39,37 +39,58 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.LongStream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class LongList.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class LongList extends PrimitiveList<Long, long[], LongList> {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7764836427712181163L;
 
+    /** The Constant RAND. */
     static final Random RAND = new SecureRandom();
 
+    /** The element data. */
     private long[] elementData = N.EMPTY_LONG_ARRAY;
+
+    /** The size. */
     private int size = 0;
 
+    /**
+     * Instantiates a new long list.
+     */
     public LongList() {
         super();
     }
 
+    /**
+     * Instantiates a new long list.
+     *
+     * @param initialCapacity the initial capacity
+     */
     public LongList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_LONG_ARRAY : new long[initialCapacity];
     }
 
     /**
      * The specified array is used as the element array for this list without copying action.
-     * 
-     * @param a
+     *
+     * @param a the a
      */
     public LongList(long[] a) {
         this(a, a.length);
     }
 
+    /**
+     * Instantiates a new long list.
+     *
+     * @param a the a
+     * @param size the size
+     */
     public LongList(long[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -77,25 +98,58 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         this.size = size;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the long list
+     */
     @SafeVarargs
     public static LongList of(final long... a) {
         return new LongList(N.nullToEmpty(a));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param size the size
+     * @return the long list
+     */
     public static LongList of(final long[] a, final int size) {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new LongList(N.nullToEmpty(a), size);
     }
 
+    /**
+     * Copy of.
+     *
+     * @param a the a
+     * @return the long list
+     */
     public static LongList copyOf(final long[] a) {
         return of(N.clone(a));
     }
 
+    /**
+     * Copy of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the long list
+     */
     public static LongList copyOf(final long[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @return the long list
+     */
     public static LongList from(Collection<Long> c) {
         if (N.isNullOrEmpty(c)) {
             return new LongList();
@@ -104,6 +158,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return from(c, 0);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param defaultForNull the default for null
+     * @return the long list
+     */
     public static LongList from(Collection<Long> c, long defaultForNull) {
         if (N.isNullOrEmpty(c)) {
             return new LongList();
@@ -119,6 +180,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return of(a);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the long list
+     */
     public static LongList from(final Collection<Long> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
@@ -129,30 +198,82 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return from(c, fromIndex, toIndex, 0);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param defaultForNull the default for null
+     * @return the long list
+     */
     public static LongList from(final Collection<Long> c, final int fromIndex, final int toIndex, long defaultForNull) {
         return of(N.toLongArray(c, fromIndex, toIndex, defaultForNull));
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @return the long list
+     */
     public static LongList range(long startInclusive, final long endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
     }
 
+    /**
+     * Range.
+     *
+     * @param startInclusive the start inclusive
+     * @param endExclusive the end exclusive
+     * @param by the by
+     * @return the long list
+     */
     public static LongList range(long startInclusive, final long endExclusive, final long by) {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @return the long list
+     */
     public static LongList rangeClosed(long startInclusive, final long endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
+    /**
+     * Range closed.
+     *
+     * @param startInclusive the start inclusive
+     * @param endInclusive the end inclusive
+     * @param by the by
+     * @return the long list
+     */
     public static LongList rangeClosed(long startInclusive, final long endInclusive, final long by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param len the len
+     * @return the long list
+     */
     public static LongList repeat(long element, final int len) {
         return of(Array.repeat(element, len));
     }
 
+    /**
+     * Random.
+     *
+     * @param len the len
+     * @return the long list
+     */
     public static LongList random(final int len) {
         final long[] a = new long[len];
 
@@ -165,20 +286,31 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Returns the original element array without copying.
-     * 
-     * @return
+     *
+     * @return the long[]
      */
     @Override
     public long[] array() {
         return elementData;
     }
 
+    /**
+     * Gets the.
+     *
+     * @param index the index
+     * @return the long
+     */
     public long get(int index) {
         rangeCheck(index);
 
         return elementData[index];
     }
 
+    /**
+     * Range check.
+     *
+     * @param index the index
+     */
     private void rangeCheck(int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -186,9 +318,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param index
-     * @param e
+     * Sets the.
+     *
+     * @param index the index
+     * @param e the e
      * @return the old value in the specified position.
      */
     public long set(int index, long e) {
@@ -201,12 +334,23 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return oldValue;
     }
 
+    /**
+     * Adds the.
+     *
+     * @param e the e
+     */
     public void add(long e) {
         ensureCapacityInternal(size + 1);
 
         elementData[size++] = e;
     }
 
+    /**
+     * Adds the.
+     *
+     * @param index the index
+     * @param e the e
+     */
     public void add(int index, long e) {
         rangeCheckForAdd(index);
 
@@ -223,6 +367,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         size++;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean addAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -239,6 +389,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return true;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param index the index
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean addAll(int index, LongList c) {
         rangeCheckForAdd(index);
 
@@ -263,11 +420,24 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return true;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean addAll(long[] a) {
         return addAll(size(), a);
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param index the index
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean addAll(int index, long[] a) {
         rangeCheckForAdd(index);
@@ -293,6 +463,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return true;
     }
 
+    /**
+     * Range check for add.
+     *
+     * @param index the index
+     */
     private void rangeCheckForAdd(int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -300,8 +475,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param e
+     * Removes the.
+     *
+     * @param e the e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(long e) {
@@ -318,8 +494,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param e
+     * Removes the all occurrences.
+     *
+     * @param e the e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean removeAllOccurrences(long e) {
@@ -342,6 +519,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return numRemoved > 0;
     }
 
+    /**
+     * Fast remove.
+     *
+     * @param index the index
+     */
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
 
@@ -352,6 +534,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         elementData[--size] = 0; // clear to let GC do its work
     }
 
+    /**
+     * Removes the all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean removeAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -360,6 +548,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return batchRemove(c, false) > 0;
     }
 
+    /**
+     * Removes the all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean removeAll(long[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -369,6 +563,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return removeAll(of(a));
     }
 
+    /**
+     * Removes the if.
+     *
+     * @param <E> the element type
+     * @param p the p
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean removeIf(Try.LongPredicate<E> p) throws E {
         final LongList tmp = new LongList(size());
 
@@ -389,6 +591,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return true;
     }
 
+    /**
+     * Retain all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean retainAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             boolean result = size() > 0;
@@ -399,6 +607,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return batchRemove(c, true) > 0;
     }
 
+    /**
+     * Retain all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     public boolean retainAll(long[] a) {
         if (N.isNullOrEmpty(a)) {
             boolean result = size() > 0;
@@ -409,6 +623,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return retainAll(LongList.of(a));
     }
 
+    /**
+     * Batch remove.
+     *
+     * @param c the c
+     * @param complement the complement
+     * @return the int
+     */
     private int batchRemove(LongList c, boolean complement) {
         final long[] elementData = this.elementData;
 
@@ -442,8 +663,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param index
+     * Delete.
+     *
+     * @param index the index
      * @return the deleted element
      */
     public long delete(int index) {
@@ -456,6 +678,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return oldValue;
     }
 
+    /**
+     * Delete all.
+     *
+     * @param indices the indices
+     */
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
@@ -465,6 +692,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         size = tmp.length;
     }
 
+    /**
+     * Delete range.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, size());
@@ -484,6 +717,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         size = newSize;
     }
 
+    /**
+     * Replace all.
+     *
+     * @param oldVal the old val
+     * @param newVal the new val
+     * @return the int
+     */
     public int replaceAll(long oldVal, long newVal) {
         if (size() == 0) {
             return 0;
@@ -502,12 +742,28 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return result;
     }
 
+    /**
+     * Replace all.
+     *
+     * @param <E> the element type
+     * @param operator the operator
+     * @throws E the e
+     */
     public <E extends Exception> void replaceAll(Try.LongUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsLong(elementData[i]);
         }
     }
 
+    /**
+     * Replace if.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @param newValue the new value
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean replaceIf(Try.LongPredicate<E> predicate, long newValue) throws E {
         boolean result = false;
 
@@ -522,20 +778,44 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return result;
     }
 
+    /**
+     * Fill.
+     *
+     * @param val the val
+     */
     public void fill(final long val) {
         fill(0, size(), val);
     }
 
+    /**
+     * Fill.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param val the val
+     */
     public void fill(final int fromIndex, final int toIndex, final long val) {
         checkFromToIndex(fromIndex, toIndex);
 
         N.fill(elementData, fromIndex, toIndex, val);
     }
 
+    /**
+     * Contains.
+     *
+     * @param e the e
+     * @return true, if successful
+     */
     public boolean contains(long e) {
         return indexOf(e) >= 0;
     }
 
+    /**
+     * Contains all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean containsAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -566,6 +846,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return true;
     }
 
+    /**
+     * Contains all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean containsAll(long[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -577,6 +863,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return containsAll(of(a));
     }
 
+    /**
+     * Contains any.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean containsAny(LongList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
             return false;
@@ -585,6 +877,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return !disjoint(c);
     }
 
+    /**
+     * Contains any.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean containsAny(long[] a) {
         if (this.isEmpty() || N.isNullOrEmpty(a)) {
@@ -594,6 +892,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return !disjoint(a);
     }
 
+    /**
+     * Disjoint.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean disjoint(final LongList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
             return true;
@@ -622,6 +926,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return true;
     }
 
+    /**
+     * Disjoint.
+     *
+     * @param b the b
+     * @return true, if successful
+     */
     @Override
     public boolean disjoint(final long[] b) {
         if (isEmpty() || N.isNullOrEmpty(b)) {
@@ -632,9 +942,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param b
-     * @return
+     * Intersection.
+     *
+     * @param b the b
+     * @return the long list
      * @see IntList#intersection(IntList)
      */
     public LongList intersection(final LongList b) {
@@ -655,6 +966,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return c;
     }
 
+    /**
+     * Intersection.
+     *
+     * @param a the a
+     * @return the long list
+     */
     public LongList intersection(final long[] a) {
         if (N.isNullOrEmpty(a)) {
             return new LongList();
@@ -664,9 +981,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param b
-     * @return
+     * Difference.
+     *
+     * @param b the b
+     * @return the long list
      * @see IntList#difference(IntList)
      */
     public LongList difference(LongList b) {
@@ -687,6 +1005,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return c;
     }
 
+    /**
+     * Difference.
+     *
+     * @param a the a
+     * @return the long list
+     */
     public LongList difference(final long[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -696,8 +1020,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param b
+     * Symmetric difference.
+     *
+     * @param b the b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
@@ -730,6 +1055,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return c;
     }
 
+    /**
+     * Symmetric difference.
+     *
+     * @param a the a
+     * @return the long list
+     */
     public LongList symmetricDifference(final long[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -740,14 +1071,33 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return symmetricDifference(of(a));
     }
 
+    /**
+     * Occurrences of.
+     *
+     * @param objectToFind the object to find
+     * @return the int
+     */
     public int occurrencesOf(final long objectToFind) {
         return N.occurrencesOf(elementData, objectToFind);
     }
 
+    /**
+     * Index of.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int indexOf(long e) {
         return indexOf(0, e);
     }
 
+    /**
+     * Index of.
+     *
+     * @param fromIndex the from index
+     * @param e the e
+     * @return the int
+     */
     public int indexOf(final int fromIndex, long e) {
         checkFromToIndex(fromIndex, size);
 
@@ -760,15 +1110,22 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return -1;
     }
 
+    /**
+     * Last index of.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int lastIndexOf(long e) {
         return lastIndexOf(size, e);
     }
 
     /**
-     * 
+     * Last index of.
+     *
      * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e
-     * @return
+     * @param e the e
+     * @return the int
      */
     public int lastIndexOf(final int fromIndex, long e) {
         checkFromToIndex(0, fromIndex);
@@ -782,40 +1139,90 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return -1;
     }
 
+    /**
+     * Min.
+     *
+     * @return the optional long
+     */
     public OptionalLong min() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.min(elementData, 0, size));
     }
 
+    /**
+     * Min.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the optional long
+     */
     public OptionalLong min(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalLong.empty() : OptionalLong.of(N.min(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * Median.
+     *
+     * @return the optional long
+     */
     public OptionalLong median() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.median(elementData, 0, size));
     }
 
+    /**
+     * Median.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the optional long
+     */
     public OptionalLong median(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalLong.empty() : OptionalLong.of(N.median(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * Max.
+     *
+     * @return the optional long
+     */
     public OptionalLong max() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.max(elementData, 0, size));
     }
 
+    /**
+     * Max.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the optional long
+     */
     public OptionalLong max(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalLong.empty() : OptionalLong.of(N.max(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param k the k
+     * @return the optional long
+     */
     public OptionalLong kthLargest(final int k) {
         return kthLargest(0, size(), k);
     }
 
+    /**
+     * Kth largest.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param k the k
+     * @return the optional long
+     */
     public OptionalLong kthLargest(final int fromIndex, final int toIndex, final int k) {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgPositive(k, "k");
@@ -823,30 +1230,70 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return toIndex - fromIndex < k ? OptionalLong.empty() : OptionalLong.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
+    /**
+     * Sum.
+     *
+     * @return the long
+     */
     public long sum() {
         return sum(0, size());
     }
 
+    /**
+     * Sum.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the long
+     */
     public long sum(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.sum(elementData, fromIndex, toIndex);
     }
 
+    /**
+     * Average.
+     *
+     * @return the optional double
+     */
     public OptionalDouble average() {
         return average(0, size());
     }
 
+    /**
+     * Average.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the optional double
+     */
     public OptionalDouble average(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.average(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(Try.LongConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.LongConsumer<E> action) throws E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -863,14 +1310,32 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * First.
+     *
+     * @return the optional long
+     */
     public OptionalLong first() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(elementData[0]);
     }
 
+    /**
+     * Last.
+     *
+     * @return the optional long
+     */
     public OptionalLong last() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(elementData[size() - 1]);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional long
+     * @throws E the e
+     */
     public <E extends Exception> OptionalLong findFirst(Try.LongPredicate<E> predicate) throws E {
         for (int i = 0; i < size; i++) {
             if (predicate.test(elementData[i])) {
@@ -881,6 +1346,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return OptionalLong.empty();
     }
 
+    /**
+     * Find last.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional long
+     * @throws E the e
+     */
     public <E extends Exception> OptionalLong findLast(Try.LongPredicate<E> predicate) throws E {
         for (int i = size - 1; i >= 0; i--) {
             if (predicate.test(elementData[i])) {
@@ -891,6 +1364,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return OptionalLong.empty();
     }
 
+    /**
+     * Find first index.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public <E extends Exception> OptionalInt findFirstIndex(Try.LongPredicate<E> predicate) throws E {
         for (int i = 0; i < size; i++) {
             if (predicate.test(elementData[i])) {
@@ -901,6 +1382,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return OptionalInt.empty();
     }
 
+    /**
+     * Find last index.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public <E extends Exception> OptionalInt findLastIndex(Try.LongPredicate<E> predicate) throws E {
         for (int i = size - 1; i >= 0; i--) {
             if (predicate.test(elementData[i])) {
@@ -913,14 +1402,26 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Returns whether all elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean allMatch(Try.LongPredicate<E> filter) throws E {
         return allMatch(0, size(), filter);
     }
 
+    /**
+     * All match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean allMatch(final int fromIndex, final int toIndex, Try.LongPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -937,14 +1438,26 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Returns whether any elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean anyMatch(Try.LongPredicate<E> filter) throws E {
         return anyMatch(0, size(), filter);
     }
 
+    /**
+     * Any match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean anyMatch(final int fromIndex, final int toIndex, Try.LongPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -961,14 +1474,26 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Returns whether no elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean noneMatch(Try.LongPredicate<E> filter) throws E {
         return noneMatch(0, size(), filter);
     }
 
+    /**
+     * None match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean noneMatch(final int fromIndex, final int toIndex, Try.LongPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -984,14 +1509,27 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param filter
-     * @return
+     * Count.
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return the int
+     * @throws E the e
      */
     public <E extends Exception> int count(Try.LongPredicate<E> filter) throws E {
         return count(0, size(), filter);
     }
 
+    /**
+     * Count.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return the int
+     * @throws E the e
+     */
     public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.LongPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -999,14 +1537,27 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param filter
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param filter the filter
      * @return a new List with the elements match the provided predicate.
+     * @throws E the e
      */
     public <E extends Exception> LongList filter(Try.LongPredicate<E> filter) throws E {
         return filter(0, size(), filter);
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return the long list
+     * @throws E the e
+     */
     public <E extends Exception> LongList filter(final int fromIndex, final int toIndex, Try.LongPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1014,24 +1565,57 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
-     * @param filter
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @param max the max
      * @return a new List with the elements match the provided predicate.
+     * @throws E the e
      */
     public <E extends Exception> LongList filter(Try.LongPredicate<E> filter, int max) throws E {
         return filter(0, size(), filter, max);
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @param max the max
+     * @return the long list
+     * @throws E the e
+     */
     public <E extends Exception> LongList filter(final int fromIndex, final int toIndex, Try.LongPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.filter(elementData, fromIndex, toIndex, filter, max);
     }
 
+    /**
+     * Map.
+     *
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the long list
+     * @throws E the e
+     */
     public <E extends Exception> LongList map(final Try.LongUnaryOperator<E> mapper) throws E {
         return map(0, size, mapper);
     }
 
+    /**
+     * Map.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param mapper the mapper
+     * @return the long list
+     * @throws E the e
+     */
     public <E extends Exception> LongList map(final int fromIndex, final int toIndex, final Try.LongUnaryOperator<E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1044,10 +1628,30 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return result;
     }
 
+    /**
+     * Map to obj.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the list
+     * @throws E the e
+     */
     public <T, E extends Exception> List<T> mapToObj(final Try.LongFunction<? extends T, E> mapper) throws E {
         return mapToObj(0, size, mapper);
     }
 
+    /**
+     * Map to obj.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param mapper the mapper
+     * @return the list
+     * @throws E the e
+     */
     public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.LongFunction<? extends T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1067,19 +1671,21 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *    if (isEmpty()) {
      *        return OptionalLong.empty();
      *    }
-     *
+     * 
      *    long result = elementData[0];
-     *
+     * 
      *    for (int i = 1; i < size; i++) {
      *        result = accumulator.applyAsLong(result, elementData[i]);
      *    }
-     *
+     * 
      *    return OptionalLong.of(result);
      * </code>
      * </pre>
-     * 
-     * @param accumulator
-     * @return
+     *
+     * @param <E> the element type
+     * @param accumulator the accumulator
+     * @return the optional long
+     * @throws E the e
      */
     public <E extends Exception> OptionalLong reduce(final Try.LongBinaryOperator<E> accumulator) throws E {
         if (isEmpty()) {
@@ -1112,10 +1718,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *     return result;
      * </code>
      * </pre>
-     * 
-     * @param identity
-     * @param accumulator
-     * @return
+     *
+     * @param <E> the element type
+     * @param identity the identity
+     * @param accumulator the accumulator
+     * @return the long
+     * @throws E the e
      */
     public <E extends Exception> long reduce(final long identity, final Try.LongBinaryOperator<E> accumulator) throws E {
         if (isEmpty()) {
@@ -1131,11 +1739,23 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return result;
     }
 
+    /**
+     * Checks for duplicates.
+     *
+     * @return true, if successful
+     */
     @Override
     public boolean hasDuplicates() {
         return N.hasDuplicates(elementData, 0, size, false);
     }
 
+    /**
+     * Distinct.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the long list
+     */
     @Override
     public LongList distinct(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1147,26 +1767,59 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * Top.
+     *
+     * @param n the n
+     * @return the long list
+     */
     public LongList top(final int n) {
         return top(0, size(), n);
     }
 
+    /**
+     * Top.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param n the n
+     * @return the long list
+     */
     public LongList top(final int fromIndex, final int toIndex, final int n) {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n));
     }
 
+    /**
+     * Top.
+     *
+     * @param n the n
+     * @param cmp the cmp
+     * @return the long list
+     */
     public LongList top(final int n, Comparator<? super Long> cmp) {
         return top(0, size(), n, cmp);
     }
 
+    /**
+     * Top.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param n the n
+     * @param cmp the cmp
+     * @return the long list
+     */
     public LongList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Long> cmp) {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
     }
 
+    /**
+     * Sort.
+     */
     @Override
     public void sort() {
         if (size > 1) {
@@ -1174,12 +1827,18 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * Parallel sort.
+     */
     public void parallelSort() {
         if (size > 1) {
             N.parallelSort(elementData, 0, size);
         }
     }
 
+    /**
+     * Reverse sort.
+     */
     public void reverseSort() {
         if (size > 1) {
             sort();
@@ -1189,9 +1848,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * This List should be sorted first.
-     * 
-     * @param key
-     * @return
+     *
+     * @param key the key
+     * @return the int
      */
     public int binarySearch(final long key) {
         return N.binarySearch(elementData, key);
@@ -1200,10 +1859,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex
-     * @param toIndex
-     * @param key
-     * @return
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param key the key
+     * @return the int
      */
     public int binarySearch(final int fromIndex, final int toIndex, final long key) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1211,6 +1870,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return N.binarySearch(elementData, fromIndex, toIndex, key);
     }
 
+    /**
+     * Reverse.
+     */
     @Override
     public void reverse() {
         if (size > 1) {
@@ -1218,6 +1880,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * Reverse.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     @Override
     public void reverse(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1227,6 +1895,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * Rotate.
+     *
+     * @param distance the distance
+     */
     @Override
     public void rotate(int distance) {
         if (size > 1) {
@@ -1234,6 +1907,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * Shuffle.
+     */
     @Override
     public void shuffle() {
         if (size() > 1) {
@@ -1241,6 +1917,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * Shuffle.
+     *
+     * @param rnd the rnd
+     */
     @Override
     public void shuffle(final Random rnd) {
         if (size() > 1) {
@@ -1248,6 +1929,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * Swap.
+     *
+     * @param i the i
+     * @param j the j
+     */
     @Override
     public void swap(int i, int j) {
         rangeCheck(i);
@@ -1256,11 +1943,23 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         set(i, set(j, elementData[i]));
     }
 
+    /**
+     * Copy.
+     *
+     * @return the long list
+     */
     @Override
     public LongList copy() {
         return new LongList(N.copyOfRange(elementData, 0, size));
     }
 
+    /**
+     * Copy.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the long list
+     */
     @Override
     public LongList copy(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1269,10 +1968,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * @param from
-     * @param to
-     * @param step
-     * 
+     * Copy.
+     *
+     * @param from the from
+     * @param to the to
+     * @param step the step
+     * @return the long list
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1285,9 +1986,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Returns List of {@code LongList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
-     * @param fromIndex
-     * @param toIndex
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+     * @return the list
      */
     @Override
     public List<LongList> split(final int fromIndex, final int toIndex, final int chunkSize) {
@@ -1332,6 +2035,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     //        return result;
     //    }
 
+    /**
+     * Join.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param delimiter the delimiter
+     * @return the string
+     */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1339,6 +2050,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
     }
 
+    /**
+     * Join.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param delimiter the delimiter
+     * @return the string
+     */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1346,6 +2065,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
     }
 
+    /**
+     * Trim to size.
+     *
+     * @return the long list
+     */
     @Override
     public LongList trimToSize() {
         if (elementData.length > size) {
@@ -1355,6 +2079,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return this;
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         if (size > 0) {
@@ -1364,20 +2091,42 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         size = 0;
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     @Override
     public boolean isEmpty() {
         return size == 0;
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * Boxed.
+     *
+     * @return the list
+     */
     public List<Long> boxed() {
         return boxed(0, size);
     }
 
+    /**
+     * Boxed.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the list
+     */
     public List<Long> boxed(int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1390,11 +2139,21 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return res;
     }
 
+    /**
+     * To array.
+     *
+     * @return the long[]
+     */
     @Override
     public long[] toArray() {
         return N.copyOfRange(elementData, 0, size);
     }
 
+    /**
+     * To float list.
+     *
+     * @return the float list
+     */
     public FloatList toFloatList() {
         final float[] a = new float[size];
 
@@ -1405,6 +2164,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return FloatList.of(a);
     }
 
+    /**
+     * To double list.
+     *
+     * @return the double list
+     */
     public DoubleList toDoubleList() {
         final double[] a = new double[size];
 
@@ -1415,6 +2179,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return DoubleList.of(a);
     }
 
+    /**
+     * To collection.
+     *
+     * @param <C> the generic type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param supplier the supplier
+     * @return the c
+     */
     @Override
     public <C extends Collection<Long>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1428,6 +2201,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return c;
     }
 
+    /**
+     * To multiset.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param supplier the supplier
+     * @return the multiset
+     */
     @Override
     public Multiset<Long> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Long>> supplier) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1441,11 +2222,39 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return multiset;
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @return the map
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Try.LongFunction<? extends K, E> keyMapper,
             Try.LongFunction<? extends V, E2> valueMapper) throws E, E2 {
         return toMap(keyMapper, valueMapper, Factory.<K, V> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Try.LongFunction<? extends K, E> keyMapper,
             Try.LongFunction<? extends V, E2> valueMapper, IntFunction<? extends M> mapFactory) throws E, E2 {
         final Try.BinaryOperator<V, RuntimeException> mergeFunction = Fn.throwingMerger();
@@ -1453,11 +2262,45 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @return the map
+     * @throws E the e
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <K, V, E extends Exception, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(Try.LongFunction<? extends K, E> keyMapper,
             Try.LongFunction<? extends V, E2> valueMapper, Try.BinaryOperator<V, E3> mergeFunction) throws E, E2, E3 {
         return toMap(keyMapper, valueMapper, mergeFunction, Factory.<K, V> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(Try.LongFunction<? extends K, E> keyMapper,
             Try.LongFunction<? extends V, E2> valueMapper, Try.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
         final M result = mapFactory.apply(size);
@@ -1469,10 +2312,36 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return result;
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <E> the element type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @return the map
+     * @throws E the e
+     */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.LongFunction<? extends K, E> keyMapper, Collector<Long, A, D> downstream) throws E {
         return toMap(keyMapper, downstream, Factory.<K, D> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.LongFunction<? extends K, E> keyMapper, final Collector<Long, A, D> downstream,
             final IntFunction<? extends M> mapFactory) throws E {
         final M result = mapFactory.apply(size);
@@ -1506,6 +2375,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return result;
     }
 
+    /**
+     * Iterator.
+     *
+     * @return the long iterator
+     */
     public LongIterator iterator() {
         if (isEmpty()) {
             return LongIterator.EMPTY;
@@ -1514,31 +2388,75 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return LongIterator.of(elementData, 0, size);
     }
 
+    /**
+     * Stream.
+     *
+     * @return the long stream
+     */
     public LongStream stream() {
         return LongStream.of(elementData, 0, size());
     }
 
+    /**
+     * Stream.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the long stream
+     */
     public LongStream stream(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return LongStream.of(elementData, fromIndex, toIndex);
     }
 
+    /**
+     * Apply.
+     *
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param func the func
+     * @return the r
+     * @throws E the e
+     */
     @Override
     public <R, E extends Exception> R apply(Try.Function<? super LongList, R, E> func) throws E {
         return func.apply(this);
     }
 
+    /**
+     * Apply if not empty.
+     *
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param func the func
+     * @return the optional
+     * @throws E the e
+     */
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super LongList, R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
+    /**
+     * Accept.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     @Override
     public <E extends Exception> void accept(Try.Consumer<? super LongList, E> action) throws E {
         action.accept(this);
     }
 
+    /**
+     * Accept if not empty.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     @Override
     public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super LongList, E> action) throws E {
         if (size > 0) {
@@ -1546,11 +2464,22 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -1566,11 +2495,21 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);
     }
 
+    /**
+     * Ensure capacity internal.
+     *
+     * @param minCapacity the min capacity
+     */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_LONG_ARRAY) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
@@ -1579,12 +2518,22 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         ensureExplicitCapacity(minCapacity);
     }
 
+    /**
+     * Ensure explicit capacity.
+     *
+     * @param minCapacity the min capacity
+     */
     private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
             grow(minCapacity);
         }
     }
 
+    /**
+     * Grow.
+     *
+     * @param minCapacity the min capacity
+     */
     private void grow(int minCapacity) {
         int oldCapacity = elementData.length;
         int newCapacity = oldCapacity + (oldCapacity >> 1);

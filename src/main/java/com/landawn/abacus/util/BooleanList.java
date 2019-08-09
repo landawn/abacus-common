@@ -37,37 +37,58 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class BooleanList.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class BooleanList extends PrimitiveList<Boolean, boolean[], BooleanList> {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -1194435277403867258L;
 
+    /** The Constant RAND. */
     static final Random RAND = new SecureRandom();
 
+    /** The element data. */
     private boolean[] elementData = N.EMPTY_BOOLEAN_ARRAY;
+
+    /** The size. */
     private int size = 0;
 
+    /**
+     * Instantiates a new boolean list.
+     */
     public BooleanList() {
         super();
     }
 
+    /**
+     * Instantiates a new boolean list.
+     *
+     * @param initialCapacity the initial capacity
+     */
     public BooleanList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BOOLEAN_ARRAY : new boolean[initialCapacity];
     }
 
     /**
      * The specified array is used as the element array for this list without copying action.
-     * 
-     * @param a
+     *
+     * @param a the a
      */
     public BooleanList(boolean[] a) {
         this(a, a.length);
     }
 
+    /**
+     * Instantiates a new boolean list.
+     *
+     * @param a the a
+     * @param size the size
+     */
     public BooleanList(boolean[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -75,25 +96,58 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         this.size = size;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the boolean list
+     */
     @SafeVarargs
     public static BooleanList of(final boolean... a) {
         return new BooleanList(N.nullToEmpty(a));
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param size the size
+     * @return the boolean list
+     */
     public static BooleanList of(final boolean[] a, final int size) {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new BooleanList(N.nullToEmpty(a), size);
     }
 
+    /**
+     * Copy of.
+     *
+     * @param a the a
+     * @return the boolean list
+     */
     public static BooleanList copyOf(final boolean[] a) {
         return of(N.clone(a));
     }
 
+    /**
+     * Copy of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the boolean list
+     */
     public static BooleanList copyOf(final boolean[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @return the boolean list
+     */
     public static BooleanList from(Collection<Boolean> c) {
         if (N.isNullOrEmpty(c)) {
             return new BooleanList();
@@ -102,6 +156,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return from(c, false);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param defaultForNull the default for null
+     * @return the boolean list
+     */
     public static BooleanList from(Collection<Boolean> c, boolean defaultForNull) {
         if (N.isNullOrEmpty(c)) {
             return new BooleanList();
@@ -117,6 +178,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return of(a);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the boolean list
+     */
     public static BooleanList from(final Collection<Boolean> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
@@ -127,14 +196,36 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return from(c, fromIndex, toIndex, false);
     }
 
+    /**
+     * From.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param defaultForNull the default for null
+     * @return the boolean list
+     */
     public static BooleanList from(final Collection<Boolean> c, final int fromIndex, final int toIndex, boolean defaultForNull) {
         return of(N.toBooleanArray(c, fromIndex, toIndex, defaultForNull));
     }
 
+    /**
+     * Repeat.
+     *
+     * @param element the element
+     * @param len the len
+     * @return the boolean list
+     */
     public static BooleanList repeat(boolean element, final int len) {
         return of(Array.repeat(element, len));
     }
 
+    /**
+     * Random.
+     *
+     * @param len the len
+     * @return the boolean list
+     */
     public static BooleanList random(final int len) {
         final boolean[] a = new boolean[len];
 
@@ -147,20 +238,31 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns the original element array without copying.
-     * 
-     * @return
+     *
+     * @return the boolean[]
      */
     @Override
     public boolean[] array() {
         return elementData;
     }
 
+    /**
+     * Gets the.
+     *
+     * @param index the index
+     * @return true, if successful
+     */
     public boolean get(int index) {
         rangeCheck(index);
 
         return elementData[index];
     }
 
+    /**
+     * Range check.
+     *
+     * @param index the index
+     */
     private void rangeCheck(int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -168,9 +270,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param index
-     * @param e
+     * Sets the.
+     *
+     * @param index the index
+     * @param e the e
      * @return the old value in the specified position.
      */
     public boolean set(int index, boolean e) {
@@ -183,12 +286,23 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return oldValue;
     }
 
+    /**
+     * Adds the.
+     *
+     * @param e the e
+     */
     public void add(boolean e) {
         ensureCapacityInternal(size + 1);
 
         elementData[size++] = e;
     }
 
+    /**
+     * Adds the.
+     *
+     * @param index the index
+     * @param e the e
+     */
     public void add(int index, boolean e) {
         rangeCheckForAdd(index);
 
@@ -205,6 +319,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         size++;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean addAll(BooleanList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -221,6 +341,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return true;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param index the index
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean addAll(int index, BooleanList c) {
         rangeCheckForAdd(index);
 
@@ -245,11 +372,24 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return true;
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean addAll(boolean[] a) {
         return addAll(size(), a);
     }
 
+    /**
+     * Adds the all.
+     *
+     * @param index the index
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean addAll(int index, boolean[] a) {
         rangeCheckForAdd(index);
@@ -275,6 +415,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return true;
     }
 
+    /**
+     * Range check for add.
+     *
+     * @param index the index
+     */
     private void rangeCheckForAdd(int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -282,8 +427,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param e
+     * Removes the.
+     *
+     * @param e the e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(boolean e) {
@@ -300,8 +446,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param e
+     * Removes the all occurrences.
+     *
+     * @param e the e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean removeAllOccurrences(boolean e) {
@@ -324,6 +471,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return numRemoved > 0;
     }
 
+    /**
+     * Fast remove.
+     *
+     * @param index the index
+     */
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
 
@@ -334,6 +486,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         elementData[--size] = false; // clear to let GC do its work
     }
 
+    /**
+     * Removes the all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean removeAll(BooleanList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -342,6 +500,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return batchRemove(c, false) > 0;
     }
 
+    /**
+     * Removes the all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean removeAll(boolean[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -351,6 +515,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return removeAll(of(a));
     }
 
+    /**
+     * Removes the if.
+     *
+     * @param <E> the element type
+     * @param p the p
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean removeIf(Try.BooleanPredicate<E> p) throws E {
         final BooleanList tmp = new BooleanList(size());
 
@@ -371,6 +543,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return true;
     }
 
+    /**
+     * Retain all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean retainAll(BooleanList c) {
         if (N.isNullOrEmpty(c)) {
             boolean result = size() > 0;
@@ -381,6 +559,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return batchRemove(c, true) > 0;
     }
 
+    /**
+     * Retain all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     public boolean retainAll(boolean[] a) {
         if (N.isNullOrEmpty(a)) {
             boolean result = size() > 0;
@@ -391,6 +575,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return retainAll(BooleanList.of(a));
     }
 
+    /**
+     * Batch remove.
+     *
+     * @param c the c
+     * @param complement the complement
+     * @return the int
+     */
     private int batchRemove(BooleanList c, boolean complement) {
         final boolean[] elementData = this.elementData;
 
@@ -424,8 +615,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param index
+     * Delete.
+     *
+     * @param index the index
      * @return the deleted element
      */
     public boolean delete(int index) {
@@ -438,6 +630,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return oldValue;
     }
 
+    /**
+     * Delete range.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, size());
@@ -457,6 +655,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         size = newSize;
     }
 
+    /**
+     * Delete all.
+     *
+     * @param indices the indices
+     */
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
@@ -466,6 +669,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         size = tmp.length;
     }
 
+    /**
+     * Replace all.
+     *
+     * @param oldVal the old val
+     * @param newVal the new val
+     * @return the int
+     */
     public int replaceAll(boolean oldVal, boolean newVal) {
         if (size() == 0) {
             return 0;
@@ -484,12 +694,28 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return result;
     }
 
+    /**
+     * Replace all.
+     *
+     * @param <E> the element type
+     * @param operator the operator
+     * @throws E the e
+     */
     public <E extends Exception> void replaceAll(Try.BooleanUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsBoolean(elementData[i]);
         }
     }
 
+    /**
+     * Replace if.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @param newValue the new value
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean replaceIf(Try.BooleanPredicate<E> predicate, boolean newValue) throws E {
         boolean result = false;
 
@@ -504,20 +730,44 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return result;
     }
 
+    /**
+     * Fill.
+     *
+     * @param val the val
+     */
     public void fill(final boolean val) {
         fill(0, size(), val);
     }
 
+    /**
+     * Fill.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param val the val
+     */
     public void fill(final int fromIndex, final int toIndex, final boolean val) {
         checkFromToIndex(fromIndex, toIndex);
 
         N.fill(elementData, fromIndex, toIndex, val);
     }
 
+    /**
+     * Contains.
+     *
+     * @param e the e
+     * @return true, if successful
+     */
     public boolean contains(boolean e) {
         return indexOf(e) >= 0;
     }
 
+    /**
+     * Contains all.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean containsAll(BooleanList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -548,6 +798,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return true;
     }
 
+    /**
+     * Contains all.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean containsAll(boolean[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -559,6 +815,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return containsAll(of(a));
     }
 
+    /**
+     * Contains any.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean containsAny(BooleanList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
             return false;
@@ -567,6 +829,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return !disjoint(c);
     }
 
+    /**
+     * Contains any.
+     *
+     * @param a the a
+     * @return true, if successful
+     */
     @Override
     public boolean containsAny(boolean[] a) {
         if (this.isEmpty() || N.isNullOrEmpty(a)) {
@@ -576,6 +844,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return !disjoint(a);
     }
 
+    /**
+     * Disjoint.
+     *
+     * @param c the c
+     * @return true, if successful
+     */
     public boolean disjoint(final BooleanList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
             return true;
@@ -604,6 +878,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return true;
     }
 
+    /**
+     * Disjoint.
+     *
+     * @param b the b
+     * @return true, if successful
+     */
     @Override
     public boolean disjoint(final boolean[] b) {
         if (isEmpty() || N.isNullOrEmpty(b)) {
@@ -614,9 +894,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param b
-     * @return
+     * Intersection.
+     *
+     * @param b the b
+     * @return the boolean list
      * @see IntList#intersection(IntList)
      */
     public BooleanList intersection(final BooleanList b) {
@@ -637,6 +918,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return c;
     }
 
+    /**
+     * Intersection.
+     *
+     * @param a the a
+     * @return the boolean list
+     */
     public BooleanList intersection(final boolean[] a) {
         if (N.isNullOrEmpty(a)) {
             return new BooleanList();
@@ -646,9 +933,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param b
-     * @return
+     * Difference.
+     *
+     * @param b the b
+     * @return the boolean list
      * @see IntList#difference(IntList)
      */
     public BooleanList difference(final BooleanList b) {
@@ -669,6 +957,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return c;
     }
 
+    /**
+     * Difference.
+     *
+     * @param a the a
+     * @return the boolean list
+     */
     public BooleanList difference(final boolean[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -678,8 +972,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param b
+     * Symmetric difference.
+     *
+     * @param b the b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
@@ -712,6 +1007,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return c;
     }
 
+    /**
+     * Symmetric difference.
+     *
+     * @param a the a
+     * @return the boolean list
+     */
     public BooleanList symmetricDifference(final boolean[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -722,14 +1023,33 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return symmetricDifference(of(a));
     }
 
+    /**
+     * Occurrences of.
+     *
+     * @param objectToFind the object to find
+     * @return the int
+     */
     public int occurrencesOf(final boolean objectToFind) {
         return N.occurrencesOf(elementData, objectToFind);
     }
 
+    /**
+     * Index of.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int indexOf(boolean e) {
         return indexOf(0, e);
     }
 
+    /**
+     * Index of.
+     *
+     * @param fromIndex the from index
+     * @param e the e
+     * @return the int
+     */
     public int indexOf(final int fromIndex, boolean e) {
         checkFromToIndex(fromIndex, size);
 
@@ -742,15 +1062,22 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return -1;
     }
 
+    /**
+     * Last index of.
+     *
+     * @param e the e
+     * @return the int
+     */
     public int lastIndexOf(boolean e) {
         return lastIndexOf(size, e);
     }
 
     /**
-     * 
+     * Last index of.
+     *
      * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e
-     * @return
+     * @param e the e
+     * @return the int
      */
     public int lastIndexOf(final int fromIndex, boolean e) {
         checkFromToIndex(0, fromIndex);
@@ -764,10 +1091,26 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return -1;
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(Try.BooleanConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
+    /**
+     * For each.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.BooleanConsumer<E> action) throws E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -784,14 +1127,32 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * First.
+     *
+     * @return the optional boolean
+     */
     public OptionalBoolean first() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[0]);
     }
 
+    /**
+     * Last.
+     *
+     * @return the optional boolean
+     */
     public OptionalBoolean last() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[size() - 1]);
     }
 
+    /**
+     * Find first.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional boolean
+     * @throws E the e
+     */
     public <E extends Exception> OptionalBoolean findFirst(Try.BooleanPredicate<E> predicate) throws E {
         for (int i = 0; i < size; i++) {
             if (predicate.test(elementData[i])) {
@@ -802,6 +1163,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return OptionalBoolean.empty();
     }
 
+    /**
+     * Find last.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional boolean
+     * @throws E the e
+     */
     public <E extends Exception> OptionalBoolean findLast(Try.BooleanPredicate<E> predicate) throws E {
         for (int i = size - 1; i >= 0; i--) {
             if (predicate.test(elementData[i])) {
@@ -812,6 +1181,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return OptionalBoolean.empty();
     }
 
+    /**
+     * Find first index.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public <E extends Exception> OptionalInt findFirstIndex(Try.BooleanPredicate<E> predicate) throws E {
         for (int i = 0; i < size; i++) {
             if (predicate.test(elementData[i])) {
@@ -822,6 +1199,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return OptionalInt.empty();
     }
 
+    /**
+     * Find last index.
+     *
+     * @param <E> the element type
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
     public <E extends Exception> OptionalInt findLastIndex(Try.BooleanPredicate<E> predicate) throws E {
         for (int i = size - 1; i >= 0; i--) {
             if (predicate.test(elementData[i])) {
@@ -834,14 +1219,26 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns whether all elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean allMatch(Try.BooleanPredicate<E> filter) throws E {
         return allMatch(0, size(), filter);
     }
 
+    /**
+     * All match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean allMatch(final int fromIndex, final int toIndex, Try.BooleanPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -858,14 +1255,26 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns whether any elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean anyMatch(Try.BooleanPredicate<E> filter) throws E {
         return anyMatch(0, size(), filter);
     }
 
+    /**
+     * Any match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean anyMatch(final int fromIndex, final int toIndex, Try.BooleanPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -882,14 +1291,26 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Returns whether no elements of this List match the provided predicate.
-     * 
-     * @param filter
-     * @return
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean noneMatch(Try.BooleanPredicate<E> filter) throws E {
         return noneMatch(0, size(), filter);
     }
 
+    /**
+     * None match.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean noneMatch(final int fromIndex, final int toIndex, Try.BooleanPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -905,14 +1326,27 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param filter
-     * @return
+     * Count.
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @return the int
+     * @throws E the e
      */
     public <E extends Exception> int count(Try.BooleanPredicate<E> filter) throws E {
         return count(0, size(), filter);
     }
 
+    /**
+     * Count.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return the int
+     * @throws E the e
+     */
     public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.BooleanPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -920,14 +1354,27 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param filter
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param filter the filter
      * @return a new List with the elements match the provided predicate.
+     * @throws E the e
      */
     public <E extends Exception> BooleanList filter(Try.BooleanPredicate<E> filter) throws E {
         return filter(0, size(), filter);
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @return the boolean list
+     * @throws E the e
+     */
     public <E extends Exception> BooleanList filter(final int fromIndex, final int toIndex, Try.BooleanPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -935,24 +1382,57 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
-     * @param filter
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param filter the filter
+     * @param max the max
      * @return a new List with the elements match the provided predicate.
+     * @throws E the e
      */
     public <E extends Exception> BooleanList filter(Try.BooleanPredicate<E> filter, int max) throws E {
         return filter(0, size(), filter, max);
     }
 
+    /**
+     * Filter.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param filter the filter
+     * @param max the max
+     * @return the boolean list
+     * @throws E the e
+     */
     public <E extends Exception> BooleanList filter(final int fromIndex, final int toIndex, Try.BooleanPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.filter(elementData, fromIndex, toIndex, filter, max);
     }
 
+    /**
+     * Map.
+     *
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the boolean list
+     * @throws E the e
+     */
     public <E extends Exception> BooleanList map(final Try.BooleanUnaryOperator<E> mapper) throws E {
         return map(0, size, mapper);
     }
 
+    /**
+     * Map.
+     *
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param mapper the mapper
+     * @return the boolean list
+     * @throws E the e
+     */
     public <E extends Exception> BooleanList map(final int fromIndex, final int toIndex, final Try.BooleanUnaryOperator<E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -965,10 +1445,30 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return result;
     }
 
+    /**
+     * Map to obj.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the list
+     * @throws E the e
+     */
     public <T, E extends Exception> List<T> mapToObj(final Try.BooleanFunction<? extends T, E> mapper) throws E {
         return mapToObj(0, size, mapper);
     }
 
+    /**
+     * Map to obj.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param mapper the mapper
+     * @return the list
+     * @throws E the e
+     */
     public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.BooleanFunction<? extends T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -988,19 +1488,21 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *    if (isEmpty()) {
      *        return OptionalBoolean.empty();
      *    }
-     *
+     * 
      *    boolean result = elementData[0];
-     *
+     * 
      *    for (int i = 1; i < size; i++) {
      *        result = accumulator.applyAsBoolean(result, elementData[i]);
      *    }
-     *
+     * 
      *    return OptionalBoolean.of(result);
      * </code>
      * </pre>
-     * 
-     * @param accumulator
-     * @return
+     *
+     * @param <E> the element type
+     * @param accumulator the accumulator
+     * @return the optional boolean
+     * @throws E the e
      */
     public <E extends Exception> OptionalBoolean reduce(final Try.BooleanBinaryOperator<E> accumulator) throws E {
         if (isEmpty()) {
@@ -1033,10 +1535,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *     return result;
      * </code>
      * </pre>
-     * 
-     * @param identity
-     * @param accumulator
-     * @return
+     *
+     * @param <E> the element type
+     * @param identity the identity
+     * @param accumulator the accumulator
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean reduce(final boolean identity, final Try.BooleanBinaryOperator<E> accumulator) throws E {
         if (isEmpty()) {
@@ -1052,6 +1556,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return result;
     }
 
+    /**
+     * Checks for duplicates.
+     *
+     * @return true, if successful
+     */
     @Override
     public boolean hasDuplicates() {
         if (size < 2) {
@@ -1063,6 +1572,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Distinct.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the boolean list
+     */
     @Override
     public BooleanList distinct(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1074,6 +1590,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Sort.
+     */
     @Override
     public void sort() {
         if (size <= 1) {
@@ -1095,6 +1614,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Reverse sort.
+     */
     public void reverseSort() {
         if (size > 1) {
             sort();
@@ -1102,6 +1624,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Reverse.
+     */
     @Override
     public void reverse() {
         if (size > 1) {
@@ -1109,6 +1634,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Reverse.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     */
     @Override
     public void reverse(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1118,6 +1649,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Rotate.
+     *
+     * @param distance the distance
+     */
     @Override
     public void rotate(int distance) {
         if (size > 1) {
@@ -1125,6 +1661,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Shuffle.
+     */
     @Override
     public void shuffle() {
         if (size() > 1) {
@@ -1132,6 +1671,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Shuffle.
+     *
+     * @param rnd the rnd
+     */
     @Override
     public void shuffle(final Random rnd) {
         if (size() > 1) {
@@ -1139,6 +1683,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Swap.
+     *
+     * @param i the i
+     * @param j the j
+     */
     @Override
     public void swap(int i, int j) {
         rangeCheck(i);
@@ -1147,11 +1697,23 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         set(i, set(j, elementData[i]));
     }
 
+    /**
+     * Copy.
+     *
+     * @return the boolean list
+     */
     @Override
     public BooleanList copy() {
         return new BooleanList(N.copyOfRange(elementData, 0, size));
     }
 
+    /**
+     * Copy.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the boolean list
+     */
     @Override
     public BooleanList copy(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1160,10 +1722,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * @param from
-     * @param to
-     * @param step
-     * 
+     * Copy.
+     *
+     * @param from the from
+     * @param to the to
+     * @param step the step
+     * @return the boolean list
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1176,9 +1740,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns List of {@code BooleanList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
-     * @param fromIndex
-     * @param toIndex
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
+     * @return the list
      */
     @Override
     public List<BooleanList> split(final int fromIndex, final int toIndex, final int chunkSize) {
@@ -1223,6 +1789,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     //        return result;
     //    }
 
+    /**
+     * Join.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param delimiter the delimiter
+     * @return the string
+     */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1230,6 +1804,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
     }
 
+    /**
+     * Join.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param delimiter the delimiter
+     * @return the string
+     */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1237,6 +1819,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
     }
 
+    /**
+     * Trim to size.
+     *
+     * @return the boolean list
+     */
     @Override
     public BooleanList trimToSize() {
         if (elementData.length > size) {
@@ -1246,6 +1833,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return this;
     }
 
+    /**
+     * Clear.
+     */
     @Override
     public void clear() {
         if (size > 0) {
@@ -1255,20 +1845,42 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         size = 0;
     }
 
+    /**
+     * Checks if is empty.
+     *
+     * @return true, if is empty
+     */
     @Override
     public boolean isEmpty() {
         return size == 0;
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * Boxed.
+     *
+     * @return the list
+     */
     public List<Boolean> boxed() {
         return boxed(0, size);
     }
 
+    /**
+     * Boxed.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the list
+     */
     public List<Boolean> boxed(int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
@@ -1281,11 +1893,25 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return res;
     }
 
+    /**
+     * To array.
+     *
+     * @return the boolean[]
+     */
     @Override
     public boolean[] toArray() {
         return N.copyOfRange(elementData, 0, size);
     }
 
+    /**
+     * To collection.
+     *
+     * @param <C> the generic type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param supplier the supplier
+     * @return the c
+     */
     @Override
     public <C extends Collection<Boolean>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1299,6 +1925,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return c;
     }
 
+    /**
+     * To multiset.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param supplier the supplier
+     * @return the multiset
+     */
     @Override
     public Multiset<Boolean> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Boolean>> supplier) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1312,11 +1946,39 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return multiset;
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @return the map
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Try.BooleanFunction<? extends K, E> keyMapper,
             Try.BooleanFunction<? extends V, E2> valueMapper) throws E, E2 {
         return toMap(keyMapper, valueMapper, Factory.<K, V> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     * @throws E2 the e2
+     */
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Try.BooleanFunction<? extends K, E> keyMapper,
             Try.BooleanFunction<? extends V, E2> valueMapper, IntFunction<? extends M> mapFactory) throws E, E2 {
         final Try.BinaryOperator<V, RuntimeException> mergeFunction = Fn.throwingMerger();
@@ -1324,11 +1986,45 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @return the map
+     * @throws E the e
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <K, V, E extends Exception, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(Try.BooleanFunction<? extends K, E> keyMapper,
             Try.BooleanFunction<? extends V, E2> valueMapper, Try.BinaryOperator<V, E3> mergeFunction) throws E, E2, E3 {
         return toMap(keyMapper, valueMapper, mergeFunction, Factory.<K, V> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param <E3> the generic type
+     * @param keyMapper the key mapper
+     * @param valueMapper the value mapper
+     * @param mergeFunction the merge function
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     * @throws E2 the e2
+     * @throws E3 the e3
+     */
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(Try.BooleanFunction<? extends K, E> keyMapper,
             Try.BooleanFunction<? extends V, E2> valueMapper, Try.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
         final M result = mapFactory.apply(size);
@@ -1340,10 +2036,36 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return result;
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <E> the element type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @return the map
+     * @throws E the e
+     */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.BooleanFunction<? extends K, E> keyMapper, Collector<Boolean, A, D> downstream) throws E {
         return toMap(keyMapper, downstream, Factory.<K, D> ofMap());
     }
 
+    /**
+     * To map.
+     *
+     * @param <K> the key type
+     * @param <A> the generic type
+     * @param <D> the generic type
+     * @param <M> the generic type
+     * @param <E> the element type
+     * @param keyMapper the key mapper
+     * @param downstream the downstream
+     * @param mapFactory the map factory
+     * @return the m
+     * @throws E the e
+     */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.BooleanFunction<? extends K, E> keyMapper,
             final Collector<Boolean, A, D> downstream, final IntFunction<? extends M> mapFactory) throws E {
         final M result = mapFactory.apply(size);
@@ -1377,6 +2099,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return result;
     }
 
+    /**
+     * Iterator.
+     *
+     * @return the boolean iterator
+     */
     public BooleanIterator iterator() {
         if (isEmpty()) {
             return BooleanIterator.EMPTY;
@@ -1385,31 +2112,75 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return BooleanIterator.of(elementData, 0, size);
     }
 
+    /**
+     * Stream.
+     *
+     * @return the stream
+     */
     public Stream<Boolean> stream() {
         return Stream.of(elementData, 0, size());
     }
 
+    /**
+     * Stream.
+     *
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the stream
+     */
     public Stream<Boolean> stream(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
 
         return Stream.of(elementData, fromIndex, toIndex);
     }
 
+    /**
+     * Apply.
+     *
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param func the func
+     * @return the r
+     * @throws E the e
+     */
     @Override
     public <R, E extends Exception> R apply(Try.Function<? super BooleanList, R, E> func) throws E {
         return func.apply(this);
     }
 
+    /**
+     * Apply if not empty.
+     *
+     * @param <R> the generic type
+     * @param <E> the element type
+     * @param func the func
+     * @return the optional
+     * @throws E the e
+     */
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super BooleanList, R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
+    /**
+     * Accept.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     @Override
     public <E extends Exception> void accept(Try.Consumer<? super BooleanList, E> action) throws E {
         action.accept(this);
     }
 
+    /**
+     * Accept if not empty.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     @Override
     public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super BooleanList, E> action) throws E {
         if (size > 0) {
@@ -1417,11 +2188,22 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -1437,11 +2219,21 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);
     }
 
+    /**
+     * Ensure capacity internal.
+     *
+     * @param minCapacity the min capacity
+     */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_BOOLEAN_ARRAY) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
@@ -1450,12 +2242,22 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         ensureExplicitCapacity(minCapacity);
     }
 
+    /**
+     * Ensure explicit capacity.
+     *
+     * @param minCapacity the min capacity
+     */
     private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
             grow(minCapacity);
         }
     }
 
+    /**
+     * Grow.
+     *
+     * @param minCapacity the min capacity
+     */
     private void grow(int minCapacity) {
         int oldCapacity = elementData.length;
         int newCapacity = oldCapacity + (oldCapacity >> 1);

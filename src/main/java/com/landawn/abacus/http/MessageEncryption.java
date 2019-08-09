@@ -14,12 +14,19 @@
 
 package com.landawn.abacus.http;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Enum MessageEncryption.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public enum MessageEncryption {
-    NONE, JSON, KRYO;
+
+    /** The none. */
+    NONE,
+    /** The json. */
+    JSON,
+    /** The kryo. */
+    KRYO;
 }

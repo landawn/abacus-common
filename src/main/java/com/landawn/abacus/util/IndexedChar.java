@@ -14,40 +14,83 @@
 
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class IndexedChar.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class IndexedChar extends AbstractIndexed {
+
+    /** The value. */
     private final char value;
 
+    /**
+     * Instantiates a new indexed char.
+     *
+     * @param index the index
+     * @param value the value
+     */
     IndexedChar(long index, char value) {
         super(index);
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @param index the index
+     * @return the indexed char
+     */
     public static IndexedChar of(char value, int index) {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedChar(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @param index the index
+     * @return the indexed char
+     */
     public static IndexedChar of(char value, long index) {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedChar(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedChar> of(final CharIterator iter) {
         return of(iter, 0);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedChar> of(final CharIterator iter, final int startIndex) {
         return of(iter, (long) startIndex);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedChar> of(final CharIterator iter, final long startIndex) {
         if (startIndex < 0) {
             throw new IllegalArgumentException("Invalid start index: " + startIndex);
@@ -68,20 +111,41 @@ public final class IndexedChar extends AbstractIndexed {
         };
     }
 
+    /**
+     * Value.
+     *
+     * @return the char
+     */
     public char value() {
         return value;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return (int) index + value * 31;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return obj instanceof IndexedChar && ((IndexedChar) obj).index == index && N.equals(((IndexedChar) obj).value, value);
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

@@ -18,6 +18,12 @@ import javax.jws.WebService;
 
 import com.landawn.abacus.LockMode;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Interface XLock.
+ *
+ * @param <T> the generic type
+ */
 @WebService
 /**
  * 
@@ -26,43 +32,46 @@ import com.landawn.abacus.LockMode;
  * @author Haiyang Li
  */
 public interface XLock<T> {
+
+    /** The Constant DEFAULT_TIMEOUT. */
     public static final long DEFAULT_TIMEOUT = 3 * 1000L;
 
     /**
-     * 
-     * @param target
-     * @param lockMode
-     * @param refLockCode
-     * @return
+     * Lock.
+     *
+     * @param target the target
+     * @param lockMode the lock mode
+     * @param refLockCode the ref lock code
+     * @return the string
      */
     public String lock(T target, LockMode lockMode, String refLockCode);
 
     /**
      * Method lock.
-     * 
-     * @param target
-     * @param lockMode
-     * @param refLockCode
-     * @param timeout
+     *
+     * @param target the target
+     * @param lockMode the lock mode
+     * @param refLockCode the ref lock code
+     * @param timeout the timeout
      * @return String
      */
     public String lock(T target, LockMode lockMode, String refLockCode, long timeout);
 
     /**
      * Method isLocked.
-     * 
-     * @param target
-     * @param requiredLockMode
-     * @param refLockCode
+     *
+     * @param target the target
+     * @param requiredLockMode the required lock mode
+     * @param refLockCode the ref lock code
      * @return boolean
      */
     public boolean isLocked(T target, LockMode requiredLockMode, String refLockCode);
 
     /**
      * Method unlock.
-     * 
-     * @param target
-     * @param refLockCode
+     *
+     * @param target the target
+     * @param refLockCode the ref lock code
      * @return boolean
      */
     public boolean unlock(T target, String refLockCode);

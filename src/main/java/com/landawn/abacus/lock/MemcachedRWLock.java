@@ -20,15 +20,20 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.MemcachedLock;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class MemcachedRWLock.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public class MemcachedRWLock<T> extends AbstractRWLock<T> {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(MemcachedRWLock.class);
 
+    /** The Constant DEFAULT_LIVE_TIME. */
     static final long DEFAULT_LIVE_TIME = 3600 * 1000L;
 
     /**
@@ -49,9 +54,7 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
      */
     private final String writeKeyPrefix;
 
-    /**
-     * Filed memcachedLock
-     */
+    /** Filed memcachedLock. */
     private final MemcachedLock<String, Number> mLock;
 
     /**
@@ -64,14 +67,34 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
      */
     private final long timeout;
 
+    /**
+     * Instantiates a new memcached RW lock.
+     *
+     * @param servers the servers
+     */
     public MemcachedRWLock(String servers) {
         this(servers, N.EMPTY_STRING, DEFAULT_LIVE_TIME, DEFAULT_TIMEOUT);
     }
 
+    /**
+     * Instantiates a new memcached RW lock.
+     *
+     * @param servers the servers
+     * @param keyPrefix the key prefix
+     * @param liveTime the live time
+     */
     public MemcachedRWLock(String servers, String keyPrefix, String liveTime) {
         this(servers, keyPrefix, Long.valueOf(liveTime), DEFAULT_TIMEOUT);
     }
 
+    /**
+     * Instantiates a new memcached RW lock.
+     *
+     * @param servers the servers
+     * @param keyPrefix the key prefix
+     * @param liveTime the live time
+     * @param timeout the timeout
+     */
     public MemcachedRWLock(String servers, String keyPrefix, long liveTime, long timeout) {
         this.mLock = new MemcachedLock<String, Number>(servers);
 
@@ -83,11 +106,22 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
         writeKeyPrefix = keyPrefix + "_WRITE_";
     }
 
+    /**
+     * Lock write on.
+     *
+     * @param target the target
+     */
     @Override
     public void lockWriteOn(T target) {
         lockWriteOn(target, timeout);
     }
 
+    /**
+     * Lock write on.
+     *
+     * @param target the target
+     * @param timeout the timeout
+     */
     @Override
     public void lockWriteOn(T target, long timeout) {
         checkTargetObject(target);
@@ -180,6 +214,11 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
         throw new AbacusException("Failed to lock the target object: " + N.toString(target) + " with key: " + key);
     }
 
+    /**
+     * Unlock write on.
+     *
+     * @param target the target
+     */
     @Override
     public void unlockWriteOn(T target) {
         checkTargetObject(target);
@@ -191,11 +230,22 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
         }
     }
 
+    /**
+     * Lock read on.
+     *
+     * @param target the target
+     */
     @Override
     public void lockReadOn(T target) {
         lockReadOn(target, timeout);
     }
 
+    /**
+     * Lock read on.
+     *
+     * @param target the target
+     * @param timeout the timeout
+     */
     @Override
     public void lockReadOn(T target, long timeout) {
         checkTargetObject(target);
@@ -255,6 +305,11 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
 
     }
 
+    /**
+     * Unlock read on.
+     *
+     * @param target the target
+     */
     @Override
     public void unlockReadOn(T target) {
         checkTargetObject(target);
@@ -266,6 +321,13 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
         }
     }
 
+    /**
+     * Generate key.
+     *
+     * @param keyPrefix the key prefix
+     * @param obj the obj
+     * @return the string
+     */
     protected String generateKey(String keyPrefix, T obj) {
         return N.isNullOrEmpty(keyPrefix) ? N.base64Encode(N.stringOf(obj).getBytes()) : (keyPrefix + N.base64Encode(N.stringOf(obj).getBytes()));
     }

@@ -21,25 +21,55 @@ import com.landawn.abacus.DataSource;
 import com.landawn.abacus.DataSourceManager;
 import com.landawn.abacus.DataSourceSelector;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class SimpleSourceSelector.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class SimpleSourceSelector implements DataSourceSelector {
+
+    /** The Constant QUERY_WITH_DATA_SOURCE. */
     private static final String QUERY_WITH_DATA_SOURCE = "queryWithDataSource";
 
+    /**
+     * Select.
+     *
+     * @param dataSourceManager the data source manager
+     * @param entityName the entity name
+     * @param sql the sql
+     * @param parameters the parameters
+     * @param options the options
+     * @return the data source
+     */
     @Override
     public DataSource select(DataSourceManager dataSourceManager, String entityName, String sql, Object[] parameters, Map<String, Object> options) {
         return getDataSource(dataSourceManager, options);
     }
 
+    /**
+     * Select.
+     *
+     * @param dataSourceManager the data source manager
+     * @param entityName the entity name
+     * @param sql the sql
+     * @param parameters the parameters
+     * @param options the options
+     * @return the data source
+     */
     @Override
     public DataSource select(DataSourceManager dataSourceManager, String entityName, String sql, List<?> parameters, Map<String, Object> options) {
         return getDataSource(dataSourceManager, options);
     }
 
+    /**
+     * Gets the data source.
+     *
+     * @param dataSourceManager the data source manager
+     * @param options the options
+     * @return the data source
+     */
     private DataSource getDataSource(DataSourceManager dataSourceManager, Map<String, Object> options) {
         String dataSourceName = (options == null) ? null : (String) options.get(QUERY_WITH_DATA_SOURCE);
 

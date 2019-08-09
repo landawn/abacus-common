@@ -17,18 +17,31 @@ package com.landawn.abacus.util;
 import java.nio.charset.Charset;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class Charsets.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class Charsets {
+
+    /** The Constant US_ASCII. */
     public static final Charset US_ASCII = Charset.forName("US-ASCII");
+
+    /** The Constant ISO_8859_1. */
     public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+
+    /** The Constant UTF_8. */
     public static final Charset UTF_8 = Charset.forName("UTF-8");
+
+    /** The Constant UTF_16BE. */
     public static final Charset UTF_16BE = Charset.forName("UTF-16BE");
+
+    /** The Constant UTF_16LE. */
     public static final Charset UTF_16LE = Charset.forName("UTF-16LE");
+
+    /** The Constant UTF_16. */
     public static final Charset UTF_16 = Charset.forName("UTF-16");
 
     /**
@@ -36,6 +49,7 @@ public final class Charsets {
      */
     public static final Charset DEFAULT = Charset.defaultCharset();
 
+    /** The Constant charsetPool. */
     private static final Map<String, Charset> charsetPool = new ObjectPool<String, Charset>(128);
     static {
         charsetPool.put(US_ASCII.name(), US_ASCII);
@@ -46,10 +60,19 @@ public final class Charsets {
         charsetPool.put(UTF_16.name(), UTF_16);
     }
 
+    /**
+     * Instantiates a new charsets.
+     */
     private Charsets() {
         // singleton.
     }
 
+    /**
+     * Gets the.
+     *
+     * @param charsetName the charset name
+     * @return the charset
+     */
     public static Charset get(String charsetName) {
         Charset charset = charsetPool.get(charsetName);
 

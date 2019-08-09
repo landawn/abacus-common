@@ -24,11 +24,12 @@ import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.util.Configuration;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.3
- * 
+ * The Class DataSourceManagerConfiguration.
+ *
  * @author Haiyang Li
+ * @since 1.3
  */
 public final class DataSourceManagerConfiguration extends Configuration {
     /**
@@ -46,9 +47,18 @@ public final class DataSourceManagerConfiguration extends Configuration {
      */
     public static final String LIVE_ENV = "liveEnv";
 
+    /** The live env. */
     private final String liveEnv;
+
+    /** The data source configuration list. */
     private List<DataSourceConfiguration> dataSourceConfigurationList;
 
+    /**
+     * Instantiates a new data source manager configuration.
+     *
+     * @param element the element
+     * @param properties the properties
+     */
     public DataSourceManagerConfiguration(Element element, Map<String, String> properties) {
         super(element, properties);
 
@@ -59,19 +69,37 @@ public final class DataSourceManagerConfiguration extends Configuration {
         }
     }
 
+    /**
+     * Gets the live env.
+     *
+     * @return the live env
+     */
     public String getLiveEnv() {
         return liveEnv;
     }
 
+    /**
+     * Gets the data source configuration list.
+     *
+     * @return the data source configuration list
+     */
     public List<DataSourceConfiguration> getDataSourceConfigurationList() {
         return dataSourceConfigurationList;
     }
 
+    /**
+     * Inits the.
+     */
     @Override
     protected void init() {
         dataSourceConfigurationList = new ArrayList<>();
     }
 
+    /**
+     * Complex element 2 attr.
+     *
+     * @param element the element
+     */
     @Override
     protected void complexElement2Attr(Element element) {
         String eleName = element.getNodeName();

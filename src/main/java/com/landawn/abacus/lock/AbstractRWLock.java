@@ -14,14 +14,21 @@
 
 package com.landawn.abacus.lock;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbstractRWLock.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public abstract class AbstractRWLock<T> implements RWLock<T> {
 
+    /**
+     * Check target object.
+     *
+     * @param target the target
+     */
     protected void checkTargetObject(T target) {
         if (target == null) {
             throw new NullPointerException("The target object can't be null");

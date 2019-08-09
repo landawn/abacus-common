@@ -16,6 +16,7 @@
  */
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
@@ -25,10 +26,10 @@ package com.landawn.abacus.util;
  * A mutable <code>float</code> wrapper.
  * <p>
  * Note that as MutableFloat does not extend Float, it is not treated by String.format as a Float parameter. 
- * 
+ *
+ * @version $Id: MutableFloat.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Float
  * @since 2.1
- * @version $Id: MutableFloat.java 1669791 2015-03-28 15:22:59Z britter $
  */
 public final class MutableFloat extends Number implements Comparable<MutableFloat>, Mutable {
 
@@ -59,10 +60,21 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @return the mutable float
+     */
     public static MutableFloat of(final float value) {
         return new MutableFloat(value);
     }
 
+    /**
+     * Value.
+     *
+     * @return the float
+     */
     public float value() {
         return value;
     }
@@ -88,25 +100,39 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
         this.value = value;
     }
 
+    /**
+     * Gets the and set.
+     *
+     * @param value the value
+     * @return the and set
+     */
     public float getAndSet(final float value) {
         final float result = this.value;
         this.value = value;
         return result;
     }
 
+    /**
+     * Sets the and get.
+     *
+     * @param value the value
+     * @return the float
+     */
     public float setAndGet(final float value) {
         this.value = value;
         return this.value;
     }
 
     /**
-    * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-    * Otherwise just return <code>false</code> without setting the value to new value.
-    * 
-    * @param newValue
+     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
+     * Otherwise just return <code>false</code> without setting the value to new value.
+     *
+     * @param <E> the element type
+     * @param newValue the new value
      * @param predicate - test the current value.
-    * @return
-    */
+     * @return true, if successful
+     * @throws E the e
+     */
     public <E extends Exception> boolean setIf(float newValue, Try.FloatPredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
@@ -119,10 +145,12 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
-     * 
-     * @param newValue
+     *
+     * @param <E> the element type
+     * @param newValue the new value
      * @param predicate the first parameter is the current value, the second parameter is the new value.
-     * @return
+     * @return true, if successful
+     * @throws E the e
      */
     public <E extends Exception> boolean setIf(float newValue, Try.FloatBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {

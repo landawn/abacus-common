@@ -22,11 +22,26 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Interface RestMethod.
+ */
 @Documented
 @Target(ANNOTATION_TYPE)
 @Retention(RUNTIME)
 public @interface RestMethod {
+
+    /**
+     * Value.
+     *
+     * @return the string
+     */
     String value();
 
+    /**
+     * Checks for body.
+     *
+     * @return true, if successful
+     */
     boolean hasBody() default false;
 }

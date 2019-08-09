@@ -14,12 +14,39 @@
 
 package com.landawn.abacus.http;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Enum ContentFormat.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public enum ContentFormat {
-    NONE, XML, XML_LZ4, XML_SNAPPY, XML_GZIP, JSON, JSON_LZ4, JSON_SNAPPY, JSON_GZIP, KRYO, LZ4, SNAPPY, GZIP;
+
+    /** The none. */
+    NONE,
+    /** The xml. */
+    XML,
+    /** The xml lz4. */
+    XML_LZ4,
+    /** The xml snappy. */
+    XML_SNAPPY,
+    /** The xml gzip. */
+    XML_GZIP,
+    /** The json. */
+    JSON,
+    /** The json lz4. */
+    JSON_LZ4,
+    /** The json snappy. */
+    JSON_SNAPPY,
+    /** The json gzip. */
+    JSON_GZIP,
+    /** The kryo. */
+    KRYO,
+    /** The lz4. */
+    LZ4,
+    /** The snappy. */
+    SNAPPY,
+    /** The gzip. */
+    GZIP;
 }

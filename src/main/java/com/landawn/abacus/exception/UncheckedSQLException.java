@@ -16,11 +16,12 @@ package com.landawn.abacus.exception;
 
 import java.sql.SQLException;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class UncheckedSQLException.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class UncheckedSQLException extends UncheckedException {
     /**
@@ -30,8 +31,8 @@ public class UncheckedSQLException extends UncheckedException {
 
     /**
      * Constructor for UncheckedSQLException.
-     * 
-     * @param cause
+     *
+     * @param cause the cause
      */
     public UncheckedSQLException(SQLException cause) {
         super(cause);
@@ -40,8 +41,9 @@ public class UncheckedSQLException extends UncheckedException {
 
     /**
      * Constructor for UncheckedSQLException.
-     * 
-     * @param errorMsg
+     *
+     * @param errorMsg the error msg
+     * @param cause the cause
      */
     public UncheckedSQLException(String errorMsg, SQLException cause) {
         super(errorMsg, cause);
@@ -57,8 +59,8 @@ public class UncheckedSQLException extends UncheckedException {
     }
 
     /**
-     * Method getErrorCode
-     * 
+     * Method getErrorCode.
+     *
      * @return int
      */
     public int getErrorCode() {

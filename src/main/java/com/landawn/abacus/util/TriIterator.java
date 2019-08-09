@@ -26,13 +26,19 @@ import com.landawn.abacus.util.function.IndexedConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.2.10
- * 
+ * The Class TriIterator.
+ *
  * @author Haiyang Li
+ * @param <A> the generic type
+ * @param <B> the generic type
+ * @param <C> the generic type
+ * @since 1.2.10
  */
 public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B, C>> {
+
+    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final TriIterator EMPTY = new TriIterator() {
         @Override
@@ -58,25 +64,40 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         }
     };
 
+    /**
+     * Empty.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @return the tri iterator
+     */
     public static <A, B, C> TriIterator<A, B, C> empty() {
         return EMPTY;
     }
 
     /**
      * Returns an infinite {@code BiIterator}.
-     * 
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
      * @param output transfer the next values.
-     * @return
+     * @return the tri iterator
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final Consumer<Triple<A, B, C>> output) {
         return generate(BooleanSupplier.TRUE, output);
     }
 
     /**
-     * 
-     * @param hasNext
-     * @param output
-     * @return
+     * Generate.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @param hasNext the has next
+     * @param output the output
+     * @return the tri iterator
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final BooleanSupplier hasNext, final Consumer<Triple<A, B, C>> output) {
         N.checkArgNotNull(hasNext);
@@ -138,11 +159,15 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
-     * @param fromIndex
-     * @param toIndex
-     * @param output
-     * @return
+     * Generate.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @param output the output
+     * @return the tri iterator
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final int fromIndex, final int toIndex, final IndexedConsumer<Triple<A, B, C>> output) {
         N.checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
@@ -204,25 +229,86 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         };
     }
 
+    /**
+     * Zip.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @param a the a
+     * @param b the b
+     * @param c the c
+     * @return the tri iterator
+     */
     public static <A, B, C> TriIterator<A, B, C> zip(final A[] a, final B[] b, final C[] c) {
         return zip(Array.asList(a), Array.asList(b), Array.asList(c));
     }
 
+    /**
+     * Zip.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @param a the a
+     * @param b the b
+     * @param c the c
+     * @param valueForNoneA the value for none A
+     * @param valueForNoneB the value for none B
+     * @param valueForNoneC the value for none C
+     * @return the tri iterator
+     */
     public static <A, B, C> TriIterator<A, B, C> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC) {
         return zip(Array.asList(a), Array.asList(b), Array.asList(c), valueForNoneA, valueForNoneB, valueForNoneC);
     }
 
+    /**
+     * Zip.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @param a the a
+     * @param b the b
+     * @param c the c
+     * @return the tri iterator
+     */
     public static <A, B, C> TriIterator<A, B, C> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), c == null ? null : c.iterator());
     }
 
+    /**
+     * Zip.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @param a the a
+     * @param b the b
+     * @param c the c
+     * @param valueForNoneA the value for none A
+     * @param valueForNoneB the value for none B
+     * @param valueForNoneC the value for none C
+     * @return the tri iterator
+     */
     public static <A, B, C> TriIterator<A, B, C> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), c == null ? null : c.iterator(), valueForNoneA, valueForNoneB,
                 valueForNoneC);
     }
 
+    /**
+     * Zip.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @param iterA the iter A
+     * @param iterB the iter B
+     * @param iterC the iter C
+     * @return the tri iterator
+     */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterator<A> iterA, final Iterator<B> iterB, final Iterator<C> iterC) {
         if (iterA == null || iterB == null || iterC == null) {
             return empty();
@@ -275,6 +361,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         };
     }
 
+    /**
+     * Zip.
+     *
+     * @param <A> the generic type
+     * @param <B> the generic type
+     * @param <C> the generic type
+     * @param iterA the iter A
+     * @param iterB the iter B
+     * @param iterC the iter C
+     * @param valueForNoneA the value for none A
+     * @param valueForNoneB the value for none B
+     * @param valueForNoneC the value for none C
+     * @return the tri iterator
+     */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterator<A> iterA, final Iterator<B> iterB, final Iterator<C> iterC, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC) {
         final Iterator<A> iter1 = iterA == null ? ObjIterator.<A> empty() : iterA;
@@ -332,10 +432,15 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
-     * @param iter
+     * Unzip.
+     *
+     * @param <T> the generic type
+     * @param <L> the generic type
+     * @param <M> the generic type
+     * @param <R> the generic type
+     * @param iter the iter
      * @param unzip output parameter.
-     * @return
+     * @return the tri iterator
      */
     public static <T, L, M, R> TriIterator<L, M, R> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<L, M, R>> unzip) {
         if (iter == null) {
@@ -359,12 +464,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         return TriIterator.generate(hasNext, output);
     }
 
+    /**
+     * For each remaining.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public abstract <E extends Exception> void forEachRemaining(final Try.TriConsumer<? super A, ? super B, ? super C, E> action) throws E;
 
     /**
      * It's preferred to call <code>forEachRemaining(Try.TriConsumer)</code> to avoid the create the unnecessary <code>Triple</code> Objects.
-     * 
-     * @deprecated
+     *
+     * @param action the action
+     * @deprecated 
      */
     @Override
     @Deprecated
@@ -372,8 +485,22 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         super.forEachRemaining(action);
     }
 
+    /**
+     * Map.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @return the obj iterator
+     */
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, R> mapper);
 
+    /**
+     * Stream.
+     *
+     * @param <R> the generic type
+     * @param mapper the mapper
+     * @return the stream
+     */
     public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, R> mapper) {
         N.checkArgNotNull(mapper);
 

@@ -22,46 +22,99 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.TypeAttrParser;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * A factory for creating Cache objects.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class CacheFactory {
+
+    /**
+     * Instantiates a new cache factory.
+     */
     private CacheFactory() {
     }
 
+    /**
+     * Creates a new Cache object.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
+     * @return the local cache< k, v>
+     */
     public static <K, V> LocalCache<K, V> createLocalCache(final int capacity, final long evictDelay) {
         return new LocalCache<K, V>(capacity, evictDelay);
     }
 
     /**
-     * 
-     * @param capacity
-     * @param evictDelay
+     * Creates a new Cache object.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param capacity the capacity
+     * @param evictDelay the evict delay
      * @param defaultLiveTime default value is 3 hours
      * @param defaultMaxIdleTime default value is 30 minutes
-     * @return
+     * @return the local cache< k, v>
      */
     public static <K, V> LocalCache<K, V> createLocalCache(final int capacity, final long evictDelay, final long defaultLiveTime,
             final long defaultMaxIdleTime) {
         return new LocalCache<K, V>(capacity, evictDelay, defaultLiveTime, defaultMaxIdleTime);
     }
 
+    /**
+     * Creates a new Cache object.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param dcc the dcc
+     * @return the distributed cache< k, v>
+     */
     public static <K, V> DistributedCache<K, V> createDistributedCache(final DistributedCacheClient<V> dcc) {
         return new DistributedCache<K, V>(dcc);
     }
 
+    /**
+     * Creates a new Cache object.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param dcc the dcc
+     * @param keyPrefix the key prefix
+     * @return the distributed cache< k, v>
+     */
     public static <K, V> DistributedCache<K, V> createDistributedCache(final DistributedCacheClient<V> dcc, final String keyPrefix) {
         return new DistributedCache<K, V>(dcc, keyPrefix);
     }
 
+    /**
+     * Creates a new Cache object.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param dcc the dcc
+     * @param keyPrefix the key prefix
+     * @param maxFailedNumForRetry the max failed num for retry
+     * @param retryDelay the retry delay
+     * @return the distributed cache< k, v>
+     */
     public static <K, V> DistributedCache<K, V> createDistributedCache(final DistributedCacheClient<V> dcc, final String keyPrefix,
             final int maxFailedNumForRetry, final long retryDelay) {
         return new DistributedCache<K, V>(dcc, keyPrefix, maxFailedNumForRetry, retryDelay);
     }
 
+    /**
+     * Creates a new Cache object.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param provider the provider
+     * @return the cache< k, v>
+     */
     @SuppressWarnings("unchecked")
     public static <K, V> Cache<K, V> createCache(final String provider) {
         TypeAttrParser attrResult = TypeAttrParser.parse(provider);

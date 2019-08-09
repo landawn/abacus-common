@@ -21,13 +21,16 @@ import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.CharStream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class CharIterator.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class CharIterator extends ImmutableIterator<Character> {
+
+    /** The Constant EMPTY. */
     public static final CharIterator EMPTY = new CharIterator() {
         @Override
         public boolean hasNext() {
@@ -40,15 +43,34 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         }
     };
 
+    /**
+     * Empty.
+     *
+     * @return the char iterator
+     */
     public static CharIterator empty() {
         return EMPTY;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the char iterator
+     */
     @SafeVarargs
     public static CharIterator of(final char... a) {
         return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the char iterator
+     */
     public static CharIterator of(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -87,9 +109,9 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param iteratorSupplier
-     * @return
+     *
+     * @param iteratorSupplier the iterator supplier
+     * @return the char iterator
      */
     public static CharIterator of(final Supplier<? extends CharIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -127,9 +149,9 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param arraySupplier
-     * @return
+     *
+     * @param arraySupplier the array supplier
+     * @return the char iterator
      */
     public static CharIterator oF(final Supplier<char[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -174,9 +196,9 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
      * Returns an infinite {@code CharIterator}.
-     * 
-     * @param supplier
-     * @return
+     *
+     * @param supplier the supplier
+     * @return the char iterator
      */
     public static CharIterator generate(final CharSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -195,10 +217,11 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * 
-     * @param hasNext
-     * @param supplier
-     * @return
+     * Generate.
+     *
+     * @param hasNext the has next
+     * @param supplier the supplier
+     * @return the char iterator
      */
     public static CharIterator generate(final BooleanSupplier hasNext, final CharSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -222,7 +245,9 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * 
+     * Next.
+     *
+     * @return the character
      * @Deprecated use <code>nextChar()</code> instead.
      */
     @Deprecated
@@ -231,12 +256,27 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         return nextChar();
     }
 
+    /**
+     * Next char.
+     *
+     * @return the char
+     */
     public abstract char nextChar();
 
+    /**
+     * To array.
+     *
+     * @return the char[]
+     */
     public char[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * To list.
+     *
+     * @return the char list
+     */
     public CharList toList() {
         final CharList list = new CharList();
 
@@ -247,10 +287,22 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         return list;
     }
 
+    /**
+     * Stream.
+     *
+     * @return the char stream
+     */
     public CharStream stream() {
         return CharStream.of(this);
     }
 
+    /**
+     * Foreach remaining.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void foreachRemaining(Try.CharConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -259,6 +311,11 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         }
     }
 
+    /**
+     * For each remaining.
+     *
+     * @param action the action
+     */
     @Override
     @Deprecated
     public void forEachRemaining(java.util.function.Consumer<? super Character> action) {

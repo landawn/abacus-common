@@ -21,13 +21,16 @@ import com.landawn.abacus.util.function.LongSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.LongStream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class LongIterator.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class LongIterator extends ImmutableIterator<Long> {
+
+    /** The Constant EMPTY. */
     public static final LongIterator EMPTY = new LongIterator() {
         @Override
         public boolean hasNext() {
@@ -40,15 +43,34 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         }
     };
 
+    /**
+     * Empty.
+     *
+     * @return the long iterator
+     */
     public static LongIterator empty() {
         return EMPTY;
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @return the long iterator
+     */
     @SafeVarargs
     public static LongIterator of(final long... a) {
         return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
     }
 
+    /**
+     * Of.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the long iterator
+     */
     public static LongIterator of(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -87,9 +109,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param iteratorSupplier
-     * @return
+     *
+     * @param iteratorSupplier the iterator supplier
+     * @return the long iterator
      */
     public static LongIterator of(final Supplier<? extends LongIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -127,9 +149,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      * Lazy evaluation.
-     * 
-     * @param arraySupplier
-     * @return
+     *
+     * @param arraySupplier the array supplier
+     * @return the long iterator
      */
     public static LongIterator oF(final Supplier<long[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -174,9 +196,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      * Returns an infinite {@code LongIterator}.
-     * 
-     * @param supplier
-     * @return
+     *
+     * @param supplier the supplier
+     * @return the long iterator
      */
     public static LongIterator generate(final LongSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -195,10 +217,11 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
-     * @param hasNext
-     * @param supplier
-     * @return
+     * Generate.
+     *
+     * @param hasNext the has next
+     * @param supplier the supplier
+     * @return the long iterator
      */
     public static LongIterator generate(final BooleanSupplier hasNext, final LongSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -222,7 +245,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * 
+     * Next.
+     *
+     * @return the long
      * @Deprecated use <code>nextLong()</code> instead.
      */
     @Deprecated
@@ -231,12 +256,27 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         return nextLong();
     }
 
+    /**
+     * Next long.
+     *
+     * @return the long
+     */
     public abstract long nextLong();
 
+    /**
+     * To array.
+     *
+     * @return the long[]
+     */
     public long[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * To list.
+     *
+     * @return the long list
+     */
     public LongList toList() {
         final LongList list = new LongList();
 
@@ -247,10 +287,22 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         return list;
     }
 
+    /**
+     * Stream.
+     *
+     * @return the long stream
+     */
     public LongStream stream() {
         return LongStream.of(this);
     }
 
+    /**
+     * Foreach remaining.
+     *
+     * @param <E> the element type
+     * @param action the action
+     * @throws E the e
+     */
     public <E extends Exception> void foreachRemaining(Try.LongConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -259,6 +311,11 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         }
     }
 
+    /**
+     * For each remaining.
+     *
+     * @param action the action
+     */
     @Override
     @Deprecated
     public void forEachRemaining(java.util.function.Consumer<? super Long> action) {

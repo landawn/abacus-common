@@ -58,37 +58,80 @@ import com.landawn.abacus.util.Configuration;
 import com.landawn.abacus.util.JdbcUtil;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class SQLConnectionManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class SQLConnectionManager extends AbstractConnectionManager {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(SQLConnectionManager.class);
 
+    /** The ds. */
     private final DataSource ds;
+
+    /** The xpool. */
     private final Map<Connection, Connection> xpool = new IdentityHashMap<Connection, Connection>();
+
+    /** The pool. */
     private final ObjectPool<PoolableConnection> pool;
 
+    /** The driver. */
     private final String driver;
+
+    /** The url. */
     private final String url;
+
+    /** The user. */
     private final String user;
+
+    /** The password. */
     private final String password;
+
+    /** The initial size. */
     private final int initialSize;
+
+    /** The min idle. */
     private final int minIdle;
+
+    /** The max idle. */
     private final int maxIdle;
+
+    /** The max active. */
     private final int maxActive;
+
+    /** The live time. */
     private final long liveTime;
+
+    /** The max idle time. */
     private final long maxIdleTime;
+
+    /** The max wait time. */
     private final long maxWaitTime;
+
+    /** The max open prepared statements per connection. */
     private final int maxOpenPreparedStatementsPerConnection;
+
+    /** The validation query. */
     private final String validationQuery;
+
+    /** The test on borrow. */
     private final boolean testOnBorrow;
+
+    /** The test on return. */
     private final boolean testOnReturn;
 
+    /** The is closed. */
     private boolean isClosed = false;
 
+    /**
+     * Instantiates a new SQL connection manager.
+     *
+     * @param props the props
+     */
     public SQLConnectionManager(Map<String, ?> props) {
         super(props);
         driver = properties.get(DRIVER);
@@ -138,6 +181,9 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         });
     }
 
+    /**
+     * Update last SQL execution failure time.
+     */
     @Override
     public void updateLastSQLExecutionFailureTime() {
         pool.lock();
@@ -149,16 +195,31 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Gets the max active.
+     *
+     * @return the max active
+     */
     @Override
     public int getMaxActive() {
         return maxActive;
     }
 
+    /**
+     * Gets the num active.
+     *
+     * @return the num active
+     */
     @Override
     public int getNumActive() {
         return xpool.size();
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     @Override
     public Connection getConnection() {
         checkClose();
@@ -202,6 +263,11 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         return conn;
     }
 
+    /**
+     * Close connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void closeConnection(Connection conn) {
         if (conn == null) {
@@ -237,6 +303,11 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Detroy connection.
+     *
+     * @param conn the conn
+     */
     @Override
     public void detroyConnection(Connection conn) {
         PoolableConnection poolableConn = (PoolableConnection) conn;
@@ -263,6 +334,9 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (isClosed) {
@@ -274,6 +348,11 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         isClosed = true;
     }
 
+    /**
+     * Clear.
+     *
+     * @param isClose the is close
+     */
     void clear(boolean isClose) {
         if (isClosed) {
             return;
@@ -345,6 +424,9 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         logger.warn("Completed to lock pool and close connection one by one");
     }
 
+    /**
+     * Check close.
+     */
     private void checkClose() {
         if (isClosed) {
             throw new IllegalStateException("The connection pool has been closed");
@@ -353,9 +435,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
 
     /**
      * Method newConnection.
-     * 
-     * @param liveTime
-     * @param maxIdleTime
+     *
      * @return PoolableConnection
      */
     private synchronized PoolableConnection newConnection() {
@@ -392,8 +472,8 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
 
     /**
      * Method finalize.
-     * 
-     * @throws Throwable
+     *
+     * @throws Throwable the throwable
      */
     @Override
     protected void finalize() throws Throwable {
@@ -434,6 +514,12 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         }
     }
 
+    /**
+     * Validate.
+     *
+     * @param conn the conn
+     * @return true, if successful
+     */
     private boolean validate(Connection conn) {
         if (conn == null) {
             return false;
@@ -465,11 +551,26 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         return true;
     }
 
+    /**
+     * The Class DriverManagerDataSource.
+     */
     class DriverManagerDataSource extends AbstractDataSource {
+
+        /** The url. */
         private final String url;
 
+        /** The connection properties. */
         private final Properties connectionProperties;
 
+        /**
+         * Instantiates a new driver manager data source.
+         *
+         * @param driver the driver
+         * @param url the url
+         * @param user the user
+         * @param password the password
+         * @param props the props
+         */
         DriverManagerDataSource(String driver, String url, String user, String password, Properties props) {
             this.url = url;
             this.connectionProperties = new Properties();
@@ -488,6 +589,12 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
             }
         }
 
+        /**
+         * Gets the connection.
+         *
+         * @return the connection
+         * @throws SQLException the SQL exception
+         */
         @Override
         public Connection getConnection() throws SQLException {
             return DriverManager.getConnection(url, connectionProperties);

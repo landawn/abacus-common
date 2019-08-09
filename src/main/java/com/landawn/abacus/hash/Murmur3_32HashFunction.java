@@ -33,6 +33,7 @@ import com.landawn.abacus.hash.Util.Ints;
 import com.landawn.abacus.hash.Util.Longs;
 import com.landawn.abacus.hash.Util.UnsignedBytes;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -44,30 +45,61 @@ import com.landawn.abacus.hash.Util.UnsignedBytes;
  * @author Kurt Alfred Kluever
  */
 final class Murmur3_32HashFunction extends AbstractStreamingHashFunction implements Serializable {
+
+    /** The Constant C1. */
     private static final int C1 = 0xcc9e2d51;
+
+    /** The Constant C2. */
     private static final int C2 = 0x1b873593;
 
+    /** The seed. */
     private final int seed;
 
+    /**
+     * Instantiates a new murmur 3 32 hash function.
+     *
+     * @param seed the seed
+     */
     Murmur3_32HashFunction(int seed) {
         this.seed = seed;
     }
 
+    /**
+     * Bits.
+     *
+     * @return the int
+     */
     @Override
     public int bits() {
         return 32;
     }
 
+    /**
+     * New hasher.
+     *
+     * @return the hasher
+     */
     @Override
     public Hasher newHasher() {
         return new Murmur3_32Hasher(seed);
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "Hashing.murmur3_32(" + seed + ")";
     }
 
+    /**
+     * Equals.
+     *
+     * @param object the object
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object object) {
         if (object instanceof Murmur3_32HashFunction) {
@@ -77,11 +109,22 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         return false;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return getClass().hashCode() ^ seed;
     }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @return the hash code
+     */
     @Override
     public HashCode hash(int input) {
         int k1 = mixK1(input);
@@ -90,6 +133,12 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         return fmix(h1, Ints.BYTES);
     }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @return the hash code
+     */
     @Override
     public HashCode hash(long input) {
         int low = (int) input;
@@ -104,6 +153,12 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         return fmix(h1, Longs.BYTES);
     }
 
+    /**
+     * Hash.
+     *
+     * @param input the input
+     * @return the hash code
+     */
     // TODO(kak): Maybe implement #hashBytes instead?
     @Override
     public HashCode hash(CharSequence input) {
@@ -126,6 +181,12 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         return fmix(h1, Chars.BYTES * input.length());
     }
 
+    /**
+     * Mix K 1.
+     *
+     * @param k1 the k 1
+     * @return the int
+     */
     private static int mixK1(int k1) {
         k1 *= C1;
         k1 = Integer.rotateLeft(k1, 15);
@@ -133,6 +194,13 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         return k1;
     }
 
+    /**
+     * Mix H 1.
+     *
+     * @param h1 the h 1
+     * @param k1 the k 1
+     * @return the int
+     */
     private static int mixH1(int h1, int k1) {
         h1 ^= k1;
         h1 = Integer.rotateLeft(h1, 13);
@@ -140,6 +208,13 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         return h1;
     }
 
+    /**
+     * Fmix.
+     *
+     * @param h1 the h 1
+     * @param length the length
+     * @return the hash code
+     */
     // Finalization mix - force all bits of a hash block to avalanche
     private static HashCode fmix(int h1, int length) {
         h1 ^= length;
@@ -151,17 +226,36 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         return HashCode.fromInt(h1);
     }
 
+    /**
+     * The Class Murmur3_32Hasher.
+     */
     private static final class Murmur3_32Hasher extends AbstractStreamingHasher {
+
+        /** The Constant CHUNK_SIZE. */
         private static final int CHUNK_SIZE = 4;
+
+        /** The h 1. */
         private int h1;
+
+        /** The length. */
         private int length;
 
+        /**
+         * Instantiates a new murmur 3 32 hasher.
+         *
+         * @param seed the seed
+         */
         Murmur3_32Hasher(int seed) {
             super(CHUNK_SIZE);
             this.h1 = seed;
             this.length = 0;
         }
 
+        /**
+         * Process.
+         *
+         * @param bb the bb
+         */
         @Override
         protected void process(ByteBuffer bb) {
             int k1 = Murmur3_32HashFunction.mixK1(bb.getInt());
@@ -169,6 +263,11 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
             length += CHUNK_SIZE;
         }
 
+        /**
+         * Process remaining.
+         *
+         * @param bb the bb
+         */
         @Override
         protected void processRemaining(ByteBuffer bb) {
             length += bb.remaining();
@@ -179,11 +278,17 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
             h1 ^= Murmur3_32HashFunction.mixK1(k1);
         }
 
+        /**
+         * Make hash.
+         *
+         * @return the hash code
+         */
         @Override
         public HashCode makeHash() {
             return Murmur3_32HashFunction.fmix(h1, length);
         }
     }
 
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 0L;
 }

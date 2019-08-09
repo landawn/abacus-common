@@ -23,43 +23,91 @@ import javax.sql.DataSource;
 
 import com.landawn.abacus.util.ClassUtil;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbstractDataSource.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public abstract class AbstractDataSource implements DataSource {
+
+    /**
+     * Gets the connection.
+     *
+     * @param username the username
+     * @param password the password
+     * @return the connection
+     * @throws SQLException the SQL exception
+     */
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the parent logger.
+     *
+     * @return the parent logger
+     * @throws SQLFeatureNotSupportedException the SQL feature not supported exception
+     */
     @Override
     public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the log writer.
+     *
+     * @return the log writer
+     * @throws SQLException the SQL exception
+     */
     @Override
     public PrintWriter getLogWriter() throws SQLException {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Sets the log writer.
+     *
+     * @param out the new log writer
+     * @throws SQLException the SQL exception
+     */
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Sets the login timeout.
+     *
+     * @param seconds the new login timeout
+     * @throws SQLException the SQL exception
+     */
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the login timeout.
+     *
+     * @return the login timeout
+     * @throws SQLException the SQL exception
+     */
     @Override
     public int getLoginTimeout() throws SQLException {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Unwrap.
+     *
+     * @param <T> the generic type
+     * @param iface the iface
+     * @return the t
+     * @throws SQLException the SQL exception
+     */
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         if (isWrapperFor(iface)) {
@@ -70,6 +118,13 @@ public abstract class AbstractDataSource implements DataSource {
         }
     }
 
+    /**
+     * Checks if is wrapper for.
+     *
+     * @param iface the iface
+     * @return true, if is wrapper for
+     * @throws SQLException the SQL exception
+     */
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return iface.isAssignableFrom(this.getClass());

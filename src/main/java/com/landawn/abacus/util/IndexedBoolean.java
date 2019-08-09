@@ -14,40 +14,83 @@
 
 package com.landawn.abacus.util;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class IndexedBoolean.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class IndexedBoolean extends AbstractIndexed {
+
+    /** The value. */
     private final boolean value;
 
+    /**
+     * Instantiates a new indexed boolean.
+     *
+     * @param index the index
+     * @param value the value
+     */
     IndexedBoolean(long index, boolean value) {
         super(index);
         this.value = value;
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @param index the index
+     * @return the indexed boolean
+     */
     public static IndexedBoolean of(boolean value, int index) {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedBoolean(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param value the value
+     * @param index the index
+     * @return the indexed boolean
+     */
     public static IndexedBoolean of(boolean value, long index) {
         N.checkArgNotNegative(index, "index");
 
         return new IndexedBoolean(index, value);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedBoolean> of(final BooleanIterator iter) {
         return of(iter, 0);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedBoolean> of(final BooleanIterator iter, final int startIndex) {
         return of(iter, (long) startIndex);
     }
 
+    /**
+     * Of.
+     *
+     * @param iter the iter
+     * @param startIndex the start index
+     * @return the obj iterator
+     */
     public static ObjIterator<IndexedBoolean> of(final BooleanIterator iter, final long startIndex) {
         if (startIndex < 0) {
             throw new IllegalArgumentException("Invalid start index: " + startIndex);
@@ -68,20 +111,41 @@ public final class IndexedBoolean extends AbstractIndexed {
         };
     }
 
+    /**
+     * Value.
+     *
+     * @return true, if successful
+     */
     public boolean value() {
         return value;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         return (int) index + (value ? 0 : 31);
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         return obj instanceof IndexedBoolean && ((IndexedBoolean) obj).index == index && N.equals(((IndexedBoolean) obj).value, value);
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

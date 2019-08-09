@@ -35,44 +35,67 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.2.6
- * 
+ * The Class DateUtil.
+ *
  * @author Haiyang Li
+ * @since 1.2.6
  */
 public abstract class DateUtil {
 
+    /** The Constant UTC_TIME_ZONE. */
     // ...
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
-    /**
-     * The system default time zone
-     */
+
+    /** The system default time zone. */
     public static final TimeZone LOCAL_TIME_ZONE = TimeZone.getDefault();
 
     /**
      * Date format.
      */
     public static final String LOCAL_YEAR_FORMAT = "yyyy";
+
+    /** The Constant LOCAL_MONTH_DAY_FORMAT. */
     public static final String LOCAL_MONTH_DAY_FORMAT = "MM-dd";
+
+    /** The Constant LOCAL_MONTH_DAY_FORMAT_SLASH. */
     static final String LOCAL_MONTH_DAY_FORMAT_SLASH = "MM/dd";
+
+    /** The Constant LOCAL_DATE_FORMAT. */
     public static final String LOCAL_DATE_FORMAT = "yyyy-MM-dd";
+
+    /** The Constant LOCAL_DATE_FORMAT_SLASH. */
     static final String LOCAL_DATE_FORMAT_SLASH = "yyyy/MM/dd";
+
+    /** The Constant LOCAL_TIME_FORMAT. */
     public static final String LOCAL_TIME_FORMAT = "HH:mm:ss";
+
+    /** The Constant LOCAL_DATETIME_FORMAT. */
     public static final String LOCAL_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    /** The Constant LOCAL_DATETIME_FORMAT_SLASH. */
     static final String LOCAL_DATETIME_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss";
+
+    /** The Constant LOCAL_TIMESTAMP_FORMAT. */
     public static final String LOCAL_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
+    /** The Constant LOCAL_TIMESTAMP_FORMAT_SLASH. */
     static final String LOCAL_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss.SSS";
 
     /**
      * It's default date/time format.
      */
     public static final String ISO_8601_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
+    /** The Constant ISO_8601_DATETIME_FORMAT_SLASH. */
     static final String ISO_8601_DATETIME_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss'Z'";
     /**
      * It's default timestamp format.
      */
     public static final String ISO_8601_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
+    /** The Constant ISO_8601_TIMESTAMP_FORMAT_SLASH. */
     static final String ISO_8601_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss.SSS'Z'";
 
     /**
@@ -88,6 +111,7 @@ public abstract class DateUtil {
      */
     public static final int SEMI_MONTH = 1001;
 
+    /** The Constant fields. */
     private static final int[][] fields = { { Calendar.MILLISECOND }, { Calendar.SECOND }, { Calendar.MINUTE }, { Calendar.HOUR_OF_DAY, Calendar.HOUR },
             { Calendar.DATE, Calendar.DAY_OF_MONTH, Calendar.AM_PM
             /* Calendar.DAY_OF_YEAR, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK_IN_MONTH */
@@ -97,7 +121,7 @@ public abstract class DateUtil {
      * A new instance of <code>java.sql.Time</code> returned is based on the
      * current time in the default time zone with the default locale.
      *
-     * @return
+     * @return the time
      */
     public static Time currentTime() {
         return new Time(System.currentTimeMillis());
@@ -107,7 +131,7 @@ public abstract class DateUtil {
      * A new instance of <code>java.sql.Date</code> returned is based on the
      * current time in the default time zone with the default locale.
      *
-     * @return
+     * @return the date
      */
     public static Date currentDate() {
         return new Date(System.currentTimeMillis());
@@ -117,7 +141,7 @@ public abstract class DateUtil {
      * A new instance of <code>java.sql.Timestamp</code> returned is based on
      * the current time in the default time zone with the default locale.
      *
-     * @return
+     * @return the timestamp
      */
     public static Timestamp currentTimestamp() {
         return new Timestamp(System.currentTimeMillis());
@@ -127,7 +151,7 @@ public abstract class DateUtil {
      * A new instance of <code>java.util.Date</code> returned is based on the
      * current time in the default time zone with the default locale.
      *
-     * @return
+     * @return the java.util. date
      */
     public static java.util.Date currentJUDate() {
         return new java.util.Date();
@@ -143,21 +167,44 @@ public abstract class DateUtil {
         return Calendar.getInstance();
     }
 
+    /**
+     * Current gregorian calendar.
+     *
+     * @return the gregorian calendar
+     */
     public static GregorianCalendar currentGregorianCalendar() {
         return new GregorianCalendar();
     }
 
+    /**
+     * Current XML gregorian calendar.
+     *
+     * @return the XML gregorian calendar
+     */
     public static XMLGregorianCalendar currentXMLGregorianCalendar() {
         return dataTypeFactory.newXMLGregorianCalendar(currentGregorianCalendar());
     }
 
+    /** The Constant dfPool. */
     private static final Map<String, Queue<DateFormat>> dfPool = new ObjectPool<>(64);
+
+    /** The Constant calendarPool. */
     private static final Map<TimeZone, Queue<Calendar>> calendarPool = new ObjectPool<>(64);
+
+    /** The Constant utcTimestampDFPool. */
     private static final Queue<DateFormat> utcTimestampDFPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+
+    /** The Constant utcDateTimeDFPool. */
     private static final Queue<DateFormat> utcDateTimeDFPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+
+    /** The Constant utcCalendarPool. */
     private static final Queue<Calendar> utcCalendarPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+
+    /** The Constant utcTimestampFormatCharsPool. */
     // ...
     private static final Queue<char[]> utcTimestampFormatCharsPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+
+    /** The Constant dataTypeFactory. */
     private static final DatatypeFactory dataTypeFactory;
 
     static {
@@ -174,6 +221,7 @@ public abstract class DateUtil {
         dataTypeFactory = temp;
     }
 
+    /** The Constant cbufOfSTDInt. */
     // ...
     private static final char[][][] cbufOfSTDInt = new char[5][][];
 
@@ -213,74 +261,167 @@ public abstract class DateUtil {
         }
     }
 
+    /**
+     * Instantiates a new date util.
+     */
     DateUtil() {
         // singleton
     }
 
+    /**
+     * Creates the JU date.
+     *
+     * @param calendar the calendar
+     * @return the java.util. date
+     */
     public static java.util.Date createJUDate(final Calendar calendar) {
         return (calendar == null) ? null : createJUDate(calendar.getTimeInMillis());
     }
 
+    /**
+     * Creates the JU date.
+     *
+     * @param date the date
+     * @return the java.util. date
+     */
     public static java.util.Date createJUDate(final java.util.Date date) {
         return (date == null) ? null : createJUDate(date.getTime());
     }
 
+    /**
+     * Creates the JU date.
+     *
+     * @param timeInMillis the time in millis
+     * @return the java.util. date
+     */
     public static java.util.Date createJUDate(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
         return (timeInMillis == 0) ? null : new java.util.Date(timeInMillis);
     }
 
+    /**
+     * Creates the date.
+     *
+     * @param calendar the calendar
+     * @return the date
+     */
     public static Date createDate(final Calendar calendar) {
         return (calendar == null) ? null : createDate(calendar.getTimeInMillis());
     }
 
+    /**
+     * Creates the date.
+     *
+     * @param date the date
+     * @return the date
+     */
     public static Date createDate(final java.util.Date date) {
         return (date == null) ? null : createDate(date.getTime());
     }
 
+    /**
+     * Creates the date.
+     *
+     * @param timeInMillis the time in millis
+     * @return the date
+     */
     public static Date createDate(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
         return (timeInMillis == 0) ? null : new Date(timeInMillis);
     }
 
+    /**
+     * Creates the time.
+     *
+     * @param calendar the calendar
+     * @return the time
+     */
     public static Time createTime(final Calendar calendar) {
         return (calendar == null) ? null : createTime(calendar.getTimeInMillis());
     }
 
+    /**
+     * Creates the time.
+     *
+     * @param date the date
+     * @return the time
+     */
     public static Time createTime(final java.util.Date date) {
         return (date == null) ? null : createTime(date.getTime());
     }
 
+    /**
+     * Creates the time.
+     *
+     * @param timeInMillis the time in millis
+     * @return the time
+     */
     public static Time createTime(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
         return (timeInMillis == 0) ? null : new Time(timeInMillis);
     }
 
+    /**
+     * Creates the timestamp.
+     *
+     * @param calendar the calendar
+     * @return the timestamp
+     */
     public static Timestamp createTimestamp(final Calendar calendar) {
         return (calendar == null) ? null : createTimestamp(calendar.getTimeInMillis());
     }
 
+    /**
+     * Creates the timestamp.
+     *
+     * @param date the date
+     * @return the timestamp
+     */
     public static Timestamp createTimestamp(final java.util.Date date) {
         return (date == null) ? null : createTimestamp(date.getTime());
     }
 
+    /**
+     * Creates the timestamp.
+     *
+     * @param timeInMillis the time in millis
+     * @return the timestamp
+     */
     public static Timestamp createTimestamp(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
         return (timeInMillis == 0) ? null : new Timestamp(timeInMillis);
     }
 
+    /**
+     * Creates the calendar.
+     *
+     * @param calendar the calendar
+     * @return the calendar
+     */
     public static Calendar createCalendar(final Calendar calendar) {
         return (calendar == null) ? null : createCalendar(calendar.getTimeInMillis());
     }
 
+    /**
+     * Creates the calendar.
+     *
+     * @param date the date
+     * @return the calendar
+     */
     public static Calendar createCalendar(final java.util.Date date) {
         return (date == null) ? null : createCalendar(date.getTime());
     }
 
+    /**
+     * Creates the calendar.
+     *
+     * @param timeInMillis the time in millis
+     * @return the calendar
+     */
     public static Calendar createCalendar(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
@@ -295,6 +436,13 @@ public abstract class DateUtil {
         return c;
     }
 
+    /**
+     * Creates the calendar.
+     *
+     * @param timeInMillis the time in millis
+     * @param tz the tz
+     * @return the calendar
+     */
     public static Calendar createCalendar(final long timeInMillis, final TimeZone tz) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
@@ -309,14 +457,32 @@ public abstract class DateUtil {
         return c;
     }
 
+    /**
+     * Creates the gregorian calendar.
+     *
+     * @param calendar the calendar
+     * @return the gregorian calendar
+     */
     public static GregorianCalendar createGregorianCalendar(final Calendar calendar) {
         return (calendar == null) ? null : createGregorianCalendar(calendar.getTimeInMillis());
     }
 
+    /**
+     * Creates the gregorian calendar.
+     *
+     * @param date the date
+     * @return the gregorian calendar
+     */
     public static GregorianCalendar createGregorianCalendar(final java.util.Date date) {
         return (date == null) ? null : createGregorianCalendar(date.getTime());
     }
 
+    /**
+     * Creates the gregorian calendar.
+     *
+     * @param timeInMillis the time in millis
+     * @return the gregorian calendar
+     */
     public static GregorianCalendar createGregorianCalendar(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
@@ -331,6 +497,13 @@ public abstract class DateUtil {
         return c;
     }
 
+    /**
+     * Creates the gregorian calendar.
+     *
+     * @param timeInMillis the time in millis
+     * @param tz the tz
+     * @return the gregorian calendar
+     */
     public static GregorianCalendar createGregorianCalendar(final long timeInMillis, final TimeZone tz) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
@@ -345,14 +518,32 @@ public abstract class DateUtil {
         return c;
     }
 
+    /**
+     * Creates the XML gregorian calendar.
+     *
+     * @param calendar the calendar
+     * @return the XML gregorian calendar
+     */
     public static XMLGregorianCalendar createXMLGregorianCalendar(final Calendar calendar) {
         return (calendar == null) ? null : createXMLGregorianCalendar(calendar.getTimeInMillis());
     }
 
+    /**
+     * Creates the XML gregorian calendar.
+     *
+     * @param date the date
+     * @return the XML gregorian calendar
+     */
     public static XMLGregorianCalendar createXMLGregorianCalendar(final java.util.Date date) {
         return (date == null) ? null : createXMLGregorianCalendar(date.getTime());
     }
 
+    /**
+     * Creates the XML gregorian calendar.
+     *
+     * @param timeInMillis the time in millis
+     * @return the XML gregorian calendar
+     */
     public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
 
@@ -363,10 +554,23 @@ public abstract class DateUtil {
         return dataTypeFactory.newXMLGregorianCalendar(createGregorianCalendar(timeInMillis));
     }
 
+    /**
+     * Parses the JU date.
+     *
+     * @param date the date
+     * @return the java.util. date
+     */
     public static java.util.Date parseJUDate(final String date) {
         return parseJUDate(date, null);
     }
 
+    /**
+     * Parses the JU date.
+     *
+     * @param date the date
+     * @param format the format
+     * @return the java.util. date
+     */
     public static java.util.Date parseJUDate(final String date, final String format) {
         return parseJUDate(date, format, null);
     }
@@ -375,10 +579,11 @@ public abstract class DateUtil {
      * Converts the specified <code>date</code> with the specified {@code format} to a new instance of java.util.Date.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
      *
-     * @param date
-     * @param format
-     * @throws IllegalArgumentException
-     *             if the date given can't be parsed with specified format.
+     * @param date the date
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the java.util. date
+     * @throws IllegalArgumentException             if the date given can't be parsed with specified format.
      */
     public static java.util.Date parseJUDate(final String date, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
@@ -388,10 +593,23 @@ public abstract class DateUtil {
         return createJUDate(parse(date, format, timeZone));
     }
 
+    /**
+     * Parses the date.
+     *
+     * @param date the date
+     * @return the date
+     */
     public static Date parseDate(final String date) {
         return parseDate(date, null);
     }
 
+    /**
+     * Parses the date.
+     *
+     * @param date the date
+     * @param format the format
+     * @return the date
+     */
     public static Date parseDate(final String date, final String format) {
         return parseDate(date, format, null);
     }
@@ -399,11 +617,11 @@ public abstract class DateUtil {
     /**
      * Converts the specified <code>date</code> with the specified {@code format} to a new instance of java.sql.Date.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
-     * 
-     * @param date
-     * @param format
-     * @param timeZone
-     * @return
+     *
+     * @param date the date
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the date
      */
     public static Date parseDate(final String date, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
@@ -413,10 +631,23 @@ public abstract class DateUtil {
         return createDate(parse(date, format, timeZone));
     }
 
+    /**
+     * Parses the time.
+     *
+     * @param date the date
+     * @return the time
+     */
     public static Time parseTime(final String date) {
         return parseTime(date, null);
     }
 
+    /**
+     * Parses the time.
+     *
+     * @param date the date
+     * @param format the format
+     * @return the time
+     */
     public static Time parseTime(final String date, final String format) {
         return parseTime(date, format, null);
     }
@@ -424,11 +655,11 @@ public abstract class DateUtil {
     /**
      * Converts the specified <code>date</code> with the specified {@code format} to a new instance of Time.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
-     * 
-     * @param date
-     * @param format
-     * @param timeZone
-     * @return
+     *
+     * @param date the date
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the time
      */
     public static Time parseTime(final String date, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
@@ -438,10 +669,23 @@ public abstract class DateUtil {
         return createTime(parse(date, format, timeZone));
     }
 
+    /**
+     * Parses the timestamp.
+     *
+     * @param date the date
+     * @return the timestamp
+     */
     public static Timestamp parseTimestamp(final String date) {
         return parseTimestamp(date, null);
     }
 
+    /**
+     * Parses the timestamp.
+     *
+     * @param date the date
+     * @param format the format
+     * @return the timestamp
+     */
     public static Timestamp parseTimestamp(final String date, final String format) {
         return parseTimestamp(date, format, null);
     }
@@ -449,11 +693,11 @@ public abstract class DateUtil {
     /**
      * Converts the specified <code>date</code> with the specified {@code format} to a new instance of Timestamp.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
-     * 
-     * @param date
-     * @param format
-     * @param timeZone
-     * @return
+     *
+     * @param date the date
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the timestamp
      */
     public static Timestamp parseTimestamp(final String date, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
@@ -463,10 +707,23 @@ public abstract class DateUtil {
         return createTimestamp(parse(date, format, timeZone));
     }
 
+    /**
+     * Parses the calendar.
+     *
+     * @param calendar the calendar
+     * @return the calendar
+     */
     public static Calendar parseCalendar(final String calendar) {
         return parseCalendar(calendar, null);
     }
 
+    /**
+     * Parses the calendar.
+     *
+     * @param calendar the calendar
+     * @param format the format
+     * @return the calendar
+     */
     public static Calendar parseCalendar(final String calendar, final String format) {
         return parseCalendar(calendar, format, null);
     }
@@ -474,11 +731,11 @@ public abstract class DateUtil {
     /**
      * Converts the specified <code>calendar</code> with the specified {@code format} to a new instance of Calendar.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
-     * 
-     * @param calendar
-     * @param format
-     * @param timeZone
-     * @return
+     *
+     * @param calendar the calendar
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the calendar
      */
     public static Calendar parseCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -488,10 +745,23 @@ public abstract class DateUtil {
         return createCalendar(parse(calendar, format, timeZone));
     }
 
+    /**
+     * Parses the gregorian calendar.
+     *
+     * @param calendar the calendar
+     * @return the gregorian calendar
+     */
     public static GregorianCalendar parseGregorianCalendar(final String calendar) {
         return parseGregorianCalendar(calendar, null);
     }
 
+    /**
+     * Parses the gregorian calendar.
+     *
+     * @param calendar the calendar
+     * @param format the format
+     * @return the gregorian calendar
+     */
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format) {
         return parseGregorianCalendar(calendar, format, null);
     }
@@ -499,11 +769,11 @@ public abstract class DateUtil {
     /**
      * Converts the specified <code>calendar</code> with the specified {@code format} to a new instance of GregorianCalendar.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
-     * 
-     * @param calendar
-     * @param format
-     * @param timeZone
-     * @return
+     *
+     * @param calendar the calendar
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the gregorian calendar
      */
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -513,10 +783,23 @@ public abstract class DateUtil {
         return createGregorianCalendar(parse(calendar, format, timeZone));
     }
 
+    /**
+     * Parses the XML gregorian calendar.
+     *
+     * @param calendar the calendar
+     * @return the XML gregorian calendar
+     */
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar) {
         return parseXMLGregorianCalendar(calendar, null);
     }
 
+    /**
+     * Parses the XML gregorian calendar.
+     *
+     * @param calendar the calendar
+     * @param format the format
+     * @return the XML gregorian calendar
+     */
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format) {
         return parseXMLGregorianCalendar(calendar, format, null);
     }
@@ -524,11 +807,11 @@ public abstract class DateUtil {
     /**
      * Converts the specified <code>calendar</code> with the specified {@code format} to a new instance of XMLGregorianCalendar.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
-     * 
-     * @param calendar
-     * @param format
-     * @param timeZone
-     * @return
+     *
+     * @param calendar the calendar
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the XML gregorian calendar
      */
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -538,6 +821,14 @@ public abstract class DateUtil {
         return createXMLGregorianCalendar(parse(calendar, format, timeZone));
     }
 
+    /**
+     * Parses the.
+     *
+     * @param date the date
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the long
+     */
     private static long parse(final String date, String format, TimeZone timeZone) {
         if ((format == null) && date.length() > 4 && (date.charAt(2) >= '0' && date.charAt(2) <= '9' && date.charAt(4) >= '0' && date.charAt(4) <= '9')) {
             try {
@@ -576,38 +867,101 @@ public abstract class DateUtil {
         }
     }
 
+    /**
+     * Format.
+     *
+     * @param date the date
+     * @return the string
+     */
     public static String format(final java.util.Date date) {
         return format(date, null, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param date the date
+     * @param format the format
+     * @return the string
+     */
     public static String format(final java.util.Date date, final String format) {
         return format(date, format, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param date the date
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the string
+     */
     public static String format(final java.util.Date date, final String format, final TimeZone timeZone) {
         return formatDate(null, date, format, timeZone);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param date the date
+     */
     public static void format(final Writer writer, final java.util.Date date) {
         format(writer, date, null, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param date the date
+     * @param format the format
+     */
     public static void format(final Writer writer, final java.util.Date date, final String format) {
         formatDate(writer, date, format, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param date the date
+     * @param format the format
+     * @param timeZone the time zone
+     */
     public static void format(final Writer writer, final java.util.Date date, final String format, final TimeZone timeZone) {
         formatDate(writer, date, format, timeZone);
     }
 
+    /**
+     * Format.
+     *
+     * @param c the c
+     * @return the string
+     */
     public static String format(final Calendar c) {
         return format(c, null, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param c the c
+     * @param format the format
+     * @return the string
+     */
     public static String format(final Calendar c, final String format) {
         return format(c, format, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param c the c
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the string
+     */
     public static String format(final Calendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
             final BufferedWriter cbuff = Objectory.createBufferedWriter();
@@ -623,14 +977,35 @@ public abstract class DateUtil {
         return format(createJUDate(c), format, timeZone);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param c the c
+     */
     public static void format(final Writer writer, final Calendar c) {
         format(writer, c, null, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param c the c
+     * @param format the format
+     */
     public static void format(final Writer writer, final Calendar c, final String format) {
         format(writer, c, format, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param c the c
+     * @param format the format
+     * @param timeZone the time zone
+     */
     public static void format(final Writer writer, final Calendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
             fastDateFormat(writer, c.getTimeInMillis(), false);
@@ -639,14 +1014,35 @@ public abstract class DateUtil {
         }
     }
 
+    /**
+     * Format.
+     *
+     * @param c the c
+     * @return the string
+     */
     public static String format(final XMLGregorianCalendar c) {
         return format(c, null, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param c the c
+     * @param format the format
+     * @return the string
+     */
     public static String format(final XMLGregorianCalendar c, final String format) {
         return format(c, format, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param c the c
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the string
+     */
     public static String format(final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
             final BufferedWriter cbuff = Objectory.createBufferedWriter();
@@ -663,14 +1059,35 @@ public abstract class DateUtil {
         return format(createJUDate(c.toGregorianCalendar()), format, timeZone);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param c the c
+     */
     public static void format(final Writer writer, final XMLGregorianCalendar c) {
         format(writer, c, null, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param c the c
+     * @param format the format
+     */
     public static void format(final Writer writer, final XMLGregorianCalendar c, final String format) {
         format(writer, c, format, null);
     }
 
+    /**
+     * Format.
+     *
+     * @param writer the writer
+     * @param c the c
+     * @param format the format
+     * @param timeZone the time zone
+     */
     public static void format(final Writer writer, final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
             fastDateFormat(writer, c.toGregorianCalendar().getTimeInMillis(), false);
@@ -687,6 +1104,7 @@ public abstract class DateUtil {
      * Sets the years field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -705,6 +1123,7 @@ public abstract class DateUtil {
      * Sets the months field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -723,6 +1142,7 @@ public abstract class DateUtil {
      * Sets the day of month field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -742,6 +1162,7 @@ public abstract class DateUtil {
      * from  0-23.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -760,6 +1181,7 @@ public abstract class DateUtil {
      * Sets the minute field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -778,6 +1200,7 @@ public abstract class DateUtil {
      * Sets the seconds field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -796,6 +1219,7 @@ public abstract class DateUtil {
      * Sets the milliseconds field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
@@ -815,6 +1239,7 @@ public abstract class DateUtil {
      * This does not use a lenient calendar.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param calendarField  the {@code Calendar} field to set the amount to
      * @param amount the amount to set
@@ -841,9 +1266,10 @@ public abstract class DateUtil {
      * <p>
      * <code>N.roll(date, -5, TimeUnit.DAYS)</code>.
      *
-     * @param date
-     * @param amount
-     * @param unit
+     * @param <T> the generic type
+     * @param date the date
+     * @param amount the amount
+     * @param unit the unit
      * @return a new instance of Date with the specified amount rolled.
      * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
@@ -861,9 +1287,10 @@ public abstract class DateUtil {
      * <p>
      * <code>N.roll(date, -5, CalendarUnit.DAY)</code>.
      *
-     * @param date
-     * @param amount
-     * @param unit
+     * @param <T> the generic type
+     * @param date the date
+     * @param amount the amount
+     * @param unit the unit
      * @return a new instance of Date with the specified amount rolled.
      * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
@@ -895,9 +1322,10 @@ public abstract class DateUtil {
      * <p>
      * <code>N.roll(c, -5, TimeUnit.DAYS)</code>.
      *
-     * @param calendar
-     * @param amount
-     * @param unit
+     * @param <T> the generic type
+     * @param calendar the calendar
+     * @param amount the amount
+     * @param unit the unit
      * @return a new instance of Calendar with the specified amount rolled.
      * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
@@ -915,9 +1343,10 @@ public abstract class DateUtil {
      * <p>
      * <code>N.roll(c, -5, CalendarUnit.DAY)</code>.
      *
-     * @param calendar
-     * @param amount
-     * @param unit
+     * @param <T> the generic type
+     * @param calendar the calendar
+     * @param amount the amount
+     * @param unit the unit
      * @return a new instance of Calendar with the specified amount rolled.
      * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
@@ -943,6 +1372,7 @@ public abstract class DateUtil {
      * Adds a number of years to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -957,6 +1387,7 @@ public abstract class DateUtil {
      * Adds a number of months to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -971,6 +1402,7 @@ public abstract class DateUtil {
      * Adds a number of weeks to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -985,6 +1417,7 @@ public abstract class DateUtil {
      * Adds a number of days to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -999,6 +1432,7 @@ public abstract class DateUtil {
      * Adds a number of hours to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1013,6 +1447,7 @@ public abstract class DateUtil {
      * Adds a number of minutes to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1027,6 +1462,7 @@ public abstract class DateUtil {
      * Adds a number of seconds to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1041,6 +1477,7 @@ public abstract class DateUtil {
      * Adds a number of milliseconds to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param date  the date, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1055,6 +1492,7 @@ public abstract class DateUtil {
      * Adds a number of years to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param calendar  the calendar, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1069,6 +1507,7 @@ public abstract class DateUtil {
      * Adds a number of months to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param calendar  the calendar, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1083,6 +1522,7 @@ public abstract class DateUtil {
      * Adds a number of weeks to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param calendar  the calendar, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1097,6 +1537,7 @@ public abstract class DateUtil {
      * Adds a number of days to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param calendar  the calendar, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1111,6 +1552,7 @@ public abstract class DateUtil {
      * Adds a number of hours to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param calendar  the calendar, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1125,6 +1567,7 @@ public abstract class DateUtil {
      * Adds a number of minutes to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param calendar  the calendar, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1139,6 +1582,7 @@ public abstract class DateUtil {
      * Adds a number of seconds to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param calendar  the calendar, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1153,6 +1597,7 @@ public abstract class DateUtil {
      * Adds a number of milliseconds to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
+     * @param <T> the generic type
      * @param calendar  the calendar, not null
      * @param amount  the amount to add, may be negative
      * @return the new {@code Date} with the amount added
@@ -1168,12 +1613,12 @@ public abstract class DateUtil {
      * 
      * <p>Rounds a date, leaving the field specified as the most
      * significant field.</p>
-     *
+     * 
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if this was passed with HOUR, it would return
      * 28 Mar 2002 14:00:00.000. If this was passed with MONTH, it
      * would return 1 April 2002 0:00:00.000.</p>
-     *
+     * 
      * <p>For a date in a timezone that handles the change to daylight
      * saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
      * Suppose daylight saving time begins at 02:00 on March 30. Rounding a
@@ -1186,6 +1631,7 @@ public abstract class DateUtil {
      * <li>March 30, 2003 02:40 rounds to March 30, 2003 04:00</li>
      * </ul>
      *
+     * @param <T> the generic type
      * @param date  the date to work with, not null
      * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
      * @return the different rounded date, not null
@@ -1207,12 +1653,12 @@ public abstract class DateUtil {
      * 
      * <p>Rounds a date, leaving the field specified as the most
      * significant field.</p>
-     *
+     * 
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if this was passed with HOUR, it would return
      * 28 Mar 2002 14:00:00.000. If this was passed with MONTH, it
      * would return 1 April 2002 0:00:00.000.</p>
-     *
+     * 
      * <p>For a date in a timezone that handles the change to daylight
      * saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
      * Suppose daylight saving time begins at 02:00 on March 30. Rounding a
@@ -1225,6 +1671,7 @@ public abstract class DateUtil {
      * <li>March 30, 2003 02:40 rounds to March 30, 2003 04:00</li>
      * </ul>
      *
+     * @param <T> the generic type
      * @param calendar  the date to work with, not null
      * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
      * @return the different rounded date, not null
@@ -1251,12 +1698,13 @@ public abstract class DateUtil {
      * 
      * <p>Truncates a date, leaving the field specified as the most
      * significant field.</p>
-     *
+     * 
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if you passed with HOUR, it would return 28 Mar
      * 2002 13:00:00.000.  If this was passed with MONTH, it would
      * return 1 Mar 2002 0:00:00.000.</p>
      *
+     * @param <T> the generic type
      * @param date  the date to work with, not null
      * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
      * @return the different truncated date, not null
@@ -1279,12 +1727,13 @@ public abstract class DateUtil {
      * 
      * <p>Truncates a date, leaving the field specified as the most
      * significant field.</p>
-     *
+     * 
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if you passed with HOUR, it would return 28 Mar
      * 2002 13:00:00.000.  If this was passed with MONTH, it would
      * return 1 Mar 2002 0:00:00.000.</p>
      *
+     * @param <T> the generic type
      * @param calendar  the date to work with, not null
      * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
      * @return the different truncated date, not null
@@ -1311,12 +1760,13 @@ public abstract class DateUtil {
      * 
      * <p>Gets a date ceiling, leaving the field specified as the most
      * significant field.</p>
-     *
+     * 
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if you passed with HOUR, it would return 28 Mar
      * 2002 14:00:00.000.  If this was passed with MONTH, it would
      * return 1 Apr 2002 0:00:00.000.</p>
      *
+     * @param <T> the generic type
      * @param date  the date to work with, not null
      * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
      * @return the different ceil date, not null
@@ -1340,12 +1790,13 @@ public abstract class DateUtil {
      * 
      * <p>Gets a date ceiling, leaving the field specified as the most
      * significant field.</p>
-     *
+     * 
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if you passed with HOUR, it would return 28 Mar
      * 2002 14:00:00.000.  If this was passed with MONTH, it would
      * return 1 Apr 2002 0:00:00.000.</p>
      *
+     * @param <T> the generic type
      * @param calendar  the date to work with, not null
      * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
      * @return the different ceil date, not null
@@ -1375,7 +1826,7 @@ public abstract class DateUtil {
      * <p>Internal calculation method.</p>
      *
      * @param val  the calendar, not null
-     * @param unit  the field constant
+     * @param field the field
      * @param modType  type to truncate, round or ceiling
      * @throws ArithmeticException if the year is over 280 million
      */
@@ -1603,6 +2054,13 @@ public abstract class DateUtil {
         return truncate(date1, field).compareTo(truncate(date2, field));
     }
 
+    /**
+     * Gets the sdf.
+     *
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the sdf
+     */
     private static DateFormat getSDF(final String format, final TimeZone timeZone) {
         DateFormat sdf = null;
 
@@ -1646,6 +2104,13 @@ public abstract class DateUtil {
         return sdf;
     }
 
+    /**
+     * Recycle SDF.
+     *
+     * @param format the format
+     * @param timeZone the time zone
+     * @param sdf the sdf
+     */
     private static void recycleSDF(final String format, final TimeZone timeZone, final DateFormat sdf) {
         if (timeZone == UTC_TIME_ZONE) {
             if ((format.length() == 28) && (format == ISO_8601_TIMESTAMP_FORMAT)) {
@@ -1660,6 +2125,13 @@ public abstract class DateUtil {
         }
     }
 
+    /**
+     * Check date format.
+     *
+     * @param str the str
+     * @param format the format
+     * @return the string
+     */
     private static String checkDateFormat(final String str, final String format) {
         if (N.isNullOrEmpty(format)) {
             int len = str.length();
@@ -1727,6 +2199,13 @@ public abstract class DateUtil {
         return format;
     }
 
+    /**
+     * Check time zone.
+     *
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the time zone
+     */
     private static TimeZone checkTimeZone(final String format, TimeZone timeZone) {
         if (timeZone == null) {
             timeZone = format.endsWith("'Z'") ? UTC_TIME_ZONE : LOCAL_TIME_ZONE;
@@ -1735,6 +2214,14 @@ public abstract class DateUtil {
         return timeZone;
     }
 
+    /**
+     * Fast date parse.
+     *
+     * @param str the str
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the long
+     */
     private static long fastDateParse(final String str, final String format, final TimeZone timeZone) {
         if (!((str.length() == 24) || (str.length() == 20) || (str.length() == 19) || (str.length() == 23))) {
             return 0;
@@ -1806,6 +2293,14 @@ public abstract class DateUtil {
         return timeInMillis;
     }
 
+    /**
+     * Parses the int.
+     *
+     * @param str the str
+     * @param from the from
+     * @param to the to
+     * @return the int
+     */
     private static int parseInt(final String str, int from, final int to) {
         int result = 0;
 
@@ -1816,6 +2311,14 @@ public abstract class DateUtil {
         return result;
     }
 
+    /**
+     * Creates the date.
+     *
+     * @param <T> the generic type
+     * @param cls the cls
+     * @param millis the millis
+     * @return the t
+     */
     private static <T extends java.util.Date> T createDate(final Class<? extends java.util.Date> cls, final long millis) {
         java.util.Date result = null;
 
@@ -1834,6 +2337,14 @@ public abstract class DateUtil {
         return (T) result;
     }
 
+    /**
+     * Creates the calendar.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param millis the millis
+     * @return the t
+     */
     private static <T extends Calendar> T createCalendar(final T c, final long millis) {
         final Class<T> cls = (Class<T>) c.getClass();
 
@@ -1856,6 +2367,15 @@ public abstract class DateUtil {
         return (T) result;
     }
 
+    /**
+     * Format date.
+     *
+     * @param writer the writer
+     * @param date the date
+     * @param format the format
+     * @param timeZone the time zone
+     * @return the string
+     */
     private static String formatDate(final Writer writer, final java.util.Date date, String format, TimeZone timeZone) {
         boolean isTimestamp = date instanceof Timestamp;
 
@@ -1900,6 +2420,13 @@ public abstract class DateUtil {
         return str;
     }
 
+    /**
+     * Fast date format.
+     *
+     * @param writer the writer
+     * @param timeInMillis the time in millis
+     * @param isTimestamp the is timestamp
+     */
     private static void fastDateFormat(final Writer writer, final long timeInMillis, final boolean isTimestamp) {
         Calendar c = utcCalendarPool.poll();
 
@@ -2003,7 +2530,14 @@ public abstract class DateUtil {
         CEILING
     }
 
+    /**
+     * The Class DateTimeUtil.
+     */
     public static class DateTimeUtil extends DateUtil {
+
+        /**
+         * Instantiates a new date time util.
+         */
         private DateTimeUtil() {
             // singleton.
         }

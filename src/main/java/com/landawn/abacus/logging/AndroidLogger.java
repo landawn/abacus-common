@@ -18,15 +18,23 @@ import com.landawn.abacus.util.N;
 
 import android.util.Log;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AndroidLogger.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 class AndroidLogger extends AbstractLogger {
+
+    /** The Constant MAX_TAG_SIZE. */
     private static final int MAX_TAG_SIZE = 23;
 
+    /**
+     * Instantiates a new android logger.
+     *
+     * @param name the name
+     */
     public AndroidLogger(String name) {
         super(name.startsWith("com.landawn.abacus") ? "Abacus"
                 : (name.length() > MAX_TAG_SIZE ? name.substring(N.max(name.length() - MAX_TAG_SIZE, name.lastIndexOf('.') + 1)) : name));
@@ -38,76 +46,156 @@ class AndroidLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * Checks if is trace enabled.
+     *
+     * @return true, if is trace enabled
+     */
     @Override
     public boolean isTraceEnabled() {
         return Log.isLoggable(name, Log.VERBOSE);
     }
 
+    /**
+     * Trace.
+     *
+     * @param msg the msg
+     */
     @Override
     public void trace(String msg) {
         Log.v(name, msg);
     }
 
+    /**
+     * Trace.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void trace(String msg, Throwable t) {
         Log.v(name, msg, t);
     }
 
+    /**
+     * Checks if is debug enabled.
+     *
+     * @return true, if is debug enabled
+     */
     @Override
     public boolean isDebugEnabled() {
         return Log.isLoggable(name, Log.DEBUG);
     }
 
+    /**
+     * Debug.
+     *
+     * @param msg the msg
+     */
     @Override
     public void debug(String msg) {
         Log.d(name, msg);
     }
 
+    /**
+     * Debug.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void debug(String msg, Throwable t) {
         Log.d(name, msg, t);
     }
 
+    /**
+     * Checks if is info enabled.
+     *
+     * @return true, if is info enabled
+     */
     @Override
     public boolean isInfoEnabled() {
         return Log.isLoggable(name, Log.INFO);
     }
 
+    /**
+     * Info.
+     *
+     * @param msg the msg
+     */
     @Override
     public void info(String msg) {
         Log.i(name, msg);
     }
 
+    /**
+     * Info.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void info(String msg, Throwable t) {
         Log.i(name, msg, t);
     }
 
+    /**
+     * Checks if is warn enabled.
+     *
+     * @return true, if is warn enabled
+     */
     @Override
     public boolean isWarnEnabled() {
         return Log.isLoggable(name, Log.WARN);
     }
 
+    /**
+     * Warn.
+     *
+     * @param msg the msg
+     */
     @Override
     public void warn(String msg) {
         Log.w(name, msg);
     }
 
+    /**
+     * Warn.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void warn(String msg, Throwable t) {
         Log.w(name, msg, t);
     }
 
+    /**
+     * Checks if is error enabled.
+     *
+     * @return true, if is error enabled
+     */
     @Override
     public boolean isErrorEnabled() {
         return Log.isLoggable(name, Log.ERROR);
     }
 
+    /**
+     * Error.
+     *
+     * @param msg the msg
+     */
     @Override
     public void error(String msg) {
         Log.e(name, msg);
     }
 
+    /**
+     * Error.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void error(String msg, Throwable t) {
         Log.e(name, msg, t);

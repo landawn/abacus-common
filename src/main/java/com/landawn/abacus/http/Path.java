@@ -22,6 +22,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+// TODO: Auto-generated Javadoc
 /**
  * Named replacement in the URL path. Values are converted to string using
  * {@link String#valueOf(Object)} and URL encoded.
@@ -50,8 +51,18 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target(PARAMETER)
 public @interface Path {
+
+    /**
+     * Value.
+     *
+     * @return the string
+     */
     String value();
 
-    /** Specifies whether the argument value to the annotated method parameter is URL encoded. */
+    /**
+     *  Specifies whether the argument value to the annotated method parameter is URL encoded.
+     *
+     * @return true, if successful
+     */
     boolean encode() default true;
 }

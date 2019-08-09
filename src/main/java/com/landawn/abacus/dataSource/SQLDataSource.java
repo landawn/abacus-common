@@ -40,35 +40,68 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.TypeAttrParser;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class SQLDataSource.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class SQLDataSource extends AbstractDataSource implements com.landawn.abacus.DataSource {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(SQLDataSource.class);
 
+    /** The name. */
     private final String name;
+
+    /** The properties. */
     private final Properties<String, String> properties;
+
+    /** The connection manager. */
     private final ConnectionManager connectionManager;
+
+    /** The read onlyconnection manager. */
     private final ConnectionManager readOnlyconnectionManager;
 
+    /** The database product name. */
     private final String databaseProductName;
+
+    /** The database product version. */
     private final String databaseProductVersion;
+
+    /** The default isolation level. */
     private final IsolationLevel defaultIsolationLevel;
+
+    /** The default connection isolation. */
     private final int defaultConnectionIsolation;
+
+    /** The query with read only connection by default. */
     private final boolean queryWithReadOnlyConnectionByDefault;
+
+    /** The sql log. */
     private final boolean sqlLog;
+
+    /** The is perf log. */
     private final boolean isPerfLog;
+
+    /** The perf log. */
     private final long perfLog;
 
+    /** The slice selector. */
     private final SliceSelector sliceSelector;
 
+    /** The persistent connection. */
     private Connection persistentConnection;
 
+    /** The is closed. */
     private boolean isClosed = false;
 
+    /**
+     * Instantiates a new SQL data source.
+     *
+     * @param dsConfig the ds config
+     */
     public SQLDataSource(DataSourceConfiguration dsConfig) {
         properties = new Properties<>();
 
@@ -123,6 +156,11 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
         }
     }
 
+    /**
+     * Instantiates a new SQL data source.
+     *
+     * @param props the props
+     */
     public SQLDataSource(Map<String, ?> props) {
         properties = new Properties<>();
 
@@ -174,6 +212,11 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
         }
     }
 
+    /**
+     * Close.
+     *
+     * @param conn the conn
+     */
     private void close(Connection conn) {
         if (conn != null) {
             try {
@@ -187,31 +230,63 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
         }
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     @Override
     public Connection getConnection() {
         return connectionManager.getConnection();
     }
 
+    /**
+     * Gets the read only connection.
+     *
+     * @return the read only connection
+     */
     @Override
     public Connection getReadOnlyConnection() {
         return readOnlyconnectionManager.getConnection();
     }
 
+    /**
+     * Gets the slice selector.
+     *
+     * @return the slice selector
+     */
     @Override
     public SliceSelector getSliceSelector() {
         return sliceSelector;
     }
 
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
     @Override
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the properties.
+     *
+     * @return the properties
+     */
     @Override
     public Properties<String, String> getProperties() {
         return properties;
     }
 
+    /**
+     * Creates the connection manager.
+     *
+     * @param provider the provider
+     * @param props the props
+     * @return the connection manager
+     */
     private ConnectionManager createConnectionManager(String provider, Map<String, ?> props) {
         if (N.isNullOrEmpty(provider)) {
             return new SQLConnectionManager(props);
@@ -232,22 +307,48 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
         }
     }
 
+    /**
+     * Gets the database product name.
+     *
+     * @return the database product name
+     */
     public String getDatabaseProductName() {
         return databaseProductName;
     }
 
+    /**
+     * Gets the database product version.
+     *
+     * @return the database product version
+     */
     public String getDatabaseProductVersion() {
         return databaseProductVersion;
     }
 
+    /**
+     * Gets the default connection isolation.
+     *
+     * @return the default connection isolation
+     */
     public int getDefaultConnectionIsolation() {
         return defaultConnectionIsolation;
     }
 
+    /**
+     * Checks if is persistent connection.
+     *
+     * @param conn the conn
+     * @return true, if is persistent connection
+     */
     public boolean isPersistentConnection(Connection conn) {
         return conn == persistentConnection;
     }
 
+    /**
+     * Gets the persistent connection.
+     *
+     * @return the persistent connection
+     */
     public synchronized Connection getPersistentConnection() {
         if (persistentConnection == null) {
             persistentConnection = getReadOnlyConnection();
@@ -281,36 +382,74 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
         return persistentConnection;
     }
 
+    /**
+     * Gets the default isolation level.
+     *
+     * @return the default isolation level
+     */
     public IsolationLevel getDefaultIsolationLevel() {
         return defaultIsolationLevel;
     }
 
+    /**
+     * Checks if is sql log enable.
+     *
+     * @return true, if is sql log enable
+     */
     public boolean isSqlLogEnable() {
         return sqlLog;
     }
 
+    /**
+     * Checks if is perf log.
+     *
+     * @return true, if is perf log
+     */
     public boolean isPerfLog() {
         return isPerfLog;
     }
 
+    /**
+     * Gets the perf log.
+     *
+     * @return the perf log
+     */
     public long getPerfLog() {
         return perfLog;
     }
 
+    /**
+     * Checks if is query with read only connection by default.
+     *
+     * @return true, if is query with read only connection by default
+     */
     public boolean isQueryWithReadOnlyConnectionByDefault() {
         return queryWithReadOnlyConnectionByDefault;
     }
 
+    /**
+     * Gets the max active.
+     *
+     * @return the max active
+     */
     @Override
     public int getMaxActive() {
         return connectionManager.getMaxActive();
     }
 
+    /**
+     * Gets the current active.
+     *
+     * @return the current active
+     */
     @Override
     public int getCurrentActive() {
         return connectionManager.getNumActive();
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (isClosed) {
@@ -322,11 +461,21 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
         isClosed = true;
     }
 
+    /**
+     * Checks if is closed.
+     *
+     * @return true, if is closed
+     */
     @Override
     public boolean isClosed() {
         return isClosed;
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -336,6 +485,12 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
         return result;
     }
 
+    /**
+     * Equals.
+     *
+     * @param obj the obj
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -351,6 +506,11 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
         return false;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return properties.toString();

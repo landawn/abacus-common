@@ -20,27 +20,53 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.TypeAttrParser;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * A factory for creating RWLock objects.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class RWLockFactory {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(RWLockFactory.class);
 
+    /**
+     * Instantiates a new RW lock factory.
+     */
     private RWLockFactory() {
         // singleton
     }
 
+    /**
+     * Creates a new RWLock object.
+     *
+     * @param <T> the generic type
+     * @return the RW lock< t>
+     */
     public static <T> RWLock<T> createLocalRWLock() {
         return new LocalRWLock<T>();
     }
 
+    /**
+     * Creates a new RWLock object.
+     *
+     * @param <T> the generic type
+     * @param timeout the timeout
+     * @return the RW lock< t>
+     */
     public static <T> RWLock<T> createLocalRWLock(long timeout) {
         return new LocalRWLock<T>(timeout);
     }
 
+    /**
+     * Creates a new RWLock object.
+     *
+     * @param <T> the generic type
+     * @param provider the provider
+     * @return the RW lock< t>
+     */
     @SuppressWarnings("unchecked")
     public static <T> RWLock<T> createLock(String provider) {
         if (logger.isInfoEnabled()) {

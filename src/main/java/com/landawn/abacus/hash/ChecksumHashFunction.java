@@ -20,6 +20,7 @@ import java.util.zip.Checksum;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.function.Supplier;
 
+// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 
@@ -28,10 +29,23 @@ import com.landawn.abacus.util.function.Supplier;
  * @author Colin Decker
  */
 final class ChecksumHashFunction extends AbstractStreamingHashFunction implements Serializable {
+
+    /** The checksum supplier. */
     private final Supplier<? extends Checksum> checksumSupplier;
+
+    /** The bits. */
     private final int bits;
+
+    /** The to string. */
     private final String toString;
 
+    /**
+     * Instantiates a new checksum hash function.
+     *
+     * @param checksumSupplier the checksum supplier
+     * @param bits the bits
+     * @param toString the to string
+     */
     ChecksumHashFunction(Supplier<? extends Checksum> checksumSupplier, int bits, String toString) {
         this.checksumSupplier = N.checkArgNotNull(checksumSupplier);
         N.checkArgument(bits == 32 || bits == 64, "bits (%s) must be either 32 or 64", bits);
@@ -39,16 +53,31 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         this.toString = N.checkArgNotNull(toString);
     }
 
+    /**
+     * Bits.
+     *
+     * @return the int
+     */
     @Override
     public int bits() {
         return bits;
     }
 
+    /**
+     * New hasher.
+     *
+     * @return the hasher
+     */
     @Override
     public Hasher newHasher() {
         return new ChecksumHasher(checksumSupplier.get());
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         return toString;
@@ -58,22 +87,46 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
      * Hasher that updates a checksum.
      */
     private final class ChecksumHasher extends AbstractByteHasher {
+
+        /** The checksum. */
         private final Checksum checksum;
 
+        /**
+         * Instantiates a new checksum hasher.
+         *
+         * @param checksum the checksum
+         */
         private ChecksumHasher(Checksum checksum) {
             this.checksum = N.checkArgNotNull(checksum);
         }
 
+        /**
+         * Update.
+         *
+         * @param b the b
+         */
         @Override
         protected void update(byte b) {
             checksum.update(b);
         }
 
+        /**
+         * Update.
+         *
+         * @param bytes the bytes
+         * @param off the off
+         * @param len the len
+         */
         @Override
         protected void update(byte[] bytes, int off, int len) {
             checksum.update(bytes, off, len);
         }
 
+        /**
+         * Hash.
+         *
+         * @return the hash code
+         */
         @Override
         public HashCode hash() {
             long value = checksum.getValue();
@@ -90,5 +143,6 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         }
     }
 
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 0L;
 }

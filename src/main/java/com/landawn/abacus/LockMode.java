@@ -14,12 +14,12 @@
 
 package com.landawn.abacus;
 
+// TODO: Auto-generated Javadoc
 /**
  * <code>R</code> --- Read; <code>A</code> --- Add; <code>U</code> --- Update; <code>D</code> --- Delete.
- * 
- * @since 0.8
- * 
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public enum LockMode {
     /**
@@ -101,15 +101,14 @@ public enum LockMode {
      * @deprecated not supported at present.
      */
     RAUD(R.intValue + A.intValue + U.intValue + D.intValue);
-    /**
-     *
-     */
+
+    /** The int value. */
     private final int intValue;
 
     /**
      * Constructor.
-     * 
-     * @param value
+     *
+     * @param value the value
      */
     private LockMode(int value) {
         intValue = value;
@@ -126,8 +125,8 @@ public enum LockMode {
 
     /**
      * Method valueOf.
-     * 
-     * @param intValue
+     *
+     * @param intValue the int value
      * @return LockMode
      */
     public static LockMode valueOf(int intValue) {
@@ -184,8 +183,8 @@ public enum LockMode {
 
     /**
      * Check if this {@code LockMode} is locked by the specified {@code byLockMode}.
-     * 
-     * @param lockMode
+     *
+     * @param lockMode the lock mode
      * @return boolean
      */
     public boolean isXLockOf(LockMode lockMode) {

@@ -14,11 +14,12 @@
 
 package com.landawn.abacus.exception;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class ServerException.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public class ServerException extends AbacusException {
     /**
@@ -35,8 +36,8 @@ public class ServerException extends AbacusException {
 
     /**
      * Constructor for XmlReadException.
-     * 
-     * @param message
+     *
+     * @param message the message
      */
     public ServerException(String message) {
         super(message);
@@ -44,9 +45,9 @@ public class ServerException extends AbacusException {
 
     /**
      * Constructor for XmlReadException.
-     * 
-     * @param message
-     * @param cause
+     *
+     * @param message the message
+     * @param cause the cause
      */
     public ServerException(String message, Throwable cause) {
         super(message, cause);
@@ -54,8 +55,8 @@ public class ServerException extends AbacusException {
 
     /**
      * Constructor for XmlReadException.
-     * 
-     * @param cause
+     *
+     * @param cause the cause
      */
     public ServerException(Throwable cause) {
         super(cause);

@@ -50,10 +50,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.URLEncodedUtil;
 import com.landawn.abacus.util.WD;
 
+// TODO: Auto-generated Javadoc
 /**
  * It's a quick way to deploy json/xml web service by
  * <code>WebServiceServlet</code>
- *
+ * 
  * <pre>
  *  {@code
  *     <servlet>
@@ -67,7 +68,7 @@ import com.landawn.abacus.util.WD;
  *         </init-param>
  *         <init-param>
  *     </servlet>
- *
+ * 
  *     <servlet-mapping>
  *         <servlet-name>helloWebService</servlet-name>
  *         <url-pattern>/HelloWebService/*</url-pattern>
@@ -75,51 +76,106 @@ import com.landawn.abacus.util.WD;
  * }
  * </pre>
  *
- * @since 0.8
- * 
  * @author Haiyang Li
+ * @since 0.8
  */
 public class WebServiceServlet extends AbstractHttpServlet {
+
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7919235560292201779L;
 
+    /** The Constant SERVICE_IMPL_CLASS. */
     protected static final String SERVICE_IMPL_CLASS = "serviceImplClass";
+
+    /** The Constant SERVICE_FACTORY_CLASS. */
     protected static final String SERVICE_FACTORY_CLASS = "serviceFactoryClass";
+
+    /** The Constant SERVICE_FACTORY_METHOD. */
     protected static final String SERVICE_FACTORY_METHOD = "serviceFactoryMethod";
 
+    /** The Constant PATH_MAPPER. */
     protected static final String PATH_MAPPER = "pathMapper";
+
+    /** The Constant HTTP_METHOD_MAPPER. */
     protected static final String HTTP_METHOD_MAPPER = "httpMethodMapper";
 
+    /** The Constant ENCRYPTION_USER_NAME. */
     protected static final String ENCRYPTION_USER_NAME = "encryptionUserName";
+
+    /** The Constant ENCRYPTION_PASSWORD. */
     protected static final String ENCRYPTION_PASSWORD = "encryptionPassword";
+
+    /** The Constant ENCRYPTION_MESSAGE. */
     protected static final String ENCRYPTION_MESSAGE = "encryptionMessage";
 
+    /** The path method map. */
     private final Map<String, Method> pathMethodMap = new HashMap<>();
+
+    /** The method parameter class map. */
     private final Map<String, Class<?>> methodParameterClassMap = new HashMap<>();
+
+    /** The parameter method map. */
     private final Map<String, Method> parameterMethodMap = new HashMap<>();
+
+    /** The ele name method map. */
     private final Map<String, Method> eleNameMethodMap = new HashMap<>();
+
+    /** The ele name parameter class map. */
     private final Map<String, Class<?>> eleNameParameterClassMap = new HashMap<>();
+
+    /** The method http method map. */
     private final Map<String, Set<HttpMethod>> methodHttpMethodMap = new HashMap<>();
+
+    /** The method parameter names map. */
     private final Map<String, String[]> methodParameterNamesMap = new HashMap<>();
+
+    /** The method parameter naming types map. */
     private final Map<String, Map<String, Type<?>>> methodParameterNamingTypesMap = new HashMap<>();
+
+    /** The method JSON deserialization config map. */
     private final Map<String, JSONDeserializationConfig> methodJSONDeserializationConfigMap = new HashMap<>();
+
+    /** The method XML deserialization config map. */
     private final Map<String, XMLDeserializationConfig> methodXMLDeserializationConfigMap = new HashMap<>();
 
     static {
         LoggerFactory.getLogger(WebServiceServlet.class).warn(IOUtil.JAVA_VERSION);
     }
 
+    /** The service impl. */
     private Object serviceImpl;
+
+    /** The encryption user name. */
     private String encryptionUserName;
+
+    /** The encryption password. */
     private byte[] encryptionPassword;
+
+    /** The encryption message. */
     private MessageEncryption encryptionMessage;
+
+    /** The service RR logger. */
     private Logger serviceRRLogger;
+
+    /** The service impl logger. */
     private Logger serviceImplLogger;
 
+    /**
+     * Inits the.
+     *
+     * @throws ServletException the servlet exception
+     */
     @Override
     public void init() throws ServletException {
         super.init();
     }
 
+    /**
+     * Inits the.
+     *
+     * @param config the config
+     * @throws ServletException the servlet exception
+     */
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
@@ -406,26 +462,60 @@ public class WebServiceServlet extends AbstractHttpServlet {
         serviceImplLogger = LoggerFactory.getLogger(serviceImplClass);
     }
 
+    /**
+     * Do get.
+     *
+     * @param request the request
+     * @param response the response
+     * @throws ServletException the servlet exception
+     */
     @Override
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException {
         execute(request, response);
     }
 
+    /**
+     * Do post.
+     *
+     * @param request the request
+     * @param response the response
+     * @throws ServletException the servlet exception
+     */
     @Override
     protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException {
         execute(request, response);
     }
 
+    /**
+     * Do put.
+     *
+     * @param request the request
+     * @param response the response
+     * @throws ServletException the servlet exception
+     */
     @Override
     protected void doPut(final HttpServletRequest request, final HttpServletResponse response) throws ServletException {
         execute(request, response);
     }
 
+    /**
+     * Do delete.
+     *
+     * @param request the request
+     * @param response the response
+     * @throws ServletException the servlet exception
+     */
     @Override
     protected void doDelete(final HttpServletRequest request, final HttpServletResponse response) throws ServletException {
         execute(request, response);
     }
 
+    /**
+     * Execute.
+     *
+     * @param request the request
+     * @param response the response
+     */
     protected void execute(final HttpServletRequest request, final HttpServletResponse response) {
         preExecute(request, response);
 
@@ -684,6 +774,14 @@ public class WebServiceServlet extends AbstractHttpServlet {
         }
     }
 
+    /**
+     * Invoke.
+     *
+     * @param method the method
+     * @param parameter the parameter
+     * @param hasFieldAnnotation the has field annotation
+     * @return the object
+     */
     protected Object invoke(final Method method, final Object parameter, final boolean hasFieldAnnotation) {
         Object result = null;
 
@@ -704,6 +802,14 @@ public class WebServiceServlet extends AbstractHttpServlet {
         return result;
     }
 
+    /**
+     * Sets the response.
+     *
+     * @param response the response
+     * @param result the result
+     * @param contentFormat the content format
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     protected void setResponse(final HttpServletResponse response, final Object result, final ContentFormat contentFormat) throws IOException {
         if (result == null) {
             return;
@@ -786,15 +892,37 @@ public class WebServiceServlet extends AbstractHttpServlet {
         }
     }
 
+    /**
+     * Pre execute.
+     *
+     * @param request the request
+     * @param response the response
+     */
     protected void preExecute(final HttpServletRequest request, final HttpServletResponse response) {
 
     }
 
+    /**
+     * Post execute.
+     *
+     * @param response the response
+     * @param result the result
+     * @param method the method
+     * @param parameter the parameter
+     * @param contentFormat the content format
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     protected void postExecute(final HttpServletResponse response, final Object result, final Method method, final Object parameter,
             final ContentFormat contentFormat) throws IOException {
 
     }
 
+    /**
+     * Check http method.
+     *
+     * @param method the method
+     * @param httpMethodName the http method name
+     */
     protected void checkHttpMethod(final Method method, final HttpMethod httpMethodName) {
         if (!methodHttpMethodMap.get(method.getName()).contains(httpMethodName)) {
             String msg = "HTTP method '" + httpMethodName + "' is not supported by operation: " + method.getName();
@@ -803,6 +931,13 @@ public class WebServiceServlet extends AbstractHttpServlet {
         }
     }
 
+    /**
+     * Find declared method by name.
+     *
+     * @param cls the cls
+     * @param methodName the method name
+     * @return the method
+     */
     protected static Method findDeclaredMethodByName(final Class<?> cls, final String methodName) {
         Method method = null;
 

@@ -18,29 +18,71 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.Properties;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Interface ConnectionManager.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 public interface ConnectionManager {
 
+    /**
+     * Gets the properties.
+     *
+     * @return the properties
+     */
     Map<String, String> getProperties();
 
+    /**
+     * Gets the connection properties.
+     *
+     * @return the connection properties
+     */
     Properties getConnectionProperties();
 
+    /**
+     * Update last SQL execution failure time.
+     */
     void updateLastSQLExecutionFailureTime();
 
+    /**
+     * Gets the max active.
+     *
+     * @return the max active
+     */
     int getMaxActive();
 
+    /**
+     * Gets the num active.
+     *
+     * @return the num active
+     */
     int getNumActive();
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     Connection getConnection();
 
+    /**
+     * Close connection.
+     *
+     * @param conn the conn
+     */
     void closeConnection(Connection conn);
 
+    /**
+     * Detroy connection.
+     *
+     * @param conn the conn
+     */
     void detroyConnection(Connection conn);
 
+    /**
+     * Close.
+     */
     void close();
 }

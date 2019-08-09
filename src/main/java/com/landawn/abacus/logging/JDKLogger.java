@@ -17,102 +17,206 @@ package com.landawn.abacus.logging;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class JDKLogger.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 class JDKLogger extends AbstractLogger {
+
+    /** The Constant SELF. */
     static final String SELF = JDKLogger.class.getName();
+
+    /** The Constant SUPER. */
     static final String SUPER = AbstractLogger.class.getName();
 
+    /** The logger impl. */
     private final java.util.logging.Logger loggerImpl;
 
+    /**
+     * Instantiates a new JDK logger.
+     *
+     * @param name the name
+     */
     public JDKLogger(String name) {
         super(name);
         loggerImpl = java.util.logging.Logger.getLogger(name);
     }
 
+    /**
+     * Checks if is trace enabled.
+     *
+     * @return true, if is trace enabled
+     */
     @Override
     public boolean isTraceEnabled() {
         return loggerImpl.isLoggable(Level.FINEST);
     }
 
+    /**
+     * Trace.
+     *
+     * @param msg the msg
+     */
     @Override
     public void trace(String msg) {
         log(Level.FINEST, msg);
     }
 
+    /**
+     * Trace.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void trace(String msg, Throwable t) {
         log(Level.FINEST, msg, t);
     }
 
+    /**
+     * Checks if is debug enabled.
+     *
+     * @return true, if is debug enabled
+     */
     @Override
     public boolean isDebugEnabled() {
         return loggerImpl.isLoggable(Level.FINE);
     }
 
+    /**
+     * Debug.
+     *
+     * @param msg the msg
+     */
     @Override
     public void debug(String msg) {
         log(Level.FINE, msg);
     }
 
+    /**
+     * Debug.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void debug(String msg, Throwable t) {
         log(Level.FINE, msg, t);
     }
 
+    /**
+     * Checks if is info enabled.
+     *
+     * @return true, if is info enabled
+     */
     @Override
     public boolean isInfoEnabled() {
         return loggerImpl.isLoggable(Level.INFO);
     }
 
+    /**
+     * Info.
+     *
+     * @param msg the msg
+     */
     @Override
     public void info(String msg) {
         log(Level.INFO, msg);
     }
 
+    /**
+     * Info.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void info(String msg, Throwable t) {
         log(Level.INFO, msg, t);
     }
 
+    /**
+     * Checks if is warn enabled.
+     *
+     * @return true, if is warn enabled
+     */
     @Override
     public boolean isWarnEnabled() {
         return loggerImpl.isLoggable(Level.WARNING);
     }
 
+    /**
+     * Warn.
+     *
+     * @param msg the msg
+     */
     @Override
     public void warn(String msg) {
         log(Level.WARNING, msg);
     }
 
+    /**
+     * Warn.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void warn(String msg, Throwable t) {
         log(Level.WARNING, msg, t);
     }
 
+    /**
+     * Checks if is error enabled.
+     *
+     * @return true, if is error enabled
+     */
     @Override
     public boolean isErrorEnabled() {
         return loggerImpl.isLoggable(Level.SEVERE);
     }
 
+    /**
+     * Error.
+     *
+     * @param msg the msg
+     */
     @Override
     public void error(String msg) {
         log(Level.SEVERE, msg);
     }
 
+    /**
+     * Error.
+     *
+     * @param msg the msg
+     * @param t the t
+     */
     @Override
     public void error(String msg, Throwable t) {
         log(Level.SEVERE, msg, t);
     }
 
+    /**
+     * Log.
+     *
+     * @param level the level
+     * @param msg the msg
+     */
     private void log(Level level, String msg) {
         log(SELF, level, msg, null);
     }
 
+    /**
+     * Log.
+     *
+     * @param level the level
+     * @param msg the msg
+     * @param t the t
+     */
     private void log(Level level, String msg, Throwable t) {
         log(SELF, level, msg, t);
     }
@@ -123,10 +227,11 @@ class JDKLogger extends AbstractLogger {
      * this instance's JDK14 logger.
      * 
      * See bug report #13 for more details.
-     * 
-     * @param level
-     * @param msg
-     * @param t
+     *
+     * @param callerFQCN the caller FQCN
+     * @param level the level
+     * @param msg the msg
+     * @param t the t
      */
     private void log(String callerFQCN, Level level, String msg, Throwable t) {
         // millis and thread are filled by the constructor
@@ -141,9 +246,9 @@ class JDKLogger extends AbstractLogger {
 
     /**
      * Fill in caller data if possible.
-     * 
-     * @param record
-     *          The record to update
+     *
+     * @param callerFQCN the caller FQCN
+     * @param record          The record to update
      */
     final private void fillCallerData(String callerFQCN, LogRecord record) {
         StackTraceElement[] steArray = new Throwable().getStackTrace();

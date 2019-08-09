@@ -21,43 +21,95 @@ import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 1.3
- * 
+ * The Class Joiner.
+ *
  * @author haiyangl
+ * @since 1.3
  */
 public class Joiner implements AutoCloseable {
+
+    /** The Constant DEFAULT_DELIMITER. */
     public static final String DEFAULT_DELIMITER = N.ELEMENT_SEPARATOR;
+
+    /** The Constant DEFAULT_KEY_VALUE_DELIMITER. */
     public static final String DEFAULT_KEY_VALUE_DELIMITER = "=";
 
+    /** The prefix. */
     private final String prefix;
+
+    /** The delimiter. */
     private final String delimiter;
+
+    /** The key value delimiter. */
     private final String keyValueDelimiter;
+
+    /** The suffix. */
     private final String suffix;
+
+    /** The is empty delimiter. */
     private final boolean isEmptyDelimiter;
+
+    /** The is empty key value delimiter. */
     private final boolean isEmptyKeyValueDelimiter;
+
+    /** The trim. */
     private boolean trim = false;
+
+    /** The skip null. */
     private boolean skipNull = false;
+
+    /** The use cached buffer. */
     private boolean useCachedBuffer = false;
+
+    /** The null text. */
     private String nullText = N.NULL_STRING;
 
+    /** The buffer. */
     private StringBuilder buffer;
 
+    /** The empty value. */
     private String emptyValue;
 
+    /**
+     * Instantiates a new joiner.
+     *
+     * @param delimiter the delimiter
+     */
     Joiner(CharSequence delimiter) {
         this(delimiter, DEFAULT_KEY_VALUE_DELIMITER);
     }
 
+    /**
+     * Instantiates a new joiner.
+     *
+     * @param delimiter the delimiter
+     * @param keyValueDelimiter the key value delimiter
+     */
     Joiner(final CharSequence delimiter, CharSequence keyValueDelimiter) {
         this(delimiter, keyValueDelimiter, "", "");
     }
 
+    /**
+     * Instantiates a new joiner.
+     *
+     * @param delimiter the delimiter
+     * @param prefix the prefix
+     * @param suffix the suffix
+     */
     Joiner(CharSequence delimiter, CharSequence prefix, CharSequence suffix) {
         this(delimiter, DEFAULT_KEY_VALUE_DELIMITER, prefix, suffix);
     }
 
+    /**
+     * Instantiates a new joiner.
+     *
+     * @param delimiter the delimiter
+     * @param keyValueDelimiter the key value delimiter
+     * @param prefix the prefix
+     * @param suffix the suffix
+     */
     Joiner(CharSequence delimiter, CharSequence keyValueDelimiter, CharSequence prefix, CharSequence suffix) {
         N.checkArgNotNull(prefix, "The prefix must not be null");
         N.checkArgNotNull(delimiter, "The delimiter must not be null");
@@ -74,32 +126,79 @@ public class Joiner implements AutoCloseable {
         this.isEmptyKeyValueDelimiter = N.isNullOrEmpty(keyValueDelimiter);
     }
 
+    /**
+     * Defau lt.
+     *
+     * @return the joiner
+     */
     public static Joiner defauLt() {
         return with(DEFAULT_DELIMITER, DEFAULT_KEY_VALUE_DELIMITER);
     }
 
+    /**
+     * With.
+     *
+     * @param delimiter the delimiter
+     * @return the joiner
+     */
     public static Joiner with(final CharSequence delimiter) {
         return new Joiner(delimiter);
     }
 
+    /**
+     * With.
+     *
+     * @param delimiter the delimiter
+     * @param keyValueDelimiter the key value delimiter
+     * @return the joiner
+     */
     public static Joiner with(final CharSequence delimiter, CharSequence keyValueDelimiter) {
         return new Joiner(delimiter, keyValueDelimiter);
     }
 
+    /**
+     * With.
+     *
+     * @param delimiter the delimiter
+     * @param prefix the prefix
+     * @param suffix the suffix
+     * @return the joiner
+     */
     public static Joiner with(CharSequence delimiter, CharSequence prefix, CharSequence suffix) {
         return new Joiner(delimiter, prefix, suffix);
     }
 
+    /**
+     * With.
+     *
+     * @param delimiter the delimiter
+     * @param keyValueDelimiter the key value delimiter
+     * @param prefix the prefix
+     * @param suffix the suffix
+     * @return the joiner
+     */
     public static Joiner with(CharSequence delimiter, CharSequence keyValueDelimiter, CharSequence prefix, CharSequence suffix) {
         return new Joiner(delimiter, keyValueDelimiter, prefix, suffix);
     }
 
+    /**
+     * Sets the empty value.
+     *
+     * @param emptyValue the empty value
+     * @return the joiner
+     */
     public Joiner setEmptyValue(CharSequence emptyValue) {
         this.emptyValue = N.checkArgNotNull(emptyValue, "The empty value must not be null").toString();
 
         return this;
     }
 
+    /**
+     * Trim.
+     *
+     * @param trim the trim
+     * @return the joiner
+     */
     public Joiner trim(boolean trim) {
         this.trim = trim;
 
@@ -108,9 +207,9 @@ public class Joiner implements AutoCloseable {
 
     /**
      * Ignore the {@code null} element/value for {@code key/value, Map, Entity} when the specified {@code element} or {@code value} is {@code null} if it's set to {@code true}.
-     * 
-     * @param skipNull
-     * @return
+     *
+     * @param skipNull the skip null
+     * @return the joiner
      */
     public Joiner skipNull(boolean skipNull) {
         this.skipNull = skipNull;
@@ -118,6 +217,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Use for null.
+     *
+     * @param nullText the null text
+     * @return the joiner
+     */
     public Joiner useForNull(String nullText) {
         this.nullText = nullText == null ? N.NULL_STRING : nullText;
 
@@ -144,9 +249,9 @@ public class Joiner implements AutoCloseable {
 
     /**
      * Improving performance by set {@code useCachedBuffer=true}, and must remember to call {@code toString()/map()/mapIfNotEmpty()/stream()/streamIfNotEmpty()} or {@code close()} to recycle the cached buffer.
-     * 
-     * @param useCachedBuffer
-     * @return
+     *
+     * @param useCachedBuffer the use cached buffer
+     * @return the joiner
      */
     public Joiner reuseCachedBuffer(boolean useCachedBuffer) {
         if (buffer != null) {
@@ -158,36 +263,78 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(boolean element) {
         prepareBuilder().append(element);
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(char element) {
         prepareBuilder().append(element);
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(int element) {
         prepareBuilder().append(element);
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(long element) {
         prepareBuilder().append(element);
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(float element) {
         prepareBuilder().append(element);
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(double element) {
         prepareBuilder().append(element);
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(String element) {
         if (element != null || skipNull == false) {
             prepareBuilder().append(element == null ? nullText : (trim ? element.trim() : element));
@@ -196,6 +343,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(CharSequence element) {
         if (element != null || skipNull == false) {
             prepareBuilder().append(element == null ? nullText : (trim ? element.toString().trim() : element));
@@ -204,6 +357,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @param start the start
+     * @param end the end
+     * @return the joiner
+     */
     public Joiner append(CharSequence element, final int start, final int end) {
         if (element != null || skipNull == false) {
             if (element == null) {
@@ -218,6 +379,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(StringBuffer element) {
         if (element != null || skipNull == false) {
             if (element == null) {
@@ -230,6 +397,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(char[] element) {
         if (element != null || skipNull == false) {
             if (element == null) {
@@ -242,6 +415,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @param offset the offset
+     * @param len the len
+     * @return the joiner
+     */
     public Joiner append(char[] element, final int offset, final int len) {
         if (element != null || skipNull == false) {
             if (element == null) {
@@ -254,6 +435,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner append(Object element) {
         if (element != null || skipNull == false) {
             prepareBuilder().append(toString(element));
@@ -262,6 +449,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append if not null.
+     *
+     * @param element the element
+     * @return the joiner
+     */
     public Joiner appendIfNotNull(Object element) {
         if (element != null) {
             prepareBuilder().append(toString(element));
@@ -270,6 +463,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append if.
+     *
+     * @param b the b
+     * @param supplier the supplier
+     * @return the joiner
+     */
     public Joiner appendIf(boolean b, Supplier<?> supplier) {
         if (b) {
             append(supplier.get());
@@ -278,6 +478,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final boolean[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -286,6 +492,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final boolean[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -310,6 +524,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final char[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -318,6 +538,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -342,6 +570,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final byte[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -350,6 +584,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -374,6 +616,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final short[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -382,6 +630,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -406,6 +662,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final int[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -414,6 +676,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -438,6 +708,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final long[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -446,6 +722,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -470,6 +754,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final float[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -478,6 +768,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -502,6 +800,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final double[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -510,6 +814,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -534,6 +846,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @return the joiner
+     */
     public Joiner appendAll(final Object[] a) {
         if (N.notNullOrEmpty(a)) {
             return appendAll(a, 0, a.length);
@@ -542,6 +860,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final Object[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
@@ -568,6 +894,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final BooleanList c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
@@ -576,6 +908,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final BooleanList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -586,6 +926,12 @@ public class Joiner implements AutoCloseable {
         return appendAll(c.array(), fromIndex, toIndex);
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final CharList c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
@@ -594,6 +940,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final CharList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -604,6 +958,12 @@ public class Joiner implements AutoCloseable {
         return appendAll(c.array(), fromIndex, toIndex);
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final ByteList c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
@@ -612,6 +972,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final ByteList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -622,6 +990,12 @@ public class Joiner implements AutoCloseable {
         return appendAll(c.array(), fromIndex, toIndex);
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final ShortList c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
@@ -630,6 +1004,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final ShortList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -640,6 +1022,12 @@ public class Joiner implements AutoCloseable {
         return appendAll(c.array(), fromIndex, toIndex);
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final IntList c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
@@ -648,6 +1036,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final IntList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -658,6 +1054,12 @@ public class Joiner implements AutoCloseable {
         return appendAll(c.array(), fromIndex, toIndex);
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final LongList c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
@@ -666,6 +1068,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final LongList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -676,6 +1086,12 @@ public class Joiner implements AutoCloseable {
         return appendAll(c.array(), fromIndex, toIndex);
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final FloatList c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
@@ -684,6 +1100,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final FloatList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -694,6 +1118,12 @@ public class Joiner implements AutoCloseable {
         return appendAll(c.array(), fromIndex, toIndex);
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final DoubleList c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c.array(), 0, c.size());
@@ -702,6 +1132,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final DoubleList c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -712,6 +1150,12 @@ public class Joiner implements AutoCloseable {
         return appendAll(c.array(), fromIndex, toIndex);
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @return the joiner
+     */
     public Joiner appendAll(final Collection<?> c) {
         if (N.notNullOrEmpty(c)) {
             return appendAll(c, 0, c.size());
@@ -720,6 +1164,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append all.
+     *
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendAll(final Collection<?> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
@@ -755,6 +1207,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, boolean value) {
         if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(key).append(value);
@@ -765,6 +1224,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, char value) {
         if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(key).append(value);
@@ -775,6 +1241,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, int value) {
         if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(key).append(value);
@@ -785,6 +1258,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, long value) {
         if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(key).append(value);
@@ -795,6 +1275,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, float value) {
         if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(key).append(value);
@@ -805,6 +1292,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, double value) {
         if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(key).append(value);
@@ -815,6 +1309,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, String value) {
         if (value != null || skipNull == false) {
             if (isEmptyKeyValueDelimiter) {
@@ -827,6 +1328,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, CharSequence value) {
         if (value != null || skipNull == false) {
             if (isEmptyKeyValueDelimiter) {
@@ -839,6 +1347,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, StringBuffer value) {
         if (value != null || skipNull == false) {
             if (value == null) {
@@ -859,6 +1374,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, char[] value) {
         if (value != null || skipNull == false) {
             if (value == null) {
@@ -879,6 +1401,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the joiner
+     */
     public Joiner appendEntry(String key, Object value) {
         if (value != null || skipNull == false) {
             if (isEmptyKeyValueDelimiter) {
@@ -891,6 +1420,12 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entry.
+     *
+     * @param entry the entry
+     * @return the joiner
+     */
     public Joiner appendEntry(Map.Entry<?, ?> entry) {
         if (skipNull == false || (entry != null && entry.getValue() != null)) {
             if (entry == null) {
@@ -919,6 +1454,12 @@ public class Joiner implements AutoCloseable {
     //        return this;
     //    }
 
+    /**
+     * Append entries.
+     *
+     * @param m the m
+     * @return the joiner
+     */
     public Joiner appendEntries(final Map<?, ?> m) {
         if (N.notNullOrEmpty(m)) {
             return appendEntries(m, 0, m.size());
@@ -927,6 +1468,14 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Append entries.
+     *
+     * @param m the m
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the joiner
+     */
     public Joiner appendEntries(final Map<?, ?> m, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, m == null ? 0 : m.size());
 
@@ -969,9 +1518,10 @@ public class Joiner implements AutoCloseable {
     }
 
     /**
-     * 
+     * Append entries.
+     *
      * @param entity entity class with getter/setter methods.
-     * @return
+     * @return the joiner
      */
     @SuppressWarnings("rawtypes")
     public Joiner appendEntries(final Object entity) {
@@ -1011,6 +1561,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param str the str
+     * @param n the n
+     * @return the joiner
+     */
     public Joiner repeat(final String str, final int n) {
         N.checkArgNotNegative(n, "n");
 
@@ -1027,6 +1584,13 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Repeat.
+     *
+     * @param obj the obj
+     * @param n the n
+     * @return the joiner
+     */
     public Joiner repeat(final Object obj, final int n) {
         return repeat(toString(obj), n);
     }
@@ -1035,11 +1599,11 @@ public class Joiner implements AutoCloseable {
      * Adds the contents of the given {@code StringJoiner} without prefix and
      * suffix as the next element if it is non-empty. If the given {@code
      * StringJoiner} is empty, the call has no effect.
-     *
+     * 
      * <p>A {@code StringJoiner} is empty if {@link #addAll(CharSequence) add()}
      * has never been called, and if {@code merge()} has never been called
      * with a non-empty {@code StringJoiner} argument.
-     *
+     * 
      * <p>If the other {@code StringJoiner} is using a different delimiter,
      * then elements from the other {@code StringJoiner} are concatenated with
      * that delimiter and the result is appended to this {@code StringJoiner}
@@ -1047,8 +1611,8 @@ public class Joiner implements AutoCloseable {
      *
      * @param other The {@code StringJoiner} whose contents should be merged
      *              into this one
-     * @throws NullPointerException if the other {@code StringJoiner} is null
      * @return This {@code StringJoiner}
+     * @throws NullPointerException if the other {@code StringJoiner} is null
      */
     public Joiner merge(Joiner other) {
         N.checkArgNotNull(other);
@@ -1063,6 +1627,11 @@ public class Joiner implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Prepare builder.
+     *
+     * @return the string builder
+     */
     private StringBuilder prepareBuilder() {
         if (buffer != null) {
             if (isEmptyDelimiter == false) {
@@ -1074,10 +1643,21 @@ public class Joiner implements AutoCloseable {
         return buffer;
     }
 
+    /**
+     * To string.
+     *
+     * @param obj the obj
+     * @return the string
+     */
     private String toString(Object obj) {
         return obj == null ? nullText : (trim ? N.toString(obj).trim() : N.toString(obj));
     }
 
+    /**
+     * Length.
+     *
+     * @return the int
+     */
     public int length() {
         // Remember that we never actually append the suffix unless we return
         // the full (present) value or some sub-string or length of it, so that
@@ -1127,9 +1707,12 @@ public class Joiner implements AutoCloseable {
      * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
-     * 
-     * @param mapper
-     * @return
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the t
+     * @throws E the e
      */
     public <T, E extends Exception> T map(Try.Function<? super String, T, E> mapper) throws E {
         return mapper.apply(toString());
@@ -1142,9 +1725,12 @@ public class Joiner implements AutoCloseable {
      * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
-     * 
-     * @param mapper
-     * @return
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param mapper the mapper
+     * @return the nullable
+     * @throws E the e
      */
     public <T, E extends Exception> Nullable<T> mapIfNotEmpty(Try.Function<? super String, T, E> mapper) throws E {
         N.checkArgNotNull(mapper);
@@ -1157,8 +1743,8 @@ public class Joiner implements AutoCloseable {
      * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
-     * 
-     * @return
+     *
+     * @return the stream
      */
     public Stream<String> stream() {
         return Stream.of(toString());
@@ -1171,13 +1757,16 @@ public class Joiner implements AutoCloseable {
      * The underline {@code StringBuilder} will be recycled after this method is called if {@code resueStringBuilder} is set to {@code true},
      * and should not continue to this instance.
      * </pre>
-     * 
-     * @return
+     *
+     * @return the stream
      */
     public Stream<String> streamIfNotEmpty() {
         return buffer == null ? Stream.<String> empty() : Stream.of(toString());
     }
 
+    /**
+     * Close.
+     */
     @Override
     public void close() {
         if (buffer != null && useCachedBuffer) {

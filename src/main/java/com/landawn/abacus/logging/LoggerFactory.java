@@ -17,26 +17,52 @@ package com.landawn.abacus.logging;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
+ * A factory for creating Logger objects.
  *
- * @since 0.8
- * 
  * @author Haiyang Li
+ * @since 0.8
  */
 public final class LoggerFactory {
+
+    /** The Constant JAVA_VENDOR. */
     private static final String JAVA_VENDOR = System.getProperty("java.vendor");
+
+    /** The Constant JAVA_VM_VENDOR. */
     private static final String JAVA_VM_VENDOR = System.getProperty("java.vm.vendor");
+
+    /** The Constant IS_ANDROID_PLATFORM. */
     private static final boolean IS_ANDROID_PLATFORM = JAVA_VENDOR.toUpperCase().contains("ANDROID") || JAVA_VM_VENDOR.contains("ANDROID");
 
+    /** The Constant jdkLogger. */
     private static final Logger jdkLogger = new JDKLogger(LoggerFactory.class.getName());
+
+    /** The Constant namedLoggers. */
     private static final Map<String, Logger> namedLoggers = new HashMap<String, Logger>();
+
+    /** The log type. */
     private static volatile int logType = 0;
+
+    /** The initialized. */
     private static volatile boolean initialized = false;
 
+    /**
+     * Gets the logger.
+     *
+     * @param clazz the clazz
+     * @return the logger
+     */
     public static synchronized Logger getLogger(Class<?> clazz) {
         return getLogger(clazz.getName());
     }
 
+    /**
+     * Gets the logger.
+     *
+     * @param name the name
+     * @return the logger
+     */
     public static synchronized Logger getLogger(String name) {
         Logger logger = namedLoggers.get(name);
 

@@ -22,25 +22,61 @@ import java.text.DecimalFormat;
 
 import com.landawn.abacus.annotation.Type.EnumType;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Interface JsonXmlField.
+ */
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonXmlField {
+
+    /**
+     * Name.
+     *
+     * @return the string
+     */
     String name() default "";
 
+    /**
+     * Type.
+     *
+     * @return the string
+     */
     String type() default "";
 
+    /**
+     * Enumerated.
+     *
+     * @return the enum type
+     */
     EnumType enumerated() default EnumType.STRING;
 
+    /**
+     * Date format.
+     *
+     * @return the string
+     */
     String dateFormat() default "";
 
+    /**
+     * Time zone.
+     *
+     * @return the string
+     */
     String timeZone() default "";
 
     /**
-     * 
-     * @return
+     * Number format.
+     *
+     * @return the string
      * @see DecimalFormat
      */
     String numberFormat() default "";
 
+    /**
+     * Ignore.
+     *
+     * @return true, if successful
+     */
     boolean ignore() default false;
 }

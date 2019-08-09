@@ -40,31 +40,59 @@ import com.landawn.abacus.pool.KeyedObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
 import com.landawn.abacus.util.N;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class PoolableConnection.
+ *
  * @author Haiyang Li
+ * @since 0.8
  */
 class PoolableConnection extends AbstractPoolable implements Connection {
+
+    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(PoolableConnection.class);
 
+    /** The Constant CACHED_SQL_LENGTH. */
     private static final int CACHED_SQL_LENGTH = 4096;
+
+    /** The Constant EVICTY_DELAY_FOR_STATEMENT_POOL. */
     private static final int EVICTY_DELAY_FOR_STATEMENT_POOL = 60 * 1000;
 
+    /** The cached statement pool. */
     private final KeyedObjectPool<CachedStatmentKey, PoolablePreparedStatement> cachedStatementPool;
 
+    /** The conn manager. */
     private final ConnectionManager connManager;
+
+    /** The internal conn. */
     private final Connection internalConn;
 
+    /** The last SQL execution time. */
     private volatile long lastSQLExecutionTime;
+
+    /** The is closed. */
     private boolean isClosed = false;
 
+    /**
+     * Instantiates a new poolable connection.
+     *
+     * @param dataSource the data source
+     * @param conn the conn
+     */
     public PoolableConnection(ConnectionManager dataSource, java.sql.Connection conn) {
         this(dataSource, conn, DataSourceConfiguration.DEFAULT_LIVE_TIME, DataSourceConfiguration.DEFAULT_MAX_IDLE_TIME,
                 DataSourceConfiguration.DEFAULT_MAX_OPEN_PREPARED_STATEMENTS_PER_CONNECTION);
     }
 
+    /**
+     * Instantiates a new poolable connection.
+     *
+     * @param connManager the conn manager
+     * @param conn the conn
+     * @param liveTime the live time
+     * @param maxIdleTime the max idle time
+     * @param cachedStatementSize the cached statement size
+     */
     public PoolableConnection(ConnectionManager connManager, java.sql.Connection conn, long liveTime, long maxIdleTime, int cachedStatementSize) {
         super(liveTime, maxIdleTime);
 
@@ -75,10 +103,20 @@ class PoolableConnection extends AbstractPoolable implements Connection {
         this.internalConn = conn;
     }
 
+    /**
+     * Gets the connection manager.
+     *
+     * @return the connection manager
+     */
     ConnectionManager getConnectionManager() {
         return connManager;
     }
 
+    /**
+     * Cache prepared statement.
+     *
+     * @param stmt the stmt
+     */
     void cachePreparedStatement(PoolablePreparedStatement stmt) {
         if (stmt == null) {
             return;
@@ -183,6 +221,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
     //        }
     //    }
 
+    /**
+     * Update last SQL execution time.
+     *
+     * @param isOk the is ok
+     */
     synchronized void updateLastSQLExecutionTime(boolean isOk) {
         lastSQLExecutionTime = System.currentTimeMillis();
 
@@ -191,14 +234,19 @@ class PoolableConnection extends AbstractPoolable implements Connection {
         }
     }
 
+    /**
+     * Gets the last SQL execution time.
+     *
+     * @return the last SQL execution time
+     */
     long getLastSQLExecutionTime() {
         return lastSQLExecutionTime;
     }
 
     /**
      * Method close.
-     * 
-     * @throws SQLException
+     *
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#close()
      */
     @Override
@@ -240,8 +288,8 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method commit.
-     * 
-     * @throws SQLException
+     *
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#commit()
      */
     @Override
@@ -251,8 +299,8 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method clearWarnings.
-     * 
-     * @throws SQLException
+     *
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#clearWarnings()
      */
     @Override
@@ -262,9 +310,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createStatement.
-     * 
+     *
      * @return Statement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#createStatement()
      */
     @Override
@@ -275,11 +323,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createStatement.
-     * 
-     * @param resultSetType
-     * @param resultSetConcurrency
+     *
+     * @param resultSetType the result set type
+     * @param resultSetConcurrency the result set concurrency
      * @return Statement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#createStatement(int, int)
      */
     @Override
@@ -292,12 +340,12 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createStatement.
-     * 
-     * @param resultSetType
-     * @param resultSetConcurrency
-     * @param resultSetHoldability
+     *
+     * @param resultSetType the result set type
+     * @param resultSetConcurrency the result set concurrency
+     * @param resultSetHoldability the result set holdability
      * @return Statement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#createStatement(int, int, int)
      */
     @Override
@@ -311,9 +359,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getAutoCommit.
-     * 
+     *
      * @return boolean
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getAutoCommit()
      */
     @Override
@@ -323,9 +371,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getCatalog.
-     * 
+     *
      * @return String
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getCatalog()
      */
     @Override
@@ -335,9 +383,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getHoldability.
-     * 
+     *
      * @return int
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getHoldability()
      */
     @Override
@@ -347,9 +395,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getMetaData.
-     * 
+     *
      * @return DatabaseMetaData
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getMetaData()
      */
     @Override
@@ -359,9 +407,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getTransactionIsolation.
-     * 
+     *
      * @return int
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getTransactionIsolation()
      */
     @Override
@@ -371,9 +419,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getTypeMap.
-     * 
+     *
      * @return Map<String,Class<?>>
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getTypeMap()
      */
     @Override
@@ -383,9 +431,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getWarnings.
-     * 
+     *
      * @return SQLWarning
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getWarnings()
      */
     @Override
@@ -395,9 +443,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method isClosed.
-     * 
+     *
      * @return boolean
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#isClosed()
      */
     @Override
@@ -422,9 +470,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method isReadOnly.
-     * 
+     *
      * @return boolean
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#isReadOnly()
      */
     @Override
@@ -434,10 +482,10 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method nativeSQL.
-     * 
-     * @param sql
+     *
+     * @param sql the sql
      * @return String
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#nativeSQL(String)
      */
     @Override
@@ -447,10 +495,10 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method prepareCall.
-     * 
-     * @param sql
+     *
+     * @param sql the sql
      * @return CallableStatement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#prepareCall(String)
      */
     @Override
@@ -462,12 +510,12 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method prepareCall.
-     * 
-     * @param sql
-     * @param resultSetType
-     * @param resultSetConcurrency
+     *
+     * @param sql the sql
+     * @param resultSetType the result set type
+     * @param resultSetConcurrency the result set concurrency
      * @return CallableStatement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#prepareCall(String, int, int)
      */
     @Override
@@ -479,13 +527,13 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method prepareCall.
-     * 
-     * @param sql
-     * @param resultSetType
-     * @param resultSetConcurrency
-     * @param resultSetHoldability
+     *
+     * @param sql the sql
+     * @param resultSetType the result set type
+     * @param resultSetConcurrency the result set concurrency
+     * @param resultSetHoldability the result set holdability
      * @return CallableStatement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#prepareCall(String, int, int, int)
      */
     @Override
@@ -498,10 +546,10 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method prepareStatement.
-     * 
-     * @param sql
+     *
+     * @param sql the sql
      * @return PreparedStatement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#prepareStatement(String)
      */
     @Override
@@ -511,11 +559,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method prepareStatement.
-     * 
-     * @param sql
-     * @param autoGeneratedKeys
+     *
+     * @param sql the sql
+     * @param autoGeneratedKeys the auto generated keys
      * @return PreparedStatement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#prepareStatement(String, int)
      */
     @Override
@@ -525,11 +573,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method prepareStatement.
-     * 
-     * @param sql
-     * @param columnIndexes
+     *
+     * @param sql the sql
+     * @param columnIndexes the column indexes
      * @return PreparedStatement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#prepareStatement(String, int[])
      */
     @Override
@@ -539,11 +587,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method prepareStatement.
-     * 
-     * @param sql
-     * @param columnNames
+     *
+     * @param sql the sql
+     * @param columnNames the column names
      * @return PreparedStatement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#prepareStatement(String, String[])
      */
     @Override
@@ -553,12 +601,12 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method prepareStatement.
-     * 
-     * @param sql
-     * @param resultSetType
-     * @param resultSetConcurrency
+     *
+     * @param sql the sql
+     * @param resultSetType the result set type
+     * @param resultSetConcurrency the result set concurrency
      * @return PreparedStatement
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#prepareStatement(String, int, int)
      */
     @Override
@@ -566,11 +614,32 @@ class PoolableConnection extends AbstractPoolable implements Connection {
         return prepareStatement(sql, -1, resultSetType, resultSetConcurrency, -1);
     }
 
+    /**
+     * Prepare statement.
+     *
+     * @param sql the sql
+     * @param resultSetType the result set type
+     * @param resultSetConcurrency the result set concurrency
+     * @param resultSetHoldability the result set holdability
+     * @return the poolable prepared statement
+     * @throws SQLException the SQL exception
+     */
     @Override
     public PoolablePreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
         return prepareStatement(sql, -1, resultSetType, resultSetConcurrency, resultSetHoldability);
     }
 
+    /**
+     * Prepare statement.
+     *
+     * @param sql the sql
+     * @param autoGeneratedKeys the auto generated keys
+     * @param resultSetType the result set type
+     * @param resultSetConcurrency the result set concurrency
+     * @param resultSetHoldability the result set holdability
+     * @return the poolable prepared statement
+     * @throws SQLException the SQL exception
+     */
     protected PoolablePreparedStatement prepareStatement(String sql, int autoGeneratedKeys, int resultSetType, int resultSetConcurrency,
             int resultSetHoldability) throws SQLException {
         PoolablePreparedStatement stmt = null;
@@ -603,9 +672,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method releaseSavepoint.
-     * 
-     * @param savepoint
-     * @throws SQLException
+     *
+     * @param savepoint the savepoint
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#releaseSavepoint(Savepoint)
      */
     @Override
@@ -615,8 +684,8 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method rollback.
-     * 
-     * @throws SQLException
+     *
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#rollback()
      */
     @Override
@@ -626,9 +695,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method rollback.
-     * 
-     * @param savepoint
-     * @throws SQLException
+     *
+     * @param savepoint the savepoint
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#rollback(Savepoint)
      */
     @Override
@@ -638,9 +707,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setAutoCommit.
-     * 
-     * @param autoCommit
-     * @throws SQLException
+     *
+     * @param autoCommit the new auto commit
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#setAutoCommit(boolean)
      */
     @Override
@@ -650,9 +719,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setCatalog.
-     * 
-     * @param catalog
-     * @throws SQLException
+     *
+     * @param catalog the new catalog
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#setCatalog(String)
      */
     @Override
@@ -662,9 +731,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setHoldability.
-     * 
-     * @param holdability
-     * @throws SQLException
+     *
+     * @param holdability the new holdability
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#setHoldability(int)
      */
     @Override
@@ -674,9 +743,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setReadOnly.
-     * 
-     * @param readOnly
-     * @throws SQLException
+     *
+     * @param readOnly the new read only
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#setReadOnly(boolean)
      */
     @Override
@@ -686,9 +755,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setSavepoint.
-     * 
+     *
      * @return Savepoint
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#setSavepoint()
      */
     @Override
@@ -698,10 +767,10 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setSavepoint.
-     * 
-     * @param name
+     *
+     * @param name the name
      * @return Savepoint
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#setSavepoint(String)
      */
     @Override
@@ -711,9 +780,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setTransactionIsolation.
-     * 
-     * @param level
-     * @throws SQLException
+     *
+     * @param level the new transaction isolation
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#setTransactionIsolation(int)
      */
     @Override
@@ -723,9 +792,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setTypeMap.
-     * 
-     * @param arg0
-     * @throws SQLException
+     *
+     * @param arg0 the arg 0
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#setTypeMap(Map<String,Class<?>>)
      */
     @Override
@@ -735,11 +804,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createArrayOf.
-     * 
-     * @param typeName
-     * @param elements
+     *
+     * @param typeName the type name
+     * @param elements the elements
      * @return Array
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#createArrayOf(String, Object[])
      */
     @Override
@@ -749,9 +818,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createBlob.
-     * 
+     *
      * @return Blob
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#createBlob()
      */
     @Override
@@ -761,9 +830,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createClob.
-     * 
+     *
      * @return Clob
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#createClob()
      */
     @Override
@@ -773,9 +842,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createNClob.
-     * 
+     *
      * @return NClob
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Conn#createNClob()
      */
     @Override
@@ -785,9 +854,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createSQLXML.
-     * 
+     *
      * @return SQLXML
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Conn#createSQLXML()
      */
     @Override
@@ -797,11 +866,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method createStruct.
-     * 
-     * @param typeName
-     * @param attributes
+     *
+     * @param typeName the type name
+     * @param attributes the attributes
      * @return Struct
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#createStruct(String, Object[])
      */
     @Override
@@ -811,9 +880,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getClientInfo.
-     * 
+     *
      * @return Properties
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getClientInfo()
      */
     @Override
@@ -823,10 +892,10 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method getClientInfo.
-     * 
-     * @param name
+     *
+     * @param name the name
      * @return String
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#getClientInfo(String)
      */
     @Override
@@ -836,10 +905,10 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method isValid.
-     * 
-     * @param timeout
+     *
+     * @param timeout the timeout
      * @return boolean
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Connection#isValid(int)
      */
     @Override
@@ -849,9 +918,9 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setClientInfo.
-     * 
-     * @param properties
-     * @throws SQLClientInfoException
+     *
+     * @param properties the new client info
+     * @throws SQLClientInfoException the SQL client info exception
      * @see java.sql.Connection#setClientInfo(Properties)
      */
     @Override
@@ -861,10 +930,10 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method setClientInfo.
-     * 
-     * @param name
-     * @param value
-     * @throws SQLClientInfoException
+     *
+     * @param name the name
+     * @param value the value
+     * @throws SQLClientInfoException the SQL client info exception
      * @see java.sql.Connection#setClientInfo(String, String)
      */
     @Override
@@ -874,10 +943,10 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method isWrapperFor.
-     * 
-     * @param iface
+     *
+     * @param iface the iface
      * @return boolean
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Wrapper#isWrapperFor(Class<?>)
      */
     @Override
@@ -887,10 +956,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method unwrap.
-     * 
-     * @param iface
+     *
+     * @param <T> the generic type
+     * @param iface the iface
      * @return T
-     * @throws SQLException
+     * @throws SQLException the SQL exception
      * @see java.sql.Wrapper#unwrap(Class<T>)
      */
     @Override
@@ -920,8 +990,8 @@ class PoolableConnection extends AbstractPoolable implements Connection {
 
     /**
      * Method equals.
-     * 
-     * @param obj
+     *
+     * @param obj the obj
      * @return boolean
      */
     @Override
@@ -929,43 +999,97 @@ class PoolableConnection extends AbstractPoolable implements Connection {
         return this == obj || (obj instanceof PoolableConnection && ((PoolableConnection) obj).internalConn.equals(internalConn));
     }
 
+    /**
+     * Abort.
+     *
+     * @param executor the executor
+     * @throws SQLException the SQL exception
+     */
     @Override
     public void abort(Executor executor) throws SQLException {
         internalConn.abort(executor);
     }
 
+    /**
+     * Gets the network timeout.
+     *
+     * @return the network timeout
+     * @throws SQLException the SQL exception
+     */
     @Override
     public int getNetworkTimeout() throws SQLException {
         return internalConn.getNetworkTimeout();
     }
 
+    /**
+     * Gets the schema.
+     *
+     * @return the schema
+     * @throws SQLException the SQL exception
+     */
     @Override
     public String getSchema() throws SQLException {
         return internalConn.getSchema();
     }
 
+    /**
+     * Sets the network timeout.
+     *
+     * @param executor the executor
+     * @param milliseconds the milliseconds
+     * @throws SQLException the SQL exception
+     */
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
         internalConn.setNetworkTimeout(executor, milliseconds);
     }
 
+    /**
+     * Sets the schema.
+     *
+     * @param schema the new schema
+     * @throws SQLException the SQL exception
+     */
     @Override
     public void setSchema(String schema) throws SQLException {
         internalConn.setSchema(schema);
     }
 
     /**
+     * The Class CachedStatmentKey.
+     *
      * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     protected static class CachedStatmentKey {
+
+        /** The sql. */
         private final String sql;
+
+        /** The auto generated keys. */
         private final int autoGeneratedKeys;
+
+        /** The result set type. */
         private final int resultSetType;
+
+        /** The result set concurrency. */
         private final int resultSetConcurrency;
+
+        /** The result set holdability. */
         private final int resultSetHoldability;
+
+        /** The h. */
         private int h;
 
+        /**
+         * Instantiates a new cached statment key.
+         *
+         * @param sql the sql
+         * @param autoGeneratedKeys the auto generated keys
+         * @param resultSetType the result set type
+         * @param resultSetConcurrency the result set concurrency
+         * @param resultSetHoldability the result set holdability
+         */
         public CachedStatmentKey(String sql, int autoGeneratedKeys, int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
             this.sql = sql;
             this.autoGeneratedKeys = autoGeneratedKeys;
@@ -974,6 +1098,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
             this.resultSetHoldability = resultSetHoldability;
         }
 
+        /**
+         * Hash code.
+         *
+         * @return the int
+         */
         @Override
         public int hashCode() {
             if (h == 0) {
@@ -988,6 +1117,12 @@ class PoolableConnection extends AbstractPoolable implements Connection {
             return h;
         }
 
+        /**
+         * Equals.
+         *
+         * @param obj the obj
+         * @return true, if successful
+         */
         @Override
         public boolean equals(Object obj) {
             if (this == obj) {
@@ -1004,6 +1139,11 @@ class PoolableConnection extends AbstractPoolable implements Connection {
             return false;
         }
 
+        /**
+         * To string.
+         *
+         * @return the string
+         */
         @Override
         public String toString() {
             return sql;

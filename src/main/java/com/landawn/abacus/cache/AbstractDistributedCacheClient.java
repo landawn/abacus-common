@@ -17,39 +17,74 @@ package com.landawn.abacus.cache;
 import java.util.Collection;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * @since 0.8
- * 
+ * The Class AbstractDistributedCacheClient.
+ *
  * @author Haiyang Li
+ * @param <T> the generic type
+ * @since 0.8
  */
 public abstract class AbstractDistributedCacheClient<T> implements DistributedCacheClient<T> {
+
+    /** The server url. */
     private final String serverUrl;
 
+    /**
+     * Instantiates a new abstract distributed cache client.
+     *
+     * @param serverUrl the server url
+     */
     public AbstractDistributedCacheClient(String serverUrl) {
         this.serverUrl = serverUrl;
     }
 
+    /**
+     * Server url.
+     *
+     * @return the string
+     */
     @Override
     public String serverUrl() {
         return serverUrl;
     }
 
+    /**
+     * Gets the bulk.
+     *
+     * @param keys the keys
+     * @return the bulk
+     */
     @Override
     public Map<String, T> getBulk(String... keys) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the bulk.
+     *
+     * @param keys the keys
+     * @return the bulk
+     */
     @Override
     public Map<String, T> getBulk(Collection<String> keys) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Flush all.
+     */
     @Override
     public void flushAll() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * To seconds.
+     *
+     * @param liveTime the live time
+     * @return the int
+     */
     protected int toSeconds(long liveTime) {
         return (int) ((liveTime % 1000 == 0) ? (liveTime / 1000) : (liveTime / 1000) + 1);
     }
