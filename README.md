@@ -214,7 +214,7 @@ compile 'abacus-util-se:1.8.8'
 Please refer to [Wiki](https://github.com/landawn/abacus-util/wiki), [Introduction to JDBC](https://www.javacodegeeks.com/2015/02/jdbc-tutorial.html), [Programming in JDBC/DB with JdbcUtil/PreparedQuery/SQLExecutor/Dao/Mapper](https://github.com/landawn/abacus-util/wiki/Programming-in-RDBMS-with-Jdbc,-Dao,-PreparedQuery-and-SQLExecutor-Mapper).
 
 
-## Also See: [abacus-da](https://github.com/landawn/abacus-da), [abacus-android](https://github.com/landawn/abacus-android), 
+## Also See: [abacus-da](https://github.com/landawn/abacus-da), [abacus-entity-manager](https://github.com/landawn/abacus-entity-manager), [abacus-android](https://github.com/landawn/abacus-android), 
 
 
 ## Recommended Java programming libraries/frameworks:

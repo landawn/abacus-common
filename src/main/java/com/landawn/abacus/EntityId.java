@@ -78,14 +78,24 @@ public interface EntityId {
         return Seid.of(propName1, propValue1, propName2, propValue2, propName3, propValue3);
     }
 
-    /**
-     * Of.
+    /** 
+     *
+     * @param nameValues the name values
+     * @return the entity id
+     * @deprecated replaced by {@link #from(Map)}
+     */
+    @Deprecated
+    public static EntityId of(Map<String, Object> nameValues) {
+        return Seid.of(nameValues);
+    }
+
+    /** 
      *
      * @param nameValues the name values
      * @return the entity id
      */
-    public static EntityId of(Map<String, Object> nameValues) {
-        return Seid.of(nameValues);
+    public static EntityId from(Map<String, Object> nameValues) {
+        return Seid.from(nameValues);
     }
 
     /**
@@ -103,6 +113,20 @@ public interface EntityId {
      * @return T
      */
     <T> T get(String propName);
+
+    /**
+     * 
+     * @param propName
+     * @return
+     */
+    int getInt(String propName);
+
+    /**
+     * 
+     * @param propName
+     * @return
+     */
+    long getLong(String propName);
 
     /**
      * Method get.

@@ -322,7 +322,12 @@ public final class IOUtil {
             : System.getProperty("user.country");
 
     /** current path retrieved by {@code new File("./").getAbsolutePath()} */
-    public static final String CURRENT_PATH = new File("./").getAbsolutePath();
+    public static final String CURRENT_PATH;
+
+    static {
+        final String path = new File("./").getAbsolutePath();
+        CURRENT_PATH = path.charAt(path.length() - 1) == '.' ? path.substring(0, path.length() - 1) : path;
+    }
 
     /** The Constant PATH_SEPARATOR. */
     // ...
