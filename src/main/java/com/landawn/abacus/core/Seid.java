@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.landawn.abacus.EntityId;
+import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -70,7 +71,10 @@ public class Seid implements EntityId, Cloneable {
      * Instantiates a new seid.
      *
      * @param entityName the entity name
+     * @deprecated for internal use only
      */
+    @Deprecated
+    @Internal
     public Seid(String entityName) {
         if (N.isNullOrEmpty(entityName)) {
             throw new IllegalArgumentException("Entity name can't be null or empty");
@@ -107,7 +111,10 @@ public class Seid implements EntityId, Cloneable {
      *
      * @param entityName the entity name
      * @return the seid
+     * @deprecated for internal use only
      */
+    @Deprecated
+    @Internal
     public static Seid of(String entityName) {
         return new Seid(entityName);
     }
@@ -241,9 +248,11 @@ public class Seid implements EntityId, Cloneable {
      * @param propName the prop name
      * @param propValue the prop value
      * @return the entity id
+     * @deprecated for internal use only
      */
-    @Override
-    public EntityId set(String propName, Object propValue) {
+    @Deprecated
+    @Internal
+    public Seid set(String propName, Object propValue) {
         final String simplePropName = NameUtil.isCanonicalName(entityName, propName) ? NameUtil.getSimpleName(propName) : propName;
 
         if (values.isEmpty() || (values.size() == 1 && values.containsKey(simplePropName))) {
@@ -265,8 +274,10 @@ public class Seid implements EntityId, Cloneable {
      * Sets the.
      *
      * @param nameValues the name values
+     * @deprecated for internal use only
      */
-    @Override
+    @Deprecated
+    @Internal
     public void set(Map<String, Object> nameValues) {
         if (N.isNullOrEmpty(nameValues)) {
             return;
@@ -297,8 +308,10 @@ public class Seid implements EntityId, Cloneable {
      *
      * @param propName the prop name
      * @return the object
+     * @deprecated for internal use only
      */
-    @Override
+    @Deprecated
+    @Internal
     public Object remove(String propName) {
         if (values.size() == 0) {
             return null;
@@ -325,8 +338,10 @@ public class Seid implements EntityId, Cloneable {
      * Removes the all.
      *
      * @param propNames the prop names
+     * @deprecated for internal use only
      */
-    @Override
+    @Deprecated
+    @Internal
     public void removeAll(Collection<String> propNames) {
         for (String propName : propNames) {
             remove(propName);
@@ -396,8 +411,10 @@ public class Seid implements EntityId, Cloneable {
 
     /**
      * Clear.
+     * @deprecated for internal use only
      */
-    @Override
+    @Deprecated
+    @Internal
     public void clear() {
         values = Collections.emptyMap();
 
@@ -408,8 +425,10 @@ public class Seid implements EntityId, Cloneable {
      * Copy.
      *
      * @return the seid
+     * @deprecated for internal use only
      */
-    @Override
+    @Deprecated
+    @Internal
     public Seid copy() {
         final Seid copy = new Seid(entityName);
 
@@ -423,7 +442,10 @@ public class Seid implements EntityId, Cloneable {
      * Clone.
      *
      * @return the seid
+     * @deprecated for internal use only
      */
+    @Deprecated
+    @Internal
     @Override
     public Seid clone() {
         return copy();

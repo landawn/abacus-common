@@ -132,7 +132,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [SQLBuilder](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/SQLBuilder_view.html), 
 [DynamicSQLBuilder](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/DynamicSQLBuilder_view.html),
 [JdbcUtil](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/JdbcUtil_view.html), 
-[JdbcUtil.Dao/CrudDao](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/JdbcUtil.Dao.html), 
+[JdbcUtil.Dao/CrudDao](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/JdbcUtil.Dao.html), 
 [ConditionFactory(CF)](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/ConditionFactory_view.html)...
 
 * JSON/XML Data Binding: 
@@ -154,32 +154,32 @@ A general programming library in Java. It's easy to learn and simple to use with
 [MemcachedLock](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/MemcachedLock_view.html).
 
 * More: 
-[Charsets](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Charsets.html),
-[Ascii](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Ascii.html),
-[CalendarUnit](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/CalendarUnit.html),
-[NamingPolicy](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/NamingPolicy.html), 
-[Properties](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Properties.html),
-[PropertiesUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/PropertiesUtil.html),
-[Wrapper](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Wrapper.html),
-[ArrayHashSet](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/ArrayHashSet.html),
-[ArrayHashMap](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/ArrayHashMap.html),
-[ClassUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/ClassUtil.html),
-[EscapeUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/EscapeUtil.html),
-[RegExUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/RegExUtil.html),
-[FilenameUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/FilenameUtil.html),
-[AddrUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/AddrUtil.html),
-[WSSecurityUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/WSSecurityUtil.html),
-[EmailUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/EmailUtil.html),
-[IEEE754rUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/IEEE754rUtil.html),
-[Timed](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Timed.html),
-[Index](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Index.html),
-[Median](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Median.html),
-[f](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/f.html),
-[Matth](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Matth.html), 
-[SafeInitializer](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/SafeInitializer.html),
-[Stopwatch](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/Stopwatch.html),
-[RateLimiter](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/util/RateLimiter.html),
-[Traverser](https://static.javadoc.io/com.landawn/abacus-util/1.8.8/com/landawn/abacus/guava/Traverser.html)(copied from Apache commons, Google Guava...under Apache License v2) ...
+[Charsets](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Charsets.html),
+[Ascii](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Ascii.html),
+[CalendarUnit](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/CalendarUnit.html),
+[NamingPolicy](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/NamingPolicy.html), 
+[Properties](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Properties.html),
+[PropertiesUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/PropertiesUtil.html),
+[Wrapper](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Wrapper.html),
+[ArrayHashSet](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/ArrayHashSet.html),
+[ArrayHashMap](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/ArrayHashMap.html),
+[ClassUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/ClassUtil.html),
+[EscapeUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/EscapeUtil.html),
+[RegExUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/RegExUtil.html),
+[FilenameUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/FilenameUtil.html),
+[AddrUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/AddrUtil.html),
+[WSSecurityUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/WSSecurityUtil.html),
+[EmailUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/EmailUtil.html),
+[IEEE754rUtil](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/IEEE754rUtil.html),
+[Timed](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Timed.html),
+[Index](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Index.html),
+[Median](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Median.html),
+[f](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/f.html),
+[Matth](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Matth.html), 
+[SafeInitializer](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/SafeInitializer.html),
+[Stopwatch](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/Stopwatch.html),
+[RateLimiter](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/util/RateLimiter.html),
+[Traverser](https://static.javadoc.io/com.landawn/abacus-util/1.8.9 /com/landawn/abacus/guava/Traverser.html)(copied from Apache commons, Google Guava...under Apache License v2) ...
 
 
 ## Download/Installation & [Changes](https://github.com/landawn/abacus-util/blob/master/CHANGES.md):
@@ -189,10 +189,10 @@ A general programming library in Java. It's easy to learn and simple to use with
 * Gradle:
 ```gradle
 // JDK 1.8 or above:
-compile 'com.landawn:abacus-util:1.8.8' 
+compile 'com.landawn:abacus-util:1.8.9 ' 
 
 // util-se (Java 1.7) - small edition without Streams/Primitive Lists... Mostly it's for abacus-android.
-compile 'abacus-util-se:1.8.8'
+compile 'abacus-util-se:1.8.9 '
 ```
 
 

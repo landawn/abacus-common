@@ -1,5 +1,6 @@
 ### 1.8.9
 
+* Refactoring `EntityId`.
 * Improvements and bug fix.
 
 

@@ -14,7 +14,6 @@
 
 package com.landawn.abacus;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,19 +29,8 @@ import com.landawn.abacus.core.Seid;
 public interface EntityId {
 
     /**
-     * Of.
      *
-     * @param entityName the entity name
-     * @return the entity id
-     */
-    public static EntityId of(String entityName) {
-        return Seid.of(entityName);
-    }
-
-    /**
-     * Of.
-     *
-     * @param propName the prop name
+     * @param propName property name with entity name, for example {@code Account.id}
      * @param propValue the prop value
      * @return the entity id
      */
@@ -51,9 +39,21 @@ public interface EntityId {
     }
 
     /**
+     * 
+     * @param entityName
+     * @param propName
+     * @param propValue
+     * @return
+     */
+    @SuppressWarnings("deprecation")
+    public static EntityId of(String entityName, String propName, Object propValue) {
+        return Seid.of(entityName).set(propName, propValue);
+    }
+
+    /**
      * Of.
      *
-     * @param propName1 the prop name 1
+     * @param propName1 property name with entity name, for example {@code Account.id}
      * @param propValue1 the prop value 1
      * @param propName2 the prop name 2
      * @param propValue2 the prop value 2
@@ -64,9 +64,23 @@ public interface EntityId {
     }
 
     /**
+     * 
+     * @param entityName
+     * @param propName1
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @return
+     */
+    @SuppressWarnings("deprecation")
+    public static EntityId of(String entityName, String propName1, Object propValue1, String propName2, Object propValue2) {
+        return Seid.of(entityName).set(propName1, propValue1).set(propName2, propValue2);
+    }
+
+    /**
      * Of.
      *
-     * @param propName1 the prop name 1
+     * @param propName1 property name with entity name, for example {@code Account.id}
      * @param propValue1 the prop value 1
      * @param propName2 the prop name 2
      * @param propValue2 the prop value 2
@@ -78,15 +92,21 @@ public interface EntityId {
         return Seid.of(propName1, propValue1, propName2, propValue2, propName3, propValue3);
     }
 
-    /** 
-     *
-     * @param nameValues the name values
-     * @return the entity id
-     * @deprecated replaced by {@link #from(Map)}
+    /**
+     * 
+     * @param entityName
+     * @param propName1
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @param propName3
+     * @param propValue3
+     * @return
      */
-    @Deprecated
-    public static EntityId of(Map<String, Object> nameValues) {
-        return Seid.of(nameValues);
+    @SuppressWarnings("deprecation")
+    public static EntityId of(String entityName, String propName1, Object propValue1, String propName2, Object propValue2, String propName3,
+            Object propValue3) {
+        return Seid.of(entityName).set(propName1, propValue1).set(propName2, propValue2).set(propName3, propValue3);
     }
 
     /** 
@@ -96,6 +116,19 @@ public interface EntityId {
      */
     public static EntityId from(Map<String, Object> nameValues) {
         return Seid.from(nameValues);
+    }
+
+    /** 
+     *
+     * @param entityName
+     * @param nameValues the name values
+     * @return the entity id
+     */
+    @SuppressWarnings("deprecation")
+    public static EntityId from(String entityName, Map<String, Object> nameValues) {
+        final Seid seid = Seid.of(entityName);
+        seid.set(nameValues);
+        return seid;
     }
 
     /**
@@ -139,41 +172,9 @@ public interface EntityId {
     <T> T get(Class<T> clazz, String propName);
 
     /**
-     * Method set.
-     *
-     * @param propName the prop name
-     * @param propValue the prop value
-     * @return the entity id
-     */
-    EntityId set(String propName, Object propValue);
-
-    /**
-     * Sets the.
-     *
-     * @param nameValues the name values
-     */
-    void set(Map<String, Object> nameValues);
-
-    /**
-     * Method remove.
-     *
-     * @param propName the prop name
-     * @return the object
-     */
-    Object remove(String propName);
-
-    /**
-     * Removes the all.
-     *
-     * @param propNames the prop names
-     */
-    void removeAll(Collection<String> propNames);
-
-    /**
-     * Contains key.
-     *
-     * @param propName the prop name
-     * @return true, if successful
+     * 
+     * @param propName
+     * @return
      */
     boolean containsKey(String propName);
 
@@ -199,21 +200,8 @@ public interface EntityId {
     int size();
 
     /**
-     * Checks if is empty.
-     *
-     * @return true, if is empty
+     * 
+     * @return
      */
     boolean isEmpty();
-
-    /**
-     * Clear.
-     */
-    void clear();
-
-    /**
-     * Copy.
-     *
-     * @return EntityId
-     */
-    EntityId copy();
 }

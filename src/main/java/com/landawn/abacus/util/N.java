@@ -81,8 +81,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.DataSet;
-import com.landawn.abacus.DirtyMarker;
-import com.landawn.abacus.EntityId;
+import com.landawn.abacus.DirtyMarker; 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.core.DirtyMarkerUtil;
@@ -7955,16 +7954,6 @@ public final class N {
     }
 
     /**
-     * Checks if is null or empty.
-     *
-     * @param entityId the entity id
-     * @return true, if is null or empty
-     */
-    public static boolean isNullOrEmpty(final EntityId entityId) {
-        return (entityId == null) || (entityId.isEmpty());
-    }
-
-    /**
      * Checks if is null or empty or blank.
      *
      * @param s the s
@@ -8154,16 +8143,6 @@ public final class N {
      */
     public static boolean notNullOrEmpty(final DataSet rs) {
         return (rs != null) && (rs.size() > 0);
-    }
-
-    /**
-     * Not null or empty.
-     *
-     * @param entityId the entity id
-     * @return true, if successful
-     */
-    public static boolean notNullOrEmpty(final EntityId entityId) {
-        return (entityId != null) && (!entityId.isEmpty());
     }
 
     /**
