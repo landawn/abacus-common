@@ -10,7 +10,7 @@
 <!-- 
 	<dataSourceManager liveEnv="dev">
 		<dataSource name="codes" env="dev">
-		    <provider>dbcp</provider>
+		    <provider>dbcp2</provider>
 		    <sqlLog>true</sqlLog>
 		    <perfLog>100</perfLog>
 		    <queryWithReadOnlyConnectionByDefault>true</queryWithReadOnlyConnectionByDefault>
@@ -56,7 +56,7 @@
 	<xsd:complexType name="DataSource">
 		<xsd:sequence>
 			<xsd:element name="sliceSelector" type="xsd:string" />
-			<!-- dbcp, c3p0 or by default are supported -->
+			<!-- dbcp2, HikariCP or by default are supported -->
 			<xsd:element name="provider" type="xsd:string" />
 			<!-- default value READ_UNCOMMITTED, READ_COMMITTED, REPEATABLE_READ, SERIALIZABLE and DEFAULT are supported  -->
 			<xsd:element name="defaultIsolation" type="xsd:string" />

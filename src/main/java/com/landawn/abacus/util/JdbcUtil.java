@@ -16846,6 +16846,17 @@ public final class JdbcUtil {
         }
 
         /**
+         * Gets the active data source.
+         *
+         * @param dataSourceName the data source name
+         * @return the active data source
+         */
+        @Override
+        public DataSource getActiveDataSource(String dataSourceName) {
+            return activeDataSources.get(dataSourceName);
+        }
+
+        /**
          * Gets the active data sources.
          *
          * @return the active data sources

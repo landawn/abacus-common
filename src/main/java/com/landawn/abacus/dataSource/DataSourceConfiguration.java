@@ -59,22 +59,12 @@ public final class DataSourceConfiguration extends Configuration {
     /**
      * Field PROVIDER. (value is ""provider"")
      */
-    public static final String PROVIDER = "provider";
-
-    /**
-     * Field DBCP. (value is ""dbcp"")
-     */
-    public static final String DBCP = "dbcp";
+    public static final String PROVIDER = "provider"; 
 
     /**
      * Field DBCP2. (value is ""dbcp2"")
      */
-    public static final String DBCP2 = "dbcp2";
-
-    /**
-     * Field C3P0. (value is ""c3p0"")
-     */
-    public static final String C3P0 = "c3p0";
+    public static final String DBCP2 = "dbcp2"; 
 
     /**
      * Field HIKARI_CP. (value is ""HikariCP"")

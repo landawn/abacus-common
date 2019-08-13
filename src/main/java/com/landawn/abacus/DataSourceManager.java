@@ -42,6 +42,14 @@ public interface DataSourceManager {
     DataSource getPrimaryDataSource();
 
     /**
+     * Gets the active data source by name.
+     * 
+     * @param dataSourceName
+     * @return
+     */
+    DataSource getActiveDataSource(String dataSourceName);
+
+    /**
      * Returns all the active data sources for the live env.
      *
      * @return the active data sources

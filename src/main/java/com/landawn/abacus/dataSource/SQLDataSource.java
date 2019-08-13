@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.dataSource;
 
-import static com.landawn.abacus.dataSource.DataSourceConfiguration.C3P0;
-import static com.landawn.abacus.dataSource.DataSourceConfiguration.DBCP;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.DBCP2;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.DEFAULT_ISOLATION;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.HIKARI_CP;
@@ -290,12 +288,8 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     private ConnectionManager createConnectionManager(String provider, Map<String, ?> props) {
         if (N.isNullOrEmpty(provider)) {
             return new SQLConnectionManager(props);
-        } else if (DBCP.equalsIgnoreCase(provider)) {
-            return new DBCPConnectionManager(props);
         } else if (DBCP2.equalsIgnoreCase(provider)) {
             return new DBCP2ConnectionManager(props);
-        } else if (C3P0.equalsIgnoreCase(provider)) {
-            return new C3P0ConnectionManager(props);
         } else if (HIKARI_CP.equalsIgnoreCase(provider)) {
             return new HikariConnectionManager(props);
         } else {

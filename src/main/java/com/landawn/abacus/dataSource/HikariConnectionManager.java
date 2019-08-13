@@ -68,8 +68,8 @@ class HikariConnectionManager extends AbstractConnectionManager {
 
             config.setMinimumIdle(Integer.valueOf(properties.get(MIN_IDLE)));
             config.setMaximumPoolSize(Integer.valueOf(properties.get(MAX_ACTIVE)));
-            config.setIdleTimeout(Integer.valueOf(properties.get(MAX_IDLE_TIME)));
-            config.setMaxLifetime(Integer.valueOf(properties.get(LIVE_TIME)));
+            config.setIdleTimeout(Long.valueOf(properties.get(MAX_IDLE_TIME)));
+            config.setMaxLifetime(Long.valueOf(properties.get(LIVE_TIME)));
             config.setConnectionTestQuery(properties.get(VALIDATION_QUERY));
 
             config.setDataSourceProperties(connectionProperties);

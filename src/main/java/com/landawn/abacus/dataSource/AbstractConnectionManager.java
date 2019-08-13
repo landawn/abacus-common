@@ -61,6 +61,7 @@ import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.Configuration;
 import com.landawn.abacus.util.N;
 
 // TODO: Auto-generated Javadoc
@@ -166,30 +167,30 @@ abstract class AbstractConnectionManager implements ConnectionManager {
 
         if (props.containsKey(LIVE_TIME)) {
             connectionProperties.remove(LIVE_TIME);
-            properties.put(LIVE_TIME, props.get(LIVE_TIME).toString());
+            properties.put(LIVE_TIME, String.valueOf(Configuration.readTimeInMillis(props.get(LIVE_TIME).toString())));
         } else {
-            properties.put(LIVE_TIME, String.valueOf(DEFAULT_LIVE_TIME));
+            properties.put(LIVE_TIME, String.valueOf(Configuration.readTimeInMillis(String.valueOf(DEFAULT_LIVE_TIME))));
         }
 
         if (props.containsKey(MAX_IDLE_TIME)) {
             connectionProperties.remove(MAX_IDLE_TIME);
-            properties.put(MAX_IDLE_TIME, props.get(MAX_IDLE_TIME).toString());
+            properties.put(MAX_IDLE_TIME, String.valueOf(Configuration.readTimeInMillis(props.get(MAX_IDLE_TIME).toString())));
         } else {
-            properties.put(MAX_IDLE_TIME, String.valueOf(DEFAULT_MAX_IDLE_TIME));
+            properties.put(MAX_IDLE_TIME, String.valueOf(Configuration.readTimeInMillis(String.valueOf(DEFAULT_MAX_IDLE_TIME))));
         }
 
         if (props.containsKey(MAX_WAIT_TIME)) {
             connectionProperties.remove(MAX_WAIT_TIME);
-            properties.put(MAX_WAIT_TIME, props.get(MAX_WAIT_TIME).toString());
+            properties.put(MAX_WAIT_TIME, String.valueOf(Configuration.readTimeInMillis(props.get(MAX_WAIT_TIME).toString())));
         } else {
-            properties.put(MAX_WAIT_TIME, String.valueOf(DEFAULT_MAX_WAIT));
+            properties.put(MAX_WAIT_TIME, String.valueOf(Configuration.readTimeInMillis(String.valueOf(DEFAULT_MAX_WAIT))));
         }
 
         if (props.containsKey(EVICT_DELAY)) {
             connectionProperties.remove(EVICT_DELAY);
-            properties.put(EVICT_DELAY, props.get(EVICT_DELAY).toString());
+            properties.put(EVICT_DELAY, String.valueOf(Configuration.readTimeInMillis(props.get(EVICT_DELAY).toString())));
         } else {
-            properties.put(EVICT_DELAY, String.valueOf(DEFAULT_EVICT_DELAY));
+            properties.put(EVICT_DELAY, String.valueOf(Configuration.readTimeInMillis(String.valueOf(DEFAULT_EVICT_DELAY))));
         }
 
         if (props.containsKey(VALIDATION_QUERY)) {

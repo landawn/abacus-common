@@ -15,10 +15,13 @@
 package com.landawn.abacus.dataSource;
 
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.DRIVER;
+import static com.landawn.abacus.dataSource.DataSourceConfiguration.EVICT_DELAY;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.INITIAL_SIZE;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.JNDI_NAME;
+import static com.landawn.abacus.dataSource.DataSourceConfiguration.LIVE_TIME;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.MAX_ACTIVE;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.MAX_IDLE;
+import static com.landawn.abacus.dataSource.DataSourceConfiguration.MAX_IDLE_TIME;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.MAX_OPEN_PREPARED_STATEMENTS_PER_CONNECTION;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.MAX_WAIT_TIME;
 import static com.landawn.abacus.dataSource.DataSourceConfiguration.MIN_IDLE;
@@ -88,8 +91,11 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
             bds.setMinIdle(Integer.valueOf(properties.get(MIN_IDLE)));
             bds.setMaxIdle(Integer.valueOf(properties.get(MAX_IDLE)));
             bds.setMaxTotal(Integer.valueOf(properties.get(MAX_ACTIVE)));
-            bds.setMaxOpenPreparedStatements(Integer.valueOf(properties.get(MAX_OPEN_PREPARED_STATEMENTS_PER_CONNECTION)));
+            bds.setMaxConnLifetimeMillis(Long.valueOf(properties.get(LIVE_TIME)));
+            bds.setSoftMinEvictableIdleTimeMillis(Long.valueOf(properties.get(MAX_IDLE_TIME)));
+            bds.setTimeBetweenEvictionRunsMillis(Long.valueOf(properties.get(EVICT_DELAY)));
             bds.setMaxWaitMillis(Long.valueOf(properties.get(MAX_WAIT_TIME)));
+            bds.setMaxOpenPreparedStatements(Integer.valueOf(properties.get(MAX_OPEN_PREPARED_STATEMENTS_PER_CONNECTION)));
             bds.setTestOnBorrow(Boolean.valueOf(properties.get(TEST_ON_BORROW)));
             bds.setTestOnReturn(Boolean.valueOf(properties.get(TEST_ON_RETURN)));
             bds.setValidationQuery(properties.get(VALIDATION_QUERY));

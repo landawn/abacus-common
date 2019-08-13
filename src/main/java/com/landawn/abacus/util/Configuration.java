@@ -595,7 +595,7 @@ public abstract class Configuration {
      * @param value the value
      * @return the long
      */
-    public static long readTimeValue(String value) {
+    public static long readTimeInMillis(String value) {
         value = value == null ? value : value.trim();
 
         if (N.isNullOrEmpty(value)) {
@@ -603,9 +603,33 @@ public abstract class Configuration {
         }
 
         char lastChar = value.charAt(value.length() - 1);
+
         if (lastChar == 'l' || lastChar == 'L') {
             value = value.substring(0, value.length() - 1);
         }
+
+        long multiple = 1L;
+
+        if (value.endsWith("ms") || value.endsWith("MS")) {
+            value = value.substring(0, value.length() - 2);
+        } else if (value.endsWith("s") || value.endsWith("S")) {
+            value = value.substring(0, value.length() - 1);
+            multiple = 1000L;
+        } else if (value.endsWith("m") || value.endsWith("M")) {
+            value = value.substring(0, value.length() - 1);
+            multiple = 60 * 1000L;
+        } else if (value.endsWith("h") || value.endsWith("H")) {
+            value = value.substring(0, value.length() - 1);
+            multiple = 60 * 60 * 1000L;
+        } else if (value.endsWith("d") || value.endsWith("D")) {
+            value = value.substring(0, value.length() - 1);
+            multiple = 24 * 60 * 60 * 1000L;
+        } else if (value.endsWith("w") || value.endsWith("W")) {
+            value = value.substring(0, value.length() - 1);
+            multiple = 7 * 24 * 60 * 60 * 1000L;
+        }
+
+        long timeInMilliSeconds = 0;
 
         if (value.contains(WD.ASTERISK)) {
             long result = 1;
@@ -615,10 +639,12 @@ public abstract class Configuration {
                 result *= N.parseLong(str.trim());
             }
 
-            return result;
+            timeInMilliSeconds = result;
         } else {
-            return N.parseLong(value);
+            timeInMilliSeconds = N.parseLong(value);
         }
+
+        return timeInMilliSeconds * multiple;
     }
 
     /**

@@ -465,7 +465,8 @@ public final class SQLTransaction implements Transaction {
      * @return the transaction id
      */
     static String getTransactionId(Object dataSourceOrConnection, final CreatedBy creator) {
-        return StringUtil.concat(System.identityHashCode(dataSourceOrConnection), "_", Thread.currentThread().getName(), "_", creator.ordinal());
+        return StringUtil.concat(System.identityHashCode(dataSourceOrConnection), "_", Thread.currentThread().getId(), "_", Thread.currentThread().getName(),
+                "_", creator.ordinal());
     }
 
     /**

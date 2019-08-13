@@ -54,7 +54,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.pool.ObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.Configuration;
 import com.landawn.abacus.util.JdbcUtil;
 import com.landawn.abacus.util.N;
 
@@ -143,9 +142,9 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         minIdle = Integer.valueOf(properties.get(MIN_IDLE));
         maxIdle = Integer.valueOf(properties.get(MAX_IDLE));
         maxActive = Integer.valueOf(properties.get(MAX_ACTIVE));
-        maxWaitTime = Configuration.readTimeValue(properties.get(MAX_WAIT_TIME));
-        liveTime = Configuration.readTimeValue(properties.get(LIVE_TIME));
-        maxIdleTime = Configuration.readTimeValue(properties.get(MAX_IDLE_TIME));
+        maxWaitTime = Long.valueOf(properties.get(MAX_WAIT_TIME));
+        liveTime = Long.valueOf(properties.get(LIVE_TIME));
+        maxIdleTime = Long.valueOf(properties.get(MAX_IDLE_TIME));
         maxOpenPreparedStatementsPerConnection = Integer.valueOf(properties.get(MAX_OPEN_PREPARED_STATEMENTS_PER_CONNECTION));
         validationQuery = properties.get(VALIDATION_QUERY);
         testOnBorrow = Boolean.valueOf(properties.get(TEST_ON_BORROW));
