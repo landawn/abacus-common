@@ -41,4 +41,18 @@ public class SQLExecutorTest extends Jdbc {
         sp = NSC.selectFrom(User.class).where(CF.in("id", ids)).pair();
         sqlExecutor.query(sp.sql, sp.parameters).println();
     }
+
+    @Test
+    public void batch_25() {
+        List<User> users = N.fill(User.class, 19764);
+        String sql_insert = NSC.insertInto(User.class, N.asSet("id")).sql();
+        JdbcSettings jdbcSettings = JdbcSettings.create().setBatchSize(5000);
+        // insert 99 users, less the specified batch size.
+        List<Long> ids = sqlExecutor.batchInsert(sql_insert, jdbcSettings, users);
+
+        assertEquals(users.size(), ids.size());
+
+        SP sp = NSC.selectFrom(User.class).where(CF.in("id", ids)).pair();
+        assertEquals(users.size(), sqlExecutor.query(sp.sql, sp.parameters).size());
+    }
 }
