@@ -16092,22 +16092,23 @@ public final class JdbcUtil {
                         }
                     } else if (paramLen > 2 || !isLastParameterMapperOrExtractor) {
                         if (isNamedQuery) {
-                            final List<Dao.Bind> binders = IntStreamEx.range(0, paramLen - (isLastParameterMapperOrExtractor ? 1 : 0))
+                            final String[] paramNames = IntStreamEx.range(0, paramLen - (isLastParameterMapperOrExtractor ? 1 : 0))
                                     .mapToObj(i -> StreamEx.of(m.getParameterAnnotations()[i])
                                             .select(Dao.Bind.class)
                                             .first()
                                             .orElseThrow(() -> new UnsupportedOperationException("In method: " + ClassUtil.getSimpleClassName(daoInterface)
                                                     + "." + m.getName() + ", parameters[" + i + "]: " + ClassUtil.getSimpleClassName(m.getParameterTypes()[i])
                                                     + " is not binded with parameter named through annotation @Bind")))
-                                    .toList();
+                                    .map(b -> b.value())
+                                    .toArray(len -> new String[len]);
 
                             parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
                                 @Override
                                 public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
                                     final NamedQuery namedQuery = ((NamedQuery) preparedQuery);
 
-                                    for (int i = 0, count = binders.size(); i < count; i++) {
-                                        namedQuery.setObject(binders.get(i).value(), args[i]);
+                                    for (int i = 0, count = paramNames.length; i < count; i++) {
+                                        namedQuery.setObject(paramNames[i], args[i]);
                                     }
                                 }
                             };

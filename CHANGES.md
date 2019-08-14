@@ -1,3 +1,9 @@
+### 1.8.10
+
+* Fix issue #26.
+* Improvements and bug fix.
+
+
 ### 1.8.9
 
 * Refactoring `EntityId`.

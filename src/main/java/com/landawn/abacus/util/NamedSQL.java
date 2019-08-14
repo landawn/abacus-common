@@ -53,6 +53,8 @@ public final class NamedSQL {
     /** The Constant PREFIX_OF_NAMED_PARAMETER. */
     private static final String PREFIX_OF_NAMED_PARAMETER = ":";
 
+    private static final char _PREFIX_OF_NAMED_PARAMETER = PREFIX_OF_NAMED_PARAMETER.charAt(0);
+
     /** The Constant LEFT_OF_IBATIS_NAMED_PARAMETER. */
     private static final String LEFT_OF_IBATIS_NAMED_PARAMETER = "#{";
 
@@ -61,6 +63,9 @@ public final class NamedSQL {
 
     /** The Constant PREFIX_OF_COUCHBASE_NAMED_PARAMETER. */
     private static final String PREFIX_OF_COUCHBASE_NAMED_PARAMETER = "$";
+
+    /** The Constant PREFIX_OF_COUCHBASE_NAMED_PARAMETER. */
+    private static final char _PREFIX_OF_COUCHBASE_NAMED_PARAMETER = PREFIX_OF_COUCHBASE_NAMED_PARAMETER.charAt(0);
 
     /** The named SQL. */
     private final String namedSQL;
@@ -110,7 +115,7 @@ public final class NamedSQL {
             for (String word : words) {
                 if (word.equals(WD.QUESTION_MARK)) {
                     if (namedParameterList.size() > 0) {
-                        throw new AbacusException("can't mix '?' and '#{propName}' in the same sql script");
+                        throw new AbacusException("can't mix '?' with name parameter ':propName' or '#{propName}' in the same sql script");
                     }
                     parameterCount++;
                 } else if (word.startsWith(LEFT_OF_IBATIS_NAMED_PARAMETER) && word.endsWith(RIGHT_OF_IBATIS_NAMED_PARAMETER)) {
@@ -118,7 +123,7 @@ public final class NamedSQL {
 
                     word = WD.QUESTION_MARK;
                     parameterCount++;
-                } else if (word.startsWith(PREFIX_OF_NAMED_PARAMETER)) {
+                } else if (word.length() >= 2 && word.charAt(0) == _PREFIX_OF_NAMED_PARAMETER && isValidNamedParameterChar(word.charAt(1))) {
                     namedParameterList.add(word.substring(1));
 
                     word = WD.QUESTION_MARK;
@@ -273,7 +278,7 @@ public final class NamedSQL {
             for (String word : words) {
                 if (word.equals(WD.QUESTION_MARK)) {
                     if (couchbaseNamedParameterList.size() > 0) {
-                        throw new AbacusException("can't mix '?' and '#{propName}' in the same sql script");
+                        throw new AbacusException("can't mix '?' with name parameter ':propName' or '#{propName}' in the same sql script");
                     }
 
                     countOfParameter++;
@@ -283,7 +288,8 @@ public final class NamedSQL {
 
                     countOfParameter++;
                     word = PREFIX_OF_COUCHBASE_NAMED_PARAMETER + countOfParameter;
-                } else if (word.startsWith(PREFIX_OF_NAMED_PARAMETER) || word.startsWith(PREFIX_OF_COUCHBASE_NAMED_PARAMETER)) {
+                } else if (word.length() >= 2 && (word.charAt(0) == _PREFIX_OF_NAMED_PARAMETER || word.charAt(0) == _PREFIX_OF_COUCHBASE_NAMED_PARAMETER)
+                        && isValidNamedParameterChar(word.charAt(1))) {
                     couchbaseNamedParameterList.add(word.substring(1));
 
                     countOfParameter++;
@@ -322,6 +328,11 @@ public final class NamedSQL {
             couchbaseNamedParameters = ImmutableList.empty();
             couchbaseParameterCount = 0;
         }
+    }
+
+    private static boolean isValidNamedParameterChar(final char ch) {
+        // https://www.cs.cmu.edu/~pattis/15-1XX/common/handouts/ascii.html
+        return !(ch < '0' || (ch > '9' && ch < 'A') || (ch > 'Z' && ch < 'a') || (ch > 'z' && ch < 128));
     }
 
     /**
