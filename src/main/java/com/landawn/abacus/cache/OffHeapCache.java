@@ -34,7 +34,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.Parser;
@@ -47,6 +46,7 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteArrayOutputStream;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
@@ -264,7 +264,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
                         // ignore
 
                         if (logger.isWarnEnabled()) {
-                            logger.warn(AbacusException.getErrorMsg(e));
+                            logger.warn(ExceptionUtil.getMessage(e));
                         }
                     }
                 }

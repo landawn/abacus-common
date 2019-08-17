@@ -73,7 +73,7 @@ public class SimpleSourceSelector implements DataSourceSelector {
     private DataSource getDataSource(DataSourceManager dataSourceManager, Map<String, Object> options) {
         String dataSourceName = (options == null) ? null : (String) options.get(QUERY_WITH_DATA_SOURCE);
 
-        DataSource ds = (dataSourceName == null) ? dataSourceManager.getPrimaryDataSource() : dataSourceManager.getActiveDataSources().get(dataSourceName);
+        DataSource ds = (dataSourceName == null) ? dataSourceManager.getPrimaryDataSource() : dataSourceManager.getActiveDataSource(dataSourceName);
 
         if (ds == null) {
             throw new IllegalArgumentException("No data source is available with name: " + dataSourceName);

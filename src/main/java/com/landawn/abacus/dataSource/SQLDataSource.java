@@ -29,11 +29,11 @@ import java.util.Map;
 
 import com.landawn.abacus.IsolationLevel;
 import com.landawn.abacus.SliceSelector;
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.TypeAttrParser;
@@ -222,7 +222,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
             } catch (SQLException e) {
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             }
         }
@@ -356,7 +356,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
                 // ignore;
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
 
                 try {
@@ -365,7 +365,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
                     // ignore;
 
                     if (logger.isWarnEnabled()) {
-                        logger.warn(AbacusException.getErrorMsg(e1));
+                        logger.warn(ExceptionUtil.getMessage(e1));
                     }
                 } finally {
                     persistentConnection = getReadOnlyConnection();

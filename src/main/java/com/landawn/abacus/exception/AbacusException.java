@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.exception;
 
-import java.sql.SQLException;
-
 // TODO: Auto-generated Javadoc
 /**
  * The Class AbacusException.
@@ -86,19 +84,5 @@ public class AbacusException extends RuntimeException {
     @Override
     public String toString() {
         return getMessage();
-    }
-
-    /**
-     * Gets the error msg.
-     *
-     * @param e the e
-     * @return the error msg
-     */
-    public static String getErrorMsg(Throwable e) {
-        if (e instanceof SQLException) {
-            return e.getClass().getSimpleName() + "|" + ((SQLException) e).getErrorCode() + "|" + ((e.getMessage() == null) ? e.getCause() : e.getMessage());
-        } else {
-            return e.getClass().getSimpleName() + "|" + ((e.getMessage() == null) ? e.getCause() : e.getMessage());
-        }
     }
 }

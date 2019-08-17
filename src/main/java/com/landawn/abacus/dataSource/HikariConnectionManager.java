@@ -29,10 +29,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.ExceptionUtil;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -108,7 +108,7 @@ class HikariConnectionManager extends AbstractConnectionManager {
         try {
             return ds.getConnection();
         } catch (SQLException e) {
-            throw new UncheckedSQLException(AbacusException.getErrorMsg(e), e);
+            throw new UncheckedSQLException(ExceptionUtil.getMessage(e), e);
         }
     }
 
@@ -123,7 +123,7 @@ class HikariConnectionManager extends AbstractConnectionManager {
             try {
                 conn.close();
             } catch (SQLException e) {
-                throw new UncheckedSQLException(AbacusException.getErrorMsg(e), e);
+                throw new UncheckedSQLException(ExceptionUtil.getMessage(e), e);
             }
         }
     }

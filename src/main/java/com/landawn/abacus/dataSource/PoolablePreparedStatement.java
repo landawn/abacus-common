@@ -39,10 +39,10 @@ import java.util.Calendar;
 import java.util.Map;
 
 import com.landawn.abacus.dataSource.PoolableConnection.CachedStatmentKey;
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.pool.AbstractPoolable;
+import com.landawn.abacus.util.ExceptionUtil;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -128,7 +128,7 @@ class PoolablePreparedStatement extends AbstractPoolable implements PreparedStat
                 destroy();
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             }
         }
@@ -174,7 +174,7 @@ class PoolablePreparedStatement extends AbstractPoolable implements PreparedStat
             // ignore;
 
             if (logger.isWarnEnabled()) {
-                logger.warn(AbacusException.getErrorMsg(e));
+                logger.warn(ExceptionUtil.getMessage(e));
             }
         }
     }

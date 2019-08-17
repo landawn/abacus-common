@@ -40,7 +40,7 @@ import lombok.NoArgsConstructor;
 public class Jdbc {
     static final DataSource dataSource = JdbcUtil.createDataSource("jdbc:h2:~/test", "sa", "");
     static final SQLExecutor sqlExecutor = new SQLExecutor(dataSource);
-    static final Mapper<User, Long> userMapper = sqlExecutor.mapper(User.class);
+    static final Mapper<User, Long> userMapper = sqlExecutor.mapper(User.class, long.class);
     static final UserDao userDao = Dao.newInstance(UserDao.class, dataSource);
 
     // initialize DB schema.

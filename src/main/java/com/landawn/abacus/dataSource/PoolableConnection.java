@@ -32,12 +32,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.pool.AbstractPoolable;
 import com.landawn.abacus.pool.KeyedObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 
 // TODO: Auto-generated Javadoc
@@ -142,7 +142,7 @@ class PoolableConnection extends AbstractPoolable implements Connection {
                 stmt.destroy();
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             }
         }
@@ -276,7 +276,7 @@ class PoolableConnection extends AbstractPoolable implements Connection {
                 // ignore;
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             } finally {
                 if (connManager != null) {
@@ -460,7 +460,7 @@ class PoolableConnection extends AbstractPoolable implements Connection {
                 destroy();
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             }
         }

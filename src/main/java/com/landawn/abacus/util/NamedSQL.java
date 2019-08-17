@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.pool.KeyedObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
 import com.landawn.abacus.pool.PoolableWrapper;
@@ -115,7 +114,7 @@ public final class NamedSQL {
             for (String word : words) {
                 if (word.equals(WD.QUESTION_MARK)) {
                     if (namedParameterList.size() > 0) {
-                        throw new AbacusException("can't mix '?' with name parameter ':propName' or '#{propName}' in the same sql script");
+                        throw new IllegalArgumentException("can't mix '?' with name parameter ':propName' or '#{propName}' in the same sql script");
                     }
                     parameterCount++;
                 } else if (word.startsWith(LEFT_OF_IBATIS_NAMED_PARAMETER) && word.endsWith(RIGHT_OF_IBATIS_NAMED_PARAMETER)) {
@@ -278,7 +277,7 @@ public final class NamedSQL {
             for (String word : words) {
                 if (word.equals(WD.QUESTION_MARK)) {
                     if (couchbaseNamedParameterList.size() > 0) {
-                        throw new AbacusException("can't mix '?' with name parameter ':propName' or '#{propName}' in the same sql script");
+                        throw new IllegalArgumentException("can't mix '?' with name parameter ':propName' or '#{propName}' in the same sql script");
                     }
 
                     countOfParameter++;

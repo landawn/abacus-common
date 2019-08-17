@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
@@ -166,7 +167,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     } catch (Exception e) {
                         // ignore
                         if (logger.isWarnEnabled()) {
-                            logger.warn(AbacusException.getErrorMsg(e));
+                            logger.warn(ExceptionUtil.getMessage(e));
                         }
                     }
                 }
@@ -602,7 +603,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             } catch (Exception e) {
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             }
         }

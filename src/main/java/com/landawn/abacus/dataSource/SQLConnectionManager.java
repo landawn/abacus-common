@@ -47,13 +47,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.pool.ObjectPool;
 import com.landawn.abacus.pool.PoolFactory;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.JdbcUtil;
 import com.landawn.abacus.util.N;
 
@@ -246,7 +246,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
                 // ignore;
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             } finally {
                 if (conn == null) {
@@ -297,7 +297,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
             detroyConnection(poolableConn);
 
             if (logger.isWarnEnabled()) {
-                logger.warn(AbacusException.getErrorMsg(e));
+                logger.warn(ExceptionUtil.getMessage(e));
             }
         }
     }
@@ -327,7 +327,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
                 // ignore;
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             }
         }
@@ -373,7 +373,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
                     // ignore
 
                     if (logger.isWarnEnabled()) {
-                        logger.warn(AbacusException.getErrorMsg(e));
+                        logger.warn(ExceptionUtil.getMessage(e));
                     }
                 }
 
@@ -402,7 +402,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
                             // ignore
 
                             if (logger.isWarnEnabled()) {
-                                logger.warn(AbacusException.getErrorMsg(e));
+                                logger.warn(ExceptionUtil.getMessage(e));
                             }
                         }
                     }
@@ -463,7 +463,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
                 return conn;
             } catch (SQLException e) {
                 String msg = "Faied to create new connection for data source '" + url + "'." + " [Active connection number]: " + (xpool.size() + 1) + ". "
-                        + AbacusException.getErrorMsg(e);
+                        + ExceptionUtil.getMessage(e);
                 throw new UncheckedSQLException(msg, e);
             }
         }
@@ -539,7 +539,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
             // ignore;
 
             if (logger.isWarnEnabled()) {
-                logger.warn(AbacusException.getErrorMsg(e));
+                logger.warn(ExceptionUtil.getMessage(e));
             }
 
             return false;

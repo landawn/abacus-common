@@ -40,10 +40,10 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 
 // TODO: Auto-generated Javadoc
@@ -142,7 +142,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
         try {
             return ds.getConnection();
         } catch (SQLException e) {
-            throw new UncheckedSQLException(AbacusException.getErrorMsg(e), e);
+            throw new UncheckedSQLException(ExceptionUtil.getMessage(e), e);
         }
     }
 
@@ -157,7 +157,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
             try {
                 conn.close();
             } catch (SQLException e) {
-                throw new UncheckedSQLException(AbacusException.getErrorMsg(e), e);
+                throw new UncheckedSQLException(ExceptionUtil.getMessage(e), e);
             }
         }
     }
@@ -181,7 +181,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
             try {
                 bds.close();
             } catch (SQLException e) {
-                throw new UncheckedSQLException(AbacusException.getErrorMsg(e), e);
+                throw new UncheckedSQLException(ExceptionUtil.getMessage(e), e);
             }
         }
     }

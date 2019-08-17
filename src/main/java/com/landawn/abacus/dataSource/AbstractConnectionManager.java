@@ -57,11 +57,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Configuration;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 
 // TODO: Auto-generated Javadoc
@@ -296,7 +296,7 @@ abstract class AbstractConnectionManager implements ConnectionManager {
 
             return (DataSource) ctx.lookup(jndiName);
         } catch (NamingException e) {
-            throw new UncheckedException("Failed to bind to JNDI: " + jndiName + ". " + AbacusException.getErrorMsg(e), e);
+            throw new UncheckedException("Failed to bind to JNDI: " + jndiName + ". " + ExceptionUtil.getMessage(e), e);
         }
     }
 

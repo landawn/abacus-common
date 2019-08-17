@@ -40,7 +40,6 @@ import java.util.Set;
 
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.core.RowDataSet;
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JSONParser;
@@ -265,7 +264,7 @@ public final class CSVUtil {
             }
 
             if (selectPropNameSet != null && selectPropNameSet.size() > 0) {
-                throw new AbacusException(selectPropNameSet + " are not included in titles: " + N.toString(titles));
+                throw new IllegalArgumentException(selectPropNameSet + " are not included in titles: " + N.toString(titles));
             }
 
             final String[] strs = new String[titles.length];
@@ -511,7 +510,7 @@ public final class CSVUtil {
                     PropInfo propInfo = entityInfo.getPropInfo(titles[i]);
 
                     if (propInfo == null && selectPropNameSet != null) {
-                        throw new AbacusException(titles[i] + " is not defined in entity class: " + ClassUtil.getCanonicalClassName(entityClass));
+                        throw new IllegalArgumentException(titles[i] + " is not defined in entity class: " + ClassUtil.getCanonicalClassName(entityClass));
                     }
 
                     if (propInfo != null) {
@@ -523,7 +522,7 @@ public final class CSVUtil {
             }
 
             if (selectPropNameSet != null && selectPropNameSet.size() > 0) {
-                throw new AbacusException(selectColumnNames + " are not included in titles: " + N.toString(titles));
+                throw new IllegalArgumentException(selectColumnNames + " are not included in titles: " + N.toString(titles));
             }
 
             final String[] strs = new String[titles.length];
@@ -740,7 +739,7 @@ public final class CSVUtil {
             if (columnNameList.size() != columnTypeMap.size()) {
                 final List<String> keys = new ArrayList<>(columnTypeMap.keySet());
                 keys.removeAll(columnNameList);
-                throw new AbacusException(keys + " are not included in titles: " + N.toString(titles));
+                throw new IllegalArgumentException(keys + " are not included in titles: " + N.toString(titles));
             }
 
             final String[] strs = new String[titles.length];
@@ -1318,7 +1317,7 @@ public final class CSVUtil {
             }
 
             if (columnNameSet != null && columnNameSet.size() > 0) {
-                throw new AbacusException(columnNameSet + " are not included in query result");
+                throw new IllegalArgumentException(columnNameSet + " are not included in query result");
             }
 
             if (writeTitle) {
@@ -2022,7 +2021,7 @@ public final class CSVUtil {
             if (columnNameList.size() != columnTypeMap.size()) {
                 final List<String> keys = new ArrayList<>(columnTypeMap.keySet());
                 keys.removeAll(columnNameList);
-                throw new AbacusException(keys + " are not included in titles: " + N.toString(titles));
+                throw new IllegalArgumentException(keys + " are not included in titles: " + N.toString(titles));
             }
 
             while (offset-- > 0 && br.readLine() != null) {

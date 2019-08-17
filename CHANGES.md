@@ -1,3 +1,9 @@
+### 1.8.11
+
+* Improve `JdbcUtil.Dao`.
+* Improvements and bug fix.
+
+
 ### 1.8.10
 
 * Fix issue #26.

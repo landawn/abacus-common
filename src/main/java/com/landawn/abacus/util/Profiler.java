@@ -32,7 +32,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
@@ -367,7 +366,7 @@ public final class Profiler {
                 } catch (Exception e) {
                     // ignore;
                     e.printStackTrace(ps);
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             }
             final long startTimeInMillis = System.currentTimeMillis();
@@ -381,7 +380,7 @@ public final class Profiler {
                 } catch (Exception e) {
                     // ignore;
                     e.printStackTrace(ps);
-                    logger.warn(AbacusException.getErrorMsg(e));
+                    logger.warn(ExceptionUtil.getMessage(e));
                 }
             }
             final SingleLoopStatistics loopStatistics = new SingleLoopStatistics(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano,
@@ -412,7 +411,7 @@ public final class Profiler {
             } catch (Exception e) {
                 // ignore;
                 e.printStackTrace(ps);
-                logger.warn(AbacusException.getErrorMsg(e));
+                logger.warn(ExceptionUtil.getMessage(e));
             }
         }
         final long startTimeInMillis = System.currentTimeMillis();
@@ -426,11 +425,11 @@ public final class Profiler {
             }
         } catch (InvocationTargetException e) {
             e.printStackTrace(ps);
-            logger.warn(AbacusException.getErrorMsg(e));
+            logger.warn(ExceptionUtil.getMessage(e));
             result = e.getTargetException();
         } catch (Exception e) {
             e.printStackTrace(ps);
-            logger.warn(AbacusException.getErrorMsg(e));
+            logger.warn(ExceptionUtil.getMessage(e));
             result = e;
         }
         final long endTimeInNano = System.nanoTime();
@@ -441,7 +440,7 @@ public final class Profiler {
             } catch (Exception e) {
                 // ignore;
                 e.printStackTrace(ps);
-                logger.warn(AbacusException.getErrorMsg(e));
+                logger.warn(ExceptionUtil.getMessage(e));
             }
         }
         MethodStatistics methodStatistics = new MethodStatistics(methodName, startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, result);

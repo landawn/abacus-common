@@ -19,9 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.LockMode;
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 
 // TODO: Auto-generated Javadoc
@@ -105,7 +105,7 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
         } catch (InterruptedException e) {
 
             if (logger.isWarnEnabled()) {
-                logger.warn(AbacusException.getErrorMsg(e));
+                logger.warn(ExceptionUtil.getMessage(e));
             }
 
             return null;

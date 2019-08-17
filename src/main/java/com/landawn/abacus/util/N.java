@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -30,10 +29,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -73,7 +70,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -81,15 +77,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.DataSet;
-import com.landawn.abacus.DirtyMarker; 
-import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.DirtyMarker;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
 import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.exception.UncheckedException;
-import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
@@ -36680,52 +36673,6 @@ public final class N {
         });
     }
 
-    /** The Constant toRuntimeExceptionFuncMap. */
-    private static final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> toRuntimeExceptionFuncMap = new HashMap<>();
-    static {
-        toRuntimeExceptionFuncMap.put(RuntimeException.class, new Function<Throwable, RuntimeException>() {
-            @Override
-            public RuntimeException apply(Throwable e) {
-                return (RuntimeException) e;
-            }
-        });
-
-        toRuntimeExceptionFuncMap.put(IOException.class, new Function<Throwable, RuntimeException>() {
-            @Override
-            public RuntimeException apply(Throwable e) {
-                return new UncheckedIOException((IOException) e);
-            }
-        });
-
-        toRuntimeExceptionFuncMap.put(SQLException.class, new Function<Throwable, RuntimeException>() {
-            @Override
-            public RuntimeException apply(Throwable e) {
-                return new UncheckedSQLException((SQLException) e);
-            }
-        });
-
-        toRuntimeExceptionFuncMap.put(ExecutionException.class, new Function<Throwable, RuntimeException>() {
-            @Override
-            public RuntimeException apply(Throwable e) {
-                return e.getCause() == null ? new UncheckedException(e) : toRuntimeException(e.getCause());
-            }
-        });
-
-        toRuntimeExceptionFuncMap.put(InvocationTargetException.class, new Function<Throwable, RuntimeException>() {
-            @Override
-            public RuntimeException apply(Throwable e) {
-                return e.getCause() == null ? new UncheckedException(e) : toRuntimeException(e.getCause());
-            }
-        });
-
-        toRuntimeExceptionFuncMap.put(UndeclaredThrowableException.class, new Function<Throwable, RuntimeException>() {
-            @Override
-            public RuntimeException apply(Throwable e) {
-                return e.getCause() == null ? new UncheckedException(e) : toRuntimeException(e.getCause());
-            }
-        });
-    }
-
     /**
      * To runtime exception.
      *
@@ -36733,39 +36680,8 @@ public final class N {
      * @return the runtime exception
      */
     public static RuntimeException toRuntimeException(Throwable e) {
-        final Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(e.getClass());
-
-        if (func == null) {
-            return e instanceof RuntimeException ? (RuntimeException) e : new UncheckedException(e);
-        } else {
-            return func.apply(e);
-        }
+        return ExceptionUtil.toRuntimeException(e);
     }
-
-    /**
-     * May caused by.
-     *
-     * @param <E> the element type
-     * @param e the e
-     * @param exceptionClass the exception class
-     * @return true, if successful
-     */
-    @Beta
-    public static <E extends Throwable> boolean mayCausedBy(Throwable e, final Class<E> exceptionClass) {
-        N.checkArgNotNull(e, "e");
-        N.checkArgNotNull(exceptionClass, "exceptionClass");
-
-        while (e != null) {
-            if (exceptionClass.isAssignableFrom(e.getClass())) {
-                return true;
-            }
-
-            e = e.getCause();
-        }
-
-        return false;
-    }
-
     /**
      * Sleep.
      *
