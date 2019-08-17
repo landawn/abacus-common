@@ -6077,7 +6077,7 @@ public class SQLExecutor {
             final List<String> idPropNames = ClassUtil.getIdFieldNames(entityClass, false);
 
             N.checkArgNotNullOrEmpty(idPropNames, "Target class: " + ClassUtil.getCanonicalClassName(entityClass)
-                    + " must at least has one id property annotated by @Id or @ReadOnlyId on field or class");
+                    + " must have at least one id property annotated by @Id or @ReadOnlyId on field or class");
 
             //    N.checkArgument(idPropNames.size() == 1, "Only one id is supported at present. But Entity class {} has {} ids: {}", targetClass, idPropNames.size(),
             //            idPropNames);
