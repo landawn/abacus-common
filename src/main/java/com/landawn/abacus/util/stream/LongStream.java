@@ -125,7 +125,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *        not merged to the interval, then mapper will receive the same
      *        value twice, otherwise it will receive the leftmost and the
      *        rightmost values which were merged to the range.
-     * @return the new stream
+     * @return
      * @see #collapse(LongBiPredicate, LongBinaryOperator)
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
@@ -150,7 +150,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *        not merged to the interval, then mapper will receive the same
      *        value twice, otherwise it will receive the leftmost and the
      *        rightmost values which were merged to the range.
-     * @return the new stream
+     * @return
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
@@ -201,8 +201,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param accumulator  the accumulation function
-     * @return the new stream which has the extract same size as this stream.
+     * @param accumulator the accumulation function
+     * @return
      */
     @SequentialOnly
     public abstract LongStream scan(final LongBinaryOperator accumulator);
@@ -229,8 +229,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * 
-     * @param accumulator  the accumulation function
-     * @return the new stream which has the extract same size as this stream.
+     * @param accumulator the accumulation function
+     * @return
      */
     @SequentialOnly
     public abstract LongStream scan(final long init, final LongBinaryOperator accumulator);

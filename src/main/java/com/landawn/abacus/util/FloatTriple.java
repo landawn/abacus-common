@@ -45,9 +45,9 @@ public final class FloatTriple {
     /**
      * Instantiates a new float triple.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
      */
     FloatTriple(float _1, float _2, float _3) {
         this._1 = _1;
@@ -58,10 +58,10 @@ public final class FloatTriple {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @return the float triple
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @return
      */
     public static FloatTriple of(float _1, float _2, float _3) {
         return new FloatTriple(_1, _2, _3);
@@ -70,7 +70,7 @@ public final class FloatTriple {
     /**
      * Min.
      *
-     * @return the float
+     * @return
      */
     public float min() {
         return N.min(_1, _2, _3);
@@ -79,7 +79,7 @@ public final class FloatTriple {
     /**
      * Max.
      *
-     * @return the float
+     * @return
      */
     public float max() {
         return N.max(_1, _2, _3);
@@ -88,7 +88,7 @@ public final class FloatTriple {
     /**
      * Median.
      *
-     * @return the float
+     * @return
      */
     public float median() {
         return N.median(_1, _2, _3);
@@ -97,7 +97,7 @@ public final class FloatTriple {
     /**
      * Sum.
      *
-     * @return the float
+     * @return
      */
     public float sum() {
         return N.sum(_1, _2, _3);
@@ -106,7 +106,7 @@ public final class FloatTriple {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return N.average(_1, _2, _3);
@@ -115,7 +115,7 @@ public final class FloatTriple {
     /**
      * Reversed.
      *
-     * @return the float triple
+     * @return
      */
     public FloatTriple reversed() {
         return new FloatTriple(_3, _2, _1);
@@ -124,7 +124,7 @@ public final class FloatTriple {
     /**
      * To array.
      *
-     * @return the float[]
+     * @return
      */
     public float[] toArray() {
         return new float[] { _1, _2, _3 };
@@ -133,7 +133,7 @@ public final class FloatTriple {
     /**
      * To list.
      *
-     * @return the float list
+     * @return
      */
     public FloatList toList() {
         return FloatList.of(_1, _2, _3);
@@ -142,8 +142,8 @@ public final class FloatTriple {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.FloatConsumer<E> comsumer) throws E {
@@ -155,8 +155,8 @@ public final class FloatTriple {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<FloatTriple, E> action) throws E {
@@ -166,10 +166,10 @@ public final class FloatTriple {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<FloatTriple, U, E> mapper) throws E {
@@ -179,9 +179,9 @@ public final class FloatTriple {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<FloatTriple> filter(final Try.Predicate<FloatTriple, E> predicate) throws E {
@@ -191,7 +191,7 @@ public final class FloatTriple {
     /**
      * Stream.
      *
-     * @return the float stream
+     * @return
      */
     public FloatStream stream() {
         return FloatStream.of(_1, _2, _3);
@@ -200,7 +200,7 @@ public final class FloatTriple {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -210,7 +210,7 @@ public final class FloatTriple {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -228,7 +228,7 @@ public final class FloatTriple {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

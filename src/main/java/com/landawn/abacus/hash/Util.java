@@ -88,7 +88,7 @@ final class Util {
          * Returns the {@code int} value that is equal to {@code value}, if possible.
          *
          * @param value any value in the range of the {@code int} type
-         * @return the {@code int} value that equals {@code value}
+         * @return
          * @throws IllegalArgumentException if {@code value} is greater than {@link Integer#MAX_VALUE} or
          *     less than {@link Integer#MIN_VALUE}
          */
@@ -120,15 +120,15 @@ final class Util {
         /**
          * From bytes.
          *
-         * @param b1 the b 1
-         * @param b2 the b 2
-         * @param b3 the b 3
-         * @param b4 the b 4
-         * @param b5 the b 5
-         * @param b6 the b 6
-         * @param b7 the b 7
-         * @param b8 the b 8
-         * @return the long
+         * @param b1
+         * @param b2
+         * @param b3
+         * @param b4
+         * @param b5
+         * @param b6
+         * @param b7
+         * @param b8
+         * @return
          */
         public static long fromBytes(byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7, byte b8) {
             return (b1 & 0xFFL) << 56 | (b2 & 0xFFL) << 48 | (b3 & 0xFFL) << 40 | (b4 & 0xFFL) << 32 | (b5 & 0xFFL) << 24 | (b6 & 0xFFL) << 16
@@ -151,8 +151,8 @@ final class Util {
         /**
          * Checked cast.
          *
-         * @param value the value
-         * @return the byte
+         * @param value
+         * @return
          */
         public static byte checkedCast(long value) {
             byte result = (byte) value;
@@ -182,8 +182,8 @@ final class Util {
         /**
          * Checked cast.
          *
-         * @param value the value
-         * @return the byte
+         * @param value
+         * @return
          */
         public static byte checkedCast(long value) {
             if ((value >> Byte.SIZE) != 0) {
@@ -197,8 +197,8 @@ final class Util {
          * Returns the value of the given byte as an integer, when treated as unsigned. That is, returns
          * {@code value + 256} if {@code value} is negative; {@code value} itself otherwise.
          *
-         * @param value the value
-         * @return the int
+         * @param value
+         * @return
          * @since 6.0
          */
         public static int toInt(byte value) {
@@ -224,8 +224,8 @@ final class Util {
         /**
          * Returns the value of the given {@code int} as a {@code long}, when treated as unsigned.
          *
-         * @param value the value
-         * @return the long
+         * @param value
+         * @return
          */
         public static long toLong(int value) {
             return value & INT_MASK;
@@ -247,10 +247,10 @@ final class Util {
         /**
          * Divide.
          *
-         * @param p the p
-         * @param q the q
-         * @param mode the mode
-         * @return the long
+         * @param p
+         * @param q
+         * @param mode
+         * @return
          */
         public static long divide(long p, long q, RoundingMode mode) {
             N.checkArgNotNull(mode);
@@ -308,7 +308,7 @@ final class Util {
         /**
          * Check rounding unnecessary.
          *
-         * @param condition the condition
+         * @param condition
          */
         static void checkRoundingUnnecessary(boolean condition) {
             if (!condition) {
@@ -320,9 +320,9 @@ final class Util {
     /**
      * Check position indexes.
      *
-     * @param start the start
-     * @param end the end
-     * @param size the size
+     * @param start
+     * @param end
+     * @param size
      */
     public static void checkPositionIndexes(int start, int end, int size) {
         // Carefully optimized for execution by hotspot (explanatory comment above)
@@ -334,10 +334,10 @@ final class Util {
     /**
      * Bad position indexes.
      *
-     * @param start the start
-     * @param end the end
-     * @param size the size
-     * @return the string
+     * @param start
+     * @param end
+     * @param size
+     * @return
      */
     private static String badPositionIndexes(int start, int end, int size) {
         if (start < 0 || start > size) {
@@ -353,10 +353,10 @@ final class Util {
     /**
      * Check position index.
      *
-     * @param index the index
-     * @param size the size
-     * @param desc the desc
-     * @return the int
+     * @param index
+     * @param size
+     * @param desc
+     * @return
      */
     public static int checkPositionIndex(int index, int size, String desc) {
         // Carefully optimized for execution by hotspot (explanatory comment above)
@@ -369,10 +369,10 @@ final class Util {
     /**
      * Bad position index.
      *
-     * @param index the index
-     * @param size the size
-     * @param desc the desc
-     * @return the string
+     * @param index
+     * @param size
+     * @param desc
+     * @return
      */
     private static String badPositionIndex(int index, int size, String desc) {
         if (index < 0) {
@@ -393,7 +393,7 @@ final class Util {
      * @param template a non-null string containing 0 or more {@code %s} placeholders.
      * @param args the arguments to be substituted into the message template. Arguments are converted
      *     to strings using {@link String#valueOf(Object)}. Arguments can be null.
-     * @return the string
+     * @return
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
     static String format(String template, Object... args) {

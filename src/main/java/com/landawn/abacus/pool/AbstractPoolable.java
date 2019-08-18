@@ -29,8 +29,8 @@ public abstract class AbstractPoolable implements Poolable {
     /**
      * Instantiates a new abstract poolable.
      *
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
+     * @param liveTime
+     * @param maxIdleTime
      */
     protected AbstractPoolable(long liveTime, long maxIdleTime) {
         activityPrint = new ActivityPrint(liveTime, maxIdleTime);
@@ -39,7 +39,7 @@ public abstract class AbstractPoolable implements Poolable {
     /**
      * Activity print.
      *
-     * @return the activity print
+     * @return
      */
     @Override
     public ActivityPrint activityPrint() {

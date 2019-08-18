@@ -38,9 +38,9 @@ public final class Chain {
      * Comparable#compareTo}, <i>if</i> the result of this comparison chain
      * has not already been determined.
      *
-     * @param <T> the generic type
-     * @param left the left
-     * @param right the right
+     * @param <T>
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static <T extends Comparable<? super T>> ComparisonChain compare(T left, T right) {
@@ -51,10 +51,10 @@ public final class Chain {
      * Compares two objects using a comparator, <i>if</i> the result of this
      * comparison chain has not already been determined.
      *
-     * @param <T> the generic type
-     * @param left the left
-     * @param right the right
-     * @param comparator the comparator
+     * @param <T>
+     * @param left
+     * @param right
+     * @param comparator
      * @return {@code ComparisonChain}
      */
     public static <T> ComparisonChain compare(T left, T right, Comparator<T> comparator) {
@@ -64,12 +64,12 @@ public final class Chain {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param left the left
-     * @param right the right
-     * @param func the func
-     * @return the comparison chain
+     * @param <T>
+     * @param <E>
+     * @param left
+     * @param right
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ComparisonChain compare(T left, T right, Try.BiFunction<? super T, ? super T, Integer, E> func) throws E {
@@ -81,8 +81,8 @@ public final class Chain {
      * than {@code true}, <i>if</i> the result of this comparison chain has not
      * already been determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compareFalseLess(boolean left, boolean right) {
@@ -94,8 +94,8 @@ public final class Chain {
      * than {@code false}, <i>if</i> the result of this comparison chain has not
      * already been determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compareTrueLess(boolean left, boolean right) {
@@ -107,8 +107,8 @@ public final class Chain {
      * <i>if</i> the result of this comparison chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compare(char left, char right) {
@@ -120,8 +120,8 @@ public final class Chain {
      * <i>if</i> the result of this comparison chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compare(byte left, byte right) {
@@ -133,8 +133,8 @@ public final class Chain {
      * <i>if</i> the result of this comparison chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compare(short left, short right) {
@@ -146,8 +146,8 @@ public final class Chain {
      * <i>if</i> the result of this comparison chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compare(int left, int right) {
@@ -159,8 +159,8 @@ public final class Chain {
      * <i>if</i> the result of this comparison chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compare(long left, long right) {
@@ -172,8 +172,8 @@ public final class Chain {
      * Float#compare}, <i>if</i> the result of this comparison chain has not
      * already been determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compare(float left, float right) {
@@ -185,8 +185,8 @@ public final class Chain {
      * Double#compare}, <i>if</i> the result of this comparison chain has not
      * already been determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code ComparisonChain}
      */
     public static ComparisonChain compare(double left, double right) {
@@ -198,8 +198,8 @@ public final class Chain {
      * N#equals(Object, Object)}, <i>if</i> the result of this equivalence chain
      * has not already been determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(Object left, Object right) {
@@ -209,12 +209,12 @@ public final class Chain {
     /**
      * Equals.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param left the left
-     * @param right the right
-     * @param func the func
-     * @return the equivalence chain
+     * @param <T>
+     * @param <E>
+     * @param left
+     * @param right
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> EquivalenceChain equals(T left, T right, Try.BiFunction<? super T, ? super T, Boolean, E> func) throws E {
@@ -226,8 +226,8 @@ public final class Chain {
      * <i>if</i> the result of this equivalence chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(boolean left, boolean right) {
@@ -239,8 +239,8 @@ public final class Chain {
      * <i>if</i> the result of this equivalence chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(char left, char right) {
@@ -252,8 +252,8 @@ public final class Chain {
      * <i>if</i> the result of this equivalence chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(byte left, byte right) {
@@ -265,8 +265,8 @@ public final class Chain {
      * <i>if</i> the result of this equivalence chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(short left, short right) {
@@ -278,8 +278,8 @@ public final class Chain {
      * <i>if</i> the result of this equivalence chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(int left, int right) {
@@ -291,8 +291,8 @@ public final class Chain {
      * <i>if</i> the result of this equivalence chain has not already been
      * determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(long left, long right) {
@@ -304,8 +304,8 @@ public final class Chain {
      * Float#compare}, <i>if</i> the result of this equivalence chain has not
      * already been determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(float left, float right) {
@@ -317,8 +317,8 @@ public final class Chain {
      * Double#compare}, <i>if</i> the result of this equivalence chain has not
      * already been determined.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      * @return {@code EquivalenceChain}
      */
     public static EquivalenceChain equals(double left, double right) {
@@ -328,7 +328,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(Object value) {
@@ -338,11 +338,11 @@ public final class Chain {
     /**
      * Hash.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param value the value
-     * @param func the func
-     * @return the hash code chain
+     * @param <T>
+     * @param <E>
+     * @param value
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> HashCodeChain hash(T value, Try.ToIntFunction<? super T, E> func) throws E {
@@ -352,7 +352,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(boolean value) {
@@ -362,7 +362,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(char value) {
@@ -372,7 +372,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(byte value) {
@@ -382,7 +382,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(short value) {
@@ -392,7 +392,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(int value) {
@@ -402,7 +402,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(long value) {
@@ -412,7 +412,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(float value) {
@@ -422,7 +422,7 @@ public final class Chain {
     /**
      * Add the hash code of the specified {@code value} to result.
      *
-     * @param value the value
+     * @param value
      * @return this
      */
     public static HashCodeChain hash(double value) {
@@ -449,9 +449,9 @@ public final class Chain {
          * Comparable#compareTo}, <i>if</i> the result of this comparison chain
          * has not already been determined.
          *
-         * @param <T> the generic type
-         * @param left the left
-         * @param right the right
+         * @param <T>
+         * @param left
+         * @param right
          * @return this
          */
         public <T extends Comparable<? super T>> ComparisonChain compare(T left, T right) {
@@ -466,10 +466,10 @@ public final class Chain {
          * Compares two objects using a comparator, <i>if</i> the result of this
          * comparison chain has not already been determined.
          *
-         * @param <T> the generic type
-         * @param left the left
-         * @param right the right
-         * @param comparator the comparator
+         * @param <T>
+         * @param left
+         * @param right
+         * @param comparator
          * @return this
          */
         public <T> ComparisonChain compare(T left, T right, Comparator<T> comparator) {
@@ -483,12 +483,12 @@ public final class Chain {
         /**
          * Compare.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param left the left
-         * @param right the right
-         * @param func the func
-         * @return the comparison chain
+         * @param <T>
+         * @param <E>
+         * @param left
+         * @param right
+         * @param func
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> ComparisonChain compare(T left, T right, Try.BiFunction<? super T, ? super T, Integer, E> func) throws E {
@@ -506,8 +506,8 @@ public final class Chain {
          * than {@code true}, <i>if</i> the result of this comparison chain has not
          * already been determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compareFalseLess(boolean left, boolean right) {
@@ -523,8 +523,8 @@ public final class Chain {
          * than {@code false}, <i>if</i> the result of this comparison chain has not
          * already been determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compareTrueLess(boolean left, boolean right) {
@@ -540,8 +540,8 @@ public final class Chain {
          * <i>if</i> the result of this comparison chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compare(char left, char right) {
@@ -557,8 +557,8 @@ public final class Chain {
          * <i>if</i> the result of this comparison chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compare(byte left, byte right) {
@@ -574,8 +574,8 @@ public final class Chain {
          * <i>if</i> the result of this comparison chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compare(short left, short right) {
@@ -591,8 +591,8 @@ public final class Chain {
          * <i>if</i> the result of this comparison chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compare(int left, int right) {
@@ -608,8 +608,8 @@ public final class Chain {
          * <i>if</i> the result of this comparison chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compare(long left, long right) {
@@ -625,8 +625,8 @@ public final class Chain {
          * Float#compare}, <i>if</i> the result of this comparison chain has not
          * already been determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compare(float left, float right) {
@@ -642,8 +642,8 @@ public final class Chain {
          * Double#compare}, <i>if</i> the result of this comparison chain has not
          * already been determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public ComparisonChain compare(double left, double right) {
@@ -657,7 +657,7 @@ public final class Chain {
         /**
          * Result.
          *
-         * @return the int
+         * @return
          */
         public int result() {
             return result;
@@ -684,8 +684,8 @@ public final class Chain {
          * N#equals(Object, Object)}, <i>if</i> the result of this equivalence chain
          * has not already been determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(Object left, Object right) {
@@ -699,12 +699,12 @@ public final class Chain {
         /**
          * Equals.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param left the left
-         * @param right the right
-         * @param func the func
-         * @return the equivalence chain
+         * @param <T>
+         * @param <E>
+         * @param left
+         * @param right
+         * @param func
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> EquivalenceChain equals(T left, T right, Try.BiFunction<? super T, ? super T, Boolean, E> func) throws E {
@@ -722,8 +722,8 @@ public final class Chain {
          * <i>if</i> the result of this equivalence chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(boolean left, boolean right) {
@@ -739,8 +739,8 @@ public final class Chain {
          * <i>if</i> the result of this equivalence chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(char left, char right) {
@@ -756,8 +756,8 @@ public final class Chain {
          * <i>if</i> the result of this equivalence chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(byte left, byte right) {
@@ -773,8 +773,8 @@ public final class Chain {
          * <i>if</i> the result of this equivalence chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(short left, short right) {
@@ -790,8 +790,8 @@ public final class Chain {
          * <i>if</i> the result of this equivalence chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(int left, int right) {
@@ -807,8 +807,8 @@ public final class Chain {
          * <i>if</i> the result of this equivalence chain has not already been
          * determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(long left, long right) {
@@ -824,8 +824,8 @@ public final class Chain {
          * Float#compare}, <i>if</i> the result of this equivalence chain has not
          * already been determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(float left, float right) {
@@ -841,8 +841,8 @@ public final class Chain {
          * Double#compare}, <i>if</i> the result of this equivalence chain has not
          * already been determined.
          *
-         * @param left the left
-         * @param right the right
+         * @param left
+         * @param right
          * @return this
          */
         public EquivalenceChain equals(double left, double right) {
@@ -881,7 +881,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(Object value) {
@@ -893,11 +893,11 @@ public final class Chain {
         /**
          * Hash.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param value the value
-         * @param func the func
-         * @return the hash code chain
+         * @param <T>
+         * @param <E>
+         * @param value
+         * @param func
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> HashCodeChain hash(T value, Try.ToIntFunction<? super T, E> func) throws E {
@@ -911,7 +911,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(boolean value) {
@@ -923,7 +923,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(char value) {
@@ -935,7 +935,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(byte value) {
@@ -947,7 +947,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(short value) {
@@ -959,7 +959,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(int value) {
@@ -971,7 +971,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(long value) {
@@ -983,7 +983,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(float value) {
@@ -995,7 +995,7 @@ public final class Chain {
         /**
          * Add the hash code of the specified {@code value} to result.
          *
-         * @param value the value
+         * @param value
          * @return this
          */
         public HashCodeChain hash(double value) {
@@ -1007,7 +1007,7 @@ public final class Chain {
         /**
          * Result.
          *
-         * @return the int
+         * @return
          */
         public int result() {
             return result;

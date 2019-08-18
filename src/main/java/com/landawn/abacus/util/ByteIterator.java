@@ -46,7 +46,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Empty.
      *
-     * @return the byte iterator
+     * @return
      */
     public static ByteIterator empty() {
         return EMPTY;
@@ -55,8 +55,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the byte iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static ByteIterator of(final byte... a) {
@@ -66,10 +66,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte iterator
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static ByteIterator of(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -110,8 +110,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier the iterator supplier
-     * @return the byte iterator
+     * @param iteratorSupplier
+     * @return
      */
     public static ByteIterator of(final Supplier<? extends ByteIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -150,8 +150,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Lazy evaluation.
      *
-     * @param arraySupplier the array supplier
-     * @return the byte iterator
+     * @param arraySupplier
+     * @return
      */
     public static ByteIterator oF(final Supplier<byte[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -197,8 +197,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Returns an infinite {@code ByteIterator}.
      *
-     * @param supplier the supplier
-     * @return the byte iterator
+     * @param supplier
+     * @return
      */
     public static ByteIterator generate(final ByteSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -219,9 +219,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Generate.
      *
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the byte iterator
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static ByteIterator generate(final BooleanSupplier hasNext, final ByteSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -247,7 +247,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Next.
      *
-     * @return the byte
+     * @return
      * @Deprecated use <code>nextByte()</code> instead.
      */
     @Deprecated
@@ -259,14 +259,14 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Next byte.
      *
-     * @return the byte
+     * @return
      */
     public abstract byte nextByte();
 
     /**
      * To array.
      *
-     * @return the byte[]
+     * @return
      */
     public byte[] toArray() {
         return toList().trimToSize().array();
@@ -275,7 +275,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * To list.
      *
-     * @return the byte list
+     * @return
      */
     public ByteList toList() {
         final ByteList list = new ByteList();
@@ -290,7 +290,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Stream.
      *
-     * @return the byte stream
+     * @return
      */
     public ByteStream stream() {
         return ByteStream.of(this);
@@ -299,8 +299,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Foreach remaining.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void foreachRemaining(Try.ByteConsumer<E> action) throws E {
@@ -314,7 +314,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * For each remaining.
      *
-     * @param action the action
+     * @param action
      */
     @Override
     @Deprecated

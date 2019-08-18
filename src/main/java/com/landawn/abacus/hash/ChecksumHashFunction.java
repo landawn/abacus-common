@@ -42,9 +42,9 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
     /**
      * Instantiates a new checksum hash function.
      *
-     * @param checksumSupplier the checksum supplier
-     * @param bits the bits
-     * @param toString the to string
+     * @param checksumSupplier
+     * @param bits
+     * @param toString
      */
     ChecksumHashFunction(Supplier<? extends Checksum> checksumSupplier, int bits, String toString) {
         this.checksumSupplier = N.checkArgNotNull(checksumSupplier);
@@ -56,7 +56,7 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
     /**
      * Bits.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int bits() {
@@ -66,7 +66,7 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -76,7 +76,7 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -94,7 +94,7 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         /**
          * Instantiates a new checksum hasher.
          *
-         * @param checksum the checksum
+         * @param checksum
          */
         private ChecksumHasher(Checksum checksum) {
             this.checksum = N.checkArgNotNull(checksum);
@@ -103,7 +103,7 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         /**
          * Update.
          *
-         * @param b the b
+         * @param b
          */
         @Override
         protected void update(byte b) {
@@ -113,9 +113,9 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         /**
          * Update.
          *
-         * @param bytes the bytes
-         * @param off the off
-         * @param len the len
+         * @param bytes
+         * @param off
+         * @param len
          */
         @Override
         protected void update(byte[] bytes, int off, int len) {
@@ -125,7 +125,7 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         /**
          * Hash.
          *
-         * @return the hash code
+         * @return
          */
         @Override
         public HashCode hash() {

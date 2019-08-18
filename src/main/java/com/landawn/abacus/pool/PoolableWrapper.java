@@ -21,7 +21,7 @@ import com.landawn.abacus.util.N;
  * The Class PoolableWrapper.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class PoolableWrapper<T> extends AbstractPoolable {
@@ -32,7 +32,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     /**
      * Wrap the the source object with <code>Long.MAX_VALUE</code> <code>liveTime</code> and <code>Long.MAX_VALUE</code> <code>maxIdleTime</code>.
      *
-     * @param srcObject the src object
+     * @param srcObject
      */
     public PoolableWrapper(T srcObject) {
         this(srcObject, Long.MAX_VALUE, Long.MAX_VALUE);
@@ -41,9 +41,9 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     /**
      * Instantiates a new poolable wrapper.
      *
-     * @param srcObject the src object
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
+     * @param srcObject
+     * @param liveTime
+     * @param maxIdleTime
      */
     public PoolableWrapper(T srcObject, long liveTime, long maxIdleTime) {
         super(liveTime, maxIdleTime);
@@ -53,9 +53,9 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     /**
      * Wrap the the source object with <code>Long.MAX_VALUE</code> <code>liveTime</code> and <code>Long.MAX_VALUE</code> <code>maxIdleTime</code>.
      *
-     * @param <T> the generic type
-     * @param srcObject the src object
-     * @return the poolable wrapper
+     * @param <T>
+     * @param srcObject
+     * @return
      */
     public static <T> PoolableWrapper<T> of(T srcObject) {
         return new PoolableWrapper<T>(srcObject);
@@ -64,11 +64,11 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     /**
      * Wrap the the source object with specified <code>liveTime</code> and <code>maxIdleTime</code>.
      *
-     * @param <T> the generic type
-     * @param srcObject the src object
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
-     * @return the poolable wrapper
+     * @param <T>
+     * @param srcObject
+     * @param liveTime
+     * @param maxIdleTime
+     * @return
      */
     public static <T> PoolableWrapper<T> of(T srcObject, long liveTime, long maxIdleTime) {
         return new PoolableWrapper<T>(srcObject, liveTime, maxIdleTime);
@@ -96,7 +96,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -106,7 +106,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @SuppressWarnings("unchecked")
@@ -118,7 +118,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

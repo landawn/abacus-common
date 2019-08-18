@@ -41,7 +41,7 @@ public @interface Type {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      * @deprecated use {@code name} to specify attribute explicitly.
      */
     @Deprecated
@@ -50,21 +50,21 @@ public @interface Type {
     /**
      * Name.
      *
-     * @return the string
+     * @return
      */
     String name() default "";
 
     /**
      * Enumerated.
      *
-     * @return the enum type
+     * @return
      */
     EnumType enumerated() default EnumType.STRING;
 
     /**
      * Scope.
      *
-     * @return the scope
+     * @return
      */
     Scope scope() default Scope.ALL;
 

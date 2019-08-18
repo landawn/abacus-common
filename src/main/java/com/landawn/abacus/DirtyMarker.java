@@ -35,7 +35,7 @@ public interface DirtyMarker {
     /**
      * Returns the entity name of the simple class name.
      *
-     * @return the string
+     * @return
      */
     String entityName();
 
@@ -60,7 +60,7 @@ public interface DirtyMarker {
     /**
      * Check if the specified property is modified.
      *
-     * @param propName the prop name
+     * @param propName
      * @return boolean
      */
     @XmlTransient
@@ -71,7 +71,7 @@ public interface DirtyMarker {
     /**
      * Set the dirty status for all signed properties.
      *
-     * @param isDirty the is dirty
+     * @param isDirty
      */
     @Internal
     @Deprecated
@@ -80,8 +80,8 @@ public interface DirtyMarker {
     /**
      * Set the dirty status for the specified property.
      *
-     * @param propName the prop name
-     * @param isDirty the is dirty
+     * @param propName
+     * @param isDirty
      */
     @Internal
     @Deprecated
@@ -90,8 +90,8 @@ public interface DirtyMarker {
     /**
      * Set the dirty status for the specified properties.
      *
-     * @param propNames the prop names
-     * @param isDirty the is dirty
+     * @param propNames
+     * @param isDirty
      */
     @Internal
     @Deprecated

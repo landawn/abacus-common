@@ -88,7 +88,7 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     /**
      * Instantiates a new abstract connection manager.
      *
-     * @param props the props
+     * @param props
      */
     public AbstractConnectionManager(Map<String, ?> props) {
         properties = new HashMap<>();
@@ -247,7 +247,7 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     /**
      * Gets the properties.
      *
-     * @return the properties
+     * @return
      */
     @Override
     public Map<String, String> getProperties() {
@@ -257,7 +257,7 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     /**
      * Gets the connection properties.
      *
-     * @return the connection properties
+     * @return
      */
     @Override
     public Properties getConnectionProperties() {
@@ -275,8 +275,8 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     /**
      * Creates the JNDI data source.
      *
-     * @param properties the properties
-     * @return the data source
+     * @param properties
+     * @return
      */
     protected DataSource createJNDIDataSource(Map<String, String> properties) {
         String jndiName = connectionProperties.getProperty(JNDI_NAME);
@@ -303,7 +303,7 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -318,7 +318,7 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -339,7 +339,7 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

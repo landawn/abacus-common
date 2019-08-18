@@ -41,7 +41,7 @@ public interface Cache<K, V> extends Closeable {
     /**
      * Gets the.
      *
-     * @param k the k
+     * @param k
      * @return V
      */
     Optional<V> get(final K k);
@@ -49,7 +49,7 @@ public interface Cache<K, V> extends Closeable {
     /**
      * Gets the t.
      *
-     * @param k the k
+     * @param k
      * @return V
      */
     V gett(final K k);
@@ -57,24 +57,24 @@ public interface Cache<K, V> extends Closeable {
     /**
      * Async get.
      *
-     * @param k the k
-     * @return the continuable future
+     * @param k
+     * @return
      */
     ContinuableFuture<Optional<V>> asyncGet(final K k);
 
     /**
      * Async gett.
      *
-     * @param k the k
-     * @return the continuable future
+     * @param k
+     * @return
      */
     ContinuableFuture<V> asyncGett(final K k);
 
     /**
      * Put.
      *
-     * @param k the k
-     * @param v the v
+     * @param k
+     * @param v
      * @return true, if successful
      */
     boolean put(final K k, final V v);
@@ -82,19 +82,19 @@ public interface Cache<K, V> extends Closeable {
     /**
      * Async put.
      *
-     * @param k the k
-     * @param v the v
-     * @return the continuable future
+     * @param k
+     * @param v
+     * @return
      */
     ContinuableFuture<Boolean> asyncPut(final K k, final V v);
 
     /**
      * Put.
      *
-     * @param k the k
-     * @param v the v
-     * @param liveTime            unit is milliseconds
-     * @param maxIdleTime            unit is milliseconds
+     * @param k
+     * @param v
+     * @param liveTime unit is milliseconds
+     * @param maxIdleTime unit is milliseconds
      * @return true, if successful
      */
     boolean put(final K k, final V v, long liveTime, long maxIdleTime);
@@ -102,33 +102,33 @@ public interface Cache<K, V> extends Closeable {
     /**
      * Async put.
      *
-     * @param k the k
-     * @param v the v
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
-     * @return the continuable future
+     * @param k
+     * @param v
+     * @param liveTime
+     * @param maxIdleTime
+     * @return
      */
     ContinuableFuture<Boolean> asyncPut(final K k, final V v, long liveTime, long maxIdleTime);
 
     /**
      * Removes the.
      *
-     * @param k the k
+     * @param k
      */
     void remove(final K k);
 
     /**
      * Async remove.
      *
-     * @param k the k
-     * @return the continuable future
+     * @param k
+     * @return
      */
     ContinuableFuture<Void> asyncRemove(final K k);
 
     /**
      * Contains key.
      *
-     * @param k the k
+     * @param k
      * @return boolean
      */
     boolean containsKey(final K k);
@@ -136,8 +136,8 @@ public interface Cache<K, V> extends Closeable {
     /**
      * Async contains key.
      *
-     * @param k the k
-     * @return the continuable future
+     * @param k
+     * @return
      */
     ContinuableFuture<Boolean> asyncContainsKey(final K k);
 
@@ -151,7 +151,7 @@ public interface Cache<K, V> extends Closeable {
     /**
      * Method size.
      *
-     * @return the int
+     * @return
      */
     int size();
 
@@ -176,35 +176,35 @@ public interface Cache<K, V> extends Closeable {
     /**
      * Gets the properties.
      *
-     * @return the properties
+     * @return
      */
     Properties<String, Object> getProperties();
 
     /**
      * Gets the property.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
-     * @return the property
+     * @param <T>
+     * @param propName
+     * @return
      */
     <T> T getProperty(String propName);
 
     /**
      * Returns the old value associated with the property by the {@code propName}, {@code null} if it doesn't exist.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
-     * @param propValue the prop value
-     * @return the t
+     * @param <T>
+     * @param propName
+     * @param propValue
+     * @return
      */
     <T> T setProperty(String propName, Object propValue);
 
     /**
      * Returns value of the property which is to be removed, {@code null} if it doesn't exist.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
-     * @return the t
+     * @param <T>
+     * @param propName
+     * @return
      */
     <T> T removeProperty(String propName);
 }

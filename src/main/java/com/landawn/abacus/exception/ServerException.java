@@ -37,7 +37,7 @@ public class ServerException extends AbacusException {
     /**
      * Constructor for XmlReadException.
      *
-     * @param message the message
+     * @param message
      */
     public ServerException(String message) {
         super(message);
@@ -46,8 +46,8 @@ public class ServerException extends AbacusException {
     /**
      * Constructor for XmlReadException.
      *
-     * @param message the message
-     * @param cause the cause
+     * @param message
+     * @param cause
      */
     public ServerException(String message, Throwable cause) {
         super(message, cause);
@@ -56,7 +56,7 @@ public class ServerException extends AbacusException {
     /**
      * Constructor for XmlReadException.
      *
-     * @param cause the cause
+     * @param cause
      */
     public ServerException(Throwable cause) {
         super(cause);

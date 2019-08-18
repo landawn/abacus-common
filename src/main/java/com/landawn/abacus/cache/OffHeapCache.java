@@ -215,7 +215,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * The memory with the specified size of MB will be allocated at application start up.
      *
-     * @param sizeMB the size MB
+     * @param sizeMB
      */
     public OffHeapCache(int sizeMB) {
         this(sizeMB, 3000);
@@ -224,7 +224,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * The memory with the specified size of MB will be allocated at application start up.
      *
-     * @param sizeMB the size MB
+     * @param sizeMB
      * @param evictDelay unit is milliseconds
      */
     public OffHeapCache(int sizeMB, long evictDelay) {
@@ -234,7 +234,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * The memory with the specified size of MB will be allocated at application start up.
      *
-     * @param sizeMB the size MB
+     * @param sizeMB
      * @param evictDelay unit is milliseconds
      * @param defaultLiveTime unit is milliseconds
      * @param defaultMaxIdleTime unit is milliseconds
@@ -290,8 +290,8 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Gets the t.
      *
-     * @param k the k
-     * @return the t
+     * @param k
+     * @return
      */
     @Override
     public V gett(K k) {
@@ -303,10 +303,10 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Copy from memory.
      *
-     * @param startPtr the start ptr
-     * @param bytes the bytes
-     * @param destOffset the dest offset
-     * @param len the len
+     * @param startPtr
+     * @param bytes
+     * @param destOffset
+     * @param len
      */
     private static void copyFromMemory(final long startPtr, final byte[] bytes, int destOffset, int len) {
         UNSAFE.copyMemory(null, startPtr, bytes, destOffset, len);
@@ -315,10 +315,10 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Put.
      *
-     * @param k the k
-     * @param v the v
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
+     * @param k
+     * @param v
+     * @param liveTime
+     * @param maxIdleTime
      * @return true, if successful
      */
     @Override
@@ -438,8 +438,8 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Gets the available segment.
      *
-     * @param size the size
-     * @return the available segment
+     * @param size
+     * @return
      */
     // TODO: performance tuning for concurrent put.
     private AvaialbeSegment getAvailableSegment(int size) {
@@ -566,10 +566,10 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Copy to memory.
      *
-     * @param srcBytes the src bytes
-     * @param srcOffset the src offset
-     * @param startPtr the start ptr
-     * @param len the len
+     * @param srcBytes
+     * @param srcOffset
+     * @param startPtr
+     * @param len
      */
     private static void copyToMemory(final byte[] srcBytes, int srcOffset, final long startPtr, final int len) {
         UNSAFE.copyMemory(srcBytes, srcOffset, null, startPtr, len);
@@ -611,7 +611,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Removes the.
      *
-     * @param k the k
+     * @param k
      */
     @Override
     public void remove(K k) {
@@ -625,7 +625,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Contains key.
      *
-     * @param k the k
+     * @param k
      * @return true, if successful
      */
     @Override
@@ -636,7 +636,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -646,7 +646,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -721,7 +721,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * The Class Wrapper.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     private static abstract class Wrapper<T> extends AbstractPoolable {
 
@@ -734,10 +734,10 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Instantiates a new wrapper.
          *
-         * @param type the type
-         * @param liveTime the live time
-         * @param maxIdleTime the max idle time
-         * @param size the size
+         * @param type
+         * @param liveTime
+         * @param maxIdleTime
+         * @param size
          */
         Wrapper(final Type<T> type, long liveTime, long maxIdleTime, int size) {
             super(liveTime, maxIdleTime);
@@ -749,7 +749,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Read.
          *
-         * @return the t
+         * @return
          */
         abstract T read();
     }
@@ -757,7 +757,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * The Class SWrapper.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     private static final class SWrapper<T> extends Wrapper<T> {
 
@@ -770,12 +770,12 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Instantiates a new s wrapper.
          *
-         * @param type the type
-         * @param liveTime the live time
-         * @param maxIdleTime the max idle time
-         * @param size the size
-         * @param segment the segment
-         * @param startPtr the start ptr
+         * @param type
+         * @param liveTime
+         * @param maxIdleTime
+         * @param size
+         * @param segment
+         * @param startPtr
          */
         SWrapper(final Type<T> type, long liveTime, long maxIdleTime, int size, Segment segment, long startPtr) {
             super(type, liveTime, maxIdleTime, size);
@@ -787,7 +787,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Read.
          *
-         * @return the t
+         * @return
          */
         @Override
         T read() {
@@ -828,7 +828,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     /**
      * The Class MWrapper.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     private static final class MWrapper<T> extends Wrapper<T> {
 
@@ -838,11 +838,11 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Instantiates a new m wrapper.
          *
-         * @param type the type
-         * @param liveTime the live time
-         * @param maxIdleTime the max idle time
-         * @param size the size
-         * @param segments the segments
+         * @param type
+         * @param liveTime
+         * @param maxIdleTime
+         * @param size
+         * @param segments
          */
         MWrapper(final Type<T> type, long liveTime, long maxIdleTime, int size, List<Map.Entry<Long, Segment>> segments) {
             super(type, liveTime, maxIdleTime, size);
@@ -853,7 +853,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Read.
          *
-         * @return the t
+         * @return
          */
         @Override
         T read() {
@@ -930,7 +930,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Instantiates a new segment.
          *
-         * @param segmentStartPtr the segment start ptr
+         * @param segmentStartPtr
          */
         public Segment(long segmentStartPtr) {
             this.startPtr = segmentStartPtr;
@@ -939,7 +939,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Allocate.
          *
-         * @return the int
+         * @return
          */
         public int allocate() {
             synchronized (blockBitSet) {
@@ -958,7 +958,7 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Release.
          *
-         * @param blockIndex the block index
+         * @param blockIndex
          */
         public void release(int blockIndex) {
             synchronized (blockBitSet) {
@@ -988,8 +988,8 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         /**
          * Instantiates a new avaialbe segment.
          *
-         * @param segment the segment
-         * @param availableBlockIndex the available block index
+         * @param segment
+         * @param availableBlockIndex
          */
         AvaialbeSegment(final Segment segment, final int availableBlockIndex) {
             this.segment = segment;

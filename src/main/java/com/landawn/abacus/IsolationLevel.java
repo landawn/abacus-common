@@ -65,7 +65,7 @@ public enum IsolationLevel {
     /**
      * Constructor.
      *
-     * @param intValue the int value
+     * @param intValue
      */
     IsolationLevel(int intValue) {
         this.intValue = intValue;
@@ -83,7 +83,7 @@ public enum IsolationLevel {
     /**
      * Method valueOf.
      *
-     * @param intValue the int value
+     * @param intValue
      * @return IsolationLevel
      */
     public static IsolationLevel valueOf(int intValue) {

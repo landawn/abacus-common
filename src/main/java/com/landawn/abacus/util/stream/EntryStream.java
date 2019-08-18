@@ -128,7 +128,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
      *
      * @param <KK> a type of keys to select.
      * @param clazz a class to filter the keys.
-     * @return the new stream
+     * @return
      */
     @SuppressWarnings({ "unchecked" })
     @SequentialOnly
@@ -150,7 +150,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
      *
      * @param <VV> a type of values to select.
      * @param clazz a class to filter the values.
-     * @return the new stream
+     * @return
      */
     @SuppressWarnings({ "unchecked" })
     @SequentialOnly

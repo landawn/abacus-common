@@ -37,7 +37,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
     /**
      * Instantiates a new abstract composite hash function.
      *
-     * @param functions the functions
+     * @param functions
      */
     AbstractCompositeHashFunction(HashFunction... functions) {
         for (HashFunction function : functions) {
@@ -51,8 +51,8 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
      * has consumed the entire input and they are ready to output a {@code HashCode}. The order of the
      * hashers are the same order as the functions given to the constructor.
      *
-     * @param hashers the hashers
-     * @return the hash code
+     * @param hashers
+     * @return
      */
     // this could be cleaner if it passed HashCode[], but that would create yet another array...
     /* protected */ abstract HashCode makeHash(Hasher[] hashers);
@@ -60,7 +60,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {

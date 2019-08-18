@@ -37,7 +37,7 @@ public class InvalidTransactionIdException extends AbacusException {
     /**
      * Constructor for InvalidTransactionIdException.
      *
-     * @param message the message
+     * @param message
      */
     public InvalidTransactionIdException(String message) {
         super(message);
@@ -46,8 +46,8 @@ public class InvalidTransactionIdException extends AbacusException {
     /**
      * Constructor for InvalidTransactionIdException.
      *
-     * @param message the message
-     * @param cause the cause
+     * @param message
+     * @param cause
      */
     public InvalidTransactionIdException(String message, Throwable cause) {
         super(message, cause);
@@ -56,7 +56,7 @@ public class InvalidTransactionIdException extends AbacusException {
     /**
      * Constructor for InvalidTransactionIdException.
      *
-     * @param cause the cause
+     * @param cause
      */
     public InvalidTransactionIdException(Throwable cause) {
         super(cause);

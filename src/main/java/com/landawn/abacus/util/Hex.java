@@ -120,8 +120,8 @@ public class Hex {
     /**
      * Decode.
      *
-     * @param data the data
-     * @return the byte[]
+     * @param data
+     * @return
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static byte[] decode(final String data) throws IllegalArgumentException {
@@ -133,7 +133,7 @@ public class Hex {
      * returned array will be half the length of the passed array, as it takes two characters to represent any given
      * byte. An exception is thrown if the passed char array has an odd number of elements.
      *
-     * @param data            An array of characters containing hexadecimal digits
+     * @param data An array of characters containing hexadecimal digits
      * @return A byte array containing binary data decoded from the supplied char array.
      * @throws IllegalArgumentException the illegal argument exception
      */
@@ -162,8 +162,8 @@ public class Hex {
     /**
      * Converts a hexadecimal character to an integer.
      *
-     * @param ch            A character to convert to an integer digit
-     * @param index            The index of the character in the source
+     * @param ch A character to convert to an integer digit
+     * @param index The index of the character in the source
      * @return An integer
      * @throws IllegalArgumentException the illegal argument exception
      */

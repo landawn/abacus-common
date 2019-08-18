@@ -58,7 +58,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Instantiates a new murmur 3 32 hash function.
      *
-     * @param seed the seed
+     * @param seed
      */
     Murmur3_32HashFunction(int seed) {
         this.seed = seed;
@@ -67,7 +67,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Bits.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int bits() {
@@ -77,7 +77,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -87,7 +87,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -97,7 +97,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Equals.
      *
-     * @param object the object
+     * @param object
      * @return true, if successful
      */
     @Override
@@ -112,7 +112,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -122,8 +122,8 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Hash.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(int input) {
@@ -136,8 +136,8 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Hash.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(long input) {
@@ -156,8 +156,8 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Hash.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     // TODO(kak): Maybe implement #hashBytes instead?
     @Override
@@ -184,8 +184,8 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Mix K 1.
      *
-     * @param k1 the k 1
-     * @return the int
+     * @param k1
+     * @return
      */
     private static int mixK1(int k1) {
         k1 *= C1;
@@ -197,9 +197,9 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Mix H 1.
      *
-     * @param h1 the h 1
-     * @param k1 the k 1
-     * @return the int
+     * @param h1
+     * @param k1
+     * @return
      */
     private static int mixH1(int h1, int k1) {
         h1 ^= k1;
@@ -211,9 +211,9 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     /**
      * Fmix.
      *
-     * @param h1 the h 1
-     * @param length the length
-     * @return the hash code
+     * @param h1
+     * @param length
+     * @return
      */
     // Finalization mix - force all bits of a hash block to avalanche
     private static HashCode fmix(int h1, int length) {
@@ -243,7 +243,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         /**
          * Instantiates a new murmur 3 32 hasher.
          *
-         * @param seed the seed
+         * @param seed
          */
         Murmur3_32Hasher(int seed) {
             super(CHUNK_SIZE);
@@ -254,7 +254,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         /**
          * Process.
          *
-         * @param bb the bb
+         * @param bb
          */
         @Override
         protected void process(ByteBuffer bb) {
@@ -266,7 +266,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         /**
          * Process remaining.
          *
-         * @param bb the bb
+         * @param bb
          */
         @Override
         protected void processRemaining(ByteBuffer bb) {
@@ -281,7 +281,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         /**
          * Make hash.
          *
-         * @return the hash code
+         * @return
          */
         @Override
         public HashCode makeHash() {

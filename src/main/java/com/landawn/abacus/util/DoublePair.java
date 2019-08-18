@@ -42,8 +42,8 @@ public final class DoublePair {
     /**
      * Instantiates a new double pair.
      *
-     * @param _1 the  1
-     * @param _2 the  2
+     * @param _1 the 1
+     * @param _2 the 2
      */
     DoublePair(double _1, double _2) {
         this._1 = _1;
@@ -53,9 +53,9 @@ public final class DoublePair {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @return the double pair
+     * @param _1 the 1
+     * @param _2 the 2
+     * @return
      */
     public static DoublePair of(double _1, double _2) {
         return new DoublePair(_1, _2);
@@ -64,7 +64,7 @@ public final class DoublePair {
     /**
      * Min.
      *
-     * @return the double
+     * @return
      */
     public double min() {
         return N.min(_1, _2);
@@ -73,7 +73,7 @@ public final class DoublePair {
     /**
      * Max.
      *
-     * @return the double
+     * @return
      */
     public double max() {
         return N.max(_1, _2);
@@ -82,7 +82,7 @@ public final class DoublePair {
     /**
      * Sum.
      *
-     * @return the double
+     * @return
      */
     public double sum() {
         return N.sum(_1, _2);
@@ -91,7 +91,7 @@ public final class DoublePair {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return N.average(_1, _2);
@@ -100,7 +100,7 @@ public final class DoublePair {
     /**
      * Reversed.
      *
-     * @return the double pair
+     * @return
      */
     public DoublePair reversed() {
         return new DoublePair(_2, _1);
@@ -109,7 +109,7 @@ public final class DoublePair {
     /**
      * To array.
      *
-     * @return the double[]
+     * @return
      */
     public double[] toArray() {
         return new double[] { _1, _2 };
@@ -118,7 +118,7 @@ public final class DoublePair {
     /**
      * To list.
      *
-     * @return the double list
+     * @return
      */
     public DoubleList toList() {
         return DoubleList.of(_1, _2);
@@ -127,8 +127,8 @@ public final class DoublePair {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.DoubleConsumer<E> comsumer) throws E {
@@ -139,8 +139,8 @@ public final class DoublePair {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<DoublePair, E> action) throws E {
@@ -150,10 +150,10 @@ public final class DoublePair {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<DoublePair, U, E> mapper) throws E {
@@ -163,9 +163,9 @@ public final class DoublePair {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<DoublePair> filter(final Try.Predicate<DoublePair, E> predicate) throws E {
@@ -175,7 +175,7 @@ public final class DoublePair {
     /**
      * Stream.
      *
-     * @return the double stream
+     * @return
      */
     public DoubleStream stream() {
         return DoubleStream.of(_1, _2);
@@ -184,7 +184,7 @@ public final class DoublePair {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -194,7 +194,7 @@ public final class DoublePair {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -212,7 +212,7 @@ public final class DoublePair {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

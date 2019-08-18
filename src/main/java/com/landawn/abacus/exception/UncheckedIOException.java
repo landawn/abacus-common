@@ -31,7 +31,7 @@ public class UncheckedIOException extends UncheckedException {
     /**
      * Constructor for UncheckedIOException.
      *
-     * @param cause the cause
+     * @param cause
      */
     public UncheckedIOException(IOException cause) {
         super(cause);
@@ -40,8 +40,8 @@ public class UncheckedIOException extends UncheckedException {
     /**
      * Constructor for UncheckedIOException.
      *
-     * @param message the message
-     * @param cause the cause
+     * @param message
+     * @param cause
      */
     public UncheckedIOException(String message, IOException cause) {
         super(message, cause);

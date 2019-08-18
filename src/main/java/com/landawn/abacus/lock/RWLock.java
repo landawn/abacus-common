@@ -20,7 +20,7 @@ import javax.jws.WebService;
 /**
  * The Interface RWLock.
  *
- * @param <T> the generic type
+ * @param <T>
  */
 @WebService
 /**
@@ -37,44 +37,44 @@ public interface RWLock<T> {
     /**
      * Method lockWriteOn.
      *
-     * @param target the target
+     * @param target
      */
     public void lockWriteOn(T target);
 
     /**
      * Lock write on.
      *
-     * @param target the target
-     * @param timeout the timeout
+     * @param target
+     * @param timeout
      */
     public void lockWriteOn(T target, long timeout);
 
     /**
      * Method unlockWriteOn.
      *
-     * @param target the target
+     * @param target
      */
     public void unlockWriteOn(T target);
 
     /**
      * Method lockReadOn.
      *
-     * @param target the target
+     * @param target
      */
     public void lockReadOn(T target);
 
     /**
      * Lock read on.
      *
-     * @param target the target
-     * @param timeout the timeout
+     * @param target
+     * @param timeout
      */
     public void lockReadOn(T target, long timeout);
 
     /**
      * Method unlockReadOn.
      *
-     * @param target the target
+     * @param target
      */
     public void unlockReadOn(T target);
 }

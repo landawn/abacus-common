@@ -25,8 +25,8 @@ import com.landawn.abacus.util.function.Supplier;
  * The Class Result.
  *
  * @author Haiyang Li
- * @param <T> the generic type
- * @param <E> the element type
+ * @param <T>
+ * @param <E>
  */
 public final class Result<T, E extends Throwable> {
 
@@ -39,8 +39,8 @@ public final class Result<T, E extends Throwable> {
     /**
      * Instantiates a new result.
      *
-     * @param value the value
-     * @param exception the exception
+     * @param value
+     * @param exception
      */
     Result(T value, E exception) {
         this.value = value;
@@ -50,11 +50,11 @@ public final class Result<T, E extends Throwable> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param value the value
-     * @param exception the exception
-     * @return the result
+     * @param <T>
+     * @param <E>
+     * @param value
+     * @param exception
+     * @return
      */
     public static <T, E extends Throwable> Result<T, E> of(final T value, final E exception) {
         return new Result<>(value, exception);
@@ -81,8 +81,8 @@ public final class Result<T, E extends Throwable> {
     /**
      * If failure.
      *
-     * @param <E2> the generic type
-     * @param actionOnFailure the action on failure
+     * @param <E2>
+     * @param actionOnFailure
      * @throws E2 the e2
      */
     public <E2 extends Exception> void ifFailure(final Try.Consumer<? super E, E2> actionOnFailure) throws E2 {
@@ -92,10 +92,10 @@ public final class Result<T, E extends Throwable> {
     /**
      * If failure or else.
      *
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param actionOnFailure the action on failure
-     * @param actionOnSuccess the action on success
+     * @param <E2>
+     * @param <E3>
+     * @param actionOnFailure
+     * @param actionOnSuccess
      * @throws E2 the e2
      * @throws E3 the e3
      */
@@ -114,8 +114,8 @@ public final class Result<T, E extends Throwable> {
     /**
      * If success.
      *
-     * @param <E2> the generic type
-     * @param actionOnSuccess the action on success
+     * @param <E2>
+     * @param actionOnSuccess
      * @throws E2 the e2
      */
     public <E2 extends Exception> void ifSuccess(final Try.Consumer<? super T, E2> actionOnSuccess) throws E2 {
@@ -125,10 +125,10 @@ public final class Result<T, E extends Throwable> {
     /**
      * If success or else.
      *
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param actionOnSuccess the action on success
-     * @param actionOnFailure the action on failure
+     * @param <E2>
+     * @param <E3>
+     * @param actionOnSuccess
+     * @param actionOnFailure
      * @throws E2 the e2
      * @throws E3 the e3
      */
@@ -147,8 +147,8 @@ public final class Result<T, E extends Throwable> {
     /**
      * Or else.
      *
-     * @param defaultValueIfErrorOccurred the default value if error occurred
-     * @return the t
+     * @param defaultValueIfErrorOccurred
+     * @return
      */
     public T orElse(final T defaultValueIfErrorOccurred) {
         if (exception == null) {
@@ -161,8 +161,8 @@ public final class Result<T, E extends Throwable> {
     /**
      * Or else get.
      *
-     * @param valueSupplierIfErrorOccurred the value supplier if error occurred
-     * @return the t
+     * @param valueSupplierIfErrorOccurred
+     * @return
      */
     public T orElseGet(final Supplier<T> valueSupplierIfErrorOccurred) {
         N.checkArgNotNull(valueSupplierIfErrorOccurred, "valueSupplierIfErrorOccurred");
@@ -177,7 +177,7 @@ public final class Result<T, E extends Throwable> {
     /**
      * Or else throw.
      *
-     * @return the t
+     * @return
      * @throws E the e
      */
     public T orElseThrow() throws E {
@@ -191,9 +191,9 @@ public final class Result<T, E extends Throwable> {
     /**
      * Or else throw.
      *
-     * @param <E2> the generic type
-     * @param exceptionSupplierIfErrorOccurred the exception supplier if error occurred
-     * @return the t
+     * @param <E2>
+     * @param exceptionSupplierIfErrorOccurred
+     * @return
      * @throws E2 the e2
      */
     public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws E2 {
@@ -209,7 +209,7 @@ public final class Result<T, E extends Throwable> {
     /**
      * Returns the {@code Exception} if occurred, otherwise {@code null} is returned.
      *
-     * @return the exception if present
+     * @return
      */
     public E getExceptionIfPresent() {
         return exception;
@@ -228,7 +228,7 @@ public final class Result<T, E extends Throwable> {
     /**
      * To tuple.
      *
-     * @return the tuple 2
+     * @return
      */
     public Tuple2<T, E> toTuple() {
         return Tuple.of(value, exception);
@@ -237,7 +237,7 @@ public final class Result<T, E extends Throwable> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -247,7 +247,7 @@ public final class Result<T, E extends Throwable> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @SuppressWarnings("rawtypes")
@@ -259,7 +259,7 @@ public final class Result<T, E extends Throwable> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

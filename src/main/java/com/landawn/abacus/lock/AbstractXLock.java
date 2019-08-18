@@ -21,7 +21,7 @@ import com.landawn.abacus.LockMode;
  * The Class AbstractXLock.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public abstract class AbstractXLock<T> implements XLock<T> {
@@ -29,7 +29,7 @@ public abstract class AbstractXLock<T> implements XLock<T> {
     /**
      * Check target object.
      *
-     * @param target the target
+     * @param target
      */
     protected void checkTargetObject(T target) {
         if (target == null) {
@@ -40,7 +40,7 @@ public abstract class AbstractXLock<T> implements XLock<T> {
     /**
      * Check lock mode.
      *
-     * @param lockMode the lock mode
+     * @param lockMode
      */
     protected void checkLockMode(LockMode lockMode) {
         if (lockMode == null) {

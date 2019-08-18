@@ -29,7 +29,7 @@ abstract class AbstractIndexed {
     /**
      * Instantiates a new abstract indexed.
      *
-     * @param index the index
+     * @param index
      */
     protected AbstractIndexed(long index) {
         this.index = index;
@@ -38,7 +38,7 @@ abstract class AbstractIndexed {
     /**
      * Index.
      *
-     * @return the int
+     * @return
      */
     public int index() {
         return (int) index;
@@ -47,7 +47,7 @@ abstract class AbstractIndexed {
     /**
      * Long index.
      *
-     * @return the long
+     * @return
      */
     public long longIndex() {
         return index;

@@ -31,11 +31,11 @@ public class NonSliceSelector implements SliceSelector {
     /**
      * Select.
      *
-     * @param entityName the entity name
-     * @param sql the sql
-     * @param parameters the parameters
-     * @param options the options
-     * @return the string
+     * @param entityName
+     * @param sql
+     * @param parameters
+     * @param options
+     * @return
      */
     @Override
     public String select(String entityName, String sql, Object[] parameters, Map<String, Object> options) {
@@ -45,11 +45,11 @@ public class NonSliceSelector implements SliceSelector {
     /**
      * Select.
      *
-     * @param entityName the entity name
-     * @param sql the sql
-     * @param parameters the parameters
-     * @param options the options
-     * @return the string
+     * @param entityName
+     * @param sql
+     * @param parameters
+     * @param options
+     * @return
      */
     @Override
     public String select(String entityName, String sql, List<?> parameters, Map<String, Object> options) {

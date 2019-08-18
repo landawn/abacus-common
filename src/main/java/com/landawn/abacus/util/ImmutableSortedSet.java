@@ -26,7 +26,7 @@ import java.util.TreeSet;
  * The Class ImmutableSortedSet.
  *
  * @author Haiyang Li
- * @param <E> the element type
+ * @param <E>
  * @since 1.1.4
  */
 public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<E> {
@@ -41,7 +41,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Instantiates a new immutable sorted set.
      *
-     * @param sortedSet the sorted set
+     * @param sortedSet
      */
     ImmutableSortedSet(SortedSet<? extends E> sortedSet) {
         super(sortedSet);
@@ -51,8 +51,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Empty.
      *
-     * @param <E> the element type
-     * @return the immutable sorted set
+     * @param <E>
+     * @return
      */
     public static <E> ImmutableSortedSet<E> empty() {
         return EMPTY;
@@ -61,9 +61,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Of.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @return the immutable sorted set
+     * @param <E>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E... a) {
@@ -77,9 +77,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Of.
      *
-     * @param <E> the element type
+     * @param <E>
      * @param sortedSet the elements in this <code>Set</code> are shared by the returned ImmutableSortedSet.
-     * @return the immutable sorted set
+     * @return
      */
     public static <E> ImmutableSortedSet<E> of(final SortedSet<? extends E> sortedSet) {
         if (sortedSet == null) {
@@ -94,9 +94,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Copy of.
      *
-     * @param <E> the element type
-     * @param sortedSet the sorted set
-     * @return the immutable sorted set
+     * @param <E>
+     * @param sortedSet
+     * @return
      */
     public static <E> ImmutableSortedSet<E> copyOf(final SortedSet<? extends E> sortedSet) {
         if (N.isNullOrEmpty(sortedSet)) {
@@ -109,9 +109,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Of.
      *
-     * @param <E> the element type
-     * @param set the set
-     * @return the immutable set
+     * @param <E>
+     * @param set
+     * @return
      */
     @Deprecated
     public static <E> ImmutableSet<E> of(final Set<? extends E> set) {
@@ -121,9 +121,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Copy of.
      *
-     * @param <E> the element type
-     * @param set the set
-     * @return the immutable set
+     * @param <E>
+     * @param set
+     * @return
      */
     @Deprecated
     public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> set) {
@@ -133,7 +133,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Comparator.
      *
-     * @return the comparator<? super e>
+     * @return
      */
     @Override
     public Comparator<? super E> comparator() {
@@ -143,9 +143,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Sub set.
      *
-     * @param fromElement the from element
-     * @param toElement the to element
-     * @return the sorted set
+     * @param fromElement
+     * @param toElement
+     * @return
      */
     @Override
     public SortedSet<E> subSet(E fromElement, E toElement) {
@@ -155,8 +155,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Head set.
      *
-     * @param toElement the to element
-     * @return the sorted set
+     * @param toElement
+     * @return
      */
     @Override
     public SortedSet<E> headSet(E toElement) {
@@ -166,8 +166,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Tail set.
      *
-     * @param fromElement the from element
-     * @return the sorted set
+     * @param fromElement
+     * @return
      */
     @Override
     public SortedSet<E> tailSet(E fromElement) {
@@ -177,7 +177,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * First.
      *
-     * @return the e
+     * @return
      */
     @Override
     public E first() {
@@ -187,7 +187,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      * Last.
      *
-     * @return the e
+     * @return
      */
     @Override
     public E last() {

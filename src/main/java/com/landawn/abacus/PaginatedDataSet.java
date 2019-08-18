@@ -70,8 +70,8 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     /**
      * Method getPage.
      *
-     * @param pageNum the page num
-     * @return the page
+     * @param pageNum
+     * @return
      * @throws IllegalArgumentException the illegal argument exception
      */
     DataSet getPage(int pageNum);
@@ -79,8 +79,8 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     /**
      * Method absolute.
      *
-     * @param pageNum the page num
-     * @return the paginated data set
+     * @param pageNum
+     * @return
      */
     PaginatedDataSet absolute(int pageNum);
 
@@ -108,7 +108,7 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     Stream<DataSet> stream();
 }

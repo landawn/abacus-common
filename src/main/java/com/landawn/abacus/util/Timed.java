@@ -19,7 +19,7 @@ package com.landawn.abacus.util;
  * The Class Timed.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.9
  */
 public class Timed<T> {
@@ -33,8 +33,8 @@ public class Timed<T> {
     /**
      * Instantiates a new timed.
      *
-     * @param value the value
-     * @param timeInMillis the time in millis
+     * @param value
+     * @param timeInMillis
      */
     Timed(T value, long timeInMillis) {
         this.value = value;
@@ -44,9 +44,9 @@ public class Timed<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @return the timed
+     * @param <T>
+     * @param value
+     * @return
      */
     public static <T> Timed<T> of(T value) {
         return new Timed<>(value, System.currentTimeMillis());
@@ -55,10 +55,10 @@ public class Timed<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param timeInMillis the time in millis
-     * @return the timed
+     * @param <T>
+     * @param value
+     * @param timeInMillis
+     * @return
      */
     public static <T> Timed<T> of(T value, long timeInMillis) {
         return new Timed<>(value, timeInMillis);
@@ -76,7 +76,7 @@ public class Timed<T> {
     /**
      * Value.
      *
-     * @return the t
+     * @return
      */
     public T value() {
         return value;
@@ -85,7 +85,7 @@ public class Timed<T> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -95,7 +95,7 @@ public class Timed<T> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -116,7 +116,7 @@ public class Timed<T> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

@@ -27,7 +27,7 @@ import com.landawn.abacus.util.N;
  * The Class MemcachedXLock.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public class MemcachedXLock<T> extends AbstractXLock<T> {
@@ -60,7 +60,7 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     /**
      * Instantiates a new memcached X lock.
      *
-     * @param servers the servers
+     * @param servers
      */
     public MemcachedXLock(String servers) {
         this(servers, N.EMPTY_STRING, DEFAULT_LIVE_TIME, DEFAULT_TIMEOUT);
@@ -69,9 +69,9 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     /**
      * Instantiates a new memcached X lock.
      *
-     * @param servers the servers
-     * @param keyPrefix the key prefix
-     * @param liveTime the live time
+     * @param servers
+     * @param keyPrefix
+     * @param liveTime
      */
     public MemcachedXLock(String servers, String keyPrefix, String liveTime) {
         this(servers, keyPrefix, Long.valueOf(liveTime), DEFAULT_TIMEOUT);
@@ -80,10 +80,10 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     /**
      * Instantiates a new memcached X lock.
      *
-     * @param servers the servers
-     * @param keyPrefix the key prefix
-     * @param liveTime the live time
-     * @param timeout the timeout
+     * @param servers
+     * @param keyPrefix
+     * @param liveTime
+     * @param timeout
      */
     public MemcachedXLock(String servers, String keyPrefix, long liveTime, long timeout) {
         this.mLock = new MemcachedLock<String, Object>(servers);
@@ -97,10 +97,10 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     /**
      * Lock.
      *
-     * @param target the target
-     * @param lockMode the lock mode
-     * @param refLockCode the ref lock code
-     * @return the string
+     * @param target
+     * @param lockMode
+     * @param refLockCode
+     * @return
      */
     @Override
     public String lock(T target, LockMode lockMode, String refLockCode) {
@@ -110,11 +110,11 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     /**
      * Lock.
      *
-     * @param target the target
-     * @param lockMode the lock mode
-     * @param refLockCode the ref lock code
-     * @param timeout the timeout
-     * @return the string
+     * @param target
+     * @param lockMode
+     * @param refLockCode
+     * @param timeout
+     * @return
      */
     @Override
     public String lock(T target, LockMode lockMode, String refLockCode, long timeout) {
@@ -180,9 +180,9 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     /**
      * Checks if is locked.
      *
-     * @param target the target
-     * @param requiredLockMode the required lock mode
-     * @param refLockCode the ref lock code
+     * @param target
+     * @param requiredLockMode
+     * @param refLockCode
      * @return true, if is locked
      */
     @Override
@@ -206,8 +206,8 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     /**
      * Unlock.
      *
-     * @param target the target
-     * @param refLockCode the ref lock code
+     * @param target
+     * @param refLockCode
      * @return true, if successful
      */
     @Override
@@ -244,9 +244,9 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     /**
      * Generate key.
      *
-     * @param keyPrefix the key prefix
-     * @param obj the obj
-     * @return the string
+     * @param keyPrefix
+     * @param obj
+     * @return
      */
     protected String generateKey(String keyPrefix, T obj) {
         return N.isNullOrEmpty(keyPrefix) ? N.base64Encode(N.stringOf(obj).getBytes()) : (keyPrefix + N.base64Encode(N.stringOf(obj).getBytes()));

@@ -53,10 +53,10 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Hash.
      *
-     * @param input the input
-     * @param off the off
-     * @param len the len
-     * @return the hash code
+     * @param input
+     * @param off
+     * @param len
+     * @return
      */
     @Override
     public HashCode hash(byte[] input, int off, int len) {
@@ -67,7 +67,7 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Bits.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int bits() {
@@ -77,7 +77,7 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -89,10 +89,10 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Fingerprint.
      *
-     * @param bytes the bytes
-     * @param offset the offset
-     * @param length the length
-     * @return the long
+     * @param bytes
+     * @param offset
+     * @param length
+     * @return
      */
     static long fingerprint(byte[] bytes, int offset, int length) {
         if (length <= 32) {
@@ -111,8 +111,8 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Shift mix.
      *
-     * @param val the val
-     * @return the long
+     * @param val
+     * @return
      */
     private static long shiftMix(long val) {
         return val ^ (val >>> 47);
@@ -121,10 +121,10 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Hash length 16.
      *
-     * @param u the u
-     * @param v the v
-     * @param mul the mul
-     * @return the long
+     * @param u
+     * @param v
+     * @param mul
+     * @return
      */
     private static long hashLength16(long u, long v, long mul) {
         long a = (u ^ v) * mul;
@@ -140,11 +140,11 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
      * returned in the output array because when we last measured, this was 12% faster than allocating
      * new arrays every time.
      *
-     * @param bytes the bytes
-     * @param offset the offset
-     * @param seedA the seed A
-     * @param seedB the seed B
-     * @param output the output
+     * @param bytes
+     * @param offset
+     * @param seedA
+     * @param seedB
+     * @param output
      */
     private static void weakHashLength32WithSeeds(byte[] bytes, int offset, long seedA, long seedB, long[] output) {
         long part1 = load64(bytes, offset);
@@ -165,10 +165,10 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Hash length 0 to 16.
      *
-     * @param bytes the bytes
-     * @param offset the offset
-     * @param length the length
-     * @return the long
+     * @param bytes
+     * @param offset
+     * @param length
+     * @return
      */
     private static long hashLength0to16(byte[] bytes, int offset, int length) {
         if (length >= 8) {
@@ -198,10 +198,10 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Hash length 17 to 32.
      *
-     * @param bytes the bytes
-     * @param offset the offset
-     * @param length the length
-     * @return the long
+     * @param bytes
+     * @param offset
+     * @param length
+     * @return
      */
     private static long hashLength17to32(byte[] bytes, int offset, int length) {
         long mul = K2 + length * 2;
@@ -215,10 +215,10 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Hash length 33 to 64.
      *
-     * @param bytes the bytes
-     * @param offset the offset
-     * @param length the length
-     * @return the long
+     * @param bytes
+     * @param offset
+     * @param length
+     * @return
      */
     private static long hashLength33To64(byte[] bytes, int offset, int length) {
         long mul = K2 + length * 2;
@@ -238,10 +238,10 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     /**
      * Hash length 65 plus.
      *
-     * @param bytes the bytes
-     * @param offset the offset
-     * @param length the length
-     * @return the long
+     * @param bytes
+     * @param offset
+     * @param length
+     * @return
      */
     /*
      * Compute an 8-byte hash of a byte array of length greater than 64 bytes.

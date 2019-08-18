@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Add <a href="https://github.com/EsotericSoftware/reflectasm/blob/master/src/com/esotericsoftware/reflectasm/AccessClassLoader.java">reflectasm</a> library to build path for better performance.
  *
  * @author haiyangl
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class Reflection<T> {
@@ -74,8 +74,8 @@ public final class Reflection<T> {
     /**
      * Instantiates a new reflection.
      *
-     * @param cls the cls
-     * @param target the target
+     * @param cls
+     * @param target
      */
     Reflection(Class<T> cls, T target) {
         this.cls = cls;
@@ -86,9 +86,9 @@ public final class Reflection<T> {
     /**
      * On.
      *
-     * @param <T> the generic type
-     * @param clsName the cls name
-     * @return the reflection
+     * @param <T>
+     * @param clsName
+     * @return
      */
     public static <T> Reflection<T> on(String clsName) {
         return on((Class<T>) ClassUtil.forClass(clsName));
@@ -97,9 +97,9 @@ public final class Reflection<T> {
     /**
      * On.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @return the reflection
+     * @param <T>
+     * @param cls
+     * @return
      */
     public static <T> Reflection<T> on(Class<T> cls) {
         return new Reflection<>(cls, null);
@@ -108,9 +108,9 @@ public final class Reflection<T> {
     /**
      * On.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the reflection
+     * @param <T>
+     * @param target
+     * @return
      */
     public static <T> Reflection<T> on(T target) {
         return new Reflection<>((Class<T>) target.getClass(), target);
@@ -119,7 +119,7 @@ public final class Reflection<T> {
     /**
      * New.
      *
-     * @return the reflection
+     * @return
      */
     public Reflection<T> _new() {
         return new Reflection<>(cls, N.newInstance(cls));
@@ -128,8 +128,8 @@ public final class Reflection<T> {
     /**
      * New.
      *
-     * @param args the args
-     * @return the reflection
+     * @param args
+     * @return
      */
     @SafeVarargs
     public final Reflection<T> _new(Object... args) {
@@ -149,7 +149,7 @@ public final class Reflection<T> {
     /**
      * Instance.
      *
-     * @return the t
+     * @return
      */
     public T instance() {
         return target;
@@ -159,8 +159,8 @@ public final class Reflection<T> {
      * Gets the.
      *
      * @param <V> the value type
-     * @param fieldName the field name
-     * @return the v
+     * @param fieldName
+     * @return
      */
     public <V> V get(String fieldName) {
         if (reflectASM != null) {
@@ -183,9 +183,9 @@ public final class Reflection<T> {
     /**
      * Sets the.
      *
-     * @param fieldName the field name
-     * @param value the value
-     * @return the reflection
+     * @param fieldName
+     * @param value
+     * @return
      */
     public Reflection<T> set(String fieldName, Object value) {
         if (reflectASM != null) {
@@ -211,9 +211,9 @@ public final class Reflection<T> {
      * Invoke.
      *
      * @param <V> the value type
-     * @param methodName the method name
-     * @param args the args
-     * @return the v
+     * @param methodName
+     * @param args
+     * @return
      */
     @SafeVarargs
     public final <V> V invoke(String methodName, Object... args) {
@@ -237,9 +237,9 @@ public final class Reflection<T> {
     /**
      * Invokke.
      *
-     * @param methodName the method name
-     * @param args the args
-     * @return the reflection
+     * @param methodName
+     * @param args
+     * @return
      */
     @SafeVarargs
     public final Reflection<T> invokke(String methodName, Object... args) {
@@ -255,8 +255,8 @@ public final class Reflection<T> {
     /**
      * Gets the field.
      *
-     * @param fieldName the field name
-     * @return the field
+     * @param fieldName
+     * @return
      * @throws NoSuchFieldException the no such field exception
      */
     private Field getField(String fieldName) throws NoSuchFieldException {
@@ -280,9 +280,9 @@ public final class Reflection<T> {
     /**
      * Gets the declared constructor.
      *
-     * @param cls the cls
-     * @param argTypes the arg types
-     * @return the declared constructor
+     * @param cls
+     * @param argTypes
+     * @return
      * @throws SecurityException the security exception
      */
     private Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>[] argTypes) throws SecurityException {
@@ -332,10 +332,10 @@ public final class Reflection<T> {
     /**
      * Gets the declared method.
      *
-     * @param cls the cls
-     * @param methodName the method name
-     * @param argTypes the arg types
-     * @return the declared method
+     * @param cls
+     * @param methodName
+     * @param argTypes
+     * @return
      * @throws SecurityException the security exception
      */
     private Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>[] argTypes) throws SecurityException {
@@ -392,8 +392,8 @@ public final class Reflection<T> {
     /**
      * Gets the types.
      *
-     * @param values the values
-     * @return the types
+     * @param values
+     * @return
      */
     private Class<?>[] getTypes(Object... values) {
         if (N.isNullOrEmpty(values)) {
@@ -412,8 +412,8 @@ public final class Reflection<T> {
     /**
      * Wrap.
      *
-     * @param cls the cls
-     * @return the class
+     * @param cls
+     * @return
      */
     private Class<?> wrap(final Class<?> cls) {
         return Primitives.isPrimitiveType(cls) ? Primitives.wrap(cls) : cls;

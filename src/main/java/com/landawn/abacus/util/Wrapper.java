@@ -25,7 +25,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
  * The Class Wrapper.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class Wrapper<T> {
@@ -64,9 +64,9 @@ public final class Wrapper<T> {
     /**
      * Instantiates a new wrapper.
      *
-     * @param value the value
-     * @param hashFunction the hash function
-     * @param equalsFunction the equals function
+     * @param value
+     * @param hashFunction
+     * @param equalsFunction
      */
     private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction) {
         this(value, hashFunction, equalsFunction, null);
@@ -75,10 +75,10 @@ public final class Wrapper<T> {
     /**
      * Instantiates a new wrapper.
      *
-     * @param value the value
-     * @param hashFunction the hash function
-     * @param equalsFunction the equals function
-     * @param toStringFunction the to string function
+     * @param value
+     * @param hashFunction
+     * @param equalsFunction
+     * @param toStringFunction
      */
     private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
             Function<? super T, String> toStringFunction) {
@@ -92,9 +92,9 @@ public final class Wrapper<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param array the array
-     * @return the wrapper
+     * @param <T>
+     * @param array
+     * @return
      */
     public static <T> Wrapper<T> of(T array) {
         // return new Wrapper<T>(checkArray(array), arrayHashFunction, arrayEqualsFunction);
@@ -104,11 +104,11 @@ public final class Wrapper<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param hashFunction the hash function
-     * @param equalsFunction the equals function
-     * @return the wrapper
+     * @param <T>
+     * @param value
+     * @param hashFunction
+     * @param equalsFunction
+     * @return
      */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction) {
         N.checkArgNotNull(hashFunction, "hashFunction");
@@ -120,12 +120,12 @@ public final class Wrapper<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param hashFunction the hash function
-     * @param equalsFunction the equals function
-     * @param toStringFunction the to string function
-     * @return the wrapper
+     * @param <T>
+     * @param value
+     * @param hashFunction
+     * @param equalsFunction
+     * @param toStringFunction
+     * @return
      */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
             Function<? super T, String> toStringFunction) {
@@ -139,7 +139,7 @@ public final class Wrapper<T> {
     /**
      * Value.
      *
-     * @return the t
+     * @return
      */
     public T value() {
         return value;
@@ -156,7 +156,7 @@ public final class Wrapper<T> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -170,7 +170,7 @@ public final class Wrapper<T> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -181,7 +181,7 @@ public final class Wrapper<T> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

@@ -98,7 +98,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Instantiates a new SQL data source.
      *
-     * @param dsConfig the ds config
+     * @param dsConfig
      */
     public SQLDataSource(DataSourceConfiguration dsConfig) {
         properties = new Properties<>();
@@ -157,7 +157,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Instantiates a new SQL data source.
      *
-     * @param props the props
+     * @param props
      */
     public SQLDataSource(Map<String, ?> props) {
         properties = new Properties<>();
@@ -213,7 +213,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Close.
      *
-     * @param conn the conn
+     * @param conn
      */
     private void close(Connection conn) {
         if (conn != null) {
@@ -231,7 +231,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the connection.
      *
-     * @return the connection
+     * @return
      */
     @Override
     public Connection getConnection() {
@@ -241,7 +241,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the read only connection.
      *
-     * @return the read only connection
+     * @return
      */
     @Override
     public Connection getReadOnlyConnection() {
@@ -251,7 +251,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the slice selector.
      *
-     * @return the slice selector
+     * @return
      */
     @Override
     public SliceSelector getSliceSelector() {
@@ -261,7 +261,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the name.
      *
-     * @return the name
+     * @return
      */
     @Override
     public String getName() {
@@ -271,7 +271,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the properties.
      *
-     * @return the properties
+     * @return
      */
     @Override
     public Properties<String, String> getProperties() {
@@ -281,9 +281,9 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Creates the connection manager.
      *
-     * @param provider the provider
-     * @param props the props
-     * @return the connection manager
+     * @param provider
+     * @param props
+     * @return
      */
     private ConnectionManager createConnectionManager(String provider, Map<String, ?> props) {
         if (N.isNullOrEmpty(provider)) {
@@ -304,7 +304,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the database product name.
      *
-     * @return the database product name
+     * @return
      */
     public String getDatabaseProductName() {
         return databaseProductName;
@@ -313,7 +313,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the database product version.
      *
-     * @return the database product version
+     * @return
      */
     public String getDatabaseProductVersion() {
         return databaseProductVersion;
@@ -322,7 +322,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the default connection isolation.
      *
-     * @return the default connection isolation
+     * @return
      */
     public int getDefaultConnectionIsolation() {
         return defaultConnectionIsolation;
@@ -331,7 +331,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Checks if is persistent connection.
      *
-     * @param conn the conn
+     * @param conn
      * @return true, if is persistent connection
      */
     public boolean isPersistentConnection(Connection conn) {
@@ -341,7 +341,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the persistent connection.
      *
-     * @return the persistent connection
+     * @return
      */
     public synchronized Connection getPersistentConnection() {
         if (persistentConnection == null) {
@@ -379,7 +379,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the default isolation level.
      *
-     * @return the default isolation level
+     * @return
      */
     public IsolationLevel getDefaultIsolationLevel() {
         return defaultIsolationLevel;
@@ -406,7 +406,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the perf log.
      *
-     * @return the perf log
+     * @return
      */
     public long getPerfLog() {
         return perfLog;
@@ -424,7 +424,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the max active.
      *
-     * @return the max active
+     * @return
      */
     @Override
     public int getMaxActive() {
@@ -434,7 +434,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Gets the current active.
      *
-     * @return the current active
+     * @return
      */
     @Override
     public int getCurrentActive() {
@@ -468,7 +468,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -482,7 +482,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -503,7 +503,7 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

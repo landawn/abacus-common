@@ -41,7 +41,7 @@ public final class MemcachedLock<K, V> {
     /**
      * Instantiates a new memcached lock.
      *
-     * @param serverUrl the server url
+     * @param serverUrl
      */
     public MemcachedLock(String serverUrl) {
         mc = new SpyMemcached<V>(serverUrl);
@@ -50,8 +50,8 @@ public final class MemcachedLock<K, V> {
     /**
      * Lock.
      *
-     * @param target the target
-     * @param liveTime the live time
+     * @param target
+     * @param liveTime
      * @return true, if successful
      */
     public boolean lock(K target, long liveTime) {
@@ -61,9 +61,9 @@ public final class MemcachedLock<K, V> {
     /**
      * Lock.
      *
-     * @param target the target
-     * @param value the value
-     * @param liveTime            unit is milliseconds
+     * @param target
+     * @param value
+     * @param liveTime unit is milliseconds
      * @return true, if successful
      */
     public boolean lock(K target, V value, long liveTime) {
@@ -79,7 +79,7 @@ public final class MemcachedLock<K, V> {
     /**
      * Checks if is locked.
      *
-     * @param target the target
+     * @param target
      * @return true, if is locked
      */
     public boolean isLocked(K target) {
@@ -89,8 +89,8 @@ public final class MemcachedLock<K, V> {
     /**
      * Gets the.
      *
-     * @param target the target
-     * @return the v
+     * @param target
+     * @return
      */
     public V get(K target) {
         Object value = mc.get(toKey(target));
@@ -101,7 +101,7 @@ public final class MemcachedLock<K, V> {
     /**
      * Unlock.
      *
-     * @param target the target
+     * @param target
      * @return true, if successful
      */
     public boolean unlock(K target) {
@@ -115,8 +115,8 @@ public final class MemcachedLock<K, V> {
     /**
      * To key.
      *
-     * @param target the target
-     * @return the string
+     * @param target
+     * @return
      */
     protected String toKey(K target) {
         return N.stringOf(target);
@@ -125,7 +125,7 @@ public final class MemcachedLock<K, V> {
     /**
      * Client.
      *
-     * @return the spy memcached
+     * @return
      */
     public SpyMemcached<V> client() {
         return mc;

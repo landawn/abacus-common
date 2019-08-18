@@ -37,7 +37,7 @@ public class UncheckedException extends AbacusException {
     /**
      * Constructor for UncheckedIOException.
      *
-     * @param message the message
+     * @param message
      */
     UncheckedException(String message) {
         super(message);
@@ -46,8 +46,8 @@ public class UncheckedException extends AbacusException {
     /**
      * Constructor for UncheckedIOException.
      *
-     * @param message the message
-     * @param cause the cause
+     * @param message
+     * @param cause
      */
     public UncheckedException(String message, Throwable cause) {
         super(message, cause);
@@ -56,7 +56,7 @@ public class UncheckedException extends AbacusException {
     /**
      * Constructor for UncheckedIOException.
      *
-     * @param cause the cause
+     * @param cause
      */
     public UncheckedException(Throwable cause) {
         super(cause);

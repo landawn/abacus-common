@@ -67,7 +67,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
     /**
      * Instantiates a new DBCP 2 connection manager.
      *
-     * @param props the props
+     * @param props
      */
     public DBCP2ConnectionManager(Map<String, ?> props) {
         super(props);
@@ -115,7 +115,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the max active.
      *
-     * @return the max active
+     * @return
      */
     @Override
     public int getMaxActive() {
@@ -125,7 +125,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the num active.
      *
-     * @return the num active
+     * @return
      */
     @Override
     public int getNumActive() {
@@ -135,7 +135,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the connection.
      *
-     * @return the connection
+     * @return
      */
     @Override
     public Connection getConnection() {
@@ -149,7 +149,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
     /**
      * Close connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     @Override
     public void closeConnection(Connection conn) {
@@ -165,7 +165,7 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
     /**
      * Detroy connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     @Override
     public void detroyConnection(Connection conn) {

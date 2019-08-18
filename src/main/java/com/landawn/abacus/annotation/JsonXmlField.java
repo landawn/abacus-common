@@ -33,42 +33,42 @@ public @interface JsonXmlField {
     /**
      * Name.
      *
-     * @return the string
+     * @return
      */
     String name() default "";
 
     /**
      * Type.
      *
-     * @return the string
+     * @return
      */
     String type() default "";
 
     /**
      * Enumerated.
      *
-     * @return the enum type
+     * @return
      */
     EnumType enumerated() default EnumType.STRING;
 
     /**
      * Date format.
      *
-     * @return the string
+     * @return
      */
     String dateFormat() default "";
 
     /**
      * Time zone.
      *
-     * @return the string
+     * @return
      */
     String timeZone() default "";
 
     /**
      * Number format.
      *
-     * @return the string
+     * @return
      * @see DecimalFormat
      */
     String numberFormat() default "";

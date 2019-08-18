@@ -26,9 +26,9 @@ import com.landawn.abacus.util.stream.Stream;
  * The Class Triple.
  *
  * @author Haiyang Li
- * @param <L> the generic type
- * @param <M> the generic type
- * @param <R> the generic type
+ * @param <L>
+ * @param <M>
+ * @param <R>
  * @since 0.8
  */
 public final class Triple<L, M, R> {
@@ -51,9 +51,9 @@ public final class Triple<L, M, R> {
     /**
      * Instantiates a new triple.
      *
-     * @param l the l
-     * @param m the m
-     * @param r the r
+     * @param l
+     * @param m
+     * @param r
      */
     Triple(final L l, final M m, final R r) {
         this.left = l;
@@ -64,13 +64,13 @@ public final class Triple<L, M, R> {
     /**
      * Of.
      *
-     * @param <L> the generic type
-     * @param <M> the generic type
-     * @param <R> the generic type
-     * @param l the l
-     * @param m the m
-     * @param r the r
-     * @return the triple
+     * @param <L>
+     * @param <M>
+     * @param <R>
+     * @param l
+     * @param m
+     * @param r
+     * @return
      */
     public static <L, M, R> Triple<L, M, R> of(final L l, final M m, final R r) {
         return new Triple<>(l, m, r);
@@ -79,7 +79,7 @@ public final class Triple<L, M, R> {
     /**
      * Gets the left.
      *
-     * @return the left
+     * @return
      */
     public L getLeft() {
         return left;
@@ -97,7 +97,7 @@ public final class Triple<L, M, R> {
     /**
      * Gets the middle.
      *
-     * @return the middle
+     * @return
      */
     public M getMiddle() {
         return middle;
@@ -115,7 +115,7 @@ public final class Triple<L, M, R> {
     /**
      * Gets the right.
      *
-     * @return the right
+     * @return
      */
     public R getRight() {
         return right;
@@ -133,9 +133,9 @@ public final class Triple<L, M, R> {
     /**
      * Sets the.
      *
-     * @param left the left
-     * @param middle the middle
-     * @param right the right
+     * @param left
+     * @param middle
+     * @param right
      */
     public void set(final L left, final M middle, final R right) {
         this.left = left;
@@ -146,8 +146,8 @@ public final class Triple<L, M, R> {
     /**
      * Gets the and set left.
      *
-     * @param newLeft the new left
-     * @return the and set left
+     * @param newLeft
+     * @return
      */
     public L getAndSetLeft(L newLeft) {
         final L res = left;
@@ -158,8 +158,8 @@ public final class Triple<L, M, R> {
     /**
      * Sets the and get left.
      *
-     * @param newLeft the new left
-     * @return the l
+     * @param newLeft
+     * @return
      */
     public L setAndGetLeft(L newLeft) {
         left = newLeft;
@@ -169,8 +169,8 @@ public final class Triple<L, M, R> {
     /**
      * Gets the and set middle.
      *
-     * @param newMiddle the new middle
-     * @return the and set middle
+     * @param newMiddle
+     * @return
      */
     public M getAndSetMiddle(M newMiddle) {
         final M res = middle;
@@ -181,8 +181,8 @@ public final class Triple<L, M, R> {
     /**
      * Sets the and get middle.
      *
-     * @param newMiddle the new middle
-     * @return the m
+     * @param newMiddle
+     * @return
      */
     public M setAndGetMiddle(M newMiddle) {
         middle = newMiddle;
@@ -192,8 +192,8 @@ public final class Triple<L, M, R> {
     /**
      * Gets the and set right.
      *
-     * @param newRight the new right
-     * @return the and set right
+     * @param newRight
+     * @return
      */
     public R getAndSetRight(R newRight) {
         final R res = newRight;
@@ -204,8 +204,8 @@ public final class Triple<L, M, R> {
     /**
      * Sets the and get right.
      *
-     * @param newRight the new right
-     * @return the r
+     * @param newRight
+     * @return
      */
     public R setAndGetRight(R newRight) {
         right = newRight;
@@ -217,8 +217,8 @@ public final class Triple<L, M, R> {
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newLeft the new left
+     * @param <E>
+     * @param newLeft
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newLeft</code>
      * @return true, if successful
@@ -238,8 +238,8 @@ public final class Triple<L, M, R> {
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newMiddle the new middle
+     * @param <E>
+     * @param newMiddle
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newMiddle</code>
      * @return true, if successful
@@ -259,8 +259,8 @@ public final class Triple<L, M, R> {
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newRight the new right
+     * @param <E>
+     * @param newRight
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newRight</code>
      * @return true, if successful
@@ -281,10 +281,10 @@ public final class Triple<L, M, R> {
      * Otherwise returns <code>false</code> without setting the left/right to
      * new values.
      *
-     * @param <E> the element type
-     * @param newLeft the new left
-     * @param newMiddle the new middle
-     * @param newRight the new right
+     * @param <E>
+     * @param newLeft
+     * @param newMiddle
+     * @param newRight
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newLeft</code>, the third parameter is the
      *        <code>newMiddle</code>, the fourth parameter is the
@@ -326,7 +326,7 @@ public final class Triple<L, M, R> {
     /**
      * Copy.
      *
-     * @return the triple
+     * @return
      */
     public Triple<L, M, R> copy() {
         return new Triple<>(this.left, this.middle, this.right);
@@ -335,7 +335,7 @@ public final class Triple<L, M, R> {
     /**
      * To array.
      *
-     * @return the object[]
+     * @return
      */
     public Object[] toArray() {
         return new Object[] { left, middle, right };
@@ -344,9 +344,9 @@ public final class Triple<L, M, R> {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param a the a
-     * @return the a[]
+     * @param <A>
+     * @param a
+     * @return
      */
     public <A> A[] toArray(A[] a) {
         if (a.length < 3) {
@@ -363,8 +363,8 @@ public final class Triple<L, M, R> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.Consumer<?, E> comsumer) throws E {
@@ -378,8 +378,8 @@ public final class Triple<L, M, R> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(final Try.TriConsumer<? super L, ? super M, ? super R, E> action) throws E {
@@ -389,8 +389,8 @@ public final class Triple<L, M, R> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(final Try.Consumer<? super Triple<L, M, R>, E> action) throws E {
@@ -400,10 +400,10 @@ public final class Triple<L, M, R> {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(final Try.TriFunction<? super L, ? super M, ? super R, U, E> mapper) throws E {
@@ -413,10 +413,10 @@ public final class Triple<L, M, R> {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(final Try.Function<? super Triple<L, M, R>, U, E> mapper) throws E {
@@ -426,9 +426,9 @@ public final class Triple<L, M, R> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<Triple<L, M, R>> filter(final Try.TriPredicate<? super L, ? super M, ? super R, E> predicate) throws E {
@@ -438,9 +438,9 @@ public final class Triple<L, M, R> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<Triple<L, M, R>> filter(final Try.Predicate<? super Triple<L, M, R>, E> predicate) throws E {
@@ -450,7 +450,7 @@ public final class Triple<L, M, R> {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<Triple<L, M, R>> stream() {
         return Stream.of(this);
@@ -459,7 +459,7 @@ public final class Triple<L, M, R> {
     /**
      * To tuple.
      *
-     * @return the tuple 3
+     * @return
      */
     public Tuple3<L, M, R> toTuple() {
         return Tuple.of(left, middle, right);
@@ -468,7 +468,7 @@ public final class Triple<L, M, R> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -483,7 +483,7 @@ public final class Triple<L, M, R> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -504,7 +504,7 @@ public final class Triple<L, M, R> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

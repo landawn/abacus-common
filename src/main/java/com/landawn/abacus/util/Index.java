@@ -40,9 +40,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final boolean[] a, final boolean objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -51,10 +51,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final boolean[] a, final int fromIndex, final boolean objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -63,9 +63,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final char[] a, final char objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -74,10 +74,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final char[] a, final int fromIndex, final char objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -86,9 +86,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final byte[] a, final byte objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -97,10 +97,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final byte[] a, final int fromIndex, final byte objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -109,9 +109,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final short[] a, final short objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -120,10 +120,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final short[] a, final int fromIndex, final short objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -132,9 +132,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final int[] a, final int objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -143,10 +143,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final int[] a, final int fromIndex, final int objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -155,9 +155,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final long[] a, final long objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -166,10 +166,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final long[] a, final int fromIndex, final long objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -178,9 +178,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final float[] a, final float objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -189,10 +189,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final float[] a, final int fromIndex, final float objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -201,9 +201,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final double[] a, final double objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -212,10 +212,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final double[] a, final int fromIndex, final double objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -224,9 +224,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final Object[] a, final Object objToFind) {
         return toOptionalInt(N.indexOf(a, objToFind));
@@ -235,10 +235,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final Object[] a, final int fromIndex, final Object objToFind) {
         return toOptionalInt(N.indexOf(a, fromIndex, objToFind));
@@ -247,9 +247,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param list the list
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param list
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final List<?> list, final Object objToFind) {
         return toOptionalInt(N.indexOf(list, objToFind));
@@ -258,10 +258,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param list the list
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param list
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final List<?> list, final int fromIndex, final Object objToFind) {
         return toOptionalInt(N.indexOf(list, fromIndex, objToFind));
@@ -270,9 +270,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param str the str
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param str
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final String str, final int objToFind) {
         return toOptionalInt(StringUtil.indexOf(str, objToFind));
@@ -281,10 +281,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param str the str
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param str
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final String str, final int fromIndex, final int objToFind) {
         return toOptionalInt(StringUtil.indexOf(str, fromIndex, objToFind));
@@ -293,9 +293,9 @@ public final class Index {
     /**
      * Of.
      *
-     * @param str the str
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param str
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final String str, final String objToFind) {
         return toOptionalInt(StringUtil.indexOf(str, objToFind));
@@ -304,10 +304,10 @@ public final class Index {
     /**
      * Of.
      *
-     * @param str the str
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param str
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt of(final String str, final int fromIndex, final String objToFind) {
         return toOptionalInt(StringUtil.indexOf(str, fromIndex, objToFind));
@@ -316,12 +316,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final boolean[] sourceArray, final int fromIndex, final boolean[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -351,12 +351,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final char[] sourceArray, final int fromIndex, final char[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -386,12 +386,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final byte[] sourceArray, final int fromIndex, final byte[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -421,12 +421,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final short[] sourceArray, final int fromIndex, final short[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -456,12 +456,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final int[] sourceArray, final int fromIndex, final int[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -491,12 +491,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final long[] sourceArray, final int fromIndex, final long[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -526,12 +526,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final float[] sourceArray, final int fromIndex, final float[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -561,12 +561,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final double[] sourceArray, final int fromIndex, final double[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -596,12 +596,12 @@ public final class Index {
     /**
      * Of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubArray(final Object[] sourceArray, final int fromIndex, final Object[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -631,12 +631,12 @@ public final class Index {
     /**
      * Of sub list.
      *
-     * @param sourceList the source list
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubList the begin index of target sub list
-     * @param size the size
-     * @return the optional int
+     * @param sourceList
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubList
+     * @param size
+     * @return
      */
     public static OptionalInt ofSubList(final List<?> sourceList, final int fromIndex, final List<?> targetSubList, final int beginIndexOfTargetSubList,
             final int size) {
@@ -671,9 +671,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final boolean[] a, final boolean objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -682,10 +682,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final boolean[] a, final int fromIndex, final boolean objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -694,9 +694,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final char[] a, final char objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -705,10 +705,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final char[] a, final int fromIndex, final char objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -717,9 +717,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final byte[] a, final byte objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -728,10 +728,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final byte[] a, final int fromIndex, final byte objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -740,9 +740,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final short[] a, final short objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -751,10 +751,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final short[] a, final int fromIndex, final short objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -763,9 +763,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final int[] a, final int objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -774,10 +774,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final int[] a, final int fromIndex, final int objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -786,9 +786,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final long[] a, final long objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -797,10 +797,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final long[] a, final int fromIndex, final long objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -809,9 +809,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final float[] a, final float objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -820,10 +820,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final float[] a, final int fromIndex, final float objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -832,9 +832,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final double[] a, final double objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -843,10 +843,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final double[] a, final int fromIndex, final double objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -855,9 +855,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final Object[] a, final Object objToFind) {
         return toOptionalInt(N.lastIndexOf(a, objToFind));
@@ -866,10 +866,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param a
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final Object[] a, final int fromIndex, final Object objToFind) {
         return toOptionalInt(N.lastIndexOf(a, fromIndex, objToFind));
@@ -878,9 +878,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param list the list
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param list
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final List<?> list, final Object objToFind) {
         return toOptionalInt(N.lastIndexOf(list, objToFind));
@@ -889,10 +889,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param list the list
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param list
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final List<?> list, final int fromIndex, final Object objToFind) {
         return toOptionalInt(N.lastIndexOf(list, fromIndex, objToFind));
@@ -901,9 +901,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param str the str
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param str
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final String str, final int objToFind) {
         return toOptionalInt(StringUtil.lastIndexOf(str, objToFind));
@@ -912,10 +912,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param str the str
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param str
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final String str, final int fromIndex, final int objToFind) {
         return toOptionalInt(StringUtil.lastIndexOf(str, fromIndex, objToFind));
@@ -924,9 +924,9 @@ public final class Index {
     /**
      * Last.
      *
-     * @param str the str
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param str
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final String str, final String objToFind) {
         return toOptionalInt(StringUtil.lastIndexOf(str, objToFind));
@@ -935,10 +935,10 @@ public final class Index {
     /**
      * Last.
      *
-     * @param str the str
-     * @param fromIndex the from index
-     * @param objToFind the obj to find
-     * @return the optional int
+     * @param str
+     * @param fromIndex
+     * @param objToFind
+     * @return
      */
     public static OptionalInt last(final String str, final int fromIndex, final String objToFind) {
         return toOptionalInt(StringUtil.lastIndexOf(str, fromIndex, objToFind));
@@ -947,12 +947,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final int fromIndex, final boolean[] targetSubList,
             final int beginIndexOfTargetSubArray, final int size) {
@@ -982,12 +982,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final char[] sourceArray, final int fromIndex, final char[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -1017,12 +1017,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final byte[] sourceArray, final int fromIndex, final byte[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -1052,12 +1052,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final short[] sourceArray, final int fromIndex, final short[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -1087,12 +1087,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final int[] sourceArray, final int fromIndex, final int[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -1122,12 +1122,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final long[] sourceArray, final int fromIndex, final long[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -1157,12 +1157,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final float[] sourceArray, final int fromIndex, final float[] targetSubList, final int beginIndexOfTargetSubArray,
             final int size) {
@@ -1192,12 +1192,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final double[] sourceArray, final int fromIndex, final double[] targetSubList,
             final int beginIndexOfTargetSubArray, final int size) {
@@ -1227,12 +1227,12 @@ public final class Index {
     /**
      * Last of sub array.
      *
-     * @param sourceArray the source array
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubArray the begin index of target sub array
-     * @param size the size
-     * @return the optional int
+     * @param sourceArray
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubArray
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubArray(final Object[] sourceArray, final int fromIndex, final Object[] targetSubList,
             final int beginIndexOfTargetSubArray, final int size) {
@@ -1262,12 +1262,12 @@ public final class Index {
     /**
      * Last of sub list.
      *
-     * @param sourceList the source list
-     * @param fromIndex the from index
-     * @param targetSubList the target sub list
-     * @param beginIndexOfTargetSubList the begin index of target sub list
-     * @param size the size
-     * @return the optional int
+     * @param sourceList
+     * @param fromIndex
+     * @param targetSubList
+     * @param beginIndexOfTargetSubList
+     * @param size
+     * @return
      */
     public static OptionalInt lastOfSubList(final List<?> sourceList, final int fromIndex, final List<?> targetSubList, final int beginIndexOfTargetSubList,
             final int size) {
@@ -1302,8 +1302,8 @@ public final class Index {
     /**
      * To optional int.
      *
-     * @param index the index
-     * @return the optional int
+     * @param index
+     * @return
      */
     private static OptionalInt toOptionalInt(int index) {
         return index < 0 ? NOT_FOUND : OptionalInt.of(index);

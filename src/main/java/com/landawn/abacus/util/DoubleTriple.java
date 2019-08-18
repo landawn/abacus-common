@@ -45,9 +45,9 @@ public final class DoubleTriple {
     /**
      * Instantiates a new double triple.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
      */
     DoubleTriple(double _1, double _2, double _3) {
         this._1 = _1;
@@ -58,10 +58,10 @@ public final class DoubleTriple {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @return the double triple
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @return
      */
     public static DoubleTriple of(double _1, double _2, double _3) {
         return new DoubleTriple(_1, _2, _3);
@@ -70,7 +70,7 @@ public final class DoubleTriple {
     /**
      * Min.
      *
-     * @return the double
+     * @return
      */
     public double min() {
         return N.min(_1, _2, _3);
@@ -79,7 +79,7 @@ public final class DoubleTriple {
     /**
      * Max.
      *
-     * @return the double
+     * @return
      */
     public double max() {
         return N.max(_1, _2, _3);
@@ -88,7 +88,7 @@ public final class DoubleTriple {
     /**
      * Median.
      *
-     * @return the double
+     * @return
      */
     public double median() {
         return N.median(_1, _2, _3);
@@ -97,7 +97,7 @@ public final class DoubleTriple {
     /**
      * Sum.
      *
-     * @return the double
+     * @return
      */
     public double sum() {
         return N.sum(_1, _2, _3);
@@ -106,7 +106,7 @@ public final class DoubleTriple {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return N.average(_1, _2, _3);
@@ -115,7 +115,7 @@ public final class DoubleTriple {
     /**
      * Reversed.
      *
-     * @return the double triple
+     * @return
      */
     public DoubleTriple reversed() {
         return new DoubleTriple(_3, _2, _1);
@@ -124,7 +124,7 @@ public final class DoubleTriple {
     /**
      * To array.
      *
-     * @return the double[]
+     * @return
      */
     public double[] toArray() {
         return new double[] { _1, _2, _3 };
@@ -133,7 +133,7 @@ public final class DoubleTriple {
     /**
      * To list.
      *
-     * @return the double list
+     * @return
      */
     public DoubleList toList() {
         return DoubleList.of(_1, _2, _3);
@@ -142,8 +142,8 @@ public final class DoubleTriple {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.DoubleConsumer<E> comsumer) throws E {
@@ -155,8 +155,8 @@ public final class DoubleTriple {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<DoubleTriple, E> action) throws E {
@@ -166,10 +166,10 @@ public final class DoubleTriple {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<DoubleTriple, U, E> mapper) throws E {
@@ -179,9 +179,9 @@ public final class DoubleTriple {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<DoubleTriple> filter(final Try.Predicate<DoubleTriple, E> predicate) throws E {
@@ -191,7 +191,7 @@ public final class DoubleTriple {
     /**
      * Stream.
      *
-     * @return the double stream
+     * @return
      */
     public DoubleStream stream() {
         return DoubleStream.of(_1, _2, _3);
@@ -200,7 +200,7 @@ public final class DoubleTriple {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -210,7 +210,7 @@ public final class DoubleTriple {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -228,7 +228,7 @@ public final class DoubleTriple {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

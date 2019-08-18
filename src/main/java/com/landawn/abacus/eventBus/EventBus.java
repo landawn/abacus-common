@@ -166,7 +166,7 @@ public class EventBus {
     /**
      * Instantiates a new event bus.
      *
-     * @param identifier the identifier
+     * @param identifier
      */
     public EventBus(final String identifier) {
         this(identifier, DEFAULT_EXECUTOR);
@@ -175,8 +175,8 @@ public class EventBus {
     /**
      * Instantiates a new event bus.
      *
-     * @param identifier the identifier
-     * @param executor the executor
+     * @param identifier
+     * @param executor
      */
     public EventBus(final String identifier, final Executor executor) {
         this.identifier = identifier;
@@ -207,7 +207,7 @@ public class EventBus {
     /**
      * Gets the default.
      *
-     * @return the default
+     * @return
      */
     public static EventBus getDefault() {
         return INSTANCE;
@@ -216,7 +216,7 @@ public class EventBus {
     /**
      * Identifier.
      *
-     * @return the string
+     * @return
      */
     public String identifier() {
         return identifier;
@@ -225,8 +225,8 @@ public class EventBus {
     /**
      * Returns the subscriber which is registered with specified <code>eventType</code>(or its sub types) and <code>null</code> event id.
      *
-     * @param eventType the event type
-     * @return the subscribers
+     * @param eventType
+     * @return
      */
     public List<Object> getSubscribers(final Class<?> eventType) {
         return getSubscribers(eventType, null);
@@ -235,9 +235,9 @@ public class EventBus {
     /**
      * Returns the subscriber which is registered with specified <code>eventType</code>(or its sub types) and <code>eventId</code>.
      *
-     * @param eventType the event type
-     * @param eventId the event id
-     * @return the subscribers
+     * @param eventType
+     * @param eventId
+     * @return
      */
     public List<Object> getSubscribers(final Class<?> eventType, final String eventId) {
         final List<Object> eventSubs = new ArrayList<>();
@@ -260,8 +260,8 @@ public class EventBus {
     /**
      * Returns all registered subscribers.
      *
-     * @param eventType the event type
-     * @return the all subscribers
+     * @param eventType
+     * @return
      */
     public List<Object> getAllSubscribers(final Class<?> eventType) {
         synchronized (registeredSubMap) {
@@ -272,8 +272,8 @@ public class EventBus {
     /**
      * Register.
      *
-     * @param subscriber the subscriber
-     * @return the event bus
+     * @param subscriber
+     * @return
      */
     public EventBus register(final Object subscriber) {
         return register(subscriber, (ThreadMode) null);
@@ -282,9 +282,9 @@ public class EventBus {
     /**
      * Register.
      *
-     * @param subscriber the subscriber
-     * @param eventId the event id
-     * @return the event bus
+     * @param subscriber
+     * @param eventId
+     * @return
      */
     public EventBus register(final Object subscriber, final String eventId) {
         return register(subscriber, eventId, (ThreadMode) null);
@@ -293,9 +293,9 @@ public class EventBus {
     /**
      * Register.
      *
-     * @param subscriber the subscriber
-     * @param threadMode the thread mode
-     * @return the event bus
+     * @param subscriber
+     * @param threadMode
+     * @return
      */
     public EventBus register(final Object subscriber, ThreadMode threadMode) {
         return register(subscriber, null, threadMode);
@@ -305,9 +305,9 @@ public class EventBus {
      * Register the subscriber with the specified <code>eventId</code> and <code>threadMode</code>. 
      * If the same register has been registered before, it be over-written with the new specified <code>eventId</code> and <code>threadMode</code>.
      *
-     * @param subscriber the subscriber
-     * @param eventId the event id
-     * @param threadMode the thread mode
+     * @param subscriber
+     * @param eventId
+     * @param threadMode
      * @return itself
      */
     public EventBus register(final Object subscriber, final String eventId, ThreadMode threadMode) {
@@ -403,8 +403,8 @@ public class EventBus {
     /**
      * Gets the class sub list.
      *
-     * @param cls the cls
-     * @return the class sub list
+     * @param cls
+     * @return
      */
     private List<SubIdentifier> getClassSubList(final Class<?> cls) {
         synchronized (classMetaSubMap) {
@@ -466,10 +466,10 @@ public class EventBus {
     /**
      * Register.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param subscriber General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id
-     * @param eventId the event id
-     * @return the event bus
+     * @param eventId
+     * @return
      */
     public <T> EventBus register(final Subscriber<T> subscriber, final String eventId) {
         return register(subscriber, eventId, (ThreadMode) null);
@@ -487,11 +487,11 @@ public class EventBus {
     /**
      * Register.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param subscriber General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id
-     * @param eventId the event id
-     * @param threadMode the thread mode
-     * @return the event bus
+     * @param eventId
+     * @param threadMode
+     * @return
      */
     public <T> EventBus register(final Subscriber<T> subscriber, final String eventId, ThreadMode threadMode) {
         final Object tmp = subscriber;
@@ -501,8 +501,8 @@ public class EventBus {
     /**
      * Unregister.
      *
-     * @param subscriber the subscriber
-     * @return the event bus
+     * @param subscriber
+     * @return
      */
     public EventBus unregister(final Object subscriber) {
         if (logger.isInfoEnabled()) {
@@ -544,8 +544,8 @@ public class EventBus {
     /**
      * Post.
      *
-     * @param event the event
-     * @return the event bus
+     * @param event
+     * @return
      */
     public EventBus post(final Object event) {
         return post((String) null, event);
@@ -554,9 +554,9 @@ public class EventBus {
     /**
      * Post.
      *
-     * @param eventId the event id
-     * @param event the event
-     * @return the event bus
+     * @param eventId
+     * @param event
+     * @return
      */
     public EventBus post(final String eventId, final Object event) {
         final Class<?> cls = event.getClass();
@@ -606,8 +606,8 @@ public class EventBus {
     /**
      * Post sticky.
      *
-     * @param event the event
-     * @return the event bus
+     * @param event
+     * @return
      */
     public EventBus postSticky(final Object event) {
         return postSticky((String) null, event);
@@ -616,9 +616,9 @@ public class EventBus {
     /**
      * Post sticky.
      *
-     * @param eventId the event id
-     * @param event the event
-     * @return the event bus
+     * @param eventId
+     * @param event
+     * @return
      */
     public EventBus postSticky(final String eventId, final Object event) {
         synchronized (stickyEventMap) {
@@ -635,7 +635,7 @@ public class EventBus {
     /**
      * Remove the sticky event posted with <code>null</code> event id.
      *
-     * @param event the event
+     * @param event
      * @return true, if successful
      */
     public boolean removeStickyEvent(final Object event) {
@@ -645,8 +645,8 @@ public class EventBus {
     /**
      * Remove the sticky event posted with the specified <code>eventId</code>.
      *
-     * @param event the event
-     * @param eventId the event id
+     * @param event
+     * @param eventId
      * @return true, if successful
      */
     public boolean removeStickyEvent(final Object event, final String eventId) {
@@ -667,7 +667,7 @@ public class EventBus {
     /**
      * Remove the sticky events which can be assigned to specified <code>eventType</code> and posted with <code>null</code> event id.
      *
-     * @param eventType the event type
+     * @param eventType
      * @return true if one or one more than sticky events are removed, otherwise, <code>false</code>.
      */
     public boolean removeStickyEvents(final Class<?> eventType) {
@@ -677,8 +677,8 @@ public class EventBus {
     /**
      * Remove the sticky events which can be assigned to specified <code>eventType</code> and posted with the specified <code>eventId</code>.
      *
-     * @param eventType the event type
-     * @param eventId the event id
+     * @param eventType
+     * @param eventId
      * @return true if one or one more than sticky events are removed, otherwise, <code>false</code>.
      */
     public boolean removeStickyEvents(final Class<?> eventType, final String eventId) {
@@ -721,8 +721,8 @@ public class EventBus {
     /**
      * Returns the sticky events which can be assigned to specified <code>eventType</code> and posted with <code>null</code> event id.
      *
-     * @param eventType the event type
-     * @return the sticky events
+     * @param eventType
+     * @return
      */
     public List<Object> getStickyEvents(Class<?> eventType) {
         return getStickyEvents(eventType, null);
@@ -731,9 +731,9 @@ public class EventBus {
     /**
      * Returns the sticky events which can be assigned to specified <code>eventType</code> and posted with the specified <code>eventId</code>.
      *
-     * @param eventType the event type
-     * @param eventId the event id
-     * @return the sticky events
+     * @param eventType
+     * @param eventId
+     * @return
      */
     public List<Object> getStickyEvents(Class<?> eventType, String eventId) {
         final List<Object> result = new ArrayList<>();
@@ -752,7 +752,7 @@ public class EventBus {
     /**
      * Checks if is supported thread mode.
      *
-     * @param threadMode the thread mode
+     * @param threadMode
      * @return true, if is supported thread mode
      */
     protected boolean isSupportedThreadMode(final ThreadMode threadMode) {
@@ -762,8 +762,8 @@ public class EventBus {
     /**
      * Dispatch.
      *
-     * @param identifier the identifier
-     * @param event the event
+     * @param identifier
+     * @param event
      */
     protected void dispatch(final SubIdentifier identifier, final Object event) {
         switch (identifier.threadMode) {
@@ -790,8 +790,8 @@ public class EventBus {
     /**
      * Post.
      *
-     * @param sub the sub
-     * @param event the event
+     * @param sub
+     * @param event
      */
     protected void post(final SubIdentifier sub, final Object event) {
         try {
@@ -881,7 +881,7 @@ public class EventBus {
         /**
          * Instantiates a new sub identifier.
          *
-         * @param method the method
+         * @param method
          */
         SubIdentifier(Method method) {
             final Subscribe subscribe = method.getAnnotation(Subscribe.class);
@@ -907,10 +907,10 @@ public class EventBus {
         /**
          * Instantiates a new sub identifier.
          *
-         * @param sub the sub
-         * @param obj the obj
-         * @param eventId the event id
-         * @param threadMode the thread mode
+         * @param sub
+         * @param obj
+         * @param eventId
+         * @param threadMode
          */
         SubIdentifier(SubIdentifier sub, Object obj, String eventId, ThreadMode threadMode) {
             this.obj = obj;
@@ -928,8 +928,8 @@ public class EventBus {
         /**
          * Checks if is my event.
          *
-         * @param eventType the event type
-         * @param eventId the event id
+         * @param eventType
+         * @param eventId
          * @return true, if is my event
          */
         boolean isMyEvent(final Class<?> eventType, final String eventId) {
@@ -951,7 +951,7 @@ public class EventBus {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -973,7 +973,7 @@ public class EventBus {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -997,7 +997,7 @@ public class EventBus {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {

@@ -22,7 +22,7 @@ import java.util.Map;
  * The Interface DistributedCacheClient.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public interface DistributedCacheClient<T> {
@@ -39,40 +39,40 @@ public interface DistributedCacheClient<T> {
     /**
      * Server url.
      *
-     * @return the string
+     * @return
      */
     String serverUrl();
 
     /**
      * Gets the.
      *
-     * @param key the key
-     * @return the t
+     * @param key
+     * @return
      */
     T get(String key);
 
     /**
      * Gets the bulk.
      *
-     * @param keys the keys
-     * @return the bulk
+     * @param keys
+     * @return
      */
     Map<String, T> getBulk(String... keys);
 
     /**
      * Gets the bulk.
      *
-     * @param keys the keys
-     * @return the bulk
+     * @param keys
+     * @return
      */
     Map<String, T> getBulk(Collection<String> keys);
 
     /**
      * Sets the.
      *
-     * @param key the key
-     * @param obj the obj
-     * @param liveTime the live time
+     * @param key
+     * @param obj
+     * @param liveTime
      * @return true, if successful
      */
     boolean set(String key, T obj, long liveTime);
@@ -80,7 +80,7 @@ public interface DistributedCacheClient<T> {
     /**
      * Delete.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     boolean delete(String key);
@@ -88,34 +88,34 @@ public interface DistributedCacheClient<T> {
     /**
      * Incr.
      *
-     * @param key the key
-     * @return the long
+     * @param key
+     * @return
      */
     long incr(String key);
 
     /**
      * Incr.
      *
-     * @param key the key
-     * @param deta the deta
-     * @return the long
+     * @param key
+     * @param deta
+     * @return
      */
     long incr(String key, int deta);
 
     /**
      * Decr.
      *
-     * @param key the key
-     * @return the long
+     * @param key
+     * @return
      */
     long decr(String key);
 
     /**
      * Decr.
      *
-     * @param key the key
-     * @param deta the deta
-     * @return the long
+     * @param key
+     * @param deta
+     * @return
      */
     long decr(String key, int deta);
 

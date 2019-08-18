@@ -55,7 +55,7 @@ import com.landawn.abacus.util.stream.Collector;
  * <code>Seq</code> should not be passed as a parameter or returned as a result because it's a pure utility class for the operations/calculation based on Collection/Array
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 @Beta
@@ -69,7 +69,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * The returned <code>Seq</code> and the specified <code>Collection</code> are backed by the same data.
      * Any changes to one will appear in the other.
      *
-     * @param c the c
+     * @param c
      */
     Seq(final Collection<T> c) {
         super(c == null ? Collections.EMPTY_LIST : c);
@@ -78,8 +78,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Empty.
      *
-     * @param <T> the generic type
-     * @return the seq
+     * @param <T>
+     * @return
      */
     public static <T> Seq<T> empty() {
         return EMPTY;
@@ -88,9 +88,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Just.
      *
-     * @param <T> the generic type
-     * @param t the t
-     * @return the seq
+     * @param <T>
+     * @param t
+     * @return
      */
     public static <T> Seq<T> just(T t) {
         return of(t);
@@ -99,9 +99,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the seq
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> Seq<T> of(final T... a) {
@@ -116,9 +116,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * The returned <code>Seq</code> and the specified <code>Collection</code> are backed by the same data.
      * Any changes to one will appear in the other.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the seq
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Seq<T> of(Collection<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -133,8 +133,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the seq
+     * @param map
+     * @return
      */
     public static <K, V> Seq<Map.Entry<K, V>> of(Map<K, V> map) {
         if (N.isNullOrEmpty(map)) {
@@ -178,7 +178,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Contains.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     @Override
@@ -193,7 +193,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     @Override
@@ -210,7 +210,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Contains all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public boolean containsAll(Object[] a) {
@@ -226,7 +226,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Contains any.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAny(Collection<?> c) {
@@ -240,7 +240,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Contains any.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public boolean containsAny(Object[] a) {
@@ -254,7 +254,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Disjoint.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean disjoint(final Collection<?> c) {
@@ -264,7 +264,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Disjoint.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public boolean disjoint(final Object[] a) {
@@ -278,8 +278,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Intersection.
      *
-     * @param b the b
-     * @return the list
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public List<T> intersection(Collection<?> b) {
@@ -289,8 +289,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public List<T> intersection(final Object[] a) {
         return N.intersection(coll, Array.asList(a));
@@ -299,8 +299,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Difference.
      *
-     * @param b the b
-     * @return the list
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public List<T> difference(Collection<?> b) {
@@ -310,8 +310,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Difference.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public List<T> difference(final Object[] a) {
         return N.difference(coll, Array.asList(a));
@@ -320,7 +320,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Symmetric difference.
      *
-     * @param b the b
+     * @param b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
@@ -331,8 +331,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public List<T> symmetricDifference(final T[] a) {
         return N.symmetricDifference(coll, Array.asList(a));
@@ -341,8 +341,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Occurrences of.
      *
-     * @param objectToFind the object to find
-     * @return the int
+     * @param objectToFind
+     * @return
      */
     public int occurrencesOf(final Object objectToFind) {
         return N.isNullOrEmpty(coll) ? 0 : N.occurrencesOf(coll, objectToFind);
@@ -351,7 +351,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Min.
      *
-     * @return the nullable
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Nullable<T> min() {
@@ -361,8 +361,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Min.
      *
-     * @param cmp the cmp
-     * @return the nullable
+     * @param cmp
+     * @return
      */
     public Nullable<T> min(Comparator<? super T> cmp) {
         return size() == 0 ? (Nullable<T>) Nullable.empty() : Nullable.of(N.min(coll, cmp));
@@ -371,8 +371,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Min by.
      *
-     * @param keyMapper the key mapper
-     * @return the nullable
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Nullable<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
@@ -382,7 +382,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Max.
      *
-     * @return the nullable
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Nullable<T> max() {
@@ -392,8 +392,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Max.
      *
-     * @param cmp the cmp
-     * @return the nullable
+     * @param cmp
+     * @return
      */
     public Nullable<T> max(Comparator<? super T> cmp) {
         return size() == 0 ? (Nullable<T>) Nullable.empty() : Nullable.of(N.max(coll, cmp));
@@ -402,8 +402,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Max by.
      *
-     * @param keyMapper the key mapper
-     * @return the nullable
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Nullable<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
@@ -413,7 +413,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Median.
      *
-     * @return the nullable
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Nullable<T> median() {
@@ -423,8 +423,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Median.
      *
-     * @param cmp the cmp
-     * @return the nullable
+     * @param cmp
+     * @return
      */
     public Nullable<T> median(Comparator<? super T> cmp) {
         return size() == 0 ? (Nullable<T>) Nullable.empty() : Nullable.of(N.median(coll, cmp));
@@ -433,8 +433,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Kth largest.
      *
-     * @param k the k
-     * @return the nullable
+     * @param k
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Nullable<T> kthLargest(final int k) {
@@ -446,9 +446,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Kth largest.
      *
-     * @param k the k
-     * @param cmp the cmp
-     * @return the nullable
+     * @param k
+     * @param cmp
+     * @return
      */
     public Nullable<T> kthLargest(final int k, Comparator<? super T> cmp) {
         N.checkArgPositive(k, "k");
@@ -459,9 +459,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Sum int.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the int
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int sumInt(final Try.ToIntFunction<? super T, E> mapper) throws E {
@@ -475,9 +475,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Sum long.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the long
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> long sumLong(final Try.ToLongFunction<? super T, E> mapper) throws E {
@@ -491,9 +491,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Sum double.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the double
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> double sumDouble(final Try.ToDoubleFunction<? super T, E> mapper) throws E {
@@ -507,9 +507,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Average int.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the optional double
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalDouble averageInt(final Try.ToIntFunction<? super T, E> mapper) throws E {
@@ -519,9 +519,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Average long.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the optional double
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalDouble averageLong(final Try.ToLongFunction<? super T, E> mapper) throws E {
@@ -531,9 +531,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Average double.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the optional double
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalDouble averageDouble(final Try.ToDoubleFunction<? super T, E> mapper) throws E {
@@ -543,8 +543,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Foreach.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void foreach(final Try.Consumer<? super T, E> action) throws E {
@@ -554,10 +554,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param action the action
-     * @param onComplete the on complete
+     * @param <E>
+     * @param <E2>
+     * @param action
+     * @param onComplete
      * @throws E the e
      * @throws E2 the e2
      */
@@ -574,8 +574,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(final Try.IndexedConsumer<? super T, E> action) throws E {
@@ -585,11 +585,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatMapper the flat mapper
-     * @param action the action
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param flatMapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -601,14 +601,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each.
      *
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param flatMapper the flat mapper
-     * @param flatMapper2 the flat mapper 2
-     * @param action the action
+     * @param <T2>
+     * @param <T3>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param flatMapper
+     * @param flatMapper2
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -622,8 +622,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each non null.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEachNonNull(final Try.Consumer<? super T, E> action) throws E {
@@ -633,11 +633,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each non null.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatMapper the flat mapper
-     * @param action the action
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param flatMapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -649,14 +649,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each non null.
      *
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param flatMapper the flat mapper
-     * @param flatMapper2 the flat mapper 2
-     * @param action the action
+     * @param <T2>
+     * @param <T3>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param flatMapper
+     * @param flatMapper2
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -670,8 +670,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each pair.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action) throws E {
@@ -681,9 +681,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each pair.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @param increment the increment
+     * @param <E>
+     * @param action
+     * @param increment
      * @throws E the e
      */
     public <E extends Exception> void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
@@ -702,8 +702,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each triple.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
@@ -713,9 +713,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For each triple.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @param increment the increment
+     * @param <E>
+     * @param action
+     * @param increment
      * @throws E the e
      */
     public <E extends Exception> void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
@@ -734,7 +734,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * First.
      *
-     * @return the nullable
+     * @return
      */
     public Nullable<T> first() {
         return N.first(coll);
@@ -743,7 +743,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * First non null.
      *
-     * @return the optional
+     * @return
      */
     public Optional<T> firstNonNull() {
         return N.firstNonNull(coll);
@@ -752,8 +752,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Return at most first <code>n</code> elements.
      *
-     * @param n the n
-     * @return the list
+     * @param n
+     * @return
      */
     public List<T> first(final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: " + n);
@@ -783,7 +783,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Last.
      *
-     * @return the nullable
+     * @return
      */
     public Nullable<T> last() {
         return N.last(coll);
@@ -792,7 +792,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Last non null.
      *
-     * @return the optional
+     * @return
      */
     public Optional<T> lastNonNull() {
         return N.lastNonNull(coll);
@@ -801,8 +801,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Return at most last <code>n</code> elements.
      *
-     * @param n the n
-     * @return the list
+     * @param n
+     * @return
      */
     public List<T> last(final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: " + n);
@@ -833,9 +833,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find first.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the nullable
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Nullable<T> findFirst(Try.Predicate<? super T, E> predicate) throws E {
@@ -845,9 +845,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find last.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the nullable
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Nullable<T> findLast(Try.Predicate<? super T, E> predicate) throws E {
@@ -857,9 +857,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find first index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findFirstIndex(Try.Predicate<? super T, E> predicate) throws E {
@@ -869,9 +869,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find last index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findLastIndex(Try.Predicate<? super T, E> predicate) throws E {
@@ -881,11 +881,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find first or last.
      *
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param predicateForFirst the predicate for first
-     * @param predicateForLast the predicate for last
-     * @return the nullable
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -903,11 +903,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find first or last index.
      *
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param predicateForFirst the predicate for first
-     * @param predicateForLast the predicate for last
-     * @return the optional int
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -925,9 +925,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find first and last.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the pair
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Try.Predicate<? super T, E> predicate) throws E {
@@ -937,11 +937,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find first and last.
      *
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param predicateForFirst the predicate for first
-     * @param predicateForLast the predicate for last
-     * @return the pair
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -957,9 +957,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find first and last index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the pair
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Try.Predicate<? super T, E> predicate) throws E {
@@ -969,11 +969,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Find first and last index.
      *
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param predicateForFirst the predicate for first
-     * @param predicateForLast the predicate for last
-     * @return the pair
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -989,8 +989,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * All match.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1011,8 +1011,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Any match.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1033,8 +1033,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * None match.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1055,10 +1055,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * N match.
      *
-     * @param <E> the element type
-     * @param atLeast the at least
-     * @param atMost the at most
-     * @param filter the filter
+     * @param <E>
+     * @param atLeast
+     * @param atMost
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1092,9 +1092,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(Try.Predicate<? super T, E> filter) throws E {
@@ -1104,9 +1104,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the list
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> filter(Try.Predicate<? super T, E> filter) throws E {
@@ -1116,10 +1116,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @param max the max
-     * @return the list
+     * @param <E>
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> filter(Try.Predicate<? super T, E> filter, final int max) throws E {
@@ -1129,11 +1129,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Filter.
      *
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param filter the filter
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param <E>
+     * @param filter
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public <C extends Collection<T>, E extends Exception> C filter(Try.Predicate<? super T, E> filter, IntFunction<? extends C> supplier) throws E {
@@ -1143,12 +1143,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Filter.
      *
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param filter the filter
-     * @param max the max
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param <E>
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public <C extends Collection<T>, E extends Exception> C filter(Try.Predicate<? super T, E> filter, final int max, IntFunction<? extends C> supplier)
@@ -1159,9 +1159,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Take while.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the list
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> takeWhile(Try.Predicate<? super T, E> filter) throws E {
@@ -1187,9 +1187,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Take while inclusive.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the list
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> takeWhileInclusive(Try.Predicate<? super T, E> filter) throws E {
@@ -1215,9 +1215,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Drop while.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the list
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> dropWhile(Try.Predicate<? super T, E> filter) throws E {
@@ -1251,9 +1251,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Skip until.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the list
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> skipUntil(final Try.Predicate<? super T, E> filter) throws E {
@@ -1287,10 +1287,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the list
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> List<R> map(final Try.Function<? super T, ? extends R, E> func) throws E {
@@ -1300,9 +1300,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map to boolean.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the boolean list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> BooleanList mapToBoolean(final Try.ToBooleanFunction<? super T, E> func) throws E {
@@ -1312,9 +1312,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map to char.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the char list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> CharList mapToChar(final Try.ToCharFunction<? super T, E> func) throws E {
@@ -1324,9 +1324,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map to byte.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the byte list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ByteList mapToByte(final Try.ToByteFunction<? super T, E> func) throws E {
@@ -1336,9 +1336,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map to short.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the short list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ShortList mapToShort(final Try.ToShortFunction<? super T, E> func) throws E {
@@ -1348,9 +1348,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map to int.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the int list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> IntList mapToInt(final Try.ToIntFunction<? super T, E> func) throws E {
@@ -1360,9 +1360,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map to long.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the long list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> LongList mapToLong(final Try.ToLongFunction<? super T, E> func) throws E {
@@ -1372,9 +1372,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map to float.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the float list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> FloatList mapToFloat(final Try.ToFloatFunction<? super T, E> func) throws E {
@@ -1384,9 +1384,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Map to double.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the double list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> DoubleList mapToDouble(final Try.ToDoubleFunction<? super T, E> func) throws E {
@@ -1396,10 +1396,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the list
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> List<R> flatMap(final Try.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
@@ -1421,10 +1421,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the list
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> List<R> flattMap(final Try.Function<? super T, ? extends R[], E> func) throws E {
@@ -1457,9 +1457,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map to boolean.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the boolean list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> BooleanList flatMapToBoolean(final Try.Function<? super T, ? extends Collection<Boolean>, E> func) throws E {
@@ -1483,9 +1483,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map to boolean.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the boolean list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> BooleanList flattMapToBoolean(final Try.Function<? super T, boolean[], E> func) throws E {
@@ -1507,9 +1507,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map to char.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the char list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> CharList flatMapToChar(final Try.Function<? super T, ? extends Collection<Character>, E> func) throws E {
@@ -1533,9 +1533,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map to char.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the char list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> CharList flattMapToChar(final Try.Function<? super T, char[], E> func) throws E {
@@ -1557,9 +1557,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map to byte.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the byte list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ByteList flatMapToByte(final Try.Function<? super T, ? extends Collection<Byte>, E> func) throws E {
@@ -1583,9 +1583,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map to byte.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the byte list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ByteList flattMapToByte(final Try.Function<? super T, byte[], E> func) throws E {
@@ -1607,9 +1607,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map to short.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the short list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ShortList flatMapToShort(final Try.Function<? super T, ? extends Collection<Short>, E> func) throws E {
@@ -1633,9 +1633,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map to short.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the short list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ShortList flattMapToShort(final Try.Function<? super T, short[], E> func) throws E {
@@ -1657,9 +1657,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map to int.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the int list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> IntList flatMapToInt(final Try.Function<? super T, ? extends Collection<Integer>, E> func) throws E {
@@ -1683,9 +1683,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map to int.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the int list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> IntList flattMapToInt(final Try.Function<? super T, int[], E> func) throws E {
@@ -1707,9 +1707,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map to long.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the long list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> LongList flatMapToLong(final Try.Function<? super T, ? extends Collection<Long>, E> func) throws E {
@@ -1733,9 +1733,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map to long.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the long list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> LongList flattMapToLong(final Try.Function<? super T, long[], E> func) throws E {
@@ -1757,9 +1757,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map to float.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the float list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> FloatList flatMapToFloat(final Try.Function<? super T, ? extends Collection<Float>, E> func) throws E {
@@ -1783,9 +1783,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map to float.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the float list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> FloatList flattMapToFloat(final Try.Function<? super T, float[], E> func) throws E {
@@ -1807,9 +1807,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map to double.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the double list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> DoubleList flatMapToDouble(final Try.Function<? super T, ? extends Collection<Double>, E> func) throws E {
@@ -1833,9 +1833,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flatt map to double.
      *
-     * @param <E> the element type
-     * @param func the func
-     * @return the double list
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <E extends Exception> DoubleList flattMapToDouble(final Try.Function<? super T, double[], E> func) throws E {
@@ -1857,13 +1857,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map.
      *
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param mapper the mapper
-     * @param func the func
-     * @return the list
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param mapper
+     * @param func
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -1889,16 +1889,16 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Flat map.
      *
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param mapper2 the mapper 2
-     * @param mapper3 the mapper 3
-     * @param func the func
-     * @return the list
+     * @param <T2>
+     * @param <T3>
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param mapper2
+     * @param mapper3
+     * @param func
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -1936,12 +1936,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For better performance, comparing to {@code Stream}.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param filter the filter
-     * @param mapper the mapper
-     * @return the list
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param filter
+     * @param mapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -1965,12 +1965,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For better performance, comparing to {@code Stream}.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param filter the filter
-     * @param mapper the mapper
-     * @return the list
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param filter
+     * @param mapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2000,12 +2000,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For better performance, comparing to {@code Stream}.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param mapper the mapper
-     * @param filter the filter
-     * @return the list
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param mapper
+     * @param filter
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2032,12 +2032,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For better performance, comparing to {@code Stream}.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param mapper the mapper
-     * @param filter the filter
-     * @return the list
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param mapper
+     * @param filter
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2068,11 +2068,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For better performance, comparing to {@code Stream}.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param filter the filter
-     * @param action the action
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param filter
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2092,11 +2092,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For better performance, comparing to {@code Stream}.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param mapper the mapper
-     * @param action the action
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param mapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2114,11 +2114,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * For better performance, comparing to {@code Stream}.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param mapper the mapper
-     * @param action the action
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param mapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2155,11 +2155,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param collapsible the collapsible
-     * @param mergeFunction the merge function
-     * @return the list
+     * @param <E>
+     * @param <E2>
+     * @param collapsible
+     * @param mergeFunction
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2193,13 +2193,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collapse.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param collapsible the collapsible
-     * @param init the init
-     * @param op the op
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param collapsible
+     * @param init
+     * @param op
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2233,9 +2233,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collapse.
      *
-     * @param <E> the element type
-     * @param collapsible the collapsible
-     * @return the list
+     * @param <E>
+     * @param collapsible
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<List<T>> collapse(final Try.BiPredicate<? super T, ? super T, E> collapsible) throws E {
@@ -2245,11 +2245,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collapse.
      *
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param collapsible the collapsible
-     * @param collectionSupplier the collection supplier
-     * @return the list
+     * @param <C>
+     * @param <E>
+     * @param collapsible
+     * @param collectionSupplier
+     * @return
      * @throws E the e
      */
     public <C extends Collection<T>, E extends Exception> List<C> collapse(final Try.BiPredicate<? super T, ? super T, E> collapsible,
@@ -2294,12 +2294,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * </code>
      * </pre>
      *
-     * @param <R> the generic type
-     * @param <A> the generic type
-     * @param <E> the element type
-     * @param collapsible the collapsible
-     * @param collector the collector
-     * @return the list
+     * @param <R>
+     * @param <A>
+     * @param <E>
+     * @param collapsible
+     * @param collector
+     * @return
      * @throws E the e
      */
     public <R, A, E extends Exception> List<R> collapse(final Try.BiPredicate<? super T, ? super T, E> collapsible, final Collector<? super T, A, R> collector)
@@ -2350,9 +2350,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
+     * @param <E>
      * @param accumulator the accumulation function
-     * @return the list
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> scan(final Try.BiFunction<? super T, ? super T, T, E> accumulator) throws E {
@@ -2390,12 +2390,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * </code>
      * </pre>
      *
-     * @param <U> the generic type
-     * @param <E> the element type
+     * @param <U>
+     * @param <E>
      * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream.
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * @param accumulator the accumulation function
-     * @return the list
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> List<U> scan(final U init, final Try.BiFunction<? super U, ? super T, U, E> accumulator) throws E {
@@ -2405,12 +2405,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Scan.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param init the init
-     * @param accumulator the accumulator
-     * @param initIncluded the init included
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param init
+     * @param accumulator
+     * @param initIncluded
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> List<U> scan(final U init, final Try.BiFunction<? super U, ? super T, U, E> accumulator, boolean initIncluded) throws E {
@@ -2451,9 +2451,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param accumulator the accumulator
-     * @return the nullable
+     * @param <E>
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Nullable<T> reduce(Try.BinaryOperator<T, E> accumulator) throws E {
@@ -2492,11 +2492,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * </code>
      * </pre>
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param identity the identity
-     * @param accumulator the accumulator
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param identity
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U reduce(final U identity, final Try.BiFunction<U, ? super T, U, E> accumulator) throws E {
@@ -2519,11 +2519,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collect.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param supplier the supplier
-     * @param accumulator the accumulator
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param supplier
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> R collect(final Supplier<R> supplier, final Try.BiConsumer<? super R, ? super T, E> accumulator) throws E {
@@ -2542,14 +2542,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collect.
      *
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param supplier the supplier
-     * @param accumulator the accumulator
-     * @param finisher the finisher
-     * @return the r
+     * @param <A>
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param supplier
+     * @param accumulator
+     * @param finisher
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2571,10 +2571,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collect.
      *
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param collector the collector
-     * @return the r
+     * @param <A>
+     * @param <R>
+     * @param collector
+     * @return
      */
     public <A, R> R collect(final Collector<? super T, A, R> collector) {
         N.checkArgNotNull(collector);
@@ -2592,10 +2592,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collect.
      *
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param collector the collector
-     * @return the r
+     * @param <A>
+     * @param <R>
+     * @param collector
+     * @return
      */
     public <A, R> R collect(final java.util.stream.Collector<? super T, A, R> collector) {
         N.checkArgNotNull(collector);
@@ -2613,13 +2613,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collect then apply.
      *
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param <RR> the generic type
-     * @param <E> the element type
-     * @param downstream the downstream
-     * @param mapper the mapper
-     * @return the rr
+     * @param <A>
+     * @param <R>
+     * @param <RR>
+     * @param <E>
+     * @param downstream
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <A, R, RR, E extends Exception> RR collectThenApply(final Collector<T, A, R> downstream, final Try.Function<? super R, ? extends RR, E> mapper)
@@ -2630,13 +2630,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collect then apply.
      *
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param <RR> the generic type
-     * @param <E> the element type
-     * @param downstream the downstream
-     * @param mapper the mapper
-     * @return the rr
+     * @param <A>
+     * @param <R>
+     * @param <RR>
+     * @param <E>
+     * @param downstream
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <A, R, RR, E extends Exception> RR collectThenApply(final java.util.stream.Collector<T, A, R> downstream,
@@ -2647,11 +2647,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collect then accept.
      *
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param downstream the downstream
-     * @param consumer the consumer
+     * @param <A>
+     * @param <R>
+     * @param <E>
+     * @param downstream
+     * @param consumer
      * @throws E the e
      */
     public <A, R, E extends Exception> void collectThenAccept(final Collector<T, A, R> downstream, final Try.Consumer<? super R, E> consumer) throws E {
@@ -2661,11 +2661,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Collect then accept.
      *
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param downstream the downstream
-     * @param consumer the consumer
+     * @param <A>
+     * @param <R>
+     * @param <E>
+     * @param downstream
+     * @param consumer
      * @throws E the e
      */
     public <A, R, E extends Exception> void collectThenAccept(final java.util.stream.Collector<T, A, R> downstream, final Try.Consumer<? super R, E> consumer)
@@ -2676,8 +2676,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Append.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     @SafeVarargs
     public final List<T> append(T... a) {
@@ -2691,8 +2691,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Append.
      *
-     * @param c the c
-     * @return the list
+     * @param c
+     * @return
      */
     public List<T> append(final Collection<? extends T> c) {
         return N.concat(this, c);
@@ -2701,8 +2701,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Prepend.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     @SafeVarargs
     public final List<T> prepend(T... a) {
@@ -2716,8 +2716,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Prepend.
      *
-     * @param c the c
-     * @return the list
+     * @param c
+     * @return
      */
     public List<T> prepend(final Collection<? extends T> c) {
         return N.concat(c, this);
@@ -2726,10 +2726,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Merge.
      *
-     * @param <E> the element type
-     * @param b the b
-     * @param nextSelector the next selector
-     * @return the list
+     * @param <E>
+     * @param b
+     * @param nextSelector
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> merge(final Collection<? extends T> b, final Try.BiFunction<? super T, ? super T, Nth, E> nextSelector) throws E {
@@ -2739,12 +2739,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Zip with.
      *
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <B>
+     * @param <R>
+     * @param <E>
+     * @param b
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public <B, R, E extends Exception> List<R> zipWith(final Collection<B> b, final Try.BiFunction<? super T, ? super B, R, E> zipFunction) throws E {
@@ -2754,14 +2754,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Zip with.
      *
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <B>
+     * @param <R>
+     * @param <E>
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public <B, R, E extends Exception> List<R> zipWith(final Collection<B> b, final T valueForNoneA, final B valueForNoneB,
@@ -2772,14 +2772,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Zip with.
      *
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param c the c
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public <B, C, R, E extends Exception> List<R> zipWith(final Collection<B> b, final Collection<C> c,
@@ -2790,17 +2790,17 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Zip with.
      *
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param c the c
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param valueForNoneC the value for none C
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public <B, C, R, E extends Exception> List<R> zipWith(final Collection<B> b, final Collection<C> c, final T valueForNoneA, final B valueForNoneB,
@@ -2811,8 +2811,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Intersperse.
      *
-     * @param value the value
-     * @return the list
+     * @param value
+     * @return
      */
     public List<T> intersperse(T value) {
         if (isEmpty()) {
@@ -2837,7 +2837,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Indexed.
      *
-     * @return the list
+     * @return
      */
     public List<Indexed<T>> indexed() {
         final List<Indexed<T>> result = new ArrayList<>(size());
@@ -2862,9 +2862,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Distinct by.
      *
-     * @param <E> the element type
+     * @param <E>
      * @param keyMapper don't change value of the input parameter.
-     * @return the list
+     * @return
      * @throws E the e
      */
     public <E extends Exception> List<T> distinctBy(final Try.Function<? super T, ?, E> keyMapper) throws E {
@@ -2874,8 +2874,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Top.
      *
-     * @param n the n
-     * @return the list
+     * @param n
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public List<T> top(final int n) {
@@ -2885,9 +2885,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Top.
      *
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param n
+     * @param cmp
+     * @return
      */
     public List<T> top(final int n, final Comparator<? super T> cmp) {
         return N.top(coll, n, cmp);
@@ -2898,7 +2898,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * or an empty List if the specified list is null or empty.
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return the list
+     * @return
      */
     public List<List<T>> split(int chunkSize) {
         return N.split(coll, chunkSize);
@@ -2907,10 +2907,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Split.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> List<List<T>> split(final Try.Predicate<? super T, E> predicate) throws E {
@@ -2920,12 +2920,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Split.
      *
-     * @param <U> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @param supplier the supplier
-     * @return the list
+     * @param <U>
+     * @param <C>
+     * @param <E>
+     * @param predicate
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public <U, C extends Collection<T>, E extends Exception> List<C> split(final Try.Predicate<? super T, E> predicate, final Supplier<? extends C> supplier)
@@ -2974,13 +2974,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * </code>
      * </pre>
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flag the flag
-     * @param predicate the predicate
-     * @param flagUpdate the flag update
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param flag
+     * @param predicate
+     * @param flagUpdate
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2992,15 +2992,15 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Split.
      *
-     * @param <U> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flag the flag
-     * @param predicate the predicate
-     * @param flagUpdate the flag update
-     * @param supplier the supplier
-     * @return the list
+     * @param <U>
+     * @param <C>
+     * @param <E>
+     * @param <E2>
+     * @param flag
+     * @param predicate
+     * @param flagUpdate
+     * @param supplier
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3050,8 +3050,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Split at.
      *
-     * @param where the where
-     * @return the pair
+     * @param where
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Pair<List<T>, List<T>> splitAt(final int where) {
@@ -3094,9 +3094,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Split by.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the pair
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Pair<List<T>, List<T>> splitBy(final Try.Predicate<? super T, E> predicate) throws E {
@@ -3128,8 +3128,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Sliding.
      *
-     * @param windowSize the window size
-     * @return the list
+     * @param windowSize
+     * @return
      */
     public List<List<T>> sliding(final int windowSize) {
         return sliding(windowSize, 1);
@@ -3138,9 +3138,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Sliding.
      *
-     * @param windowSize the window size
-     * @param increment the increment
-     * @return the list
+     * @param windowSize
+     * @param increment
+     * @return
      */
     public List<List<T>> sliding(final int windowSize, final int increment) {
         N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -3190,7 +3190,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Join.
      *
-     * @return the string
+     * @return
      */
     public String join() {
         return join(N.ELEMENT_SEPARATOR);
@@ -3199,8 +3199,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Join.
      *
-     * @param delimiter the delimiter
-     * @return the string
+     * @param delimiter
+     * @return
      */
     public String join(final char delimiter) {
         return StringUtil.join(coll, delimiter);
@@ -3209,8 +3209,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Join.
      *
-     * @param delimiter the delimiter
-     * @return the string
+     * @param delimiter
+     * @return
      */
     public String join(final String delimiter) {
         return StringUtil.join(coll, delimiter);
@@ -3219,10 +3219,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Join.
      *
-     * @param <E> the element type
-     * @param toStringFunc the to string func
-     * @param delimiter the delimiter
-     * @return the string
+     * @param <E>
+     * @param toStringFunc
+     * @param delimiter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> String join(final Try.Function<? super T, String, E> toStringFunc, final String delimiter) throws E {
@@ -3242,7 +3242,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Only one.
      *
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if there are more than one element in this {@code Seq}.
      */
     public Nullable<T> onlyOne() throws DuplicatedResultException {
@@ -3268,7 +3268,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -3278,7 +3278,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * To array.
      *
-     * @return the object[]
+     * @return
      */
     @Override
     public Object[] toArray() {
@@ -3288,9 +3288,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param a the a
-     * @return the a[]
+     * @param <A>
+     * @param a
+     * @return
      */
     @Override
     public <A> A[] toArray(A[] a) {
@@ -3300,7 +3300,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * To list.
      *
-     * @return the list
+     * @return
      */
     public List<T> toList() {
         return coll == null ? new ArrayList<T>() : new ArrayList<T>(coll);
@@ -3309,7 +3309,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * To set.
      *
-     * @return the sets the
+     * @return
      */
     public Set<T> toSet() {
         return coll == null ? new HashSet<T>() : new HashSet<T>(coll);
@@ -3318,9 +3318,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param supplier
+     * @return
      */
     public <C extends Collection<T>> C toCollection(final IntFunction<? extends C> supplier) {
         final C result = supplier.apply(size());
@@ -3335,7 +3335,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * To multiset.
      *
-     * @return the multiset
+     * @return
      */
     public Multiset<T> toMultiset() {
         final Multiset<T> result = new Multiset<>(N.initHashCapacity(size()));
@@ -3350,8 +3350,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * To multiset.
      *
-     * @param supplier the supplier
-     * @return the multiset
+     * @param supplier
+     * @return
      */
     public Multiset<T> toMultiset(final IntFunction<Multiset<T>> supplier) {
         final Multiset<T> result = supplier.apply(size());
@@ -3368,11 +3368,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3386,13 +3386,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3406,13 +3406,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -3427,15 +3427,15 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -3456,12 +3456,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @return
      * @throws E the e
      */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.Function<? super T, ? extends K, E> keyMapper, Collector<? super T, A, D> downstream) throws E {
@@ -3472,14 +3472,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.Function<? super T, ? extends K, E> keyMapper,
@@ -3492,14 +3492,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param downstream
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3513,16 +3513,16 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3565,11 +3565,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3583,13 +3583,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3604,13 +3604,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -3626,15 +3626,15 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -3662,12 +3662,12 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * Flat to map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param flatKeyMapper the flat key mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param flatKeyMapper
+     * @param downstream
+     * @return
      * @throws E the e
      */
     public <K, A, D, E extends Exception> Map<K, D> flatToMap(Try.Function<? super T, ? extends Collection<? extends K>, E> flatKeyMapper,
@@ -3679,14 +3679,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * Flat to map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param flatKeyMapper the flat key mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param flatKeyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>, E extends Exception> Map<K, D> flatToMap(Try.Function<? super T, ? extends Collection<? extends K>, E> flatKeyMapper,
@@ -3699,14 +3699,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param <E2>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param downstream
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3721,16 +3721,16 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3779,9 +3779,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * Group to.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @return the map
+     * @param <E>
+     * @param keyMapper
+     * @return
      * @throws E the e
      */
     public <K, E extends Exception> Map<K, List<T>> groupTo(Try.Function<? super T, ? extends K, E> keyMapper) throws E {
@@ -3792,11 +3792,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * Group to.
      *
      * @param <K> the key type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param keyMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, M extends Map<K, List<T>>, E extends Exception> M groupTo(Try.Function<? super T, ? extends K, E> keyMapper, IntFunction<? extends M> mapFactory)
@@ -3825,11 +3825,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3843,13 +3843,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3878,9 +3878,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * Flat group to.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param flatKeyMapper the flat key mapper
-     * @return the map
+     * @param <E>
+     * @param flatKeyMapper
+     * @return
      * @throws E the e
      */
     public <K, E extends Exception> Map<K, List<T>> flatGroupTo(final Try.Function<? super T, ? extends Collection<? extends K>, E> flatKeyMapper) throws E {
@@ -3891,11 +3891,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * Flat group to.
      *
      * @param <K> the key type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param flatKeyMapper the flat key mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param flatKeyMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, M extends Map<K, List<T>>, E extends Exception> M flatGroupTo(final Try.Function<? super T, ? extends Collection<? extends K>, E> flatKeyMapper,
@@ -3929,11 +3929,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3948,13 +3948,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -3989,9 +3989,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * To multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @return the list multimap
+     * @param <E>
+     * @param keyMapper
+     * @return
      * @throws E the e
      */
     public <K, E extends Exception> ListMultimap<K, T> toMultimap(Try.Function<? super T, ? extends K, E> keyMapper) throws E {
@@ -4003,11 +4003,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param keyMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, V extends Collection<T>, M extends Multimap<K, T, V>, E extends Exception> M toMultimap(Try.Function<? super T, ? extends K, E> keyMapper,
@@ -4026,11 +4026,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @return the list multimap
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -4044,14 +4044,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <C> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <C>
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -4071,9 +4071,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * Flat to multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param flatKeyMapper the flat key mapper
-     * @return the list multimap
+     * @param <E>
+     * @param flatKeyMapper
+     * @return
      * @throws E the e
      */
     public <K, E extends Exception> ListMultimap<K, T> flatToMultimap(Try.Function<? super T, ? extends Collection<? extends K>, E> flatKeyMapper) throws E {
@@ -4085,11 +4085,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param flatKeyMapper the flat key mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param flatKeyMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, V extends Collection<T>, M extends Multimap<K, T, V>, E extends Exception> M flatToMultimap(
@@ -4115,11 +4115,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @return the list multimap
+     * @param <E>
+     * @param <E2>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -4134,14 +4134,14 @@ public final class Seq<T> extends ImmutableCollection<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <C> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param flatKeyMapper the flat key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <C>
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -4168,13 +4168,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param b the b
-     * @param leftKeyMapper the left key mapper
-     * @param rightKeyMapper the right key mapper
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
@@ -4205,11 +4205,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param predicate the predicate
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param b
+     * @param predicate
+     * @return
      * @throws E the e
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
@@ -4234,13 +4234,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param b the b
-     * @param leftKeyMapper the left key mapper
-     * @param rightKeyMapper the right key mapper
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
@@ -4287,11 +4287,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param predicate the predicate
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param b
+     * @param predicate
+     * @return
      * @throws E the e
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
@@ -4338,13 +4338,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param b the b
-     * @param leftKeyMapper the left key mapper
-     * @param rightKeyMapper the right key mapper
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
@@ -4381,11 +4381,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param predicate the predicate
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param b
+     * @param predicate
+     * @return
      * @throws E the e
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
@@ -4421,13 +4421,13 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param b the b
-     * @param leftKeyMapper the left key mapper
-     * @param rightKeyMapper the right key mapper
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
@@ -4464,11 +4464,11 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param predicate the predicate
-     * @return the list
+     * @param <U>
+     * @param <E>
+     * @param b
+     * @param predicate
+     * @return
      * @throws E the e
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
@@ -4504,9 +4504,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Returns a read-only <code>Seq</code>.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the seq
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public Seq<T> slice(final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, size());
@@ -4525,7 +4525,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Iterator.
      *
-     * @return the obj iterator
+     * @return
      */
     @Override
     public ObjIterator<T> iterator() {
@@ -4539,10 +4539,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> R apply(Try.Function<? super Seq<T>, R, E> func) throws E {
@@ -4552,10 +4552,10 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Apply if not empty.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the optional
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super Seq<T>, R, E> func) throws E {
@@ -4565,8 +4565,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<? super Seq<T>, E> action) throws E {
@@ -4576,8 +4576,8 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Accept if not empty.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super Seq<T>, E> action) throws E {
@@ -4596,7 +4596,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -4606,7 +4606,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -4627,7 +4627,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -4637,7 +4637,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
     /**
      * The Class SubCollection.
      *
-     * @param <E> the element type
+     * @param <E>
      */
     private static final class SubCollection<E> implements Collection<E> {
 
@@ -4653,9 +4653,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Instantiates a new sub collection.
          *
-         * @param c the c
-         * @param fromIndex the from index
-         * @param toIndex the to index
+         * @param c
+         * @param fromIndex
+         * @param toIndex
          */
         SubCollection(Collection<E> c, int fromIndex, int toIndex) {
             this.c = c;
@@ -4666,7 +4666,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Adds the.
          *
-         * @param e the e
+         * @param e
          * @return true, if successful
          */
         @Override
@@ -4677,7 +4677,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Removes the.
          *
-         * @param o the o
+         * @param o
          * @return true, if successful
          */
         @Override
@@ -4688,7 +4688,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Contains.
          *
-         * @param o the o
+         * @param o
          * @return true, if successful
          */
         @Override
@@ -4707,7 +4707,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Contains all.
          *
-         * @param c the c
+         * @param c
          * @return true, if successful
          */
         @Override
@@ -4724,7 +4724,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
+         * @param c
          * @return true, if successful
          */
         @Override
@@ -4735,7 +4735,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
+         * @param c
          * @return true, if successful
          */
         @Override
@@ -4746,7 +4746,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Retain all.
          *
-         * @param c the c
+         * @param c
          * @return true, if successful
          */
         @Override
@@ -4775,7 +4775,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Size.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int size() {
@@ -4785,7 +4785,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * Iterator.
          *
-         * @return the iterator
+         * @return
          */
         @Override
         public Iterator<E> iterator() {
@@ -4827,7 +4827,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -4844,9 +4844,9 @@ public final class Seq<T> extends ImmutableCollection<T> {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {

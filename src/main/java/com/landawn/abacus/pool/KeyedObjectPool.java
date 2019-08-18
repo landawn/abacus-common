@@ -23,7 +23,7 @@ import java.util.Set;
  *
  * @author Haiyang Li
  * @param <K> the key type
- * @param <E> the element type
+ * @param <E>
  * @since 0.8
  */
 public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
@@ -31,8 +31,8 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Method put.
      *
-     * @param key the key
-     * @param e the e
+     * @param key
+     * @param e
      * @return boolean
      */
     boolean put(K key, E e);
@@ -40,9 +40,9 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Method put.
      *
-     * @param key the key
-     * @param e the e
-     * @param autoDestroyOnFailedToPut the auto destroy on failed to put
+     * @param key
+     * @param e
+     * @param autoDestroyOnFailedToPut
      * @return boolean
      */
     boolean put(K key, E e, boolean autoDestroyOnFailedToPut);
@@ -50,7 +50,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Method get.
      *
-     * @param key the key
+     * @param key
      * @return E
      */
     E get(K key);
@@ -58,7 +58,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Method remove.
      *
-     * @param key the key
+     * @param key
      * @return E
      */
     E remove(K key);
@@ -66,7 +66,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Get but don't update last access time.
      *
-     * @param key the key
+     * @param key
      * @return E
      */
     E peek(K key);
@@ -88,7 +88,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Method containsKey.
      *
-     * @param key the key
+     * @param key
      * @return boolean
      */
     boolean containsKey(K key);
@@ -96,7 +96,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Method containsValue.
      *
-     * @param e the e
+     * @param e
      * @return boolean
      */
     boolean containsValue(E e);
@@ -105,16 +105,16 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * The Interface MemoryMeasure.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      */
     public static interface MemoryMeasure<K, E> {
 
         /**
          * Size of.
          *
-         * @param key the key
-         * @param e the e
-         * @return the long
+         * @param key
+         * @param e
+         * @return
          */
         long sizeOf(K key, E e);
     }

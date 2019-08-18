@@ -178,8 +178,8 @@ public final class SQLParser {
     /**
      * Parses the.
      *
-     * @param sql the sql
-     * @return the list
+     * @param sql
+     * @return
      */
     public static List<String> parse(String sql) {
         final int sqlLength = sql.length();
@@ -247,11 +247,11 @@ public final class SQLParser {
     /**
      * Index word.
      *
-     * @param sql the sql
-     * @param word the word
-     * @param fromIndex the from index
-     * @param caseSensitive the case sensitive
-     * @return the int
+     * @param sql
+     * @param word
+     * @param fromIndex
+     * @param caseSensitive
+     * @return
      */
     public static int indexWord(String sql, String word, int fromIndex, boolean caseSensitive) {
         String[] subWords = compositeWords.get(word);
@@ -373,9 +373,9 @@ public final class SQLParser {
     /**
      * Next word.
      *
-     * @param sql the sql
-     * @param fromIndex the from index
-     * @return the string
+     * @param sql
+     * @param fromIndex
+     * @return
      */
     public static String nextWord(String sql, int fromIndex) {
         final int sqlLength = sql.length();
@@ -429,7 +429,7 @@ public final class SQLParser {
     /**
      * Register seperator.
      *
-     * @param seperator the seperator
+     * @param seperator
      */
     public static void registerSeperator(char seperator) {
         N.checkArgPositive(seperator, "seperator");
@@ -440,7 +440,7 @@ public final class SQLParser {
     /**
      * Register seperator.
      *
-     * @param seperator the seperator
+     * @param seperator
      */
     public static void registerSeperator(String seperator) {
         N.checkArgNotNull(seperator, "seperator");
@@ -455,10 +455,10 @@ public final class SQLParser {
     /**
      * Checks if is seperator.
      *
-     * @param str the str
-     * @param len the len
-     * @param index the index
-     * @param ch the ch
+     * @param str
+     * @param len
+     * @param index
+     * @param ch
      * @return true, if is seperator
      */
     public static boolean isSeperator(String str, int len, int index, char ch) {
@@ -473,9 +473,9 @@ public final class SQLParser {
     /**
      * Checks if is function name.
      *
-     * @param words the words
-     * @param len the len
-     * @param index the index
+     * @param words
+     * @param len
+     * @param index
      * @return true, if is function name
      */
     public static boolean isFunctionName(final List<String> words, int len, int index) {

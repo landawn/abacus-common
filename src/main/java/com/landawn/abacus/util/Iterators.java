@@ -57,8 +57,8 @@ public final class Iterators {
     /**
      * Contains.
      *
-     * @param iter the iter
-     * @param objToFind the obj to find
+     * @param iter
+     * @param objToFind
      * @return true, if successful
      */
     public static boolean contains(final Iterator<?> iter, final Object objToFind) {
@@ -78,9 +78,9 @@ public final class Iterators {
     /**
      * Index of.
      *
-     * @param iter the iter
-     * @param objToFind the obj to find
-     * @return the long
+     * @param iter
+     * @param objToFind
+     * @return
      */
     public static long indexOf(final Iterator<?> iter, final Object objToFind) {
         if (iter == null) {
@@ -103,9 +103,9 @@ public final class Iterators {
     /**
      * Occurrences of.
      *
-     * @param iter the iter
-     * @param objToFind the obj to find
-     * @return the long
+     * @param iter
+     * @param objToFind
+     * @return
      */
     public static long occurrencesOf(final Iterator<?> iter, final Object objToFind) {
         if (iter == null) {
@@ -126,8 +126,8 @@ public final class Iterators {
     /**
      * Count.
      *
-     * @param iter the iter
-     * @return the long
+     * @param iter
+     * @return
      */
     public static long count(final Iterator<?> iter) {
         if (iter == null) {
@@ -147,10 +147,10 @@ public final class Iterators {
     /**
      * Count.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @param filter the filter
-     * @return the long
+     * @param <T>
+     * @param iter
+     * @param filter
+     * @return
      */
     public static <T> long count(final Iterator<T> iter, final Predicate<? super T> filter) {
         N.checkArgNotNull(filter);
@@ -173,9 +173,9 @@ public final class Iterators {
     /**
      * To list.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the list
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> List<T> toList(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -194,9 +194,9 @@ public final class Iterators {
     /**
      * To set.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the sets the
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> Set<T> toSet(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -215,11 +215,11 @@ public final class Iterators {
     /**
      * To collection.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param iter the iter
-     * @param collectionFactory the collection factory
-     * @return the c
+     * @param <T>
+     * @param <C>
+     * @param iter
+     * @param collectionFactory
+     * @return
      */
     public static <T, C extends Collection<T>> C toCollection(final Iterator<? extends T> iter, final Supplier<? extends C> collectionFactory) {
         final C c = collectionFactory.get();
@@ -238,12 +238,12 @@ public final class Iterators {
     /**
      * To map.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param keyMapper the key mapper
-     * @return the map
+     * @param <E>
+     * @param iter
+     * @param keyMapper
+     * @return
      * @throws E the e
      */
     public static <T, K, E extends Exception> Map<K, T> toMap(final Iterator<? extends T> iter, final Try.Function<? super T, K, E> keyMapper) throws E {
@@ -267,15 +267,15 @@ public final class Iterators {
     /**
      * To map.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iter the iter
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -302,17 +302,17 @@ public final class Iterators {
     /**
      * To map.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iter the iter
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @param mapSupplier the map supplier
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -340,10 +340,10 @@ public final class Iterators {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Iterator<T> iter, final Try.Consumer<? super T, E> action) throws E {
@@ -361,10 +361,10 @@ public final class Iterators {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Iterator<T> iter, final Try.IndexedConsumer<? super T, E> action) throws E {
@@ -384,13 +384,13 @@ public final class Iterators {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iter the iter
-     * @param flatMapper the flat mapper
-     * @param action the action
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param flatMapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -421,16 +421,16 @@ public final class Iterators {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param iter the iter
-     * @param flatMapper the flat mapper
-     * @param flatMapper2 the flat mapper 2
-     * @param action the action
+     * @param <T>
+     * @param <T2>
+     * @param <T3>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param iter
+     * @param flatMapper
+     * @param flatMapper2
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -470,12 +470,12 @@ public final class Iterators {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param action
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Try.BiConsumer<? super A, ? super B, E> action)
@@ -494,14 +494,14 @@ public final class Iterators {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param action
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
@@ -520,14 +520,14 @@ public final class Iterators {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param action
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
@@ -551,17 +551,17 @@ public final class Iterators {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param valueForNoneC the value for none C
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param action
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
@@ -588,13 +588,13 @@ public final class Iterators {
     /**
      * For each non null.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iter the iter
-     * @param flatMapper the flat mapper
-     * @param action the action
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param flatMapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -629,16 +629,16 @@ public final class Iterators {
     /**
      * For each non null.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param iter the iter
-     * @param flatMapper the flat mapper
-     * @param flatMapper2 the flat mapper 2
-     * @param action the action
+     * @param <T>
+     * @param <T2>
+     * @param <T3>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param iter
+     * @param flatMapper
+     * @param flatMapper2
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -684,10 +684,10 @@ public final class Iterators {
     /**
      * For each pair.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Try.BiConsumer<? super T, ? super T, E> action) throws E {
@@ -697,11 +697,11 @@ public final class Iterators {
     /**
      * For each pair.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param action the action
-     * @param increment the increment
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param action
+     * @param increment
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Try.BiConsumer<? super T, ? super T, E> action, final int increment)
@@ -743,10 +743,10 @@ public final class Iterators {
     /**
      * For each triple.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final Iterator<T> iter, final Try.TriConsumer<? super T, ? super T, ? super T, E> action)
@@ -757,11 +757,11 @@ public final class Iterators {
     /**
      * For each triple.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param action the action
-     * @param increment the increment
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param action
+     * @param increment
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final Iterator<T> iter, final Try.TriConsumer<? super T, ? super T, ? super T, E> action,
@@ -807,10 +807,10 @@ public final class Iterators {
     /**
      * Repeat.
      *
-     * @param <T> the generic type
-     * @param e the e
-     * @param n the n
-     * @return the obj iterator
+     * @param <T>
+     * @param e
+     * @param n
+     * @return
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
@@ -842,10 +842,10 @@ public final class Iterators {
     /**
      * Repeat each.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @return the obj iterator
+     * @param <T>
+     * @param c
+     * @param n
+     * @return
      */
     public static <T> ObjIterator<T> repeatEach(final Collection<T> c, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
@@ -888,10 +888,10 @@ public final class Iterators {
     /**
      * Repeat all.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @return the obj iterator
+     * @param <T>
+     * @param c
+     * @param n
+     * @return
      */
     public static <T> ObjIterator<T> repeatAll(final Collection<T> c, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
@@ -928,10 +928,10 @@ public final class Iterators {
     /**
      * Repeat each to size.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param size the size
-     * @return the obj iterator
+     * @param <T>
+     * @param c
+     * @param size
+     * @return
      */
     public static <T> ObjIterator<T> repeatEachToSize(final Collection<T> c, final int size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
@@ -978,10 +978,10 @@ public final class Iterators {
     /**
      * Repeat all to size.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param size the size
-     * @return the obj iterator
+     * @param <T>
+     * @param c
+     * @param size
+     * @return
      */
     public static <T> ObjIterator<T> repeatAllToSize(final Collection<T> c, final int size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
@@ -1020,8 +1020,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the boolean iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static BooleanIterator concat(final boolean[]... a) {
@@ -1058,8 +1058,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the short iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static ShortIterator concat(final short[]... a) {
@@ -1096,8 +1096,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the byte iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static ByteIterator concat(final byte[]... a) {
@@ -1134,8 +1134,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the int iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static IntIterator concat(final int[]... a) {
@@ -1172,8 +1172,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the long iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static LongIterator concat(final long[]... a) {
@@ -1210,8 +1210,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the float iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static FloatIterator concat(final float[]... a) {
@@ -1248,8 +1248,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the double iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static DoubleIterator concat(final double[]... a) {
@@ -1286,8 +1286,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the boolean iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static BooleanIterator concat(final BooleanIterator... a) {
@@ -1322,8 +1322,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the char iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static CharIterator concat(final CharIterator... a) {
@@ -1358,8 +1358,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the byte iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static ByteIterator concat(final ByteIterator... a) {
@@ -1394,8 +1394,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the short iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static ShortIterator concat(final ShortIterator... a) {
@@ -1430,8 +1430,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the int iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static IntIterator concat(final IntIterator... a) {
@@ -1466,8 +1466,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the long iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static LongIterator concat(final LongIterator... a) {
@@ -1502,8 +1502,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the float iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static FloatIterator concat(final FloatIterator... a) {
@@ -1538,8 +1538,8 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param a the a
-     * @return the double iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static DoubleIterator concat(final DoubleIterator... a) {
@@ -1574,9 +1574,9 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final T[]... a) {
@@ -1598,9 +1598,9 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Collection<? extends T>... a) {
@@ -1622,9 +1622,9 @@ public final class Iterators {
     /**
      * Concatt.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the obj iterator
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> ObjIterator<T> concatt(final Collection<? extends Collection<? extends T>> c) {
         if (N.isNullOrEmpty(c)) {
@@ -1659,9 +1659,9 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Iterator<? extends T>... a) {
@@ -1675,9 +1675,9 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the obj iterator
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> ObjIterator<T> concat(final Collection<? extends Iterator<? extends T>> c) {
         if (N.isNullOrEmpty(c)) {
@@ -1711,10 +1711,10 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param a the a
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <A, B> BiIterator<A, B> concat(final BiIterator<A, B>... a) {
@@ -1789,11 +1789,11 @@ public final class Iterators {
     /**
      * Concat.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param a the a
-     * @return the tri iterator
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <A, B, C> TriIterator<A, B, C> concat(final TriIterator<A, B, C>... a) {
@@ -1868,11 +1868,11 @@ public final class Iterators {
     /**
      * Merge.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param nextSelector the next selector
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @param b
+     * @param nextSelector
+     * @return
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends T> a, final Collection<? extends T> b,
             final BiFunction<? super T, ? super T, Nth> nextSelector) {
@@ -1886,11 +1886,11 @@ public final class Iterators {
     /**
      * Merge.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param nextSelector the next selector
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @param b
+     * @param nextSelector
+     * @return
      */
     public static <T> ObjIterator<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final BiFunction<? super T, ? super T, Nth> nextSelector) {
@@ -1959,13 +1959,13 @@ public final class Iterators {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param zipFunction the zip function
-     * @return the obj iterator
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @return
      */
     public static <A, B, R> ObjIterator<R> zip(final Collection<A> a, final Collection<B> b, final BiFunction<? super A, ? super B, R> zipFunction) {
         final Iterator<A> iterA = N.isNullOrEmpty(a) ? ObjIterator.<A> empty() : a.iterator();
@@ -1977,13 +1977,13 @@ public final class Iterators {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param zipFunction the zip function
-     * @return the obj iterator
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @return
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, R> zipFunction) {
         N.checkArgNotNull(zipFunction);
@@ -2007,15 +2007,15 @@ public final class Iterators {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param zipFunction the zip function
-     * @return the obj iterator
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c,
             final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
@@ -2029,15 +2029,15 @@ public final class Iterators {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param zipFunction the zip function
-     * @return the obj iterator
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
             final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
@@ -2063,15 +2063,15 @@ public final class Iterators {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param zipFunction the zip function
-     * @return the obj iterator
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
      */
     public static <A, B, R> ObjIterator<R> zip(final Collection<A> a, final Collection<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, R> zipFunction) {
@@ -2084,15 +2084,15 @@ public final class Iterators {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param zipFunction the zip function
-     * @return the obj iterator
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, R> zipFunction) {
@@ -2117,18 +2117,18 @@ public final class Iterators {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param valueForNoneC the value for none C
-     * @param zipFunction the zip function
-     * @return the obj iterator
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
@@ -2142,18 +2142,18 @@ public final class Iterators {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param valueForNoneC the value for none C
-     * @param zipFunction the zip function
-     * @return the obj iterator
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
@@ -2178,12 +2178,12 @@ public final class Iterators {
     /**
      * Unzip.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
-     * @param <R> the generic type
-     * @param iter the iter
+     * @param <T>
+     * @param <L>
+     * @param <R>
+     * @param iter
      * @param unzip the second parameter is an output parameter.
-     * @return the bi iterator
+     * @return
      */
     public static <T, L, R> BiIterator<L, R> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<L, R>> unzip) {
         return BiIterator.unzip(iter, unzip);
@@ -2192,13 +2192,13 @@ public final class Iterators {
     /**
      * Unzipp.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
-     * @param <M> the generic type
-     * @param <R> the generic type
-     * @param iter the iter
+     * @param <T>
+     * @param <L>
+     * @param <M>
+     * @param <R>
+     * @param iter
      * @param unzip the second parameter is an output parameter.
-     * @return the tri iterator
+     * @return
      */
     public static <T, L, M, R> TriIterator<L, M, R> unzipp(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<L, M, R>> unzip) {
         return TriIterator.unzip(iter, unzip);
@@ -2207,10 +2207,10 @@ public final class Iterators {
     /**
      * Split.
      *
-     * @param <T> the generic type
-     * @param iter the iter
+     * @param <T>
+     * @param iter
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return the obj iterator
+     * @return
      */
     public static <T> ObjIterator<List<T>> split(final Iterator<? extends T> iter, final int chunkSize) {
         N.checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, can't be: %s", chunkSize);
@@ -2247,10 +2247,10 @@ public final class Iterators {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @param index the index
-     * @return the nullable
+     * @param <T>
+     * @param iter
+     * @param index
+     * @return
      */
     public static <T> Nullable<T> get(final Iterator<T> iter, int index) {
         N.checkArgNotNegative(index, "index");
@@ -2273,9 +2273,9 @@ public final class Iterators {
     /**
      * First.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the nullable
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> Nullable<T> first(final Iterator<T> iter) {
         return iter != null && iter.hasNext() ? Nullable.of(iter.next()) : Nullable.<T> empty();
@@ -2284,9 +2284,9 @@ public final class Iterators {
     /**
      * First non null.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the optional
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> Optional<T> firstNonNull(final Iterator<T> iter) {
         if (iter == null) {
@@ -2307,9 +2307,9 @@ public final class Iterators {
     /**
      * Last.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the nullable
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> Nullable<T> last(final Iterator<T> iter) {
         if (iter == null || iter.hasNext() == false) {
@@ -2328,9 +2328,9 @@ public final class Iterators {
     /**
      * Last non null.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the optional
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> Optional<T> lastNonNull(final Iterator<T> iter) {
         if (iter == null) {
@@ -2355,9 +2355,9 @@ public final class Iterators {
      * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times
      * or until {@code hasNext()} returns {@code false}, whichever comes first.
      *
-     * @param iterator the iterator
-     * @param numberToAdvance the number to advance
-     * @return the number of elements the iterator was advanced
+     * @param iterator
+     * @param numberToAdvance
+     * @return
      */
     public static long advance(Iterator<?> iterator, long numberToAdvance) {
         N.checkArgNotNegative(numberToAdvance, "numberToAdvance");
@@ -2377,10 +2377,10 @@ public final class Iterators {
      * 
      * This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @param n the n
-     * @return the obj iterator
+     * @param <T>
+     * @param iter
+     * @param n
+     * @return
      */
     public static <T> ObjIterator<T> skip(final Iterator<T> iter, final long n) {
         N.checkArgNotNegative(n, "n");
@@ -2425,10 +2425,10 @@ public final class Iterators {
     /**
      * Returns a new {@code Iterator}.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @param count the count
-     * @return the obj iterator
+     * @param <T>
+     * @param iter
+     * @param count
+     * @return
      */
     public static <T> ObjIterator<T> limit(final Iterator<T> iter, final long count) {
         N.checkArgNotNegative(count, "count");
@@ -2464,11 +2464,11 @@ public final class Iterators {
      * This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *  
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @param offset the offset
-     * @param count the count
-     * @return the obj iterator
+     * @param <T>
+     * @param iter
+     * @param offset
+     * @param count
+     * @return
      */
     public static <T> ObjIterator<T> limit(final Iterator<T> iter, final long offset, final long count) {
         N.checkArgNotNegative(count, "offset");
@@ -2516,9 +2516,9 @@ public final class Iterators {
     /**
      * Returns a new {@code ObjIterator} with {@code null} elements removed.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the obj iterator
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> ObjIterator<T> skipNull(final Iterator<T> iter) {
         if (iter == null) {
@@ -2564,8 +2564,8 @@ public final class Iterators {
     /**
      * Gets the only element.
      *
-     * @param <T> the generic type
-     * @param iter the iter
+     * @param <T>
+     * @param iter
      * @return throws DuplicatedResultException if there are more than one elements in the specified {@code iter}.
      * @throws DuplicatedResultException the duplicated result exception
      */
@@ -2586,10 +2586,10 @@ public final class Iterators {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @param filter the filter
-     * @return the obj iterator
+     * @param <T>
+     * @param iter
+     * @param filter
+     * @return
      */
     public static <T> ObjIterator<T> filter(final Iterator<T> iter, final Predicate<? super T> filter) {
         N.checkArgNotNull(filter, "filter");
@@ -2635,11 +2635,11 @@ public final class Iterators {
     /**
      * Map.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param iter the iter
-     * @param mapper the mapper
-     * @return the obj iterator
+     * @param <T>
+     * @param <U>
+     * @param iter
+     * @param mapper
+     * @return
      */
     public static <T, U> ObjIterator<U> map(final Iterator<T> iter, final Function<? super T, U> mapper) {
         N.checkArgNotNull(mapper, "mapper");
@@ -2664,11 +2664,11 @@ public final class Iterators {
     /**
      * Flat map.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param iter the iter
-     * @param mapper the mapper
-     * @return the obj iterator
+     * @param <T>
+     * @param <U>
+     * @param iter
+     * @param mapper
+     * @return
      */
     public static <T, U> ObjIterator<U> flatMap(final Iterator<T> iter, final Function<? super T, ? extends Collection<? extends U>> mapper) {
         N.checkArgNotNull(mapper, "mapper");
@@ -2711,12 +2711,12 @@ public final class Iterators {
     /**
      * Generate.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param init the init
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the obj iterator
+     * @param <T>
+     * @param <U>
+     * @param init
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, T> supplier) {
         N.checkArgNotNull(hasNext);
@@ -2738,12 +2738,12 @@ public final class Iterators {
     /**
      * Generate.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param init the init
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the obj iterator
+     * @param <T>
+     * @param <U>
+     * @param init
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, T> hasNext, final BiFunction<? super U, T, T> supplier) {
         N.checkArgNotNull(hasNext);

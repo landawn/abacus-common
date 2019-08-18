@@ -69,7 +69,7 @@ public class EchoServlet extends AbstractHttpServlet {
     /**
      * Inits the.
      *
-     * @param config the config
+     * @param config
      * @throws ServletException the servlet exception
      */
     @Override
@@ -82,8 +82,8 @@ public class EchoServlet extends AbstractHttpServlet {
     /**
      * Do get.
      *
-     * @param req the req
-     * @param resp the resp
+     * @param req
+     * @param resp
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
@@ -93,8 +93,8 @@ public class EchoServlet extends AbstractHttpServlet {
     /**
      * Do post.
      *
-     * @param req the req
-     * @param resp the resp
+     * @param req
+     * @param resp
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -104,8 +104,8 @@ public class EchoServlet extends AbstractHttpServlet {
     /**
      * Do put.
      *
-     * @param req the req
-     * @param resp the resp
+     * @param req
+     * @param resp
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
@@ -115,8 +115,8 @@ public class EchoServlet extends AbstractHttpServlet {
     /**
      * Do delete.
      *
-     * @param req the req
-     * @param resp the resp
+     * @param req
+     * @param resp
      */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
@@ -126,8 +126,8 @@ public class EchoServlet extends AbstractHttpServlet {
     /**
      * Execute.
      *
-     * @param request the request
-     * @param response the response
+     * @param request
+     * @param response
      * @throws UncheckedIOException the unchecked IO exception
      */
     protected void execute(HttpServletRequest request, HttpServletResponse response) throws UncheckedIOException {

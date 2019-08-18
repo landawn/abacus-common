@@ -123,7 +123,7 @@ public abstract class FloatStream
      *        not merged to the interval, then mapper will receive the same
      *        value twice, otherwise it will receive the leftmost and the
      *        rightmost values which were merged to the range.
-     * @return the new stream
+     * @return
      * @see #collapse(FloatBiPredicate, FloatBinaryOperator)
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
@@ -148,7 +148,7 @@ public abstract class FloatStream
      *        not merged to the interval, then mapper will receive the same
      *        value twice, otherwise it will receive the leftmost and the
      *        rightmost values which were merged to the range.
-     * @return the new stream
+     * @return
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
@@ -199,8 +199,8 @@ public abstract class FloatStream
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param accumulator  the accumulation function
-     * @return the new stream which has the extract same size as this stream.
+     * @param accumulator the accumulation function
+     * @return
      */
     @SequentialOnly
     public abstract FloatStream scan(final FloatBinaryOperator accumulator);
@@ -227,8 +227,8 @@ public abstract class FloatStream
      * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * 
-     * @param accumulator  the accumulation function
-     * @return the new stream which has the extract same size as this stream.
+     * @param accumulator the accumulation function
+     * @return
      */
     @SequentialOnly
     public abstract FloatStream scan(final float init, final FloatBinaryOperator accumulator);

@@ -29,7 +29,7 @@ import java.util.Set;
  * The elements in the array must not be modified after the array is added into the set.
  *
  * @author Haiyang Li
- * @param <E> the element type
+ * @param <E>
  * @since 0.8
  */
 public class ArrayHashSet<E> implements Set<E> {
@@ -47,7 +47,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Instantiates a new array hash set.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public ArrayHashSet(final int initialCapacity) {
         this.set = new HashSet<>(initialCapacity);
@@ -56,7 +56,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Instantiates a new array hash set.
      *
-     * @param setType the set type
+     * @param setType
      */
     @SuppressWarnings("rawtypes")
     public ArrayHashSet(final Class<? extends Set> setType) {
@@ -66,7 +66,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Instantiates a new array hash set.
      *
-     * @param coll the coll
+     * @param coll
      */
     public ArrayHashSet(final Collection<? extends E> coll) {
         if (N.isNullOrEmpty(coll)) {
@@ -81,7 +81,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Instantiates a new array hash set.
      *
-     * @param set the set
+     * @param set
      */
     ArrayHashSet(Set<Wrapper<E>> set) {
         this.set = set;
@@ -90,7 +90,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     @Override
@@ -101,7 +101,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Adds the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     @Override
@@ -122,7 +122,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Removes the.
      *
-     * @param o the o
+     * @param o
      * @return true, if successful
      */
     @Override
@@ -133,7 +133,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Removes the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     @Override
@@ -154,7 +154,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Retain all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     @Override
@@ -181,7 +181,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Contains.
      *
-     * @param o the o
+     * @param o
      * @return true, if successful
      */
     @Override
@@ -192,7 +192,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     @Override
@@ -213,7 +213,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Iterator.
      *
-     * @return the iterator
+     * @return
      */
     @Override
     public Iterator<E> iterator() {
@@ -223,7 +223,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * To array.
      *
-     * @return the object[]
+     * @return
      */
     @Override
     public Object[] toArray() {
@@ -246,9 +246,9 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * To array.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the t[]
+     * @param <T>
+     * @param a
+     * @return
      */
     @Override
     public <T> T[] toArray(T[] a) {
@@ -271,7 +271,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -299,7 +299,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -309,7 +309,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -320,7 +320,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -330,7 +330,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      * The Class Itr.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     static class Itr<T> implements Iterator<T> {
 
@@ -340,7 +340,7 @@ public class ArrayHashSet<E> implements Set<E> {
         /**
          * Instantiates a new itr.
          *
-         * @param it the it
+         * @param it
          */
         Itr(Iterator<Wrapper<T>> it) {
             this.it = it;
@@ -359,7 +359,7 @@ public class ArrayHashSet<E> implements Set<E> {
         /**
          * Next.
          *
-         * @return the t
+         * @return
          */
         @Override
         public T next() {

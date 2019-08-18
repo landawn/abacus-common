@@ -40,8 +40,8 @@ public final class HashingOutputStream extends FilterOutputStream {
      * 
      * <p>The {@link OutputStream} should not be written to before or after the hand-off.
      *
-     * @param hashFunction the hash function
-     * @param out the out
+     * @param hashFunction
+     * @param out
      */
     // TODO(user): Evaluate whether it makes sense to always piggyback the computation of a
     // HashCode on an existing OutputStream, compared to creating a separate OutputStream that could
@@ -55,7 +55,7 @@ public final class HashingOutputStream extends FilterOutputStream {
     /**
      * Write.
      *
-     * @param b the b
+     * @param b
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
@@ -67,9 +67,9 @@ public final class HashingOutputStream extends FilterOutputStream {
     /**
      * Write.
      *
-     * @param bytes the bytes
-     * @param off the off
-     * @param len the len
+     * @param bytes
+     * @param off
+     * @param len
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
@@ -82,7 +82,7 @@ public final class HashingOutputStream extends FilterOutputStream {
      * Returns the {@link HashCode} based on the data written to this stream. The result is
      * unspecified if this method is called more than once on the same instance.
      *
-     * @return the hash code
+     * @return
      */
     public HashCode hash() {
         return hasher.hash();

@@ -37,7 +37,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Instantiates a new immutable bi map.
      *
-     * @param map the map
+     * @param map
      */
     @SuppressWarnings("unchecked")
     ImmutableBiMap(final BiMap<? extends K, ? extends V> map) {
@@ -50,7 +50,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the immutable bi map
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <K, V> ImmutableBiMap<K, V> empty() {
@@ -62,11 +62,11 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @return the immutable bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableBiMap<K, V> of(final k k1, final v v1) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1);
@@ -78,13 +78,13 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @return the immutable bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableBiMap<K, V> of(final k k1, final v v1, final k k2, final v v2) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2);
@@ -96,15 +96,15 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @return the immutable bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableBiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3);
@@ -116,17 +116,17 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @return the immutable bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableBiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4) {
@@ -139,19 +139,19 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @return the immutable bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableBiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5) {
@@ -164,21 +164,21 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @return the immutable bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableBiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6) {
@@ -191,23 +191,23 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @param k7 the k 7
-     * @param v7 the v 7
-     * @return the immutable bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableBiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
@@ -221,7 +221,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param <K> the key type
      * @param <V> the value type
      * @param map the elements in this <code>map</code> are shared by the returned ImmutableBiMap.
-     * @return the immutable bi map
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final BiMap<? extends K, ? extends V> map) {
         if (map == null) {
@@ -236,8 +236,8 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the immutable bi map
+     * @param map
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> copyOf(final BiMap<? extends K, ? extends V> map) {
         if (N.isNullOrEmpty(map)) {
@@ -252,8 +252,8 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the immutable map
+     * @param map
+     * @return
      */
     @Deprecated
     public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) {
@@ -265,8 +265,8 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the immutable map
+     * @param map
+     * @return
      */
     @Deprecated
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
@@ -276,8 +276,8 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     /**
      * Gets the by value.
      *
-     * @param value the value
-     * @return the by value
+     * @param value
+     * @return
      */
     public K getByValue(Object value) {
         return biMap.getByValue(value);

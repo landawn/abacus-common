@@ -71,7 +71,7 @@ public interface Logger {
     /**
      * Gets the name.
      *
-     * @return the name
+     * @return
      */
     public String getName();
 
@@ -95,27 +95,27 @@ public interface Logger {
     /**
      * Trace.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     public void trace(String template, Object arg);
 
     /**
      * Trace.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void trace(String template, Object arg1, Object arg2);
 
     /**
      * Trace.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void trace(String template, Object arg1, Object arg2, Object arg3);
 
@@ -152,53 +152,53 @@ public interface Logger {
     /**
      * Trace.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     public void trace(Throwable t, String msg);
 
     /**
      * Trace.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     public void trace(Throwable t, String template, Object arg);
 
     /**
      * Trace.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void trace(Throwable t, String template, Object arg1, Object arg2);
 
     /**
      * Trace.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void trace(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
      * Trace.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     public void trace(Supplier<String> supplier);
 
     /**
      * Trace.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      * @deprecated replaced by {@link #trace(Throwable, Supplier)}
      */
     @Deprecated
@@ -207,8 +207,8 @@ public interface Logger {
     /**
      * Trace.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     public void trace(Throwable t, Supplier<String> supplier);
 
@@ -231,27 +231,27 @@ public interface Logger {
     /**
      * Debug.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     public void debug(String template, Object arg);
 
     /**
      * Debug.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void debug(String template, Object arg1, Object arg2);
 
     /**
      * Debug.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void debug(String template, Object arg1, Object arg2, Object arg3);
 
@@ -288,53 +288,53 @@ public interface Logger {
     /**
      * Debug.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     public void debug(Throwable t, String msg);
 
     /**
      * Debug.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     public void debug(Throwable t, String template, Object arg);
 
     /**
      * Debug.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void debug(Throwable t, String template, Object arg1, Object arg2);
 
     /**
      * Debug.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void debug(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
      * Debug.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     public void debug(Supplier<String> supplier);
 
     /**
      * Debug.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      * @deprecated replaced by {@link #debug(Throwable, Supplier)}
      */
     @Deprecated
@@ -343,8 +343,8 @@ public interface Logger {
     /**
      * Debug.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     public void debug(Throwable t, Supplier<String> supplier);
 
@@ -367,27 +367,27 @@ public interface Logger {
     /**
      * Info.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     public void info(String template, Object arg);
 
     /**
      * Info.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void info(String template, Object arg1, Object arg2);
 
     /**
      * Info.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void info(String template, Object arg1, Object arg2, Object arg3);
 
@@ -424,53 +424,53 @@ public interface Logger {
     /**
      * Info.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     public void info(Throwable t, String msg);
 
     /**
      * Info.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     public void info(Throwable t, String template, Object arg);
 
     /**
      * Info.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void info(Throwable t, String template, Object arg1, Object arg2);
 
     /**
      * Info.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void info(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
      * Info.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     public void info(Supplier<String> supplier);
 
     /**
      * Info.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      * @deprecated replaced by {@link #info(Throwable, Supplier)}
      */
     @Deprecated
@@ -479,8 +479,8 @@ public interface Logger {
     /**
      * Info.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     public void info(Throwable t, Supplier<String> supplier);
 
@@ -503,27 +503,27 @@ public interface Logger {
     /**
      * Warn.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     public void warn(String template, Object arg);
 
     /**
      * Warn.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void warn(String template, Object arg1, Object arg2);
 
     /**
      * Warn.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void warn(String template, Object arg1, Object arg2, Object arg3);
 
@@ -560,53 +560,53 @@ public interface Logger {
     /**
      * Warn.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     public void warn(Throwable t, String msg);
 
     /**
      * Warn.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     public void warn(Throwable t, String template, Object arg);
 
     /**
      * Warn.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void warn(Throwable t, String template, Object arg1, Object arg2);
 
     /**
      * Warn.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void warn(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
      * Warn.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     public void warn(Supplier<String> supplier);
 
     /**
      * Warn.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      * @deprecated replaced by {@link #warn(Throwable, Supplier)}
      */
     @Deprecated
@@ -615,8 +615,8 @@ public interface Logger {
     /**
      * Warn.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     public void warn(Throwable t, Supplier<String> supplier);
 
@@ -639,27 +639,27 @@ public interface Logger {
     /**
      * Error.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     public void error(String template, Object arg);
 
     /**
      * Error.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void error(String template, Object arg1, Object arg2);
 
     /**
      * Error.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void error(String template, Object arg1, Object arg2, Object arg3);
 
@@ -696,53 +696,53 @@ public interface Logger {
     /**
      * Error.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     public void error(Throwable t, String msg);
 
     /**
      * Error.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     public void error(Throwable t, String template, Object arg);
 
     /**
      * Error.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     public void error(Throwable t, String template, Object arg1, Object arg2);
 
     /**
      * Error.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     public void error(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
      * Error.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     public void error(Supplier<String> supplier);
 
     /**
      * Error.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      * @deprecated replaced by {@link #error(Throwable, Supplier)}
      */
     @Deprecated
@@ -751,8 +751,8 @@ public interface Logger {
     /**
      * Error.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     public void error(Throwable t, Supplier<String> supplier);
 

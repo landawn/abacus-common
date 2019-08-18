@@ -173,7 +173,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Inits the.
      *
-     * @param config the config
+     * @param config
      * @throws ServletException the servlet exception
      */
     @Override
@@ -465,8 +465,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Do get.
      *
-     * @param request the request
-     * @param response the response
+     * @param request
+     * @param response
      * @throws ServletException the servlet exception
      */
     @Override
@@ -477,8 +477,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Do post.
      *
-     * @param request the request
-     * @param response the response
+     * @param request
+     * @param response
      * @throws ServletException the servlet exception
      */
     @Override
@@ -489,8 +489,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Do put.
      *
-     * @param request the request
-     * @param response the response
+     * @param request
+     * @param response
      * @throws ServletException the servlet exception
      */
     @Override
@@ -501,8 +501,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Do delete.
      *
-     * @param request the request
-     * @param response the response
+     * @param request
+     * @param response
      * @throws ServletException the servlet exception
      */
     @Override
@@ -513,8 +513,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Execute.
      *
-     * @param request the request
-     * @param response the response
+     * @param request
+     * @param response
      */
     protected void execute(final HttpServletRequest request, final HttpServletResponse response) {
         preExecute(request, response);
@@ -777,10 +777,10 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Invoke.
      *
-     * @param method the method
-     * @param parameter the parameter
-     * @param hasFieldAnnotation the has field annotation
-     * @return the object
+     * @param method
+     * @param parameter
+     * @param hasFieldAnnotation
+     * @return
      */
     protected Object invoke(final Method method, final Object parameter, final boolean hasFieldAnnotation) {
         Object result = null;
@@ -805,9 +805,9 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Sets the response.
      *
-     * @param response the response
-     * @param result the result
-     * @param contentFormat the content format
+     * @param response
+     * @param result
+     * @param contentFormat
      * @throws IOException Signals that an I/O exception has occurred.
      */
     protected void setResponse(final HttpServletResponse response, final Object result, final ContentFormat contentFormat) throws IOException {
@@ -895,8 +895,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Pre execute.
      *
-     * @param request the request
-     * @param response the response
+     * @param request
+     * @param response
      */
     protected void preExecute(final HttpServletRequest request, final HttpServletResponse response) {
 
@@ -905,11 +905,11 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Post execute.
      *
-     * @param response the response
-     * @param result the result
-     * @param method the method
-     * @param parameter the parameter
-     * @param contentFormat the content format
+     * @param response
+     * @param result
+     * @param method
+     * @param parameter
+     * @param contentFormat
      * @throws IOException Signals that an I/O exception has occurred.
      */
     protected void postExecute(final HttpServletResponse response, final Object result, final Method method, final Object parameter,
@@ -920,8 +920,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Check http method.
      *
-     * @param method the method
-     * @param httpMethodName the http method name
+     * @param method
+     * @param httpMethodName
      */
     protected void checkHttpMethod(final Method method, final HttpMethod httpMethodName) {
         if (!methodHttpMethodMap.get(method.getName()).contains(httpMethodName)) {
@@ -934,9 +934,9 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /**
      * Find declared method by name.
      *
-     * @param cls the cls
-     * @param methodName the method name
-     * @return the method
+     * @param cls
+     * @param methodName
+     * @return
      */
     protected static Method findDeclaredMethodByName(final Class<?> cls, final String methodName) {
         Method method = null;

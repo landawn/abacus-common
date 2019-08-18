@@ -38,7 +38,7 @@ import com.landawn.abacus.util.Objectory;
  *
  * @author Haiyang Li
  * @param <K> the key type
- * @param <E> the element type
+ * @param <E>
  * @since 0.8
  */
 public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool implements KeyedObjectPool<K, E> {
@@ -67,9 +67,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Instantiates a new generic keyed object pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
      */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
         this(capacity, evictDelay, evictionPolicy, 0, null);
@@ -78,11 +78,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Instantiates a new generic keyed object pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
-     * @param maxMemorySize the max memory size
-     * @param memoryMeasure the memory measure
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
+     * @param maxMemorySize
+     * @param memoryMeasure
      */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, long maxMemorySize,
             KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -92,11 +92,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Instantiates a new generic keyed object pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
-     * @param autoBalance the auto balance
-     * @param balanceFactor the balance factor
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
+     * @param autoBalance
+     * @param balanceFactor
      */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
         this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
@@ -105,13 +105,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Instantiates a new generic keyed object pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
-     * @param autoBalance the auto balance
-     * @param balanceFactor the balance factor
-     * @param maxMemorySize the max memory size
-     * @param memoryMeasure the memory measure
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
+     * @param autoBalance
+     * @param balanceFactor
+     * @param maxMemorySize
+     * @param memoryMeasure
      */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor, long maxMemorySize,
             KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -180,8 +180,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Put.
      *
-     * @param key the key
-     * @param e the e
+     * @param key
+     * @param e
      * @return true, if successful
      */
     @Override
@@ -236,9 +236,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Put.
      *
-     * @param key the key
-     * @param e the e
-     * @param autoDestroyOnFailedToPut the auto destroy on failed to put
+     * @param key
+     * @param e
+     * @param autoDestroyOnFailedToPut
      * @return true, if successful
      */
     @Override
@@ -259,8 +259,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Gets the.
      *
-     * @param key the key
-     * @return the e
+     * @param key
+     * @return
      */
     @Override
     public E get(K key) {
@@ -292,8 +292,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Removes the.
      *
-     * @param key the key
-     * @return the e
+     * @param key
+     * @return
      */
     @Override
     public E remove(K key) {
@@ -327,8 +327,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Peek.
      *
-     * @param key the key
-     * @return the e
+     * @param key
+     * @return
      */
     @Override
     public E peek(K key) {
@@ -346,7 +346,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Contains key.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     @Override
@@ -365,7 +365,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Contains value.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     @Override
@@ -384,7 +384,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -402,7 +402,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Values.
      *
-     * @return the collection
+     * @return
      */
     @Override
     public Collection<E> values() {
@@ -468,7 +468,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -480,7 +480,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -490,7 +490,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -502,7 +502,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -512,7 +512,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Vacate.
      *
-     * @param vacationNumber the vacation number
+     * @param vacationNumber
      */
     protected void vacate(int vacationNumber) {
         int size = pool.size();
@@ -583,8 +583,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Destroy.
      *
-     * @param key the key
-     * @param value the value
+     * @param key
+     * @param value
      */
     protected void destroy(K key, E value) {
         evictionCount.incrementAndGet();
@@ -612,7 +612,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Destroy all.
      *
-     * @param map the map
+     * @param map
      */
     protected void destroyAll(Map<K, E> map) {
         if (N.notNullOrEmpty(map)) {
@@ -642,7 +642,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Write object.
      *
-     * @param os the os
+     * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private void writeObject(java.io.ObjectOutputStream os) throws java.io.IOException {
@@ -658,7 +658,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Read object.
      *
-     * @param is the is
+     * @param is
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */

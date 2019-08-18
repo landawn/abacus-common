@@ -122,8 +122,8 @@ final class FileSystemUtil {
      * If your operating system isn't supported, please raise a JIRA call detailing
      * the exact result from df -k and as much other detail as possible, thanks.
      *
-     * @param path  the path to get free space for, not null, not empty on Unix
-     * @return the amount of free drive space on the drive or volume in kilobytes
+     * @param path the path to get free space for, not null, not empty on Unix
+     * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
@@ -150,10 +150,10 @@ final class FileSystemUtil {
      * If your operating system isn't supported, please raise a JIRA call detailing
      * the exact result from df -k and as much other detail as possible, thanks.
      *
-     * @param path  the path to get free space for, not null, not empty on Unix
+     * @param path the path to get free space for, not null, not empty on Unix
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the amount of free drive space on the drive or volume in kilobytes
+     * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
@@ -171,7 +171,7 @@ final class FileSystemUtil {
      * freeSpaceKb(new File(".").getAbsolutePath())
      * </pre>
      *
-     * @return the amount of free drive space on the drive or volume in kilobytes
+     * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalStateException if an error occurred in initialisation
      * @since 2.0
@@ -190,7 +190,7 @@ final class FileSystemUtil {
      *
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the amount of free drive space on the drive or volume in kilobytes
+     * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalStateException if an error occurred in initialisation
      * @since 2.0
@@ -210,12 +210,12 @@ final class FileSystemUtil {
      * The free space is calculated via the command line.
      * It uses 'dir /-c' on Windows and 'df' on *nix.
      *
-     * @param path  the path to get free space for, not null, not empty on Unix
-     * @param os  the operating system code
-     * @param kb  whether to normalize to kilobytes
+     * @param path the path to get free space for, not null, not empty on Unix
+     * @param os the operating system code
+     * @param kb whether to normalize to kilobytes
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the amount of free drive space on the drive or volume
+     * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
@@ -242,10 +242,10 @@ final class FileSystemUtil {
     /**
      * Find free space on the Windows platform using the 'dir' command.
      *
-     * @param path  the path to get free space for, including the colon
+     * @param path the path to get free space for, including the colon
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the amount of free drive space on the drive
+     * @return
      * @throws IOException if an error occurs
      */
     long freeSpaceWindows(String path, final long timeout) throws IOException {
@@ -277,9 +277,9 @@ final class FileSystemUtil {
     /**
      * Parses the Windows dir response last line.
      *
-     * @param line  the line to parse
-     * @param path  the path that was sent
-     * @return the number of bytes
+     * @param line the line to parse
+     * @param path the path that was sent
+     * @return
      * @throws IOException if an error occurs
      */
     long parseDir(final String line, final String path) throws IOException {
@@ -328,12 +328,12 @@ final class FileSystemUtil {
     /**
      * Find free space on the *nix platform using the 'df' command.
      *
-     * @param path  the path to get free space for
-     * @param kb  whether to normalize to kilobytes
-     * @param posix  whether to use the POSIX standard format flag
+     * @param path the path to get free space for
+     * @param kb whether to normalize to kilobytes
+     * @param posix whether to use the POSIX standard format flag
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the amount of free drive space on the volume
+     * @return
      * @throws IOException if an error occurs
      */
     long freeSpaceUnix(final String path, final boolean kb, final boolean posix, final long timeout) throws IOException {
@@ -382,9 +382,9 @@ final class FileSystemUtil {
     /**
      * Parses the bytes from a string.
      *
-     * @param freeSpace  the free space string
-     * @param path  the path
-     * @return the number of bytes
+     * @param freeSpace the free space string
+     * @param path 
+     * @return
      * @throws IOException if an error occurs
      */
     long parseBytes(final String freeSpace, final String path) throws IOException {
@@ -404,11 +404,11 @@ final class FileSystemUtil {
     /**
      * Performs the os command.
      *
-     * @param cmdAttribs  the command line parameters
+     * @param cmdAttribs the command line parameters
      * @param max The maximum limit for the lines returned
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the lines returned by the command, converted to lower-case
+     * @return
      * @throws IOException if an error occurs
      */
     List<String> performCommand(final String[] cmdAttribs, final int max, final long timeout) throws IOException {
@@ -473,8 +473,8 @@ final class FileSystemUtil {
     /**
      * Opens the process to the operating system.
      *
-     * @param cmdAttribs  the command line parameters
-     * @return the process
+     * @param cmdAttribs the command line parameters
+     * @return
      * @throws IOException if an error occurs
      */
     Process openProcess(final String[] cmdAttribs) throws IOException {

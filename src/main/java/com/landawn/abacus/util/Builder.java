@@ -34,7 +34,7 @@ import com.landawn.abacus.util.stream.Stream;
  * The Class Builder.
  *
  * @author haiyangl
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public class Builder<T> {
@@ -45,7 +45,7 @@ public class Builder<T> {
     /**
      * Instantiates a new builder.
      *
-     * @param val the val
+     * @param val
      */
     Builder(T val) {
         N.checkArgNotNull(val);
@@ -56,8 +56,8 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param val the val
-     * @return the boolean list builder
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final BooleanListBuilder of(BooleanList val) {
@@ -67,8 +67,8 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param val the val
-     * @return the char list builder
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final CharListBuilder of(CharList val) {
@@ -78,8 +78,8 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param val the val
-     * @return the byte list builder
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final ByteListBuilder of(ByteList val) {
@@ -89,8 +89,8 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param val the val
-     * @return the short list builder
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final ShortListBuilder of(ShortList val) {
@@ -100,8 +100,8 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param val the val
-     * @return the int list builder
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final IntListBuilder of(IntList val) {
@@ -111,8 +111,8 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param val the val
-     * @return the long list builder
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final LongListBuilder of(LongList val) {
@@ -122,8 +122,8 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param val the val
-     * @return the float list builder
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final FloatListBuilder of(FloatList val) {
@@ -133,8 +133,8 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param val the val
-     * @return the double list builder
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final DoubleListBuilder of(DoubleList val) {
@@ -144,10 +144,10 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
-     * @param val the val
-     * @return the list builder
+     * @param <T>
+     * @param <L>
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final <T, L extends List<T>> ListBuilder<T, L> of(L val) {
@@ -157,10 +157,10 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param val the val
-     * @return the collection builder
+     * @param <T>
+     * @param <C>
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final <T, C extends Collection<T>> CollectionBuilder<T, C> of(C val) {
@@ -172,9 +172,9 @@ public class Builder<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param val the val
-     * @return the map builder
+     * @param <M>
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final <K, V, M extends Map<K, V>> MapBuilder<K, V, M> of(M val) {
@@ -184,9 +184,9 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param val the val
-     * @return the multiset builder
+     * @param <T>
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final <T> MultisetBuilder<T> of(Multiset<T> val) {
@@ -196,9 +196,9 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param val the val
-     * @return the long multiset builder
+     * @param <T>
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final <T> LongMultisetBuilder<T> of(LongMultiset<T> val) {
@@ -209,11 +209,11 @@ public class Builder<T> {
      * Of.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param val the val
-     * @return the multimap builder
+     * @param <M>
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> MultimapBuilder<K, E, V, M> of(M val) {
@@ -223,9 +223,9 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param val the val
-     * @return the data set builder
+     * @param <T>
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final <T> DataSetBuilder of(DataSet val) {
@@ -235,9 +235,9 @@ public class Builder<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param val the val
-     * @return the builder
+     * @param <T>
+     * @param val
+     * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
     public static final <T> Builder<T> of(T val) {
@@ -251,7 +251,7 @@ public class Builder<T> {
     /**
      * Val.
      *
-     * @return the t
+     * @return
      */
     public T val() {
         return val;
@@ -260,9 +260,9 @@ public class Builder<T> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param consumer the consumer
-     * @return the builder
+     * @param <E>
+     * @param consumer
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Builder<T> accept(final Try.Consumer<? super T, E> consumer) throws E {
@@ -274,10 +274,10 @@ public class Builder<T> {
     /**
      * Map.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the builder
+     * @param <R>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> Builder<R> map(final Try.Function<? super T, R, E> mapper) throws E {
@@ -287,8 +287,8 @@ public class Builder<T> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
+     * @param <E>
+     * @param predicate
      * @return <code>Optional</code> with the value if <code>predicate</code> returns true,
      * otherwise, return an empty <code>Optional</code>
      * @throws E the e
@@ -300,7 +300,7 @@ public class Builder<T> {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<T> stream() {
         return Stream.of(val);
@@ -417,7 +417,7 @@ public class Builder<T> {
         /**
          * Instantiates a new boolean list builder.
          *
-         * @param val the val
+         * @param val
          */
         BooleanListBuilder(BooleanList val) {
             super(val);
@@ -426,9 +426,9 @@ public class Builder<T> {
         /**
          * Sets the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the boolean list builder
+         * @param index
+         * @param e
+         * @return
          */
         public BooleanListBuilder set(int index, boolean e) {
             val.set(index, e);
@@ -439,8 +439,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the boolean list builder
+         * @param e
+         * @return
          */
         public BooleanListBuilder add(boolean e) {
             val.add(e);
@@ -451,9 +451,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the boolean list builder
+         * @param index
+         * @param e
+         * @return
          */
         public BooleanListBuilder add(int index, boolean e) {
             val.add(index, e);
@@ -464,8 +464,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the boolean list builder
+         * @param c
+         * @return
          */
         public BooleanListBuilder addAll(BooleanList c) {
             val.addAll(c);
@@ -476,9 +476,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the boolean list builder
+         * @param index
+         * @param c
+         * @return
          */
         public BooleanListBuilder addAll(int index, BooleanList c) {
             val.addAll(index, c);
@@ -489,8 +489,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the boolean list builder
+         * @param e
+         * @return
          */
         public BooleanListBuilder remove(boolean e) {
             val.remove(e);
@@ -507,8 +507,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the boolean list builder
+         * @param c
+         * @return
          */
         public BooleanListBuilder removeAll(BooleanList c) {
             val.removeAll(c);
@@ -525,7 +525,7 @@ public class Builder<T> {
         /**
          * Instantiates a new char list builder.
          *
-         * @param val the val
+         * @param val
          */
         CharListBuilder(CharList val) {
             super(val);
@@ -534,9 +534,9 @@ public class Builder<T> {
         /**
          * Sets the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the char list builder
+         * @param index
+         * @param e
+         * @return
          */
         public CharListBuilder set(int index, char e) {
             val.set(index, e);
@@ -547,8 +547,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the char list builder
+         * @param e
+         * @return
          */
         public CharListBuilder add(char e) {
             val.add(e);
@@ -559,9 +559,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the char list builder
+         * @param index
+         * @param e
+         * @return
          */
         public CharListBuilder add(int index, char e) {
             val.add(index, e);
@@ -572,8 +572,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the char list builder
+         * @param c
+         * @return
          */
         public CharListBuilder addAll(CharList c) {
             val.addAll(c);
@@ -584,9 +584,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the char list builder
+         * @param index
+         * @param c
+         * @return
          */
         public CharListBuilder addAll(int index, CharList c) {
             val.addAll(index, c);
@@ -597,8 +597,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the char list builder
+         * @param e
+         * @return
          */
         public CharListBuilder remove(char e) {
             val.remove(e);
@@ -615,8 +615,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the char list builder
+         * @param c
+         * @return
          */
         public CharListBuilder removeAll(CharList c) {
             val.removeAll(c);
@@ -633,7 +633,7 @@ public class Builder<T> {
         /**
          * Instantiates a new byte list builder.
          *
-         * @param val the val
+         * @param val
          */
         ByteListBuilder(ByteList val) {
             super(val);
@@ -642,9 +642,9 @@ public class Builder<T> {
         /**
          * Sets the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the byte list builder
+         * @param index
+         * @param e
+         * @return
          */
         public ByteListBuilder set(int index, byte e) {
             val.set(index, e);
@@ -655,8 +655,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the byte list builder
+         * @param e
+         * @return
          */
         public ByteListBuilder add(byte e) {
             val.add(e);
@@ -667,9 +667,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the byte list builder
+         * @param index
+         * @param e
+         * @return
          */
         public ByteListBuilder add(int index, byte e) {
             val.add(index, e);
@@ -680,8 +680,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the byte list builder
+         * @param c
+         * @return
          */
         public ByteListBuilder addAll(ByteList c) {
             val.addAll(c);
@@ -692,9 +692,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the byte list builder
+         * @param index
+         * @param c
+         * @return
          */
         public ByteListBuilder addAll(int index, ByteList c) {
             val.addAll(index, c);
@@ -705,8 +705,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the byte list builder
+         * @param e
+         * @return
          */
         public ByteListBuilder remove(byte e) {
             val.remove(e);
@@ -723,8 +723,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the byte list builder
+         * @param c
+         * @return
          */
         public ByteListBuilder removeAll(ByteList c) {
             val.removeAll(c);
@@ -741,7 +741,7 @@ public class Builder<T> {
         /**
          * Instantiates a new short list builder.
          *
-         * @param val the val
+         * @param val
          */
         ShortListBuilder(ShortList val) {
             super(val);
@@ -750,9 +750,9 @@ public class Builder<T> {
         /**
          * Sets the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the short list builder
+         * @param index
+         * @param e
+         * @return
          */
         public ShortListBuilder set(int index, short e) {
             val.set(index, e);
@@ -763,8 +763,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the short list builder
+         * @param e
+         * @return
          */
         public ShortListBuilder add(short e) {
             val.add(e);
@@ -775,9 +775,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the short list builder
+         * @param index
+         * @param e
+         * @return
          */
         public ShortListBuilder add(int index, short e) {
             val.add(index, e);
@@ -788,8 +788,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the short list builder
+         * @param c
+         * @return
          */
         public ShortListBuilder addAll(ShortList c) {
             val.addAll(c);
@@ -800,9 +800,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the short list builder
+         * @param index
+         * @param c
+         * @return
          */
         public ShortListBuilder addAll(int index, ShortList c) {
             val.addAll(index, c);
@@ -813,8 +813,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the short list builder
+         * @param e
+         * @return
          */
         public ShortListBuilder remove(short e) {
             val.remove(e);
@@ -831,8 +831,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the short list builder
+         * @param c
+         * @return
          */
         public ShortListBuilder removeAll(ShortList c) {
             val.removeAll(c);
@@ -849,7 +849,7 @@ public class Builder<T> {
         /**
          * Instantiates a new int list builder.
          *
-         * @param val the val
+         * @param val
          */
         IntListBuilder(IntList val) {
             super(val);
@@ -858,9 +858,9 @@ public class Builder<T> {
         /**
          * Sets the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the int list builder
+         * @param index
+         * @param e
+         * @return
          */
         public IntListBuilder set(int index, int e) {
             val.set(index, e);
@@ -871,8 +871,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the int list builder
+         * @param e
+         * @return
          */
         public IntListBuilder add(int e) {
             val.add(e);
@@ -883,9 +883,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the int list builder
+         * @param index
+         * @param e
+         * @return
          */
         public IntListBuilder add(int index, int e) {
             val.add(index, e);
@@ -896,8 +896,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the int list builder
+         * @param c
+         * @return
          */
         public IntListBuilder addAll(IntList c) {
             val.addAll(c);
@@ -908,9 +908,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the int list builder
+         * @param index
+         * @param c
+         * @return
          */
         public IntListBuilder addAll(int index, IntList c) {
             val.addAll(index, c);
@@ -921,8 +921,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the int list builder
+         * @param e
+         * @return
          */
         public IntListBuilder remove(int e) {
             val.remove(e);
@@ -939,8 +939,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the int list builder
+         * @param c
+         * @return
          */
         public IntListBuilder removeAll(IntList c) {
             val.removeAll(c);
@@ -957,7 +957,7 @@ public class Builder<T> {
         /**
          * Instantiates a new long list builder.
          *
-         * @param val the val
+         * @param val
          */
         LongListBuilder(LongList val) {
             super(val);
@@ -966,9 +966,9 @@ public class Builder<T> {
         /**
          * Sets the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the long list builder
+         * @param index
+         * @param e
+         * @return
          */
         public LongListBuilder set(int index, long e) {
             val.set(index, e);
@@ -979,8 +979,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the long list builder
+         * @param e
+         * @return
          */
         public LongListBuilder add(long e) {
             val.add(e);
@@ -991,9 +991,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the long list builder
+         * @param index
+         * @param e
+         * @return
          */
         public LongListBuilder add(int index, long e) {
             val.add(index, e);
@@ -1004,8 +1004,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the long list builder
+         * @param c
+         * @return
          */
         public LongListBuilder addAll(LongList c) {
             val.addAll(c);
@@ -1016,9 +1016,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the long list builder
+         * @param index
+         * @param c
+         * @return
          */
         public LongListBuilder addAll(int index, LongList c) {
             val.addAll(index, c);
@@ -1029,8 +1029,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the long list builder
+         * @param e
+         * @return
          */
         public LongListBuilder remove(long e) {
             val.remove(e);
@@ -1047,8 +1047,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the long list builder
+         * @param c
+         * @return
          */
         public LongListBuilder removeAll(LongList c) {
             val.removeAll(c);
@@ -1065,7 +1065,7 @@ public class Builder<T> {
         /**
          * Instantiates a new float list builder.
          *
-         * @param val the val
+         * @param val
          */
         FloatListBuilder(FloatList val) {
             super(val);
@@ -1074,9 +1074,9 @@ public class Builder<T> {
         /**
          * Sets the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the float list builder
+         * @param index
+         * @param e
+         * @return
          */
         public FloatListBuilder set(int index, float e) {
             val.set(index, e);
@@ -1087,8 +1087,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the float list builder
+         * @param e
+         * @return
          */
         public FloatListBuilder add(float e) {
             val.add(e);
@@ -1099,9 +1099,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the float list builder
+         * @param index
+         * @param e
+         * @return
          */
         public FloatListBuilder add(int index, float e) {
             val.add(index, e);
@@ -1112,8 +1112,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the float list builder
+         * @param c
+         * @return
          */
         public FloatListBuilder addAll(FloatList c) {
             val.addAll(c);
@@ -1124,9 +1124,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the float list builder
+         * @param index
+         * @param c
+         * @return
          */
         public FloatListBuilder addAll(int index, FloatList c) {
             val.addAll(index, c);
@@ -1137,8 +1137,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the float list builder
+         * @param e
+         * @return
          */
         public FloatListBuilder remove(float e) {
             val.remove(e);
@@ -1155,8 +1155,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the float list builder
+         * @param c
+         * @return
          */
         public FloatListBuilder removeAll(FloatList c) {
             val.removeAll(c);
@@ -1173,7 +1173,7 @@ public class Builder<T> {
         /**
          * Instantiates a new double list builder.
          *
-         * @param val the val
+         * @param val
          */
         DoubleListBuilder(DoubleList val) {
             super(val);
@@ -1182,9 +1182,9 @@ public class Builder<T> {
         /**
          * Sets the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the double list builder
+         * @param index
+         * @param e
+         * @return
          */
         public DoubleListBuilder set(int index, double e) {
             val.set(index, e);
@@ -1195,8 +1195,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the double list builder
+         * @param e
+         * @return
          */
         public DoubleListBuilder add(double e) {
             val.add(e);
@@ -1207,9 +1207,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the double list builder
+         * @param index
+         * @param e
+         * @return
          */
         public DoubleListBuilder add(int index, double e) {
             val.add(index, e);
@@ -1220,8 +1220,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the double list builder
+         * @param c
+         * @return
          */
         public DoubleListBuilder addAll(DoubleList c) {
             val.addAll(c);
@@ -1232,9 +1232,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the double list builder
+         * @param index
+         * @param c
+         * @return
          */
         public DoubleListBuilder addAll(int index, DoubleList c) {
             val.addAll(index, c);
@@ -1245,8 +1245,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the double list builder
+         * @param e
+         * @return
          */
         public DoubleListBuilder remove(double e) {
             val.remove(e);
@@ -1263,8 +1263,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the double list builder
+         * @param c
+         * @return
          */
         public DoubleListBuilder removeAll(DoubleList c) {
             val.removeAll(c);
@@ -1276,15 +1276,15 @@ public class Builder<T> {
     /**
      * The Class ListBuilder.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
+     * @param <T>
+     * @param <L>
      */
     public static final class ListBuilder<T, L extends List<T>> extends CollectionBuilder<T, L> {
 
         /**
          * Instantiates a new list builder.
          *
-         * @param c the c
+         * @param c
          */
         ListBuilder(L c) {
             super(c);
@@ -1293,9 +1293,9 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param index the index
-         * @param e the e
-         * @return the list builder
+         * @param index
+         * @param e
+         * @return
          */
         public ListBuilder<T, L> add(int index, T e) {
             val.add(index, e);
@@ -1306,9 +1306,9 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param index the index
-         * @param c the c
-         * @return the list builder
+         * @param index
+         * @param c
+         * @return
          */
         public ListBuilder<T, L> addAll(int index, Collection<? extends T> c) {
             N.checkIndex(index, val.size());
@@ -1323,8 +1323,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param index the index
-         * @return the list builder
+         * @param index
+         * @return
          */
         public ListBuilder<T, L> remove(int index) {
             val.remove(index);
@@ -1336,15 +1336,15 @@ public class Builder<T> {
     /**
      * The Class CollectionBuilder.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
+     * @param <T>
+     * @param <C>
      */
     public static class CollectionBuilder<T, C extends Collection<T>> extends Builder<C> {
 
         /**
          * Instantiates a new collection builder.
          *
-         * @param c the c
+         * @param c
          */
         CollectionBuilder(C c) {
             super(c);
@@ -1353,8 +1353,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the collection builder
+         * @param e
+         * @return
          */
         public CollectionBuilder<T, C> add(T e) {
             val.add(e);
@@ -1365,8 +1365,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the collection builder
+         * @param c
+         * @return
          */
         public CollectionBuilder<T, C> addAll(final Collection<? extends T> c) {
             if (N.notNullOrEmpty(c)) {
@@ -1379,8 +1379,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the collection builder
+         * @param e
+         * @return
          */
         public CollectionBuilder<T, C> remove(Object e) {
             val.remove(e);
@@ -1391,8 +1391,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the collection builder
+         * @param c
+         * @return
          */
         public CollectionBuilder<T, C> removeAll(Collection<?> c) {
             if (N.notNullOrEmpty(c)) {
@@ -1406,14 +1406,14 @@ public class Builder<T> {
     /**
      * The Class MultisetBuilder.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     public static final class MultisetBuilder<T> extends Builder<Multiset<T>> {
 
         /**
          * Instantiates a new multiset builder.
          *
-         * @param c the c
+         * @param c
          */
         MultisetBuilder(Multiset<T> c) {
             super(c);
@@ -1422,8 +1422,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the multiset builder
+         * @param e
+         * @return
          */
         public MultisetBuilder<T> add(T e) {
             val.add(e);
@@ -1434,8 +1434,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the multiset builder
+         * @param c
+         * @return
          */
         public MultisetBuilder<T> addAll(final Collection<? extends T> c) {
             val.addAll(c);
@@ -1446,8 +1446,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param m the m
-         * @return the multiset builder
+         * @param m
+         * @return
          */
         public MultisetBuilder<T> addAll(final Map<? extends T, Integer> m) {
             val.addAll(m);
@@ -1458,8 +1458,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param multiset the multiset
-         * @return the multiset builder
+         * @param multiset
+         * @return
          */
         public MultisetBuilder<T> addAll(final Multiset<? extends T> multiset) {
             val.addAll(multiset);
@@ -1470,8 +1470,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the multiset builder
+         * @param e
+         * @return
          */
         public MultisetBuilder<T> remove(Object e) {
             val.remove(e);
@@ -1482,8 +1482,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the multiset builder
+         * @param c
+         * @return
          */
         public MultisetBuilder<T> removeAll(Collection<?> c) {
             val.removeAll(c);
@@ -1494,8 +1494,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param m the m
-         * @return the multiset builder
+         * @param m
+         * @return
          */
         public MultisetBuilder<T> removeAll(final Map<? extends T, Integer> m) {
             val.removeAll(m);
@@ -1506,8 +1506,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param multiset the multiset
-         * @return the multiset builder
+         * @param multiset
+         * @return
          */
         public MultisetBuilder<T> removeAll(Multiset<? extends T> multiset) {
             val.removeAll(multiset);
@@ -1519,14 +1519,14 @@ public class Builder<T> {
     /**
      * The Class LongMultisetBuilder.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     public static final class LongMultisetBuilder<T> extends Builder<LongMultiset<T>> {
 
         /**
          * Instantiates a new long multiset builder.
          *
-         * @param c the c
+         * @param c
          */
         LongMultisetBuilder(LongMultiset<T> c) {
             super(c);
@@ -1535,8 +1535,8 @@ public class Builder<T> {
         /**
          * Adds the.
          *
-         * @param e the e
-         * @return the long multiset builder
+         * @param e
+         * @return
          */
         public LongMultisetBuilder<T> add(T e) {
             val.add(e);
@@ -1547,8 +1547,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param c the c
-         * @return the long multiset builder
+         * @param c
+         * @return
          */
         public LongMultisetBuilder<T> addAll(final Collection<? extends T> c) {
             val.addAll(c);
@@ -1559,8 +1559,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param m the m
-         * @return the long multiset builder
+         * @param m
+         * @return
          */
         public LongMultisetBuilder<T> addAll(final Map<? extends T, Long> m) {
             val.addAll(m);
@@ -1571,8 +1571,8 @@ public class Builder<T> {
         /**
          * Adds the all.
          *
-         * @param multiset the multiset
-         * @return the long multiset builder
+         * @param multiset
+         * @return
          */
         public LongMultisetBuilder<T> addAll(final LongMultiset<? extends T> multiset) {
             val.addAll(multiset);
@@ -1583,8 +1583,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param e the e
-         * @return the long multiset builder
+         * @param e
+         * @return
          */
         public LongMultisetBuilder<T> remove(Object e) {
             val.remove(e);
@@ -1595,8 +1595,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param c the c
-         * @return the long multiset builder
+         * @param c
+         * @return
          */
         public LongMultisetBuilder<T> removeAll(Collection<?> c) {
             val.removeAll(c);
@@ -1607,8 +1607,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param m the m
-         * @return the long multiset builder
+         * @param m
+         * @return
          */
         public LongMultisetBuilder<T> removeAll(final Map<? extends T, Long> m) {
             val.removeAll(m);
@@ -1619,8 +1619,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param multiset the multiset
-         * @return the long multiset builder
+         * @param multiset
+         * @return
          */
         public LongMultisetBuilder<T> removeAll(LongMultiset<? extends T> multiset) {
             val.removeAll(multiset);
@@ -1634,14 +1634,14 @@ public class Builder<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
+     * @param <M>
      */
     public static final class MapBuilder<K, V, M extends Map<K, V>> extends Builder<M> {
 
         /**
          * Instantiates a new map builder.
          *
-         * @param m the m
+         * @param m
          */
         MapBuilder(M m) {
             super(m);
@@ -1650,9 +1650,9 @@ public class Builder<T> {
         /**
          * Put.
          *
-         * @param k the k
-         * @param v the v
-         * @return the map builder
+         * @param k
+         * @param v
+         * @return
          */
         public MapBuilder<K, V, M> put(K k, V v) {
             val.put(k, v);
@@ -1663,8 +1663,8 @@ public class Builder<T> {
         /**
          * Put all.
          *
-         * @param m the m
-         * @return the map builder
+         * @param m
+         * @return
          */
         public MapBuilder<K, V, M> putAll(Map<? extends K, ? extends V> m) {
             if (N.notNullOrEmpty(m)) {
@@ -1677,9 +1677,9 @@ public class Builder<T> {
         /**
          * Put if absent.
          *
-         * @param key the key
-         * @param value the value
-         * @return the map builder
+         * @param key
+         * @param value
+         * @return
          */
         public MapBuilder<K, V, M> putIfAbsent(K key, V value) {
             V v = val.get(key);
@@ -1694,9 +1694,9 @@ public class Builder<T> {
         /**
          * Put if absent.
          *
-         * @param key the key
-         * @param supplier the supplier
-         * @return the map builder
+         * @param key
+         * @param supplier
+         * @return
          */
         public MapBuilder<K, V, M> putIfAbsent(K key, Supplier<V> supplier) {
             V v = val.get(key);
@@ -1711,8 +1711,8 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param k the k
-         * @return the map builder
+         * @param k
+         * @return
          */
         public MapBuilder<K, V, M> remove(Object k) {
             val.remove(k);
@@ -1723,8 +1723,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param keysToRemove the keys to remove
-         * @return the map builder
+         * @param keysToRemove
+         * @return
          */
         public MapBuilder<K, V, M> removeAll(Collection<?> keysToRemove) {
             if (N.notNullOrEmpty(keysToRemove)) {
@@ -1741,16 +1741,16 @@ public class Builder<T> {
      * The Class MultimapBuilder.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
+     * @param <M>
      */
     public static final class MultimapBuilder<K, E, V extends Collection<E>, M extends Multimap<K, E, V>> extends Builder<M> {
 
         /**
          * Instantiates a new multimap builder.
          *
-         * @param m the m
+         * @param m
          */
         MultimapBuilder(M m) {
             super(m);
@@ -1759,9 +1759,9 @@ public class Builder<T> {
         /**
          * Put.
          *
-         * @param key the key
-         * @param e the e
-         * @return the multimap builder
+         * @param key
+         * @param e
+         * @return
          */
         public MultimapBuilder<K, E, V, M> put(K key, E e) {
             val.put(key, e);
@@ -1772,9 +1772,9 @@ public class Builder<T> {
         /**
          * Put all.
          *
-         * @param k the k
-         * @param c the c
-         * @return the multimap builder
+         * @param k
+         * @param c
+         * @return
          */
         public MultimapBuilder<K, E, V, M> putAll(final K k, final Collection<? extends E> c) {
             val.putAll(k, c);
@@ -1785,8 +1785,8 @@ public class Builder<T> {
         /**
          * Put all.
          *
-         * @param m the m
-         * @return the multimap builder
+         * @param m
+         * @return
          */
         public MultimapBuilder<K, E, V, M> putAll(Map<? extends K, ? extends E> m) {
             val.putAll(m);
@@ -1797,8 +1797,8 @@ public class Builder<T> {
         /**
          * Put all.
          *
-         * @param m the m
-         * @return the multimap builder
+         * @param m
+         * @return
          */
         public MultimapBuilder<K, E, V, M> putAll(Multimap<? extends K, ? extends E, ? extends V> m) {
             val.putAll(m);
@@ -1809,9 +1809,9 @@ public class Builder<T> {
         /**
          * Removes the.
          *
-         * @param k the k
-         * @param e the e
-         * @return the multimap builder
+         * @param k
+         * @param e
+         * @return
          */
         public MultimapBuilder<K, E, V, M> remove(Object k, Object e) {
             val.remove(k, e);
@@ -1822,8 +1822,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param k the k
-         * @return the multimap builder
+         * @param k
+         * @return
          */
         public MultimapBuilder<K, E, V, M> removeAll(Object k) {
             val.removeAll(k);
@@ -1834,9 +1834,9 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param k the k
-         * @param valuesToRemove the values to remove
-         * @return the multimap builder
+         * @param k
+         * @param valuesToRemove
+         * @return
          */
         public MultimapBuilder<K, E, V, M> removeAll(Object k, Collection<?> valuesToRemove) {
             val.removeAll(k, valuesToRemove);
@@ -1847,8 +1847,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param m the m
-         * @return the multimap builder
+         * @param m
+         * @return
          */
         public MultimapBuilder<K, E, V, M> removeAll(Map<? extends K, ? extends E> m) {
             val.removeAll(m);
@@ -1859,8 +1859,8 @@ public class Builder<T> {
         /**
          * Removes the all.
          *
-         * @param m the m
-         * @return the multimap builder
+         * @param m
+         * @return
          */
         public MultimapBuilder<K, E, V, M> removeAll(Multimap<?, ?, ?> m) {
             val.removeAll(m);
@@ -1877,7 +1877,7 @@ public class Builder<T> {
         /**
          * Instantiates a new data set builder.
          *
-         * @param ds the ds
+         * @param ds
          */
         DataSetBuilder(DataSet ds) {
             super(ds);
@@ -1886,9 +1886,9 @@ public class Builder<T> {
         /**
          * Rename column.
          *
-         * @param columnName the column name
-         * @param newColumnName the new column name
-         * @return the data set builder
+         * @param columnName
+         * @param newColumnName
+         * @return
          */
         public DataSetBuilder renameColumn(String columnName, String newColumnName) {
             val.renameColumn(columnName, newColumnName);
@@ -1899,8 +1899,8 @@ public class Builder<T> {
         /**
          * Rename columns.
          *
-         * @param oldNewNames the old new names
-         * @return the data set builder
+         * @param oldNewNames
+         * @return
          */
         public DataSetBuilder renameColumns(Map<String, String> oldNewNames) {
             val.renameColumns(oldNewNames);
@@ -1911,10 +1911,10 @@ public class Builder<T> {
         /**
          * Rename column.
          *
-         * @param <E> the element type
-         * @param columnName the column name
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param columnName
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder renameColumn(String columnName, Try.Function<String, String, E> func) throws E {
@@ -1926,10 +1926,10 @@ public class Builder<T> {
         /**
          * Rename columns.
          *
-         * @param <E> the element type
-         * @param columnNames the column names
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param columnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder renameColumns(Collection<String> columnNames, Try.Function<String, String, E> func) throws E {
@@ -1941,9 +1941,9 @@ public class Builder<T> {
         /**
          * Rename columns.
          *
-         * @param <E> the element type
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder renameColumns(Try.Function<String, String, E> func) throws E {
@@ -1955,9 +1955,9 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param columnName the column name
-         * @param column the column
-         * @return the data set builder
+         * @param columnName
+         * @param column
+         * @return
          */
         public DataSetBuilder addColumn(String columnName, List<?> column) {
             val.addColumn(columnName, column);
@@ -1968,10 +1968,10 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param columnIndex the column index
-         * @param columnName the column name
-         * @param column the column
-         * @return the data set builder
+         * @param columnIndex
+         * @param columnName
+         * @param column
+         * @return
          */
         public DataSetBuilder addColumn(int columnIndex, String columnName, List<?> column) {
             val.addColumn(columnIndex, columnName, column);
@@ -1982,12 +1982,12 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param newColumnName the new column name
-         * @param fromColumnName the from column name
-         * @param func the func
-         * @return the data set builder
+         * @param <T>
+         * @param <E>
+         * @param newColumnName
+         * @param fromColumnName
+         * @param func
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> DataSetBuilder addColumn(String newColumnName, String fromColumnName, Try.Function<T, ?, E> func) throws E {
@@ -1999,13 +1999,13 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param columnIndex the column index
-         * @param newColumnName the new column name
-         * @param fromColumnName the from column name
-         * @param func the func
-         * @return the data set builder
+         * @param <T>
+         * @param <E>
+         * @param columnIndex
+         * @param newColumnName
+         * @param fromColumnName
+         * @param func
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, String fromColumnName, Try.Function<T, ?, E> func)
@@ -2018,11 +2018,11 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E> the element type
-         * @param newColumnName the new column name
-         * @param fromColumnNames the from column names
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder addColumn(String newColumnName, Collection<String> fromColumnNames,
@@ -2035,12 +2035,12 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E> the element type
-         * @param columnIndex the column index
-         * @param newColumnName the new column name
-         * @param fromColumnNames the from column names
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param columnIndex
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, Collection<String> fromColumnNames,
@@ -2053,11 +2053,11 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E> the element type
-         * @param newColumnName the new column name
-         * @param fromColumnNames the from column names
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, Try.BiFunction<?, ?, ?, E> func)
@@ -2070,12 +2070,12 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E> the element type
-         * @param columnIndex the column index
-         * @param newColumnName the new column name
-         * @param fromColumnNames the from column names
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param columnIndex
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple2<String, String> fromColumnNames,
@@ -2088,11 +2088,11 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E> the element type
-         * @param newColumnName the new column name
-         * @param fromColumnNames the from column names
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames,
@@ -2105,12 +2105,12 @@ public class Builder<T> {
         /**
          * Adds the column.
          *
-         * @param <E> the element type
-         * @param columnIndex the column index
-         * @param newColumnName the new column name
-         * @param fromColumnNames the from column names
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param columnIndex
+         * @param newColumnName
+         * @param fromColumnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple3<String, String, String> fromColumnNames,
@@ -2123,8 +2123,8 @@ public class Builder<T> {
         /**
          * Removes the column.
          *
-         * @param columnName the column name
-         * @return the data set builder
+         * @param columnName
+         * @return
          */
         public DataSetBuilder removeColumn(String columnName) {
             val.removeColumn(columnName);
@@ -2135,8 +2135,8 @@ public class Builder<T> {
         /**
          * Removes the columns.
          *
-         * @param columnNames the column names
-         * @return the data set builder
+         * @param columnNames
+         * @return
          */
         public DataSetBuilder removeColumns(Collection<String> columnNames) {
             val.removeColumns(columnNames);
@@ -2147,9 +2147,9 @@ public class Builder<T> {
         /**
          * Removes the columns.
          *
-         * @param <E> the element type
-         * @param filter the filter
-         * @return the data set builder
+         * @param <E>
+         * @param filter
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder removeColumns(Predicate<String, E> filter) throws E {
@@ -2161,9 +2161,9 @@ public class Builder<T> {
         /**
          * Removes the columns if.
          *
-         * @param <E> the element type
-         * @param filter the filter
-         * @return the data set builder
+         * @param <E>
+         * @param filter
+         * @return
          * @throws E the e
          * @deprecated replaced by {@code removeColumns}.
          */
@@ -2177,11 +2177,11 @@ public class Builder<T> {
         /**
          * Update column.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param columnName the column name
-         * @param func the func
-         * @return the data set builder
+         * @param <T>
+         * @param <E>
+         * @param columnName
+         * @param func
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> DataSetBuilder updateColumn(String columnName, Try.Function<T, ?, E> func) throws E {
@@ -2193,11 +2193,11 @@ public class Builder<T> {
         /**
          * Update columns.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param columnNames the column names
-         * @param func the func
-         * @return the data set builder
+         * @param <T>
+         * @param <E>
+         * @param columnNames
+         * @param func
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> DataSetBuilder updateColumns(Collection<String> columnNames, Try.Function<?, ?, E> func) throws E {
@@ -2209,9 +2209,9 @@ public class Builder<T> {
         /**
          * Convert column.
          *
-         * @param columnName the column name
-         * @param targetType the target type
-         * @return the data set builder
+         * @param columnName
+         * @param targetType
+         * @return
          */
         public DataSetBuilder convertColumn(String columnName, Class<?> targetType) {
             val.convertColumn(columnName, targetType);
@@ -2222,8 +2222,8 @@ public class Builder<T> {
         /**
          * Convert columns.
          *
-         * @param columnTargetTypes the column target types
-         * @return the data set builder
+         * @param columnTargetTypes
+         * @return
          */
         public DataSetBuilder convertColumns(Map<String, Class<?>> columnTargetTypes) {
             val.convertColumns(columnTargetTypes);
@@ -2234,10 +2234,10 @@ public class Builder<T> {
         /**
          * Combine columns.
          *
-         * @param columnNames the column names
-         * @param newColumnName the new column name
-         * @param newColumnClass the new column class
-         * @return the data set builder
+         * @param columnNames
+         * @param newColumnName
+         * @param newColumnClass
+         * @return
          */
         public DataSetBuilder combineColumns(Collection<String> columnNames, String newColumnName, Class<?> newColumnClass) {
             val.combineColumns(columnNames, newColumnName, newColumnClass);
@@ -2248,11 +2248,11 @@ public class Builder<T> {
         /**
          * Combine columns.
          *
-         * @param <E> the element type
-         * @param columnNames the column names
-         * @param newColumnName the new column name
-         * @param combineFunc the combine func
-         * @return the data set builder
+         * @param <E>
+         * @param columnNames
+         * @param newColumnName
+         * @param combineFunc
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder combineColumns(Collection<String> columnNames, String newColumnName,
@@ -2265,11 +2265,11 @@ public class Builder<T> {
         /**
          * Combine columns.
          *
-         * @param <E> the element type
-         * @param columnNames the column names
-         * @param newColumnName the new column name
-         * @param combineFunc the combine func
-         * @return the data set builder
+         * @param <E>
+         * @param columnNames
+         * @param newColumnName
+         * @param combineFunc
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder combineColumns(Tuple2<String, String> columnNames, String newColumnName,
@@ -2282,11 +2282,11 @@ public class Builder<T> {
         /**
          * Combine columns.
          *
-         * @param <E> the element type
-         * @param columnNames the column names
-         * @param newColumnName the new column name
-         * @param combineFunc the combine func
-         * @return the data set builder
+         * @param <E>
+         * @param columnNames
+         * @param newColumnName
+         * @param combineFunc
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder combineColumns(Tuple3<String, String, String> columnNames, String newColumnName,
@@ -2299,11 +2299,11 @@ public class Builder<T> {
         /**
          * Combine columns.
          *
-         * @param <E> the element type
-         * @param columnNameFilter the column name filter
-         * @param newColumnName the new column name
-         * @param newColumnClass the new column class
-         * @return the data set builder
+         * @param <E>
+         * @param columnNameFilter
+         * @param newColumnName
+         * @param newColumnClass
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder combineColumns(Try.Predicate<String, E> columnNameFilter, String newColumnName, Class<?> newColumnClass)
@@ -2316,12 +2316,12 @@ public class Builder<T> {
         /**
          * Combine columns.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param columnNameFilter the column name filter
-         * @param newColumnName the new column name
-         * @param combineFunc the combine func
-         * @return the data set builder
+         * @param <E>
+         * @param <E2>
+         * @param columnNameFilter
+         * @param newColumnName
+         * @param combineFunc
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -2335,12 +2335,12 @@ public class Builder<T> {
         /**
          * Divide column.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param columnName the column name
-         * @param newColumnNames the new column names
-         * @param divideFunc the divide func
-         * @return the data set builder
+         * @param <T>
+         * @param <E>
+         * @param columnName
+         * @param newColumnNames
+         * @param divideFunc
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames,
@@ -2353,12 +2353,12 @@ public class Builder<T> {
         /**
          * Divide column.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param columnName the column name
-         * @param newColumnNames the new column names
-         * @param output the output
-         * @return the data set builder
+         * @param <T>
+         * @param <E>
+         * @param columnName
+         * @param newColumnNames
+         * @param output
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames, Try.BiConsumer<T, Object[], E> output)
@@ -2371,12 +2371,12 @@ public class Builder<T> {
         /**
          * Divide column.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param columnName the column name
-         * @param newColumnNames the new column names
-         * @param output the output
-         * @return the data set builder
+         * @param <T>
+         * @param <E>
+         * @param columnName
+         * @param newColumnNames
+         * @param output
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Tuple2<String, String> newColumnNames,
@@ -2389,12 +2389,12 @@ public class Builder<T> {
         /**
          * Divide column.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param columnName the column name
-         * @param newColumnNames the new column names
-         * @param output the output
-         * @return the data set builder
+         * @param <T>
+         * @param <E>
+         * @param columnName
+         * @param newColumnNames
+         * @param output
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Tuple3<String, String, String> newColumnNames,
@@ -2407,9 +2407,9 @@ public class Builder<T> {
         /**
          * Update all.
          *
-         * @param <E> the element type
-         * @param func the func
-         * @return the data set builder
+         * @param <E>
+         * @param func
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder updateAll(Try.Function<?, ?, E> func) throws E {
@@ -2421,10 +2421,10 @@ public class Builder<T> {
         /**
          * Replace if.
          *
-         * @param <E> the element type
-         * @param func the func
-         * @param newValue the new value
-         * @return the data set builder
+         * @param <E>
+         * @param func
+         * @param newValue
+         * @return
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder replaceIf(Try.Predicate<?, E> func, Object newValue) throws E {
@@ -2436,8 +2436,8 @@ public class Builder<T> {
         /**
          * Sort by.
          *
-         * @param columnName the column name
-         * @return the data set builder
+         * @param columnName
+         * @return
          */
         public DataSetBuilder sortBy(String columnName) {
             val.sortBy(columnName);
@@ -2448,10 +2448,10 @@ public class Builder<T> {
         /**
          * Sort by.
          *
-         * @param <T> the generic type
-         * @param columnName the column name
-         * @param cmp the cmp
-         * @return the data set builder
+         * @param <T>
+         * @param columnName
+         * @param cmp
+         * @return
          */
         public <T> DataSetBuilder sortBy(String columnName, Comparator<T> cmp) {
             val.sortBy(columnName, cmp);
@@ -2462,8 +2462,8 @@ public class Builder<T> {
         /**
          * Sort by.
          *
-         * @param columnNames the column names
-         * @return the data set builder
+         * @param columnNames
+         * @return
          */
         public DataSetBuilder sortBy(Collection<String> columnNames) {
             val.sortBy(columnNames);
@@ -2474,9 +2474,9 @@ public class Builder<T> {
         /**
          * Sort by.
          *
-         * @param columnNames the column names
-         * @param cmp the cmp
-         * @return the data set builder
+         * @param columnNames
+         * @param cmp
+         * @return
          */
         public DataSetBuilder sortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp) {
             val.sortBy(columnNames, cmp);
@@ -2487,9 +2487,9 @@ public class Builder<T> {
         /**
          * Sort by.
          *
-         * @param columnNames the column names
-         * @param keyMapper the key mapper
-         * @return the data set builder
+         * @param columnNames
+         * @param keyMapper
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public DataSetBuilder sortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
@@ -2501,8 +2501,8 @@ public class Builder<T> {
         /**
          * Parallel sort by.
          *
-         * @param columnName the column name
-         * @return the data set builder
+         * @param columnName
+         * @return
          */
         public DataSetBuilder parallelSortBy(String columnName) {
             val.parallelSortBy(columnName);
@@ -2513,10 +2513,10 @@ public class Builder<T> {
         /**
          * Parallel sort by.
          *
-         * @param <T> the generic type
-         * @param columnName the column name
-         * @param cmp the cmp
-         * @return the data set builder
+         * @param <T>
+         * @param columnName
+         * @param cmp
+         * @return
          */
         public <T> DataSetBuilder parallelSortBy(String columnName, Comparator<T> cmp) {
             val.parallelSortBy(columnName, cmp);
@@ -2527,8 +2527,8 @@ public class Builder<T> {
         /**
          * Parallel sort by.
          *
-         * @param columnNames the column names
-         * @return the data set builder
+         * @param columnNames
+         * @return
          */
         public DataSetBuilder parallelSortBy(Collection<String> columnNames) {
             val.parallelSortBy(columnNames);
@@ -2539,9 +2539,9 @@ public class Builder<T> {
         /**
          * Parallel sort by.
          *
-         * @param columnNames the column names
-         * @param cmp the cmp
-         * @return the data set builder
+         * @param columnNames
+         * @param cmp
+         * @return
          */
         public DataSetBuilder parallelSortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp) {
             val.parallelSortBy(columnNames, cmp);
@@ -2552,9 +2552,9 @@ public class Builder<T> {
         /**
          * Parallel sort by.
          *
-         * @param columnNames the column names
-         * @param keyMapper the key mapper
-         * @return the data set builder
+         * @param columnNames
+         * @param keyMapper
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public DataSetBuilder parallelSortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
@@ -2567,14 +2567,14 @@ public class Builder<T> {
     /**
      * The Class X.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     public static final class X<T> extends Builder<T> {
 
         /**
          * Instantiates a new x.
          *
-         * @param val the val
+         * @param val
          */
         private X(T val) {
             super(val);

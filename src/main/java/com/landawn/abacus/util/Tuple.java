@@ -85,7 +85,7 @@ public abstract class Tuple {
     /**
      * Arity.
      *
-     * @return the int
+     * @return
      */
     public abstract int arity();
 
@@ -106,24 +106,24 @@ public abstract class Tuple {
     /**
      * To array.
      *
-     * @return the object[]
+     * @return
      */
     public abstract Object[] toArray();
 
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param a the a
-     * @return the a[]
+     * @param <A>
+     * @param a
+     * @return
      */
     public abstract <A> A[] toArray(A[] a);
 
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param consumer the consumer
+     * @param <E>
+     * @param consumer
      * @throws E the e
      */
     public abstract <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E;
@@ -131,16 +131,16 @@ public abstract class Tuple {
     /**
      * Stream.
      *
-     * @return the stream<? extends tuple>
+     * @return
      */
     protected abstract Stream<? extends Tuple> stream();
 
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param _1 the  1
-     * @return the tuple 1
+     * @param <T1>
+     * @param _1 the 1
+     * @return
      */
     public static <T1> Tuple1<T1> of(T1 _1) {
         return new Tuple1<>(_1);
@@ -149,11 +149,11 @@ public abstract class Tuple {
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param _1 the  1
-     * @param _2 the  2
-     * @return the tuple 2
+     * @param <T1>
+     * @param <T2>
+     * @param _1 the 1
+     * @param _2 the 2
+     * @return
      */
     public static <T1, T2> Tuple2<T1, T2> of(T1 _1, T2 _2) {
         return new Tuple2<>(_1, _2);
@@ -162,13 +162,13 @@ public abstract class Tuple {
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @return the tuple 3
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @return
      */
     public static <T1, T2, T3> Tuple3<T1, T2, T3> of(T1 _1, T2 _2, T3 _3) {
         return new Tuple3<>(_1, _2, _3);
@@ -177,15 +177,15 @@ public abstract class Tuple {
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @param _4 the  4
-     * @return the tuple 4
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @param _4 the 4
+     * @return
      */
     public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> of(T1 _1, T2 _2, T3 _3, T4 _4) {
         return new Tuple4<>(_1, _2, _3, _4);
@@ -194,17 +194,17 @@ public abstract class Tuple {
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @param _4 the  4
-     * @param _5 the  5
-     * @return the tuple 5
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @param _4 the 4
+     * @param _5 the 5
+     * @return
      */
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5) {
         return new Tuple5<>(_1, _2, _3, _4, _5);
@@ -213,19 +213,19 @@ public abstract class Tuple {
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @param _4 the  4
-     * @param _5 the  5
-     * @param _6 the  6
-     * @return the tuple 6
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @param _4 the 4
+     * @param _5 the 5
+     * @param _6 the 6
+     * @return
      */
     public static <T1, T2, T3, T4, T5, T6> Tuple6<T1, T2, T3, T4, T5, T6> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6) {
         return new Tuple6<>(_1, _2, _3, _4, _5, _6);
@@ -234,21 +234,21 @@ public abstract class Tuple {
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param <T7> the generic type
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @param _4 the  4
-     * @param _5 the  5
-     * @param _6 the  6
-     * @param _7 the  7
-     * @return the tuple 7
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @param _4 the 4
+     * @param _5 the 5
+     * @param _6 the 6
+     * @param _7 the 7
+     * @return
      */
     public static <T1, T2, T3, T4, T5, T6, T7> Tuple7<T1, T2, T3, T4, T5, T6, T7> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7) {
         return new Tuple7<>(_1, _2, _3, _4, _5, _6, _7);
@@ -257,23 +257,23 @@ public abstract class Tuple {
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param <T7> the generic type
-     * @param <T8> the generic type
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @param _4 the  4
-     * @param _5 the  5
-     * @param _6 the  6
-     * @param _7 the  7
-     * @param _8 the  8
-     * @return the tuple 8
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
+     * @param <T8>
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @param _4 the 4
+     * @param _5 the 5
+     * @param _6 the 6
+     * @param _7 the 7
+     * @param _8 the 8
+     * @return
      */
     public static <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7, T8 _8) {
         return new Tuple8<>(_1, _2, _3, _4, _5, _6, _7, _8);
@@ -282,25 +282,25 @@ public abstract class Tuple {
     /**
      * Of.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param <T7> the generic type
-     * @param <T8> the generic type
-     * @param <T9> the generic type
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @param _4 the  4
-     * @param _5 the  5
-     * @param _6 the  6
-     * @param _7 the  7
-     * @param _8 the  8
-     * @param _9 the  9
-     * @return the tuple 9
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
+     * @param <T8>
+     * @param <T9>
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @param _4 the 4
+     * @param _5 the 5
+     * @param _6 the 6
+     * @param _7 the 7
+     * @param _8 the 8
+     * @param _9 the 9
+     * @return
      */
     public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7, T8 _8,
             T9 _9) {
@@ -312,8 +312,8 @@ public abstract class Tuple {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param entry the entry
-     * @return the tuple 2
+     * @param entry
+     * @return
      */
     public static <K, V> Tuple2<K, V> from(final Map.Entry<K, V> entry) {
         return new Tuple2<>(entry.getKey(), entry.getValue());
@@ -322,9 +322,9 @@ public abstract class Tuple {
     /**
      * From.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the t
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Tuple> T from(final Object[] a) {
         final int len = a == null ? 0 : a.length;
@@ -382,9 +382,9 @@ public abstract class Tuple {
     /**
      * From.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the t
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Tuple> T from(final Collection<?> c) {
         final int len = c == null ? 0 : c.size();
@@ -443,7 +443,7 @@ public abstract class Tuple {
     /**
      * The Class Tuple1.
      *
-     * @param <T1> the generic type
+     * @param <T1>
      */
     public final static class Tuple1<T1> extends Tuple {
 
@@ -461,7 +461,7 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 1.
          *
-         * @param _1 the  1
+         * @param _1 the 1
          */
         Tuple1(T1 _1) {
             this._1 = _1;
@@ -470,7 +470,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -500,7 +500,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -510,9 +510,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -528,8 +528,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -542,8 +542,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple1<T1>, E> action) throws E {
@@ -553,10 +553,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple1<T1>, U, E> mapper) throws E {
@@ -566,9 +566,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple1<T1>> filter(final Try.Predicate<? super Tuple1<T1>, E> predicate) throws E {
@@ -578,7 +578,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple1<T1>> stream() {
@@ -592,7 +592,7 @@ public abstract class Tuple {
          * </code>
          * </pre>.
          *
-         * @return the optional
+         * @return
          * @see Optional#ofNullable(Object)
          */
         public Optional<T1> toOptional() {
@@ -602,7 +602,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -615,7 +615,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -636,7 +636,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -647,8 +647,8 @@ public abstract class Tuple {
     /**
      * The Class Tuple2.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
+     * @param <T1>
+     * @param <T2>
      */
     public final static class Tuple2<T1, T2> extends Tuple {
 
@@ -669,8 +669,8 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 2.
          *
-         * @param _1 the  1
-         * @param _2 the  2
+         * @param _1 the 1
+         * @param _2 the 2
          */
         Tuple2(T1 _1, T2 _2) {
             this._1 = _1;
@@ -680,7 +680,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -710,7 +710,7 @@ public abstract class Tuple {
         /**
          * Reversed.
          *
-         * @return the tuple 2
+         * @return
          */
         public Tuple2<T2, T1> reversed() {
             return of(_2, _1);
@@ -719,7 +719,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -729,9 +729,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -748,8 +748,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -763,8 +763,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple2<T1, T2>, E> action) throws E {
@@ -774,8 +774,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.BiConsumer<? super T1, ? super T2, E> action) throws E {
@@ -785,10 +785,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple2<T1, T2>, U, E> mapper) throws E {
@@ -798,10 +798,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.BiFunction<? super T1, ? super T2, U, E> mapper) throws E {
@@ -811,9 +811,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Try.Predicate<? super Tuple2<T1, T2>, E> predicate) throws E {
@@ -823,9 +823,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Try.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
@@ -835,7 +835,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple2<T1, T2>> stream() {
@@ -845,7 +845,7 @@ public abstract class Tuple {
         /**
          * To pair.
          *
-         * @return the pair
+         * @return
          */
         public Pair<T1, T2> toPair() {
             return Pair.of(_1, _2);
@@ -854,7 +854,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -868,7 +868,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -889,7 +889,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -900,9 +900,9 @@ public abstract class Tuple {
     /**
      * The Class Tuple3.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
      */
     public final static class Tuple3<T1, T2, T3> extends Tuple {
 
@@ -926,9 +926,9 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 3.
          *
-         * @param _1 the  1
-         * @param _2 the  2
-         * @param _3 the  3
+         * @param _1 the 1
+         * @param _2 the 2
+         * @param _3 the 3
          */
         Tuple3(T1 _1, T2 _2, T3 _3) {
             this._1 = _1;
@@ -939,7 +939,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -969,7 +969,7 @@ public abstract class Tuple {
         /**
          * Reversed.
          *
-         * @return the tuple 3
+         * @return
          */
         public Tuple3<T3, T2, T1> reversed() {
             return new Tuple3<>(_3, _2, _1);
@@ -978,7 +978,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -988,9 +988,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1008,8 +1008,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -1024,8 +1024,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple3<T1, T2, T3>, E> action) throws E {
@@ -1035,8 +1035,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.TriConsumer<? super T1, ? super T2, ? super T3, E> action) throws E {
@@ -1046,10 +1046,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple3<T1, T2, T3>, U, E> mapper) throws E {
@@ -1059,10 +1059,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.TriFunction<? super T1, ? super T2, ? super T3, U, E> mapper) throws E {
@@ -1072,9 +1072,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Try.Predicate<? super Tuple3<T1, T2, T3>, E> predicate) throws E {
@@ -1084,9 +1084,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Try.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate) throws E {
@@ -1096,7 +1096,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple3<T1, T2, T3>> stream() {
@@ -1106,7 +1106,7 @@ public abstract class Tuple {
         /**
          * To triple.
          *
-         * @return the triple
+         * @return
          */
         public Triple<T1, T2, T3> toTriple() {
             return Triple.of(_1, _2, _3);
@@ -1115,7 +1115,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -1130,7 +1130,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -1151,7 +1151,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1162,10 +1162,10 @@ public abstract class Tuple {
     /**
      * The Class Tuple4.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
      */
     public final static class Tuple4<T1, T2, T3, T4> extends Tuple {
 
@@ -1192,10 +1192,10 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 4.
          *
-         * @param _1 the  1
-         * @param _2 the  2
-         * @param _3 the  3
-         * @param _4 the  4
+         * @param _1 the 1
+         * @param _2 the 2
+         * @param _3 the 3
+         * @param _4 the 4
          */
         Tuple4(T1 _1, T2 _2, T3 _3, T4 _4) {
             this._1 = _1;
@@ -1207,7 +1207,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -1237,7 +1237,7 @@ public abstract class Tuple {
         /**
          * Reversed.
          *
-         * @return the tuple 4
+         * @return
          */
         public Tuple4<T4, T3, T2, T1> reversed() {
             return new Tuple4<>(_4, _3, _2, _1);
@@ -1246,7 +1246,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -1256,9 +1256,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1277,8 +1277,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -1294,8 +1294,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple4<T1, T2, T3, T4>, E> action) throws E {
@@ -1305,10 +1305,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple4<T1, T2, T3, T4>, U, E> mapper) throws E {
@@ -1318,9 +1318,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple4<T1, T2, T3, T4>> filter(final Try.Predicate<? super Tuple4<T1, T2, T3, T4>, E> predicate) throws E {
@@ -1330,7 +1330,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple4<T1, T2, T3, T4>> stream() {
@@ -1340,7 +1340,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -1356,7 +1356,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -1377,7 +1377,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1388,11 +1388,11 @@ public abstract class Tuple {
     /**
      * The Class Tuple5.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
      */
     public final static class Tuple5<T1, T2, T3, T4, T5> extends Tuple {
 
@@ -1422,11 +1422,11 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 5.
          *
-         * @param _1 the  1
-         * @param _2 the  2
-         * @param _3 the  3
-         * @param _4 the  4
-         * @param _5 the  5
+         * @param _1 the 1
+         * @param _2 the 2
+         * @param _3 the 3
+         * @param _4 the 4
+         * @param _5 the 5
          */
         Tuple5(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5) {
             this._1 = _1;
@@ -1439,7 +1439,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -1469,7 +1469,7 @@ public abstract class Tuple {
         /**
          * Reversed.
          *
-         * @return the tuple 5
+         * @return
          */
         public Tuple5<T5, T4, T3, T2, T1> reversed() {
             return new Tuple5<>(_5, _4, _3, _2, _1);
@@ -1478,7 +1478,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -1488,9 +1488,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1510,8 +1510,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -1528,8 +1528,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple5<T1, T2, T3, T4, T5>, E> action) throws E {
@@ -1539,10 +1539,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple5<T1, T2, T3, T4, T5>, U, E> mapper) throws E {
@@ -1552,9 +1552,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple5<T1, T2, T3, T4, T5>> filter(final Try.Predicate<? super Tuple5<T1, T2, T3, T4, T5>, E> predicate)
@@ -1565,7 +1565,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple5<T1, T2, T3, T4, T5>> stream() {
@@ -1575,7 +1575,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -1592,7 +1592,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -1614,7 +1614,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1625,12 +1625,12 @@ public abstract class Tuple {
     /**
      * The Class Tuple6.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
      */
     public static final class Tuple6<T1, T2, T3, T4, T5, T6> extends Tuple {
 
@@ -1663,12 +1663,12 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 6.
          *
-         * @param _1 the  1
-         * @param _2 the  2
-         * @param _3 the  3
-         * @param _4 the  4
-         * @param _5 the  5
-         * @param _6 the  6
+         * @param _1 the 1
+         * @param _2 the 2
+         * @param _3 the 3
+         * @param _4 the 4
+         * @param _5 the 5
+         * @param _6 the 6
          */
         Tuple6(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6) {
             this._1 = _1;
@@ -1682,7 +1682,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -1712,7 +1712,7 @@ public abstract class Tuple {
         /**
          * Reversed.
          *
-         * @return the tuple 6
+         * @return
          */
         public Tuple6<T6, T5, T4, T3, T2, T1> reversed() {
             return new Tuple6<>(_6, _5, _4, _3, _2, _1);
@@ -1721,7 +1721,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -1731,9 +1731,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -1754,8 +1754,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -1773,8 +1773,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> action) throws E {
@@ -1784,10 +1784,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple6<T1, T2, T3, T4, T5, T6>, U, E> mapper) throws E {
@@ -1797,9 +1797,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple6<T1, T2, T3, T4, T5, T6>> filter(final Try.Predicate<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> predicate)
@@ -1810,7 +1810,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple6<T1, T2, T3, T4, T5, T6>> stream() {
@@ -1820,7 +1820,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -1838,7 +1838,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -1860,7 +1860,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1872,13 +1872,13 @@ public abstract class Tuple {
     /**
      * The Class Tuple7.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param <T7> the generic type
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
      */
     public static final class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple {
 
@@ -1914,13 +1914,13 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 7.
          *
-         * @param _1 the  1
-         * @param _2 the  2
-         * @param _3 the  3
-         * @param _4 the  4
-         * @param _5 the  5
-         * @param _6 the  6
-         * @param _7 the  7
+         * @param _1 the 1
+         * @param _2 the 2
+         * @param _3 the 3
+         * @param _4 the 4
+         * @param _5 the 5
+         * @param _6 the 6
+         * @param _7 the 7
          */
         Tuple7(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7) {
             this._1 = _1;
@@ -1935,7 +1935,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -1965,7 +1965,7 @@ public abstract class Tuple {
         /**
          * Reversed.
          *
-         * @return the tuple 7
+         * @return
          */
         public Tuple7<T7, T6, T5, T4, T3, T2, T1> reversed() {
             return new Tuple7<>(_7, _6, _5, _4, _3, _2, _1);
@@ -1974,7 +1974,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -1984,9 +1984,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -2008,8 +2008,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -2028,8 +2028,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, E> action) throws E {
@@ -2039,10 +2039,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, U, E> mapper) throws E {
@@ -2052,9 +2052,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple7<T1, T2, T3, T4, T5, T6, T7>> filter(
@@ -2065,7 +2065,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple7<T1, T2, T3, T4, T5, T6, T7>> stream() {
@@ -2075,7 +2075,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -2094,7 +2094,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -2116,7 +2116,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -2128,14 +2128,14 @@ public abstract class Tuple {
     /**
      * The Class Tuple8.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param <T7> the generic type
-     * @param <T8> the generic type
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
+     * @param <T8>
      */
     public static final class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple {
 
@@ -2174,14 +2174,14 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 8.
          *
-         * @param _1 the  1
-         * @param _2 the  2
-         * @param _3 the  3
-         * @param _4 the  4
-         * @param _5 the  5
-         * @param _6 the  6
-         * @param _7 the  7
-         * @param _8 the  8
+         * @param _1 the 1
+         * @param _2 the 2
+         * @param _3 the 3
+         * @param _4 the 4
+         * @param _5 the 5
+         * @param _6 the 6
+         * @param _7 the 7
+         * @param _8 the 8
          */
         Tuple8(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7, T8 _8) {
             this._1 = _1;
@@ -2197,7 +2197,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -2227,7 +2227,7 @@ public abstract class Tuple {
         /**
          * Reversed.
          *
-         * @return the tuple 8
+         * @return
          */
         public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
             return new Tuple8<>(_8, _7, _6, _5, _4, _3, _2, _1);
@@ -2236,7 +2236,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -2246,9 +2246,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -2271,8 +2271,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -2292,8 +2292,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, E> action) throws E {
@@ -2303,10 +2303,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, U, E> mapper) throws E {
@@ -2316,9 +2316,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> filter(
@@ -2329,7 +2329,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> stream() {
@@ -2339,7 +2339,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -2359,7 +2359,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -2381,7 +2381,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -2393,15 +2393,15 @@ public abstract class Tuple {
     /**
      * The Class Tuple9.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param <T7> the generic type
-     * @param <T8> the generic type
-     * @param <T9> the generic type
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
+     * @param <T8>
+     * @param <T9>
      */
     public static final class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple {
 
@@ -2443,15 +2443,15 @@ public abstract class Tuple {
         /**
          * Instantiates a new tuple 9.
          *
-         * @param _1 the  1
-         * @param _2 the  2
-         * @param _3 the  3
-         * @param _4 the  4
-         * @param _5 the  5
-         * @param _6 the  6
-         * @param _7 the  7
-         * @param _8 the  8
-         * @param _9 the  9
+         * @param _1 the 1
+         * @param _2 the 2
+         * @param _3 the 3
+         * @param _4 the 4
+         * @param _5 the 5
+         * @param _6 the 6
+         * @param _7 the 7
+         * @param _8 the 8
+         * @param _9 the 9
          */
         Tuple9(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7, T8 _8, T9 _9) {
             this._1 = _1;
@@ -2468,7 +2468,7 @@ public abstract class Tuple {
         /**
          * Arity.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int arity() {
@@ -2498,7 +2498,7 @@ public abstract class Tuple {
         /**
          * Reversed.
          *
-         * @return the tuple 9
+         * @return
          */
         public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
             return new Tuple9<>(_9, _8, _7, _6, _5, _4, _3, _2, _1);
@@ -2507,7 +2507,7 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -2517,9 +2517,9 @@ public abstract class Tuple {
         /**
          * To array.
          *
-         * @param <A> the generic type
-         * @param a the a
-         * @return the a[]
+         * @param <A>
+         * @param a
+         * @return
          */
         @Override
         public <A> A[] toArray(A[] a) {
@@ -2543,8 +2543,8 @@ public abstract class Tuple {
         /**
          * For each.
          *
-         * @param <E> the element type
-         * @param consumer the consumer
+         * @param <E>
+         * @param consumer
          * @throws E the e
          */
         @Override
@@ -2565,8 +2565,8 @@ public abstract class Tuple {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, E> action) throws E {
@@ -2576,10 +2576,10 @@ public abstract class Tuple {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, U, E> mapper) throws E {
@@ -2589,9 +2589,9 @@ public abstract class Tuple {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> filter(
@@ -2602,7 +2602,7 @@ public abstract class Tuple {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         @Override
         public Stream<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> stream() {
@@ -2612,7 +2612,7 @@ public abstract class Tuple {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -2633,7 +2633,7 @@ public abstract class Tuple {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -2656,7 +2656,7 @@ public abstract class Tuple {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {

@@ -33,7 +33,7 @@ public @interface DELETE {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value() default "";
 }

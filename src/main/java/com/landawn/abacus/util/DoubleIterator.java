@@ -46,7 +46,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Empty.
      *
-     * @return the double iterator
+     * @return
      */
     public static DoubleIterator empty() {
         return EMPTY;
@@ -55,8 +55,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the double iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static DoubleIterator of(final double... a) {
@@ -66,10 +66,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double iterator
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static DoubleIterator of(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -110,8 +110,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier the iterator supplier
-     * @return the double iterator
+     * @param iteratorSupplier
+     * @return
      */
     public static DoubleIterator of(final Supplier<? extends DoubleIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -150,8 +150,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Lazy evaluation.
      *
-     * @param arraySupplier the array supplier
-     * @return the double iterator
+     * @param arraySupplier
+     * @return
      */
     public static DoubleIterator oF(final Supplier<double[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -197,8 +197,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Returns an infinite {@code DoubleIterator}.
      *
-     * @param supplier the supplier
-     * @return the double iterator
+     * @param supplier
+     * @return
      */
     public static DoubleIterator generate(final DoubleSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -219,9 +219,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Generate.
      *
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the double iterator
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static DoubleIterator generate(final BooleanSupplier hasNext, final DoubleSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -247,7 +247,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Next.
      *
-     * @return the double
+     * @return
      * @Deprecated use <code>nextDouble()</code> instead.
      */
     @Deprecated
@@ -259,14 +259,14 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Next double.
      *
-     * @return the double
+     * @return
      */
     public abstract double nextDouble();
 
     /**
      * To array.
      *
-     * @return the double[]
+     * @return
      */
     public double[] toArray() {
         return toList().trimToSize().array();
@@ -275,7 +275,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * To list.
      *
-     * @return the double list
+     * @return
      */
     public DoubleList toList() {
         final DoubleList list = new DoubleList();
@@ -290,7 +290,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Stream.
      *
-     * @return the double stream
+     * @return
      */
     public DoubleStream stream() {
         return DoubleStream.of(this);
@@ -299,8 +299,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Foreach remaining.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void foreachRemaining(Try.DoubleConsumer<E> action) throws E {
@@ -314,7 +314,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * For each remaining.
      *
-     * @param action the action
+     * @param action
      */
     @Override
     @Deprecated

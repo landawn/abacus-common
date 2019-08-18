@@ -45,7 +45,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Empty.
      *
-     * @return the boolean iterator
+     * @return
      */
     public static BooleanIterator empty() {
         return EMPTY;
@@ -54,8 +54,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the boolean iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static BooleanIterator of(final boolean... a) {
@@ -65,10 +65,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the boolean iterator
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -109,8 +109,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier the iterator supplier
-     * @return the boolean iterator
+     * @param iteratorSupplier
+     * @return
      */
     public static BooleanIterator of(final Supplier<? extends BooleanIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -149,8 +149,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Lazy evaluation.
      *
-     * @param arraySupplier the array supplier
-     * @return the boolean iterator
+     * @param arraySupplier
+     * @return
      */
     public static BooleanIterator oF(final Supplier<boolean[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -196,8 +196,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns an infinite {@code BooleanIterator}.
      *
-     * @param supplier the supplier
-     * @return the boolean iterator
+     * @param supplier
+     * @return
      */
     public static BooleanIterator generate(final BooleanSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -218,9 +218,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Generate.
      *
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the boolean iterator
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static BooleanIterator generate(final BooleanSupplier hasNext, final BooleanSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -246,7 +246,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Next.
      *
-     * @return the boolean
+     * @return
      * @Deprecated use <code>nextBoolean()</code> instead.
      */
     @Deprecated
@@ -265,7 +265,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * To array.
      *
-     * @return the boolean[]
+     * @return
      */
     public boolean[] toArray() {
         return toList().trimToSize().array();
@@ -274,7 +274,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * To list.
      *
-     * @return the boolean list
+     * @return
      */
     public BooleanList toList() {
         final BooleanList list = new BooleanList();
@@ -289,7 +289,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<Boolean> stream() {
         return Stream.of(this);
@@ -298,8 +298,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Foreach remaining.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void foreachRemaining(Try.BooleanConsumer<E> action) throws E {
@@ -313,7 +313,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * For each remaining.
      *
-     * @param action the action
+     * @param action
      */
     @Override
     @Deprecated

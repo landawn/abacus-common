@@ -36,7 +36,7 @@ import com.landawn.abacus.util.Objectory;
  * The Class GenericObjectPool.
  *
  * @author Haiyang Li
- * @param <E> the element type
+ * @param <E>
  * @since 0.8
  */
 public class GenericObjectPool<E extends Poolable> extends AbstractPool implements ObjectPool<E> {
@@ -65,9 +65,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Instantiates a new generic object pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
      */
     protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
         this(capacity, evictDelay, evictionPolicy, 0, null);
@@ -76,11 +76,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Instantiates a new generic object pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
-     * @param maxMemorySize the max memory size
-     * @param memoryMeasure the memory measure
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
+     * @param maxMemorySize
+     * @param memoryMeasure
      */
     protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, long maxMemorySize, ObjectPool.MemoryMeasure<E> memoryMeasure) {
         this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
@@ -89,11 +89,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Instantiates a new generic object pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
-     * @param autoBalance the auto balance
-     * @param balanceFactor the balance factor
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
+     * @param autoBalance
+     * @param balanceFactor
      */
     protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
         this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
@@ -102,13 +102,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Instantiates a new generic object pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
-     * @param autoBalance the auto balance
-     * @param balanceFactor the balance factor
-     * @param maxMemorySize the max memory size
-     * @param memoryMeasure the memory measure
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
+     * @param autoBalance
+     * @param balanceFactor
+     * @param maxMemorySize
+     * @param memoryMeasure
      */
     protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor, long maxMemorySize,
             ObjectPool.MemoryMeasure<E> memoryMeasure) {
@@ -179,7 +179,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     @Override
@@ -230,8 +230,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Adds the.
      *
-     * @param e the e
-     * @param autoDestroyOnFailedToAdd the auto destroy on failed to add
+     * @param e
+     * @param autoDestroyOnFailedToAdd
      * @return true, if successful
      */
     @Override
@@ -252,9 +252,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Adds the.
      *
-     * @param e the e
-     * @param timeout the timeout
-     * @param unit the unit
+     * @param e
+     * @param timeout
+     * @param unit
      * @return true, if successful
      * @throws InterruptedException the interrupted exception
      */
@@ -313,10 +313,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Adds the.
      *
-     * @param e the e
-     * @param timeout the timeout
-     * @param unit the unit
-     * @param autoDestroyOnFailedToAdd the auto destroy on failed to add
+     * @param e
+     * @param timeout
+     * @param unit
+     * @param autoDestroyOnFailedToAdd
      * @return true, if successful
      * @throws InterruptedException the interrupted exception
      */
@@ -338,7 +338,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Take.
      *
-     * @return the e
+     * @return
      */
     @Override
     public E take() {
@@ -376,9 +376,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Take.
      *
-     * @param timeout the timeout
-     * @param unit the unit
-     * @return the e
+     * @param timeout
+     * @param unit
+     * @return
      * @throws InterruptedException the interrupted exception
      */
     @Override
@@ -426,7 +426,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Contains.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     @Override
@@ -493,7 +493,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -505,7 +505,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -515,7 +515,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -527,7 +527,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -537,7 +537,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Vacate.
      *
-     * @param vacationNumber the vacation number
+     * @param vacationNumber
      */
     protected void vacate(int vacationNumber) {
         int size = pool.size();
@@ -603,7 +603,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Destroy.
      *
-     * @param value the value
+     * @param value
      */
     protected void destroy(E value) {
         evictionCount.incrementAndGet();
@@ -631,7 +631,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Destroy all.
      *
-     * @param c the c
+     * @param c
      */
     protected void destroyAll(Collection<E> c) {
         if (N.notNullOrEmpty(c)) {
@@ -661,7 +661,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Write object.
      *
-     * @param os the os
+     * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private void writeObject(java.io.ObjectOutputStream os) throws java.io.IOException {
@@ -677,7 +677,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Read object.
      *
-     * @param is the is
+     * @param is
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */

@@ -77,7 +77,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Instantiates a new bi map.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public BiMap(int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
@@ -86,8 +86,8 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Instantiates a new bi map.
      *
-     * @param initialCapacity the initial capacity
-     * @param loadFactor the load factor
+     * @param initialCapacity
+     * @param loadFactor
      */
     public BiMap(int initialCapacity, float loadFactor) {
         this(new HashMap<K, V>(initialCapacity, loadFactor), new HashMap<V, K>(initialCapacity, loadFactor));
@@ -96,8 +96,8 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Instantiates a new bi map.
      *
-     * @param keyMapType the key map type
-     * @param valueMapType the value map type
+     * @param keyMapType
+     * @param valueMapType
      */
     @SuppressWarnings("rawtypes")
     public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
@@ -107,8 +107,8 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Instantiates a new bi map.
      *
-     * @param keyMapSupplier the key map supplier
-     * @param valueMapSupplier the value map supplier
+     * @param keyMapSupplier
+     * @param valueMapSupplier
      */
     public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
         this.keyMapSupplier = keyMapSupplier;
@@ -136,11 +136,11 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @return the bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1) {
         final BiMap<K, V> map = new BiMap<>();
@@ -155,13 +155,13 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @return the bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2) {
         final BiMap<K, V> map = new BiMap<>();
@@ -177,15 +177,15 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @return the bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
         final BiMap<K, V> map = new BiMap<>();
@@ -202,17 +202,17 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @return the bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4) {
@@ -231,19 +231,19 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @return the bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5) {
@@ -263,21 +263,21 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @return the bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6) {
@@ -298,23 +298,23 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @param k7 the k 7
-     * @param v7 the v 7
-     * @return the bi map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
@@ -336,8 +336,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the bi map
+     * @param map
+     * @return
      */
     public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         final BiMap<K, V> biMap = new BiMap<>(Maps.newTargetMap(map), Maps.newOrderingMap(map));
@@ -352,8 +352,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the bi map
+     * @param map
+     * @return
      * @deprecated replaced by {@code copyOf}
      */
     @Deprecated
@@ -364,8 +364,8 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Gets the.
      *
-     * @param key the key
-     * @return the v
+     * @param key
+     * @return
      */
     @Override
     public V get(Object key) {
@@ -375,8 +375,8 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Gets the by value.
      *
-     * @param value the value
-     * @return the by value
+     * @param value
+     * @return
      */
     public K getByValue(Object value) {
         return valueMap.get(value);
@@ -385,9 +385,9 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Put.
      *
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param key
+     * @param value
+     * @return
      * @throws IllegalArgumentException if the given value is already bound to a
      *     different key in this bimap. The bimap will remain unmodified in this
      *     event. To avoid this exception, call {@link #forcePut} instead.
@@ -411,7 +411,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param key the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
-     * @return the value which was previously associated with the key, which may
+     * @return
      *     be {@code null}, or {@code null} if there was no previous entry
      */
     public V forcePut(final K key, final V value) {
@@ -421,10 +421,10 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Put.
      *
-     * @param key the key
-     * @param value the value
-     * @param isForce the is force
-     * @return the v
+     * @param key
+     * @param value
+     * @param isForce
+     * @return
      */
     private V put(final K key, final V value, final boolean isForce) {
         if ((key == null) || (value == null)) {
@@ -455,7 +455,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Warning:</b> the results of calling this method may vary depending on
      * the iteration order of {@code map}.
      *
-     * @param m the m
+     * @param m
      * @throws IllegalArgumentException if an attempt to {@code put} any
      *     entry fails. Note that some map entries may have been added to the
      *     bimap before the exception was thrown.
@@ -470,8 +470,8 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Removes the.
      *
-     * @param key the key
-     * @return the v
+     * @param key
+     * @return
      */
     @Override
     public V remove(Object key) {
@@ -487,8 +487,8 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Removes the by value.
      *
-     * @param value the value
-     * @return the k
+     * @param value
+     * @return
      */
     public K removeByValue(Object value) {
         K key = valueMap.remove(value);
@@ -503,7 +503,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Contains key.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     @Override
@@ -514,7 +514,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Contains value.
      *
-     * @param value the value
+     * @param value
      * @return true, if successful
      */
     @Override
@@ -525,7 +525,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Returns an immutable key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -535,7 +535,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Returns an immutable value set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<V> values() {
@@ -545,7 +545,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Returns an immutable Set of Immutable entry.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
@@ -607,7 +607,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Returns the inverse view of this BiMap, which maps each of this bimap's values to its associated key. 
      * The two BiMaps are backed by the same data; any changes to one will appear in the other.
      *
-     * @return the bi map
+     * @return
      */
     public BiMap<V, K> inversed() {
         return (inverse == null) ? inverse = new BiMap<>(valueMap, keyMap) : inverse;
@@ -616,7 +616,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Copy.
      *
-     * @return the bi map
+     * @return
      */
     public BiMap<K, V> copy() {
         final BiMap<K, V> copy = new BiMap<>(keyMapSupplier, valueMapSupplier);
@@ -648,7 +648,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -662,7 +662,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -672,7 +672,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @SuppressWarnings("unchecked")
@@ -684,7 +684,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

@@ -28,14 +28,14 @@ public interface Transaction {
     /**
      * Returns the identifier of this transaction if it's supported.
      *
-     * @return the string
+     * @return
      */
     String id();
 
     /**
      * Isolation level.
      *
-     * @return the isolation level
+     * @return
      */
     IsolationLevel isolationLevel();
 

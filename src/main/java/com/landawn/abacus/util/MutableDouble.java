@@ -53,7 +53,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Constructs a new MutableDouble with the specified value.
      * 
-     * @param value  the initial value to store
+     * @param value the initial value to store
      */
     MutableDouble(final double value) {
         super();
@@ -63,8 +63,8 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Of.
      *
-     * @param value the value
-     * @return the mutable double
+     * @param value
+     * @return
      */
     public static MutableDouble of(final double value) {
         return new MutableDouble(value);
@@ -73,7 +73,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Value.
      *
-     * @return the double
+     * @return
      */
     public double value() {
         return value;
@@ -83,7 +83,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Gets the value as a Double instance.
      * 
-     * @return the value as a Double, never null
+     * @return
      * @deprecated replace by {@link #value()}.
      */
     @Deprecated
@@ -94,7 +94,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Sets the value.
      * 
-     * @param value  the value to set
+     * @param value the value to set
      */
     public void setValue(final double value) {
         this.value = value;
@@ -103,8 +103,8 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Gets the and set.
      *
-     * @param value the value
-     * @return the and set
+     * @param value
+     * @return
      */
     public double getAndSet(final double value) {
         final double result = this.value;
@@ -115,8 +115,8 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Sets the and get.
      *
-     * @param value the value
-     * @return the double
+     * @param value
+     * @return
      */
     public double setAndGet(final double value) {
         this.value = value;
@@ -127,8 +127,8 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate - test the current value.
      * @return true, if successful
      * @throws E the e
@@ -146,8 +146,8 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate the first parameter is the current value, the second parameter is the new value.
      * @return true, if successful
      * @throws E the e
@@ -203,7 +203,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Adds a value to the value of this instance.
      * 
-     * @param operand  the value to add
+     * @param operand the value to add
      * @since Commons Lang 2.2
      */
     public void add(final double operand) {
@@ -213,7 +213,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Subtracts a value from the value of this instance.
      * 
-     * @param operand  the value to subtract, not null
+     * @param operand the value to subtract, not null
      * @since Commons Lang 2.2
      */
     public void subtract(final double operand) {
@@ -223,7 +223,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Increments by one the current value.
      *
-     * @return the previous value
+     * @return
      */
     public final double getAndIncrement() {
         return value++;
@@ -232,7 +232,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Decrements by one the current value.
      *
-     * @return the previous value
+     * @return
      */
     public final double getAndDecrement() {
         return value--;
@@ -241,7 +241,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Increments by one the current value.
      *
-     * @return the updated value
+     * @return
      */
     public final double incrementAndGet() {
         return ++value;
@@ -250,7 +250,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Decrements by one the current value.
      *
-     * @return the updated value
+     * @return
      */
     public final double decrementAndGet() {
         return --value;
@@ -260,7 +260,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * Adds the given value to the current value.
      *
      * @param delta the value to add
-     * @return the previous value
+     * @return
      */
     public final double getAndAdd(final double delta) {
         final double prev = value;
@@ -272,7 +272,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * Adds the given value to the current value.
      *
      * @param delta the value to add
-     * @return the updated value
+     * @return
      */
     public final double addAndGet(final double delta) {
         return value += delta;
@@ -283,7 +283,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Returns the value of this MutableDouble as an int.
      *
-     * @return the numeric value represented by this object after conversion to type int.
+     * @return
      */
     @Override
     public int intValue() {
@@ -293,7 +293,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Returns the value of this MutableDouble as a long.
      *
-     * @return the numeric value represented by this object after conversion to type long.
+     * @return
      */
     @Override
     public long longValue() {
@@ -303,7 +303,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Returns the value of this MutableDouble as a float.
      *
-     * @return the numeric value represented by this object after conversion to type float.
+     * @return
      */
     @Override
     public float floatValue() {
@@ -313,7 +313,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Returns the value of this MutableDouble as a double.
      *
-     * @return the numeric value represented by this object after conversion to type double.
+     * @return
      */
     @Override
     public double doubleValue() {
@@ -324,7 +324,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Compares this mutable to another in ascending order.
      * 
-     * @param other  the other mutable to compare to, not null
+     * @param other the other mutable to compare to, not null
      * @return negative if this is less, zero if equal, positive if greater
      */
     @Override
@@ -359,7 +359,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * <code>+0.0==-0.0</code> has the value <code>true</code>. This allows hashtables to operate properly.
      * </ul>
      * 
-     * @param obj  the object to compare with, null returns false
+     * @param obj the object to compare with, null returns false
      * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
      */
     @Override
@@ -382,7 +382,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     /**
      * Returns the String value of this mutable.
      * 
-     * @return the mutable value as a string
+     * @return
      */
     @Override
     public String toString() {

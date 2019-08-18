@@ -56,8 +56,8 @@ public final class DataSourceManagerConfiguration extends Configuration {
     /**
      * Instantiates a new data source manager configuration.
      *
-     * @param element the element
-     * @param properties the properties
+     * @param element
+     * @param properties
      */
     public DataSourceManagerConfiguration(Element element, Map<String, String> properties) {
         super(element, properties);
@@ -72,7 +72,7 @@ public final class DataSourceManagerConfiguration extends Configuration {
     /**
      * Gets the live env.
      *
-     * @return the live env
+     * @return
      */
     public String getLiveEnv() {
         return liveEnv;
@@ -81,7 +81,7 @@ public final class DataSourceManagerConfiguration extends Configuration {
     /**
      * Gets the data source configuration list.
      *
-     * @return the data source configuration list
+     * @return
      */
     public List<DataSourceConfiguration> getDataSourceConfigurationList() {
         return dataSourceConfigurationList;
@@ -98,7 +98,7 @@ public final class DataSourceManagerConfiguration extends Configuration {
     /**
      * Complex element 2 attr.
      *
-     * @param element the element
+     * @param element
      */
     @Override
     protected void complexElement2Attr(Element element) {

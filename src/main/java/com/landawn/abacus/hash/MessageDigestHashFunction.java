@@ -47,8 +47,8 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     /**
      * Instantiates a new message digest hash function.
      *
-     * @param algorithmName the algorithm name
-     * @param toString the to string
+     * @param algorithmName
+     * @param toString
      */
     MessageDigestHashFunction(String algorithmName, String toString) {
         this.prototype = getMessageDigest(algorithmName);
@@ -60,9 +60,9 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     /**
      * Instantiates a new message digest hash function.
      *
-     * @param algorithmName the algorithm name
-     * @param bytes the bytes
-     * @param toString the to string
+     * @param algorithmName
+     * @param bytes
+     * @param toString
      */
     MessageDigestHashFunction(String algorithmName, int bytes, String toString) {
         this.toString = N.checkArgNotNull(toString);
@@ -76,7 +76,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     /**
      * Supports clone.
      *
-     * @param digest the digest
+     * @param digest
      * @return true, if successful
      */
     private static boolean supportsClone(MessageDigest digest) {
@@ -91,7 +91,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     /**
      * Bits.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int bits() {
@@ -101,7 +101,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -111,8 +111,8 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     /**
      * Gets the message digest.
      *
-     * @param algorithmName the algorithm name
-     * @return the message digest
+     * @param algorithmName
+     * @return
      */
     private static MessageDigest getMessageDigest(String algorithmName) {
         try {
@@ -125,7 +125,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -156,9 +156,9 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         /**
          * Instantiates a new serialized form.
          *
-         * @param algorithmName the algorithm name
-         * @param bytes the bytes
-         * @param toString the to string
+         * @param algorithmName
+         * @param bytes
+         * @param toString
          */
         private SerializedForm(String algorithmName, int bytes, String toString) {
             this.algorithmName = algorithmName;
@@ -169,7 +169,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         /**
          * Read resolve.
          *
-         * @return the object
+         * @return
          */
         private Object readResolve() {
             return new MessageDigestHashFunction(algorithmName, bytes, toString);
@@ -182,7 +182,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     /**
      * Write replace.
      *
-     * @return the object
+     * @return
      */
     Object writeReplace() {
         return new SerializedForm(prototype.getAlgorithm(), bytes, toString);
@@ -205,8 +205,8 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         /**
          * Instantiates a new message digest hasher.
          *
-         * @param digest the digest
-         * @param bytes the bytes
+         * @param digest
+         * @param bytes
          */
         private MessageDigestHasher(MessageDigest digest, int bytes) {
             this.digest = digest;
@@ -216,7 +216,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         /**
          * Update.
          *
-         * @param b the b
+         * @param b
          */
         @Override
         protected void update(byte b) {
@@ -227,7 +227,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         /**
          * Update.
          *
-         * @param b the b
+         * @param b
          */
         @Override
         protected void update(byte[] b) {
@@ -238,9 +238,9 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         /**
          * Update.
          *
-         * @param b the b
-         * @param off the off
-         * @param len the len
+         * @param b
+         * @param off
+         * @param len
          */
         @Override
         protected void update(byte[] b, int off, int len) {
@@ -258,7 +258,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         /**
          * Hash.
          *
-         * @return the hash code
+         * @return
          */
         @Override
         public HashCode hash() {

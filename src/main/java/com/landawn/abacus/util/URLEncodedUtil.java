@@ -195,8 +195,8 @@ public final class URLEncodedUtil {
     /**
      * Decode.
      *
-     * @param urlQuery the url query
-     * @return the map
+     * @param urlQuery
+     * @return
      */
     public static Map<String, String> decode(final String urlQuery) {
         return decode(urlQuery, Charsets.UTF_8);
@@ -205,9 +205,9 @@ public final class URLEncodedUtil {
     /**
      * Decode.
      *
-     * @param urlQuery the url query
-     * @param charset the charset
-     * @return the map
+     * @param urlQuery
+     * @param charset
+     * @return
      */
     public static Map<String, String> decode(final String urlQuery, final Charset charset) {
         final Map<String, String> result = new LinkedHashMap<>();
@@ -245,10 +245,10 @@ public final class URLEncodedUtil {
     /**
      * Decode.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param urlQuery the url query
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param urlQuery
+     * @return
      */
     public static <T> T decode(final Class<T> targetClass, final String urlQuery) {
         return decode(targetClass, urlQuery, Charsets.UTF_8);
@@ -257,11 +257,11 @@ public final class URLEncodedUtil {
     /**
      * Decode.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param urlQuery the url query
-     * @param charset the charset
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param urlQuery
+     * @param charset
+     * @return
      */
     public static <T> T decode(final Class<T> targetClass, final String urlQuery, final Charset charset) {
         final T result = N.newInstance(targetClass);
@@ -314,10 +314,10 @@ public final class URLEncodedUtil {
     /**
      * Parameters 2 entity.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param parameters the parameters
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param parameters
+     * @return
      */
     public static <T> T parameters2Entity(final Class<T> targetClass, final Map<String, String[]> parameters) {
         final T result = N.newInstance(targetClass);
@@ -355,8 +355,8 @@ public final class URLEncodedUtil {
     /**
      * Encode.
      *
-     * @param parameters the parameters
-     * @return the string
+     * @param parameters
+     * @return
      */
     public static String encode(final Object parameters) {
         return encode(parameters, Charsets.UTF_8);
@@ -365,9 +365,9 @@ public final class URLEncodedUtil {
     /**
      * Encode.
      *
-     * @param parameters the parameters
-     * @param charset the charset
-     * @return the string
+     * @param parameters
+     * @param charset
+     * @return
      */
     public static String encode(final Object parameters, final Charset charset) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -384,9 +384,9 @@ public final class URLEncodedUtil {
     /**
      * Encode.
      *
-     * @param url the url
-     * @param parameters the parameters
-     * @return the string
+     * @param url
+     * @param parameters
+     * @return
      */
     public static String encode(final String url, final Object parameters) {
         return encode(url, parameters, Charsets.UTF_8);
@@ -395,10 +395,10 @@ public final class URLEncodedUtil {
     /**
      * Encode.
      *
-     * @param url the url
-     * @param parameters the parameters
-     * @param charset the charset
-     * @return the string
+     * @param url
+     * @param parameters
+     * @param charset
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static String encode(final String url, final Object parameters, final Charset charset) {
@@ -422,8 +422,8 @@ public final class URLEncodedUtil {
     /**
      * Encode.
      *
-     * @param output the output
-     * @param parameters the parameters
+     * @param output
+     * @param parameters
      */
     public static void encode(final StringBuilder output, final Object parameters) {
         encode(output, parameters, Charsets.UTF_8);
@@ -432,9 +432,9 @@ public final class URLEncodedUtil {
     /**
      * Encode.
      *
-     * @param output the output
-     * @param parameters the parameters
-     * @param charset the charset
+     * @param output
+     * @param parameters
+     * @param charset
      */
     @SuppressWarnings("rawtypes")
     public static void encode(final StringBuilder output, final Object parameters, final Charset charset) {
@@ -553,9 +553,9 @@ public final class URLEncodedUtil {
      * Uses the {@link #URLENCODER} set of characters, rather than the {@link #UNRSERVED} set; this is for compatibilty
      * with previous releases, URLEncoder.encode() and most browsers.
      *
-     * @param sb the sb
-     * @param content            the content to encode, will convert space to '+'
-     * @param charset            the charset to use
+     * @param sb
+     * @param content the content to encode, will convert space to '+'
+     * @param charset the charset to use
      * @return encoded string
      */
     private static void encodeFormFields(final StringBuilder sb, final String content, final Charset charset) {
@@ -565,11 +565,11 @@ public final class URLEncodedUtil {
     /**
      * Url encode.
      *
-     * @param sb the sb
-     * @param content the content
-     * @param charset the charset
-     * @param safechars the safechars
-     * @param blankAsPlus the blank as plus
+     * @param sb
+     * @param content
+     * @param charset
+     * @param safechars
+     * @param blankAsPlus
      */
     private static void urlEncode(final StringBuilder sb, final String content, final Charset charset, final BitSet safechars, final boolean blankAsPlus) {
         if (content == null) {
@@ -603,10 +603,10 @@ public final class URLEncodedUtil {
      * <p>
      * Used by URIBuilder to encode the userinfo segment.
      *
-     * @param sb the sb
-     * @param content            the string to encode, does not convert space to '+'
-     * @param charset            the charset to use
-     * @return the encoded string
+     * @param sb
+     * @param content the string to encode, does not convert space to '+'
+     * @param charset the charset to use
+     * @return
      */
     static void encUserInfo(final StringBuilder sb, final String content, final Charset charset) {
         urlEncode(sb, content, charset, USERINFO, false);
@@ -617,10 +617,10 @@ public final class URLEncodedUtil {
      * <p>
      * Used by URIBuilder to encode the urlQuery and fragment segments.
      *
-     * @param sb the sb
-     * @param content            the string to encode, does not convert space to '+'
-     * @param charset            the charset to use
-     * @return the encoded string
+     * @param sb
+     * @param content the string to encode, does not convert space to '+'
+     * @param charset the charset to use
+     * @return
      */
     static void encUric(final StringBuilder sb, final String content, final Charset charset) {
         urlEncode(sb, content, charset, URIC, false);
@@ -631,10 +631,10 @@ public final class URLEncodedUtil {
      * <p>
      * Used by URIBuilder to encode path segments.
      *
-     * @param sb the sb
-     * @param content            the string to encode, does not convert space to '+'
-     * @param charset            the charset to use
-     * @return the encoded string
+     * @param sb
+     * @param content the string to encode, does not convert space to '+'
+     * @param charset the charset to use
+     * @return
      */
     static void encPath(final StringBuilder sb, final String content, final Charset charset) {
         urlEncode(sb, content, charset, PATHSAFE, false);

@@ -42,8 +42,8 @@ public class BooleanPair {
     /**
      * Instantiates a new boolean pair.
      *
-     * @param _1 the  1
-     * @param _2 the  2
+     * @param _1 the 1
+     * @param _2 the 2
      */
     BooleanPair(boolean _1, boolean _2) {
         this._1 = _1;
@@ -53,9 +53,9 @@ public class BooleanPair {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @return the boolean pair
+     * @param _1 the 1
+     * @param _2 the 2
+     * @return
      */
     public static BooleanPair of(boolean _1, boolean _2) {
         return new BooleanPair(_1, _2);
@@ -64,7 +64,7 @@ public class BooleanPair {
     /**
      * Reversed.
      *
-     * @return the boolean pair
+     * @return
      */
     public BooleanPair reversed() {
         return new BooleanPair(_2, _1);
@@ -73,7 +73,7 @@ public class BooleanPair {
     /**
      * To array.
      *
-     * @return the boolean[]
+     * @return
      */
     public boolean[] toArray() {
         return new boolean[] { _1, _2 };
@@ -82,7 +82,7 @@ public class BooleanPair {
     /**
      * To list.
      *
-     * @return the boolean list
+     * @return
      */
     public BooleanList toList() {
         return BooleanList.of(_1, _2);
@@ -91,8 +91,8 @@ public class BooleanPair {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.BooleanConsumer<E> comsumer) throws E {
@@ -103,8 +103,8 @@ public class BooleanPair {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<BooleanPair, E> action) throws E {
@@ -114,10 +114,10 @@ public class BooleanPair {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<BooleanPair, U, E> mapper) throws E {
@@ -127,9 +127,9 @@ public class BooleanPair {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<BooleanPair> filter(final Try.Predicate<BooleanPair, E> predicate) throws E {
@@ -139,7 +139,7 @@ public class BooleanPair {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<Boolean> stream() {
         return Stream.of(_1, _2);
@@ -148,7 +148,7 @@ public class BooleanPair {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -158,7 +158,7 @@ public class BooleanPair {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -176,7 +176,7 @@ public class BooleanPair {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

@@ -54,7 +54,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Instantiates a new map entity.
      *
-     * @param entityName the entity name
+     * @param entityName
      */
     public MapEntity(String entityName) {
         super(entityName);
@@ -63,8 +63,8 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Instantiates a new map entity.
      *
-     * @param entityName the entity name
-     * @param props the props
+     * @param entityName
+     * @param props
      */
     public MapEntity(String entityName, Map<String, Object> props) {
         this(entityName);
@@ -75,8 +75,8 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Value of.
      *
-     * @param entityName the entity name
-     * @return the map entity
+     * @param entityName
+     * @return
      */
     public static MapEntity valueOf(String entityName) {
         return new MapEntity(entityName);
@@ -85,9 +85,9 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Value of.
      *
-     * @param entityName the entity name
-     * @param props the props
-     * @return the map entity
+     * @param entityName
+     * @param props
+     * @return
      */
     public static MapEntity valueOf(String entityName, Map<String, Object> props) {
         return new MapEntity(entityName, props);
@@ -96,9 +96,9 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
-     * @return the t
+     * @param <T>
+     * @param propName
+     * @return
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String propName) {
@@ -112,10 +112,10 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param clazz the clazz
-     * @param propName the prop name
-     * @return the t
+     * @param <T>
+     * @param clazz
+     * @param propName
+     * @return
      */
     @SuppressWarnings("unchecked")
     public <T> T get(Class<T> clazz, String propName) {
@@ -131,9 +131,9 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Sets the.
      *
-     * @param propName the prop name
-     * @param propValue the prop value
-     * @return the map entity
+     * @param propName
+     * @param propValue
+     * @return
      */
     public MapEntity set(String propName, Object propValue) {
         checkForzen();
@@ -152,7 +152,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Sets the.
      *
-     * @param nameValues the name values
+     * @param nameValues
      */
     public void set(Map<String, Object> nameValues) {
         checkForzen();
@@ -165,8 +165,8 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Removes the.
      *
-     * @param propName the prop name
-     * @return the object
+     * @param propName
+     * @return
      */
     public Object remove(String propName) {
         checkForzen();
@@ -187,7 +187,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Removes the all.
      *
-     * @param propNames the prop names
+     * @param propNames
      */
     public void removeAll(Collection<String> propNames) {
         checkForzen();
@@ -200,7 +200,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Contains key.
      *
-     * @param propName the prop name
+     * @param propName
      * @return true, if successful
      */
     public boolean containsKey(String propName) {
@@ -229,7 +229,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Entry set.
      *
-     * @return the sets the
+     * @return
      */
     public Set<Map.Entry<String, Object>> entrySet() {
         return values.entrySet();
@@ -238,7 +238,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     public int size() {
         return values.size();
@@ -267,7 +267,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Copy.
      *
-     * @return the map entity
+     * @return
      */
     public MapEntity copy() {
         final MapEntity copy = new MapEntity(this.entityName, this.values);
@@ -282,7 +282,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -296,7 +296,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -317,7 +317,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -327,7 +327,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     /**
      * Signed prop names.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<String> signedPropNames() {

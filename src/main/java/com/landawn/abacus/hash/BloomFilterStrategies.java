@@ -150,7 +150,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          * Instantiates a new bit array.
          *
-         * @param bits the bits
+         * @param bits
          */
         BitArray(long bits) {
             this(new long[Ints.checkedCast(LongMath.divide(bits, 64, RoundingMode.CEILING))]);
@@ -159,7 +159,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          * Instantiates a new bit array.
          *
-         * @param data the data
+         * @param data
          */
         // Used by serialization
         BitArray(long[] data) {
@@ -175,7 +175,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          *  Returns true if the bit changed value.
          *
-         * @param index the index
+         * @param index
          * @return true, if successful
          */
         boolean set(long index) {
@@ -190,7 +190,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          * Gets the.
          *
-         * @param index the index
+         * @param index
          * @return true, if successful
          */
         boolean get(long index) {
@@ -200,7 +200,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          *  Number of bits.
          *
-         * @return the long
+         * @return
          */
         long bitSize() {
             return (long) data.length * Long.SIZE;
@@ -209,7 +209,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          *  Number of set bits (1s).
          *
-         * @return the long
+         * @return
          */
         long bitCount() {
             return bitCount;
@@ -218,7 +218,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          * Copy.
          *
-         * @return the bit array
+         * @return
          */
         BitArray copy() {
             return new BitArray(data.clone());
@@ -227,7 +227,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          *  Combines the two BitArrays using bitwise OR.
          *
-         * @param array the array
+         * @param array
          */
         void putAll(BitArray array) {
             N.checkArgument(data.length == array.data.length, "BitArrays must be of equal length (%s != %s)", data.length, array.data.length);
@@ -241,7 +241,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          * Equals.
          *
-         * @param o the o
+         * @param o
          * @return true, if successful
          */
         @Override
@@ -256,7 +256,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {

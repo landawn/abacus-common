@@ -33,7 +33,7 @@ public @interface GET {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value() default "";
 }

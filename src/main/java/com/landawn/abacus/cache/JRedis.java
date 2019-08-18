@@ -33,7 +33,7 @@ import redis.clients.jedis.JedisShardInfo;
  * The Class JRedis.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public class JRedis<T> extends AbstractDistributedCacheClient<T> {
@@ -47,7 +47,7 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Instantiates a new j redis.
      *
-     * @param serverUrl the server url
+     * @param serverUrl
      */
     public JRedis(String serverUrl) {
         this(serverUrl, DEFAULT_TIMEOUT);
@@ -56,8 +56,8 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Instantiates a new j redis.
      *
-     * @param serverUrl the server url
-     * @param timeout the timeout
+     * @param serverUrl
+     * @param timeout
      */
     public JRedis(final String serverUrl, final long timeout) {
         super(serverUrl);
@@ -76,8 +76,8 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Gets the.
      *
-     * @param key the key
-     * @return the t
+     * @param key
+     * @return
      */
     @Override
     public T get(String key) {
@@ -87,9 +87,9 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Sets the.
      *
-     * @param key the key
-     * @param obj the obj
-     * @param liveTime the live time
+     * @param key
+     * @param obj
+     * @param liveTime
      * @return true, if successful
      */
     @Override
@@ -102,7 +102,7 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Delete.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     @Override
@@ -115,8 +115,8 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Incr.
      *
-     * @param key the key
-     * @return the long
+     * @param key
+     * @return
      */
     @Override
     public long incr(String key) {
@@ -126,9 +126,9 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Incr.
      *
-     * @param key the key
-     * @param deta the deta
-     * @return the long
+     * @param key
+     * @param deta
+     * @return
      */
     @Override
     public long incr(String key, int deta) {
@@ -138,8 +138,8 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Decr.
      *
-     * @param key the key
-     * @return the long
+     * @param key
+     * @return
      */
     @Override
     public long decr(String key) {
@@ -149,9 +149,9 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Decr.
      *
-     * @param key the key
-     * @param deta the deta
-     * @return the long
+     * @param key
+     * @param deta
+     * @return
      */
     @Override
     public long decr(String key, int deta) {
@@ -181,8 +181,8 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Gets the key bytes.
      *
-     * @param key the key
-     * @return the key bytes
+     * @param key
+     * @return
      */
     protected byte[] getKeyBytes(String key) {
         return key.getBytes();
@@ -191,8 +191,8 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Encode.
      *
-     * @param obj the obj
-     * @return the byte[]
+     * @param obj
+     * @return
      */
     protected byte[] encode(Object obj) {
         return obj == null ? N.EMPTY_BYTE_ARRAY : kryoParser.encode(obj);
@@ -201,8 +201,8 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     /**
      * Decode.
      *
-     * @param bytes the bytes
-     * @return the t
+     * @param bytes
+     * @return
      */
     protected T decode(byte[] bytes) {
         return (T) (N.isNullOrEmpty(bytes) ? null : kryoParser.decode(bytes));

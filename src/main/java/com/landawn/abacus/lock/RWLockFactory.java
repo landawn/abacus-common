@@ -42,8 +42,8 @@ public final class RWLockFactory {
     /**
      * Creates a new RWLock object.
      *
-     * @param <T> the generic type
-     * @return the RW lock< t>
+     * @param <T>
+     * @return
      */
     public static <T> RWLock<T> createLocalRWLock() {
         return new LocalRWLock<T>();
@@ -52,9 +52,9 @@ public final class RWLockFactory {
     /**
      * Creates a new RWLock object.
      *
-     * @param <T> the generic type
-     * @param timeout the timeout
-     * @return the RW lock< t>
+     * @param <T>
+     * @param timeout
+     * @return
      */
     public static <T> RWLock<T> createLocalRWLock(long timeout) {
         return new LocalRWLock<T>(timeout);
@@ -63,9 +63,9 @@ public final class RWLockFactory {
     /**
      * Creates a new RWLock object.
      *
-     * @param <T> the generic type
-     * @param provider the provider
-     * @return the RW lock< t>
+     * @param <T>
+     * @param provider
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> RWLock<T> createLock(String provider) {

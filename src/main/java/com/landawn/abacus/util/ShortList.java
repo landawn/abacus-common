@@ -70,7 +70,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Instantiates a new short list.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public ShortList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_SHORT_ARRAY : new short[initialCapacity];
@@ -79,7 +79,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * The specified array is used as the element array for this list without copying action.
      *
-     * @param a the a
+     * @param a
      */
     public ShortList(short[] a) {
         this(a, a.length);
@@ -88,8 +88,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Instantiates a new short list.
      *
-     * @param a the a
-     * @param size the size
+     * @param a
+     * @param size
      */
     public ShortList(short[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -101,8 +101,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the short list
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static ShortList of(final short... a) {
@@ -112,9 +112,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param size the size
-     * @return the short list
+     * @param a
+     * @param size
+     * @return
      */
     public static ShortList of(final short[] a, final int size) {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -125,8 +125,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Copy of.
      *
-     * @param a the a
-     * @return the short list
+     * @param a
+     * @return
      */
     public static ShortList copyOf(final short[] a) {
         return of(N.clone(a));
@@ -135,10 +135,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Copy of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static ShortList copyOf(final short[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -147,8 +147,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * From.
      *
-     * @param c the c
-     * @return the short list
+     * @param c
+     * @return
      */
     public static ShortList from(Collection<Short> c) {
         if (N.isNullOrEmpty(c)) {
@@ -161,9 +161,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the short list
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static ShortList from(Collection<Short> c, short defaultForNull) {
         if (N.isNullOrEmpty(c)) {
@@ -183,10 +183,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static ShortList from(final Collection<Short> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -201,11 +201,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the short list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static ShortList from(final Collection<Short> c, final int fromIndex, final int toIndex, short defaultForNull) {
         return of(N.toShortArray(c, fromIndex, toIndex, defaultForNull));
@@ -214,9 +214,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Range.
      *
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @return the short list
+     * @param startInclusive
+     * @param endExclusive
+     * @return
      */
     public static ShortList range(short startInclusive, final short endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
@@ -225,10 +225,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Range.
      *
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @param by the by
-     * @return the short list
+     * @param startInclusive
+     * @param endExclusive
+     * @param by
+     * @return
      */
     public static ShortList range(short startInclusive, final short endExclusive, final short by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -237,9 +237,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Range closed.
      *
-     * @param startInclusive the start inclusive
-     * @param endInclusive the end inclusive
-     * @return the short list
+     * @param startInclusive
+     * @param endInclusive
+     * @return
      */
     public static ShortList rangeClosed(short startInclusive, final short endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
@@ -248,10 +248,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Range closed.
      *
-     * @param startInclusive the start inclusive
-     * @param endInclusive the end inclusive
-     * @param by the by
-     * @return the short list
+     * @param startInclusive
+     * @param endInclusive
+     * @param by
+     * @return
      */
     public static ShortList rangeClosed(short startInclusive, final short endInclusive, final short by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -260,9 +260,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Repeat.
      *
-     * @param element the element
-     * @param len the len
-     * @return the short list
+     * @param element
+     * @param len
+     * @return
      */
     public static ShortList repeat(short element, final int len) {
         return of(Array.repeat(element, len));
@@ -271,8 +271,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Random.
      *
-     * @param len the len
-     * @return the short list
+     * @param len
+     * @return
      */
     public static ShortList random(final int len) {
         final int bound = Short.MAX_VALUE - Short.MIN_VALUE + 1;
@@ -288,7 +288,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns the original element array without copying.
      *
-     * @return the short[]
+     * @return
      */
     @Override
     public short[] array() {
@@ -298,8 +298,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Gets the.
      *
-     * @param index the index
-     * @return the short
+     * @param index
+     * @return
      */
     public short get(int index) {
         rangeCheck(index);
@@ -310,7 +310,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Range check.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheck(int index) {
         if (index >= size) {
@@ -321,9 +321,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Sets the.
      *
-     * @param index the index
-     * @param e the e
-     * @return the old value in the specified position.
+     * @param index
+     * @param e
+     * @return
      */
     public short set(int index, short e) {
         rangeCheck(index);
@@ -338,7 +338,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      */
     public void add(short e) {
         ensureCapacityInternal(size + 1);
@@ -349,8 +349,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Adds the.
      *
-     * @param index the index
-     * @param e the e
+     * @param index
+     * @param e
      */
     public void add(int index, short e) {
         rangeCheckForAdd(index);
@@ -371,7 +371,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Adds the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(ShortList c) {
@@ -393,8 +393,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param c the c
+     * @param index
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(int index, ShortList c) {
@@ -424,7 +424,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Adds the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -435,8 +435,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param a the a
+     * @param index
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -467,7 +467,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Range check for add.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheckForAdd(int index) {
         if (index > size || index < 0) {
@@ -478,7 +478,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Removes the.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(short e) {
@@ -497,7 +497,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Removes the all occurrences.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean removeAllOccurrences(short e) {
@@ -523,7 +523,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Fast remove.
      *
-     * @param index the index
+     * @param index
      */
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
@@ -538,7 +538,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Removes the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean removeAll(ShortList c) {
@@ -552,7 +552,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Removes the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -567,8 +567,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Removes the if.
      *
-     * @param <E> the element type
-     * @param p the p
+     * @param <E>
+     * @param p
      * @return true, if successful
      * @throws E the e
      */
@@ -595,7 +595,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Retain all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean retainAll(ShortList c) {
@@ -611,7 +611,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Retain all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public boolean retainAll(short[] a) {
@@ -627,9 +627,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Batch remove.
      *
-     * @param c the c
-     * @param complement the complement
-     * @return the int
+     * @param c
+     * @param complement
+     * @return
      */
     private int batchRemove(ShortList c, boolean complement) {
         final short[] elementData = this.elementData;
@@ -666,8 +666,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Delete.
      *
-     * @param index the index
-     * @return the deleted element
+     * @param index
+     * @return
      */
     public short delete(int index) {
         rangeCheck(index);
@@ -682,7 +682,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Delete all.
      *
-     * @param indices the indices
+     * @param indices
      */
     @Override
     @SafeVarargs
@@ -696,8 +696,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Delete range.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) {
@@ -721,9 +721,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Replace all.
      *
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public int replaceAll(short oldVal, short newVal) {
         if (size() == 0) {
@@ -746,8 +746,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Replace all.
      *
-     * @param <E> the element type
-     * @param operator the operator
+     * @param <E>
+     * @param operator
      * @throws E the e
      */
     public <E extends Exception> void replaceAll(Try.ShortUnaryOperator<E> operator) throws E {
@@ -759,9 +759,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Replace if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @param newValue the new value
+     * @param <E>
+     * @param predicate
+     * @param newValue
      * @return true, if successful
      * @throws E the e
      */
@@ -782,7 +782,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Fill.
      *
-     * @param val the val
+     * @param val
      */
     public void fill(final short val) {
         fill(0, size(), val);
@@ -791,9 +791,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Fill.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public void fill(final int fromIndex, final int toIndex, final short val) {
         checkFromToIndex(fromIndex, toIndex);
@@ -804,7 +804,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Contains.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     public boolean contains(short e) {
@@ -814,7 +814,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAll(ShortList c) {
@@ -850,7 +850,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Contains all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -867,7 +867,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Disjoint.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean disjoint(final ShortList c) {
@@ -901,7 +901,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Contains any.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAny(ShortList c) {
@@ -915,7 +915,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Contains any.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -930,7 +930,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Disjoint.
      *
-     * @param b the b
+     * @param b
      * @return true, if successful
      */
     @Override
@@ -945,8 +945,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Intersection.
      *
-     * @param b the b
-     * @return the short list
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public ShortList intersection(final ShortList b) {
@@ -970,8 +970,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @return the short list
+     * @param a
+     * @return
      */
     public ShortList intersection(final short[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -984,8 +984,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Difference.
      *
-     * @param b the b
-     * @return the short list
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public ShortList difference(final ShortList b) {
@@ -1009,8 +1009,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Difference.
      *
-     * @param a the a
-     * @return the short list
+     * @param a
+     * @return
      */
     public ShortList difference(final short[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1023,7 +1023,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Symmetric difference.
      *
-     * @param b the b
+     * @param b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
@@ -1059,8 +1059,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @return the short list
+     * @param a
+     * @return
      */
     public ShortList symmetricDifference(final short[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1075,8 +1075,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Occurrences of.
      *
-     * @param objectToFind the object to find
-     * @return the int
+     * @param objectToFind
+     * @return
      */
     public int occurrencesOf(final short objectToFind) {
         return N.occurrencesOf(elementData, objectToFind);
@@ -1085,8 +1085,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int indexOf(short e) {
         return indexOf(0, e);
@@ -1095,9 +1095,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Index of.
      *
-     * @param fromIndex the from index
-     * @param e the e
-     * @return the int
+     * @param fromIndex
+     * @param e
+     * @return
      */
     public int indexOf(final int fromIndex, short e) {
         checkFromToIndex(fromIndex, size);
@@ -1114,8 +1114,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Last index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(short e) {
         return lastIndexOf(size, e);
@@ -1125,8 +1125,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Last index of.
      *
      * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(final int fromIndex, short e) {
         checkFromToIndex(0, fromIndex);
@@ -1143,7 +1143,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Min.
      *
-     * @return the optional short
+     * @return
      */
     public OptionalShort min() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.min(elementData, 0, size));
@@ -1152,9 +1152,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Min.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional short
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalShort min(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1165,7 +1165,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Median.
      *
-     * @return the optional short
+     * @return
      */
     public OptionalShort median() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.median(elementData, 0, size));
@@ -1174,9 +1174,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Median.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional short
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalShort median(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1187,7 +1187,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Max.
      *
-     * @return the optional short
+     * @return
      */
     public OptionalShort max() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.max(elementData, 0, size));
@@ -1196,9 +1196,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Max.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional short
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalShort max(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1209,8 +1209,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Kth largest.
      *
-     * @param k the k
-     * @return the optional short
+     * @param k
+     * @return
      */
     public OptionalShort kthLargest(final int k) {
         return kthLargest(0, size(), k);
@@ -1219,10 +1219,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Kth largest.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param k the k
-     * @return the optional short
+     * @param fromIndex
+     * @param toIndex
+     * @param k
+     * @return
      */
     public OptionalShort kthLargest(final int fromIndex, final int toIndex, final int k) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1234,7 +1234,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return sum(0, size());
@@ -1243,9 +1243,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Sum.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public int sum(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1256,7 +1256,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Average.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1265,9 +1265,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Average.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalDouble average(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1278,8 +1278,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.ShortConsumer<E> action) throws E {
@@ -1289,10 +1289,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.ShortConsumer<E> action) throws E {
@@ -1314,7 +1314,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * First.
      *
-     * @return the optional short
+     * @return
      */
     public OptionalShort first() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[0]);
@@ -1323,7 +1323,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Last.
      *
-     * @return the optional short
+     * @return
      */
     public OptionalShort last() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[size() - 1]);
@@ -1332,9 +1332,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Find first.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional short
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalShort findFirst(Try.ShortPredicate<E> predicate) throws E {
@@ -1350,9 +1350,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Find last.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional short
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalShort findLast(Try.ShortPredicate<E> predicate) throws E {
@@ -1368,9 +1368,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Find first index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findFirstIndex(Try.ShortPredicate<E> predicate) throws E {
@@ -1386,9 +1386,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Find last index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findLastIndex(Try.ShortPredicate<E> predicate) throws E {
@@ -1404,8 +1404,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns whether all elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1416,10 +1416,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * All match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1440,8 +1440,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns whether any elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1452,10 +1452,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Any match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1476,8 +1476,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns whether no elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1488,10 +1488,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * None match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1512,9 +1512,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(Try.ShortPredicate<E> filter) throws E {
@@ -1524,11 +1524,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.ShortPredicate<E> filter) throws E {
@@ -1540,8 +1540,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1552,11 +1552,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the short list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ShortList filter(final int fromIndex, final int toIndex, Try.ShortPredicate<E> filter) throws E {
@@ -1568,9 +1568,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @param max the max
+     * @param <E>
+     * @param filter
+     * @param max
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1581,12 +1581,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @return the short list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ShortList filter(final int fromIndex, final int toIndex, Try.ShortPredicate<E> filter, final int max) throws E {
@@ -1598,9 +1598,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the short list
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ShortList map(final Try.ShortUnaryOperator<E> mapper) throws E {
@@ -1610,11 +1610,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the short list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ShortList map(final int fromIndex, final int toIndex, final Try.ShortUnaryOperator<E> mapper) throws E {
@@ -1632,10 +1632,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final Try.ShortFunction<? extends T, E> mapper) throws E {
@@ -1645,12 +1645,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.ShortFunction<? extends T, E> mapper) throws E {
@@ -1683,9 +1683,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param accumulator the accumulator
-     * @return the optional short
+     * @param <E>
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalShort reduce(final Try.ShortBinaryOperator<E> accumulator) throws E {
@@ -1720,10 +1720,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param identity the identity
-     * @param accumulator the accumulator
-     * @return the short
+     * @param <E>
+     * @param identity
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> short reduce(final short identity, final Try.ShortBinaryOperator<E> accumulator) throws E {
@@ -1753,9 +1753,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Distinct.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public ShortList distinct(final int fromIndex, final int toIndex) {
@@ -1771,8 +1771,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Top.
      *
-     * @param n the n
-     * @return the short list
+     * @param n
+     * @return
      */
     public ShortList top(final int n) {
         return top(0, size(), n);
@@ -1781,10 +1781,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Top.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the short list
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public ShortList top(final int fromIndex, final int toIndex, final int n) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1795,9 +1795,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Top.
      *
-     * @param n the n
-     * @param cmp the cmp
-     * @return the short list
+     * @param n
+     * @param cmp
+     * @return
      */
     public ShortList top(final int n, Comparator<? super Short> cmp) {
         return top(0, size(), n, cmp);
@@ -1806,11 +1806,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Top.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the short list
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public ShortList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Short> cmp) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1850,8 +1850,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * This List should be sorted first.
      *
-     * @param key the key
-     * @return the int
+     * @param key
+     * @return
      */
     public int binarySearch(final short key) {
         return N.binarySearch(elementData, key);
@@ -1860,10 +1860,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public int binarySearch(final int fromIndex, final int toIndex, final short key) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1884,8 +1884,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Reverse.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) {
@@ -1899,7 +1899,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Rotate.
      *
-     * @param distance the distance
+     * @param distance
      */
     @Override
     public void rotate(int distance) {
@@ -1921,7 +1921,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Shuffle.
      *
-     * @param rnd the rnd
+     * @param rnd
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -1933,8 +1933,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Swap.
      *
-     * @param i the i
-     * @param j the j
+     * @param i
+     * @param j
      */
     @Override
     public void swap(int i, int j) {
@@ -1947,7 +1947,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Copy.
      *
-     * @return the short list
+     * @return
      */
     @Override
     public ShortList copy() {
@@ -1957,9 +1957,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Copy.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public ShortList copy(final int fromIndex, final int toIndex) {
@@ -1971,10 +1971,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Copy.
      *
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the short list
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1988,10 +1988,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Returns List of {@code ShortList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param size the size
-     * @return the list
+     * @param fromIndex
+     * @param toIndex
+     * @param size
+     * @return
      */
     @Override
     public List<ShortList> split(final int fromIndex, final int toIndex, final int size) {
@@ -2039,10 +2039,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) {
@@ -2054,10 +2054,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) {
@@ -2069,7 +2069,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Trim to size.
      *
-     * @return the short list
+     * @return
      */
     @Override
     public ShortList trimToSize() {
@@ -2105,7 +2105,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -2115,7 +2115,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Boxed.
      *
-     * @return the list
+     * @return
      */
     public List<Short> boxed() {
         return boxed(0, size);
@@ -2124,9 +2124,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Boxed.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public List<Short> boxed(int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2143,7 +2143,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * To array.
      *
-     * @return the short[]
+     * @return
      */
     @Override
     public short[] toArray() {
@@ -2153,7 +2153,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * To int list.
      *
-     * @return the int list
+     * @return
      */
     public IntList toIntList() {
         final int[] a = new int[size];
@@ -2168,11 +2168,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public <C extends Collection<Short>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
@@ -2190,10 +2190,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * To multiset.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the multiset
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public Multiset<Short> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Short>> supplier) {
@@ -2213,11 +2213,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2231,13 +2231,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2253,13 +2253,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2274,15 +2274,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2302,12 +2302,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @return
      * @throws E the e
      */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.ShortFunction<? extends K, E> keyMapper, Collector<Short, A, D> downstream) throws E {
@@ -2318,14 +2318,14 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.ShortFunction<? extends K, E> keyMapper,
@@ -2364,7 +2364,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Iterator.
      *
-     * @return the short iterator
+     * @return
      */
     public ShortIterator iterator() {
         if (isEmpty()) {
@@ -2377,7 +2377,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Stream.
      *
-     * @return the short stream
+     * @return
      */
     public ShortStream stream() {
         return ShortStream.of(elementData, 0, size());
@@ -2386,9 +2386,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Stream.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short stream
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public ShortStream stream(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2399,10 +2399,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2413,10 +2413,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Apply if not empty.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the optional
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2427,8 +2427,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2439,8 +2439,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2453,7 +2453,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2463,7 +2463,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -2484,7 +2484,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -2494,7 +2494,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Ensure capacity internal.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_SHORT_ARRAY) {
@@ -2507,7 +2507,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Ensure explicit capacity.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
@@ -2518,7 +2518,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Grow.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void grow(int minCapacity) {
         int oldCapacity = elementData.length;

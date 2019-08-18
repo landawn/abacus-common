@@ -72,7 +72,7 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Instantiates a new abstract http client.
      *
-     * @param url the url
+     * @param url
      */
     protected AbstractHttpClient(String url) {
         this(url, DEFAULT_MAX_CONNECTION, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -81,8 +81,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Instantiates a new abstract http client.
      *
-     * @param url the url
-     * @param maxConnection the max connection
+     * @param url
+     * @param maxConnection
      */
     protected AbstractHttpClient(String url, int maxConnection) {
         this(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -91,10 +91,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Instantiates a new abstract http client.
      *
-     * @param url the url
-     * @param maxConnection the max connection
-     * @param connTimeout the conn timeout
-     * @param readTimeout the read timeout
+     * @param url
+     * @param maxConnection
+     * @param connTimeout
+     * @param readTimeout
      */
     protected AbstractHttpClient(String url, int maxConnection, long connTimeout, long readTimeout) {
         this(url, maxConnection, connTimeout, readTimeout, null);
@@ -103,11 +103,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Instantiates a new abstract http client.
      *
-     * @param url the url
-     * @param maxConnection the max connection
-     * @param connTimeout the conn timeout
-     * @param readTimeout the read timeout
-     * @param settings the settings
+     * @param url
+     * @param maxConnection
+     * @param connTimeout
+     * @param readTimeout
+     * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
     protected AbstractHttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
@@ -132,7 +132,7 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Url.
      *
-     * @return the string
+     * @return
      */
     public String url() {
         return _url;
@@ -141,7 +141,7 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the.
      *
-     * @return the string
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String get() throws UncheckedIOException {
@@ -151,8 +151,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the.
      *
-     * @param settings the settings
-     * @return the string
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String get(final HttpSettings settings) throws UncheckedIOException {
@@ -162,8 +162,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the.
      *
-     * @param queryParameters the query parameters
-     * @return the string
+     * @param queryParameters
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String get(final Object queryParameters) throws UncheckedIOException {
@@ -173,9 +173,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the.
      *
-     * @param queryParameters the query parameters
-     * @param settings the settings
-     * @return the string
+     * @param queryParameters
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String get(final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
@@ -185,9 +185,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
@@ -197,10 +197,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param settings the settings
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(final Class<T> resultClass, final HttpSettings settings) throws UncheckedIOException {
@@ -210,10 +210,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param queryParameters the query parameters
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(final Class<T> resultClass, final Object queryParameters) throws UncheckedIOException {
@@ -223,11 +223,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param queryParameters the query parameters
-     * @param settings the settings
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
@@ -237,7 +237,7 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async get.
      *
-     * @return the continuable future
+     * @return
      */
     public ContinuableFuture<String> asyncGet() {
         return asyncGet(String.class);
@@ -246,8 +246,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async get.
      *
-     * @param settings the settings
-     * @return the continuable future
+     * @param settings
+     * @return
      */
     public ContinuableFuture<String> asyncGet(final HttpSettings settings) {
         return asyncGet(String.class, settings);
@@ -256,8 +256,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async get.
      *
-     * @param queryParameters the query parameters
-     * @return the continuable future
+     * @param queryParameters
+     * @return
      */
     public ContinuableFuture<String> asyncGet(final Object queryParameters) {
         return asyncGet(String.class, queryParameters);
@@ -266,9 +266,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async get.
      *
-     * @param queryParameters the query parameters
-     * @param settings the settings
-     * @return the continuable future
+     * @param queryParameters
+     * @param settings
+     * @return
      */
     public ContinuableFuture<String> asyncGet(final Object queryParameters, final HttpSettings settings) {
         return asyncGet(String.class, queryParameters, settings);
@@ -277,9 +277,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async get.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
         return asyncGet(resultClass, null, _settings);
@@ -288,10 +288,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async get.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param settings the settings
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final HttpSettings settings) {
         return asyncGet(resultClass, null, settings);
@@ -300,10 +300,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async get.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param queryParameters the query parameters
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters) {
         return asyncGet(resultClass, queryParameters, _settings);
@@ -312,11 +312,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async get.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param queryParameters the query parameters
-     * @param settings the settings
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) {
         return asyncExecute(resultClass, HttpMethod.GET, queryParameters, settings);
@@ -325,7 +325,7 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Delete.
      *
-     * @return the string
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String delete() throws UncheckedIOException {
@@ -335,8 +335,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Delete.
      *
-     * @param settings the settings
-     * @return the string
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String delete(final HttpSettings settings) throws UncheckedIOException {
@@ -346,8 +346,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Delete.
      *
-     * @param queryParameters the query parameters
-     * @return the string
+     * @param queryParameters
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String delete(final Object queryParameters) throws UncheckedIOException {
@@ -357,9 +357,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Delete.
      *
-     * @param queryParameters the query parameters
-     * @param settings the settings
-     * @return the string
+     * @param queryParameters
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String delete(final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
@@ -369,9 +369,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
@@ -381,10 +381,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param settings the settings
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(final Class<T> resultClass, final HttpSettings settings) throws UncheckedIOException {
@@ -394,10 +394,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param queryParameters the query parameters
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(final Class<T> resultClass, final Object queryParameters) throws UncheckedIOException {
@@ -407,11 +407,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param queryParameters the query parameters
-     * @param settings the settings
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
@@ -421,7 +421,7 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async delete.
      *
-     * @return the continuable future
+     * @return
      */
     public ContinuableFuture<String> asyncDelete() {
         return asyncDelete(String.class);
@@ -430,8 +430,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async delete.
      *
-     * @param settings the settings
-     * @return the continuable future
+     * @param settings
+     * @return
      */
     public ContinuableFuture<String> asyncDelete(final HttpSettings settings) {
         return asyncDelete(String.class, settings);
@@ -440,8 +440,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async delete.
      *
-     * @param queryParameters the query parameters
-     * @return the continuable future
+     * @param queryParameters
+     * @return
      */
     public ContinuableFuture<String> asyncDelete(final Object queryParameters) {
         return asyncDelete(String.class, queryParameters);
@@ -450,9 +450,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async delete.
      *
-     * @param queryParameters the query parameters
-     * @param settings the settings
-     * @return the continuable future
+     * @param queryParameters
+     * @param settings
+     * @return
      */
     public ContinuableFuture<String> asyncDelete(final Object queryParameters, final HttpSettings settings) {
         return asyncDelete(String.class, queryParameters, settings);
@@ -461,9 +461,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
         return asyncDelete(resultClass, null, _settings);
@@ -472,10 +472,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param settings the settings
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final HttpSettings settings) {
         return asyncDelete(resultClass, null, settings);
@@ -484,10 +484,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param queryParameters the query parameters
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Object queryParameters) {
         return asyncDelete(resultClass, queryParameters, _settings);
@@ -496,11 +496,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param queryParameters the query parameters
-     * @param settings the settings
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) {
         return asyncExecute(resultClass, HttpMethod.DELETE, queryParameters, settings);
@@ -509,8 +509,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Post.
      *
-     * @param request the request
-     * @return the string
+     * @param request
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String post(final Object request) throws UncheckedIOException {
@@ -520,9 +520,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Post.
      *
-     * @param request the request
-     * @param settings the settings
-     * @return the string
+     * @param request
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String post(final Object request, final HttpSettings settings) throws UncheckedIOException {
@@ -532,10 +532,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Post.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param request the request
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T post(final Class<T> resultClass, final Object request) throws UncheckedIOException {
@@ -545,11 +545,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Post.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param request the request
-     * @param settings the settings
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T post(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
@@ -559,8 +559,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async post.
      *
-     * @param request the request
-     * @return the continuable future
+     * @param request
+     * @return
      */
     public ContinuableFuture<String> asyncPost(final Object request) {
         return asyncPost(String.class, request);
@@ -569,9 +569,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async post.
      *
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param request
+     * @param settings
+     * @return
      */
     public ContinuableFuture<String> asyncPost(final Object request, final HttpSettings settings) {
         return asyncPost(String.class, request, settings);
@@ -580,10 +580,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async post.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param request the request
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Object request) {
         return asyncPost(resultClass, request, _settings);
@@ -592,11 +592,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async post.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Object request, final HttpSettings settings) {
         return asyncExecute(resultClass, HttpMethod.POST, request, settings);
@@ -605,8 +605,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Put.
      *
-     * @param request the request
-     * @return the string
+     * @param request
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String put(final Object request) throws UncheckedIOException {
@@ -616,9 +616,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Put.
      *
-     * @param request the request
-     * @param settings the settings
-     * @return the string
+     * @param request
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String put(final Object request, final HttpSettings settings) throws UncheckedIOException {
@@ -628,10 +628,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Put.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param request the request
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T put(final Class<T> resultClass, final Object request) throws UncheckedIOException {
@@ -641,11 +641,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Put.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param request the request
-     * @param settings the settings
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T put(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
@@ -655,8 +655,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async put.
      *
-     * @param request the request
-     * @return the continuable future
+     * @param request
+     * @return
      */
     public ContinuableFuture<String> asyncPut(final Object request) {
         return asyncPut(String.class, request);
@@ -665,9 +665,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async put.
      *
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param request
+     * @param settings
+     * @return
      */
     public ContinuableFuture<String> asyncPut(final Object request, final HttpSettings settings) {
         return asyncPut(String.class, request, settings);
@@ -676,10 +676,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async put.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param request the request
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Object request) {
         return asyncPut(resultClass, request, _settings);
@@ -688,11 +688,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async put.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Object request, final HttpSettings settings) {
         return asyncExecute(resultClass, HttpMethod.PUT, request, settings);
@@ -701,9 +701,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Execute.
      *
-     * @param httpMethod the http method
-     * @param request the request
-     * @return the string
+     * @param httpMethod
+     * @param request
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String execute(final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
@@ -713,10 +713,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Execute.
      *
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
-     * @return the string
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
@@ -726,11 +726,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Execute.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param httpMethod the http method
-     * @param request the request
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
+     * @param request
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
@@ -740,12 +740,12 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Write the specified <code>request</code> to request body.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param httpMethod the http method
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
      * @param request can be String/Map/Entity/InputStream/Reader...
-     * @param settings the settings
-     * @return the t
+     * @param settings
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public abstract <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request, final HttpSettings settings)
@@ -755,9 +755,9 @@ public abstract class AbstractHttpClient implements Closeable {
      * Execute.
      *
      * @param output write the InputStream in the response to this specified File.
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
+     * @param httpMethod
+     * @param request
+     * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
     public abstract void execute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException;
@@ -766,9 +766,9 @@ public abstract class AbstractHttpClient implements Closeable {
      * Execute.
      *
      * @param output write the InputStream in the response to this specified OutputStream.
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
+     * @param httpMethod
+     * @param request
+     * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
     public abstract void execute(final OutputStream output, final HttpMethod httpMethod, final Object request, final HttpSettings settings)
@@ -778,9 +778,9 @@ public abstract class AbstractHttpClient implements Closeable {
      * Execute.
      *
      * @param output write the InputStream in the response to this specified Writer.
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
+     * @param httpMethod
+     * @param request
+     * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
     public abstract void execute(final Writer output, final HttpMethod httpMethod, final Object request, final HttpSettings settings)
@@ -789,9 +789,9 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async execute.
      *
-     * @param httpMethod the http method
-     * @param request the request
-     * @return the continuable future
+     * @param httpMethod
+     * @param request
+     * @return
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request) {
         return asyncExecute(String.class, httpMethod, request);
@@ -800,10 +800,10 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async execute.
      *
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
         return asyncExecute(String.class, httpMethod, request, settings);
@@ -812,11 +812,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async execute.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param httpMethod the http method
-     * @param request the request
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
+     * @param request
+     * @return
      */
     public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request) {
         return asyncExecute(resultClass, httpMethod, request, _settings);
@@ -825,12 +825,12 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async execute.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
      */
     public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
         final Callable<T> cmd = new Callable<T>() {
@@ -846,11 +846,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async execute.
      *
-     * @param output the output
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param output
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
      */
     public ContinuableFuture<Void> asyncExecute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
         final Callable<Void> cmd = new Callable<Void>() {
@@ -868,11 +868,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async execute.
      *
-     * @param output the output
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param output
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
      */
     public ContinuableFuture<Void> asyncExecute(final OutputStream output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
         final Callable<Void> cmd = new Callable<Void>() {
@@ -890,11 +890,11 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Async execute.
      *
-     * @param output the output
-     * @param httpMethod the http method
-     * @param request the request
-     * @param settings the settings
-     * @return the continuable future
+     * @param output
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
      */
     public ContinuableFuture<Void> asyncExecute(final Writer output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
         final Callable<Void> cmd = new Callable<Void>() {
@@ -920,7 +920,7 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Checks if is one way request.
      *
-     * @param settings the settings
+     * @param settings
      * @return true, if is one way request
      */
     protected boolean isOneWayRequest(HttpSettings settings) {
@@ -930,8 +930,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the content format.
      *
-     * @param settings the settings
-     * @return the content format
+     * @param settings
+     * @return
      */
     protected ContentFormat getContentFormat(HttpSettings settings) {
         ContentFormat contentFormat = null;
@@ -964,8 +964,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the content type.
      *
-     * @param settings the settings
-     * @return the content type
+     * @param settings
+     * @return
      */
     protected String getContentType(HttpSettings settings) {
         String contentType = null;
@@ -992,8 +992,8 @@ public abstract class AbstractHttpClient implements Closeable {
     /**
      * Gets the content encoding.
      *
-     * @param settings the settings
-     * @return the content encoding
+     * @param settings
+     * @return
      */
     protected String getContentEncoding(HttpSettings settings) {
         String contentEncoding = null;

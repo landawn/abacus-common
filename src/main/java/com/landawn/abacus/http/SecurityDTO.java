@@ -56,7 +56,7 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Gets the user name.
      *
-     * @return the user name
+     * @return
      */
     public String getUserName() {
         return userName;
@@ -74,7 +74,7 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Gets the password.
      *
-     * @return the password
+     * @return
      */
     public String getPassword() {
         return password;
@@ -92,7 +92,7 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Gets the nonce.
      *
-     * @return the nonce
+     * @return
      */
     public String getNonce() {
         return nonce;
@@ -110,7 +110,7 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Gets the created.
      *
-     * @return the created
+     * @return
      */
     public String getCreated() {
         return created;
@@ -128,8 +128,8 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Encrypt this request with specified userName and password.
      *
-     * @param userName the user name
-     * @param password the password
+     * @param userName
+     * @param password
      */
     public void encrypt(final String userName, final String password) {
         encrypt(userName, password.getBytes(Charsets.UTF_8), MessageEncryption.NONE);
@@ -138,9 +138,9 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Encrypt this request with specified userName and password.
      *
-     * @param userName the user name
-     * @param password the password
-     * @param msgEncryption the msg encryption
+     * @param userName
+     * @param password
+     * @param msgEncryption
      */
     public void encrypt(final String userName, final byte[] password, final MessageEncryption msgEncryption) {
         setUserName(null);
@@ -198,8 +198,8 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Decrypt.
      *
-     * @param userName the user name
-     * @param password the password
+     * @param userName
+     * @param password
      * @return true, if successful
      */
     public boolean decrypt(final String userName, final String password) {
@@ -209,9 +209,9 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Decrypt.
      *
-     * @param userName the user name
-     * @param password the password
-     * @param msgEncryption the msg encryption
+     * @param userName
+     * @param password
+     * @param msgEncryption
      * @return true, if successful
      */
     public boolean decrypt(final String userName, final byte[] password, final MessageEncryption msgEncryption) {
@@ -284,7 +284,7 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -301,7 +301,7 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -322,7 +322,7 @@ public abstract class SecurityDTO implements Serializable {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

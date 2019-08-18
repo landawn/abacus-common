@@ -92,7 +92,7 @@ final class LittleEndianByteArray {
      *
      * @param source the input bytes
      * @param offset the offset into the array at which to start
-     * @return the value found in the array in the form of a long
+     * @return
      */
     static int load32(byte[] source, int offset) {
         // TODO(user): Measure the benefit of delegating this to LittleEndianBytes also.
@@ -121,18 +121,18 @@ final class LittleEndianByteArray {
         /**
          * Gets the long little endian.
          *
-         * @param array the array
-         * @param offset the offset
-         * @return the long little endian
+         * @param array
+         * @param offset
+         * @return
          */
         long getLongLittleEndian(byte[] array, int offset);
 
         /**
          * Put long little endian.
          *
-         * @param array the array
-         * @param offset the offset
-         * @param value the value
+         * @param array
+         * @param offset
+         * @param value
          */
         void putLongLittleEndian(byte[] array, int offset, long value);
     }

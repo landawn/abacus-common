@@ -38,9 +38,9 @@ public interface Poolable {
     /**
      * Wrap the the source object with <code>Long.MAX_VALUE</code> <code>liveTime</code> and <code>Long.MAX_VALUE</code> <code>maxIdleTime</code>.
      *
-     * @param <T> the generic type
-     * @param srcObject the src object
-     * @return the poolable wrapper
+     * @param <T>
+     * @param srcObject
+     * @return
      */
     public static <T> PoolableWrapper<T> wrap(T srcObject) {
         return PoolableWrapper.of(srcObject);
@@ -49,11 +49,11 @@ public interface Poolable {
     /**
      * Wrap the the source object with specified <code>liveTime</code> and <code>maxIdleTime</code>.
      *
-     * @param <T> the generic type
-     * @param srcObject the src object
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
-     * @return the poolable wrapper
+     * @param <T>
+     * @param srcObject
+     * @param liveTime
+     * @param maxIdleTime
+     * @return
      */
     public static <T> PoolableWrapper<T> wrap(T srcObject, long liveTime, long maxIdleTime) {
         return PoolableWrapper.of(srcObject, liveTime, maxIdleTime);

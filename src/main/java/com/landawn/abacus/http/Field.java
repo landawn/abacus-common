@@ -60,7 +60,7 @@ public @interface Field {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value();
 }

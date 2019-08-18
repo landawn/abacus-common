@@ -36,12 +36,12 @@ public class SimpleSourceSelector implements DataSourceSelector {
     /**
      * Select.
      *
-     * @param dataSourceManager the data source manager
-     * @param entityName the entity name
-     * @param sql the sql
-     * @param parameters the parameters
-     * @param options the options
-     * @return the data source
+     * @param dataSourceManager
+     * @param entityName
+     * @param sql
+     * @param parameters
+     * @param options
+     * @return
      */
     @Override
     public DataSource select(DataSourceManager dataSourceManager, String entityName, String sql, Object[] parameters, Map<String, Object> options) {
@@ -51,12 +51,12 @@ public class SimpleSourceSelector implements DataSourceSelector {
     /**
      * Select.
      *
-     * @param dataSourceManager the data source manager
-     * @param entityName the entity name
-     * @param sql the sql
-     * @param parameters the parameters
-     * @param options the options
-     * @return the data source
+     * @param dataSourceManager
+     * @param entityName
+     * @param sql
+     * @param parameters
+     * @param options
+     * @return
      */
     @Override
     public DataSource select(DataSourceManager dataSourceManager, String entityName, String sql, List<?> parameters, Map<String, Object> options) {
@@ -66,9 +66,9 @@ public class SimpleSourceSelector implements DataSourceSelector {
     /**
      * Gets the data source.
      *
-     * @param dataSourceManager the data source manager
-     * @param options the options
-     * @return the data source
+     * @param dataSourceManager
+     * @param options
+     * @return
      */
     private DataSource getDataSource(DataSourceManager dataSourceManager, Map<String, Object> options) {
         String dataSourceName = (options == null) ? null : (String) options.get(QUERY_WITH_DATA_SOURCE);

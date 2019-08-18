@@ -38,14 +38,14 @@ public interface Pool extends Serializable {
     /**
      * Gets the capacity.
      *
-     * @return the capacity
+     * @return
      */
     int getCapacity();
 
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     int size();
 
@@ -81,28 +81,28 @@ public interface Pool extends Serializable {
     /**
      * Put count.
      *
-     * @return the long
+     * @return
      */
     long putCount();
 
     /**
      * Hit count.
      *
-     * @return the long
+     * @return
      */
     long hitCount();
 
     /**
      * Miss count.
      *
-     * @return the long
+     * @return
      */
     long missCount();
 
     /**
      *  Returns the number of values that have been evicted.
      *
-     * @return the long
+     * @return
      */
     long evictionCount();
 }

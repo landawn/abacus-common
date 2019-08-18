@@ -42,8 +42,8 @@ public final class XLockFactory {
     /**
      * Creates a new XLock object.
      *
-     * @param <T> the generic type
-     * @return the x lock< t>
+     * @param <T>
+     * @return
      */
     public static <T> XLock<T> createLocalXLock() {
         return new LocalXLock<T>();
@@ -52,9 +52,9 @@ public final class XLockFactory {
     /**
      * Creates a new XLock object.
      *
-     * @param <T> the generic type
-     * @param timeout the timeout
-     * @return the x lock< t>
+     * @param <T>
+     * @param timeout
+     * @return
      */
     public static <T> XLock<T> createLocalXLock(long timeout) {
         return new LocalXLock<T>(timeout);
@@ -63,9 +63,9 @@ public final class XLockFactory {
     /**
      * Creates a new XLock object.
      *
-     * @param <T> the generic type
-     * @param provider the provider
-     * @return the x lock< t>
+     * @param <T>
+     * @param provider
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> XLock<T> createLock(String provider) {

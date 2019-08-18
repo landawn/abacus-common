@@ -35,9 +35,9 @@ public abstract class AbstractDataSource implements DataSource {
     /**
      * Gets the connection.
      *
-     * @param username the username
-     * @param password the password
-     * @return the connection
+     * @param username
+     * @param password
+     * @return
      * @throws SQLException the SQL exception
      */
     @Override
@@ -48,7 +48,7 @@ public abstract class AbstractDataSource implements DataSource {
     /**
      * Gets the parent logger.
      *
-     * @return the parent logger
+     * @return
      * @throws SQLFeatureNotSupportedException the SQL feature not supported exception
      */
     @Override
@@ -59,7 +59,7 @@ public abstract class AbstractDataSource implements DataSource {
     /**
      * Gets the log writer.
      *
-     * @return the log writer
+     * @return
      * @throws SQLException the SQL exception
      */
     @Override
@@ -92,7 +92,7 @@ public abstract class AbstractDataSource implements DataSource {
     /**
      * Gets the login timeout.
      *
-     * @return the login timeout
+     * @return
      * @throws SQLException the SQL exception
      */
     @Override
@@ -103,9 +103,9 @@ public abstract class AbstractDataSource implements DataSource {
     /**
      * Unwrap.
      *
-     * @param <T> the generic type
-     * @param iface the iface
-     * @return the t
+     * @param <T>
+     * @param iface
+     * @return
      * @throws SQLException the SQL exception
      */
     @Override
@@ -121,7 +121,7 @@ public abstract class AbstractDataSource implements DataSource {
     /**
      * Checks if is wrapper for.
      *
-     * @param iface the iface
+     * @param iface
      * @return true, if is wrapper for
      * @throws SQLException the SQL exception
      */

@@ -42,8 +42,8 @@ public final class IntPair {
     /**
      * Instantiates a new int pair.
      *
-     * @param _1 the  1
-     * @param _2 the  2
+     * @param _1 the 1
+     * @param _2 the 2
      */
     IntPair(int _1, int _2) {
         this._1 = _1;
@@ -53,9 +53,9 @@ public final class IntPair {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @return the int pair
+     * @param _1 the 1
+     * @param _2 the 2
+     * @return
      */
     public static IntPair of(int _1, int _2) {
         return new IntPair(_1, _2);
@@ -64,7 +64,7 @@ public final class IntPair {
     /**
      * Min.
      *
-     * @return the int
+     * @return
      */
     public int min() {
         return N.min(_1, _2);
@@ -73,7 +73,7 @@ public final class IntPair {
     /**
      * Max.
      *
-     * @return the int
+     * @return
      */
     public int max() {
         return N.max(_1, _2);
@@ -82,7 +82,7 @@ public final class IntPair {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return N.toIntExact(0L + _1 + _2);
@@ -91,7 +91,7 @@ public final class IntPair {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return (0d + _1 + _2) / 2;
@@ -100,7 +100,7 @@ public final class IntPair {
     /**
      * Reversed.
      *
-     * @return the int pair
+     * @return
      */
     public IntPair reversed() {
         return new IntPair(_2, _1);
@@ -109,7 +109,7 @@ public final class IntPair {
     /**
      * To array.
      *
-     * @return the int[]
+     * @return
      */
     public int[] toArray() {
         return new int[] { _1, _2 };
@@ -118,7 +118,7 @@ public final class IntPair {
     /**
      * To list.
      *
-     * @return the int list
+     * @return
      */
     public IntList toList() {
         return IntList.of(_1, _2);
@@ -127,8 +127,8 @@ public final class IntPair {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.IntConsumer<E> comsumer) throws E {
@@ -139,8 +139,8 @@ public final class IntPair {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<IntPair, E> action) throws E {
@@ -150,10 +150,10 @@ public final class IntPair {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<IntPair, U, E> mapper) throws E {
@@ -163,9 +163,9 @@ public final class IntPair {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<IntPair> filter(final Try.Predicate<IntPair, E> predicate) throws E {
@@ -175,7 +175,7 @@ public final class IntPair {
     /**
      * Stream.
      *
-     * @return the int stream
+     * @return
      */
     public IntStream stream() {
         return IntStream.of(_1, _2);
@@ -184,7 +184,7 @@ public final class IntPair {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -194,7 +194,7 @@ public final class IntPair {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -212,7 +212,7 @@ public final class IntPair {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

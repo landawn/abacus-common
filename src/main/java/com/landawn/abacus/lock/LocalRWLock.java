@@ -28,7 +28,7 @@ import com.landawn.abacus.util.N;
  * The Class LocalRWLock.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class LocalRWLock<T> extends AbstractRWLock<T> {
@@ -52,7 +52,7 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Instantiates a new local RW lock.
      *
-     * @param timeout the timeout
+     * @param timeout
      */
     public LocalRWLock(long timeout) {
         this.timeout = timeout;
@@ -61,7 +61,7 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Lock write on.
      *
-     * @param target the target
+     * @param target
      */
     @Override
     public void lockWriteOn(T target) {
@@ -71,8 +71,8 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Lock write on.
      *
-     * @param target the target
-     * @param timeout the timeout
+     * @param target
+     * @param timeout
      */
     @Override
     public void lockWriteOn(T target, long timeout) {
@@ -96,7 +96,7 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Unlock write on.
      *
-     * @param target the target
+     * @param target
      */
     @Override
     public void unlockWriteOn(T target) {
@@ -118,7 +118,7 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Lock read on.
      *
-     * @param target the target
+     * @param target
      */
     @Override
     public void lockReadOn(T target) {
@@ -128,8 +128,8 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Lock read on.
      *
-     * @param target the target
-     * @param timeout the timeout
+     * @param target
+     * @param timeout
      */
     @Override
     public void lockReadOn(T target, long timeout) {
@@ -153,7 +153,7 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Unlock read on.
      *
-     * @param target the target
+     * @param target
      */
     @Override
     public void unlockReadOn(T target) {
@@ -175,8 +175,8 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Gets the target lock.
      *
-     * @param target the target
-     * @return the target lock
+     * @param target
+     * @return
      */
     private RefReentrantReadWriteLock getTargetLock(T target) {
         synchronized (blockedLockPool) {
@@ -187,8 +187,8 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Gets the or create lock.
      *
-     * @param target the target
-     * @return the or create lock
+     * @param target
+     * @return
      */
     private RefReentrantReadWriteLock getOrCreateLock(T target) {
         synchronized (blockedLockPool) {
@@ -209,8 +209,8 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     /**
      * Close lock.
      *
-     * @param target the target
-     * @param refRWLock the ref RW lock
+     * @param target
+     * @param refRWLock
      */
     private void closeLock(T target, RefReentrantReadWriteLock refRWLock) {
         synchronized (blockedLockPool) {

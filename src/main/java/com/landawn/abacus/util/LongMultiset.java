@@ -54,7 +54,7 @@ import com.landawn.abacus.util.stream.Stream;
  * occurrences of any one element.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class LongMultiset<T> implements Iterable<T> {
@@ -83,7 +83,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Instantiates a new long multiset.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public LongMultiset(int initialCapacity) {
         this.mapSupplier = Suppliers.ofMap();
@@ -93,7 +93,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Instantiates a new long multiset.
      *
-     * @param c the c
+     * @param c
      */
     public LongMultiset(final Collection<? extends T> c) {
         this();
@@ -104,7 +104,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Instantiates a new long multiset.
      *
-     * @param valueMapType the value map type
+     * @param valueMapType
      */
     @SuppressWarnings("rawtypes")
     public LongMultiset(final Class<? extends Map> valueMapType) {
@@ -114,7 +114,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Instantiates a new long multiset.
      *
-     * @param mapSupplier the map supplier
+     * @param mapSupplier
      */
     @SuppressWarnings("rawtypes")
     public LongMultiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
@@ -136,9 +136,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the long multiset
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> LongMultiset<T> of(final T... a) {
@@ -158,9 +158,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * From.
      *
-     * @param <T> the generic type
-     * @param coll the coll
-     * @return the long multiset
+     * @param <T>
+     * @param coll
+     * @return
      */
     public static <T> LongMultiset<T> from(final Collection<? extends T> coll) {
         return new LongMultiset<>(coll);
@@ -169,9 +169,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * From.
      *
-     * @param <T> the generic type
-     * @param m the m
-     * @return the long multiset
+     * @param <T>
+     * @param m
+     * @return
      */
     public static <T> LongMultiset<T> from(final Map<? extends T, Long> m) {
         if (N.isNullOrEmpty(m)) {
@@ -188,9 +188,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Fromm.
      *
-     * @param <T> the generic type
-     * @param m the m
-     * @return the long multiset
+     * @param <T>
+     * @param m
+     * @return
      */
     public static <T> LongMultiset<T> fromm(final Map<? extends T, Integer> m) {
         if (N.isNullOrEmpty(m)) {
@@ -213,9 +213,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * From.
      *
-     * @param <T> the generic type
-     * @param multiset the multiset
-     * @return the long multiset
+     * @param <T>
+     * @param multiset
+     * @return
      */
     public static <T> LongMultiset<T> from(final Multiset<? extends T> multiset) {
         if (N.isNullOrEmpty(multiset)) {
@@ -234,8 +234,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Gets the.
      *
-     * @param e the e
-     * @return the occurrences of the specified object. zero is returned if it's not in this set.
+     * @param e
+     * @return
      */
     public long get(final Object e) {
         final MutableLong count = valueMap.get(e);
@@ -246,9 +246,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Gets the or default.
      *
-     * @param e the e
-     * @param defaultValue the default value
-     * @return the occurrences of the specified object. the specified defaultValue is returned if it's not in this set.
+     * @param e
+     * @param defaultValue
+     * @return
      */
     public long getOrDefault(final Object e, long defaultValue) {
         final MutableLong count = valueMap.get(e);
@@ -259,9 +259,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * The element will be removed if the specified count is 0.
      *
-     * @param e the e
-     * @param occurrences the occurrences
-     * @return the and set
+     * @param e
+     * @param occurrences
+     * @return
      */
     public long getAndSet(final T e, final long occurrences) {
         checkOccurrences(occurrences);
@@ -287,9 +287,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * The element will be removed if the specified count is 0.
      *
-     * @param e the e
-     * @param occurrences the occurrences
-     * @return the long
+     * @param e
+     * @param occurrences
+     * @return
      */
     public long setAndGet(final T e, final long occurrences) {
         checkOccurrences(occurrences);
@@ -314,8 +314,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * The element will be removed if the specified count is 0.
      *
-     * @param e the e
-     * @param occurrences the occurrences
+     * @param e
+     * @param occurrences
      * @return this LongMultiset.
      * @throws IllegalArgumentException if the occurrences of element is less than 0
      */
@@ -340,9 +340,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Sets the all.
      *
-     * @param c the c
-     * @param occurrences the occurrences
-     * @return the long multiset
+     * @param c
+     * @param occurrences
+     * @return
      */
     public LongMultiset<T> setAll(final Collection<? extends T> c, final long occurrences) {
         checkOccurrences(occurrences);
@@ -359,7 +359,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Sets the all.
      *
-     * @param m the m
+     * @param m
      * @return this LongMultiset.
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
@@ -380,7 +380,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Sets the all.
      *
-     * @param multiset the multiset
+     * @param multiset
      * @return this LongMultiset.
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
@@ -397,8 +397,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Occurrences of.
      *
-     * @param e the e
-     * @return the long
+     * @param e
+     * @return
      */
     public long occurrencesOf(final Object e) {
         return get(e);
@@ -407,7 +407,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Min occurrences.
      *
-     * @return the optional
+     * @return
      */
     public Optional<Pair<T, Long>> minOccurrences() {
         if (size() == 0) {
@@ -434,7 +434,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Max occurrences.
      *
-     * @return the optional
+     * @return
      */
     public Optional<Pair<T, Long>> maxOccurrences() {
         if (size() == 0) {
@@ -461,7 +461,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * All min occurrences.
      *
-     * @return the optional
+     * @return
      */
     public Optional<Pair<List<T>, Long>> allMinOccurrences() {
         if (size() == 0) {
@@ -490,7 +490,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * All max occurrences.
      *
-     * @return the optional
+     * @return
      */
     public Optional<Pair<List<T>, Long>> allMaxOccurrences() {
         if (size() == 0) {
@@ -519,7 +519,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Sum of occurrences.
      *
-     * @return the long
+     * @return
      * @throws ArithmeticException if total occurrences overflows the maximum value of long.
      */
     public long sumOfOccurrences() {
@@ -535,7 +535,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Average of occurrences.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble averageOfOccurrences() {
         if (size() == 0) {
@@ -550,7 +550,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      * @return always true
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
@@ -561,8 +561,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the.
      *
-     * @param e the e
-     * @param occurrences the occurrences
+     * @param e
+     * @param occurrences
      * @return true if the specified occurrences is bigger than 0.
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
@@ -590,7 +590,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the if absent.
      *
-     * @param e the e
+     * @param e
      * @return true if the specified element is absent.
      * @throws IllegalArgumentException the illegal argument exception
      */
@@ -601,8 +601,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the if absent.
      *
-     * @param e the e
-     * @param occurrences the occurrences
+     * @param e
+     * @param occurrences
      * @return true if the specified element is absent and occurrences is bigger than 0.
      * @throws IllegalArgumentException the illegal argument exception
      */
@@ -624,8 +624,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the and get.
      *
-     * @param e the e
-     * @return the long
+     * @param e
+     * @return
      */
     public long addAndGet(final T e) {
         return addAndGet(e, 1);
@@ -634,9 +634,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the and get.
      *
-     * @param e the e
-     * @param occurrences the occurrences
-     * @return the long
+     * @param e
+     * @param occurrences
+     * @return
      */
     public long addAndGet(final T e, final long occurrences) {
         checkOccurrences(occurrences);
@@ -662,8 +662,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Gets the and add.
      *
-     * @param e the e
-     * @return the and add
+     * @param e
+     * @return
      */
     public long getAndAdd(final T e) {
         return getAndAdd(e, 1);
@@ -672,9 +672,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Gets the and add.
      *
-     * @param e the e
-     * @param occurrences the occurrences
-     * @return the and add
+     * @param e
+     * @param occurrences
+     * @return
      */
     public long getAndAdd(final T e, final long occurrences) {
         checkOccurrences(occurrences);
@@ -702,7 +702,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
@@ -717,8 +717,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the all.
      *
-     * @param c the c
-     * @param occurrences the occurrences
+     * @param c
+     * @param occurrences
      * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
@@ -739,7 +739,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the all.
      *
-     * @param m the m
+     * @param m
      * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
@@ -768,7 +768,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Adds the all.
      *
-     * @param multiset the multiset
+     * @param multiset
      * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
@@ -787,7 +787,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Contains.
      *
-     * @param o the o
+     * @param o
      * @return true, if successful
      */
     public boolean contains(final Object o) {
@@ -797,7 +797,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAll(final Collection<?> c) {
@@ -808,7 +808,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Remove one occurrence from the specified elements. 
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     public boolean remove(final Object e) {
@@ -819,8 +819,8 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Remove the specified occurrences from the specified element. 
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
-     * @param e the e
-     * @param occurrences the occurrences
+     * @param e
+     * @param occurrences
      * @return true, if successful
      */
     public boolean remove(final Object e, final long occurrences) {
@@ -844,8 +844,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the and get.
      *
-     * @param e the e
-     * @return the long
+     * @param e
+     * @return
      */
     public long removeAndGet(final Object e) {
         return removeAndGet(e, 1);
@@ -854,9 +854,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the and get.
      *
-     * @param e the e
-     * @param occurrences the occurrences
-     * @return the long
+     * @param e
+     * @param occurrences
+     * @return
      */
     public long removeAndGet(final Object e, final long occurrences) {
         checkOccurrences(occurrences);
@@ -879,8 +879,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Gets the and remove.
      *
-     * @param e the e
-     * @return the and remove
+     * @param e
+     * @return
      */
     public long getAndRemove(final Object e) {
         return getAndRemove(e, 1);
@@ -889,9 +889,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Gets the and remove.
      *
-     * @param e the e
-     * @param occurrences the occurrences
-     * @return the and remove
+     * @param e
+     * @param occurrences
+     * @return
      */
     public long getAndRemove(final Object e, final long occurrences) {
         checkOccurrences(occurrences);
@@ -913,8 +913,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the all occurrences.
      *
-     * @param e the e
-     * @return the occurrences of the specified element before it's removed.
+     * @param e
+     * @return
      */
     public long removeAllOccurrences(final Object e) {
         final MutableLong count = valueMap.remove(e);
@@ -925,8 +925,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the all occurrences if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
+     * @param <E>
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -955,8 +955,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the all occurrences if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
+     * @param <E>
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -985,9 +985,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the if.
      *
-     * @param <E> the element type
-     * @param occurrences the occurrences
-     * @param predicate the predicate
+     * @param <E>
+     * @param occurrences
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -1018,9 +1018,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the if.
      *
-     * @param <E> the element type
-     * @param occurrences the occurrences
-     * @param predicate the predicate
+     * @param <E>
+     * @param occurrences
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -1055,7 +1055,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * collection. This method ignores how often any element might appear in
      * {@code c}, and only cares whether or not an element appears at all.
      *
-     * @param c the c
+     * @param c
      * @return <tt>true</tt> if this set changed as a result of the call
      * @see Collection#removeAll(Collection)
      */
@@ -1081,8 +1081,8 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Remove the specified occurrences from the specified elements. 
      * The elements will be removed from this set if the occurrences equals to or less than 0 after the operation.
      *
-     * @param c the c
-     * @param occurrences            the occurrences to remove if the element is in the specified collection <code>c</code>.
+     * @param c
+     * @param occurrences the occurrences to remove if the element is in the specified collection <code>c</code>.
      * @return <tt>true</tt> if this set changed as a result of the call
      */
     public boolean removeAll(final Collection<?> c, final long occurrences) {
@@ -1108,7 +1108,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the all.
      *
-     * @param m the m
+     * @param m
      * @return true, if successful
      */
     public boolean removeAll(final Map<?, Long> m) {
@@ -1136,7 +1136,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Removes the all.
      *
-     * @param multiset the multiset
+     * @param multiset
      * @return true, if successful
      * @throws IllegalArgumentException the illegal argument exception
      */
@@ -1155,9 +1155,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Replace if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @param newOccurrences the new occurrences
+     * @param <E>
+     * @param predicate
+     * @param newOccurrences
      * @return true, if successful
      * @throws E the e
      */
@@ -1199,9 +1199,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Replace if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @param newOccurrences the new occurrences
+     * @param <E>
+     * @param predicate
+     * @param newOccurrences
      * @return true, if successful
      * @throws E the e
      */
@@ -1243,8 +1243,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * The associated elements will be removed if zero or negative occurrences are returned by the specified <code>function</code>.
      *
-     * @param <E> the element type
-     * @param function the function
+     * @param <E>
+     * @param function
      * @throws E the e
      */
     public <E extends Exception> void replaceAll(Try.BiFunction<? super T, ? super Long, Long, E> function) throws E {
@@ -1278,7 +1278,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * this collection all of its elements that are not contained in the
      * specified collection.
      *
-     * @param c the c
+     * @param c
      * @return <tt>true</tt> if this set changed as a result of the call
      * @see Collection#retainAll(Collection)
      */
@@ -1307,7 +1307,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Copy.
      *
-     * @return the long multiset
+     * @return
      */
     public LongMultiset<T> copy() {
         final LongMultiset<T> copy = new LongMultiset<>(mapSupplier);
@@ -1320,7 +1320,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Elements.
      *
-     * @return the sets the
+     * @return
      */
     public Set<T> elements() {
         return ImmutableSet.of(valueMap.keySet());
@@ -1329,7 +1329,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     public int size() {
         return valueMap.size();
@@ -1354,7 +1354,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Iterator.
      *
-     * @return the iterator
+     * @return
      */
     @Override
     public Iterator<T> iterator() {
@@ -1368,7 +1368,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To array.
      *
-     * @return the object[]
+     * @return
      */
     public Object[] toArray() {
         return valueMap.keySet().toArray();
@@ -1377,9 +1377,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param a the a
-     * @return the a[]
+     * @param <A>
+     * @param a
+     * @return
      */
     public <A> A[] toArray(final A[] a) {
         return valueMap.keySet().toArray(a);
@@ -1388,7 +1388,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To map.
      *
-     * @return the map
+     * @return
      */
     public Map<T, Long> toMap() {
         final Map<T, Long> result = Maps.newOrderingMap(valueMap);
@@ -1403,9 +1403,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To map.
      *
-     * @param <M> the generic type
-     * @param supplier the supplier
-     * @return the m
+     * @param <M>
+     * @param supplier
+     * @return
      */
     public <M extends Map<T, Long>> M toMap(final IntFunction<? extends M> supplier) {
         final M result = supplier.apply(size());
@@ -1420,7 +1420,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To map sorted by occurrences.
      *
-     * @return the map
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public Map<T, Long> toMapSortedByOccurrences() {
@@ -1430,8 +1430,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To map sorted by occurrences.
      *
-     * @param cmp the cmp
-     * @return the map
+     * @param cmp
+     * @return
      */
     public Map<T, Long> toMapSortedByOccurrences(final Comparator<? super Long> cmp) {
         return toMapSortedBy(new Comparator<Map.Entry<T, MutableLong>>() {
@@ -1445,8 +1445,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To map sorted by key.
      *
-     * @param cmp the cmp
-     * @return the map
+     * @param cmp
+     * @return
      */
     public Map<T, Long> toMapSortedByKey(final Comparator<? super T> cmp) {
         return toMapSortedBy(new Comparator<Map.Entry<T, MutableLong>>() {
@@ -1460,8 +1460,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To map sorted by.
      *
-     * @param cmp the cmp
-     * @return the map
+     * @param cmp
+     * @return
      */
     Map<T, Long> toMapSortedBy(final Comparator<Map.Entry<T, MutableLong>> cmp) {
         if (N.isNullOrEmpty(valueMap)) {
@@ -1483,7 +1483,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To immutable map.
      *
-     * @return the immutable map
+     * @return
      */
     public ImmutableMap<T, Long> toImmutableMap() {
         return ImmutableMap.of(toMap());
@@ -1492,8 +1492,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To immutable map.
      *
-     * @param mapSupplier the map supplier
-     * @return the immutable map
+     * @param mapSupplier
+     * @return
      */
     public ImmutableMap<T, Long> toImmutableMap(final IntFunction<? extends Map<T, Long>> mapSupplier) {
         return ImmutableMap.of(toMap(mapSupplier));
@@ -1534,9 +1534,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the long multiset
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> LongMultiset<T> filter(Try.Predicate<? super T, E> filter) throws E {
@@ -1554,9 +1554,9 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the long multiset
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> LongMultiset<T> filter(Try.BiPredicate<? super T, Long, E> filter) throws E {
@@ -1574,8 +1574,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(final Try.Consumer<? super T, E> action) throws E {
@@ -1589,8 +1589,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(final Try.ObjLongConsumer<? super T, E> action) throws E {
@@ -1620,10 +1620,10 @@ public final class LongMultiset<T> implements Iterable<T> {
      * return newValue;
      * </pre>
      *
-     * @param <E> the element type
-     * @param e the e
-     * @param mappingFunction the mapping function
-     * @return the long
+     * @param <E>
+     * @param e
+     * @param mappingFunction
+     * @return
      * @throws E the e
      */
     public <E extends Exception> long computeIfAbsent(T e, Try.Function<? super T, Long, E> mappingFunction) throws E {
@@ -1665,10 +1665,10 @@ public final class LongMultiset<T> implements Iterable<T> {
      * return newValue;
      * </pre>
      *
-     * @param <E> the element type
-     * @param e the e
-     * @param remappingFunction the remapping function
-     * @return the long
+     * @param <E>
+     * @param e
+     * @param remappingFunction
+     * @return
      * @throws E the e
      */
     public <E extends Exception> long computeIfPresent(T e, Try.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
@@ -1709,10 +1709,10 @@ public final class LongMultiset<T> implements Iterable<T> {
      * return newValue;
      * </pre>
      *
-     * @param <E> the element type
-     * @param key the key
-     * @param remappingFunction the remapping function
-     * @return the long
+     * @param <E>
+     * @param key
+     * @param remappingFunction
+     * @return
      * @throws E the e
      */
     public <E extends Exception> long compute(T key, Try.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
@@ -1750,11 +1750,11 @@ public final class LongMultiset<T> implements Iterable<T> {
      * return newValue;
      * </pre>
      *
-     * @param <E> the element type
-     * @param key the key
-     * @param value the value
-     * @param remappingFunction the remapping function
-     * @return the long
+     * @param <E>
+     * @param key
+     * @param value
+     * @param remappingFunction
+     * @return
      * @throws E the e
      */
     public <E extends Exception> long merge(T key, long value, Try.BiFunction<Long, Long, Long, E> remappingFunction) throws E {
@@ -1778,7 +1778,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<T> stream() {
         return Stream.of(valueMap.keySet());
@@ -1787,7 +1787,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Flat stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<T> flatStream() {
         final Iterator<Map.Entry<T, MutableLong>> entryIter = valueMap.entrySet().iterator();
@@ -1838,7 +1838,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Entry stream.
      *
-     * @return the entry stream
+     * @return
      */
     public EntryStream<T, Long> entryStream() {
         return EntryStream.of(valueMap).mapValue(TO_LONG);
@@ -1847,10 +1847,10 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> R apply(Try.Function<? super LongMultiset<T>, R, E> func) throws E {
@@ -1860,10 +1860,10 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Apply if not empty.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the optional
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super LongMultiset<T>, R, E> func) throws E {
@@ -1873,8 +1873,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<? super LongMultiset<T>, E> action) throws E {
@@ -1884,8 +1884,8 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Accept if not empty.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super LongMultiset<T>, E> action) throws E {
@@ -1897,7 +1897,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -1907,7 +1907,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -1918,7 +1918,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -1928,7 +1928,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Check occurrences.
      *
-     * @param occurrences the occurrences
+     * @param occurrences
      */
     private static void checkOccurrences(final long occurrences) {
         if (occurrences < 0) {

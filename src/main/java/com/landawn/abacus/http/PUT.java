@@ -33,7 +33,7 @@ public @interface PUT {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value() default "";
 }

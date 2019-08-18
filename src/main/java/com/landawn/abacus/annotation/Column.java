@@ -33,7 +33,7 @@ public @interface Column {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value() default "";
 }

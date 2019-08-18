@@ -45,9 +45,9 @@ public class ShortTriple {
     /**
      * Instantiates a new short triple.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
      */
     ShortTriple(short _1, short _2, short _3) {
         this._1 = _1;
@@ -58,10 +58,10 @@ public class ShortTriple {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @return the short triple
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @return
      */
     public static ShortTriple of(short _1, short _2, short _3) {
         return new ShortTriple(_1, _2, _3);
@@ -70,7 +70,7 @@ public class ShortTriple {
     /**
      * Min.
      *
-     * @return the short
+     * @return
      */
     public short min() {
         return N.min(_1, _2, _3);
@@ -79,7 +79,7 @@ public class ShortTriple {
     /**
      * Max.
      *
-     * @return the short
+     * @return
      */
     public short max() {
         return N.max(_1, _2, _3);
@@ -88,7 +88,7 @@ public class ShortTriple {
     /**
      * Median.
      *
-     * @return the short
+     * @return
      */
     public short median() {
         return N.median(_1, _2, _3);
@@ -97,7 +97,7 @@ public class ShortTriple {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return _1 + _2 + _3;
@@ -106,7 +106,7 @@ public class ShortTriple {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return (0d + _1 + _2 + _3) / 3;
@@ -115,7 +115,7 @@ public class ShortTriple {
     /**
      * Reversed.
      *
-     * @return the short triple
+     * @return
      */
     public ShortTriple reversed() {
         return new ShortTriple(_3, _2, _1);
@@ -124,7 +124,7 @@ public class ShortTriple {
     /**
      * To array.
      *
-     * @return the short[]
+     * @return
      */
     public short[] toArray() {
         return new short[] { _1, _2, _3 };
@@ -133,7 +133,7 @@ public class ShortTriple {
     /**
      * To list.
      *
-     * @return the short list
+     * @return
      */
     public ShortList toList() {
         return ShortList.of(_1, _2, _3);
@@ -142,8 +142,8 @@ public class ShortTriple {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.ShortConsumer<E> comsumer) throws E {
@@ -155,8 +155,8 @@ public class ShortTriple {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<ShortTriple, E> action) throws E {
@@ -166,10 +166,10 @@ public class ShortTriple {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<ShortTriple, U, E> mapper) throws E {
@@ -179,9 +179,9 @@ public class ShortTriple {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<ShortTriple> filter(final Try.Predicate<ShortTriple, E> predicate) throws E {
@@ -191,7 +191,7 @@ public class ShortTriple {
     /**
      * Stream.
      *
-     * @return the short stream
+     * @return
      */
     public ShortStream stream() {
         return ShortStream.of(_1, _2, _3);
@@ -200,7 +200,7 @@ public class ShortTriple {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -210,7 +210,7 @@ public class ShortTriple {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -228,7 +228,7 @@ public class ShortTriple {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

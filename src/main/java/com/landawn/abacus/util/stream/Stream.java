@@ -259,7 +259,7 @@ public abstract class Stream<T>
      *        not merged to the interval, then mapper will receive the same
      *        value twice, otherwise it will receive the leftmost and the
      *        rightmost values which were merged to the range.
-     * @return the new stream
+     * @return
      * @see #collapse(BiPredicate, BinaryOperator)
      */
     @SequentialOnly
@@ -717,8 +717,8 @@ public abstract class Stream<T>
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param accumulator  the accumulation function
-     * @return the new stream which has the extract same size as this stream.
+     * @param accumulator the accumulation function
+     * @return
      */
     @SequentialOnly
     public abstract Stream<T> scan(final BiFunction<? super T, ? super T, T> accumulator);
@@ -748,8 +748,8 @@ public abstract class Stream<T>
      * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * 
-     * @param accumulator  the accumulation function
-     * @return the new stream which has the extract same size as this stream.
+     * @param accumulator the accumulation function
+     * @return
      */
     @SequentialOnly
     public abstract <U> Stream<U> scan(final U init, final BiFunction<U, ? super T, U> accumulator);

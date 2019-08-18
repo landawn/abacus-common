@@ -121,7 +121,7 @@ public abstract class DateUtil {
      * A new instance of <code>java.sql.Time</code> returned is based on the
      * current time in the default time zone with the default locale.
      *
-     * @return the time
+     * @return
      */
     public static Time currentTime() {
         return new Time(System.currentTimeMillis());
@@ -131,7 +131,7 @@ public abstract class DateUtil {
      * A new instance of <code>java.sql.Date</code> returned is based on the
      * current time in the default time zone with the default locale.
      *
-     * @return the date
+     * @return
      */
     public static Date currentDate() {
         return new Date(System.currentTimeMillis());
@@ -141,7 +141,7 @@ public abstract class DateUtil {
      * A new instance of <code>java.sql.Timestamp</code> returned is based on
      * the current time in the default time zone with the default locale.
      *
-     * @return the timestamp
+     * @return
      */
     public static Timestamp currentTimestamp() {
         return new Timestamp(System.currentTimeMillis());
@@ -151,7 +151,7 @@ public abstract class DateUtil {
      * A new instance of <code>java.util.Date</code> returned is based on the
      * current time in the default time zone with the default locale.
      *
-     * @return the java.util. date
+     * @return
      */
     public static java.util.Date currentJUDate() {
         return new java.util.Date();
@@ -170,7 +170,7 @@ public abstract class DateUtil {
     /**
      * Current gregorian calendar.
      *
-     * @return the gregorian calendar
+     * @return
      */
     public static GregorianCalendar currentGregorianCalendar() {
         return new GregorianCalendar();
@@ -179,7 +179,7 @@ public abstract class DateUtil {
     /**
      * Current XML gregorian calendar.
      *
-     * @return the XML gregorian calendar
+     * @return
      */
     public static XMLGregorianCalendar currentXMLGregorianCalendar() {
         return dataTypeFactory.newXMLGregorianCalendar(currentGregorianCalendar());
@@ -271,8 +271,8 @@ public abstract class DateUtil {
     /**
      * Creates the JU date.
      *
-     * @param calendar the calendar
-     * @return the java.util. date
+     * @param calendar
+     * @return
      */
     public static java.util.Date createJUDate(final Calendar calendar) {
         return (calendar == null) ? null : createJUDate(calendar.getTimeInMillis());
@@ -281,8 +281,8 @@ public abstract class DateUtil {
     /**
      * Creates the JU date.
      *
-     * @param date the date
-     * @return the java.util. date
+     * @param date
+     * @return
      */
     public static java.util.Date createJUDate(final java.util.Date date) {
         return (date == null) ? null : createJUDate(date.getTime());
@@ -291,8 +291,8 @@ public abstract class DateUtil {
     /**
      * Creates the JU date.
      *
-     * @param timeInMillis the time in millis
-     * @return the java.util. date
+     * @param timeInMillis
+     * @return
      */
     public static java.util.Date createJUDate(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -303,8 +303,8 @@ public abstract class DateUtil {
     /**
      * Creates the date.
      *
-     * @param calendar the calendar
-     * @return the date
+     * @param calendar
+     * @return
      */
     public static Date createDate(final Calendar calendar) {
         return (calendar == null) ? null : createDate(calendar.getTimeInMillis());
@@ -313,8 +313,8 @@ public abstract class DateUtil {
     /**
      * Creates the date.
      *
-     * @param date the date
-     * @return the date
+     * @param date
+     * @return
      */
     public static Date createDate(final java.util.Date date) {
         return (date == null) ? null : createDate(date.getTime());
@@ -323,8 +323,8 @@ public abstract class DateUtil {
     /**
      * Creates the date.
      *
-     * @param timeInMillis the time in millis
-     * @return the date
+     * @param timeInMillis
+     * @return
      */
     public static Date createDate(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -335,8 +335,8 @@ public abstract class DateUtil {
     /**
      * Creates the time.
      *
-     * @param calendar the calendar
-     * @return the time
+     * @param calendar
+     * @return
      */
     public static Time createTime(final Calendar calendar) {
         return (calendar == null) ? null : createTime(calendar.getTimeInMillis());
@@ -345,8 +345,8 @@ public abstract class DateUtil {
     /**
      * Creates the time.
      *
-     * @param date the date
-     * @return the time
+     * @param date
+     * @return
      */
     public static Time createTime(final java.util.Date date) {
         return (date == null) ? null : createTime(date.getTime());
@@ -355,8 +355,8 @@ public abstract class DateUtil {
     /**
      * Creates the time.
      *
-     * @param timeInMillis the time in millis
-     * @return the time
+     * @param timeInMillis
+     * @return
      */
     public static Time createTime(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -367,8 +367,8 @@ public abstract class DateUtil {
     /**
      * Creates the timestamp.
      *
-     * @param calendar the calendar
-     * @return the timestamp
+     * @param calendar
+     * @return
      */
     public static Timestamp createTimestamp(final Calendar calendar) {
         return (calendar == null) ? null : createTimestamp(calendar.getTimeInMillis());
@@ -377,8 +377,8 @@ public abstract class DateUtil {
     /**
      * Creates the timestamp.
      *
-     * @param date the date
-     * @return the timestamp
+     * @param date
+     * @return
      */
     public static Timestamp createTimestamp(final java.util.Date date) {
         return (date == null) ? null : createTimestamp(date.getTime());
@@ -387,8 +387,8 @@ public abstract class DateUtil {
     /**
      * Creates the timestamp.
      *
-     * @param timeInMillis the time in millis
-     * @return the timestamp
+     * @param timeInMillis
+     * @return
      */
     public static Timestamp createTimestamp(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -399,8 +399,8 @@ public abstract class DateUtil {
     /**
      * Creates the calendar.
      *
-     * @param calendar the calendar
-     * @return the calendar
+     * @param calendar
+     * @return
      */
     public static Calendar createCalendar(final Calendar calendar) {
         return (calendar == null) ? null : createCalendar(calendar.getTimeInMillis());
@@ -409,8 +409,8 @@ public abstract class DateUtil {
     /**
      * Creates the calendar.
      *
-     * @param date the date
-     * @return the calendar
+     * @param date
+     * @return
      */
     public static Calendar createCalendar(final java.util.Date date) {
         return (date == null) ? null : createCalendar(date.getTime());
@@ -419,8 +419,8 @@ public abstract class DateUtil {
     /**
      * Creates the calendar.
      *
-     * @param timeInMillis the time in millis
-     * @return the calendar
+     * @param timeInMillis
+     * @return
      */
     public static Calendar createCalendar(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -439,9 +439,9 @@ public abstract class DateUtil {
     /**
      * Creates the calendar.
      *
-     * @param timeInMillis the time in millis
-     * @param tz the tz
-     * @return the calendar
+     * @param timeInMillis
+     * @param tz
+     * @return
      */
     public static Calendar createCalendar(final long timeInMillis, final TimeZone tz) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -460,8 +460,8 @@ public abstract class DateUtil {
     /**
      * Creates the gregorian calendar.
      *
-     * @param calendar the calendar
-     * @return the gregorian calendar
+     * @param calendar
+     * @return
      */
     public static GregorianCalendar createGregorianCalendar(final Calendar calendar) {
         return (calendar == null) ? null : createGregorianCalendar(calendar.getTimeInMillis());
@@ -470,8 +470,8 @@ public abstract class DateUtil {
     /**
      * Creates the gregorian calendar.
      *
-     * @param date the date
-     * @return the gregorian calendar
+     * @param date
+     * @return
      */
     public static GregorianCalendar createGregorianCalendar(final java.util.Date date) {
         return (date == null) ? null : createGregorianCalendar(date.getTime());
@@ -480,8 +480,8 @@ public abstract class DateUtil {
     /**
      * Creates the gregorian calendar.
      *
-     * @param timeInMillis the time in millis
-     * @return the gregorian calendar
+     * @param timeInMillis
+     * @return
      */
     public static GregorianCalendar createGregorianCalendar(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -500,9 +500,9 @@ public abstract class DateUtil {
     /**
      * Creates the gregorian calendar.
      *
-     * @param timeInMillis the time in millis
-     * @param tz the tz
-     * @return the gregorian calendar
+     * @param timeInMillis
+     * @param tz
+     * @return
      */
     public static GregorianCalendar createGregorianCalendar(final long timeInMillis, final TimeZone tz) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -521,8 +521,8 @@ public abstract class DateUtil {
     /**
      * Creates the XML gregorian calendar.
      *
-     * @param calendar the calendar
-     * @return the XML gregorian calendar
+     * @param calendar
+     * @return
      */
     public static XMLGregorianCalendar createXMLGregorianCalendar(final Calendar calendar) {
         return (calendar == null) ? null : createXMLGregorianCalendar(calendar.getTimeInMillis());
@@ -531,8 +531,8 @@ public abstract class DateUtil {
     /**
      * Creates the XML gregorian calendar.
      *
-     * @param date the date
-     * @return the XML gregorian calendar
+     * @param date
+     * @return
      */
     public static XMLGregorianCalendar createXMLGregorianCalendar(final java.util.Date date) {
         return (date == null) ? null : createXMLGregorianCalendar(date.getTime());
@@ -541,8 +541,8 @@ public abstract class DateUtil {
     /**
      * Creates the XML gregorian calendar.
      *
-     * @param timeInMillis the time in millis
-     * @return the XML gregorian calendar
+     * @param timeInMillis
+     * @return
      */
     public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis) {
         N.checkArgPositive(timeInMillis, "timeInMillis");
@@ -557,8 +557,8 @@ public abstract class DateUtil {
     /**
      * Parses the JU date.
      *
-     * @param date the date
-     * @return the java.util. date
+     * @param date
+     * @return
      */
     public static java.util.Date parseJUDate(final String date) {
         return parseJUDate(date, null);
@@ -567,9 +567,9 @@ public abstract class DateUtil {
     /**
      * Parses the JU date.
      *
-     * @param date the date
-     * @param format the format
-     * @return the java.util. date
+     * @param date
+     * @param format
+     * @return
      */
     public static java.util.Date parseJUDate(final String date, final String format) {
         return parseJUDate(date, format, null);
@@ -579,10 +579,10 @@ public abstract class DateUtil {
      * Converts the specified <code>date</code> with the specified {@code format} to a new instance of java.util.Date.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
      *
-     * @param date the date
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the java.util. date
+     * @param date
+     * @param format
+     * @param timeZone
+     * @return
      * @throws IllegalArgumentException             if the date given can't be parsed with specified format.
      */
     public static java.util.Date parseJUDate(final String date, final String format, final TimeZone timeZone) {
@@ -596,8 +596,8 @@ public abstract class DateUtil {
     /**
      * Parses the date.
      *
-     * @param date the date
-     * @return the date
+     * @param date
+     * @return
      */
     public static Date parseDate(final String date) {
         return parseDate(date, null);
@@ -606,9 +606,9 @@ public abstract class DateUtil {
     /**
      * Parses the date.
      *
-     * @param date the date
-     * @param format the format
-     * @return the date
+     * @param date
+     * @param format
+     * @return
      */
     public static Date parseDate(final String date, final String format) {
         return parseDate(date, format, null);
@@ -618,10 +618,10 @@ public abstract class DateUtil {
      * Converts the specified <code>date</code> with the specified {@code format} to a new instance of java.sql.Date.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
      *
-     * @param date the date
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the date
+     * @param date
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static Date parseDate(final String date, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
@@ -634,8 +634,8 @@ public abstract class DateUtil {
     /**
      * Parses the time.
      *
-     * @param date the date
-     * @return the time
+     * @param date
+     * @return
      */
     public static Time parseTime(final String date) {
         return parseTime(date, null);
@@ -644,9 +644,9 @@ public abstract class DateUtil {
     /**
      * Parses the time.
      *
-     * @param date the date
-     * @param format the format
-     * @return the time
+     * @param date
+     * @param format
+     * @return
      */
     public static Time parseTime(final String date, final String format) {
         return parseTime(date, format, null);
@@ -656,10 +656,10 @@ public abstract class DateUtil {
      * Converts the specified <code>date</code> with the specified {@code format} to a new instance of Time.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
      *
-     * @param date the date
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the time
+     * @param date
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static Time parseTime(final String date, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
@@ -672,8 +672,8 @@ public abstract class DateUtil {
     /**
      * Parses the timestamp.
      *
-     * @param date the date
-     * @return the timestamp
+     * @param date
+     * @return
      */
     public static Timestamp parseTimestamp(final String date) {
         return parseTimestamp(date, null);
@@ -682,9 +682,9 @@ public abstract class DateUtil {
     /**
      * Parses the timestamp.
      *
-     * @param date the date
-     * @param format the format
-     * @return the timestamp
+     * @param date
+     * @param format
+     * @return
      */
     public static Timestamp parseTimestamp(final String date, final String format) {
         return parseTimestamp(date, format, null);
@@ -694,10 +694,10 @@ public abstract class DateUtil {
      * Converts the specified <code>date</code> with the specified {@code format} to a new instance of Timestamp.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
      *
-     * @param date the date
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the timestamp
+     * @param date
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static Timestamp parseTimestamp(final String date, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date))) {
@@ -710,8 +710,8 @@ public abstract class DateUtil {
     /**
      * Parses the calendar.
      *
-     * @param calendar the calendar
-     * @return the calendar
+     * @param calendar
+     * @return
      */
     public static Calendar parseCalendar(final String calendar) {
         return parseCalendar(calendar, null);
@@ -720,9 +720,9 @@ public abstract class DateUtil {
     /**
      * Parses the calendar.
      *
-     * @param calendar the calendar
-     * @param format the format
-     * @return the calendar
+     * @param calendar
+     * @param format
+     * @return
      */
     public static Calendar parseCalendar(final String calendar, final String format) {
         return parseCalendar(calendar, format, null);
@@ -732,10 +732,10 @@ public abstract class DateUtil {
      * Converts the specified <code>calendar</code> with the specified {@code format} to a new instance of Calendar.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
      *
-     * @param calendar the calendar
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the calendar
+     * @param calendar
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static Calendar parseCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -748,8 +748,8 @@ public abstract class DateUtil {
     /**
      * Parses the gregorian calendar.
      *
-     * @param calendar the calendar
-     * @return the gregorian calendar
+     * @param calendar
+     * @return
      */
     public static GregorianCalendar parseGregorianCalendar(final String calendar) {
         return parseGregorianCalendar(calendar, null);
@@ -758,9 +758,9 @@ public abstract class DateUtil {
     /**
      * Parses the gregorian calendar.
      *
-     * @param calendar the calendar
-     * @param format the format
-     * @return the gregorian calendar
+     * @param calendar
+     * @param format
+     * @return
      */
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format) {
         return parseGregorianCalendar(calendar, format, null);
@@ -770,10 +770,10 @@ public abstract class DateUtil {
      * Converts the specified <code>calendar</code> with the specified {@code format} to a new instance of GregorianCalendar.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
      *
-     * @param calendar the calendar
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the gregorian calendar
+     * @param calendar
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -786,8 +786,8 @@ public abstract class DateUtil {
     /**
      * Parses the XML gregorian calendar.
      *
-     * @param calendar the calendar
-     * @return the XML gregorian calendar
+     * @param calendar
+     * @return
      */
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar) {
         return parseXMLGregorianCalendar(calendar, null);
@@ -796,9 +796,9 @@ public abstract class DateUtil {
     /**
      * Parses the XML gregorian calendar.
      *
-     * @param calendar the calendar
-     * @param format the format
-     * @return the XML gregorian calendar
+     * @param calendar
+     * @param format
+     * @return
      */
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format) {
         return parseXMLGregorianCalendar(calendar, format, null);
@@ -808,10 +808,10 @@ public abstract class DateUtil {
      * Converts the specified <code>calendar</code> with the specified {@code format} to a new instance of XMLGregorianCalendar.
      * <code>null</code> is returned if the specified <code>date</code> is null or empty.
      *
-     * @param calendar the calendar
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the XML gregorian calendar
+     * @param calendar
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
@@ -824,10 +824,10 @@ public abstract class DateUtil {
     /**
      * Parses the.
      *
-     * @param date the date
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the long
+     * @param date
+     * @param format
+     * @param timeZone
+     * @return
      */
     private static long parse(final String date, String format, TimeZone timeZone) {
         if ((format == null) && date.length() > 4 && (date.charAt(2) >= '0' && date.charAt(2) <= '9' && date.charAt(4) >= '0' && date.charAt(4) <= '9')) {
@@ -870,8 +870,8 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param date the date
-     * @return the string
+     * @param date
+     * @return
      */
     public static String format(final java.util.Date date) {
         return format(date, null, null);
@@ -880,9 +880,9 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param date the date
-     * @param format the format
-     * @return the string
+     * @param date
+     * @param format
+     * @return
      */
     public static String format(final java.util.Date date, final String format) {
         return format(date, format, null);
@@ -891,10 +891,10 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param date the date
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the string
+     * @param date
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static String format(final java.util.Date date, final String format, final TimeZone timeZone) {
         return formatDate(null, date, format, timeZone);
@@ -903,8 +903,8 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param date the date
+     * @param writer
+     * @param date
      */
     public static void format(final Writer writer, final java.util.Date date) {
         format(writer, date, null, null);
@@ -913,9 +913,9 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param date the date
-     * @param format the format
+     * @param writer
+     * @param date
+     * @param format
      */
     public static void format(final Writer writer, final java.util.Date date, final String format) {
         formatDate(writer, date, format, null);
@@ -924,10 +924,10 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param date the date
-     * @param format the format
-     * @param timeZone the time zone
+     * @param writer
+     * @param date
+     * @param format
+     * @param timeZone
      */
     public static void format(final Writer writer, final java.util.Date date, final String format, final TimeZone timeZone) {
         formatDate(writer, date, format, timeZone);
@@ -936,8 +936,8 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param c the c
-     * @return the string
+     * @param c
+     * @return
      */
     public static String format(final Calendar c) {
         return format(c, null, null);
@@ -946,9 +946,9 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param c the c
-     * @param format the format
-     * @return the string
+     * @param c
+     * @param format
+     * @return
      */
     public static String format(final Calendar c, final String format) {
         return format(c, format, null);
@@ -957,10 +957,10 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param c the c
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the string
+     * @param c
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static String format(final Calendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
@@ -980,8 +980,8 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param c the c
+     * @param writer
+     * @param c
      */
     public static void format(final Writer writer, final Calendar c) {
         format(writer, c, null, null);
@@ -990,9 +990,9 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param c the c
-     * @param format the format
+     * @param writer
+     * @param c
+     * @param format
      */
     public static void format(final Writer writer, final Calendar c, final String format) {
         format(writer, c, format, null);
@@ -1001,10 +1001,10 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param c the c
-     * @param format the format
-     * @param timeZone the time zone
+     * @param writer
+     * @param c
+     * @param format
+     * @param timeZone
      */
     public static void format(final Writer writer, final Calendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
@@ -1017,8 +1017,8 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param c the c
-     * @return the string
+     * @param c
+     * @return
      */
     public static String format(final XMLGregorianCalendar c) {
         return format(c, null, null);
@@ -1027,9 +1027,9 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param c the c
-     * @param format the format
-     * @return the string
+     * @param c
+     * @param format
+     * @return
      */
     public static String format(final XMLGregorianCalendar c, final String format) {
         return format(c, format, null);
@@ -1038,10 +1038,10 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param c the c
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the string
+     * @param c
+     * @param format
+     * @param timeZone
+     * @return
      */
     public static String format(final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
@@ -1062,8 +1062,8 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param c the c
+     * @param writer
+     * @param c
      */
     public static void format(final Writer writer, final XMLGregorianCalendar c) {
         format(writer, c, null, null);
@@ -1072,9 +1072,9 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param c the c
-     * @param format the format
+     * @param writer
+     * @param c
+     * @param format
      */
     public static void format(final Writer writer, final XMLGregorianCalendar c, final String format) {
         format(writer, c, format, null);
@@ -1083,10 +1083,10 @@ public abstract class DateUtil {
     /**
      * Format.
      *
-     * @param writer the writer
-     * @param c the c
-     * @param format the format
-     * @param timeZone the time zone
+     * @param writer
+     * @param c
+     * @param format
+     * @param timeZone
      */
     public static void format(final Writer writer, final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
@@ -1104,8 +1104,8 @@ public abstract class DateUtil {
      * Sets the years field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
+     * @param <T>
+     * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
@@ -1123,8 +1123,8 @@ public abstract class DateUtil {
      * Sets the months field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
+     * @param <T>
+     * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
@@ -1142,8 +1142,8 @@ public abstract class DateUtil {
      * Sets the day of month field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
+     * @param <T>
+     * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
@@ -1162,8 +1162,8 @@ public abstract class DateUtil {
      * from  0-23.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
+     * @param <T>
+     * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
@@ -1181,8 +1181,8 @@ public abstract class DateUtil {
      * Sets the minute field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
+     * @param <T>
+     * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
@@ -1200,8 +1200,8 @@ public abstract class DateUtil {
      * Sets the seconds field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
+     * @param <T>
+     * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
@@ -1219,8 +1219,8 @@ public abstract class DateUtil {
      * Sets the milliseconds field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
+     * @param <T>
+     * @param date the date, not null
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
@@ -1239,9 +1239,9 @@ public abstract class DateUtil {
      * This does not use a lenient calendar.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param calendarField  the {@code Calendar} field to set the amount to
+     * @param <T>
+     * @param date the date, not null
+     * @param calendarField the {@code Calendar} field to set the amount to
      * @param amount the amount to set
      * @return a new {@code Date} set with the specified value
      * @throws IllegalArgumentException if the date is null
@@ -1266,10 +1266,10 @@ public abstract class DateUtil {
      * <p>
      * <code>N.roll(date, -5, TimeUnit.DAYS)</code>.
      *
-     * @param <T> the generic type
-     * @param date the date
-     * @param amount the amount
-     * @param unit the unit
+     * @param <T>
+     * @param date
+     * @param amount
+     * @param unit
      * @return a new instance of Date with the specified amount rolled.
      * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
@@ -1287,10 +1287,10 @@ public abstract class DateUtil {
      * <p>
      * <code>N.roll(date, -5, CalendarUnit.DAY)</code>.
      *
-     * @param <T> the generic type
-     * @param date the date
-     * @param amount the amount
-     * @param unit the unit
+     * @param <T>
+     * @param date
+     * @param amount
+     * @param unit
      * @return a new instance of Date with the specified amount rolled.
      * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
@@ -1322,10 +1322,10 @@ public abstract class DateUtil {
      * <p>
      * <code>N.roll(c, -5, TimeUnit.DAYS)</code>.
      *
-     * @param <T> the generic type
-     * @param calendar the calendar
-     * @param amount the amount
-     * @param unit the unit
+     * @param <T>
+     * @param calendar
+     * @param amount
+     * @param unit
      * @return a new instance of Calendar with the specified amount rolled.
      * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
@@ -1343,10 +1343,10 @@ public abstract class DateUtil {
      * <p>
      * <code>N.roll(c, -5, CalendarUnit.DAY)</code>.
      *
-     * @param <T> the generic type
-     * @param calendar the calendar
-     * @param amount the amount
-     * @param unit the unit
+     * @param <T>
+     * @param calendar
+     * @param amount
+     * @param unit
      * @return a new instance of Calendar with the specified amount rolled.
      * @deprecated replaced by {@code addYears/addMonths/addWeeks/...}
      */
@@ -1372,10 +1372,10 @@ public abstract class DateUtil {
      * Adds a number of years to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param date the date, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addYears(final T date, final int amount) {
@@ -1387,10 +1387,10 @@ public abstract class DateUtil {
      * Adds a number of months to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param date the date, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addMonths(final T date, final int amount) {
@@ -1402,10 +1402,10 @@ public abstract class DateUtil {
      * Adds a number of weeks to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param date the date, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addWeeks(final T date, final int amount) {
@@ -1417,10 +1417,10 @@ public abstract class DateUtil {
      * Adds a number of days to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param date the date, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addDays(final T date, final int amount) {
@@ -1432,10 +1432,10 @@ public abstract class DateUtil {
      * Adds a number of hours to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param date the date, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addHours(final T date, final int amount) {
@@ -1447,10 +1447,10 @@ public abstract class DateUtil {
      * Adds a number of minutes to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param date the date, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addMinutes(final T date, final int amount) {
@@ -1462,10 +1462,10 @@ public abstract class DateUtil {
      * Adds a number of seconds to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param date the date, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addSeconds(final T date, final int amount) {
@@ -1477,10 +1477,10 @@ public abstract class DateUtil {
      * Adds a number of milliseconds to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param date  the date, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param date the date, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the date is null
      */
     public static <T extends java.util.Date> T addMilliseconds(final T date, final int amount) {
@@ -1492,10 +1492,10 @@ public abstract class DateUtil {
      * Adds a number of years to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param calendar  the calendar, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param calendar the calendar, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addYears(final T calendar, final int amount) {
@@ -1507,10 +1507,10 @@ public abstract class DateUtil {
      * Adds a number of months to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param calendar  the calendar, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param calendar the calendar, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addMonths(final T calendar, final int amount) {
@@ -1522,10 +1522,10 @@ public abstract class DateUtil {
      * Adds a number of weeks to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param calendar  the calendar, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param calendar the calendar, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addWeeks(final T calendar, final int amount) {
@@ -1537,10 +1537,10 @@ public abstract class DateUtil {
      * Adds a number of days to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param calendar  the calendar, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param calendar the calendar, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addDays(final T calendar, final int amount) {
@@ -1552,10 +1552,10 @@ public abstract class DateUtil {
      * Adds a number of hours to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param calendar  the calendar, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param calendar the calendar, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addHours(final T calendar, final int amount) {
@@ -1567,10 +1567,10 @@ public abstract class DateUtil {
      * Adds a number of minutes to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param calendar  the calendar, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param calendar the calendar, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addMinutes(final T calendar, final int amount) {
@@ -1582,10 +1582,10 @@ public abstract class DateUtil {
      * Adds a number of seconds to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param calendar  the calendar, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param calendar the calendar, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addSeconds(final T calendar, final int amount) {
@@ -1597,10 +1597,10 @@ public abstract class DateUtil {
      * Adds a number of milliseconds to a calendar returning a new object.
      * The original {@code Date} is unchanged.
      *
-     * @param <T> the generic type
-     * @param calendar  the calendar, not null
-     * @param amount  the amount to add, may be negative
-     * @return the new {@code Date} with the amount added
+     * @param <T>
+     * @param calendar the calendar, not null
+     * @param amount the amount to add, may be negative
+     * @return
      * @throws IllegalArgumentException if the calendar is null
      */
     public static <T extends Calendar> T addMilliseconds(final T calendar, final int amount) {
@@ -1631,10 +1631,10 @@ public abstract class DateUtil {
      * <li>March 30, 2003 02:40 rounds to March 30, 2003 04:00</li>
      * </ul>
      *
-     * @param <T> the generic type
-     * @param date  the date to work with, not null
-     * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
-     * @return the different rounded date, not null
+     * @param <T>
+     * @param date the date to work with, not null
+     * @param field the field from {@code Calendar} or <code>SEMI_MONTH</code>
+     * @return
      * @throws ArithmeticException if the year is over 280 million
      */
     public static <T extends java.util.Date> T round(final T date, final int field) {
@@ -1671,10 +1671,10 @@ public abstract class DateUtil {
      * <li>March 30, 2003 02:40 rounds to March 30, 2003 04:00</li>
      * </ul>
      *
-     * @param <T> the generic type
-     * @param calendar  the date to work with, not null
-     * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
-     * @return the different rounded date, not null
+     * @param <T>
+     * @param calendar the date to work with, not null
+     * @param field the field from {@code Calendar} or <code>SEMI_MONTH</code>
+     * @return
      * @throws IllegalArgumentException if the date is <code>null</code>
      * @throws ArithmeticException if the year is over 280 million
      */
@@ -1704,10 +1704,10 @@ public abstract class DateUtil {
      * 2002 13:00:00.000.  If this was passed with MONTH, it would
      * return 1 Mar 2002 0:00:00.000.</p>
      *
-     * @param <T> the generic type
-     * @param date  the date to work with, not null
-     * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
-     * @return the different truncated date, not null
+     * @param <T>
+     * @param date the date to work with, not null
+     * @param field the field from {@code Calendar} or <code>SEMI_MONTH</code>
+     * @return
      * @throws IllegalArgumentException if the date is <code>null</code>
      * @throws ArithmeticException if the year is over 280 million
      */
@@ -1733,10 +1733,10 @@ public abstract class DateUtil {
      * 2002 13:00:00.000.  If this was passed with MONTH, it would
      * return 1 Mar 2002 0:00:00.000.</p>
      *
-     * @param <T> the generic type
-     * @param calendar  the date to work with, not null
-     * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
-     * @return the different truncated date, not null
+     * @param <T>
+     * @param calendar the date to work with, not null
+     * @param field the field from {@code Calendar} or <code>SEMI_MONTH</code>
+     * @return
      * @throws IllegalArgumentException if the date is <code>null</code>
      * @throws ArithmeticException if the year is over 280 million
      */
@@ -1766,10 +1766,10 @@ public abstract class DateUtil {
      * 2002 14:00:00.000.  If this was passed with MONTH, it would
      * return 1 Apr 2002 0:00:00.000.</p>
      *
-     * @param <T> the generic type
-     * @param date  the date to work with, not null
-     * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
-     * @return the different ceil date, not null
+     * @param <T>
+     * @param date the date to work with, not null
+     * @param field the field from {@code Calendar} or <code>SEMI_MONTH</code>
+     * @return
      * @throws IllegalArgumentException if the date is <code>null</code>
      * @throws ArithmeticException if the year is over 280 million
      * @since 2.5
@@ -1796,10 +1796,10 @@ public abstract class DateUtil {
      * 2002 14:00:00.000.  If this was passed with MONTH, it would
      * return 1 Apr 2002 0:00:00.000.</p>
      *
-     * @param <T> the generic type
-     * @param calendar  the date to work with, not null
-     * @param field  the field from {@code Calendar} or <code>SEMI_MONTH</code>
-     * @return the different ceil date, not null
+     * @param <T>
+     * @param calendar the date to work with, not null
+     * @param field the field from {@code Calendar} or <code>SEMI_MONTH</code>
+     * @return
      * @throws IllegalArgumentException if the date is <code>null</code>
      * @throws ArithmeticException if the year is over 280 million
      * @since 2.5
@@ -1825,9 +1825,9 @@ public abstract class DateUtil {
      * 
      * <p>Internal calculation method.</p>
      *
-     * @param val  the calendar, not null
-     * @param field the field
-     * @param modType  type to truncate, round or ceiling
+     * @param val the calendar, not null
+     * @param field
+     * @param modType type to truncate, round or ceiling
      * @throws ArithmeticException if the year is over 280 million
      */
     private static void modify(final Calendar val, final int field, final ModifyType modType) {
@@ -2057,9 +2057,9 @@ public abstract class DateUtil {
     /**
      * Gets the sdf.
      *
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the sdf
+     * @param format
+     * @param timeZone
+     * @return
      */
     private static DateFormat getSDF(final String format, final TimeZone timeZone) {
         DateFormat sdf = null;
@@ -2107,9 +2107,9 @@ public abstract class DateUtil {
     /**
      * Recycle SDF.
      *
-     * @param format the format
-     * @param timeZone the time zone
-     * @param sdf the sdf
+     * @param format
+     * @param timeZone
+     * @param sdf
      */
     private static void recycleSDF(final String format, final TimeZone timeZone, final DateFormat sdf) {
         if (timeZone == UTC_TIME_ZONE) {
@@ -2128,9 +2128,9 @@ public abstract class DateUtil {
     /**
      * Check date format.
      *
-     * @param str the str
-     * @param format the format
-     * @return the string
+     * @param str
+     * @param format
+     * @return
      */
     private static String checkDateFormat(final String str, final String format) {
         if (N.isNullOrEmpty(format)) {
@@ -2202,9 +2202,9 @@ public abstract class DateUtil {
     /**
      * Check time zone.
      *
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the time zone
+     * @param format
+     * @param timeZone
+     * @return
      */
     private static TimeZone checkTimeZone(final String format, TimeZone timeZone) {
         if (timeZone == null) {
@@ -2217,10 +2217,10 @@ public abstract class DateUtil {
     /**
      * Fast date parse.
      *
-     * @param str the str
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the long
+     * @param str
+     * @param format
+     * @param timeZone
+     * @return
      */
     private static long fastDateParse(final String str, final String format, final TimeZone timeZone) {
         if (!((str.length() == 24) || (str.length() == 20) || (str.length() == 19) || (str.length() == 23))) {
@@ -2296,10 +2296,10 @@ public abstract class DateUtil {
     /**
      * Parses the int.
      *
-     * @param str the str
-     * @param from the from
-     * @param to the to
-     * @return the int
+     * @param str
+     * @param from
+     * @param to
+     * @return
      */
     private static int parseInt(final String str, int from, final int to) {
         int result = 0;
@@ -2314,10 +2314,10 @@ public abstract class DateUtil {
     /**
      * Creates the date.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @param millis the millis
-     * @return the t
+     * @param <T>
+     * @param cls
+     * @param millis
+     * @return
      */
     private static <T extends java.util.Date> T createDate(final Class<? extends java.util.Date> cls, final long millis) {
         java.util.Date result = null;
@@ -2340,10 +2340,10 @@ public abstract class DateUtil {
     /**
      * Creates the calendar.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param millis the millis
-     * @return the t
+     * @param <T>
+     * @param c
+     * @param millis
+     * @return
      */
     private static <T extends Calendar> T createCalendar(final T c, final long millis) {
         final Class<T> cls = (Class<T>) c.getClass();
@@ -2370,11 +2370,11 @@ public abstract class DateUtil {
     /**
      * Format date.
      *
-     * @param writer the writer
-     * @param date the date
-     * @param format the format
-     * @param timeZone the time zone
-     * @return the string
+     * @param writer
+     * @param date
+     * @param format
+     * @param timeZone
+     * @return
      */
     private static String formatDate(final Writer writer, final java.util.Date date, String format, TimeZone timeZone) {
         boolean isTimestamp = date instanceof Timestamp;
@@ -2423,9 +2423,9 @@ public abstract class DateUtil {
     /**
      * Fast date format.
      *
-     * @param writer the writer
-     * @param timeInMillis the time in millis
-     * @param isTimestamp the is timestamp
+     * @param writer
+     * @param timeInMillis
+     * @param isTimestamp
      */
     private static void fastDateFormat(final Writer writer, final long timeInMillis, final boolean isTimestamp) {
         Calendar c = utcCalendarPool.poll();

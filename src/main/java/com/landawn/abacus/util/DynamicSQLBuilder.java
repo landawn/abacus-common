@@ -62,7 +62,7 @@ public class DynamicSQLBuilder {
     /**
      * Creates the.
      *
-     * @return the dynamic SQL builder
+     * @return
      */
     public static DynamicSQLBuilder create() {
         return new DynamicSQLBuilder();
@@ -71,7 +71,7 @@ public class DynamicSQLBuilder {
     /**
      * Select.
      *
-     * @return the select
+     * @return
      */
     public Select select() {
         return select;
@@ -80,7 +80,7 @@ public class DynamicSQLBuilder {
     /**
      * From.
      *
-     * @return the from
+     * @return
      */
     public From from() {
         return from;
@@ -89,7 +89,7 @@ public class DynamicSQLBuilder {
     /**
      * Where.
      *
-     * @return the where
+     * @return
      */
     public Where where() {
         if (where == null) {
@@ -102,7 +102,7 @@ public class DynamicSQLBuilder {
     /**
      * Group by.
      *
-     * @return the group by
+     * @return
      */
     public GroupBy groupBy() {
         if (groupBy == null) {
@@ -115,7 +115,7 @@ public class DynamicSQLBuilder {
     /**
      * Having.
      *
-     * @return the having
+     * @return
      */
     public Having having() {
         if (having == null) {
@@ -128,7 +128,7 @@ public class DynamicSQLBuilder {
     /**
      * Order by.
      *
-     * @return the order by
+     * @return
      */
     public OrderBy orderBy() {
         if (orderBy == null) {
@@ -141,8 +141,8 @@ public class DynamicSQLBuilder {
     /**
      * Limit.
      *
-     * @param limitCond the limit cond
-     * @return the dynamic SQL builder
+     * @param limitCond
+     * @return
      */
     public DynamicSQLBuilder limit(String limitCond) {
         this.limitCond = limitCond;
@@ -153,8 +153,8 @@ public class DynamicSQLBuilder {
     /**
      * Limit.
      *
-     * @param count the count
-     * @return the dynamic SQL builder
+     * @param count
+     * @return
      */
     public DynamicSQLBuilder limit(int count) {
         return limit("LIMIT " + count);
@@ -163,9 +163,9 @@ public class DynamicSQLBuilder {
     /**
      * Limit.
      *
-     * @param offset the offset
-     * @param count the count
-     * @return the dynamic SQL builder
+     * @param offset
+     * @param count
+     * @return
      */
     public DynamicSQLBuilder limit(int offset, int count) {
         return limit("LIMIT " + offset + ", " + count);
@@ -174,8 +174,8 @@ public class DynamicSQLBuilder {
     /**
      * Limit by row num.
      *
-     * @param count the count
-     * @return the dynamic SQL builder
+     * @param count
+     * @return
      */
     public DynamicSQLBuilder limitByRowNum(int count) {
         return limit("ROWNUM < " + count);
@@ -184,8 +184,8 @@ public class DynamicSQLBuilder {
     /**
      * Union.
      *
-     * @param query the query
-     * @return the dynamic SQL builder
+     * @param query
+     * @return
      */
     public DynamicSQLBuilder union(final String query) {
         if (moreParts == null) {
@@ -200,8 +200,8 @@ public class DynamicSQLBuilder {
     /**
      * Union all.
      *
-     * @param query the query
-     * @return the dynamic SQL builder
+     * @param query
+     * @return
      */
     public DynamicSQLBuilder unionAll(final String query) {
         if (moreParts == null) {
@@ -216,8 +216,8 @@ public class DynamicSQLBuilder {
     /**
      * Intersect.
      *
-     * @param query the query
-     * @return the dynamic SQL builder
+     * @param query
+     * @return
      */
     public DynamicSQLBuilder intersect(final String query) {
         if (moreParts == null) {
@@ -232,8 +232,8 @@ public class DynamicSQLBuilder {
     /**
      * Except.
      *
-     * @param query the query
-     * @return the dynamic SQL builder
+     * @param query
+     * @return
      */
     public DynamicSQLBuilder except(final String query) {
         if (moreParts == null) {
@@ -248,8 +248,8 @@ public class DynamicSQLBuilder {
     /**
      * Minus.
      *
-     * @param query the query
-     * @return the dynamic SQL builder
+     * @param query
+     * @return
      */
     public DynamicSQLBuilder minus(final String query) {
         if (moreParts == null) {
@@ -264,7 +264,7 @@ public class DynamicSQLBuilder {
     /**
      * Builds the.
      *
-     * @return the string
+     * @return
      */
     public String build() {
         select.sb.append(" ").append(from.sb);
@@ -327,7 +327,7 @@ public class DynamicSQLBuilder {
         /**
          * Instantiates a new select.
          *
-         * @param sb the sb
+         * @param sb
          */
         Select(final StringBuilder sb) {
             this.sb = sb;
@@ -336,8 +336,8 @@ public class DynamicSQLBuilder {
         /**
          * Append.
          *
-         * @param column the column
-         * @return the select
+         * @param column
+         * @return
          */
         public Select append(String column) {
             if (sb.length() > 0) {
@@ -354,9 +354,9 @@ public class DynamicSQLBuilder {
         /**
          * Append.
          *
-         * @param column the column
-         * @param alias the alias
-         * @return the select
+         * @param column
+         * @param alias
+         * @return
          */
         public Select append(String column, String alias) {
             if (sb.length() > 0) {
@@ -382,7 +382,7 @@ public class DynamicSQLBuilder {
         /**
          * Instantiates a new from.
          *
-         * @param sb the sb
+         * @param sb
          */
         From(final StringBuilder sb) {
             this.sb = sb;
@@ -391,8 +391,8 @@ public class DynamicSQLBuilder {
         /**
          * Append.
          *
-         * @param table the table
-         * @return the from
+         * @param table
+         * @return
          */
         public From append(String table) {
             if (sb.length() > 0) {
@@ -409,9 +409,9 @@ public class DynamicSQLBuilder {
         /**
          * Append.
          *
-         * @param table the table
-         * @param alias the alias
-         * @return the from
+         * @param table
+         * @param alias
+         * @return
          */
         public From append(String table, String alias) {
             if (sb.length() > 0) {
@@ -428,9 +428,9 @@ public class DynamicSQLBuilder {
         /**
          * Join.
          *
-         * @param table the table
-         * @param on the on
-         * @return the from
+         * @param table
+         * @param on
+         * @return
          */
         public From join(String table, String on) {
             sb.append(" JOIN ").append(table).append(" ON ").append(on);
@@ -441,9 +441,9 @@ public class DynamicSQLBuilder {
         /**
          * Inner join.
          *
-         * @param table the table
-         * @param on the on
-         * @return the from
+         * @param table
+         * @param on
+         * @return
          */
         public From innerJoin(String table, String on) {
             sb.append(" INNER JOIN ").append(table).append(" ON ").append(on);
@@ -454,9 +454,9 @@ public class DynamicSQLBuilder {
         /**
          * Left join.
          *
-         * @param table the table
-         * @param on the on
-         * @return the from
+         * @param table
+         * @param on
+         * @return
          */
         public From leftJoin(String table, String on) {
             sb.append(" LEFT JOIN ").append(table).append(" ON ").append(on);
@@ -467,9 +467,9 @@ public class DynamicSQLBuilder {
         /**
          * Right join.
          *
-         * @param table the table
-         * @param on the on
-         * @return the from
+         * @param table
+         * @param on
+         * @return
          */
         public From rightJoin(String table, String on) {
             sb.append(" RIGHT JOIN ").append(table).append(" ON ").append(on);
@@ -480,9 +480,9 @@ public class DynamicSQLBuilder {
         /**
          * Full join.
          *
-         * @param table the table
-         * @param on the on
-         * @return the from
+         * @param table
+         * @param on
+         * @return
          */
         public From fullJoin(String table, String on) {
             sb.append(" FULL JOIN ").append(table).append(" ON ").append(on);
@@ -502,7 +502,7 @@ public class DynamicSQLBuilder {
         /**
          * Instantiates a new where.
          *
-         * @param sb the sb
+         * @param sb
          */
         Where(final StringBuilder sb) {
             this.sb = sb;
@@ -511,8 +511,8 @@ public class DynamicSQLBuilder {
         /**
          * Append.
          *
-         * @param cond the cond
-         * @return the where
+         * @param cond
+         * @return
          */
         public Where append(String cond) {
             if (sb.length() > 0) {
@@ -529,8 +529,8 @@ public class DynamicSQLBuilder {
         /**
          * Append question mark {@code ?} {@code n} times.
          *
-         * @param n the n
-         * @return the where
+         * @param n
+         * @return
          */
         public Where repeatQM(int n) {
             N.checkArgNotNegative(n, "n");
@@ -549,10 +549,10 @@ public class DynamicSQLBuilder {
         /**
          * Append question mark {@code ?} {@code n} times.
          *
-         * @param n the n
-         * @param prefix the prefix
-         * @param postfix the postfix
-         * @return the where
+         * @param n
+         * @param prefix
+         * @param postfix
+         * @return
          */
         public Where repeatQM(int n, String prefix, String postfix) {
             N.checkArgNotNegative(n, "n");
@@ -575,8 +575,8 @@ public class DynamicSQLBuilder {
         /**
          * And.
          *
-         * @param cond the cond
-         * @return the where
+         * @param cond
+         * @return
          */
         public Where and(String cond) {
             sb.append(" AND ").append(cond);
@@ -587,8 +587,8 @@ public class DynamicSQLBuilder {
         /**
          * Or.
          *
-         * @param cond the cond
-         * @return the where
+         * @param cond
+         * @return
          */
         public Where or(String cond) {
             sb.append(" OR ").append(cond);
@@ -608,7 +608,7 @@ public class DynamicSQLBuilder {
         /**
          * Instantiates a new group by.
          *
-         * @param sb the sb
+         * @param sb
          */
         GroupBy(final StringBuilder sb) {
             this.sb = sb;
@@ -617,8 +617,8 @@ public class DynamicSQLBuilder {
         /**
          * Append.
          *
-         * @param column the column
-         * @return the group by
+         * @param column
+         * @return
          */
         public GroupBy append(String column) {
             if (sb.length() > 0) {
@@ -644,7 +644,7 @@ public class DynamicSQLBuilder {
         /**
          * Instantiates a new having.
          *
-         * @param sb the sb
+         * @param sb
          */
         Having(final StringBuilder sb) {
             this.sb = sb;
@@ -653,8 +653,8 @@ public class DynamicSQLBuilder {
         /**
          * Append.
          *
-         * @param cond the cond
-         * @return the having
+         * @param cond
+         * @return
          */
         public Having append(String cond) {
             if (sb.length() > 0) {
@@ -671,8 +671,8 @@ public class DynamicSQLBuilder {
         /**
          * And.
          *
-         * @param cond the cond
-         * @return the having
+         * @param cond
+         * @return
          */
         public Having and(String cond) {
             sb.append(" AND ").append(cond);
@@ -683,8 +683,8 @@ public class DynamicSQLBuilder {
         /**
          * Or.
          *
-         * @param cond the cond
-         * @return the having
+         * @param cond
+         * @return
          */
         public Having or(String cond) {
             sb.append(" OR ").append(cond);
@@ -704,7 +704,7 @@ public class DynamicSQLBuilder {
         /**
          * Instantiates a new order by.
          *
-         * @param sb the sb
+         * @param sb
          */
         OrderBy(final StringBuilder sb) {
             this.sb = sb;
@@ -713,8 +713,8 @@ public class DynamicSQLBuilder {
         /**
          * Append.
          *
-         * @param column the column
-         * @return the order by
+         * @param column
+         * @return
          */
         public OrderBy append(String column) {
             if (sb.length() > 0) {

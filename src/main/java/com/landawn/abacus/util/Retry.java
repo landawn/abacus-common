@@ -27,7 +27,7 @@ import com.landawn.abacus.util.function.Predicate;
  * The Class Retry.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class Retry<T> {
@@ -50,10 +50,10 @@ public final class Retry<T> {
     /**
      * Instantiates a new retry.
      *
-     * @param retryTimes the retry times
-     * @param retryInterval the retry interval
-     * @param retryCondition the retry condition
-     * @param retryCondition2 the retry condition 2
+     * @param retryTimes
+     * @param retryInterval
+     * @param retryCondition
+     * @param retryCondition2
      */
     Retry(final int retryTimes, final long retryInterval, final Predicate<? super Exception> retryCondition,
             final BiPredicate<? super T, ? super Exception> retryCondition2) {
@@ -67,10 +67,10 @@ public final class Retry<T> {
     /**
      * Of.
      *
-     * @param retryTimes the retry times
-     * @param retryInterval the retry interval
-     * @param retryCondition the retry condition
-     * @return the retry
+     * @param retryTimes
+     * @param retryInterval
+     * @param retryCondition
+     * @return
      */
     public static Retry<Void> of(final int retryTimes, final long retryInterval, final Predicate<? super Exception> retryCondition) {
         if (retryTimes < 0 || retryInterval < 0) {
@@ -85,11 +85,11 @@ public final class Retry<T> {
     /**
      * Of.
      *
-     * @param <R> the generic type
-     * @param retryTimes the retry times
-     * @param retryInterval the retry interval
-     * @param retryCondition the retry condition
-     * @return the retry
+     * @param <R>
+     * @param retryTimes
+     * @param retryInterval
+     * @param retryCondition
+     * @return
      */
     public static <R> Retry<R> of(final int retryTimes, final long retryInterval, final BiPredicate<? super R, ? super Exception> retryCondition) {
         if (retryTimes < 0 || retryInterval < 0) {
@@ -104,7 +104,7 @@ public final class Retry<T> {
     /**
      * Run.
      *
-     * @param cmd the cmd
+     * @param cmd
      * @throws Exception the exception
      */
     public void run(final Try.Runnable<? extends Exception> cmd) throws Exception {
@@ -139,8 +139,8 @@ public final class Retry<T> {
     /**
      * Call.
      *
-     * @param callable the callable
-     * @return the t
+     * @param callable
+     * @return
      * @throws Exception the exception
      */
     public T call(final Callable<T> callable) throws Exception {
@@ -198,9 +198,9 @@ public final class Retry<T> {
     /**
      * Iterate.
      *
-     * @param <E> the element type
-     * @param iter the iter
-     * @return the iterator
+     * @param <E>
+     * @param iter
+     * @return
      * @deprecated replaced by {@code Retry#iterate(Iterator, int)}.
      */
     @Deprecated
@@ -211,10 +211,10 @@ public final class Retry<T> {
     /**
      * Iterate.
      *
-     * @param <E> the element type
-     * @param iter the iter
-     * @param totalRetryTimes the total retry times
-     * @return the iterator
+     * @param <E>
+     * @param iter
+     * @param totalRetryTimes
+     * @return
      */
     public <E> Iterator<E> iterate(final Iterator<E> iter, final int totalRetryTimes) {
         N.checkArgPositive(totalRetryTimes, "totalRetryTimes");

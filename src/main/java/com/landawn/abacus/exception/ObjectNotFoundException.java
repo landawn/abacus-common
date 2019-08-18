@@ -36,7 +36,7 @@ public class ObjectNotFoundException extends AbacusException {
     /**
      * Constructor for EntityNotFoundException.
      *
-     * @param message the message
+     * @param message
      */
     public ObjectNotFoundException(String message) {
         super(message);
@@ -45,8 +45,8 @@ public class ObjectNotFoundException extends AbacusException {
     /**
      * Constructor for EntityNotFoundException.
      *
-     * @param message the message
-     * @param cause the cause
+     * @param message
+     * @param cause
      */
     public ObjectNotFoundException(String message, Throwable cause) {
         super(message, cause);
@@ -55,7 +55,7 @@ public class ObjectNotFoundException extends AbacusException {
     /**
      * Constructor for EntityNotFoundException.
      *
-     * @param cause the cause
+     * @param cause
      */
     public ObjectNotFoundException(Throwable cause) {
         super(cause);

@@ -29,8 +29,8 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Instantiates a new indexed double.
      *
-     * @param index the index
-     * @param value the value
+     * @param index
+     * @param value
      */
     IndexedDouble(long index, double value) {
         super(index);
@@ -40,9 +40,9 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param value the value
-     * @param index the index
-     * @return the indexed double
+     * @param value
+     * @param index
+     * @return
      */
     public static IndexedDouble of(double value, int index) {
         N.checkArgNotNegative(index, "index");
@@ -53,9 +53,9 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param value the value
-     * @param index the index
-     * @return the indexed double
+     * @param value
+     * @param index
+     * @return
      */
     public static IndexedDouble of(double value, long index) {
         N.checkArgNotNegative(index, "index");
@@ -66,8 +66,8 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param iter the iter
-     * @return the obj iterator
+     * @param iter
+     * @return
      */
     public static ObjIterator<IndexedDouble> of(final DoubleIterator iter) {
         return of(iter, 0);
@@ -76,9 +76,9 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param iter the iter
-     * @param startIndex the start index
-     * @return the obj iterator
+     * @param iter
+     * @param startIndex
+     * @return
      */
     public static ObjIterator<IndexedDouble> of(final DoubleIterator iter, final int startIndex) {
         return of(iter, (long) startIndex);
@@ -87,9 +87,9 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param iter the iter
-     * @param startIndex the start index
-     * @return the obj iterator
+     * @param iter
+     * @param startIndex
+     * @return
      */
     public static ObjIterator<IndexedDouble> of(final DoubleIterator iter, final long startIndex) {
         if (startIndex < 0) {
@@ -114,7 +114,7 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Value.
      *
-     * @return the double
+     * @return
      */
     public double value() {
         return value;
@@ -123,7 +123,7 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -133,7 +133,7 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -144,7 +144,7 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

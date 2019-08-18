@@ -46,7 +46,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @author Haiyang Li
  * @param <K> the key type
- * @param <E> the element type
+ * @param <E>
  * @param <V> the value type
  * @see N#newMultimap(Supplier, Supplier)
  * @see N#newListMultimap()
@@ -78,7 +78,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Returns a <code>Multimap<K, E, List<E>></code>.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     Multimap(int initialCapacity) {
         this(new HashMap<K, V>(initialCapacity), (Supplier<V>) Suppliers.ofList());
@@ -87,8 +87,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Instantiates a new multimap.
      *
-     * @param mapType the map type
-     * @param valueType the value type
+     * @param mapType
+     * @param valueType
      */
     @SuppressWarnings("rawtypes")
     Multimap(final Class<? extends Map> mapType, final Class<? extends Collection> valueType) {
@@ -98,8 +98,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Instantiates a new multimap.
      *
-     * @param mapSupplier the map supplier
-     * @param valueSupplier the value supplier
+     * @param mapSupplier
+     * @param valueSupplier
      */
     Multimap(final Supplier<? extends Map<K, V>> mapSupplier, final Supplier<? extends V> valueSupplier) {
         this.mapSupplier = mapSupplier;
@@ -110,8 +110,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Instantiates a new multimap.
      *
-     * @param valueMap the value map
-     * @param valueSupplier the value supplier
+     * @param valueMap
+     * @param valueSupplier
      */
     @Internal
     Multimap(final Map<K, V> valueMap, final Supplier<? extends V> valueSupplier) {
@@ -123,8 +123,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Value type 2 supplier.
      *
-     * @param valueType the value type
-     * @return the supplier
+     * @param valueType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     static Supplier valueType2Supplier(final Class<? extends Collection> valueType) {
@@ -152,12 +152,12 @@ public class Multimap<K, E, V extends Collection<E>> {
      * From.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param map the map
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param multimapSupplier
+     * @return
      */
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M from(final Map<? extends K, ? extends E> map,
             final IntFunction<? extends M> multimapSupplier) {
@@ -174,12 +174,12 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Fromm.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param map the map
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param multimapSupplier
+     * @return
      */
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M fromm(final Map<? extends K, ? extends Collection<? extends E>> map,
             final IntFunction<? extends M> multimapSupplier) {
@@ -197,15 +197,15 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * From.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <X> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param <X>
+     * @param c
+     * @param keyMapper
+     * @param multimapSupplier
+     * @return
      * @throws X the x
      */
     public static <T, K, V extends Collection<T>, M extends Multimap<K, T, V>, X extends Exception> M from(final Collection<? extends T> c,
@@ -224,18 +224,18 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * From.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <X> the generic type
-     * @param <X2> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param <X>
+     * @param <X2>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @param multimapSupplier
+     * @return
      * @throws X the x
      * @throws X2 the x2
      */
@@ -257,12 +257,12 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param map the map
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param multimapSupplier
+     * @return
      * @see ListMultimap#invertFrom(Map)
      * @see SetMultimap#invertFrom(Map)
      */
@@ -283,12 +283,12 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Flat invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param map the map
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param multimapSupplier
+     * @return
      * @see ListMultimap#flatInvertFrom(Map)
      * @see SetMultimap#flatInvertFrom(Map)
      */
@@ -315,13 +315,13 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <VV> the generic type
-     * @param <M> the generic type
-     * @param multimap the multimap
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <VV>
+     * @param <M>
+     * @param multimap
+     * @param multimapSupplier
+     * @return
      */
     public static <K, E, V extends Collection<E>, VV extends Collection<K>, M extends Multimap<E, K, VV>> M invertFrom(final Multimap<K, E, V> multimap,
             final IntFunction<? extends M> multimapSupplier) {
@@ -346,13 +346,13 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Concat.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param a the a
-     * @param b the b
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param a
+     * @param b
+     * @param multimapSupplier
+     * @return
      */
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
             final Map<? extends K, ? extends E> b, final IntFunction<? extends M> multimapSupplier) {
@@ -368,14 +368,14 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Concat.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param a
+     * @param b
+     * @param c
+     * @param multimapSupplier
+     * @return
      */
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
             final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier) {
@@ -392,11 +392,11 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Wrap.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param map the map
-     * @param valueSupplier the value supplier
-     * @return the multimap
+     * @param map
+     * @param valueSupplier
+     * @return
      */
     public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
         N.checkArgNotNull(map, "map");
@@ -408,8 +408,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Gets the.
      *
-     * @param key the key
-     * @return the v
+     * @param key
+     * @return
      */
     public V get(final Object key) {
         return valueMap.get(key);
@@ -418,9 +418,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Gets the or default.
      *
-     * @param key the key
-     * @param defaultValue the default value
-     * @return the or default
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public V getOrDefault(final Object key, V defaultValue) {
         final V value = valueMap.get(key);
@@ -435,8 +435,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Put.
      *
-     * @param key the key
-     * @param e the e
+     * @param key
+     * @param e
      * @return true, if successful
      */
     public boolean put(final K key, final E e) {
@@ -454,8 +454,8 @@ public class Multimap<K, E, V extends Collection<E>> {
      * If the specified value is not already associated with the specified key 
      * associates it with the given key and returns {@code true}, else returns {@code false}.
      *
-     * @param key the key
-     * @param e the e
+     * @param key
+     * @param e
      * @return true, if successful
      */
     public boolean putIfAbsent(final K key, final E e) {
@@ -475,8 +475,8 @@ public class Multimap<K, E, V extends Collection<E>> {
      * If the specified key is not already associated with any value (or is mapped
      * to {@code null}) associates it with the given value and returns {@code true}, else returns {@code false}.
      *
-     * @param key the key
-     * @param e the e
+     * @param key
+     * @param e
      * @return true, if successful
      */
     public boolean putIfKeyAbsent(final K key, final E e) {
@@ -495,8 +495,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Put all.
      *
-     * @param key the key
-     * @param c the c
+     * @param key
+     * @param c
      * @return true, if successful
      */
     public boolean putAll(final K key, final Collection<? extends E> c) {
@@ -519,8 +519,8 @@ public class Multimap<K, E, V extends Collection<E>> {
      * to {@code null}) associates it with the given values in the specified {@code collection} 
      * and returns {@code true}, else returns {@code false}.
      *
-     * @param key the key
-     * @param c the c
+     * @param key
+     * @param c
      * @return true, if successful
      */
     public boolean putAllIfKeyAbsent(final K key, final Collection<? extends E> c) {
@@ -543,7 +543,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Put all.
      *
-     * @param m the m
+     * @param m
      * @return true, if successful
      */
     public boolean putAll(final Map<? extends K, ? extends E> m) {
@@ -573,7 +573,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Put all.
      *
-     * @param m the m
+     * @param m
      * @return true, if successful
      */
     public boolean putAll(final Multimap<? extends K, ? extends E, ? extends Collection<? extends E>> m) {
@@ -607,8 +607,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Removes the.
      *
-     * @param key the key
-     * @param e the e
+     * @param key
+     * @param e
      * @return true, if successful
      */
     public boolean remove(final Object key, final Object e) {
@@ -628,7 +628,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Removes the all.
      *
-     * @param key the key
+     * @param key
      * @return values associated with specified key.
      */
     public V removeAll(final Object key) {
@@ -638,8 +638,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Removes the all.
      *
-     * @param key the key
-     * @param c the c
+     * @param key
+     * @param c
      * @return true, if successful
      */
     public boolean removeAll(final Object key, final Collection<?> c) {
@@ -672,7 +672,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * </code>
      * </pre>
      *
-     * @param m the m
+     * @param m
      * @return true, if successful
      */
     public boolean removeAll(final Map<? extends K, ? extends E> m) {
@@ -707,7 +707,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Removes the all.
      *
-     * @param m the m
+     * @param m
      * @return true, if successful
      */
     public boolean removeAll(final Multimap<?, ?, ?> m) {
@@ -742,9 +742,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Remove the specified value (one occurrence) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param value the value
-     * @param predicate the predicate
+     * @param <X>
+     * @param value
+     * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -779,9 +779,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Remove the specified value (one occurrence) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param value the value
-     * @param predicate the predicate
+     * @param <X>
+     * @param value
+     * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -816,9 +816,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Remove the specified values (all occurrences) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param values the values
-     * @param predicate the predicate
+     * @param <X>
+     * @param values
+     * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -853,9 +853,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Remove the specified values (all occurrences) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param values the values
-     * @param predicate the predicate
+     * @param <X>
+     * @param values
+     * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -890,8 +890,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Remove all the values associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param predicate the predicate
+     * @param <X>
+     * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -922,8 +922,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Remove all the values associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param predicate the predicate
+     * @param <X>
+     * @param predicate
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -955,9 +955,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Replaces one of the specified <code>oldValue</code> with the specified <code>newValue</code>.
      * <code>False</code> is returned if no <code>oldValue</code> is found.
      *
-     * @param key the key
-     * @param oldValue the old value
-     * @param newValue the new value
+     * @param key
+     * @param oldValue
+     * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
     public boolean replace(final K key, final Object oldValue, final E newValue) {
@@ -973,9 +973,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Replace.
      *
-     * @param val the val
-     * @param oldValue the old value
-     * @param newValue the new value
+     * @param val
+     * @param oldValue
+     * @param newValue
      * @return true, if successful
      */
     private boolean replace(final V val, final Object oldValue, final E newValue) {
@@ -1033,9 +1033,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Replaces all of the specified <code>oldValue</code> with the specified <code>newValue</code>.
      * <code>False</code> is returned if no <code>oldValue</code> is found.
      *
-     * @param key the key
-     * @param oldValues the old values
-     * @param newValue the new value
+     * @param key
+     * @param oldValues
+     * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
     public boolean replaceAll(final K key, final Collection<?> oldValues, final E newValue) {
@@ -1056,10 +1056,10 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Replace the specified value (one occurrence) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param predicate the predicate
-     * @param oldValue the old value
-     * @param newValue the new value
+     * @param <X>
+     * @param predicate
+     * @param oldValue
+     * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -1078,10 +1078,10 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Replace the specified value (one occurrence) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param predicate the predicate
-     * @param oldValue the old value
-     * @param newValue the new value
+     * @param <X>
+     * @param predicate
+     * @param oldValue
+     * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -1100,10 +1100,10 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Replace the specified value (all occurrences) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param predicate the predicate
-     * @param oldValues the old values
-     * @param newValue the new value
+     * @param <X>
+     * @param predicate
+     * @param oldValues
+     * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -1125,10 +1125,10 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Replace the specified value (all occurrences) from the value set associated with keys which satisfy the specified <code>predicate</code>.
      *
-     * @param <X> the generic type
-     * @param predicate the predicate
-     * @param oldValues the old values
-     * @param newValue the new value
+     * @param <X>
+     * @param predicate
+     * @param oldValues
+     * @param newValue
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      * @throws X the x
      */
@@ -1150,8 +1150,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * The associated keys will be removed if null or empty values are returned by the specified <code>function</code>.
      *
-     * @param <X> the generic type
-     * @param function the function
+     * @param <X>
+     * @param function
      * @throws X the x
      */
     public <X extends Exception> void replaceAll(Try.BiFunction<? super K, ? super V, ? extends V, X> function) throws X {
@@ -1186,8 +1186,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Contains.
      *
-     * @param key the key
-     * @param e the e
+     * @param key
+     * @param e
      * @return true, if successful
      */
     public boolean contains(final Object key, final Object e) {
@@ -1199,7 +1199,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Contains key.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     public boolean containsKey(final Object key) {
@@ -1209,7 +1209,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Contains value.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     public boolean containsValue(final Object e) {
@@ -1227,8 +1227,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Contains all.
      *
-     * @param key the key
-     * @param c the c
+     * @param key
+     * @param c
      * @return true, if successful
      */
     public boolean containsAll(final Object key, final Collection<?> c) {
@@ -1240,9 +1240,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Filter by key.
      *
-     * @param <X> the generic type
-     * @param filter the filter
-     * @return the multimap
+     * @param <X>
+     * @param filter
+     * @return
      * @throws X the x
      */
     public <X extends Exception> Multimap<K, E, V> filterByKey(Try.Predicate<? super K, X> filter) throws X {
@@ -1260,9 +1260,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Filter by value.
      *
-     * @param <X> the generic type
-     * @param filter the filter
-     * @return the multimap
+     * @param <X>
+     * @param filter
+     * @return
      * @throws X the x
      */
     public <X extends Exception> Multimap<K, E, V> filterByValue(Try.Predicate<? super V, X> filter) throws X {
@@ -1280,9 +1280,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Filter.
      *
-     * @param <X> the generic type
-     * @param filter the filter
-     * @return the multimap
+     * @param <X>
+     * @param filter
+     * @return
      * @throws X the x
      */
     public <X extends Exception> Multimap<K, E, V> filter(Try.BiPredicate<? super K, ? super V, X> filter) throws X {
@@ -1300,8 +1300,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * For each.
      *
-     * @param <X> the generic type
-     * @param action the action
+     * @param <X>
+     * @param action
      * @throws X the x
      */
     public <X extends Exception> void forEach(Try.BiConsumer<? super K, ? super V, X> action) throws X {
@@ -1315,8 +1315,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Flat for each.
      *
-     * @param <X> the generic type
-     * @param action the action
+     * @param <X>
+     * @param action
      * @throws X the x
      */
     public <X extends Exception> void flatForEach(Try.BiConsumer<? super K, ? super E, X> action) throws X {
@@ -1336,8 +1336,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * For each key.
      *
-     * @param <X> the generic type
-     * @param action the action
+     * @param <X>
+     * @param action
      * @throws X the x
      */
     public <X extends Exception> void forEachKey(final Try.Consumer<? super K, X> action) throws X {
@@ -1351,8 +1351,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * For each value.
      *
-     * @param <X> the generic type
-     * @param action the action
+     * @param <X>
+     * @param action
      * @throws X the x
      */
     public <X extends Exception> void forEachValue(final Try.Consumer<? super V, X> action) throws X {
@@ -1366,8 +1366,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Flat for each value.
      *
-     * @param <X> the generic type
-     * @param action the action
+     * @param <X>
+     * @param action
      * @throws X the x
      */
     public <X extends Exception> void flatForEachValue(Try.Consumer<? super E, X> action) throws X {
@@ -1399,10 +1399,10 @@ public class Multimap<K, E, V extends Collection<E>> {
      * return newValue;
      * </pre>
      *
-     * @param <X> the generic type
-     * @param key the key
-     * @param mappingFunction the mapping function
-     * @return the v
+     * @param <X>
+     * @param key
+     * @param mappingFunction
+     * @return
      * @throws X the x
      */
     public <X extends Exception> V computeIfAbsent(K key, Try.Function<? super K, ? extends V, X> mappingFunction) throws X {
@@ -1444,10 +1444,10 @@ public class Multimap<K, E, V extends Collection<E>> {
      * return newValue;
      * </pre>
      *
-     * @param <X> the generic type
-     * @param key the key
-     * @param remappingFunction the remapping function
-     * @return the v
+     * @param <X>
+     * @param key
+     * @param remappingFunction
+     * @return
      * @throws X the x
      */
     public <X extends Exception> V computeIfPresent(K key, Try.BiFunction<? super K, ? super V, ? extends V, X> remappingFunction) throws X {
@@ -1488,10 +1488,10 @@ public class Multimap<K, E, V extends Collection<E>> {
      * return newValue;
      * </pre>
      *
-     * @param <X> the generic type
-     * @param key the key
-     * @param remappingFunction the remapping function
-     * @return the v
+     * @param <X>
+     * @param key
+     * @param remappingFunction
+     * @return
      * @throws X the x
      */
     public <X extends Exception> V compute(K key, Try.BiFunction<? super K, ? super V, ? extends V, X> remappingFunction) throws X {
@@ -1529,11 +1529,11 @@ public class Multimap<K, E, V extends Collection<E>> {
      * return newValue;
      * </pre>
      *
-     * @param <X> the generic type
-     * @param key the key
-     * @param value the value
-     * @param remappingFunction the remapping function
-     * @return the v
+     * @param <X>
+     * @param key
+     * @param value
+     * @param remappingFunction
+     * @return
      * @throws X the x
      */
     public <X extends Exception> V merge(K key, V value, Try.BiFunction<? super V, ? super V, ? extends V, X> remappingFunction) throws X {
@@ -1578,11 +1578,11 @@ public class Multimap<K, E, V extends Collection<E>> {
      * return newValue;
      * </pre>
      *
-     * @param <X> the generic type
-     * @param key the key
-     * @param e the e
-     * @param remappingFunction the remapping function
-     * @return the v
+     * @param <X>
+     * @param key
+     * @param e
+     * @param remappingFunction
+     * @return
      * @throws X the x
      */
     public <X extends Exception> V merge(K key, E e, Try.BiFunction<? super V, ? super E, ? extends V, X> remappingFunction) throws X {
@@ -1612,7 +1612,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Copy.
      *
-     * @return the multimap
+     * @return
      */
     public Multimap<K, E, V> copy() {
         final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);
@@ -1625,7 +1625,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     public Set<K> keySet() {
         return valueMap.keySet();
@@ -1634,7 +1634,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Values.
      *
-     * @return the collection
+     * @return
      */
     public Collection<V> values() {
         return valueMap.values();
@@ -1643,7 +1643,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Flat values.
      *
-     * @return the list
+     * @return
      */
     public List<E> flatValues() {
         final List<E> result = new ArrayList<>(totalCountOfValues());
@@ -1658,9 +1658,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Flat values.
      *
-     * @param <R> the generic type
-     * @param supplier the supplier
-     * @return the r
+     * @param <R>
+     * @param supplier
+     * @return
      */
     public <R extends Collection<E>> R flatValues(final IntFunction<R> supplier) {
         final R result = supplier.apply(totalCountOfValues());
@@ -1675,7 +1675,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Entry set.
      *
-     * @return the sets the
+     * @return
      */
     public Set<Map.Entry<K, V>> entrySet() {
         return valueMap.entrySet();
@@ -1684,7 +1684,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * To map.
      *
-     * @return the map
+     * @return
      */
     public Map<K, V> toMap() {
         final Map<K, V> result = Maps.newOrderingMap(valueMap);
@@ -1697,9 +1697,9 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * To map.
      *
-     * @param <M> the generic type
-     * @param supplier the supplier
-     * @return the m
+     * @param <M>
+     * @param supplier
+     * @return
      */
     public <M extends Map<K, V>> M toMap(final IntFunction<? extends M> supplier) {
         final M map = supplier.apply(size());
@@ -1710,7 +1710,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * To multiset.
      *
-     * @return the multiset
+     * @return
      */
     public Multiset<K> toMultiset() {
         final Multiset<K> multiset = new Multiset<>(valueMap.getClass());
@@ -1740,7 +1740,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * <p>Changes to the returned map or the collections that serve as its values
      * will update the underlying multimap, and vice versa.
      *
-     * @return the map
+     * @return
      */
     public Map<K, V> unwrap() {
         return valueMap;
@@ -1749,7 +1749,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<Map.Entry<K, V>> stream() {
         return Stream.of(valueMap.entrySet());
@@ -1758,7 +1758,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Entry stream.
      *
-     * @return the entry stream
+     * @return
      */
     public EntryStream<K, V> entryStream() {
         return EntryStream.of(valueMap);
@@ -1774,7 +1774,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     public int size() {
         return valueMap.size();
@@ -1783,7 +1783,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Returns the total count of all the elements in all values.
      *
-     * @return the int
+     * @return
      */
     public int totalCountOfValues() {
         int count = 0;
@@ -1807,10 +1807,10 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <X> the generic type
-     * @param func the func
-     * @return the r
+     * @param <R>
+     * @param <X>
+     * @param func
+     * @return
      * @throws X the x
      */
     public <R, X extends Exception> R apply(Try.Function<? super Multimap<K, E, V>, R, X> func) throws X {
@@ -1820,8 +1820,8 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Accept.
      *
-     * @param <X> the generic type
-     * @param action the action
+     * @param <X>
+     * @param action
      * @throws X the x
      */
     public <X extends Exception> void accept(Try.Consumer<? super Multimap<K, E, V>, X> action) throws X {
@@ -1831,7 +1831,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -1841,7 +1841,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @SuppressWarnings("unchecked")
@@ -1853,7 +1853,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

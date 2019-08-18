@@ -19,7 +19,7 @@ package com.landawn.abacus.lock;
  * The Class AbstractRWLock.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public abstract class AbstractRWLock<T> implements RWLock<T> {
@@ -27,7 +27,7 @@ public abstract class AbstractRWLock<T> implements RWLock<T> {
     /**
      * Check target object.
      *
-     * @param target the target
+     * @param target
      */
     protected void checkTargetObject(T target) {
         if (target == null) {

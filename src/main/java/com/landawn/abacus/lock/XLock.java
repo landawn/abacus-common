@@ -22,7 +22,7 @@ import com.landawn.abacus.LockMode;
 /**
  * The Interface XLock.
  *
- * @param <T> the generic type
+ * @param <T>
  */
 @WebService
 /**
@@ -39,20 +39,20 @@ public interface XLock<T> {
     /**
      * Lock.
      *
-     * @param target the target
-     * @param lockMode the lock mode
-     * @param refLockCode the ref lock code
-     * @return the string
+     * @param target
+     * @param lockMode
+     * @param refLockCode
+     * @return
      */
     public String lock(T target, LockMode lockMode, String refLockCode);
 
     /**
      * Method lock.
      *
-     * @param target the target
-     * @param lockMode the lock mode
-     * @param refLockCode the ref lock code
-     * @param timeout the timeout
+     * @param target
+     * @param lockMode
+     * @param refLockCode
+     * @param timeout
      * @return String
      */
     public String lock(T target, LockMode lockMode, String refLockCode, long timeout);
@@ -60,9 +60,9 @@ public interface XLock<T> {
     /**
      * Method isLocked.
      *
-     * @param target the target
-     * @param requiredLockMode the required lock mode
-     * @param refLockCode the ref lock code
+     * @param target
+     * @param requiredLockMode
+     * @param refLockCode
      * @return boolean
      */
     public boolean isLocked(T target, LockMode requiredLockMode, String refLockCode);
@@ -70,8 +70,8 @@ public interface XLock<T> {
     /**
      * Method unlock.
      *
-     * @param target the target
-     * @param refLockCode the ref lock code
+     * @param target
+     * @param refLockCode
      * @return boolean
      */
     public boolean unlock(T target, String refLockCode);

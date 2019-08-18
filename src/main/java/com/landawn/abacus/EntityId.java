@@ -31,8 +31,8 @@ public interface EntityId {
     /**
      *
      * @param propName property name with entity name, for example {@code Account.id}
-     * @param propValue the prop value
-     * @return the entity id
+     * @param propValue
+     * @return
      */
     public static EntityId of(String propName, Object propValue) {
         return Seid.of(propName, propValue);
@@ -54,10 +54,10 @@ public interface EntityId {
      * Of.
      *
      * @param propName1 property name with entity name, for example {@code Account.id}
-     * @param propValue1 the prop value 1
-     * @param propName2 the prop name 2
-     * @param propValue2 the prop value 2
-     * @return the entity id
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @return
      */
     public static EntityId of(String propName1, Object propValue1, String propName2, Object propValue2) {
         return Seid.of(propName1, propValue1, propName2, propValue2);
@@ -81,12 +81,12 @@ public interface EntityId {
      * Of.
      *
      * @param propName1 property name with entity name, for example {@code Account.id}
-     * @param propValue1 the prop value 1
-     * @param propName2 the prop name 2
-     * @param propValue2 the prop value 2
-     * @param propName3 the prop name 3
-     * @param propValue3 the prop value 3
-     * @return the entity id
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @param propName3
+     * @param propValue3
+     * @return
      */
     public static EntityId of(String propName1, Object propValue1, String propName2, Object propValue2, String propName3, Object propValue3) {
         return Seid.of(propName1, propValue1, propName2, propValue2, propName3, propValue3);
@@ -111,8 +111,8 @@ public interface EntityId {
 
     /** 
      *
-     * @param nameValues the name values
-     * @return the entity id
+     * @param nameValues
+     * @return
      */
     public static EntityId from(Map<String, Object> nameValues) {
         return Seid.from(nameValues);
@@ -121,8 +121,8 @@ public interface EntityId {
     /** 
      *
      * @param entityName
-     * @param nameValues the name values
-     * @return the entity id
+     * @param nameValues
+     * @return
      */
     @SuppressWarnings("deprecation")
     public static EntityId from(String entityName, Map<String, Object> nameValues) {
@@ -141,8 +141,8 @@ public interface EntityId {
     /**
      * Method get.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
+     * @param <T>
+     * @param propName
      * @return T
      */
     <T> T get(String propName);
@@ -164,9 +164,9 @@ public interface EntityId {
     /**
      * Method get.
      *
-     * @param <T> the generic type
-     * @param clazz the clazz
-     * @param propName the prop name
+     * @param <T>
+     * @param clazz
+     * @param propName
      * @return T
      */
     <T> T get(Class<T> clazz, String propName);
@@ -188,14 +188,14 @@ public interface EntityId {
     /**
      * Entry set.
      *
-     * @return the sets the
+     * @return
      */
     Set<Map.Entry<String, Object>> entrySet();
 
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     int size();
 

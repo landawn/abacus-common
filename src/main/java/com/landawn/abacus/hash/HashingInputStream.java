@@ -40,8 +40,8 @@ public final class HashingInputStream extends FilterInputStream {
      * 
      * <p>The {@link InputStream} should not be read from before or after the hand-off.
      *
-     * @param hashFunction the hash function
-     * @param in the in
+     * @param hashFunction
+     * @param in
      */
     public HashingInputStream(HashFunction hashFunction, InputStream in) {
         super(N.checkArgNotNull(in));
@@ -52,7 +52,7 @@ public final class HashingInputStream extends FilterInputStream {
      * Reads the next byte of data from the underlying input stream and updates the hasher with the
      * byte read.
      *
-     * @return the int
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
@@ -69,10 +69,10 @@ public final class HashingInputStream extends FilterInputStream {
      * Reads the specified bytes of data from the underlying input stream and updates the hasher with
      * the bytes read.
      *
-     * @param bytes the bytes
-     * @param off the off
-     * @param len the len
-     * @return the int
+     * @param bytes
+     * @param off
+     * @param len
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
@@ -98,7 +98,7 @@ public final class HashingInputStream extends FilterInputStream {
     /**
      * mark() is not supported for HashingInputStream.
      *
-     * @param readlimit the readlimit
+     * @param readlimit
      */
     @Override
     public void mark(int readlimit) {
@@ -118,7 +118,7 @@ public final class HashingInputStream extends FilterInputStream {
      * Returns the {@link HashCode} based on the data read from this stream. The result is unspecified
      * if this method is called more than once on the same instance.
      *
-     * @return the hash code
+     * @return
      */
     public HashCode hash() {
         return hasher.hash();

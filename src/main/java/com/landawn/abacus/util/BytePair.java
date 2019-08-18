@@ -42,8 +42,8 @@ public class BytePair {
     /**
      * Instantiates a new byte pair.
      *
-     * @param _1 the  1
-     * @param _2 the  2
+     * @param _1 the 1
+     * @param _2 the 2
      */
     BytePair(byte _1, byte _2) {
         this._1 = _1;
@@ -53,9 +53,9 @@ public class BytePair {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @return the byte pair
+     * @param _1 the 1
+     * @param _2 the 2
+     * @return
      */
     public static BytePair of(byte _1, byte _2) {
         return new BytePair(_1, _2);
@@ -64,7 +64,7 @@ public class BytePair {
     /**
      * Min.
      *
-     * @return the byte
+     * @return
      */
     public byte min() {
         return N.min(_1, _2);
@@ -73,7 +73,7 @@ public class BytePair {
     /**
      * Max.
      *
-     * @return the byte
+     * @return
      */
     public byte max() {
         return N.max(_1, _2);
@@ -82,7 +82,7 @@ public class BytePair {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return _1 + _2;
@@ -91,7 +91,7 @@ public class BytePair {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return (0d + _1 + _2) / 2;
@@ -100,7 +100,7 @@ public class BytePair {
     /**
      * Reversed.
      *
-     * @return the byte pair
+     * @return
      */
     public BytePair reversed() {
         return new BytePair(_2, _1);
@@ -109,7 +109,7 @@ public class BytePair {
     /**
      * To array.
      *
-     * @return the byte[]
+     * @return
      */
     public byte[] toArray() {
         return new byte[] { _1, _2 };
@@ -118,7 +118,7 @@ public class BytePair {
     /**
      * To list.
      *
-     * @return the byte list
+     * @return
      */
     public ByteList toList() {
         return ByteList.of(_1, _2);
@@ -127,8 +127,8 @@ public class BytePair {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.ByteConsumer<E> comsumer) throws E {
@@ -139,8 +139,8 @@ public class BytePair {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<BytePair, E> action) throws E {
@@ -150,10 +150,10 @@ public class BytePair {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<BytePair, U, E> mapper) throws E {
@@ -163,9 +163,9 @@ public class BytePair {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<BytePair> filter(final Try.Predicate<BytePair, E> predicate) throws E {
@@ -175,7 +175,7 @@ public class BytePair {
     /**
      * Stream.
      *
-     * @return the byte stream
+     * @return
      */
     public ByteStream stream() {
         return ByteStream.of(_1, _2);
@@ -184,7 +184,7 @@ public class BytePair {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -194,7 +194,7 @@ public class BytePair {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -212,7 +212,7 @@ public class BytePair {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

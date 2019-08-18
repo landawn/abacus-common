@@ -46,7 +46,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Empty.
      *
-     * @return the long iterator
+     * @return
      */
     public static LongIterator empty() {
         return EMPTY;
@@ -55,8 +55,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the long iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static LongIterator of(final long... a) {
@@ -66,10 +66,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the long iterator
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static LongIterator of(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -110,8 +110,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier the iterator supplier
-     * @return the long iterator
+     * @param iteratorSupplier
+     * @return
      */
     public static LongIterator of(final Supplier<? extends LongIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -150,8 +150,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Lazy evaluation.
      *
-     * @param arraySupplier the array supplier
-     * @return the long iterator
+     * @param arraySupplier
+     * @return
      */
     public static LongIterator oF(final Supplier<long[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -197,8 +197,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Returns an infinite {@code LongIterator}.
      *
-     * @param supplier the supplier
-     * @return the long iterator
+     * @param supplier
+     * @return
      */
     public static LongIterator generate(final LongSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -219,9 +219,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Generate.
      *
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the long iterator
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static LongIterator generate(final BooleanSupplier hasNext, final LongSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -247,7 +247,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Next.
      *
-     * @return the long
+     * @return
      * @Deprecated use <code>nextLong()</code> instead.
      */
     @Deprecated
@@ -259,14 +259,14 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Next long.
      *
-     * @return the long
+     * @return
      */
     public abstract long nextLong();
 
     /**
      * To array.
      *
-     * @return the long[]
+     * @return
      */
     public long[] toArray() {
         return toList().trimToSize().array();
@@ -275,7 +275,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * To list.
      *
-     * @return the long list
+     * @return
      */
     public LongList toList() {
         final LongList list = new LongList();
@@ -290,7 +290,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Stream.
      *
-     * @return the long stream
+     * @return
      */
     public LongStream stream() {
         return LongStream.of(this);
@@ -299,8 +299,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * Foreach remaining.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void foreachRemaining(Try.LongConsumer<E> action) throws E {
@@ -314,7 +314,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      * For each remaining.
      *
-     * @param action the action
+     * @param action
      */
     @Override
     @Deprecated

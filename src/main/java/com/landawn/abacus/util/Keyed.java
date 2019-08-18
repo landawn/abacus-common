@@ -20,7 +20,7 @@ package com.landawn.abacus.util;
  *
  * @author HaiYang Li
  * @param <K> the key type
- * @param <T> the generic type
+ * @param <T>
  */
 public class Keyed<K, T> {
 
@@ -33,8 +33,8 @@ public class Keyed<K, T> {
     /**
      * Instantiates a new keyed.
      *
-     * @param key the key
-     * @param val the val
+     * @param key
+     * @param val
      */
     Keyed(K key, T val) {
         this.key = key;
@@ -45,10 +45,10 @@ public class Keyed<K, T> {
      * Of.
      *
      * @param <K> the key type
-     * @param <T> the generic type
-     * @param key the key
-     * @param val the val
-     * @return the keyed
+     * @param <T>
+     * @param key
+     * @param val
+     * @return
      */
     public static <K, T> Keyed<K, T> of(final K key, final T val) {
         return new Keyed<>(key, val);
@@ -57,7 +57,7 @@ public class Keyed<K, T> {
     /**
      * Key.
      *
-     * @return the k
+     * @return
      */
     public K key() {
         return key;
@@ -66,7 +66,7 @@ public class Keyed<K, T> {
     /**
      * Val.
      *
-     * @return the t
+     * @return
      */
     public T val() {
         return val;
@@ -75,7 +75,7 @@ public class Keyed<K, T> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -85,7 +85,7 @@ public class Keyed<K, T> {
     /**
      * Equals.
      *
-     * @param val the val
+     * @param val
      * @return true, if successful
      */
     @Override
@@ -105,7 +105,7 @@ public class Keyed<K, T> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

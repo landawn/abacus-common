@@ -33,7 +33,7 @@ public @interface POST {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value() default "";
 }

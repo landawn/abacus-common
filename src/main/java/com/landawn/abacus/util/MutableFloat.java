@@ -53,7 +53,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Constructs a new MutableFloat with the specified value.
      * 
-     * @param value  the initial value to store
+     * @param value the initial value to store
      */
     MutableFloat(final float value) {
         super();
@@ -63,8 +63,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Of.
      *
-     * @param value the value
-     * @return the mutable float
+     * @param value
+     * @return
      */
     public static MutableFloat of(final float value) {
         return new MutableFloat(value);
@@ -73,7 +73,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Value.
      *
-     * @return the float
+     * @return
      */
     public float value() {
         return value;
@@ -83,7 +83,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Gets the value as a Float instance.
      * 
-     * @return the value as a Float, never null
+     * @return
      * @deprecated replace by {@link #value()}.
      */
     @Deprecated
@@ -94,7 +94,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Sets the value.
      * 
-     * @param value  the value to set
+     * @param value the value to set
      */
     public void setValue(final float value) {
         this.value = value;
@@ -103,8 +103,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Gets the and set.
      *
-     * @param value the value
-     * @return the and set
+     * @param value
+     * @return
      */
     public float getAndSet(final float value) {
         final float result = this.value;
@@ -115,8 +115,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Sets the and get.
      *
-     * @param value the value
-     * @return the float
+     * @param value
+     * @return
      */
     public float setAndGet(final float value) {
         this.value = value;
@@ -127,8 +127,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate - test the current value.
      * @return true, if successful
      * @throws E the e
@@ -146,8 +146,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate the first parameter is the current value, the second parameter is the new value.
      * @return true, if successful
      * @throws E the e
@@ -203,7 +203,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Adds a value to the value of this instance.
      * 
-     * @param operand  the value to add, not null
+     * @param operand the value to add, not null
      * @since Commons Lang 2.2
      */
     public void add(final float operand) {
@@ -213,7 +213,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Subtracts a value from the value of this instance.
      * 
-     * @param operand  the value to subtract
+     * @param operand the value to subtract
      * @since Commons Lang 2.2
      */
     public void subtract(final float operand) {
@@ -223,7 +223,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Increments by one the current value.
      *
-     * @return the previous value
+     * @return
      */
     public final float getAndIncrement() {
         return value++;
@@ -232,7 +232,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Decrements by one the current value.
      *
-     * @return the previous value
+     * @return
      */
     public final float getAndDecrement() {
         return value--;
@@ -241,7 +241,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Increments by one the current value.
      *
-     * @return the updated value
+     * @return
      */
     public final float incrementAndGet() {
         return ++value;
@@ -250,7 +250,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Decrements by one the current value.
      *
-     * @return the updated value
+     * @return
      */
     public final float decrementAndGet() {
         return --value;
@@ -260,7 +260,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * Adds the given value to the current value.
      *
      * @param delta the value to add
-     * @return the previous value
+     * @return
      */
     public final float getAndAdd(final float delta) {
         final float prev = value;
@@ -272,7 +272,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * Adds the given value to the current value.
      *
      * @param delta the value to add
-     * @return the updated value
+     * @return
      */
     public final float addAndGet(final float delta) {
         return value += delta;
@@ -283,7 +283,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Returns the value of this MutableFloat as an int.
      *
-     * @return the numeric value represented by this object after conversion to type int.
+     * @return
      */
     @Override
     public int intValue() {
@@ -293,7 +293,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Returns the value of this MutableFloat as a long.
      *
-     * @return the numeric value represented by this object after conversion to type long.
+     * @return
      */
     @Override
     public long longValue() {
@@ -303,7 +303,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Returns the value of this MutableFloat as a float.
      *
-     * @return the numeric value represented by this object after conversion to type float.
+     * @return
      */
     @Override
     public float floatValue() {
@@ -313,7 +313,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Returns the value of this MutableFloat as a double.
      *
-     * @return the numeric value represented by this object after conversion to type double.
+     * @return
      */
     @Override
     public double doubleValue() {
@@ -324,7 +324,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Compares this mutable to another in ascending order.
      * 
-     * @param other  the other mutable to compare to, not null
+     * @param other the other mutable to compare to, not null
      * @return negative if this is less, zero if equal, positive if greater
      */
     @Override
@@ -360,7 +360,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * </ul>
      * This definition allows hashtables to operate properly.
      * 
-     * @param obj  the object to compare with, null returns false
+     * @param obj the object to compare with, null returns false
      * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
      * @see java.lang.Float#floatToIntBits(float)
      */
@@ -383,7 +383,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Returns the String value of this mutable.
      * 
-     * @return the mutable value as a string
+     * @return
      */
     @Override
     public String toString() {

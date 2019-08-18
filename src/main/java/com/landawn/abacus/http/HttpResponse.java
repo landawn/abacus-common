@@ -57,13 +57,13 @@ public class HttpResponse {
     /**
      * Instantiates a new http response.
      *
-     * @param sentRequestAtMillis the sent request at millis
-     * @param receivedResponseAtMillis the received response at millis
-     * @param code the code
-     * @param message the message
-     * @param headers the headers
-     * @param body the body
-     * @param bodyFormat the body format
+     * @param sentRequestAtMillis
+     * @param receivedResponseAtMillis
+     * @param code
+     * @param message
+     * @param headers
+     * @param body
+     * @param bodyFormat
      */
     HttpResponse(long sentRequestAtMillis, long receivedResponseAtMillis, int code, String message, Map<String, List<String>> headers, byte[] body,
             ContentFormat bodyFormat) {
@@ -89,7 +89,7 @@ public class HttpResponse {
     /**
      * Sent request at millis.
      *
-     * @return the long
+     * @return
      */
     public long sentRequestAtMillis() {
         return sentRequestAtMillis;
@@ -98,7 +98,7 @@ public class HttpResponse {
     /**
      * Received response at millis.
      *
-     * @return the long
+     * @return
      */
     public long receivedResponseAtMillis() {
         return receivedResponseAtMillis;
@@ -107,7 +107,7 @@ public class HttpResponse {
     /**
      * Code.
      *
-     * @return the int
+     * @return
      */
     public int code() {
         return code;
@@ -116,7 +116,7 @@ public class HttpResponse {
     /**
      * Message.
      *
-     * @return the string
+     * @return
      */
     public String message() {
         return message;
@@ -125,7 +125,7 @@ public class HttpResponse {
     /**
      * Headers.
      *
-     * @return the map
+     * @return
      */
     public Map<String, List<String>> headers() {
         return headers;
@@ -134,7 +134,7 @@ public class HttpResponse {
     /**
      * Body.
      *
-     * @return the byte[]
+     * @return
      */
     public byte[] body() {
         return body;
@@ -143,9 +143,9 @@ public class HttpResponse {
     /**
      * Body.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @return
      */
     public <T> T body(Class<T> resultClass) {
         N.checkArgNotNull(resultClass, "resultClass");
@@ -178,7 +178,7 @@ public class HttpResponse {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -195,7 +195,7 @@ public class HttpResponse {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -217,7 +217,7 @@ public class HttpResponse {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

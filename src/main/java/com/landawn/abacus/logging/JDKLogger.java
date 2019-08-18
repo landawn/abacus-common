@@ -38,7 +38,7 @@ class JDKLogger extends AbstractLogger {
     /**
      * Instantiates a new JDK logger.
      *
-     * @param name the name
+     * @param name
      */
     public JDKLogger(String name) {
         super(name);
@@ -58,7 +58,7 @@ class JDKLogger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void trace(String msg) {
@@ -68,8 +68,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void trace(String msg, Throwable t) {
@@ -89,7 +89,7 @@ class JDKLogger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void debug(String msg) {
@@ -99,8 +99,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void debug(String msg, Throwable t) {
@@ -120,7 +120,7 @@ class JDKLogger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void info(String msg) {
@@ -130,8 +130,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void info(String msg, Throwable t) {
@@ -151,7 +151,7 @@ class JDKLogger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void warn(String msg) {
@@ -161,8 +161,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void warn(String msg, Throwable t) {
@@ -182,7 +182,7 @@ class JDKLogger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void error(String msg) {
@@ -192,8 +192,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void error(String msg, Throwable t) {
@@ -203,8 +203,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Log.
      *
-     * @param level the level
-     * @param msg the msg
+     * @param level
+     * @param msg
      */
     private void log(Level level, String msg) {
         log(SELF, level, msg, null);
@@ -213,9 +213,9 @@ class JDKLogger extends AbstractLogger {
     /**
      * Log.
      *
-     * @param level the level
-     * @param msg the msg
-     * @param t the t
+     * @param level
+     * @param msg
+     * @param t
      */
     private void log(Level level, String msg, Throwable t) {
         log(SELF, level, msg, t);
@@ -228,10 +228,10 @@ class JDKLogger extends AbstractLogger {
      * 
      * See bug report #13 for more details.
      *
-     * @param callerFQCN the caller FQCN
-     * @param level the level
-     * @param msg the msg
-     * @param t the t
+     * @param callerFQCN
+     * @param level
+     * @param msg
+     * @param t
      */
     private void log(String callerFQCN, Level level, String msg, Throwable t) {
         // millis and thread are filled by the constructor
@@ -247,8 +247,8 @@ class JDKLogger extends AbstractLogger {
     /**
      * Fill in caller data if possible.
      *
-     * @param callerFQCN the caller FQCN
-     * @param record          The record to update
+     * @param callerFQCN
+     * @param record The record to update
      */
     final private void fillCallerData(String callerFQCN, LogRecord record) {
         StackTraceElement[] steArray = new Throwable().getStackTrace();

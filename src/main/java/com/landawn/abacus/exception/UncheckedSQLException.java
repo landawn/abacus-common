@@ -32,7 +32,7 @@ public class UncheckedSQLException extends UncheckedException {
     /**
      * Constructor for UncheckedSQLException.
      *
-     * @param cause the cause
+     * @param cause
      */
     public UncheckedSQLException(SQLException cause) {
         super(cause);
@@ -42,8 +42,8 @@ public class UncheckedSQLException extends UncheckedException {
     /**
      * Constructor for UncheckedSQLException.
      *
-     * @param errorMsg the error msg
-     * @param cause the cause
+     * @param errorMsg
+     * @param cause
      */
     public UncheckedSQLException(String errorMsg, SQLException cause) {
         super(errorMsg, cause);

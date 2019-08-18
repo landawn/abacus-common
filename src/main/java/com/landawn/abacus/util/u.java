@@ -45,7 +45,7 @@ public class u {
     /**
      * The Class Optional.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     public static final class Optional<T> {
 
@@ -65,7 +65,7 @@ public class u {
         /**
          * Instantiates a new optional.
          *
-         * @param value the value
+         * @param value
          */
         private Optional(T value) {
             this.value = N.checkArgNotNull(value);
@@ -74,8 +74,8 @@ public class u {
         /**
          * Empty.
          *
-         * @param <T> the generic type
-         * @return the optional
+         * @param <T>
+         * @return
          */
         public static <T> Optional<T> empty() {
             return (Optional<T>) EMPTY;
@@ -84,9 +84,9 @@ public class u {
         /**
          * Of.
          *
-         * @param <T> the generic type
-         * @param value the value
-         * @return the optional
+         * @param <T>
+         * @param value
+         * @return
          */
         public static <T> Optional<T> of(T value) {
             return new Optional<>(value);
@@ -95,9 +95,9 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param <T> the generic type
-         * @param value the value
-         * @return the optional
+         * @param <T>
+         * @param value
+         * @return
          */
         public static <T> Optional<T> ofNullable(T value) {
             if (value == null) {
@@ -110,9 +110,9 @@ public class u {
         /**
          * From.
          *
-         * @param <T> the generic type
-         * @param op the op
-         * @return the optional
+         * @param <T>
+         * @param op
+         * @return
          */
         public static <T> Optional<T> from(java.util.Optional<T> op) {
             if (op.isPresent()) {
@@ -125,7 +125,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the t
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public T get() throws NoSuchElementException {
@@ -153,8 +153,8 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @return itself
          * @throws E the e
          */
@@ -171,10 +171,10 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
          * @return itself
          * @throws E the e
          * @throws E2 the e2
@@ -196,9 +196,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<T> filter(Try.Predicate<? super T, E> predicate) throws E {
@@ -214,10 +214,10 @@ public class u {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> map(final Try.Function<? super T, ? extends U, E> mapper) throws E {
@@ -233,9 +233,9 @@ public class u {
         /**
          * Map to boolean.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional boolean
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBoolean(final Try.ToBooleanFunction<? super T, E> mapper) throws E {
@@ -251,9 +251,9 @@ public class u {
         /**
          * Map to char.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional char
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Try.ToCharFunction<? super T, E> mapper) throws E {
@@ -269,9 +269,9 @@ public class u {
         /**
          * Map to byte.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional byte
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByte(final Try.ToByteFunction<? super T, E> mapper) throws E {
@@ -287,9 +287,9 @@ public class u {
         /**
          * Map to short.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional short
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalShort mapToShort(final Try.ToShortFunction<? super T, E> mapper) throws E {
@@ -305,9 +305,9 @@ public class u {
         /**
          * Map to int.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<? super T, E> mapper) throws E {
@@ -323,9 +323,9 @@ public class u {
         /**
          * Map to long.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional long
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Try.ToLongFunction<? super T, E> mapper) throws E {
@@ -341,9 +341,9 @@ public class u {
         /**
          * Map to float.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional float
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Try.ToFloatFunction<? super T, E> mapper) throws E {
@@ -359,9 +359,9 @@ public class u {
         /**
          * Map to double.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional double
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<? super T, E> mapper) throws E {
@@ -377,10 +377,10 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> Optional<U> flatMap(Try.Function<? super T, Optional<U>, E> mapper) throws E {
@@ -396,9 +396,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<T> or(Try.Supplier<Optional<? extends T>, E> supplier) throws E {
@@ -414,7 +414,7 @@ public class u {
         /**
          * Or null.
          *
-         * @return the t
+         * @return
          */
         public T orNull() {
             return isPresent() ? value : null;
@@ -423,8 +423,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the t
+         * @param other
+         * @return
          */
         public T orElse(T other) {
             return isPresent() ? value : other;
@@ -433,9 +433,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the t
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> T orElseGet(Try.Supplier<? extends T, E> other) throws E {
@@ -453,7 +453,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the t
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public T orElseThrow() throws NoSuchElementException {
@@ -467,9 +467,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the t
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -483,7 +483,7 @@ public class u {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         public Stream<T> stream() {
             if (isPresent()) {
@@ -496,7 +496,7 @@ public class u {
         /**
          * To list.
          *
-         * @return the list
+         * @return
          */
         public List<T> toList() {
             if (isPresent()) {
@@ -509,7 +509,7 @@ public class u {
         /**
          * To set.
          *
-         * @return the sets the
+         * @return
          */
         public Set<T> toSet() {
             if (isPresent()) {
@@ -522,7 +522,7 @@ public class u {
         /**
          * To immutable list.
          *
-         * @return the immutable list
+         * @return
          */
         public ImmutableList<T> toImmutableList() {
             if (isPresent()) {
@@ -535,7 +535,7 @@ public class u {
         /**
          * To immutable set.
          *
-         * @return the immutable set
+         * @return
          */
         public ImmutableSet<T> toImmutableSet() {
             if (isPresent()) {
@@ -548,7 +548,7 @@ public class u {
         /**
          * .
          *
-         * @return the java.util. optional
+         * @return
          */
         public java.util.Optional<T> __() {
             if (isPresent()) {
@@ -561,7 +561,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -582,7 +582,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -592,7 +592,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -635,7 +635,7 @@ public class u {
         /**
          * Instantiates a new optional boolean.
          *
-         * @param value the value
+         * @param value
          */
         private OptionalBoolean(boolean value) {
             this.value = value;
@@ -645,7 +645,7 @@ public class u {
         /**
          * Empty.
          *
-         * @return the optional boolean
+         * @return
          */
         public static OptionalBoolean empty() {
             return EMPTY;
@@ -654,8 +654,8 @@ public class u {
         /**
          * Of.
          *
-         * @param value the value
-         * @return the optional boolean
+         * @param value
+         * @return
          */
         public static OptionalBoolean of(boolean value) {
             return value ? TRUE : FALSE;
@@ -664,8 +664,8 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param val the val
-         * @return the optional boolean
+         * @param val
+         * @return
          */
         public static OptionalBoolean ofNullable(Boolean val) {
             if (val == null) {
@@ -697,9 +697,9 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
-         * @return the optional boolean
+         * @param <E>
+         * @param action
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean ifPresent(Try.BooleanConsumer<E> action) throws E {
@@ -715,11 +715,11 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
-         * @return the optional boolean
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -740,9 +740,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional boolean
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean filter(Try.BooleanPredicate<E> predicate) throws E {
@@ -758,9 +758,9 @@ public class u {
         /**
          * Map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional boolean
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean map(final Try.BooleanUnaryOperator<E> mapper) throws E {
@@ -776,10 +776,10 @@ public class u {
         /**
          * Map to obj.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Try.BooleanFunction<T, E> mapper) throws E {
@@ -795,9 +795,9 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional boolean
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean flatMap(Try.BooleanFunction<OptionalBoolean, E> mapper) throws E {
@@ -813,9 +813,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional boolean
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean or(Try.Supplier<OptionalBoolean, E> supplier) throws E {
@@ -869,7 +869,7 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
+         * @param other
          * @return true, if successful
          */
         public boolean orElse(boolean other) {
@@ -879,8 +879,8 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
+         * @param <E>
+         * @param other
          * @return true, if successful
          * @throws E the e
          */
@@ -897,8 +897,8 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
+         * @param <X>
+         * @param exceptionSupplier
          * @return true, if successful
          * @throws X the x
          */
@@ -915,8 +915,8 @@ public class u {
         /**
          * Compare to.
          *
-         * @param optional the optional
-         * @return the int
+         * @param optional
+         * @return
          */
         @Override
         public int compareTo(OptionalBoolean optional) {
@@ -934,7 +934,7 @@ public class u {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         public Stream<Boolean> stream() {
             if (isPresent) {
@@ -947,7 +947,7 @@ public class u {
         /**
          * Boxed.
          *
-         * @return the optional
+         * @return
          */
         public Optional<Boolean> boxed() {
             if (isPresent) {
@@ -960,7 +960,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -981,7 +981,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -991,7 +991,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1031,7 +1031,7 @@ public class u {
         /**
          * Instantiates a new optional char.
          *
-         * @param value the value
+         * @param value
          */
         private OptionalChar(char value) {
             this.value = value;
@@ -1041,7 +1041,7 @@ public class u {
         /**
          * Empty.
          *
-         * @return the optional char
+         * @return
          */
         public static OptionalChar empty() {
             return EMPTY;
@@ -1050,8 +1050,8 @@ public class u {
         /**
          * Of.
          *
-         * @param value the value
-         * @return the optional char
+         * @param value
+         * @return
          */
         public static OptionalChar of(char value) {
             return value == N.CHAR_0 ? CHAR_0 : new OptionalChar(value);
@@ -1060,8 +1060,8 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param val the val
-         * @return the optional char
+         * @param val
+         * @return
          */
         public static OptionalChar ofNullable(Character val) {
             if (val == null) {
@@ -1074,7 +1074,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the char
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public char get() throws NoSuchElementException {
@@ -1093,9 +1093,9 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
-         * @return the optional char
+         * @param <E>
+         * @param action
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalChar ifPresent(Try.CharConsumer<E> action) throws E {
@@ -1111,11 +1111,11 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
-         * @return the optional char
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -1135,9 +1135,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional char
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalChar filter(Try.CharPredicate<E> predicate) throws E {
@@ -1153,9 +1153,9 @@ public class u {
         /**
          * Map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional char
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalChar map(final Try.CharUnaryOperator<E> mapper) throws E {
@@ -1171,9 +1171,9 @@ public class u {
         /**
          * Map to int.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Character, E> mapper) throws E {
@@ -1189,10 +1189,10 @@ public class u {
         /**
          * Map to obj.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Try.CharFunction<T, E> mapper) throws E {
@@ -1208,9 +1208,9 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional char
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalChar flatMap(Try.CharFunction<OptionalChar, E> mapper) throws E {
@@ -1226,9 +1226,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional char
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalChar or(Try.Supplier<OptionalChar, E> supplier) throws E {
@@ -1242,7 +1242,7 @@ public class u {
         /**
          * Or zero.
          *
-         * @return the char
+         * @return
          */
         public char orZero() {
             return isPresent() ? value : 0;
@@ -1255,7 +1255,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the char
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public char orElseThrow() throws NoSuchElementException {
@@ -1269,8 +1269,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the char
+         * @param other
+         * @return
          */
         public char orElse(char other) {
             return isPresent() ? value : other;
@@ -1279,9 +1279,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the char
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> char orElseGet(Try.CharSupplier<E> other) throws E {
@@ -1297,9 +1297,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the char
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> char orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -1315,8 +1315,8 @@ public class u {
         /**
          * Compare to.
          *
-         * @param optional the optional
-         * @return the int
+         * @param optional
+         * @return
          */
         @Override
         public int compareTo(OptionalChar optional) {
@@ -1334,7 +1334,7 @@ public class u {
         /**
          * Boxed.
          *
-         * @return the optional
+         * @return
          */
         public Optional<Character> boxed() {
             if (isPresent()) {
@@ -1347,7 +1347,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -1368,7 +1368,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -1378,7 +1378,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1424,7 +1424,7 @@ public class u {
         /**
          * Instantiates a new optional byte.
          *
-         * @param value the value
+         * @param value
          */
         private OptionalByte(byte value) {
             this.value = value;
@@ -1434,7 +1434,7 @@ public class u {
         /**
          * Empty.
          *
-         * @return the optional byte
+         * @return
          */
         public static OptionalByte empty() {
             return EMPTY;
@@ -1443,8 +1443,8 @@ public class u {
         /**
          * Of.
          *
-         * @param value the value
-         * @return the optional byte
+         * @param value
+         * @return
          */
         public static OptionalByte of(byte value) {
             return POOL[value - Byte.MIN_VALUE];
@@ -1453,8 +1453,8 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param val the val
-         * @return the optional byte
+         * @param val
+         * @return
          */
         public static OptionalByte ofNullable(Byte val) {
             if (val == null) {
@@ -1467,7 +1467,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the byte
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public byte get() throws NoSuchElementException {
@@ -1486,9 +1486,9 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
-         * @return the optional byte
+         * @param <E>
+         * @param action
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalByte ifPresent(Try.ByteConsumer<E> action) throws E {
@@ -1504,11 +1504,11 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
-         * @return the optional byte
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -1528,9 +1528,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional byte
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalByte filter(Try.BytePredicate<E> predicate) throws E {
@@ -1546,9 +1546,9 @@ public class u {
         /**
          * Map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional byte
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalByte map(final Try.ByteUnaryOperator<E> mapper) throws E {
@@ -1564,9 +1564,9 @@ public class u {
         /**
          * Map to int.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Byte, E> mapper) throws E {
@@ -1582,10 +1582,10 @@ public class u {
         /**
          * Map to obj.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Try.ByteFunction<T, E> mapper) throws E {
@@ -1601,9 +1601,9 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional byte
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalByte flatMap(Try.ByteFunction<OptionalByte, E> mapper) throws E {
@@ -1619,9 +1619,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional byte
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalByte or(Try.Supplier<OptionalByte, E> supplier) throws E {
@@ -1635,7 +1635,7 @@ public class u {
         /**
          * Or zero.
          *
-         * @return the byte
+         * @return
          */
         public byte orZero() {
             return isPresent ? value : 0;
@@ -1648,7 +1648,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the byte
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public byte orElseThrow() throws NoSuchElementException {
@@ -1662,8 +1662,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the byte
+         * @param other
+         * @return
          */
         public byte orElse(byte other) {
             return isPresent ? value : other;
@@ -1672,9 +1672,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the byte
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> byte orElseGet(Try.ByteSupplier<E> other) throws E {
@@ -1690,9 +1690,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the byte
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> byte orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -1708,8 +1708,8 @@ public class u {
         /**
          * Compare to.
          *
-         * @param optional the optional
-         * @return the int
+         * @param optional
+         * @return
          */
         @Override
         public int compareTo(OptionalByte optional) {
@@ -1727,7 +1727,7 @@ public class u {
         /**
          * Boxed.
          *
-         * @return the optional
+         * @return
          */
         public Optional<Byte> boxed() {
             if (isPresent) {
@@ -1740,7 +1740,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -1761,7 +1761,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -1771,7 +1771,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1808,7 +1808,7 @@ public class u {
         /**
          * Instantiates a new optional short.
          *
-         * @param value the value
+         * @param value
          */
         private OptionalShort(short value) {
             this.value = value;
@@ -1818,7 +1818,7 @@ public class u {
         /**
          * Empty.
          *
-         * @return the optional short
+         * @return
          */
         public static OptionalShort empty() {
             return EMPTY;
@@ -1827,8 +1827,8 @@ public class u {
         /**
          * Of.
          *
-         * @param value the value
-         * @return the optional short
+         * @param value
+         * @return
          */
         public static OptionalShort of(short value) {
             return new OptionalShort(value);
@@ -1837,8 +1837,8 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param val the val
-         * @return the optional short
+         * @param val
+         * @return
          */
         public static OptionalShort ofNullable(Short val) {
             if (val == null) {
@@ -1851,7 +1851,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the short
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public short get() throws NoSuchElementException {
@@ -1870,9 +1870,9 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
-         * @return the optional short
+         * @param <E>
+         * @param action
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalShort ifPresent(Try.ShortConsumer<E> action) throws E {
@@ -1888,11 +1888,11 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
-         * @return the optional short
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -1913,9 +1913,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional short
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalShort filter(Try.ShortPredicate<E> predicate) throws E {
@@ -1931,9 +1931,9 @@ public class u {
         /**
          * Map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional short
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalShort map(final Try.ShortUnaryOperator<E> mapper) throws E {
@@ -1949,9 +1949,9 @@ public class u {
         /**
          * Map to int.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Short, E> mapper) throws E {
@@ -1967,10 +1967,10 @@ public class u {
         /**
          * Map to obj.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Try.ShortFunction<T, E> mapper) throws E {
@@ -1986,9 +1986,9 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional short
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalShort flatMap(Try.ShortFunction<OptionalShort, E> mapper) throws E {
@@ -2004,9 +2004,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional short
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalShort or(Try.Supplier<OptionalShort, E> supplier) throws E {
@@ -2020,7 +2020,7 @@ public class u {
         /**
          * Or zero.
          *
-         * @return the short
+         * @return
          */
         public short orZero() {
             return isPresent ? value : 0;
@@ -2033,7 +2033,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the short
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public short orElseThrow() throws NoSuchElementException {
@@ -2047,8 +2047,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the short
+         * @param other
+         * @return
          */
         public short orElse(short other) {
             return isPresent ? value : other;
@@ -2057,9 +2057,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the short
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> short orElseGet(Try.ShortSupplier<E> other) throws E {
@@ -2075,9 +2075,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the short
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> short orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -2093,8 +2093,8 @@ public class u {
         /**
          * Compare to.
          *
-         * @param optional the optional
-         * @return the int
+         * @param optional
+         * @return
          */
         @Override
         public int compareTo(OptionalShort optional) {
@@ -2112,7 +2112,7 @@ public class u {
         /**
          * Boxed.
          *
-         * @return the optional
+         * @return
          */
         public Optional<Short> boxed() {
             if (isPresent) {
@@ -2125,7 +2125,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -2146,7 +2146,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -2156,7 +2156,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -2208,7 +2208,7 @@ public class u {
         /**
          * Instantiates a new optional int.
          *
-         * @param value the value
+         * @param value
          */
         private OptionalInt(int value) {
             this.value = value;
@@ -2218,7 +2218,7 @@ public class u {
         /**
          * Empty.
          *
-         * @return the optional int
+         * @return
          */
         public static OptionalInt empty() {
             return EMPTY;
@@ -2227,8 +2227,8 @@ public class u {
         /**
          * Of.
          *
-         * @param value the value
-         * @return the optional int
+         * @param value
+         * @return
          */
         public static OptionalInt of(int value) {
             return value >= MIN_CACHED_VALUE && value < MAX_CACHED_VALUE ? POOL[value - MIN_CACHED_VALUE] : new OptionalInt(value);
@@ -2237,8 +2237,8 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param val the val
-         * @return the optional int
+         * @param val
+         * @return
          */
         public static OptionalInt ofNullable(Integer val) {
             if (val == null) {
@@ -2251,8 +2251,8 @@ public class u {
         /**
          * From.
          *
-         * @param op the op
-         * @return the optional int
+         * @param op
+         * @return
          */
         public static OptionalInt from(java.util.OptionalInt op) {
             if (op.isPresent()) {
@@ -2265,7 +2265,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the int
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public int get() throws NoSuchElementException {
@@ -2284,9 +2284,9 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
-         * @return the optional int
+         * @param <E>
+         * @param action
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt ifPresent(Try.IntConsumer<E> action) throws E {
@@ -2302,11 +2302,11 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
-         * @return the optional int
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -2326,9 +2326,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional int
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt filter(Try.IntPredicate<E> predicate) throws E {
@@ -2344,9 +2344,9 @@ public class u {
         /**
          * Map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt map(final Try.IntUnaryOperator<E> mapper) throws E {
@@ -2362,9 +2362,9 @@ public class u {
         /**
          * Map to long.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional long
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Try.ToLongFunction<Integer, E> mapper) throws E {
@@ -2380,9 +2380,9 @@ public class u {
         /**
          * Map to double.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional double
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<Integer, E> mapper) throws E {
@@ -2398,10 +2398,10 @@ public class u {
         /**
          * Map to obj.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Try.IntFunction<T, E> mapper) throws E {
@@ -2417,9 +2417,9 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt flatMap(Try.IntFunction<OptionalInt, E> mapper) throws E {
@@ -2435,9 +2435,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional int
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt or(Try.Supplier<OptionalInt, E> supplier) throws E {
@@ -2451,7 +2451,7 @@ public class u {
         /**
          * Or zero.
          *
-         * @return the int
+         * @return
          */
         public int orZero() {
             return isPresent ? value : 0;
@@ -2464,7 +2464,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the int
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public int orElseThrow() throws NoSuchElementException {
@@ -2478,8 +2478,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the int
+         * @param other
+         * @return
          */
         public int orElse(int other) {
             return isPresent ? value : other;
@@ -2488,9 +2488,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the int
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> int orElseGet(Try.IntSupplier<E> other) throws E {
@@ -2506,9 +2506,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the int
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> int orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -2524,8 +2524,8 @@ public class u {
         /**
          * Compare to.
          *
-         * @param optional the optional
-         * @return the int
+         * @param optional
+         * @return
          */
         @Override
         public int compareTo(OptionalInt optional) {
@@ -2543,7 +2543,7 @@ public class u {
         /**
          * Stream.
          *
-         * @return the int stream
+         * @return
          */
         public IntStream stream() {
             if (isPresent) {
@@ -2556,7 +2556,7 @@ public class u {
         /**
          * Boxed.
          *
-         * @return the optional
+         * @return
          */
         public Optional<Integer> boxed() {
             if (isPresent) {
@@ -2569,7 +2569,7 @@ public class u {
         /**
          * .
          *
-         * @return the java.util. optional int
+         * @return
          */
         public java.util.OptionalInt __() {
             if (isPresent) {
@@ -2582,7 +2582,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -2603,7 +2603,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -2613,7 +2613,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -2650,7 +2650,7 @@ public class u {
         /**
          * Instantiates a new optional long.
          *
-         * @param value the value
+         * @param value
          */
         private OptionalLong(long value) {
             this.value = value;
@@ -2660,7 +2660,7 @@ public class u {
         /**
          * Empty.
          *
-         * @return the optional long
+         * @return
          */
         public static OptionalLong empty() {
             return EMPTY;
@@ -2669,8 +2669,8 @@ public class u {
         /**
          * Of.
          *
-         * @param value the value
-         * @return the optional long
+         * @param value
+         * @return
          */
         public static OptionalLong of(long value) {
             return new OptionalLong(value);
@@ -2679,8 +2679,8 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param val the val
-         * @return the optional long
+         * @param val
+         * @return
          */
         public static OptionalLong ofNullable(Long val) {
             if (val == null) {
@@ -2693,8 +2693,8 @@ public class u {
         /**
          * From.
          *
-         * @param op the op
-         * @return the optional long
+         * @param op
+         * @return
          */
         public static OptionalLong from(java.util.OptionalLong op) {
             if (op.isPresent()) {
@@ -2707,7 +2707,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the long
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public long get() throws NoSuchElementException {
@@ -2726,9 +2726,9 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
-         * @return the optional long
+         * @param <E>
+         * @param action
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong ifPresent(Try.LongConsumer<E> action) throws E {
@@ -2744,11 +2744,11 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
-         * @return the optional long
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -2768,9 +2768,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional long
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong filter(Try.LongPredicate<E> predicate) throws E {
@@ -2786,9 +2786,9 @@ public class u {
         /**
          * Map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional long
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong map(final Try.LongUnaryOperator<E> mapper) throws E {
@@ -2804,9 +2804,9 @@ public class u {
         /**
          * Map to int.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Long, E> mapper) throws E {
@@ -2822,9 +2822,9 @@ public class u {
         /**
          * Map to double.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional double
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<Long, E> mapper) throws E {
@@ -2840,10 +2840,10 @@ public class u {
         /**
          * Map to obj.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Try.LongFunction<T, E> mapper) throws E {
@@ -2859,9 +2859,9 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional long
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong flatMap(Try.LongFunction<OptionalLong, E> mapper) throws E {
@@ -2877,9 +2877,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional long
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong or(Try.Supplier<OptionalLong, E> supplier) throws E {
@@ -2893,7 +2893,7 @@ public class u {
         /**
          * Or zero.
          *
-         * @return the long
+         * @return
          */
         public long orZero() {
             return isPresent ? value : 0;
@@ -2906,7 +2906,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the long
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public long orElseThrow() throws NoSuchElementException {
@@ -2920,8 +2920,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the long
+         * @param other
+         * @return
          */
         public long orElse(long other) {
             return isPresent ? value : other;
@@ -2930,9 +2930,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the long
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> long orElseGet(Try.LongSupplier<E> other) throws E {
@@ -2948,9 +2948,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the long
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> long orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -2966,8 +2966,8 @@ public class u {
         /**
          * Compare to.
          *
-         * @param optional the optional
-         * @return the int
+         * @param optional
+         * @return
          */
         @Override
         public int compareTo(OptionalLong optional) {
@@ -2985,7 +2985,7 @@ public class u {
         /**
          * Stream.
          *
-         * @return the long stream
+         * @return
          */
         public LongStream stream() {
             if (isPresent) {
@@ -2998,7 +2998,7 @@ public class u {
         /**
          * Boxed.
          *
-         * @return the optional
+         * @return
          */
         public Optional<Long> boxed() {
             if (isPresent) {
@@ -3011,7 +3011,7 @@ public class u {
         /**
          * .
          *
-         * @return the java.util. optional long
+         * @return
          */
         public java.util.OptionalLong __() {
             if (isPresent) {
@@ -3024,7 +3024,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -3045,7 +3045,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -3055,7 +3055,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -3092,7 +3092,7 @@ public class u {
         /**
          * Instantiates a new optional float.
          *
-         * @param value the value
+         * @param value
          */
         private OptionalFloat(float value) {
             this.value = value;
@@ -3102,7 +3102,7 @@ public class u {
         /**
          * Empty.
          *
-         * @return the optional float
+         * @return
          */
         public static OptionalFloat empty() {
             return EMPTY;
@@ -3111,8 +3111,8 @@ public class u {
         /**
          * Of.
          *
-         * @param value the value
-         * @return the optional float
+         * @param value
+         * @return
          */
         public static OptionalFloat of(float value) {
             return new OptionalFloat(value);
@@ -3121,8 +3121,8 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param val the val
-         * @return the optional float
+         * @param val
+         * @return
          */
         public static OptionalFloat ofNullable(Float val) {
             if (val == null) {
@@ -3135,7 +3135,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the float
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public float get() throws NoSuchElementException {
@@ -3154,9 +3154,9 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
-         * @return the optional float
+         * @param <E>
+         * @param action
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat ifPresent(Try.FloatConsumer<E> action) throws E {
@@ -3172,11 +3172,11 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
-         * @return the optional float
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -3197,9 +3197,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional float
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat filter(Try.FloatPredicate<E> predicate) throws E {
@@ -3215,9 +3215,9 @@ public class u {
         /**
          * Map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional float
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat map(final Try.FloatUnaryOperator<E> mapper) throws E {
@@ -3233,9 +3233,9 @@ public class u {
         /**
          * Map to double.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional double
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<Float, E> mapper) throws E {
@@ -3251,10 +3251,10 @@ public class u {
         /**
          * Map to obj.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Try.FloatFunction<T, E> mapper) throws E {
@@ -3270,9 +3270,9 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional float
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat flatMap(Try.FloatFunction<OptionalFloat, E> mapper) throws E {
@@ -3288,9 +3288,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional float
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat or(Try.Supplier<OptionalFloat, E> supplier) throws E {
@@ -3304,7 +3304,7 @@ public class u {
         /**
          * Or zero.
          *
-         * @return the float
+         * @return
          */
         public float orZero() {
             return isPresent ? value : 0;
@@ -3317,7 +3317,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the float
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public float orElseThrow() throws NoSuchElementException {
@@ -3331,8 +3331,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the float
+         * @param other
+         * @return
          */
         public float orElse(float other) {
             return isPresent ? value : other;
@@ -3341,9 +3341,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the float
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> float orElseGet(Try.FloatSupplier<E> other) throws E {
@@ -3359,9 +3359,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the float
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> float orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -3377,8 +3377,8 @@ public class u {
         /**
          * Compare to.
          *
-         * @param optional the optional
-         * @return the int
+         * @param optional
+         * @return
          */
         @Override
         public int compareTo(OptionalFloat optional) {
@@ -3396,7 +3396,7 @@ public class u {
         /**
          * Boxed.
          *
-         * @return the optional
+         * @return
          */
         public Optional<Float> boxed() {
             if (isPresent) {
@@ -3409,7 +3409,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -3430,7 +3430,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -3440,7 +3440,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -3477,7 +3477,7 @@ public class u {
         /**
          * Instantiates a new optional double.
          *
-         * @param value the value
+         * @param value
          */
         private OptionalDouble(double value) {
             this.value = value;
@@ -3487,7 +3487,7 @@ public class u {
         /**
          * Empty.
          *
-         * @return the optional double
+         * @return
          */
         public static OptionalDouble empty() {
             return EMPTY;
@@ -3496,8 +3496,8 @@ public class u {
         /**
          * Of.
          *
-         * @param value the value
-         * @return the optional double
+         * @param value
+         * @return
          */
         public static OptionalDouble of(double value) {
             return new OptionalDouble(value);
@@ -3506,8 +3506,8 @@ public class u {
         /**
          * Of nullable.
          *
-         * @param val the val
-         * @return the optional double
+         * @param val
+         * @return
          */
         public static OptionalDouble ofNullable(Double val) {
             if (val == null) {
@@ -3520,8 +3520,8 @@ public class u {
         /**
          * From.
          *
-         * @param op the op
-         * @return the optional double
+         * @param op
+         * @return
          */
         public static OptionalDouble from(java.util.OptionalDouble op) {
             if (op.isPresent()) {
@@ -3534,7 +3534,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the double
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public double get() throws NoSuchElementException {
@@ -3553,9 +3553,9 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
-         * @return the optional double
+         * @param <E>
+         * @param action
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble ifPresent(Try.DoubleConsumer<E> action) throws E {
@@ -3571,11 +3571,11 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
-         * @return the optional double
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
+         * @return
          * @throws E the e
          * @throws E2 the e2
          */
@@ -3596,9 +3596,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional double
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble filter(Try.DoublePredicate<E> predicate) throws E {
@@ -3614,9 +3614,9 @@ public class u {
         /**
          * Map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional double
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble map(final Try.DoubleUnaryOperator<E> mapper) throws E {
@@ -3632,9 +3632,9 @@ public class u {
         /**
          * Map to int.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Double, E> mapper) throws E {
@@ -3650,9 +3650,9 @@ public class u {
         /**
          * Map to long.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional long
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Try.ToLongFunction<Double, E> mapper) throws E {
@@ -3668,10 +3668,10 @@ public class u {
         /**
          * Map to obj.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <T>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Try.DoubleFunction<T, E> mapper) throws E {
@@ -3687,9 +3687,9 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional double
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble flatMap(Try.DoubleFunction<OptionalDouble, E> mapper) throws E {
@@ -3705,9 +3705,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the optional double
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble or(Try.Supplier<OptionalDouble, E> supplier) throws E {
@@ -3721,7 +3721,7 @@ public class u {
         /**
          * Or zero.
          *
-         * @return the double
+         * @return
          */
         public double orZero() {
             return isPresent ? value : 0;
@@ -3734,7 +3734,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the double
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public double orElseThrow() throws NoSuchElementException {
@@ -3748,8 +3748,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the double
+         * @param other
+         * @return
          */
         public double orElse(double other) {
             return isPresent ? value : other;
@@ -3758,9 +3758,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the double
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> double orElseGet(Try.DoubleSupplier<E> other) throws E {
@@ -3776,9 +3776,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the double
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> double orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -3794,8 +3794,8 @@ public class u {
         /**
          * Compare to.
          *
-         * @param optional the optional
-         * @return the int
+         * @param optional
+         * @return
          */
         @Override
         public int compareTo(OptionalDouble optional) {
@@ -3813,7 +3813,7 @@ public class u {
         /**
          * Stream.
          *
-         * @return the double stream
+         * @return
          */
         public DoubleStream stream() {
             if (isPresent) {
@@ -3826,7 +3826,7 @@ public class u {
         /**
          * Boxed.
          *
-         * @return the optional
+         * @return
          */
         public Optional<Double> boxed() {
             if (isPresent) {
@@ -3839,7 +3839,7 @@ public class u {
         /**
          * .
          *
-         * @return the java.util. optional double
+         * @return
          */
         public java.util.OptionalDouble __() {
             if (isPresent) {
@@ -3852,7 +3852,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -3873,7 +3873,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -3883,7 +3883,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -3898,7 +3898,7 @@ public class u {
     /**
      * The Class Nullable.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     public static final class Nullable<T> {
 
@@ -3922,7 +3922,7 @@ public class u {
         /**
          * Instantiates a new nullable.
          *
-         * @param value the value
+         * @param value
          */
         private Nullable(T value) {
             this.value = value;
@@ -3932,8 +3932,8 @@ public class u {
         /**
          * Empty.
          *
-         * @param <T> the generic type
-         * @return the nullable
+         * @param <T>
+         * @return
          */
         public static <T> Nullable<T> empty() {
             return (Nullable<T>) EMPTY;
@@ -3942,9 +3942,9 @@ public class u {
         /**
          * Of.
          *
-         * @param <T> the generic type
-         * @param value the value
-         * @return the nullable
+         * @param <T>
+         * @param value
+         * @return
          */
         public static <T> Nullable<T> of(T value) {
             return new Nullable<>(value);
@@ -3953,9 +3953,9 @@ public class u {
         /**
          * From.
          *
-         * @param <T> the generic type
-         * @param optional the optional
-         * @return the nullable
+         * @param <T>
+         * @param optional
+         * @return
          */
         public static <T> Nullable<T> from(Optional<T> optional) {
             if (optional.isPresent()) {
@@ -3968,9 +3968,9 @@ public class u {
         /**
          * From.
          *
-         * @param <T> the generic type
-         * @param optional the optional
-         * @return the nullable
+         * @param <T>
+         * @param optional
+         * @return
          */
         public static <T> Nullable<T> from(java.util.Optional<T> optional) {
             if (optional.isPresent()) {
@@ -3983,7 +3983,7 @@ public class u {
         /**
          * Gets the.
          *
-         * @return the t
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public T get() throws NoSuchElementException {
@@ -4040,8 +4040,8 @@ public class u {
         /**
          * If present.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @return itself
          * @throws E the e
          */
@@ -4058,10 +4058,10 @@ public class u {
         /**
          * If present or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
          * @return itself
          * @throws E the e
          * @throws E2 the e2
@@ -4083,8 +4083,8 @@ public class u {
         /**
          * If not null.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @return itself
          * @throws E the e
          */
@@ -4101,10 +4101,10 @@ public class u {
         /**
          * If not null or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
          * @return itself
          * @throws E the e
          * @throws E2 the e2
@@ -4126,9 +4126,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the nullable
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> filter(Try.Predicate<? super T, E> predicate) throws E {
@@ -4144,9 +4144,9 @@ public class u {
         /**
          * Filter if not null.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<T> filterIfNotNull(Try.Predicate<? super T, E> predicate) throws E {
@@ -4162,10 +4162,10 @@ public class u {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> map(Try.Function<? super T, ? extends U, E> mapper) throws E {
@@ -4181,9 +4181,9 @@ public class u {
         /**
          * Map to boolean.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional boolean
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBoolean(final Try.ToBooleanFunction<? super T, E> mapper) throws E {
@@ -4199,9 +4199,9 @@ public class u {
         /**
          * Map to char.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional char
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Try.ToCharFunction<? super T, E> mapper) throws E {
@@ -4217,9 +4217,9 @@ public class u {
         /**
          * Map to byte.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional byte
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByte(final Try.ToByteFunction<? super T, E> mapper) throws E {
@@ -4235,9 +4235,9 @@ public class u {
         /**
          * Map to short.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional short
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalShort mapToShort(final Try.ToShortFunction<? super T, E> mapper) throws E {
@@ -4253,9 +4253,9 @@ public class u {
         /**
          * Map to int.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<? super T, E> mapper) throws E {
@@ -4271,9 +4271,9 @@ public class u {
         /**
          * Map to long.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional long
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Try.ToLongFunction<? super T, E> mapper) throws E {
@@ -4289,9 +4289,9 @@ public class u {
         /**
          * Map to float.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional float
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Try.ToFloatFunction<? super T, E> mapper) throws E {
@@ -4307,9 +4307,9 @@ public class u {
         /**
          * Map to double.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional double
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<? super T, E> mapper) throws E {
@@ -4325,10 +4325,10 @@ public class u {
         /**
          * Map if not null.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> mapIfNotNull(Try.Function<? super T, ? extends U, E> mapper) throws E {
@@ -4344,9 +4344,9 @@ public class u {
         /**
          * Map to boolean if not null.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional boolean
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBooleanIfNotNull(final Try.ToBooleanFunction<? super T, E> mapper) throws E {
@@ -4362,9 +4362,9 @@ public class u {
         /**
          * Map to char if not null.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional char
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToCharIfNotNull(final Try.ToCharFunction<? super T, E> mapper) throws E {
@@ -4380,9 +4380,9 @@ public class u {
         /**
          * Map to byte if not null.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional byte
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByteIfNotNull(final Try.ToByteFunction<? super T, E> mapper) throws E {
@@ -4398,9 +4398,9 @@ public class u {
         /**
          * Map to short if not null.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional short
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalShort mapToShortIfNotNull(final Try.ToShortFunction<? super T, E> mapper) throws E {
@@ -4416,9 +4416,9 @@ public class u {
         /**
          * Map to int if not null.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional int
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToIntIfNotNull(final Try.ToIntFunction<? super T, E> mapper) throws E {
@@ -4434,9 +4434,9 @@ public class u {
         /**
          * Map to long if not null.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional long
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLongIfNotNull(final Try.ToLongFunction<? super T, E> mapper) throws E {
@@ -4452,9 +4452,9 @@ public class u {
         /**
          * Map to float if not null.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional float
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloatIfNotNull(final Try.ToFloatFunction<? super T, E> mapper) throws E {
@@ -4470,9 +4470,9 @@ public class u {
         /**
          * Map to double if not null.
          *
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the optional double
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDoubleIfNotNull(final Try.ToDoubleFunction<? super T, E> mapper) throws E {
@@ -4488,10 +4488,10 @@ public class u {
         /**
          * Flat map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> flatMap(Try.Function<? super T, Nullable<U>, E> mapper) throws E {
@@ -4507,10 +4507,10 @@ public class u {
         /**
          * Flat map if not null.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> flatMapIfNotNull(Try.Function<? super T, Nullable<U>, E> mapper) throws E {
@@ -4526,9 +4526,9 @@ public class u {
         /**
          * Or.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the nullable
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> or(Try.Supplier<Nullable<? extends T>, E> supplier) throws E {
@@ -4544,9 +4544,9 @@ public class u {
         /**
          * Or if null.
          *
-         * @param <E> the element type
-         * @param supplier the supplier
-         * @return the nullable
+         * @param <E>
+         * @param supplier
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> orIfNull(Try.Supplier<Nullable<? extends T>, E> supplier) throws E {
@@ -4562,7 +4562,7 @@ public class u {
         /**
          * Or null.
          *
-         * @return the t
+         * @return
          */
         public T orNull() {
             return isPresent() ? value : null;
@@ -4575,8 +4575,8 @@ public class u {
         /**
          * Or else.
          *
-         * @param other the other
-         * @return the t
+         * @param other
+         * @return
          */
         public T orElse(T other) {
             return isPresent() ? value : other;
@@ -4585,9 +4585,9 @@ public class u {
         /**
          * Or else get.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the t
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> T orElseGet(Try.Supplier<? extends T, E> other) throws E {
@@ -4603,7 +4603,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return the t
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public T orElseThrow() throws NoSuchElementException {
@@ -4617,9 +4617,9 @@ public class u {
         /**
          * Or else throw.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the t
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
@@ -4635,8 +4635,8 @@ public class u {
         /**
          * Or else if null.
          *
-         * @param other the other
-         * @return the t
+         * @param other
+         * @return
          */
         public T orElseIfNull(T other) {
             return isNotNull() ? value : other;
@@ -4645,9 +4645,9 @@ public class u {
         /**
          * Or else get if null.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the t
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> T orElseGetIfNull(Try.Supplier<? extends T, E> other) throws E {
@@ -4663,7 +4663,7 @@ public class u {
         /**
          * Or else throw if null.
          *
-         * @return the t
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public T orElseThrowIfNull() throws NoSuchElementException {
@@ -4677,9 +4677,9 @@ public class u {
         /**
          * Or else throw if null.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the t
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> T orElseThrowIfNull(Supplier<? extends X> exceptionSupplier) throws X {
@@ -4695,7 +4695,7 @@ public class u {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         public Stream<T> stream() {
             if (isPresent()) {
@@ -4708,7 +4708,7 @@ public class u {
         /**
          * Stream if not null.
          *
-         * @return the stream
+         * @return
          */
         public Stream<T> streamIfNotNull() {
             if (isNotNull()) {
@@ -4721,7 +4721,7 @@ public class u {
         /**
          * To list.
          *
-         * @return the list
+         * @return
          */
         public List<T> toList() {
             if (isPresent()) {
@@ -4734,7 +4734,7 @@ public class u {
         /**
          * To list if not null.
          *
-         * @return the list
+         * @return
          */
         public List<T> toListIfNotNull() {
             if (isNotNull()) {
@@ -4747,7 +4747,7 @@ public class u {
         /**
          * To set.
          *
-         * @return the sets the
+         * @return
          */
         public Set<T> toSet() {
             if (isPresent()) {
@@ -4760,7 +4760,7 @@ public class u {
         /**
          * To set if not null.
          *
-         * @return the sets the
+         * @return
          */
         public Set<T> toSetIfNotNull() {
             if (isNotNull()) {
@@ -4773,7 +4773,7 @@ public class u {
         /**
          * To immutable list.
          *
-         * @return the immutable list
+         * @return
          */
         public ImmutableList<T> toImmutableList() {
             if (isPresent()) {
@@ -4786,7 +4786,7 @@ public class u {
         /**
          * To immutable list if not null.
          *
-         * @return the immutable list
+         * @return
          */
         public ImmutableList<T> toImmutableListIfNotNull() {
             if (isNotNull()) {
@@ -4799,7 +4799,7 @@ public class u {
         /**
          * To immutable set.
          *
-         * @return the immutable set
+         * @return
          */
         public ImmutableSet<T> toImmutableSet() {
             if (isPresent()) {
@@ -4812,7 +4812,7 @@ public class u {
         /**
          * To immutable set if not null.
          *
-         * @return the immutable set
+         * @return
          */
         public ImmutableSet<T> toImmutableSetIfNotNull() {
             if (isNotNull()) {
@@ -4825,7 +4825,7 @@ public class u {
         /**
          * To optional.
          *
-         * @return the optional
+         * @return
          */
         public Optional<T> toOptional() {
             if (value == null) {
@@ -4838,7 +4838,7 @@ public class u {
         /**
          * To jdk optional.
          *
-         * @return the java.util. optional
+         * @return
          */
         public java.util.Optional<T> toJdkOptional() {
             if (value == null) {
@@ -4851,7 +4851,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -4872,7 +4872,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -4882,7 +4882,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -4897,7 +4897,7 @@ public class u {
     /**
      * The Class Holder.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     public static final class Holder<T> extends Reference<T, Holder<T>> {
 
@@ -4911,7 +4911,7 @@ public class u {
         /**
          * Instantiates a new holder.
          *
-         * @param value the value
+         * @param value
          */
         Holder(T value) {
             super(value);
@@ -4920,9 +4920,9 @@ public class u {
         /**
          * Of.
          *
-         * @param <T> the generic type
-         * @param value the value
-         * @return the holder
+         * @param <T>
+         * @param value
+         * @return
          */
         public static <T> Holder<T> of(T value) {
             return new Holder<>(value);
@@ -4932,7 +4932,7 @@ public class u {
     /**
      * The Class R.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     public static final class R<T> extends Reference<T, R<T>> {
 
@@ -4946,7 +4946,7 @@ public class u {
         /**
          * Instantiates a new r.
          *
-         * @param value the value
+         * @param value
          */
         R(T value) {
             super(value);
@@ -4955,9 +4955,9 @@ public class u {
         /**
          * Of.
          *
-         * @param <T> the generic type
-         * @param value the value
-         * @return the r
+         * @param <T>
+         * @param value
+         * @return
          */
         public static <T> R<T> of(T value) {
             return new R<>(value);
@@ -4967,8 +4967,8 @@ public class u {
     /**
      * The Class Reference.
      *
-     * @param <T> the generic type
-     * @param <H> the generic type
+     * @param <T>
+     * @param <H>
      */
     static abstract class Reference<T, H extends Reference<T, H>> {
 
@@ -4985,7 +4985,7 @@ public class u {
         /**
          * Instantiates a new reference.
          *
-         * @param value the value
+         * @param value
          */
         protected Reference(T value) {
             this.value = value;
@@ -4994,7 +4994,7 @@ public class u {
         /**
          * Value.
          *
-         * @return the t
+         * @return
          */
         public T value() {
             return value;
@@ -5003,7 +5003,7 @@ public class u {
         /**
          * Gets the value.
          *
-         * @return the value
+         * @return
          * @deprecated replace by {@link #value()}.
          */
         @Deprecated
@@ -5023,8 +5023,8 @@ public class u {
         /**
          * Gets the and set.
          *
-         * @param value the value
-         * @return the and set
+         * @param value
+         * @return
          */
         public T getAndSet(final T value) {
             final T result = this.value;
@@ -5035,8 +5035,8 @@ public class u {
         /**
          * Sets the and get.
          *
-         * @param value the value
-         * @return the t
+         * @param value
+         * @return
          */
         public T setAndGet(final T value) {
             this.value = value;
@@ -5046,9 +5046,9 @@ public class u {
         /**
          * Gets the and update.
          *
-         * @param <E> the element type
-         * @param updateFunction the update function
-         * @return the and update
+         * @param <E>
+         * @param updateFunction
+         * @return
          * @throws E the e
          */
         public final <E extends Exception> T getAndUpdate(Try.UnaryOperator<T, E> updateFunction) throws E {
@@ -5060,9 +5060,9 @@ public class u {
         /**
          * Update and get.
          *
-         * @param <E> the element type
-         * @param updateFunction the update function
-         * @return the t
+         * @param <E>
+         * @param updateFunction
+         * @return
          * @throws E the e
          */
         public final <E extends Exception> T updateAndGet(Try.UnaryOperator<T, E> updateFunction) throws E {
@@ -5074,8 +5074,8 @@ public class u {
          * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
          * Otherwise just return <code>false</code> without setting the value to new value.
          *
-         * @param <E> the element type
-         * @param newValue the new value
+         * @param <E>
+         * @param newValue
          * @param predicate - test the current value.
          * @return true, if successful
          * @throws E the e
@@ -5093,8 +5093,8 @@ public class u {
          * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
          * Otherwise just return <code>false</code> without setting the value to new value.
          *
-         * @param <E> the element type
-         * @param newValue the new value
+         * @param <E>
+         * @param newValue
          * @param predicate the first parameter is the current value, the second parameter is the new value.
          * @return true, if successful
          * @throws E the e
@@ -5129,8 +5129,8 @@ public class u {
         /**
          * If not null.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void ifNotNull(Try.Consumer<? super T, E> action) throws E {
@@ -5144,10 +5144,10 @@ public class u {
         /**
          * If not null or else.
          *
-         * @param <E> the element type
-         * @param <E2> the generic type
-         * @param action the action
-         * @param emptyAction the empty action
+         * @param <E>
+         * @param <E2>
+         * @param action
+         * @param emptyAction
          * @throws E the e
          * @throws E2 the e2
          */
@@ -5165,8 +5165,8 @@ public class u {
         /**
          * Accept.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         public <E extends Exception> void accept(final Try.Consumer<? super T, E> action) throws E {
@@ -5176,8 +5176,8 @@ public class u {
         /**
          * Accept if not null.
          *
-         * @param <E> the element type
-         * @param action the action
+         * @param <E>
+         * @param action
          * @throws E the e
          */
         @Deprecated
@@ -5192,10 +5192,10 @@ public class u {
         /**
          * Map.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the u
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> U map(final Try.Function<? super T, ? extends U, E> mapper) throws E {
@@ -5205,10 +5205,10 @@ public class u {
         /**
          * Map if not null.
          *
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param mapper the mapper
-         * @return the nullable
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> mapIfNotNull(final Try.Function<? super T, ? extends U, E> mapper) throws E {
@@ -5224,9 +5224,9 @@ public class u {
         /**
          * Filter.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the nullable
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> filter(final Try.Predicate<? super T, E> predicate) throws E {
@@ -5240,9 +5240,9 @@ public class u {
         /**
          * Filter if not null.
          *
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the optional
+         * @param <E>
+         * @param predicate
+         * @return
          * @throws E the e
          */
         public <E extends Exception> Optional<T> filterIfNotNull(final Try.Predicate<? super T, E> predicate) throws E {
@@ -5258,7 +5258,7 @@ public class u {
         /**
          * Stream.
          *
-         * @return the stream
+         * @return
          */
         public Stream<T> stream() {
             return Stream.of(value);
@@ -5267,7 +5267,7 @@ public class u {
         /**
          * Stream if not null.
          *
-         * @return the stream
+         * @return
          */
         public Stream<T> streamIfNotNull() {
             if (isNotNull()) {
@@ -5280,8 +5280,8 @@ public class u {
         /**
          * Or else if null.
          *
-         * @param other the other
-         * @return the t
+         * @param other
+         * @return
          */
         public T orElseIfNull(T other) {
             return isNotNull() ? value : other;
@@ -5290,9 +5290,9 @@ public class u {
         /**
          * Or else get if null.
          *
-         * @param <E> the element type
-         * @param other the other
-         * @return the t
+         * @param <E>
+         * @param other
+         * @return
          * @throws E the e
          */
         public <E extends Exception> T orElseGetIfNull(Try.Supplier<? extends T, E> other) throws E {
@@ -5308,9 +5308,9 @@ public class u {
         /**
          * Or else throw if null.
          *
-         * @param <X> the generic type
-         * @param exceptionSupplier the exception supplier
-         * @return the t
+         * @param <X>
+         * @param exceptionSupplier
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> T orElseThrowIfNull(Supplier<? extends X> exceptionSupplier) throws X {
@@ -5326,7 +5326,7 @@ public class u {
         /**
          * Returns a non-empty {@code Nullable} with the {@code value}.
          *
-         * @return the nullable
+         * @return
          */
         public Nullable<T> toNullable() {
             return Nullable.of(value);
@@ -5335,7 +5335,7 @@ public class u {
         /**
          * Returns an {@code Optional} with the {@code value} if {@code value} is not null, otherwise an empty {@code Optional} is returned.
          *
-         * @return the optional
+         * @return
          */
         public Optional<T> toOptional() {
             return Optional.ofNullable(value);
@@ -5344,7 +5344,7 @@ public class u {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -5354,7 +5354,7 @@ public class u {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @SuppressWarnings("rawtypes")
@@ -5366,7 +5366,7 @@ public class u {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {

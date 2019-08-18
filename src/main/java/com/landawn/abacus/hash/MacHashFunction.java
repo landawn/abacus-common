@@ -50,9 +50,9 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     /**
      * Instantiates a new mac hash function.
      *
-     * @param algorithmName the algorithm name
-     * @param key the key
-     * @param toString the to string
+     * @param algorithmName
+     * @param key
+     * @param toString
      */
     MacHashFunction(String algorithmName, Key key, String toString) {
         this.prototype = getMac(algorithmName, key);
@@ -65,7 +65,7 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     /**
      * Bits.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int bits() {
@@ -75,7 +75,7 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     /**
      * Supports clone.
      *
-     * @param mac the mac
+     * @param mac
      * @return true, if successful
      */
     private static boolean supportsClone(Mac mac) {
@@ -90,9 +90,9 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     /**
      * Gets the mac.
      *
-     * @param algorithmName the algorithm name
-     * @param key the key
-     * @return the mac
+     * @param algorithmName
+     * @param key
+     * @return
      */
     private static Mac getMac(String algorithmName, Key key) {
         try {
@@ -109,7 +109,7 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -126,7 +126,7 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -147,7 +147,7 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         /**
          * Instantiates a new mac hasher.
          *
-         * @param mac the mac
+         * @param mac
          */
         private MacHasher(Mac mac) {
             this.mac = mac;
@@ -156,7 +156,7 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         /**
          * Update.
          *
-         * @param b the b
+         * @param b
          */
         @Override
         protected void update(byte b) {
@@ -167,7 +167,7 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         /**
          * Update.
          *
-         * @param b the b
+         * @param b
          */
         @Override
         protected void update(byte[] b) {
@@ -178,9 +178,9 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         /**
          * Update.
          *
-         * @param b the b
-         * @param off the off
-         * @param len the len
+         * @param b
+         * @param off
+         * @param len
          */
         @Override
         protected void update(byte[] b, int off, int len) {
@@ -198,7 +198,7 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         /**
          * Hash.
          *
-         * @return the hash code
+         * @return
          */
         @Override
         public HashCode hash() {

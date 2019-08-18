@@ -35,7 +35,7 @@ public @interface Subscribe {
     /**
      * Thread mode.
      *
-     * @return the thread mode
+     * @return
      */
     ThreadMode threadMode() default ThreadMode.DEFAULT;
 
@@ -59,14 +59,14 @@ public @interface Subscribe {
     /**
      * Only subscribe the events which are posted with the specified event id.
      *
-     * @return the string
+     * @return
      */
     String eventId() default "";
 
     /**
      * The event will be ignored if the interval between this event and last event is less than the specified <code>interval</code>.
      *
-     * @return the long
+     * @return
      */
     long interval() default 0; // Unit is milliseconds.
 

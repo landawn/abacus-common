@@ -119,8 +119,8 @@ public abstract class Configuration {
     /**
      * Constructor for Configuration.
      *
-     * @param element the element
-     * @param props the props
+     * @param element
+     * @param props
      */
     protected Configuration(Element element, Map<String, String> props) {
         if (props != null) {
@@ -161,7 +161,7 @@ public abstract class Configuration {
     /**
      * Method element2Attr.
      *
-     * @param element the element
+     * @param element
      */
     protected void complexElement2Attr(Element element) {
         throw new AbacusException("Unknow element: " + element.getNodeName());
@@ -170,8 +170,8 @@ public abstract class Configuration {
     /**
      * Gets the source code location.
      *
-     * @param clazz the clazz
-     * @return the source code location
+     * @param clazz
+     * @return
      */
     public static String getSourceCodeLocation(Class<?> clazz) {
         return clazz.getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " ");
@@ -180,7 +180,7 @@ public abstract class Configuration {
     /**
      * Gets the common config path.
      *
-     * @return the common config path
+     * @return
      */
     public static List<String> getCommonConfigPath() {
         String currentLocation = getCurrrentSourceCodeLocation().getAbsolutePath();
@@ -218,7 +218,7 @@ public abstract class Configuration {
     /**
      * All the folders named with '.cvs', '.svn', '.git' will be ignored in file/folder find/search method.
      *
-     * @param configDir the config dir
+     * @param configDir
      * @return File
      */
     public static File findDir(String configDir) {
@@ -228,7 +228,7 @@ public abstract class Configuration {
     /**
      * All the folders named with '.cvs', '.svn', '.git' will be ignored in file/folder find/search method.
      *
-     * @param configFileName the config file name
+     * @param configFileName
      * @return File
      */
     public static File findFile(String configFileName) {
@@ -238,9 +238,9 @@ public abstract class Configuration {
     /**
      * Find file.
      *
-     * @param configFileName the config file name
-     * @param isDir the is dir
-     * @param foundDir the found dir
+     * @param configFileName
+     * @param isDir
+     * @param foundDir
      * @return File
      */
     private static File findFile(String configFileName, boolean isDir, Set<String> foundDir) {
@@ -344,9 +344,9 @@ public abstract class Configuration {
     /**
      * Find file by file.
      *
-     * @param srcFile the src file
-     * @param file the file
-     * @return the file
+     * @param srcFile
+     * @param file
+     * @return
      */
     public static File findFileByFile(File srcFile, String file) {
         File targetFile = new File(file);
@@ -369,10 +369,10 @@ public abstract class Configuration {
     /**
      * Find file in dir.
      *
-     * @param configFileName the config file name
-     * @param dir the dir
-     * @param isDir the is dir
-     * @return the file
+     * @param configFileName
+     * @param dir
+     * @param isDir
+     * @return
      */
     public static File findFileInDir(String configFileName, File dir, boolean isDir) {
         if (N.isNullOrEmpty(configFileName)) {
@@ -397,12 +397,12 @@ public abstract class Configuration {
     /**
      * Find file in dir.
      *
-     * @param folderPrefix the folder prefix
-     * @param configFileName the config file name
-     * @param dir the dir
-     * @param isDir the is dir
-     * @param foundDir the found dir
-     * @return the file
+     * @param folderPrefix
+     * @param configFileName
+     * @param dir
+     * @param isDir
+     * @param foundDir
+     * @return
      */
     private static File findFileInDir(String folderPrefix, String configFileName, File dir, boolean isDir, Set<String> foundDir) {
         if (dir == null) {
@@ -467,7 +467,7 @@ public abstract class Configuration {
     /**
      * Gets the currrent source code location.
      *
-     * @return the currrent source code location
+     * @return
      */
     private static File getCurrrentSourceCodeLocation() {
         File dir = new File(getSourceCodeLocation(Configuration.class));
@@ -489,7 +489,7 @@ public abstract class Configuration {
     /**
      * Method newDocument.
      *
-     * @param file the file
+     * @param file
      * @return Document
      */
     public static Document parse(File file) {
@@ -505,7 +505,7 @@ public abstract class Configuration {
     /**
      * Method createDocument.
      *
-     * @param is the is
+     * @param is
      * @return Document
      */
     public static Document parse(InputStream is) {
@@ -521,8 +521,8 @@ public abstract class Configuration {
     /**
      * Format path.
      *
-     * @param file the file
-     * @return the file
+     * @param file
+     * @return
      */
     public static File formatPath(File file) {
         if (!file.exists() && (new File(file.getAbsolutePath().replaceAll("%20", " "))).exists()) {
@@ -535,7 +535,7 @@ public abstract class Configuration {
     /**
      * Method isTextElement.
      *
-     * @param node the node
+     * @param node
      * @return boolean
      */
     public static boolean isTextElement(Node node) {
@@ -553,7 +553,7 @@ public abstract class Configuration {
     /**
      * Method getTextElementContent.
      *
-     * @param node the node
+     * @param node
      * @return String
      */
     public static String getTextContent(Node node) {
@@ -563,8 +563,8 @@ public abstract class Configuration {
     /**
      * Read element.
      *
-     * @param element the element
-     * @return the map
+     * @param element
+     * @return
      */
     public static Map<String, String> readElement(Element element) {
         Map<String, String> result = XMLUtil.readAttributes(element);
@@ -592,8 +592,8 @@ public abstract class Configuration {
      * Supports the time property/attribute value which is multiplied by '*'.
      * For example: 3 * 1000 or 3 * 1000L
      *
-     * @param value the value
-     * @return the long
+     * @param value
+     * @return
      */
     public static long readTimeInMillis(String value) {
         value = value == null ? value : value.trim();
@@ -659,7 +659,7 @@ public abstract class Configuration {
     /**
      * Method getAttribute.
      *
-     * @param attrName the attr name
+     * @param attrName
      * @return String
      */
     public String getAttribute(String attrName) {
@@ -669,7 +669,7 @@ public abstract class Configuration {
     /**
      * Method hasAttribute.
      *
-     * @param attrName the attr name
+     * @param attrName
      * @return boolean
      */
     public boolean hasAttribute(String attrName) {
@@ -679,7 +679,7 @@ public abstract class Configuration {
     /**
      * Gets the attributes.
      *
-     * @return the attributes
+     * @return
      */
     public Map<String, String> getAttributes() {
         return attrs;
@@ -688,8 +688,8 @@ public abstract class Configuration {
     /**
      * Method addAttribute.
      *
-     * @param attrName the attr name
-     * @param attrValue the attr value
+     * @param attrName
+     * @param attrValue
      * @return String
      */
     protected String setAttribute(String attrName, String attrValue) {
@@ -712,7 +712,7 @@ public abstract class Configuration {
     /**
      * Method removeAttribute.
      *
-     * @param attrName the attr name
+     * @param attrName
      * @return String
      */
     protected String removeAttribute(String attrName) {
@@ -722,8 +722,8 @@ public abstract class Configuration {
     /**
      * String 2 array.
      *
-     * @param st the st
-     * @return the string[]
+     * @param st
+     * @return
      */
     protected String[] string2Array(String st) {
         return Splitter.with(WD.COMMA).trim(true).splitToArray(st);
@@ -732,8 +732,8 @@ public abstract class Configuration {
     /**
      * String 2 list.
      *
-     * @param st the st
-     * @return the list
+     * @param st
+     * @return
      */
     protected List<String> string2List(String st) {
         return Splitter.with(WD.COMMA).trim(true).split(st);
@@ -742,8 +742,8 @@ public abstract class Configuration {
     /**
      * String 2 set.
      *
-     * @param st the st
-     * @return the sets the
+     * @param st
+     * @return
      */
     protected Set<String> string2Set(String st) {
         return Splitter.with(WD.COMMA).trim(true).split(new HashSet<String>(), st);
@@ -752,7 +752,7 @@ public abstract class Configuration {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -762,7 +762,7 @@ public abstract class Configuration {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -773,7 +773,7 @@ public abstract class Configuration {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

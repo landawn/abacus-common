@@ -73,11 +73,11 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
          * 
          * <p>Returns whether any bits changed as a result of this operation.
          *
-         * @param <T> the generic type
-         * @param object the object
-         * @param funnel the funnel
-         * @param numHashFunctions the num hash functions
-         * @param bits the bits
+         * @param <T>
+         * @param object
+         * @param funnel
+         * @param numHashFunctions
+         * @param bits
          * @return true, if successful
          */
         <T> boolean put(T object, BiConsumer<? super T, ? super Hasher> funnel, int numHashFunctions, BitArray bits);
@@ -86,11 +86,11 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
          * Queries {@code numHashFunctions} bits of the given bit array, by hashing a user element;
          * returns {@code true} if and only if all selected bits are set.
          *
-         * @param <T> the generic type
-         * @param object the object
-         * @param funnel the funnel
-         * @param numHashFunctions the num hash functions
-         * @param bits the bits
+         * @param <T>
+         * @param object
+         * @param funnel
+         * @param numHashFunctions
+         * @param bits
          * @return true, if successful
          */
         <T> boolean mightContain(T object, BiConsumer<? super T, ? super Hasher> funnel, int numHashFunctions, BitArray bits);
@@ -102,7 +102,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
          * custom, stateful strategy we may define (e.g. any kind of strategy that would depend on user
          * input).
          *
-         * @return the int
+         * @return
          */
         int ordinal();
     }
@@ -124,10 +124,10 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     /**
      * Creates a BloomFilter.
      *
-     * @param bits the bits
-     * @param numHashFunctions the num hash functions
-     * @param funnel the funnel
-     * @param strategy the strategy
+     * @param bits
+     * @param numHashFunctions
+     * @param funnel
+     * @param strategy
      */
     private BloomFilter(BitArray bits, int numHashFunctions, BiConsumer<? super T, ? super Hasher> funnel, Strategy strategy) {
         N.checkArgument(numHashFunctions > 0, "numHashFunctions (%s) must be > 0", numHashFunctions);
@@ -142,7 +142,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * Creates a new {@code BloomFilter} that's a copy of this instance. The new instance is equal to
      * this instance but shares no mutable state.
      *
-     * @return the bloom filter
+     * @return
      * @since 12.0
      */
     public BloomFilter<T> copy() {
@@ -153,7 +153,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * Returns {@code true} if the element <i>might</i> have been put in this Bloom filter,
      * {@code false} if this is <i>definitely</i> not the case.
      *
-     * @param object the object
+     * @param object
      * @return true, if successful
      */
     public boolean mightContain(T object) {
@@ -163,7 +163,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     /**
      * Test.
      *
-     * @param input the input
+     * @param input
      * @return true, if successful
      * @deprecated Provided only to satisfy the {@link Predicate} interface; use {@link #mightContain}
      *     instead.
@@ -178,7 +178,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * Puts an element into this {@code BloomFilter}. Ensures that subsequent invocations of
      * {@link #mightContain(Object)} with the same element will always return {@code true}.
      *
-     * @param object the object
+     * @param object
      * @return true if the bloom filter's bits changed as a result of this operation. If the bits
      *     changed, this is <i>definitely</i> the first time {@code object} has been added to the
      *     filter. If the bits haven't changed, this <i>might</i> be the first time {@code object} has
@@ -200,7 +200,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * usually the case that too many elements (more than expected) have been put in the
      * {@code BloomFilter}, degenerating it.
      *
-     * @return the double
+     * @return
      * @since 14.0 (since 11.0 as expectedFalsePositiveProbability())
      */
     public double expectedFpp() {
@@ -211,7 +211,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     /**
      * Returns the number of bits in the underlying bit array.
      *
-     * @return the long
+     * @return
      */
     long bitSize() {
         return bits.bitSize();
@@ -264,7 +264,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     /**
      * Equals.
      *
-     * @param object the object
+     * @param object
      * @return true, if successful
      */
     @Override
@@ -283,7 +283,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -304,7 +304,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * ensuring proper serialization and deserialization, which is important since {@link #equals}
      * also relies on object identity of funnels.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param funnel the funnel of T's that the constructed {@code BloomFilter<T>} will use
      * @param expectedInsertions the number of expected insertions to the constructed
      *     {@code BloomFilter<T>}; must be positive
@@ -329,7 +329,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * ensuring proper serialization and deserialization, which is important since {@link #equals}
      * also relies on object identity of funnels.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param funnel the funnel of T's that the constructed {@code BloomFilter<T>} will use
      * @param expectedInsertions the number of expected insertions to the constructed
      *     {@code BloomFilter<T>}; must be positive
@@ -344,12 +344,12 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     /**
      * Creates the.
      *
-     * @param <T> the generic type
-     * @param funnel the funnel
-     * @param expectedInsertions the expected insertions
-     * @param fpp the fpp
-     * @param strategy the strategy
-     * @return the bloom filter
+     * @param <T>
+     * @param funnel
+     * @param expectedInsertions
+     * @param fpp
+     * @param strategy
+     * @return
      */
     static <T> BloomFilter<T> create(BiConsumer<? super T, ? super Hasher> funnel, long expectedInsertions, double fpp, Strategy strategy) {
         N.checkArgNotNull(funnel);
@@ -389,7 +389,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * ensuring proper serialization and deserialization, which is important since {@link #equals}
      * also relies on object identity of funnels.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param funnel the funnel of T's that the constructed {@code BloomFilter<T>} will use
      * @param expectedInsertions the number of expected insertions to the constructed
      *     {@code BloomFilter<T>}; must be positive
@@ -413,7 +413,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * ensuring proper serialization and deserialization, which is important since {@link #equals}
      * also relies on object identity of funnels.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param funnel the funnel of T's that the constructed {@code BloomFilter<T>} will use
      * @param expectedInsertions the number of expected insertions to the constructed
      *     {@code BloomFilter<T>}; must be positive
@@ -444,7 +444,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      *
      * @param n expected insertions (must be positive)
      * @param m total number of bits in Bloom filter (must be positive)
-     * @return the int
+     * @return
      */
     static int optimalNumOfHashFunctions(long n, long m) {
         // (m / n) * log(2), but avoid truncation due to division!
@@ -459,7 +459,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      *
      * @param n expected insertions (must be positive)
      * @param p false positive rate (must be 0 < p < 1)
-     * @return the long
+     * @return
      */
     static long optimalNumOfBits(long n, double p) {
         if (p == 0) {
@@ -471,7 +471,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     /**
      * Write replace.
      *
-     * @return the object
+     * @return
      */
     private Object writeReplace() {
         return new SerialForm<T>(this);
@@ -480,7 +480,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     /**
      * The Class SerialForm.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     private static class SerialForm<T> implements Serializable {
 
@@ -499,7 +499,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
         /**
          * Instantiates a new serial form.
          *
-         * @param bf the bf
+         * @param bf
          */
         SerialForm(BloomFilter<T> bf) {
             this.data = bf.bits.data;
@@ -511,7 +511,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
         /**
          * Read resolve.
          *
-         * @return the object
+         * @return
          */
         Object readResolve() {
             return new BloomFilter<T>(new BitArray(data), numHashFunctions, funnel, strategy);
@@ -528,7 +528,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * 
      * <p>Use {@linkplain #readFrom(InputStream, BiConsumer)} to reconstruct the written BloomFilter.
      *
-     * @param out the out
+     * @param out
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void writeTo(OutputStream out) throws IOException {
@@ -554,10 +554,10 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * <b>Warning:</b> the funnel provided <b>must</b> behave identically to the one used to populate
      * the original Bloom filter!
      *
-     * @param <T> the generic type
-     * @param in the in
-     * @param funnel the funnel
-     * @return the bloom filter
+     * @param <T>
+     * @param in
+     * @param funnel
+     * @return
      * @throws IOException if the InputStream throws an {@code IOException}, or if its data does not
      *     appear to be a BloomFilter serialized using the {@linkplain #writeTo(OutputStream)} method.
      */

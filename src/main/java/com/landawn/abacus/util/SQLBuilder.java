@@ -376,8 +376,8 @@ public abstract class SQLBuilder {
     /**
      * Instantiates a new SQL builder.
      *
-     * @param namingPolicy the naming policy
-     * @param sqlPolicy the sql policy
+     * @param namingPolicy
+     * @param sqlPolicy
      */
     SQLBuilder(final NamingPolicy namingPolicy, final SQLPolicy sqlPolicy) {
         if (activeStringBuilderCounter.incrementAndGet() > 1024) {
@@ -450,8 +450,8 @@ public abstract class SQLBuilder {
     /**
      * Register non sub entity prop names.
      *
-     * @param entityClass the entity class
-     * @param nonSubEntityPropNames the non sub entity prop names
+     * @param entityClass
+     * @param nonSubEntityPropNames
      */
     public static void registerNonSubEntityPropNames(final Class<?> entityClass, final Collection<String> nonSubEntityPropNames) {
         final Set<String> set = ImmutableSet.copyOf(nonSubEntityPropNames);
@@ -470,9 +470,9 @@ public abstract class SQLBuilder {
     /**
      * Gets the table name.
      *
-     * @param entityClass the entity class
-     * @param namingPolicy the naming policy
-     * @return the table name
+     * @param entityClass
+     * @param namingPolicy
+     * @return
      */
     static String getTableName(final Class<?> entityClass, final NamingPolicy namingPolicy) {
         String[] entityTableNames = classTableNameMap.get(entityClass);
@@ -514,10 +514,10 @@ public abstract class SQLBuilder {
     /**
      * Gets the select prop names by class.
      *
-     * @param entityClass the entity class
-     * @param includeSubEntityProperties the include sub entity properties
-     * @param excludedPropNames the excluded prop names
-     * @return the select prop names by class
+     * @param entityClass
+     * @param includeSubEntityProperties
+     * @param excludedPropNames
+     * @return
      */
     static Collection<String> getSelectPropNamesByClass(final Class<?> entityClass, final boolean includeSubEntityProperties,
             final Set<String> excludedPropNames) {
@@ -536,9 +536,9 @@ public abstract class SQLBuilder {
     /**
      * Gets the insert prop names by class.
      *
-     * @param entity the entity
-     * @param excludedPropNames the excluded prop names
-     * @return the insert prop names by class
+     * @param entity
+     * @param excludedPropNames
+     * @return
      */
     static Collection<String> getInsertPropNamesByClass(final Object entity, final Set<String> excludedPropNames) {
         final Class<?> entityClass = entity.getClass();
@@ -568,9 +568,9 @@ public abstract class SQLBuilder {
     /**
      * Gets the insert prop names by class.
      *
-     * @param entityClass the entity class
-     * @param excludedPropNames the excluded prop names
-     * @return the insert prop names by class
+     * @param entityClass
+     * @param excludedPropNames
+     * @return
      */
     static Collection<String> getInsertPropNamesByClass(final Class<?> entityClass, final Set<String> excludedPropNames) {
         final Collection<String>[] val = loadPropNamesByClass(entityClass);
@@ -588,9 +588,9 @@ public abstract class SQLBuilder {
     /**
      * Gets the update prop names by class.
      *
-     * @param entityClass the entity class
-     * @param excludedPropNames the excluded prop names
-     * @return the update prop names by class
+     * @param entityClass
+     * @param excludedPropNames
+     * @return
      */
     static Collection<String> getUpdatePropNamesByClass(final Class<?> entityClass, final Set<String> excludedPropNames) {
         final Collection<String>[] val = loadPropNamesByClass(entityClass);
@@ -608,9 +608,9 @@ public abstract class SQLBuilder {
     /**
      * Gets the delete prop names by class.
      *
-     * @param entityClass the entity class
-     * @param excludedPropNames the excluded prop names
-     * @return the delete prop names by class
+     * @param entityClass
+     * @param excludedPropNames
+     * @return
      */
     static Collection<String> getDeletePropNamesByClass(final Class<?> entityClass, final Set<String> excludedPropNames) {
         if (N.isNullOrEmpty(excludedPropNames)) {
@@ -632,8 +632,8 @@ public abstract class SQLBuilder {
     /**
      * Load prop names by class.
      *
-     * @param entityClass the entity class
-     * @return the collection[]
+     * @param entityClass
+     * @return
      */
     static Collection<String>[] loadPropNamesByClass(final Class<?> entityClass) {
         Set<String>[] val = defaultPropNamesPool.get(entityClass);
@@ -735,8 +735,8 @@ public abstract class SQLBuilder {
     /**
      * Gets the sub entity prop names.
      *
-     * @param entityClass the entity class
-     * @return the sub entity prop names
+     * @param entityClass
+     * @return
      */
     static Set<String> getSubEntityPropNames(final Class<?> entityClass) {
         synchronized (entityClass) {
@@ -766,9 +766,9 @@ public abstract class SQLBuilder {
     /**
      * Gets the select table names.
      *
-     * @param entityClass the entity class
-     * @param namingPolicy the naming policy
-     * @return the select table names
+     * @param entityClass
+     * @param namingPolicy
+     * @return
      */
     private static List<String> getSelectTableNames(final Class<?> entityClass, final NamingPolicy namingPolicy) {
         final Set<String> subEntityPropNames = getSubEntityPropNames(entityClass);
@@ -866,8 +866,8 @@ public abstract class SQLBuilder {
     /**
      * Named.
      *
-     * @param propNames the prop names
-     * @return the map
+     * @param propNames
+     * @return
      */
     @Beta
     static Map<String, Expression> named(final String... propNames) {
@@ -883,8 +883,8 @@ public abstract class SQLBuilder {
     /**
      * Named.
      *
-     * @param propNames the prop names
-     * @return the map
+     * @param propNames
+     * @return
      */
     @Beta
     static Map<String, Expression> named(final Collection<String> propNames) {
@@ -917,8 +917,8 @@ public abstract class SQLBuilder {
      * <br />
      * It's designed for batch SQL builder.
      *
-     * @param n the n
-     * @return the string
+     * @param n
+     * @return
      */
     public static String repeatQM(int n) {
         N.checkArgNotNegative(n, "count");
@@ -935,8 +935,8 @@ public abstract class SQLBuilder {
     /**
      * Into.
      *
-     * @param tableName the table name
-     * @return the SQL builder
+     * @param tableName
+     * @return
      */
     public SQLBuilder into(final String tableName) {
         if (op != OperationType.ADD) {
@@ -1114,8 +1114,8 @@ public abstract class SQLBuilder {
     /**
      * Into.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder into(final Class<?> entityClass) {
         if (this.entityClass != null) {
@@ -1128,8 +1128,8 @@ public abstract class SQLBuilder {
     /**
      * From.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder from(String expr) {
         expr = expr.trim();
@@ -1145,8 +1145,8 @@ public abstract class SQLBuilder {
     /**
      * From.
      *
-     * @param tableNames the table names
-     * @return the SQL builder
+     * @param tableNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder from(final String... tableNames) {
@@ -1161,8 +1161,8 @@ public abstract class SQLBuilder {
     /**
      * From.
      *
-     * @param tableNames the table names
-     * @return the SQL builder
+     * @param tableNames
+     * @return
      */
     public SQLBuilder from(final Collection<String> tableNames) {
         if (tableNames.size() == 1) {
@@ -1176,8 +1176,8 @@ public abstract class SQLBuilder {
     /**
      * From.
      *
-     * @param tableAliases the table aliases
-     * @return the SQL builder
+     * @param tableAliases
+     * @return
      */
     public SQLBuilder from(final Map<String, String> tableAliases) {
         final String tableName = tableAliases.keySet().iterator().next().trim();
@@ -1188,9 +1188,9 @@ public abstract class SQLBuilder {
     /**
      * From.
      *
-     * @param tableName the table name
-     * @param fromCause the from cause
-     * @return the SQL builder
+     * @param tableName
+     * @param fromCause
+     * @return
      */
     private SQLBuilder from(final String tableName, final String fromCause) {
         if (op != OperationType.QUERY) {
@@ -1320,8 +1320,8 @@ public abstract class SQLBuilder {
     /**
      * From.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder from(final Class<?> entityClass) {
         if (this.entityClass != null) {
@@ -1334,8 +1334,8 @@ public abstract class SQLBuilder {
     /**
      * Join.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder join(final String expr) {
         sb.append(_SPACE_JOIN_SPACE);
@@ -1348,8 +1348,8 @@ public abstract class SQLBuilder {
     /**
      * Join.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder join(final Class<?> entityClass) {
         sb.append(_SPACE_JOIN_SPACE);
@@ -1362,8 +1362,8 @@ public abstract class SQLBuilder {
     /**
      * Inner join.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder innerJoin(final String expr) {
         sb.append(_SPACE_INNER_JOIN_SPACE);
@@ -1376,8 +1376,8 @@ public abstract class SQLBuilder {
     /**
      * Inner join.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder innerJoin(final Class<?> entityClass) {
         sb.append(_SPACE_INNER_JOIN_SPACE);
@@ -1390,8 +1390,8 @@ public abstract class SQLBuilder {
     /**
      * Left join.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder leftJoin(final String expr) {
         sb.append(_SPACE_LEFT_JOIN_SPACE);
@@ -1404,8 +1404,8 @@ public abstract class SQLBuilder {
     /**
      * Left join.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder leftJoin(final Class<?> entityClass) {
         sb.append(_SPACE_LEFT_JOIN_SPACE);
@@ -1418,8 +1418,8 @@ public abstract class SQLBuilder {
     /**
      * Right join.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder rightJoin(final String expr) {
         sb.append(_SPACE_RIGHT_JOIN_SPACE);
@@ -1432,8 +1432,8 @@ public abstract class SQLBuilder {
     /**
      * Right join.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder rightJoin(final Class<?> entityClass) {
         sb.append(_SPACE_RIGHT_JOIN_SPACE);
@@ -1446,8 +1446,8 @@ public abstract class SQLBuilder {
     /**
      * Full join.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder fullJoin(final String expr) {
         sb.append(_SPACE_FULL_JOIN_SPACE);
@@ -1460,8 +1460,8 @@ public abstract class SQLBuilder {
     /**
      * Full join.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder fullJoin(final Class<?> entityClass) {
         sb.append(_SPACE_FULL_JOIN_SPACE);
@@ -1474,8 +1474,8 @@ public abstract class SQLBuilder {
     /**
      * Cross join.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder crossJoin(final String expr) {
         sb.append(_SPACE_CROSS_JOIN_SPACE);
@@ -1488,8 +1488,8 @@ public abstract class SQLBuilder {
     /**
      * Cross join.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder crossJoin(final Class<?> entityClass) {
         sb.append(_SPACE_CROSS_JOIN_SPACE);
@@ -1502,8 +1502,8 @@ public abstract class SQLBuilder {
     /**
      * Natural join.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder naturalJoin(final String expr) {
         sb.append(_SPACE_NATURAL_JOIN_SPACE);
@@ -1516,8 +1516,8 @@ public abstract class SQLBuilder {
     /**
      * Natural join.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder naturalJoin(final Class<?> entityClass) {
         sb.append(_SPACE_NATURAL_JOIN_SPACE);
@@ -1530,8 +1530,8 @@ public abstract class SQLBuilder {
     /**
      * On.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder on(final String expr) {
         sb.append(_SPACE_ON_SPACE);
@@ -1545,7 +1545,7 @@ public abstract class SQLBuilder {
      * On.
      *
      * @param cond any literal written in <code>Expression</code> condition won't be formalized
-     * @return the SQL builder
+     * @return
      */
     public SQLBuilder on(final Condition cond) {
         sb.append(_SPACE_ON_SPACE);
@@ -1558,8 +1558,8 @@ public abstract class SQLBuilder {
     /**
      * Using.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder using(final String expr) {
         sb.append(_SPACE_USING_SPACE);
@@ -1572,8 +1572,8 @@ public abstract class SQLBuilder {
     /**
      * Where.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder where(final String expr) {
         init(true);
@@ -1588,7 +1588,7 @@ public abstract class SQLBuilder {
     /**
      * Append string expr.
      *
-     * @param expr the expr
+     * @param expr
      */
     private void appendStringExpr(final String expr) {
         final Map<String, String> propColumnNameMap = getPropColumnNameMap();
@@ -1612,7 +1612,7 @@ public abstract class SQLBuilder {
      * Where.
      *
      * @param cond any literal written in <code>Expression</code> condition won't be formalized
-     * @return the SQL builder
+     * @return
      */
     public SQLBuilder where(final Condition cond) {
         init(true);
@@ -1627,8 +1627,8 @@ public abstract class SQLBuilder {
     /**
      * Group by.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder groupBy(final String expr) {
         sb.append(_SPACE_GROUP_BY_SPACE);
@@ -1646,8 +1646,8 @@ public abstract class SQLBuilder {
     /**
      * Group by.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder groupBy(final String... columnNames) {
@@ -1678,9 +1678,9 @@ public abstract class SQLBuilder {
     /**
      * Group by.
      *
-     * @param columnName the column name
-     * @param direction the direction
-     * @return the SQL builder
+     * @param columnName
+     * @param direction
+     * @return
      */
     public SQLBuilder groupBy(final String columnName, final SortDirection direction) {
         groupBy(columnName);
@@ -1694,8 +1694,8 @@ public abstract class SQLBuilder {
     /**
      * Group by.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     public SQLBuilder groupBy(final Collection<String> columnNames) {
         sb.append(_SPACE_GROUP_BY_SPACE);
@@ -1716,9 +1716,9 @@ public abstract class SQLBuilder {
     /**
      * Group by.
      *
-     * @param columnNames the column names
-     * @param direction the direction
-     * @return the SQL builder
+     * @param columnNames
+     * @param direction
+     * @return
      */
     public SQLBuilder groupBy(final Collection<String> columnNames, final SortDirection direction) {
         groupBy(columnNames);
@@ -1732,8 +1732,8 @@ public abstract class SQLBuilder {
     /**
      * Group by.
      *
-     * @param orders the orders
-     * @return the SQL builder
+     * @param orders
+     * @return
      */
     public SQLBuilder groupBy(final Map<String, SortDirection> orders) {
         sb.append(_SPACE_GROUP_BY_SPACE);
@@ -1757,8 +1757,8 @@ public abstract class SQLBuilder {
     /**
      * Having.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder having(final String expr) {
         sb.append(_SPACE_HAVING_SPACE);
@@ -1772,7 +1772,7 @@ public abstract class SQLBuilder {
      * Having.
      *
      * @param cond any literal written in <code>Expression</code> condition won't be formalized
-     * @return the SQL builder
+     * @return
      */
     public SQLBuilder having(final Condition cond) {
         sb.append(_SPACE_HAVING_SPACE);
@@ -1785,8 +1785,8 @@ public abstract class SQLBuilder {
     /**
      * Order by.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder orderBy(final String expr) {
         sb.append(_SPACE_ORDER_BY_SPACE);
@@ -1804,8 +1804,8 @@ public abstract class SQLBuilder {
     /**
      * Order by.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder orderBy(final String... columnNames) {
@@ -1836,9 +1836,9 @@ public abstract class SQLBuilder {
     /**
      * Order by.
      *
-     * @param columnName the column name
-     * @param direction the direction
-     * @return the SQL builder
+     * @param columnName
+     * @param direction
+     * @return
      */
     public SQLBuilder orderBy(final String columnName, final SortDirection direction) {
         orderBy(columnName);
@@ -1852,8 +1852,8 @@ public abstract class SQLBuilder {
     /**
      * Order by.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     public SQLBuilder orderBy(final Collection<String> columnNames) {
         sb.append(_SPACE_ORDER_BY_SPACE);
@@ -1874,9 +1874,9 @@ public abstract class SQLBuilder {
     /**
      * Order by.
      *
-     * @param columnNames the column names
-     * @param direction the direction
-     * @return the SQL builder
+     * @param columnNames
+     * @param direction
+     * @return
      */
     public SQLBuilder orderBy(final Collection<String> columnNames, final SortDirection direction) {
         orderBy(columnNames);
@@ -1890,8 +1890,8 @@ public abstract class SQLBuilder {
     /**
      * Order by.
      *
-     * @param orders the orders
-     * @return the SQL builder
+     * @param orders
+     * @return
      */
     public SQLBuilder orderBy(final Map<String, SortDirection> orders) {
         sb.append(_SPACE_ORDER_BY_SPACE);
@@ -1916,8 +1916,8 @@ public abstract class SQLBuilder {
     /**
      * Limit.
      *
-     * @param count the count
-     * @return the SQL builder
+     * @param count
+     * @return
      */
     public SQLBuilder limit(final int count) {
         sb.append(_SPACE_LIMIT_SPACE);
@@ -1930,9 +1930,9 @@ public abstract class SQLBuilder {
     /**
      * Limit.
      *
-     * @param offset the offset
-     * @param count the count
-     * @return the SQL builder
+     * @param offset
+     * @param count
+     * @return
      */
     public SQLBuilder limit(final int offset, final int count) {
         sb.append(_SPACE_LIMIT_SPACE);
@@ -1949,8 +1949,8 @@ public abstract class SQLBuilder {
     /**
      * Offset.
      *
-     * @param offset the offset
-     * @return the SQL builder
+     * @param offset
+     * @return
      */
     public SQLBuilder offset(final int offset) {
         sb.append(_SPACE_OFFSET_SPACE);
@@ -1963,8 +1963,8 @@ public abstract class SQLBuilder {
     /**
      * Limit by row num.
      *
-     * @param count the count
-     * @return the SQL builder
+     * @param count
+     * @return
      */
     public SQLBuilder limitByRowNum(final int count) {
         sb.append(" ROWNUM ");
@@ -1977,8 +1977,8 @@ public abstract class SQLBuilder {
     /**
      * Union.
      *
-     * @param sqlBuilder the sql builder
-     * @return the SQL builder
+     * @param sqlBuilder
+     * @return
      */
     public SQLBuilder union(final SQLBuilder sqlBuilder) {
         final String sql = sqlBuilder.sql();
@@ -1993,8 +1993,8 @@ public abstract class SQLBuilder {
     /**
      * Union.
      *
-     * @param query the query
-     * @return the SQL builder
+     * @param query
+     * @return
      */
     public SQLBuilder union(final String query) {
         return union(N.asArray(query));
@@ -2003,8 +2003,8 @@ public abstract class SQLBuilder {
     /**
      * Union.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder union(final String... columnNames) {
@@ -2031,8 +2031,8 @@ public abstract class SQLBuilder {
     /**
      * Union.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     public SQLBuilder union(final Collection<String> columnNames) {
         op = OperationType.QUERY;
@@ -2049,8 +2049,8 @@ public abstract class SQLBuilder {
     /**
      * Union all.
      *
-     * @param sqlBuilder the sql builder
-     * @return the SQL builder
+     * @param sqlBuilder
+     * @return
      */
     public SQLBuilder unionAll(final SQLBuilder sqlBuilder) {
         final String sql = sqlBuilder.sql();
@@ -2065,8 +2065,8 @@ public abstract class SQLBuilder {
     /**
      * Union all.
      *
-     * @param query the query
-     * @return the SQL builder
+     * @param query
+     * @return
      */
     public SQLBuilder unionAll(final String query) {
         return unionAll(N.asArray(query));
@@ -2075,8 +2075,8 @@ public abstract class SQLBuilder {
     /**
      * Union all.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder unionAll(final String... columnNames) {
@@ -2103,8 +2103,8 @@ public abstract class SQLBuilder {
     /**
      * Union all.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     public SQLBuilder unionAll(final Collection<String> columnNames) {
         op = OperationType.QUERY;
@@ -2121,8 +2121,8 @@ public abstract class SQLBuilder {
     /**
      * Intersect.
      *
-     * @param sqlBuilder the sql builder
-     * @return the SQL builder
+     * @param sqlBuilder
+     * @return
      */
     public SQLBuilder intersect(final SQLBuilder sqlBuilder) {
         final String sql = sqlBuilder.sql();
@@ -2137,8 +2137,8 @@ public abstract class SQLBuilder {
     /**
      * Intersect.
      *
-     * @param query the query
-     * @return the SQL builder
+     * @param query
+     * @return
      */
     public SQLBuilder intersect(final String query) {
         return intersect(N.asArray(query));
@@ -2147,8 +2147,8 @@ public abstract class SQLBuilder {
     /**
      * Intersect.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder intersect(final String... columnNames) {
@@ -2175,8 +2175,8 @@ public abstract class SQLBuilder {
     /**
      * Intersect.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     public SQLBuilder intersect(final Collection<String> columnNames) {
         op = OperationType.QUERY;
@@ -2193,8 +2193,8 @@ public abstract class SQLBuilder {
     /**
      * Except.
      *
-     * @param sqlBuilder the sql builder
-     * @return the SQL builder
+     * @param sqlBuilder
+     * @return
      */
     public SQLBuilder except(final SQLBuilder sqlBuilder) {
         final String sql = sqlBuilder.sql();
@@ -2209,8 +2209,8 @@ public abstract class SQLBuilder {
     /**
      * Except.
      *
-     * @param query the query
-     * @return the SQL builder
+     * @param query
+     * @return
      */
     public SQLBuilder except(final String query) {
         return except(N.asArray(query));
@@ -2219,8 +2219,8 @@ public abstract class SQLBuilder {
     /**
      * Except.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder except(final String... columnNames) {
@@ -2247,8 +2247,8 @@ public abstract class SQLBuilder {
     /**
      * Except.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     public SQLBuilder except(final Collection<String> columnNames) {
         op = OperationType.QUERY;
@@ -2265,8 +2265,8 @@ public abstract class SQLBuilder {
     /**
      * Minus.
      *
-     * @param sqlBuilder the sql builder
-     * @return the SQL builder
+     * @param sqlBuilder
+     * @return
      */
     public SQLBuilder minus(final SQLBuilder sqlBuilder) {
         final String sql = sqlBuilder.sql();
@@ -2281,8 +2281,8 @@ public abstract class SQLBuilder {
     /**
      * Minus.
      *
-     * @param query the query
-     * @return the SQL builder
+     * @param query
+     * @return
      */
     public SQLBuilder minus(final String query) {
         return minus(N.asArray(query));
@@ -2291,8 +2291,8 @@ public abstract class SQLBuilder {
     /**
      * Minus.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder minus(final String... columnNames) {
@@ -2319,8 +2319,8 @@ public abstract class SQLBuilder {
     /**
      * Minus.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     public SQLBuilder minus(final Collection<String> columnNames) {
         op = OperationType.QUERY;
@@ -2337,7 +2337,7 @@ public abstract class SQLBuilder {
     /**
      * For update.
      *
-     * @return the SQL builder
+     * @return
      */
     public SQLBuilder forUpdate() {
         sb.append(_SPACE_FOR_UPDATE);
@@ -2348,8 +2348,8 @@ public abstract class SQLBuilder {
     /**
      * Sets the.
      *
-     * @param expr the expr
-     * @return the SQL builder
+     * @param expr
+     * @return
      */
     public SQLBuilder set(final String expr) {
         return set(N.asArray(expr));
@@ -2358,8 +2358,8 @@ public abstract class SQLBuilder {
     /**
      * Sets the.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     @SafeVarargs
     public final SQLBuilder set(final String... columnNames) {
@@ -2436,8 +2436,8 @@ public abstract class SQLBuilder {
     /**
      * Sets the.
      *
-     * @param columnNames the column names
-     * @return the SQL builder
+     * @param columnNames
+     * @return
      */
     public SQLBuilder set(final Collection<String> columnNames) {
         init(false);
@@ -2512,8 +2512,8 @@ public abstract class SQLBuilder {
     /**
      * Sets the.
      *
-     * @param props the props
-     * @return the SQL builder
+     * @param props
+     * @return
      */
     public SQLBuilder set(final Map<String, Object> props) {
         init(false);
@@ -2601,8 +2601,8 @@ public abstract class SQLBuilder {
     /**
      * Only the dirty properties will be set into the result SQL if the specified entity is a dirty marker entity.
      *
-     * @param entity the entity
-     * @return the SQL builder
+     * @param entity
+     * @return
      */
     public SQLBuilder set(final Object entity) {
         return set(entity, null);
@@ -2611,9 +2611,9 @@ public abstract class SQLBuilder {
     /**
      * Only the dirty properties will be set into the result SQL if the specified entity is a dirty marker entity.
      *
-     * @param entity the entity
-     * @param excludedPropNames the excluded prop names
-     * @return the SQL builder
+     * @param entity
+     * @param excludedPropNames
+     * @return
      */
     public SQLBuilder set(final Object entity, final Set<String> excludedPropNames) {
         if (entity instanceof String) {
@@ -2646,8 +2646,8 @@ public abstract class SQLBuilder {
     /**
      * Sets the.
      *
-     * @param entityClass the entity class
-     * @return the SQL builder
+     * @param entityClass
+     * @return
      */
     public SQLBuilder set(Class<?> entityClass) {
         this.entityClass = entityClass;
@@ -2658,9 +2658,9 @@ public abstract class SQLBuilder {
     /**
      * Sets the.
      *
-     * @param entityClass the entity class
-     * @param excludedPropNames the excluded prop names
-     * @return the SQL builder
+     * @param entityClass
+     * @param excludedPropNames
+     * @return
      */
     public SQLBuilder set(Class<?> entityClass, final Set<String> excludedPropNames) {
         this.entityClass = entityClass;
@@ -2671,7 +2671,7 @@ public abstract class SQLBuilder {
     /**
      * This SQLBuilder will be closed after <code>sql()</code> is called.
      *
-     * @return the string
+     * @return
      */
     public String sql() {
         if (sb == null) {
@@ -2701,7 +2701,7 @@ public abstract class SQLBuilder {
     /**
      * Parameters.
      *
-     * @return the list
+     * @return
      */
     public List<Object> parameters() {
         return parameters;
@@ -2710,7 +2710,7 @@ public abstract class SQLBuilder {
     /**
      *  This SQLBuilder will be closed after <code>pair()</code> is called.
      *  
-     * @return the pair of sql and parameters.
+     * @return
      */
     public SP pair() {
         return new SP(sql(), parameters);
@@ -2719,10 +2719,10 @@ public abstract class SQLBuilder {
     /**
      * Apply.
      *
-     * @param <T> the generic type
-     * @param <EX> the generic type
-     * @param func the func
-     * @return the t
+     * @param <T>
+     * @param <EX>
+     * @param func
+     * @return
      * @throws EX the ex
      */
     public <T, EX extends Exception> T apply(final Try.Function<? super SP, T, EX> func) throws EX {
@@ -2732,8 +2732,8 @@ public abstract class SQLBuilder {
     /**
      * Accept.
      *
-     * @param <EX> the generic type
-     * @param consumer the consumer
+     * @param <EX>
+     * @param consumer
      * @throws EX the ex
      */
     public <EX extends Exception> void accept(final Try.Consumer<? super SP, EX> consumer) throws EX {
@@ -2743,7 +2743,7 @@ public abstract class SQLBuilder {
     /**
      * Inits the.
      *
-     * @param setForUpdate the set for update
+     * @param setForUpdate
      */
     void init(boolean setForUpdate) {
         if (sb.length() > 0) {
@@ -2810,8 +2810,8 @@ public abstract class SQLBuilder {
     /**
      * Sets the parameter for ibatis named SQL.
      *
-     * @param propName the prop name
-     * @param propValue the prop value
+     * @param propName
+     * @param propValue
      */
     private void setParameterForIbatisNamedSQL(final String propName, final Object propValue) {
         if (CF.QME.equals(propValue)) {
@@ -2832,8 +2832,8 @@ public abstract class SQLBuilder {
     /**
      * Sets the parameter for named SQL.
      *
-     * @param propName the prop name
-     * @param propValue the prop value
+     * @param propName
+     * @param propValue
      */
     private void setParameterForNamedSQL(final String propName, final Object propValue) {
         if (CF.QME.equals(propValue)) {
@@ -2852,8 +2852,8 @@ public abstract class SQLBuilder {
     /**
      * Sets the parameter.
      *
-     * @param propName the prop name
-     * @param propValue the prop value
+     * @param propName
+     * @param propValue
      */
     private void setParameter(final String propName, final Object propValue) {
         switch (sqlPolicy) {
@@ -2889,7 +2889,7 @@ public abstract class SQLBuilder {
     /**
      * Append insert props.
      *
-     * @param props the props
+     * @param props
      */
     private void appendInsertProps(final Map<String, Object> props) {
         switch (sqlPolicy) {
@@ -2965,7 +2965,7 @@ public abstract class SQLBuilder {
     /**
      * Append condition.
      *
-     * @param cond the cond
+     * @param cond
      */
     private void appendCondition(final Condition cond) {
         if (cond instanceof Binary) {
@@ -3116,8 +3116,8 @@ public abstract class SQLBuilder {
     /**
      * Formalize column name.
      *
-     * @param propName the prop name
-     * @return the string
+     * @param propName
+     * @return
      */
     private String formalizeColumnName(final String propName) {
         return formalizeColumnName(getPropColumnNameMap(), propName);
@@ -3126,9 +3126,9 @@ public abstract class SQLBuilder {
     /**
      * Formalize column name.
      *
-     * @param propColumnNameMap the prop column name map
-     * @param propName the prop name
-     * @return the string
+     * @param propColumnNameMap
+     * @param propName
+     * @return
      */
     private String formalizeColumnName(final Map<String, String> propColumnNameMap, final String propName) {
         String columnName = propColumnNameMap == null ? null : propColumnNameMap.get(propName);
@@ -3155,7 +3155,7 @@ public abstract class SQLBuilder {
     /**
      * Gets the prop column name map.
      *
-     * @return the prop column name map
+     * @return
      */
     private Map<String, String> getPropColumnNameMap() {
         if (entityClass == null || Map.class.isAssignableFrom(entityClass)) {
@@ -3174,7 +3174,7 @@ public abstract class SQLBuilder {
     /**
      * Checks if is sub query.
      *
-     * @param columnNames the column names
+     * @param columnNames
      * @return true, if is sub query
      */
     private boolean isSubQuery(final String... columnNames) {
@@ -3214,7 +3214,7 @@ public abstract class SQLBuilder {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -3224,9 +3224,9 @@ public abstract class SQLBuilder {
     /**
      * Parses the insert entity.
      *
-     * @param instance the instance
-     * @param entity the entity
-     * @param excludedPropNames the excluded prop names
+     * @param instance
+     * @param entity
+     * @param excludedPropNames
      */
     private static void parseInsertEntity(final SQLBuilder instance, final Object entity, final Set<String> excludedPropNames) {
         if (entity instanceof String) {
@@ -3253,8 +3253,8 @@ public abstract class SQLBuilder {
     /**
      * To insert props list.
      *
-     * @param propsList the props list
-     * @return the collection
+     * @param propsList
+     * @return
      */
     private static Collection<Map<String, Object>> toInsertPropsList(final Collection<?> propsList) {
         final Optional<?> first = N.firstNonNull(propsList);
@@ -3321,7 +3321,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the scsb
+         * @return
          */
         static SCSB createInstance() {
             return new SCSB();
@@ -3330,8 +3330,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -3340,8 +3340,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -3356,8 +3356,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -3371,8 +3371,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -3386,8 +3386,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -3396,9 +3396,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -3414,8 +3414,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -3424,9 +3424,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -3441,8 +3441,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -3451,9 +3451,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -3463,7 +3463,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -3484,8 +3484,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -3501,8 +3501,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -3517,8 +3517,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -3533,8 +3533,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -3549,8 +3549,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -3565,8 +3565,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -3581,8 +3581,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -3591,9 +3591,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -3602,9 +3602,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -3613,10 +3613,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -3631,8 +3631,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -3641,9 +3641,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -3652,9 +3652,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -3663,10 +3663,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -3685,8 +3685,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -3700,8 +3700,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -3710,9 +3710,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -3728,8 +3728,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -3743,8 +3743,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -3783,7 +3783,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the acsb
+         * @return
          */
         static ACSB createInstance() {
             return new ACSB();
@@ -3792,8 +3792,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -3802,8 +3802,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -3818,8 +3818,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -3833,8 +3833,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -3848,8 +3848,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -3858,9 +3858,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -3876,8 +3876,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -3886,9 +3886,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -3903,8 +3903,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -3913,9 +3913,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -3925,7 +3925,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -3946,8 +3946,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -3963,8 +3963,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -3979,8 +3979,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -3995,8 +3995,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4011,8 +4011,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -4027,8 +4027,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -4043,8 +4043,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -4053,9 +4053,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -4064,9 +4064,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -4075,10 +4075,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -4093,8 +4093,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -4103,9 +4103,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -4114,9 +4114,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -4125,10 +4125,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -4147,8 +4147,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -4162,8 +4162,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -4172,9 +4172,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -4190,8 +4190,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -4205,8 +4205,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -4245,7 +4245,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the lcsb
+         * @return
          */
         static LCSB createInstance() {
             return new LCSB();
@@ -4254,8 +4254,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -4264,8 +4264,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -4280,8 +4280,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4295,8 +4295,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -4310,8 +4310,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -4320,9 +4320,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -4338,8 +4338,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -4348,9 +4348,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -4365,8 +4365,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -4375,9 +4375,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -4387,7 +4387,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -4408,8 +4408,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -4425,8 +4425,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4441,8 +4441,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4457,8 +4457,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4473,8 +4473,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -4489,8 +4489,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -4505,8 +4505,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -4515,9 +4515,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -4526,9 +4526,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -4537,10 +4537,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -4555,8 +4555,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -4565,9 +4565,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -4576,9 +4576,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -4587,10 +4587,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -4609,8 +4609,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -4624,8 +4624,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -4634,9 +4634,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -4652,8 +4652,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -4667,8 +4667,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -4704,7 +4704,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the psc
+         * @return
          */
         static PSC createInstance() {
             return new PSC();
@@ -4713,8 +4713,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -4723,8 +4723,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -4739,8 +4739,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4754,8 +4754,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -4769,8 +4769,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -4779,9 +4779,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -4797,8 +4797,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -4807,9 +4807,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -4824,8 +4824,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -4834,9 +4834,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -4846,7 +4846,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -4867,8 +4867,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -4884,8 +4884,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4900,8 +4900,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4916,8 +4916,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -4932,8 +4932,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -4948,8 +4948,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -4964,8 +4964,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -4974,9 +4974,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -4985,9 +4985,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -4996,10 +4996,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5014,8 +5014,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -5024,9 +5024,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -5035,9 +5035,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -5046,10 +5046,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -5068,8 +5068,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -5083,8 +5083,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -5093,9 +5093,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5111,8 +5111,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -5126,8 +5126,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -5163,7 +5163,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the pac
+         * @return
          */
         static PAC createInstance() {
             return new PAC();
@@ -5172,8 +5172,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -5182,8 +5182,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -5198,8 +5198,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -5213,8 +5213,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -5228,8 +5228,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -5238,9 +5238,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5256,8 +5256,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -5266,9 +5266,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5283,8 +5283,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -5293,9 +5293,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -5305,7 +5305,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -5326,8 +5326,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -5343,8 +5343,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -5359,8 +5359,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -5375,8 +5375,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -5391,8 +5391,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -5407,8 +5407,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -5423,8 +5423,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -5433,9 +5433,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -5444,9 +5444,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -5455,10 +5455,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5473,8 +5473,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -5483,9 +5483,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -5494,9 +5494,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -5505,10 +5505,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -5527,8 +5527,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -5542,8 +5542,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -5552,9 +5552,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5570,8 +5570,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -5585,8 +5585,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -5622,7 +5622,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the plc
+         * @return
          */
         static PLC createInstance() {
             return new PLC();
@@ -5631,8 +5631,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -5641,8 +5641,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -5657,8 +5657,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -5672,8 +5672,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -5687,8 +5687,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -5697,9 +5697,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5715,8 +5715,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -5725,9 +5725,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5742,8 +5742,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -5752,9 +5752,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -5764,7 +5764,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -5785,8 +5785,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -5802,8 +5802,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -5818,8 +5818,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -5834,8 +5834,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -5850,8 +5850,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -5866,8 +5866,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -5882,8 +5882,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -5892,9 +5892,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -5903,9 +5903,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -5914,10 +5914,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -5932,8 +5932,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -5942,9 +5942,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -5953,9 +5953,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -5964,10 +5964,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -5986,8 +5986,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -6001,8 +6001,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -6011,9 +6011,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6029,8 +6029,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -6044,8 +6044,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -6081,7 +6081,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the nsc
+         * @return
          */
         static NSC createInstance() {
             return new NSC();
@@ -6090,8 +6090,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -6100,8 +6100,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -6116,8 +6116,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -6131,8 +6131,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -6146,8 +6146,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -6156,9 +6156,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6174,8 +6174,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -6184,9 +6184,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6201,8 +6201,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -6211,9 +6211,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -6223,7 +6223,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -6244,8 +6244,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -6261,8 +6261,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -6277,8 +6277,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -6293,8 +6293,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -6309,8 +6309,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -6325,8 +6325,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -6341,8 +6341,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -6351,9 +6351,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -6362,9 +6362,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -6373,10 +6373,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6391,8 +6391,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -6401,9 +6401,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -6412,9 +6412,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -6423,10 +6423,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -6445,8 +6445,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -6460,8 +6460,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -6470,9 +6470,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6488,8 +6488,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -6503,8 +6503,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -6540,7 +6540,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the nac
+         * @return
          */
         static NAC createInstance() {
             return new NAC();
@@ -6549,8 +6549,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -6559,8 +6559,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -6575,8 +6575,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -6590,8 +6590,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -6605,8 +6605,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -6615,9 +6615,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6633,8 +6633,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -6643,9 +6643,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6660,8 +6660,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -6670,9 +6670,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -6682,7 +6682,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -6703,8 +6703,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -6720,8 +6720,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -6736,8 +6736,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -6752,8 +6752,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -6768,8 +6768,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -6784,8 +6784,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -6800,8 +6800,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -6810,9 +6810,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -6821,9 +6821,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -6832,10 +6832,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6850,8 +6850,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -6860,9 +6860,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -6871,9 +6871,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -6882,10 +6882,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -6904,8 +6904,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -6919,8 +6919,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -6929,9 +6929,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -6947,8 +6947,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -6962,8 +6962,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -6999,7 +6999,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the nlc
+         * @return
          */
         static NLC createInstance() {
             return new NLC();
@@ -7008,8 +7008,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -7018,8 +7018,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -7034,8 +7034,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7049,8 +7049,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -7064,8 +7064,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -7074,9 +7074,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -7092,8 +7092,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -7102,9 +7102,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -7119,8 +7119,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -7129,9 +7129,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -7141,7 +7141,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -7162,8 +7162,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -7179,8 +7179,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7195,8 +7195,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7211,8 +7211,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7227,8 +7227,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -7243,8 +7243,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -7259,8 +7259,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -7269,9 +7269,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -7280,9 +7280,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -7291,10 +7291,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -7309,8 +7309,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -7319,9 +7319,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -7330,9 +7330,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -7341,10 +7341,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -7363,8 +7363,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -7378,8 +7378,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -7388,9 +7388,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -7406,8 +7406,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -7421,8 +7421,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -7459,7 +7459,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the msc
+         * @return
          */
         static MSC createInstance() {
             return new MSC();
@@ -7468,8 +7468,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -7478,8 +7478,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -7494,8 +7494,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7509,8 +7509,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -7524,8 +7524,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -7534,9 +7534,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -7552,8 +7552,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -7562,9 +7562,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -7579,8 +7579,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -7589,9 +7589,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -7601,7 +7601,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -7622,8 +7622,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -7639,8 +7639,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7655,8 +7655,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7671,8 +7671,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7687,8 +7687,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -7703,8 +7703,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -7719,8 +7719,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -7729,9 +7729,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -7740,9 +7740,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -7751,10 +7751,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -7769,8 +7769,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -7779,9 +7779,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -7790,9 +7790,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -7801,10 +7801,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -7823,8 +7823,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -7838,8 +7838,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -7848,9 +7848,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -7866,8 +7866,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -7881,8 +7881,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -7919,7 +7919,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the mac
+         * @return
          */
         static MAC createInstance() {
             return new MAC();
@@ -7928,8 +7928,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -7938,8 +7938,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -7954,8 +7954,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -7969,8 +7969,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -7984,8 +7984,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -7994,9 +7994,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -8012,8 +8012,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -8022,9 +8022,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -8039,8 +8039,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -8049,9 +8049,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -8061,7 +8061,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -8082,8 +8082,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -8099,8 +8099,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -8115,8 +8115,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -8131,8 +8131,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -8147,8 +8147,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -8163,8 +8163,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -8179,8 +8179,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -8189,9 +8189,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -8200,9 +8200,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -8211,10 +8211,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -8229,8 +8229,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -8239,9 +8239,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -8250,9 +8250,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -8261,10 +8261,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -8283,8 +8283,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -8298,8 +8298,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -8308,9 +8308,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -8326,8 +8326,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -8341,8 +8341,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -8379,7 +8379,7 @@ public abstract class SQLBuilder {
         /**
          * Creates the instance.
          *
-         * @return the mlc
+         * @return
          */
         static MLC createInstance() {
             return new MLC();
@@ -8388,8 +8388,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param expr the expr
-         * @return the SQL builder
+         * @param expr
+         * @return
          */
         public static SQLBuilder insert(final String expr) {
             return insert(N.asArray(expr));
@@ -8398,8 +8398,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder insert(final String... columnNames) {
@@ -8414,8 +8414,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder insert(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -8429,8 +8429,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the SQL builder
+         * @param props
+         * @return
          */
         public static SQLBuilder insert(final Map<String, Object> props) {
             final SQLBuilder instance = createInstance();
@@ -8444,8 +8444,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the SQL builder
+         * @param entity
+         * @return
          */
         public static SQLBuilder insert(final Object entity) {
             return insert(entity, null);
@@ -8454,9 +8454,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entity
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -8472,8 +8472,8 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass) {
             return insert(entityClass, null);
@@ -8482,9 +8482,9 @@ public abstract class SQLBuilder {
         /**
          * Insert.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -8499,8 +8499,8 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass) {
             return insertInto(entityClass, null);
@@ -8509,9 +8509,9 @@ public abstract class SQLBuilder {
         /**
          * Insert into.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return insert(entityClass, excludedPropNames).into(entityClass);
@@ -8521,7 +8521,7 @@ public abstract class SQLBuilder {
          * Generate the MySQL style batch insert sql.
          *
          * @param propsList list of entity or properties map.
-         * @return the SQL builder
+         * @return
          */
         @Beta
         public static SQLBuilder batchInsert(final Collection<?> propsList) {
@@ -8542,8 +8542,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
@@ -8559,8 +8559,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final String[] columnNames) {
             final SQLBuilder instance = createInstance();
@@ -8575,8 +8575,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -8591,8 +8591,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnNames the column names
-         * @return the SQL builder
+         * @param columnNames
+         * @return
          */
         public static SQLBuilder select(final String expr, final Collection<String> columnNames) {
             final SQLBuilder instance = createInstance();
@@ -8607,8 +8607,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -8623,8 +8623,8 @@ public abstract class SQLBuilder {
          * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
-         * @param columnAliases the column aliases
-         * @return the SQL builder
+         * @param columnAliases
+         * @return
          */
         public static SQLBuilder select(final String expr, final Map<String, String> columnAliases) {
             final SQLBuilder instance = createInstance();
@@ -8639,8 +8639,8 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass) {
             return select(entityClass, false);
@@ -8649,9 +8649,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return select(entityClass, includeSubEntityProperties, null);
@@ -8660,9 +8660,9 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return select(entityClass, false, excludedPropNames);
@@ -8671,10 +8671,10 @@ public abstract class SQLBuilder {
         /**
          * Select.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -8689,8 +8689,8 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass) {
             return selectFrom(entityClass, false);
@@ -8699,9 +8699,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
             return selectFrom(entityClass, includeSubEntityProperties, null);
@@ -8710,9 +8710,9 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
             return selectFrom(entityClass, false, excludedPropNames);
@@ -8721,10 +8721,10 @@ public abstract class SQLBuilder {
         /**
          * Select from.
          *
-         * @param entityClass the entity class
-         * @param includeSubEntityProperties the include sub entity properties
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
             if (includeSubEntityProperties) {
@@ -8743,8 +8743,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder update(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -8758,8 +8758,8 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass) {
             return update(entityClass, null);
@@ -8768,9 +8768,9 @@ public abstract class SQLBuilder {
         /**
          * Update.
          *
-         * @param entityClass the entity class
-         * @param excludedPropNames the excluded prop names
-         * @return the SQL builder
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
          */
         public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
             final SQLBuilder instance = createInstance();
@@ -8786,8 +8786,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param tableName the table name
-         * @return the SQL builder
+         * @param tableName
+         * @return
          */
         public static SQLBuilder deleteFrom(final String tableName) {
             final SQLBuilder instance = createInstance();
@@ -8801,8 +8801,8 @@ public abstract class SQLBuilder {
         /**
          * Delete from.
          *
-         * @param entityClass the entity class
-         * @return the SQL builder
+         * @param entityClass
+         * @return
          */
         public static SQLBuilder deleteFrom(final Class<?> entityClass) {
             final SQLBuilder instance = createInstance();
@@ -8829,8 +8829,8 @@ public abstract class SQLBuilder {
         /**
          * Instantiates a new sp.
          *
-         * @param sql the sql
-         * @param parameters the parameters
+         * @param sql
+         * @param parameters
          */
         SP(final String sql, final List<Object> parameters) {
             this.sql = sql;
@@ -8840,7 +8840,7 @@ public abstract class SQLBuilder {
         /**
          * .
          *
-         * @return the pair
+         * @return
          */
         public Pair<String, List<Object>> __() {
             return Pair.of(sql, parameters);
@@ -8849,7 +8849,7 @@ public abstract class SQLBuilder {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -8859,7 +8859,7 @@ public abstract class SQLBuilder {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -8880,7 +8880,7 @@ public abstract class SQLBuilder {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {

@@ -25,7 +25,7 @@ import java.util.TreeSet;
  * The Class ImmutableNavigableSet.
  *
  * @author Haiyang Li
- * @param <E> the element type
+ * @param <E>
  * @since 1.1.4
  */
 public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implements NavigableSet<E> {
@@ -40,7 +40,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Instantiates a new immutable navigable set.
      *
-     * @param navigableSet the navigable set
+     * @param navigableSet
      */
     ImmutableNavigableSet(NavigableSet<? extends E> navigableSet) {
         super(navigableSet);
@@ -50,8 +50,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Empty.
      *
-     * @param <E> the element type
-     * @return the immutable navigable set
+     * @param <E>
+     * @return
      */
     public static <E> ImmutableNavigableSet<E> empty() {
         return EMPTY;
@@ -60,9 +60,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Of.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @return the immutable navigable set
+     * @param <E>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E... a) {
@@ -76,9 +76,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Of.
      *
-     * @param <E> the element type
+     * @param <E>
      * @param navigableSet the elements in this <code>Set</code> are shared by the returned ImmutableNavigableSet.
-     * @return the immutable navigable set
+     * @return
      */
     public static <E> ImmutableNavigableSet<E> of(final NavigableSet<? extends E> navigableSet) {
         if (navigableSet == null) {
@@ -93,9 +93,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Copy of.
      *
-     * @param <E> the element type
-     * @param sortedSet the sorted set
-     * @return the immutable navigable set
+     * @param <E>
+     * @param sortedSet
+     * @return
      */
     public static <E> ImmutableNavigableSet<E> copyOf(final SortedSet<? extends E> sortedSet) {
         if (N.isNullOrEmpty(sortedSet)) {
@@ -108,9 +108,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Of.
      *
-     * @param <E> the element type
-     * @param sortedSet the sorted set
-     * @return the immutable sorted set
+     * @param <E>
+     * @param sortedSet
+     * @return
      */
     @Deprecated
     public static <E> ImmutableSortedSet<E> of(final SortedSet<? extends E> sortedSet) {
@@ -120,8 +120,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Lower.
      *
-     * @param e the e
-     * @return the e
+     * @param e
+     * @return
      */
     @Override
     public E lower(E e) {
@@ -131,8 +131,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Floor.
      *
-     * @param e the e
-     * @return the e
+     * @param e
+     * @return
      */
     @Override
     public E floor(E e) {
@@ -142,8 +142,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Ceiling.
      *
-     * @param e the e
-     * @return the e
+     * @param e
+     * @return
      */
     @Override
     public E ceiling(E e) {
@@ -153,8 +153,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Higher.
      *
-     * @param e the e
-     * @return the e
+     * @param e
+     * @return
      */
     @Override
     public E higher(E e) {
@@ -164,7 +164,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Poll first.
      *
-     * @return the e
+     * @return
      */
     @Override
     public E pollFirst() {
@@ -174,7 +174,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Poll last.
      *
-     * @return the e
+     * @return
      */
     @Override
     public E pollLast() {
@@ -184,7 +184,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Descending set.
      *
-     * @return the navigable set
+     * @return
      */
     @Override
     public NavigableSet<E> descendingSet() {
@@ -194,7 +194,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Descending iterator.
      *
-     * @return the iterator
+     * @return
      */
     @Override
     public Iterator<E> descendingIterator() {
@@ -204,11 +204,11 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Sub set.
      *
-     * @param fromElement the from element
-     * @param fromInclusive the from inclusive
-     * @param toElement the to element
-     * @param toInclusive the to inclusive
-     * @return the navigable set
+     * @param fromElement
+     * @param fromInclusive
+     * @param toElement
+     * @param toInclusive
+     * @return
      */
     @Override
     public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
@@ -218,9 +218,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Head set.
      *
-     * @param toElement the to element
-     * @param inclusive the inclusive
-     * @return the navigable set
+     * @param toElement
+     * @param inclusive
+     * @return
      */
     @Override
     public NavigableSet<E> headSet(E toElement, boolean inclusive) {
@@ -230,9 +230,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      * Tail set.
      *
-     * @param fromElement the from element
-     * @param inclusive the inclusive
-     * @return the navigable set
+     * @param fromElement
+     * @param inclusive
+     * @return
      */
     @Override
     public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {

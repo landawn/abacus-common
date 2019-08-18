@@ -96,8 +96,8 @@ public final class Hashing {
      * 
      * <p>The exact C++ equivalent is the MurmurHash3_x86_32 function (Murmur3A).
      *
-     * @param seed the seed
-     * @return the hash function
+     * @param seed
+     * @return
      */
     public static HashFunction murmur3_32(int seed) {
         return new Murmur3_32HashFunction(seed);
@@ -110,7 +110,7 @@ public final class Hashing {
      * 
      * <p>The exact C++ equivalent is the MurmurHash3_x86_32 function (Murmur3A).
      *
-     * @return the hash function
+     * @return
      */
     public static HashFunction murmur3_32() {
         return Murmur3_32Holder.MURMUR3_32;
@@ -135,8 +135,8 @@ public final class Hashing {
      * 
      * <p>The exact C++ equivalent is the MurmurHash3_x64_128 function (Murmur3F).
      *
-     * @param seed the seed
-     * @return the hash function
+     * @param seed
+     * @return
      */
     public static HashFunction murmur3_128(int seed) {
         return new Murmur3_128HashFunction(seed);
@@ -149,7 +149,7 @@ public final class Hashing {
      * 
      * <p>The exact C++ equivalent is the MurmurHash3_x64_128 function (Murmur3F).
      *
-     * @return the hash function
+     * @return
      */
     public static HashFunction murmur3_128() {
         return Murmur3_128Holder.MURMUR3_128;
@@ -171,7 +171,7 @@ public final class Hashing {
      * Returns a hash function implementing the <a href="https://131002.net/siphash/">64-bit
      * SipHash-2-4 algorithm</a> using a seed value of {@code k = 00 01 02 ...}.
      *
-     * @return the hash function
+     * @return
      * @since 15.0
      */
     public static HashFunction sipHash24() {
@@ -191,9 +191,9 @@ public final class Hashing {
      * Returns a hash function implementing the <a href="https://131002.net/siphash/">64-bit
      * SipHash-2-4 algorithm</a> using the given seed.
      *
-     * @param k0 the k 0
-     * @param k1 the k 1
-     * @return the hash function
+     * @param k0
+     * @param k1
+     * @return
      * @since 15.0
      */
     public static HashFunction sipHash24(long k0, long k1) {
@@ -208,7 +208,7 @@ public final class Hashing {
      * recommended for use in new code. It should be used for legacy compatibility reasons only.
      * Please consider using a hash function in the SHA-2 family of functions (e.g., SHA-256).
      *
-     * @return the hash function
+     * @return
      */
     public static HashFunction md5() {
         return Md5Holder.MD5;
@@ -231,7 +231,7 @@ public final class Hashing {
      * code. It should be used for legacy compatibility reasons only. Please consider using a hash
      * function in the SHA-2 family of functions (e.g., SHA-256).
      *
-     * @return the hash function
+     * @return
      */
     public static HashFunction sha1() {
         return Sha1Holder.SHA_1;
@@ -250,7 +250,7 @@ public final class Hashing {
      * Returns a hash function implementing the SHA-256 algorithm (256 hash bits) by delegating to the
      * SHA-256 {@link MessageDigest}.
      *
-     * @return the hash function
+     * @return
      */
     public static HashFunction sha256() {
         return Sha256Holder.SHA_256;
@@ -269,7 +269,7 @@ public final class Hashing {
      * Returns a hash function implementing the SHA-384 algorithm (384 hash bits) by delegating to the
      * SHA-384 {@link MessageDigest}.
      *
-     * @return the hash function
+     * @return
      * @since 19.0
      */
     public static HashFunction sha384() {
@@ -289,7 +289,7 @@ public final class Hashing {
      * Returns a hash function implementing the SHA-512 algorithm (512 hash bits) by delegating to the
      * SHA-512 {@link MessageDigest}.
      *
-     * @return the hash function
+     * @return
      */
     public static HashFunction sha512() {
         return Sha512Holder.SHA_512;
@@ -309,7 +309,7 @@ public final class Hashing {
      * MD5 (128 hash bits) hash function and the given secret key.
      *
      * @param key the secret key
-     * @return the hash function
+     * @return
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
      * @since 20.0
      */
@@ -323,7 +323,7 @@ public final class Hashing {
      * and the MD5 algorithm.
      *
      * @param key the key material of the secret key
-     * @return the hash function
+     * @return
      * @since 20.0
      */
     public static HashFunction hmacMd5(byte[] key) {
@@ -335,7 +335,7 @@ public final class Hashing {
      * SHA-1 (160 hash bits) hash function and the given secret key.
      *
      * @param key the secret key
-     * @return the hash function
+     * @return
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
      * @since 20.0
      */
@@ -349,7 +349,7 @@ public final class Hashing {
      * array and the SHA-1 algorithm.
      *
      * @param key the key material of the secret key
-     * @return the hash function
+     * @return
      * @since 20.0
      */
     public static HashFunction hmacSha1(byte[] key) {
@@ -361,7 +361,7 @@ public final class Hashing {
      * SHA-256 (256 hash bits) hash function and the given secret key.
      *
      * @param key the secret key
-     * @return the hash function
+     * @return
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
      * @since 20.0
      */
@@ -375,7 +375,7 @@ public final class Hashing {
      * array and the SHA-256 algorithm.
      *
      * @param key the key material of the secret key
-     * @return the hash function
+     * @return
      * @since 20.0
      */
     public static HashFunction hmacSha256(byte[] key) {
@@ -387,7 +387,7 @@ public final class Hashing {
      * SHA-512 (512 hash bits) hash function and the given secret key.
      *
      * @param key the secret key
-     * @return the hash function
+     * @return
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
      * @since 20.0
      */
@@ -401,7 +401,7 @@ public final class Hashing {
      * array and the SHA-512 algorithm.
      *
      * @param key the key material of the secret key
-     * @return the hash function
+     * @return
      * @since 20.0
      */
     public static HashFunction hmacSha512(byte[] key) {
@@ -411,9 +411,9 @@ public final class Hashing {
     /**
      * Hmac to string.
      *
-     * @param methodName the method name
-     * @param key the key
-     * @return the string
+     * @param methodName
+     * @param key
+     * @return
      */
     private static String hmacToString(String methodName, Key key) {
         return String.format("Hashing.%s(Key[algorithm=%s, format=%s])", methodName, key.getAlgorithm(), key.getFormat());
@@ -423,7 +423,7 @@ public final class Hashing {
      * Returns a hash function implementing the CRC32C checksum algorithm (32 hash bits) as described
      * by RFC 3720, Section 12.1.
      *
-     * @return the hash function
+     * @return
      * @since 18.0
      */
     public static HashFunction crc32c() {
@@ -446,7 +446,7 @@ public final class Hashing {
      * <p>To get the {@code long} value equivalent to {@link Checksum#getValue()} for a
      * {@code HashCode} produced by this function, use {@link HashCode#padToLong()}.
      *
-     * @return the hash function
+     * @return
      * @since 14.0
      */
     public static HashFunction crc32() {
@@ -469,7 +469,7 @@ public final class Hashing {
      * <p>To get the {@code long} value equivalent to {@link Checksum#getValue()} for a
      * {@code HashCode} produced by this function, use {@link HashCode#padToLong()}.
      *
-     * @return the hash function
+     * @return
      * @since 14.0
      */
     public static HashFunction adler32() {
@@ -488,9 +488,9 @@ public final class Hashing {
     /**
      * Checksum hash function.
      *
-     * @param type the type
-     * @param toString the to string
-     * @return the hash function
+     * @param type
+     * @param toString
+     * @return
      */
     private static HashFunction checksumHashFunction(ChecksumType type, String toString) {
         return new ChecksumHashFunction(type, type.bits, toString);
@@ -523,7 +523,7 @@ public final class Hashing {
         /**
          * Instantiates a new checksum type.
          *
-         * @param bits the bits
+         * @param bits
          */
         ChecksumType(int bits) {
             this.bits = bits;
@@ -532,7 +532,7 @@ public final class Hashing {
         /**
          * Gets the.
          *
-         * @return the checksum
+         * @return
          */
         @Override
         public abstract Checksum get();
@@ -548,7 +548,7 @@ public final class Hashing {
      * (see {@link com.google.common.primitives.UnsignedInts}). Comparisons between the two should
      * take this into account.
      *
-     * @return the hash function
+     * @return
      * @since 20.0
      */
     public static HashFunction farmHashFingerprint64() {
@@ -595,9 +595,9 @@ public final class Hashing {
      * <p>See the <a href="http://en.wikipedia.org/wiki/Consistent_hashing">Wikipedia article on
      * consistent hashing</a> for more information.
      *
-     * @param hashCode the hash code
-     * @param buckets the buckets
-     * @return the int
+     * @param hashCode
+     * @param buckets
+     * @return
      */
     public static int consistentHash(HashCode hashCode, int buckets) {
         return consistentHash(hashCode.padToLong(), buckets);
@@ -634,9 +634,9 @@ public final class Hashing {
      * <p>See the <a href="http://en.wikipedia.org/wiki/Consistent_hashing">Wikipedia article on
      * consistent hashing</a> for more information.
      *
-     * @param input the input
-     * @param buckets the buckets
-     * @return the int
+     * @param input
+     * @param buckets
+     * @return
      */
     public static int consistentHash(long input, int buckets) {
         N.checkArgument(buckets > 0, "buckets must be positive: %s", buckets);
@@ -658,9 +658,9 @@ public final class Hashing {
     /**
      * Combine ordered.
      *
-     * @param first the first
-     * @param second the second
-     * @return the hash code
+     * @param first
+     * @param second
+     * @return
      */
     public static HashCode combineOrdered(final HashCode first, final HashCode second) {
         return combineOrdered(Arrays.asList(first, second));
@@ -669,10 +669,10 @@ public final class Hashing {
     /**
      * Combine ordered.
      *
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the hash code
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static HashCode combineOrdered(final HashCode first, final HashCode second, final HashCode third) {
         return combineOrdered(Arrays.asList(first, second, third));
@@ -684,8 +684,8 @@ public final class Hashing {
      * codes are produced by two calls to this method, it is <i>as likely as possible</i> that each
      * was computed from the <i>same</i> input hash codes in the <i>same</i> order.
      *
-     * @param hashCodes the hash codes
-     * @return the hash code
+     * @param hashCodes
+     * @return
      * @throws IllegalArgumentException if {@code hashCodes} is empty, or the hash codes do not all
      *     have the same bit length
      */
@@ -707,9 +707,9 @@ public final class Hashing {
     /**
      * Combine unordered.
      *
-     * @param first the first
-     * @param second the second
-     * @return the hash code
+     * @param first
+     * @param second
+     * @return
      */
     public static HashCode combineUnordered(final HashCode first, final HashCode second) {
         return combineUnordered(Arrays.asList(first, second));
@@ -718,10 +718,10 @@ public final class Hashing {
     /**
      * Combine unordered.
      *
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the hash code
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static HashCode combineUnordered(final HashCode first, final HashCode second, final HashCode third) {
         return combineUnordered(Arrays.asList(first, second, third));
@@ -733,8 +733,8 @@ public final class Hashing {
      * codes are produced by two calls to this method, it is <i>as likely as possible</i> that each
      * was computed from the <i>same</i> input hash codes in <i>some</i> order.
      *
-     * @param hashCodes the hash codes
-     * @return the hash code
+     * @param hashCodes
+     * @return
      * @throws IllegalArgumentException if {@code hashCodes} is empty, or the hash codes do not all
      *     have the same bit length
      */
@@ -755,8 +755,8 @@ public final class Hashing {
     /**
      * Checks that the passed argument is positive, and ceils it to a multiple of 32.
      *
-     * @param bits the bits
-     * @return the int
+     * @param bits
+     * @return
      */
     static int checkPositiveAndMakeMultipleOf32(int bits) {
         N.checkArgument(bits > 0, "Number of bits must be positive");
@@ -766,9 +766,9 @@ public final class Hashing {
     /**
      * Concatenating.
      *
-     * @param first the first
-     * @param second the second
-     * @return the hash function
+     * @param first
+     * @param second
+     * @return
      */
     public static HashFunction concatenating(final HashFunction first, final HashFunction second) {
         return new ConcatenatedHashFunction(N.asArray(first, second));
@@ -777,10 +777,10 @@ public final class Hashing {
     /**
      * Concatenating.
      *
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the hash function
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static HashFunction concatenating(HashFunction first, HashFunction second, HashFunction third) {
         return new ConcatenatedHashFunction(N.asArray(first, second, third));
@@ -794,8 +794,8 @@ public final class Hashing {
      * <p>For example, if you need 1024-bit hash codes, you could join two {@link Hashing#sha512} hash
      * functions together: {@code Hashing.concatenating(Hashing.sha512(), Hashing.sha512())}.
      *
-     * @param hashFunctions the hash functions
-     * @return the hash function
+     * @param hashFunctions
+     * @return
      * @since 19.0
      */
     public static HashFunction concatenating(Iterable<HashFunction> hashFunctions) {
@@ -833,7 +833,7 @@ public final class Hashing {
         /**
          * Instantiates a new concatenated hash function.
          *
-         * @param functions the functions
+         * @param functions
          */
         private ConcatenatedHashFunction(HashFunction... functions) {
             super(functions);
@@ -848,8 +848,8 @@ public final class Hashing {
         /**
          * Make hash.
          *
-         * @param hashers the hashers
-         * @return the hash code
+         * @param hashers
+         * @return
          */
         @Override
         HashCode makeHash(Hasher[] hashers) {
@@ -865,7 +865,7 @@ public final class Hashing {
         /**
          * Bits.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int bits() {
@@ -875,7 +875,7 @@ public final class Hashing {
         /**
          * Equals.
          *
-         * @param object the object
+         * @param object
          * @return true, if successful
          */
         @Override
@@ -890,7 +890,7 @@ public final class Hashing {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -910,7 +910,7 @@ public final class Hashing {
         /**
          * Instantiates a new linear congruential generator.
          *
-         * @param seed the seed
+         * @param seed
          */
         public LinearCongruentialGenerator(long seed) {
             this.state = seed;
@@ -919,7 +919,7 @@ public final class Hashing {
         /**
          * Next double.
          *
-         * @return the double
+         * @return
          */
         public double nextDouble() {
             state = 2862933555777941757L * state + 1;

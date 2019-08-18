@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * The Interface ObjectPool.
  *
  * @author Haiyang Li
- * @param <E> the element type
+ * @param <E>
  * @since 0.8
  */
 public interface ObjectPool<E extends Poolable> extends Pool {
@@ -29,7 +29,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     boolean add(E e);
@@ -37,8 +37,8 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Adds the.
      *
-     * @param e the e
-     * @param autoDestroyOnFailedToAdd the auto destroy on failed to add
+     * @param e
+     * @param autoDestroyOnFailedToAdd
      * @return true, if successful
      */
     boolean add(E e, boolean autoDestroyOnFailedToAdd);
@@ -46,9 +46,9 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Adds the.
      *
-     * @param e the e
-     * @param timeout the timeout
-     * @param unit the unit
+     * @param e
+     * @param timeout
+     * @param unit
      * @return true, if successful
      * @throws InterruptedException the interrupted exception
      */
@@ -57,10 +57,10 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Adds the.
      *
-     * @param e the e
-     * @param timeout the timeout
-     * @param unit the unit
-     * @param autoDestroyOnFailedToAdd the auto destroy on failed to add
+     * @param e
+     * @param timeout
+     * @param unit
+     * @param autoDestroyOnFailedToAdd
      * @return true, if successful
      * @throws InterruptedException the interrupted exception
      */
@@ -69,16 +69,16 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Retrieves and removes the head of this queue, or returns <tt>null</tt> if this queue is empty.
      * 
-     * @return the head of this queue, or <tt>null</tt> if this queue is empty
+     * @return
      */
     E take();
 
     /**
      * Take.
      *
-     * @param timeout the timeout
-     * @param unit the unit
-     * @return the e
+     * @param timeout
+     * @param unit
+     * @return
      * @throws InterruptedException the interrupted exception
      */
     E take(long timeout, TimeUnit unit) throws InterruptedException;
@@ -86,7 +86,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * Method contains.
      *
-     * @param e the e
+     * @param e
      * @return boolean
      */
     boolean contains(E e);
@@ -94,15 +94,15 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     /**
      * The Interface MemoryMeasure.
      *
-     * @param <E> the element type
+     * @param <E>
      */
     public static interface MemoryMeasure<E> {
 
         /**
          * Size of.
          *
-         * @param e the e
-         * @return the long
+         * @param e
+         * @return
          */
         long sizeOf(E e);
     }

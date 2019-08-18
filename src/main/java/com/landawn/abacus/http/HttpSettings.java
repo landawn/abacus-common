@@ -66,7 +66,7 @@ public final class HttpSettings {
     /**
      * Creates the.
      *
-     * @return the http settings
+     * @return
      */
     public static HttpSettings create() {
         return new HttpSettings();
@@ -75,7 +75,7 @@ public final class HttpSettings {
     /**
      * Gets the connection timeout.
      *
-     * @return the connection timeout
+     * @return
      */
     public int getConnectionTimeout() {
         return connectionTimeout;
@@ -84,8 +84,8 @@ public final class HttpSettings {
     /**
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param connTimeout the conn timeout
-     * @return the http settings
+     * @param connTimeout
+     * @return
      */
     public HttpSettings setConnectionTimeout(int connTimeout) {
         this.connectionTimeout = connTimeout;
@@ -96,7 +96,7 @@ public final class HttpSettings {
     /**
      * Gets the read timeout.
      *
-     * @return the read timeout
+     * @return
      */
     public int getReadTimeout() {
         return readTimeout;
@@ -106,8 +106,8 @@ public final class HttpSettings {
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *  
      *
-     * @param readTimeout the read timeout
-     * @return the http settings
+     * @param readTimeout
+     * @return
      */
     public HttpSettings setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
@@ -118,7 +118,7 @@ public final class HttpSettings {
     /**
      * Gets the SSL socket factory.
      *
-     * @return the SSL socket factory
+     * @return
      */
     public SSLSocketFactory getSSLSocketFactory() {
         return this.sslSocketFactory;
@@ -127,8 +127,8 @@ public final class HttpSettings {
     /**
      * Sets the SSL socket factory.
      *
-     * @param sslSocketFactory the ssl socket factory
-     * @return the http settings
+     * @param sslSocketFactory
+     * @return
      */
     public HttpSettings setSSLSocketFactory(final SSLSocketFactory sslSocketFactory) {
         this.sslSocketFactory = sslSocketFactory;
@@ -139,7 +139,7 @@ public final class HttpSettings {
     /**
      * Gets the use caches.
      *
-     * @return the use caches
+     * @return
      */
     public boolean getUseCaches() {
         return useCaches;
@@ -148,8 +148,8 @@ public final class HttpSettings {
     /**
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param useCaches the use caches
-     * @return the http settings
+     * @param useCaches
+     * @return
      */
     public HttpSettings setUseCaches(boolean useCaches) {
         this.useCaches = useCaches;
@@ -171,8 +171,8 @@ public final class HttpSettings {
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *  
      *
-     * @param doInput the do input
-     * @return the http settings
+     * @param doInput
+     * @return
      * @see java.net.HttpURLConnection#setDoInput(boolean)
      */
     public HttpSettings doInput(boolean doInput) {
@@ -194,8 +194,8 @@ public final class HttpSettings {
     /**
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param doOutput the do output
-     * @return the http settings
+     * @param doOutput
+     * @return
      * @see java.net.HttpURLConnection#setDoOutput(boolean)
      */
     public HttpSettings doOutput(boolean doOutput) {
@@ -216,8 +216,8 @@ public final class HttpSettings {
     /**
      * Checks if is one way request.
      *
-     * @param isOneWayRequest the is one way request
-     * @return the http settings
+     * @param isOneWayRequest
+     * @return
      */
     public HttpSettings isOneWayRequest(boolean isOneWayRequest) {
         this.isOneWayRequest = isOneWayRequest;
@@ -228,7 +228,7 @@ public final class HttpSettings {
     /**
      * Gets the content format.
      *
-     * @return the content format
+     * @return
      */
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
@@ -242,8 +242,8 @@ public final class HttpSettings {
     /**
      * Sets the content format.
      *
-     * @param contentFormat the content format
-     * @return the http settings
+     * @param contentFormat
+     * @return
      */
     public HttpSettings setContentFormat(ContentFormat contentFormat) {
         this.contentFormat = contentFormat;
@@ -277,9 +277,9 @@ public final class HttpSettings {
     /**
      * Header.
      *
-     * @param name the name
-     * @param value the value
-     * @return the http settings
+     * @param name
+     * @param value
+     * @return
      */
     public HttpSettings header(String name, Object value) {
         headers().set(name, value);
@@ -290,11 +290,11 @@ public final class HttpSettings {
     /**
      * Headers.
      *
-     * @param name1 the name 1
-     * @param value1 the value 1
-     * @param name2 the name 2
-     * @param value2 the value 2
-     * @return the http settings
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @return
      */
     public HttpSettings headers(String name1, Object value1, String name2, Object value2) {
         headers().set(name1, value1);
@@ -306,13 +306,13 @@ public final class HttpSettings {
     /**
      * Headers.
      *
-     * @param name1 the name 1
-     * @param value1 the value 1
-     * @param name2 the name 2
-     * @param value2 the value 2
-     * @param name3 the name 3
-     * @param value3 the value 3
-     * @return the http settings
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @param name3
+     * @param value3
+     * @return
      */
     public HttpSettings headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
         headers().set(name1, value1);
@@ -325,8 +325,8 @@ public final class HttpSettings {
     /**
      * Headers.
      *
-     * @param headers the headers
-     * @return the http settings
+     * @param headers
+     * @return
      */
     public HttpSettings headers(Map<String, Object> headers) {
         headers().setAll(headers);
@@ -337,8 +337,8 @@ public final class HttpSettings {
     /**
      * Headers.
      *
-     * @param headers the headers
-     * @return the http settings
+     * @param headers
+     * @return
      */
     public HttpSettings headers(HttpHeaders headers) {
         if (headers == null) {
@@ -353,7 +353,7 @@ public final class HttpSettings {
     /**
      * Headers.
      *
-     * @return the http headers
+     * @return
      */
     public HttpHeaders headers() {
         if (headers == null) {
@@ -366,7 +366,7 @@ public final class HttpSettings {
     /**
      * Copy.
      *
-     * @return the http settings
+     * @return
      */
     public HttpSettings copy() {
         return new HttpSettings().setConnectionTimeout(connectionTimeout)
@@ -383,7 +383,7 @@ public final class HttpSettings {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

@@ -28,7 +28,7 @@ import java.util.TreeSet;
  * It's immutable.
  *
  * @author haiyang li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
@@ -103,7 +103,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Instantiates a new h base column.
      *
-     * @param value the value
+     * @param value
      */
     public HBaseColumn(T value) {
         this(value, LATEST_TIMESTAMP);
@@ -112,8 +112,8 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Instantiates a new h base column.
      *
-     * @param value the value
-     * @param version the version
+     * @param value
+     * @param version
      */
     public HBaseColumn(T value, long version) {
         this.value = value;
@@ -123,9 +123,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Empty of.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @return the h base column
+     * @param <T>
+     * @param targetClass
+     * @return
      */
     public static <T> HBaseColumn<T> emptyOf(Class<?> targetClass) {
         final HBaseColumn<?> column = emptyColumnPool.get(targetClass);
@@ -136,9 +136,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Value of.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @return the h base column
+     * @param <T>
+     * @param value
+     * @return
      */
     public static <T> HBaseColumn<T> valueOf(T value) {
         return new HBaseColumn<T>(value);
@@ -147,10 +147,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Value of.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param version the version
-     * @return the h base column
+     * @param <T>
+     * @param value
+     * @param version
+     * @return
      */
     public static <T> HBaseColumn<T> valueOf(T value, long version) {
         return new HBaseColumn<T>(value, version);
@@ -159,9 +159,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @return the list
+     * @param <T>
+     * @param value
+     * @return
      */
     public static <T> List<HBaseColumn<T>> asList(T value) {
         return N.asList(new HBaseColumn<T>(value));
@@ -170,10 +170,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param version the version
-     * @return the list
+     * @param <T>
+     * @param value
+     * @param version
+     * @return
      */
     public static <T> List<HBaseColumn<T>> asList(T value, long version) {
         return N.asList(new HBaseColumn<T>(value, version));
@@ -182,9 +182,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @return the sets the
+     * @param <T>
+     * @param value
+     * @return
      */
     public static <T> Set<HBaseColumn<T>> asSet(T value) {
         return N.asSet(new HBaseColumn<T>(value));
@@ -193,10 +193,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param version the version
-     * @return the sets the
+     * @param <T>
+     * @param value
+     * @param version
+     * @return
      */
     public static <T> Set<HBaseColumn<T>> asSet(T value, long version) {
         return N.asSet(new HBaseColumn<T>(value, version));
@@ -205,9 +205,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Returns a sorted set descended by version.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @return the sorted set
+     * @param <T>
+     * @param value
+     * @return
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(T value) {
         return asSortedSet(value, DESC_HBASE_COLUMN_COMPARATOR);
@@ -216,10 +216,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As sorted set.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param cmp the cmp
-     * @return the sorted set
+     * @param <T>
+     * @param value
+     * @param cmp
+     * @return
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(T value, Comparator<HBaseColumn<?>> cmp) {
         final SortedSet<HBaseColumn<T>> set = new TreeSet<HBaseColumn<T>>(cmp == null ? DESC_HBASE_COLUMN_COMPARATOR : cmp);
@@ -232,10 +232,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Returns a sorted set descended by version.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param version the version
-     * @return the sorted set
+     * @param <T>
+     * @param value
+     * @param version
+     * @return
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(T value, long version) {
         return asSortedSet(value, version, DESC_HBASE_COLUMN_COMPARATOR);
@@ -244,11 +244,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As sorted set.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param version the version
-     * @param cmp the cmp
-     * @return the sorted set
+     * @param <T>
+     * @param value
+     * @param version
+     * @param cmp
+     * @return
      */
     public static <T> SortedSet<HBaseColumn<T>> asSortedSet(T value, long version, Comparator<HBaseColumn<?>> cmp) {
         final SortedSet<HBaseColumn<T>> set = new TreeSet<HBaseColumn<T>>(cmp == null ? DESC_HBASE_COLUMN_COMPARATOR : cmp);
@@ -261,9 +261,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As map.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @return the map
+     * @param <T>
+     * @param value
+     * @return
      */
     public static <T> Map<Long, HBaseColumn<T>> asMap(T value) {
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value);
@@ -274,10 +274,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As map.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param version the version
-     * @return the map
+     * @param <T>
+     * @param value
+     * @param version
+     * @return
      */
     public static <T> Map<Long, HBaseColumn<T>> asMap(T value, long version) {
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value, version);
@@ -288,9 +288,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Returns a sorted map descended by version.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @return the sorted map
+     * @param <T>
+     * @param value
+     * @return
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(T value) {
         return asSortedMap(value, DESC_HBASE_VERSION_COMPARATOR);
@@ -299,10 +299,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As sorted map.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param cmp the cmp
-     * @return the sorted map
+     * @param <T>
+     * @param value
+     * @param cmp
+     * @return
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(T value, Comparator<Long> cmp) {
         final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<Long, HBaseColumn<T>>(cmp == null ? DESC_HBASE_VERSION_COMPARATOR : cmp);
@@ -316,10 +316,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Returns a sorted map descended by version.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param version the version
-     * @return the sorted map
+     * @param <T>
+     * @param value
+     * @param version
+     * @return
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(T value, long version) {
         return asSortedMap(value, version, DESC_HBASE_VERSION_COMPARATOR);
@@ -328,11 +328,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * As sorted map.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param version the version
-     * @param cmp the cmp
-     * @return the sorted map
+     * @param <T>
+     * @param value
+     * @param version
+     * @param cmp
+     * @return
      */
     public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(T value, long version, Comparator<Long> cmp) {
         final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<Long, HBaseColumn<T>>(cmp == null ? DESC_HBASE_VERSION_COMPARATOR : cmp);
@@ -346,7 +346,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Value.
      *
-     * @return the t
+     * @return
      */
     public T value() {
         return value;
@@ -355,7 +355,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Version.
      *
-     * @return the long
+     * @return
      */
     public long version() {
         return version;
@@ -364,7 +364,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Copy.
      *
-     * @return the h base column
+     * @return
      */
     public HBaseColumn<T> copy() {
         return new HBaseColumn<T>(this.value, this.version);
@@ -382,8 +382,8 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Compare to.
      *
-     * @param o the o
-     * @return the int
+     * @param o
+     * @return
      */
     @Override
     public int compareTo(HBaseColumn<T> o) {
@@ -393,7 +393,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -407,7 +407,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -431,7 +431,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

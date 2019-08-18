@@ -19,7 +19,7 @@ package com.landawn.abacus.util;
  * The Class Synchronized.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class Synchronized<T> {
@@ -30,7 +30,7 @@ public final class Synchronized<T> {
     /**
      * Instantiates a new synchronized.
      *
-     * @param mutex the mutex
+     * @param mutex
      */
     Synchronized(final T mutex) {
         N.checkArgNotNull(mutex);
@@ -41,9 +41,9 @@ public final class Synchronized<T> {
     /**
      * On.
      *
-     * @param <T> the generic type
-     * @param mutex the mutex
-     * @return the synchronized
+     * @param <T>
+     * @param mutex
+     * @return
      */
     public static <T> Synchronized<T> on(final T mutex) {
         N.checkArgNotNull(mutex);
@@ -54,10 +54,10 @@ public final class Synchronized<T> {
     /**
      * Run.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
+     * @param <T>
+     * @param <E>
      * @param mutex to locked on.
-     * @param cmd the cmd
+     * @param cmd
      * @throws E the e
      */
     public static <T, E extends Exception> void run(final T mutex, final Try.Runnable<E> cmd) throws E {
@@ -72,12 +72,12 @@ public final class Synchronized<T> {
     /**
      * Call.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
+     * @param <T>
+     * @param <R>
+     * @param <E>
      * @param mutex to locked on.
-     * @param cmd the cmd
-     * @return the r
+     * @param cmd
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> R call(final T mutex, final Try.Callable<R, RuntimeException> cmd) throws E {
@@ -92,10 +92,10 @@ public final class Synchronized<T> {
     /**
      * Test.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
+     * @param <T>
+     * @param <E>
      * @param mutex to locked on.
-     * @param predicate the predicate
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -111,12 +111,12 @@ public final class Synchronized<T> {
     /**
      * Test.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
+     * @param <T>
+     * @param <U>
+     * @param <E>
      * @param mutex to locked on.
-     * @param u the u
-     * @param predicate the predicate
+     * @param u
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -132,10 +132,10 @@ public final class Synchronized<T> {
     /**
      * Accept.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
+     * @param <T>
+     * @param <E>
      * @param mutex to locked on.
-     * @param consumer the consumer
+     * @param consumer
      * @throws E the e
      */
     public static <T, E extends Exception> void accept(final T mutex, final Try.Consumer<? super T, E> consumer) throws E {
@@ -150,12 +150,12 @@ public final class Synchronized<T> {
     /**
      * Accept.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
+     * @param <T>
+     * @param <U>
+     * @param <E>
      * @param mutex to locked on.
-     * @param u the u
-     * @param consumer the consumer
+     * @param u
+     * @param consumer
      * @throws E the e
      */
     public static <T, U, E extends Exception> void accept(final T mutex, final U u, final Try.BiConsumer<? super T, ? super U, E> consumer) throws E {
@@ -170,12 +170,12 @@ public final class Synchronized<T> {
     /**
      * Apply.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
+     * @param <T>
+     * @param <R>
+     * @param <E>
      * @param mutex to locked on.
-     * @param funciton the funciton
-     * @return the r
+     * @param funciton
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> R apply(final T mutex, final Try.Function<? super T, R, E> funciton) throws E {
@@ -190,14 +190,14 @@ public final class Synchronized<T> {
     /**
      * Apply.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
      * @param mutex to locked on.
-     * @param u the u
-     * @param funciton the funciton
-     * @return the r
+     * @param u
+     * @param funciton
+     * @return
      * @throws E the e
      */
     public static <T, U, R, E extends Exception> R apply(final T mutex, final U u, final Try.BiFunction<? super T, ? super U, R, E> funciton) throws E {
@@ -212,8 +212,8 @@ public final class Synchronized<T> {
     /**
      * Run.
      *
-     * @param <E> the element type
-     * @param cmd the cmd
+     * @param <E>
+     * @param cmd
      * @throws E the e
      */
     public <E extends Exception> void run(final Try.Runnable<E> cmd) throws E {
@@ -227,10 +227,10 @@ public final class Synchronized<T> {
     /**
      * Call.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param cmd the cmd
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param cmd
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> R call(final Try.Callable<R, E> cmd) throws E {
@@ -244,8 +244,8 @@ public final class Synchronized<T> {
     /**
      * Test.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
+     * @param <E>
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -260,8 +260,8 @@ public final class Synchronized<T> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param consumer the consumer
+     * @param <E>
+     * @param consumer
      * @throws E the e
      */
     public <E extends Exception> void accept(final Try.Consumer<? super T, E> consumer) throws E {
@@ -275,10 +275,10 @@ public final class Synchronized<T> {
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param function the function
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param function
+     * @return
      * @throws E the e
      */
     public <R, E extends Exception> R apply(final Try.Function<? super T, R, E> function) throws E {

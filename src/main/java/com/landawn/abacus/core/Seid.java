@@ -70,7 +70,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Instantiates a new seid.
      *
-     * @param entityName the entity name
+     * @param entityName
      * @deprecated for internal use only
      */
     @Deprecated
@@ -86,8 +86,8 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Instantiates a new seid.
      *
-     * @param propName the prop name
-     * @param propValue the prop value
+     * @param propName
+     * @param propValue
      */
     public Seid(String propName, Object propValue) {
         this(NameUtil.getParentName(propName));
@@ -98,7 +98,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Instantiates a new seid.
      *
-     * @param nameValues the name values
+     * @param nameValues
      */
     public Seid(Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
@@ -109,8 +109,8 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Of.
      *
-     * @param entityName the entity name
-     * @return the seid
+     * @param entityName
+     * @return
      * @deprecated for internal use only
      */
     @Deprecated
@@ -122,9 +122,9 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Of.
      *
-     * @param propName the prop name
-     * @param propValue the prop value
-     * @return the seid
+     * @param propName
+     * @param propValue
+     * @return
      */
     public static Seid of(String propName, Object propValue) {
         return new Seid(propName, propValue);
@@ -133,11 +133,11 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Of.
      *
-     * @param propName1 the prop name 1
-     * @param propValue1 the prop value 1
-     * @param propName2 the prop name 2
-     * @param propValue2 the prop value 2
-     * @return the seid
+     * @param propName1
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @return
      */
     public static Seid of(String propName1, Object propValue1, String propName2, Object propValue2) {
         final Seid result = new Seid(propName1, propValue1);
@@ -148,13 +148,13 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Of.
      *
-     * @param propName1 the prop name 1
-     * @param propValue1 the prop value 1
-     * @param propName2 the prop name 2
-     * @param propValue2 the prop value 2
-     * @param propName3 the prop name 3
-     * @param propValue3 the prop value 3
-     * @return the seid
+     * @param propName1
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @param propName3
+     * @param propValue3
+     * @return
      */
     public static Seid of(String propName1, Object propValue1, String propName2, Object propValue2, String propName3, Object propValue3) {
         final Seid result = new Seid(propName1, propValue1);
@@ -176,8 +176,8 @@ public class Seid implements EntityId, Cloneable {
 
     /** 
      *
-     * @param nameValues the name values
-     * @return the seid
+     * @param nameValues
+     * @return
      */
     public static Seid from(Map<String, Object> nameValues) {
         return new Seid(nameValues);
@@ -186,7 +186,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Entity name.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String entityName() {
@@ -196,9 +196,9 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
-     * @return the t
+     * @param <T>
+     * @param propName
+     * @return
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -225,10 +225,10 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param clazz the clazz
-     * @param propName the prop name
-     * @return the t
+     * @param <T>
+     * @param clazz
+     * @param propName
+     * @return
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -245,9 +245,9 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Sets the.
      *
-     * @param propName the prop name
-     * @param propValue the prop value
-     * @return the entity id
+     * @param propName
+     * @param propValue
+     * @return
      * @deprecated for internal use only
      */
     @Deprecated
@@ -273,7 +273,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Sets the.
      *
-     * @param nameValues the name values
+     * @param nameValues
      * @deprecated for internal use only
      */
     @Deprecated
@@ -306,8 +306,8 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Removes the.
      *
-     * @param propName the prop name
-     * @return the object
+     * @param propName
+     * @return
      * @deprecated for internal use only
      */
     @Deprecated
@@ -337,7 +337,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Removes the all.
      *
-     * @param propNames the prop names
+     * @param propNames
      * @deprecated for internal use only
      */
     @Deprecated
@@ -353,7 +353,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Contains key.
      *
-     * @param propName the prop name
+     * @param propName
      * @return true, if successful
      */
     @Override
@@ -372,7 +372,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<String> keySet() {
@@ -382,7 +382,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Entry set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<Entry<String, Object>> entrySet() {
@@ -392,7 +392,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -424,7 +424,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Copy.
      *
-     * @return the seid
+     * @return
      * @deprecated for internal use only
      */
     @Deprecated
@@ -441,7 +441,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Clone.
      *
-     * @return the seid
+     * @return
      * @deprecated for internal use only
      */
     @Deprecated
@@ -454,7 +454,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -469,7 +469,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -479,7 +479,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -489,7 +489,7 @@ public class Seid implements EntityId, Cloneable {
     /**
      * String value.
      *
-     * @return the string
+     * @return
      */
     private String stringValue() {
         if (strValue == null) {

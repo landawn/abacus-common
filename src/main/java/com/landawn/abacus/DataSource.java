@@ -30,14 +30,14 @@ public interface DataSource extends javax.sql.DataSource {
     /**
      * Gets the slice selector.
      *
-     * @return the slice selector
+     * @return
      */
     SliceSelector getSliceSelector();
 
     /**
      * Returns the connection for write/read operation.
      *
-     * @return the connection
+     * @return
      */
     @Override
     Connection getConnection();
@@ -46,35 +46,35 @@ public interface DataSource extends javax.sql.DataSource {
      * Returns the read-only connection if it's configured in Abacus.xml file, otherwise the same connection as
      * {@code getConnection()} is returned
      *
-     * @return the read only connection
+     * @return
      */
     Connection getReadOnlyConnection();
 
     /**
      * Gets the name.
      *
-     * @return the name of the data source if it's configured, otherwise, {@code null} is returned.
+     * @return
      */
     String getName();
 
     /**
      * Gets the properties.
      *
-     * @return the properties used to manage the connection.
+     * @return
      */
     Properties<String, String> getProperties();
 
     /**
      * Returns the maximum number of active connections that can be allocated from this pool.
      *
-     * @return the max active
+     * @return
      */
     int getMaxActive();
 
     /**
      * Returns the number of allocated collection.
      *
-     * @return the current active
+     * @return
      */
     int getCurrentActive();
 

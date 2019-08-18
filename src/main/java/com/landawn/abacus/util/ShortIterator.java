@@ -46,7 +46,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Empty.
      *
-     * @return the short iterator
+     * @return
      */
     public static ShortIterator empty() {
         return EMPTY;
@@ -55,8 +55,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the short iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static ShortIterator of(final short... a) {
@@ -66,10 +66,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short iterator
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -110,8 +110,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier the iterator supplier
-     * @return the short iterator
+     * @param iteratorSupplier
+     * @return
      */
     public static ShortIterator of(final Supplier<? extends ShortIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -150,8 +150,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Lazy evaluation.
      *
-     * @param arraySupplier the array supplier
-     * @return the short iterator
+     * @param arraySupplier
+     * @return
      */
     public static ShortIterator oF(final Supplier<short[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -197,8 +197,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Returns an infinite {@code ShortIterator}.
      *
-     * @param supplier the supplier
-     * @return the short iterator
+     * @param supplier
+     * @return
      */
     public static ShortIterator generate(final ShortSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -219,9 +219,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Generate.
      *
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the short iterator
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static ShortIterator generate(final BooleanSupplier hasNext, final ShortSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -247,7 +247,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Next.
      *
-     * @return the short
+     * @return
      * @Deprecated use <code>nextShort()</code> instead.
      */
     @Deprecated
@@ -259,14 +259,14 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Next short.
      *
-     * @return the short
+     * @return
      */
     public abstract short nextShort();
 
     /**
      * To array.
      *
-     * @return the short[]
+     * @return
      */
     public short[] toArray() {
         return toList().trimToSize().array();
@@ -275,7 +275,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * To list.
      *
-     * @return the short list
+     * @return
      */
     public ShortList toList() {
         final ShortList list = new ShortList();
@@ -290,7 +290,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Stream.
      *
-     * @return the short stream
+     * @return
      */
     public ShortStream stream() {
         return ShortStream.of(this);
@@ -299,8 +299,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Foreach remaining.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void foreachRemaining(Try.ShortConsumer<E> action) throws E {
@@ -314,7 +314,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * For each remaining.
      *
-     * @param action the action
+     * @param action
      */
     @Override
     @Deprecated

@@ -37,7 +37,7 @@ public class DuplicatedRecordException extends AbacusException {
     /**
      * Constructor for EntityNotFoundException.
      *
-     * @param message the message
+     * @param message
      */
     public DuplicatedRecordException(String message) {
         super(message);
@@ -46,8 +46,8 @@ public class DuplicatedRecordException extends AbacusException {
     /**
      * Constructor for EntityNotFoundException.
      *
-     * @param message the message
-     * @param cause the cause
+     * @param message
+     * @param cause
      */
     public DuplicatedRecordException(String message, Throwable cause) {
         super(message, cause);
@@ -56,7 +56,7 @@ public class DuplicatedRecordException extends AbacusException {
     /**
      * Constructor for EntityNotFoundException.
      *
-     * @param cause the cause
+     * @param cause
      */
     public DuplicatedRecordException(Throwable cause) {
         super(cause);

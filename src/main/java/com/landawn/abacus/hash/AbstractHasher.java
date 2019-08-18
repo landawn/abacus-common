@@ -35,8 +35,8 @@ abstract class AbstractHasher implements Hasher {
     /**
      * Put.
      *
-     * @param b the b
-     * @return the hasher
+     * @param b
+     * @return
      */
     @Override
     public final Hasher put(boolean b) {
@@ -46,8 +46,8 @@ abstract class AbstractHasher implements Hasher {
     /**
      * Put.
      *
-     * @param d the d
-     * @return the hasher
+     * @param d
+     * @return
      */
     @Override
     public final Hasher put(double d) {
@@ -57,8 +57,8 @@ abstract class AbstractHasher implements Hasher {
     /**
      * Put.
      *
-     * @param f the f
-     * @return the hasher
+     * @param f
+     * @return
      */
     @Override
     public final Hasher put(float f) {
@@ -68,8 +68,8 @@ abstract class AbstractHasher implements Hasher {
     /**
      * Put.
      *
-     * @param chars the chars
-     * @return the hasher
+     * @param chars
+     * @return
      */
     @Override
     public Hasher put(char[] chars) {
@@ -79,10 +79,10 @@ abstract class AbstractHasher implements Hasher {
     /**
      * Put.
      *
-     * @param chars the chars
-     * @param off the off
-     * @param len the len
-     * @return the hasher
+     * @param chars
+     * @param off
+     * @param len
+     * @return
      */
     @Override
     public Hasher put(char[] chars, int off, int len) {
@@ -98,8 +98,8 @@ abstract class AbstractHasher implements Hasher {
     /**
      * Put.
      *
-     * @param charSequence the char sequence
-     * @return the hasher
+     * @param charSequence
+     * @return
      */
     @Override
     public Hasher put(CharSequence charSequence) {
@@ -113,9 +113,9 @@ abstract class AbstractHasher implements Hasher {
     /**
      * Put.
      *
-     * @param charSequence the char sequence
-     * @param charset the charset
-     * @return the hasher
+     * @param charSequence
+     * @param charset
+     * @return
      */
     @Override
     public Hasher put(CharSequence charSequence, Charset charset) {
@@ -125,10 +125,10 @@ abstract class AbstractHasher implements Hasher {
     /**
      * Put.
      *
-     * @param <T> the generic type
-     * @param instance the instance
-     * @param funnel the funnel
-     * @return the hasher
+     * @param <T>
+     * @param instance
+     * @param funnel
+     * @return
      */
     @Override
     public <T> Hasher put(T instance, BiConsumer<? super T, ? super Hasher> funnel) {

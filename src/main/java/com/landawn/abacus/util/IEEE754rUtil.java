@@ -56,7 +56,7 @@ public final class IEEE754rUtil {
      *            value 1
      * @param b
      *            value 2
-     * @return the smallest of the values
+     * @return
      */
     public static float min(final float a, final float b) {
         if (Float.isNaN(a)) {
@@ -83,7 +83,7 @@ public final class IEEE754rUtil {
      *            value 2
      * @param c
      *            value 3
-     * @return the smallest of the values
+     * @return
      */
     public static float min(final float a, final float b, final float c) {
         return min(min(a, b), c);
@@ -94,8 +94,8 @@ public final class IEEE754rUtil {
      * Returns the minimum value in an array.
      * </p>
      *
-     * @param array            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @param array an array, must not be null or empty
+     * @return
      * @throws IllegalArgumentException             if <code>array</code> is empty
      */
     @SafeVarargs
@@ -127,7 +127,7 @@ public final class IEEE754rUtil {
      *            value 1
      * @param b
      *            value 2
-     * @return the smallest of the values
+     * @return
      */
     public static double min(final double a, final double b) {
         if (Double.isNaN(a)) {
@@ -154,7 +154,7 @@ public final class IEEE754rUtil {
      *            value 2
      * @param c
      *            value 3
-     * @return the smallest of the values
+     * @return
      */
     public static double min(final double a, final double b, final double c) {
         return min(min(a, b), c);
@@ -165,8 +165,8 @@ public final class IEEE754rUtil {
      * Returns the minimum value in an array.
      * </p>
      *
-     * @param array            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @param array an array, must not be null or empty
+     * @return
      * @throws IllegalArgumentException             if <code>array</code> is empty
      */
     @SafeVarargs
@@ -198,7 +198,7 @@ public final class IEEE754rUtil {
      *            value 1
      * @param b
      *            value 2
-     * @return the largest of the values
+     * @return
      */
     public static float max(final float a, final float b) {
         if (Float.isNaN(a)) {
@@ -225,7 +225,7 @@ public final class IEEE754rUtil {
      *            value 2
      * @param c
      *            value 3
-     * @return the largest of the values
+     * @return
      */
     public static float max(final float a, final float b, final float c) {
         return max(max(a, b), c);
@@ -236,8 +236,8 @@ public final class IEEE754rUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param array            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @param array an array, must not be null or empty
+     * @return
      * @throws IllegalArgumentException             if <code>array</code> is empty
      */
     @SafeVarargs
@@ -269,7 +269,7 @@ public final class IEEE754rUtil {
      *            value 1
      * @param b
      *            value 2
-     * @return the largest of the values
+     * @return
      */
     public static double max(final double a, final double b) {
         if (Double.isNaN(a)) {
@@ -296,7 +296,7 @@ public final class IEEE754rUtil {
      *            value 2
      * @param c
      *            value 3
-     * @return the largest of the values
+     * @return
      */
     public static double max(final double a, final double b, final double c) {
         return max(max(a, b), c);
@@ -307,8 +307,8 @@ public final class IEEE754rUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param array            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @param array an array, must not be null or empty
+     * @return
      * @throws IllegalArgumentException             if <code>array</code> is empty
      */
     @SafeVarargs

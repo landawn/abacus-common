@@ -60,8 +60,8 @@ public final class RegExUtil {
      * StringUtils.removeAll("ABCabc123abc", Pattern.compile("[a-z]"))     = "ABC123"
      * </pre>
      *
-     * @param text  text to remove from, may be null
-     * @param regex  the regular expression to which this string is to be matched
+     * @param text text to remove from, may be null
+     * @param regex the regular expression to which this string is to be matched
      * @return  the text with any removes processed,
      *              {@code null} if null String input
      *
@@ -101,8 +101,8 @@ public final class RegExUtil {
      * StringUtils.removeAll("ABCabc123abc", "[a-z]")     = "ABC123"
      * </pre>
      *
-     * @param text  text to remove from, may be null
-     * @param regex  the regular expression to which this string is to be matched
+     * @param text text to remove from, may be null
+     * @param regex the regular expression to which this string is to be matched
      * @return  the text with any removes processed,
      *              {@code null} if null String input
      * @see #replaceAll(String, String, String)
@@ -138,8 +138,8 @@ public final class RegExUtil {
      * StringUtils.removeFirst("ABCabc123abc", Pattern.compile("[a-z]+"))      = "ABC123abc"
      * </pre>
      *
-     * @param text  text to remove from, may be null
-     * @param regex  the regular expression pattern to which this string is to be matched
+     * @param text text to remove from, may be null
+     * @param regex the regular expression pattern to which this string is to be matched
      * @return  the text with the first replacement processed,
      *              {@code null} if null String input
      *
@@ -179,8 +179,8 @@ public final class RegExUtil {
      * StringUtils.removeFirst("ABCabc123abc", "[a-z]+")      = "ABC123abc"
      * </pre>
      *
-     * @param text  text to remove from, may be null
-     * @param regex  the regular expression to which this string is to be matched
+     * @param text text to remove from, may be null
+     * @param regex the regular expression to which this string is to be matched
      * @return  the text with the first replacement processed,
      *              {@code null} if null String input
      * @see #replaceFirst(String, String, String)
@@ -250,9 +250,9 @@ public final class RegExUtil {
      * StringUtils.replaceFirst("Lorem ipsum  dolor   sit", Pattern.compile("( +)([a-z]+)"), "_$2")  = "Lorem_ipsum  dolor   sit"
      * </pre>
      *
-     * @param text  text to search and replace in, may be null
-     * @param regex  the regular expression pattern to which this string is to be matched
-     * @param replacement  the string to be substituted for the first match
+     * @param text text to search and replace in, may be null
+     * @param regex the regular expression pattern to which this string is to be matched
+     * @param replacement the string to be substituted for the first match
      * @return  the text with the first replacement processed,
      *              {@code null} if null String input
      *
@@ -298,9 +298,9 @@ public final class RegExUtil {
      * StringUtils.replaceFirst("Lorem ipsum  dolor   sit", "( +)([a-z]+)", "_$2")  = "Lorem_ipsum  dolor   sit"
      * </pre>
      *
-     * @param text  text to search and replace in, may be null
-     * @param regex  the regular expression to which this string is to be matched
-     * @param replacement  the string to be substituted for the first match
+     * @param text text to search and replace in, may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacement the string to be substituted for the first match
      * @return  the text with the first replacement processed,
      *              {@code null} if null String input
      * @see String#replaceFirst(String, String)
@@ -341,9 +341,9 @@ public final class RegExUtil {
      * StringUtils.replaceAll("Lorem ipsum  dolor   sit", Pattern.compile("( +)([a-z]+)"), "_$2")  = "Lorem_ipsum_dolor_sit"
      * </pre>
      *
-     * @param text  text to search and replace in, may be null
-     * @param regex  the regular expression pattern to which this string is to be matched
-     * @param replacement  the string to be substituted for each match
+     * @param text text to search and replace in, may be null
+     * @param regex the regular expression pattern to which this string is to be matched
+     * @param replacement the string to be substituted for each match
      * @return  the text with any replacements processed,
      *              {@code null} if null String input
      *
@@ -390,9 +390,9 @@ public final class RegExUtil {
      * StringUtils.replaceAll("Lorem ipsum  dolor   sit", "( +)([a-z]+)", "_$2")  = "Lorem_ipsum_dolor_sit"
      * </pre>
      *
-     * @param text  text to search and replace in, may be null
-     * @param regex  the regular expression to which this string is to be matched
-     * @param replacement  the string to be substituted for each match
+     * @param text text to search and replace in, may be null
+     * @param regex the regular expression to which this string is to be matched
+     * @param replacement the string to be substituted for each match
      * @return  the text with any replacements processed,
      *              {@code null} if null String input
      * @see #replacePattern(String, String, String)

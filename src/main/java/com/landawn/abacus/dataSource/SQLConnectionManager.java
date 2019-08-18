@@ -129,7 +129,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     /**
      * Instantiates a new SQL connection manager.
      *
-     * @param props the props
+     * @param props
      */
     public SQLConnectionManager(Map<String, ?> props) {
         super(props);
@@ -197,7 +197,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the max active.
      *
-     * @return the max active
+     * @return
      */
     @Override
     public int getMaxActive() {
@@ -207,7 +207,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the num active.
      *
-     * @return the num active
+     * @return
      */
     @Override
     public int getNumActive() {
@@ -217,7 +217,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the connection.
      *
-     * @return the connection
+     * @return
      */
     @Override
     public Connection getConnection() {
@@ -265,7 +265,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     /**
      * Close connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     @Override
     public void closeConnection(Connection conn) {
@@ -305,7 +305,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     /**
      * Detroy connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     @Override
     public void detroyConnection(Connection conn) {
@@ -350,7 +350,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     /**
      * Clear.
      *
-     * @param isClose the is close
+     * @param isClose
      */
     void clear(boolean isClose) {
         if (isClosed) {
@@ -516,7 +516,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     /**
      * Validate.
      *
-     * @param conn the conn
+     * @param conn
      * @return true, if successful
      */
     private boolean validate(Connection conn) {
@@ -564,11 +564,11 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         /**
          * Instantiates a new driver manager data source.
          *
-         * @param driver the driver
-         * @param url the url
-         * @param user the user
-         * @param password the password
-         * @param props the props
+         * @param driver
+         * @param url
+         * @param user
+         * @param password
+         * @param props
          */
         DriverManagerDataSource(String driver, String url, String user, String password, Properties props) {
             this.url = url;
@@ -591,7 +591,7 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
         /**
          * Gets the connection.
          *
-         * @return the connection
+         * @return
          * @throws SQLException the SQL exception
          */
         @Override

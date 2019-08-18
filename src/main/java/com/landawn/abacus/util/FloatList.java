@@ -70,7 +70,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Instantiates a new float list.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public FloatList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_FLOAT_ARRAY : new float[initialCapacity];
@@ -79,7 +79,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * The specified array is used as the element array for this list without copying action.
      *
-     * @param a the a
+     * @param a
      */
     public FloatList(float[] a) {
         this(a, a.length);
@@ -88,8 +88,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Instantiates a new float list.
      *
-     * @param a the a
-     * @param size the size
+     * @param a
+     * @param size
      */
     public FloatList(float[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -101,8 +101,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the float list
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static FloatList of(final float... a) {
@@ -112,9 +112,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param size the size
-     * @return the float list
+     * @param a
+     * @param size
+     * @return
      */
     public static FloatList of(final float[] a, final int size) {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -125,8 +125,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Copy of.
      *
-     * @param a the a
-     * @return the float list
+     * @param a
+     * @return
      */
     public static FloatList copyOf(final float[] a) {
         return of(N.clone(a));
@@ -135,10 +135,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Copy of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static FloatList copyOf(final float[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -147,8 +147,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * From.
      *
-     * @param c the c
-     * @return the float list
+     * @param c
+     * @return
      */
     public static FloatList from(Collection<Float> c) {
         if (N.isNullOrEmpty(c)) {
@@ -161,9 +161,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the float list
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static FloatList from(Collection<Float> c, float defaultForNull) {
         if (N.isNullOrEmpty(c)) {
@@ -183,10 +183,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static FloatList from(final Collection<Float> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -201,11 +201,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the float list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static FloatList from(final Collection<Float> c, final int fromIndex, final int toIndex, float defaultForNull) {
         return of(N.toFloatArray(c, fromIndex, toIndex, defaultForNull));
@@ -214,9 +214,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Repeat.
      *
-     * @param element the element
-     * @param len the len
-     * @return the float list
+     * @param element
+     * @param len
+     * @return
      */
     public static FloatList repeat(float element, final int len) {
         return of(Array.repeat(element, len));
@@ -225,8 +225,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Random.
      *
-     * @param len the len
-     * @return the float list
+     * @param len
+     * @return
      */
     public static FloatList random(final int len) {
         final float[] a = new float[len];
@@ -241,7 +241,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Returns the original element array without copying.
      *
-     * @return the float[]
+     * @return
      */
     @Override
     public float[] array() {
@@ -251,8 +251,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Gets the.
      *
-     * @param index the index
-     * @return the float
+     * @param index
+     * @return
      */
     public float get(int index) {
         rangeCheck(index);
@@ -263,7 +263,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Range check.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheck(int index) {
         if (index >= size) {
@@ -274,9 +274,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Sets the.
      *
-     * @param index the index
-     * @param e the e
-     * @return the old value in the specified position.
+     * @param index
+     * @param e
+     * @return
      */
     public float set(int index, float e) {
         rangeCheck(index);
@@ -291,7 +291,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      */
     public void add(float e) {
         ensureCapacityInternal(size + 1);
@@ -302,8 +302,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Adds the.
      *
-     * @param index the index
-     * @param e the e
+     * @param index
+     * @param e
      */
     public void add(int index, float e) {
         rangeCheckForAdd(index);
@@ -324,7 +324,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Adds the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(FloatList c) {
@@ -346,8 +346,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param c the c
+     * @param index
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(int index, FloatList c) {
@@ -377,7 +377,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Adds the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -388,8 +388,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param a the a
+     * @param index
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -420,7 +420,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Range check for add.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheckForAdd(int index) {
         if (index > size || index < 0) {
@@ -431,7 +431,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Removes the.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(float e) {
@@ -450,7 +450,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Removes the all occurrences.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean removeAllOccurrences(float e) {
@@ -476,7 +476,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Fast remove.
      *
-     * @param index the index
+     * @param index
      */
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
@@ -491,7 +491,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Removes the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean removeAll(FloatList c) {
@@ -505,7 +505,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Removes the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -520,8 +520,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Removes the if.
      *
-     * @param <E> the element type
-     * @param p the p
+     * @param <E>
+     * @param p
      * @return true, if successful
      * @throws E the e
      */
@@ -548,7 +548,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Retain all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean retainAll(FloatList c) {
@@ -564,7 +564,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Retain all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public boolean retainAll(float[] a) {
@@ -580,9 +580,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Batch remove.
      *
-     * @param c the c
-     * @param complement the complement
-     * @return the int
+     * @param c
+     * @param complement
+     * @return
      */
     private int batchRemove(FloatList c, boolean complement) {
         final float[] elementData = this.elementData;
@@ -619,8 +619,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Delete.
      *
-     * @param index the index
-     * @return the deleted element
+     * @param index
+     * @return
      */
     public float delete(int index) {
         rangeCheck(index);
@@ -635,7 +635,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Delete all.
      *
-     * @param indices the indices
+     * @param indices
      */
     @Override
     @SafeVarargs
@@ -650,8 +650,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Delete range.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) {
@@ -675,9 +675,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Replace all.
      *
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public int replaceAll(float oldVal, float newVal) {
         if (size() == 0) {
@@ -700,8 +700,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Replace all.
      *
-     * @param <E> the element type
-     * @param operator the operator
+     * @param <E>
+     * @param operator
      * @throws E the e
      */
     public <E extends Exception> void replaceAll(Try.FloatUnaryOperator<E> operator) throws E {
@@ -713,9 +713,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Replace if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @param newValue the new value
+     * @param <E>
+     * @param predicate
+     * @param newValue
      * @return true, if successful
      * @throws E the e
      */
@@ -736,7 +736,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Fill.
      *
-     * @param val the val
+     * @param val
      */
     public void fill(final float val) {
         fill(0, size(), val);
@@ -745,9 +745,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Fill.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public void fill(final int fromIndex, final int toIndex, final float val) {
         checkFromToIndex(fromIndex, toIndex);
@@ -758,7 +758,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Contains.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     public boolean contains(float e) {
@@ -768,7 +768,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAll(FloatList c) {
@@ -804,7 +804,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Contains all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -821,7 +821,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Contains any.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAny(FloatList c) {
@@ -835,7 +835,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Contains any.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -850,7 +850,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Disjoint.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean disjoint(final FloatList c) {
@@ -884,7 +884,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Disjoint.
      *
-     * @param b the b
+     * @param b
      * @return true, if successful
      */
     @Override
@@ -899,8 +899,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Intersection.
      *
-     * @param b the b
-     * @return the float list
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public FloatList intersection(final FloatList b) {
@@ -924,8 +924,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @return the float list
+     * @param a
+     * @return
      */
     public FloatList intersection(final float[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -938,8 +938,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Difference.
      *
-     * @param b the b
-     * @return the float list
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public FloatList difference(FloatList b) {
@@ -963,8 +963,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Difference.
      *
-     * @param a the a
-     * @return the float list
+     * @param a
+     * @return
      */
     public FloatList difference(final float[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -977,7 +977,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Symmetric difference.
      *
-     * @param b the b
+     * @param b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
@@ -1013,8 +1013,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @return the float list
+     * @param a
+     * @return
      */
     public FloatList symmetricDifference(final float[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1029,8 +1029,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Occurrences of.
      *
-     * @param objectToFind the object to find
-     * @return the int
+     * @param objectToFind
+     * @return
      */
     public int occurrencesOf(final float objectToFind) {
         return N.occurrencesOf(elementData, objectToFind);
@@ -1039,8 +1039,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int indexOf(float e) {
         return indexOf(0, e);
@@ -1049,9 +1049,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Index of.
      *
-     * @param fromIndex the from index
-     * @param e the e
-     * @return the int
+     * @param fromIndex
+     * @param e
+     * @return
      */
     public int indexOf(final int fromIndex, float e) {
         checkFromToIndex(fromIndex, size);
@@ -1068,8 +1068,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Last index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(float e) {
         return lastIndexOf(size, e);
@@ -1079,8 +1079,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Last index of.
      *
      * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(final int fromIndex, float e) {
         checkFromToIndex(0, fromIndex);
@@ -1097,7 +1097,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Min.
      *
-     * @return the optional float
+     * @return
      */
     public OptionalFloat min() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.min(elementData, 0, size));
@@ -1106,9 +1106,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Min.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional float
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalFloat min(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1119,7 +1119,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Median.
      *
-     * @return the optional float
+     * @return
      */
     public OptionalFloat median() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.median(elementData, 0, size));
@@ -1128,9 +1128,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Median.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional float
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalFloat median(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1141,7 +1141,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Max.
      *
-     * @return the optional float
+     * @return
      */
     public OptionalFloat max() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.max(elementData, 0, size));
@@ -1150,9 +1150,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Max.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional float
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalFloat max(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1163,8 +1163,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Kth largest.
      *
-     * @param k the k
-     * @return the optional float
+     * @param k
+     * @return
      */
     public OptionalFloat kthLargest(final int k) {
         return kthLargest(0, size(), k);
@@ -1173,10 +1173,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Kth largest.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param k the k
-     * @return the optional float
+     * @param fromIndex
+     * @param toIndex
+     * @param k
+     * @return
      */
     public OptionalFloat kthLargest(final int fromIndex, final int toIndex, final int k) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1188,7 +1188,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Sum.
      *
-     * @return the float
+     * @return
      */
     public float sum() {
         return sum(0, size());
@@ -1197,9 +1197,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Sum.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public float sum(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1210,7 +1210,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Average.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1219,9 +1219,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Average.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalDouble average(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1232,8 +1232,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.FloatConsumer<E> action) throws E {
@@ -1243,10 +1243,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.FloatConsumer<E> action) throws E {
@@ -1268,7 +1268,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * First.
      *
-     * @return the optional float
+     * @return
      */
     public OptionalFloat first() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(elementData[0]);
@@ -1277,7 +1277,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Last.
      *
-     * @return the optional float
+     * @return
      */
     public OptionalFloat last() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(elementData[size() - 1]);
@@ -1286,9 +1286,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Find first.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional float
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalFloat findFirst(Try.FloatPredicate<E> predicate) throws E {
@@ -1304,9 +1304,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Find last.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional float
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalFloat findLast(Try.FloatPredicate<E> predicate) throws E {
@@ -1322,9 +1322,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Find first index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findFirstIndex(Try.FloatPredicate<E> predicate) throws E {
@@ -1340,9 +1340,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Find last index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findLastIndex(Try.FloatPredicate<E> predicate) throws E {
@@ -1358,8 +1358,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Returns whether all elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1370,10 +1370,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * All match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1394,8 +1394,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Returns whether any elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1406,10 +1406,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Any match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1430,8 +1430,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Returns whether no elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1442,10 +1442,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * None match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1466,9 +1466,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(Try.FloatPredicate<E> filter) throws E {
@@ -1478,11 +1478,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.FloatPredicate<E> filter) throws E {
@@ -1494,8 +1494,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1506,11 +1506,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the float list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> FloatList filter(final int fromIndex, final int toIndex, Try.FloatPredicate<E> filter) throws E {
@@ -1522,9 +1522,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @param max the max
+     * @param <E>
+     * @param filter
+     * @param max
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1535,12 +1535,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @return the float list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public <E extends Exception> FloatList filter(final int fromIndex, final int toIndex, Try.FloatPredicate<E> filter, final int max) throws E {
@@ -1552,9 +1552,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the float list
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> FloatList map(final Try.FloatUnaryOperator<E> mapper) throws E {
@@ -1564,11 +1564,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the float list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> FloatList map(final int fromIndex, final int toIndex, final Try.FloatUnaryOperator<E> mapper) throws E {
@@ -1586,10 +1586,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final Try.FloatFunction<? extends T, E> mapper) throws E {
@@ -1599,12 +1599,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.FloatFunction<? extends T, E> mapper) throws E {
@@ -1637,9 +1637,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param accumulator the accumulator
-     * @return the optional float
+     * @param <E>
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalFloat reduce(final Try.FloatBinaryOperator<E> accumulator) throws E {
@@ -1674,10 +1674,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param identity the identity
-     * @param accumulator the accumulator
-     * @return the float
+     * @param <E>
+     * @param identity
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> float reduce(final float identity, final Try.FloatBinaryOperator<E> accumulator) throws E {
@@ -1707,9 +1707,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Distinct.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public FloatList distinct(final int fromIndex, final int toIndex) {
@@ -1725,8 +1725,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Top.
      *
-     * @param n the n
-     * @return the float list
+     * @param n
+     * @return
      */
     public FloatList top(final int n) {
         return top(0, size(), n);
@@ -1735,10 +1735,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Top.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the float list
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public FloatList top(final int fromIndex, final int toIndex, final int n) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1749,9 +1749,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Top.
      *
-     * @param n the n
-     * @param cmp the cmp
-     * @return the float list
+     * @param n
+     * @param cmp
+     * @return
      */
     public FloatList top(final int n, Comparator<? super Float> cmp) {
         return top(0, size(), n, cmp);
@@ -1760,11 +1760,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Top.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the float list
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public FloatList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Float> cmp) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1804,8 +1804,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * This List should be sorted first.
      *
-     * @param key the key
-     * @return the int
+     * @param key
+     * @return
      */
     public int binarySearch(final float key) {
         return N.binarySearch(elementData, key);
@@ -1814,10 +1814,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public int binarySearch(final int fromIndex, final int toIndex, final float key) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1838,8 +1838,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Reverse.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) {
@@ -1853,7 +1853,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Rotate.
      *
-     * @param distance the distance
+     * @param distance
      */
     @Override
     public void rotate(int distance) {
@@ -1875,7 +1875,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Shuffle.
      *
-     * @param rnd the rnd
+     * @param rnd
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -1887,8 +1887,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Swap.
      *
-     * @param i the i
-     * @param j the j
+     * @param i
+     * @param j
      */
     @Override
     public void swap(int i, int j) {
@@ -1901,7 +1901,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Copy.
      *
-     * @return the float list
+     * @return
      */
     @Override
     public FloatList copy() {
@@ -1911,9 +1911,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Copy.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public FloatList copy(final int fromIndex, final int toIndex) {
@@ -1925,10 +1925,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Copy.
      *
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the float list
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1942,10 +1942,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Returns List of {@code FloatList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return the list
+     * @return
      */
     @Override
     public List<FloatList> split(final int fromIndex, final int toIndex, final int chunkSize) {
@@ -1993,10 +1993,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) {
@@ -2008,10 +2008,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) {
@@ -2023,7 +2023,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Trim to size.
      *
-     * @return the float list
+     * @return
      */
     @Override
     public FloatList trimToSize() {
@@ -2059,7 +2059,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -2069,7 +2069,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Boxed.
      *
-     * @return the list
+     * @return
      */
     public List<Float> boxed() {
         return boxed(0, size);
@@ -2078,9 +2078,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Boxed.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public List<Float> boxed(int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2097,7 +2097,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * To array.
      *
-     * @return the float[]
+     * @return
      */
     @Override
     public float[] toArray() {
@@ -2107,7 +2107,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * To double list.
      *
-     * @return the double list
+     * @return
      */
     public DoubleList toDoubleList() {
         final double[] a = new double[size];
@@ -2122,11 +2122,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public <C extends Collection<Float>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
@@ -2144,10 +2144,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * To multiset.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the multiset
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public Multiset<Float> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Float>> supplier) {
@@ -2167,11 +2167,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2185,13 +2185,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2207,13 +2207,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2228,15 +2228,15 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2256,12 +2256,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @return
      * @throws E the e
      */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.FloatFunction<? extends K, E> keyMapper, Collector<Float, A, D> downstream) throws E {
@@ -2272,14 +2272,14 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.FloatFunction<? extends K, E> keyMapper,
@@ -2318,7 +2318,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Iterator.
      *
-     * @return the float iterator
+     * @return
      */
     public FloatIterator iterator() {
         if (isEmpty()) {
@@ -2331,7 +2331,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Stream.
      *
-     * @return the float stream
+     * @return
      */
     public FloatStream stream() {
         return FloatStream.of(elementData, 0, size());
@@ -2340,9 +2340,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Stream.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float stream
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public FloatStream stream(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2353,10 +2353,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2367,10 +2367,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Apply if not empty.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the optional
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2381,8 +2381,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2393,8 +2393,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2407,7 +2407,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2417,7 +2417,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -2438,7 +2438,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -2448,7 +2448,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Ensure capacity internal.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_FLOAT_ARRAY) {
@@ -2461,7 +2461,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Ensure explicit capacity.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
@@ -2472,7 +2472,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Grow.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void grow(int minCapacity) {
         int oldCapacity = elementData.length;

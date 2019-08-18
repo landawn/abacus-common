@@ -69,7 +69,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Instantiates a new byte list.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public ByteList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BYTE_ARRAY : new byte[initialCapacity];
@@ -78,7 +78,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * The specified array is used as the element array for this list without copying action.
      *
-     * @param a the a
+     * @param a
      */
     public ByteList(byte[] a) {
         this(a, a.length);
@@ -87,8 +87,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Instantiates a new byte list.
      *
-     * @param a the a
-     * @param size the size
+     * @param a
+     * @param size
      */
     public ByteList(byte[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -100,8 +100,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the byte list
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static ByteList of(final byte... a) {
@@ -111,9 +111,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param size the size
-     * @return the byte list
+     * @param a
+     * @param size
+     * @return
      */
     public static ByteList of(final byte[] a, final int size) {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -124,8 +124,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Copy of.
      *
-     * @param a the a
-     * @return the byte list
+     * @param a
+     * @return
      */
     public static ByteList copyOf(final byte[] a) {
         return of(N.clone(a));
@@ -134,10 +134,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Copy of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static ByteList copyOf(final byte[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -146,8 +146,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * From.
      *
-     * @param c the c
-     * @return the byte list
+     * @param c
+     * @return
      */
     public static ByteList from(final Collection<Byte> c) {
         if (N.isNullOrEmpty(c)) {
@@ -160,9 +160,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the byte list
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static ByteList from(final Collection<Byte> c, final byte defaultForNull) {
         if (N.isNullOrEmpty(c)) {
@@ -182,10 +182,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -200,11 +200,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the byte list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex, byte defaultForNull) {
         return of(N.toByteArray(c, fromIndex, toIndex, defaultForNull));
@@ -213,9 +213,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Range.
      *
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @return the byte list
+     * @param startInclusive
+     * @param endExclusive
+     * @return
      */
     public static ByteList range(byte startInclusive, final byte endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
@@ -224,10 +224,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Range.
      *
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @param by the by
-     * @return the byte list
+     * @param startInclusive
+     * @param endExclusive
+     * @param by
+     * @return
      */
     public static ByteList range(byte startInclusive, final byte endExclusive, final byte by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -236,9 +236,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Range closed.
      *
-     * @param startInclusive the start inclusive
-     * @param endInclusive the end inclusive
-     * @return the byte list
+     * @param startInclusive
+     * @param endInclusive
+     * @return
      */
     public static ByteList rangeClosed(byte startInclusive, final byte endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
@@ -247,10 +247,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Range closed.
      *
-     * @param startInclusive the start inclusive
-     * @param endInclusive the end inclusive
-     * @param by the by
-     * @return the byte list
+     * @param startInclusive
+     * @param endInclusive
+     * @param by
+     * @return
      */
     public static ByteList rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -259,9 +259,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Repeat.
      *
-     * @param element the element
-     * @param len the len
-     * @return the byte list
+     * @param element
+     * @param len
+     * @return
      */
     public static ByteList repeat(byte element, final int len) {
         return of(Array.repeat(element, len));
@@ -270,8 +270,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Random.
      *
-     * @param len the len
-     * @return the byte list
+     * @param len
+     * @return
      */
     public static ByteList random(final int len) {
         final int bound = Byte.MAX_VALUE - Byte.MIN_VALUE + 1;
@@ -289,7 +289,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns the original element array without copying.
      *
-     * @return the byte[]
+     * @return
      */
     @Override
     public byte[] array() {
@@ -299,8 +299,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Gets the.
      *
-     * @param index the index
-     * @return the byte
+     * @param index
+     * @return
      */
     public byte get(int index) {
         rangeCheck(index);
@@ -311,7 +311,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Range check.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheck(int index) {
         if (index >= size) {
@@ -322,9 +322,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Sets the.
      *
-     * @param index the index
-     * @param e the e
-     * @return the old value in the specified position.
+     * @param index
+     * @param e
+     * @return
      */
     public byte set(int index, byte e) {
         rangeCheck(index);
@@ -339,7 +339,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      */
     public void add(byte e) {
         ensureCapacityInternal(size + 1);
@@ -350,8 +350,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Adds the.
      *
-     * @param index the index
-     * @param e the e
+     * @param index
+     * @param e
      */
     public void add(int index, byte e) {
         rangeCheckForAdd(index);
@@ -372,7 +372,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Adds the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(ByteList c) {
@@ -394,8 +394,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param c the c
+     * @param index
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(int index, ByteList c) {
@@ -425,7 +425,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Adds the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -436,8 +436,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param a the a
+     * @param index
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -468,7 +468,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Range check for add.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheckForAdd(int index) {
         if (index > size || index < 0) {
@@ -479,7 +479,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Removes the.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(byte e) {
@@ -498,7 +498,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Removes the all occurrences.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean removeAllOccurrences(byte e) {
@@ -524,7 +524,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Fast remove.
      *
-     * @param index the index
+     * @param index
      */
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
@@ -539,7 +539,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Removes the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean removeAll(ByteList c) {
@@ -553,7 +553,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Removes the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -568,8 +568,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Removes the if.
      *
-     * @param <E> the element type
-     * @param p the p
+     * @param <E>
+     * @param p
      * @return true, if successful
      * @throws E the e
      */
@@ -596,7 +596,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Retain all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean retainAll(ByteList c) {
@@ -612,7 +612,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Retain all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public boolean retainAll(byte[] a) {
@@ -628,9 +628,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Batch remove.
      *
-     * @param c the c
-     * @param complement the complement
-     * @return the int
+     * @param c
+     * @param complement
+     * @return
      */
     private int batchRemove(ByteList c, boolean complement) {
         final byte[] elementData = this.elementData;
@@ -667,8 +667,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Delete.
      *
-     * @param index the index
-     * @return the deleted element
+     * @param index
+     * @return
      */
     public byte delete(int index) {
         rangeCheck(index);
@@ -683,7 +683,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Delete all.
      *
-     * @param indices the indices
+     * @param indices
      */
     @Override
     @SafeVarargs
@@ -697,8 +697,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Delete range.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) {
@@ -722,9 +722,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Replace all.
      *
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public int replaceAll(byte oldVal, byte newVal) {
         if (size() == 0) {
@@ -747,8 +747,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Replace all.
      *
-     * @param <E> the element type
-     * @param operator the operator
+     * @param <E>
+     * @param operator
      * @throws E the e
      */
     public <E extends Exception> void replaceAll(Try.ByteUnaryOperator<E> operator) throws E {
@@ -760,9 +760,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Replace if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @param newValue the new value
+     * @param <E>
+     * @param predicate
+     * @param newValue
      * @return true, if successful
      * @throws E the e
      */
@@ -783,7 +783,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Fill.
      *
-     * @param val the val
+     * @param val
      */
     public void fill(final byte val) {
         fill(0, size(), val);
@@ -792,9 +792,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Fill.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public void fill(final int fromIndex, final int toIndex, final byte val) {
         checkFromToIndex(fromIndex, toIndex);
@@ -805,7 +805,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Contains.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     public boolean contains(byte e) {
@@ -815,7 +815,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAll(ByteList c) {
@@ -851,7 +851,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Contains all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -868,7 +868,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Contains any.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAny(ByteList c) {
@@ -882,7 +882,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Contains any.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -897,7 +897,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Disjoint.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean disjoint(final ByteList c) {
@@ -931,7 +931,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Disjoint.
      *
-     * @param b the b
+     * @param b
      * @return true, if successful
      */
     @Override
@@ -946,8 +946,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Intersection.
      *
-     * @param b the b
-     * @return the byte list
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public ByteList intersection(final ByteList b) {
@@ -971,8 +971,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @return the byte list
+     * @param a
+     * @return
      */
     public ByteList intersection(final byte[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -985,8 +985,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Difference.
      *
-     * @param b the b
-     * @return the byte list
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public ByteList difference(ByteList b) {
@@ -1010,8 +1010,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Difference.
      *
-     * @param a the a
-     * @return the byte list
+     * @param a
+     * @return
      */
     public ByteList difference(final byte[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1024,7 +1024,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Symmetric difference.
      *
-     * @param b the b
+     * @param b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
@@ -1060,8 +1060,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @return the byte list
+     * @param a
+     * @return
      */
     public ByteList symmetricDifference(final byte[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1076,8 +1076,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Occurrences of.
      *
-     * @param objectToFind the object to find
-     * @return the int
+     * @param objectToFind
+     * @return
      */
     public int occurrencesOf(final byte objectToFind) {
         return N.occurrencesOf(elementData, objectToFind);
@@ -1086,8 +1086,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int indexOf(byte e) {
         return indexOf(0, e);
@@ -1096,9 +1096,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Index of.
      *
-     * @param fromIndex the from index
-     * @param e the e
-     * @return the int
+     * @param fromIndex
+     * @param e
+     * @return
      */
     public int indexOf(final int fromIndex, byte e) {
         checkFromToIndex(fromIndex, size);
@@ -1115,8 +1115,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Last index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(byte e) {
         return lastIndexOf(size, e);
@@ -1126,8 +1126,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Last index of.
      *
      * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(final int fromIndex, byte e) {
         checkFromToIndex(0, fromIndex);
@@ -1144,7 +1144,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Min.
      *
-     * @return the optional byte
+     * @return
      */
     public OptionalByte min() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.min(elementData, 0, size));
@@ -1153,9 +1153,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Min.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional byte
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalByte min(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1166,7 +1166,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Median.
      *
-     * @return the optional byte
+     * @return
      */
     public OptionalByte median() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, 0, size));
@@ -1175,9 +1175,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Median.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional byte
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalByte median(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1188,7 +1188,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Max.
      *
-     * @return the optional byte
+     * @return
      */
     public OptionalByte max() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(elementData, 0, size));
@@ -1197,9 +1197,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Max.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional byte
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalByte max(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1210,8 +1210,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Kth largest.
      *
-     * @param k the k
-     * @return the optional byte
+     * @param k
+     * @return
      */
     public OptionalByte kthLargest(final int k) {
         return kthLargest(0, size(), k);
@@ -1220,10 +1220,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Kth largest.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param k the k
-     * @return the optional byte
+     * @param fromIndex
+     * @param toIndex
+     * @param k
+     * @return
      */
     public OptionalByte kthLargest(final int fromIndex, final int toIndex, final int k) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1235,7 +1235,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return sum(0, size());
@@ -1244,9 +1244,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Sum.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public int sum(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1257,7 +1257,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Average.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1266,9 +1266,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Average.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalDouble average(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1279,8 +1279,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.ByteConsumer<E> action) throws E {
@@ -1290,10 +1290,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.ByteConsumer<E> action) throws E {
@@ -1315,7 +1315,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * First.
      *
-     * @return the optional byte
+     * @return
      */
     public OptionalByte first() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[0]);
@@ -1324,7 +1324,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Last.
      *
-     * @return the optional byte
+     * @return
      */
     public OptionalByte last() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[size() - 1]);
@@ -1333,9 +1333,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Find first.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional byte
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalByte findFirst(Try.BytePredicate<E> predicate) throws E {
@@ -1351,9 +1351,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Find last.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional byte
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalByte findLast(Try.BytePredicate<E> predicate) throws E {
@@ -1369,9 +1369,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Find first index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findFirstIndex(Try.BytePredicate<E> predicate) throws E {
@@ -1387,9 +1387,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Find last index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findLastIndex(Try.BytePredicate<E> predicate) throws E {
@@ -1405,8 +1405,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns whether all elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1417,10 +1417,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * All match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1441,8 +1441,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns whether any elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1453,10 +1453,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Any match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1477,8 +1477,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Returns whether no elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1489,10 +1489,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * None match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1513,9 +1513,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(Try.BytePredicate<E> filter) throws E {
@@ -1525,11 +1525,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.BytePredicate<E> filter) throws E {
@@ -1541,8 +1541,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1553,11 +1553,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the byte list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ByteList filter(final int fromIndex, final int toIndex, Try.BytePredicate<E> filter) throws E {
@@ -1569,9 +1569,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @param max the max
+     * @param <E>
+     * @param filter
+     * @param max
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1582,12 +1582,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @return the byte list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ByteList filter(final int fromIndex, final int toIndex, Try.BytePredicate<E> filter, final int max) throws E {
@@ -1599,9 +1599,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the byte list
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ByteList map(final Try.ByteUnaryOperator<E> mapper) throws E {
@@ -1611,11 +1611,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the byte list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> ByteList map(final int fromIndex, final int toIndex, final Try.ByteUnaryOperator<E> mapper) throws E {
@@ -1633,10 +1633,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final Try.ByteFunction<? extends T, E> mapper) throws E {
@@ -1646,12 +1646,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.ByteFunction<? extends T, E> mapper) throws E {
@@ -1684,9 +1684,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param accumulator the accumulator
-     * @return the optional byte
+     * @param <E>
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalByte reduce(final Try.ByteBinaryOperator<E> accumulator) throws E {
@@ -1721,10 +1721,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param identity the identity
-     * @param accumulator the accumulator
-     * @return the byte
+     * @param <E>
+     * @param identity
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> byte reduce(final byte identity, final Try.ByteBinaryOperator<E> accumulator) throws E {
@@ -1754,9 +1754,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Distinct.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public ByteList distinct(final int fromIndex, final int toIndex) {
@@ -1801,8 +1801,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * This List should be sorted first.
      *
-     * @param key the key
-     * @return the int
+     * @param key
+     * @return
      */
     public int binarySearch(final byte key) {
         return N.binarySearch(elementData, key);
@@ -1811,10 +1811,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public int binarySearch(final int fromIndex, final int toIndex, final byte key) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1835,8 +1835,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Reverse.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) {
@@ -1850,7 +1850,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Rotate.
      *
-     * @param distance the distance
+     * @param distance
      */
     @Override
     public void rotate(int distance) {
@@ -1872,7 +1872,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Shuffle.
      *
-     * @param rnd the rnd
+     * @param rnd
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -1884,8 +1884,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Swap.
      *
-     * @param i the i
-     * @param j the j
+     * @param i
+     * @param j
      */
     @Override
     public void swap(int i, int j) {
@@ -1898,7 +1898,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Copy.
      *
-     * @return the byte list
+     * @return
      */
     @Override
     public ByteList copy() {
@@ -1908,9 +1908,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Copy.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public ByteList copy(final int fromIndex, final int toIndex) {
@@ -1922,10 +1922,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Copy.
      *
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the byte list
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1939,10 +1939,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Returns List of {@code ByteList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return the list
+     * @return
      */
     @Override
     public List<ByteList> split(final int fromIndex, final int toIndex, final int chunkSize) {
@@ -1990,10 +1990,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) {
@@ -2005,10 +2005,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) {
@@ -2020,7 +2020,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Trim to size.
      *
-     * @return the byte list
+     * @return
      */
     @Override
     public ByteList trimToSize() {
@@ -2056,7 +2056,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -2066,7 +2066,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Boxed.
      *
-     * @return the list
+     * @return
      */
     public List<Byte> boxed() {
         return boxed(0, size);
@@ -2075,9 +2075,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Boxed.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public List<Byte> boxed(int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2094,7 +2094,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * To array.
      *
-     * @return the byte[]
+     * @return
      */
     @Override
     public byte[] toArray() {
@@ -2104,7 +2104,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * To int list.
      *
-     * @return the int list
+     * @return
      */
     public IntList toIntList() {
         final int[] a = new int[size];
@@ -2119,11 +2119,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public <C extends Collection<Byte>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
@@ -2141,10 +2141,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * To multiset.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the multiset
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public Multiset<Byte> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Byte>> supplier) {
@@ -2164,11 +2164,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2182,13 +2182,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2204,13 +2204,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2225,15 +2225,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2253,12 +2253,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @return
      * @throws E the e
      */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.ByteFunction<? extends K, E> keyMapper, Collector<Byte, A, D> downstream) throws E {
@@ -2269,14 +2269,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.ByteFunction<? extends K, E> keyMapper, final Collector<Byte, A, D> downstream,
@@ -2315,7 +2315,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Iterator.
      *
-     * @return the byte iterator
+     * @return
      */
     public ByteIterator iterator() {
         if (isEmpty()) {
@@ -2328,7 +2328,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Stream.
      *
-     * @return the byte stream
+     * @return
      */
     public ByteStream stream() {
         return ByteStream.of(elementData, 0, size());
@@ -2337,9 +2337,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Stream.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte stream
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public ByteStream stream(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2350,10 +2350,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2364,10 +2364,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Apply if not empty.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the optional
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2378,8 +2378,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2390,8 +2390,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2404,7 +2404,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2414,7 +2414,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -2435,7 +2435,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -2445,7 +2445,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Ensure capacity internal.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_BYTE_ARRAY) {
@@ -2458,7 +2458,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Ensure explicit capacity.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
@@ -2469,7 +2469,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Grow.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void grow(int minCapacity) {
         int oldCapacity = elementData.length;

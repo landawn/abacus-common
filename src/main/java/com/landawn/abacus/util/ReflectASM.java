@@ -26,7 +26,7 @@ import com.esotericsoftware.reflectasm.MethodAccess;
  * The Class ReflectASM.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 final class ReflectASM<T> {
@@ -53,8 +53,8 @@ final class ReflectASM<T> {
     /**
      * Instantiates a new reflect ASM.
      *
-     * @param cls the cls
-     * @param target the target
+     * @param cls
+     * @param target
      */
     ReflectASM(Class<T> cls, T target) {
         this.cls = cls;
@@ -64,9 +64,9 @@ final class ReflectASM<T> {
     /**
      * On.
      *
-     * @param <T> the generic type
-     * @param clsName the cls name
-     * @return the reflect ASM
+     * @param <T>
+     * @param clsName
+     * @return
      */
     public static <T> ReflectASM<T> on(String clsName) {
         return on((Class<T>) ClassUtil.forClass(clsName));
@@ -75,9 +75,9 @@ final class ReflectASM<T> {
     /**
      * On.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @return the reflect ASM
+     * @param <T>
+     * @param cls
+     * @return
      */
     public static <T> ReflectASM<T> on(Class<T> cls) {
         return new ReflectASM<T>(cls, null);
@@ -86,9 +86,9 @@ final class ReflectASM<T> {
     /**
      * On.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the reflect ASM
+     * @param <T>
+     * @param target
+     * @return
      */
     public static <T> ReflectASM<T> on(T target) {
         return new ReflectASM<T>((Class<T>) target.getClass(), target);
@@ -97,7 +97,7 @@ final class ReflectASM<T> {
     /**
      * New.
      *
-     * @return the reflect ASM
+     * @return
      */
     public ReflectASM<T> _new() {
         return new ReflectASM<T>(cls, getConstructorAccess(cls).newInstance());
@@ -107,8 +107,8 @@ final class ReflectASM<T> {
      * Gets the.
      *
      * @param <V> the value type
-     * @param fieldName the field name
-     * @return the v
+     * @param fieldName
+     * @return
      */
     public <V> V get(String fieldName) {
         final FieldAccess fieldAccess = getFieldAccess(fieldName);
@@ -119,9 +119,9 @@ final class ReflectASM<T> {
     /**
      * Sets the.
      *
-     * @param fieldName the field name
-     * @param value the value
-     * @return the reflect ASM
+     * @param fieldName
+     * @param value
+     * @return
      */
     public ReflectASM<T> set(String fieldName, Object value) {
         final FieldAccess fieldAccess = getFieldAccess(fieldName);
@@ -135,9 +135,9 @@ final class ReflectASM<T> {
      * Invoke.
      *
      * @param <V> the value type
-     * @param methodName the method name
-     * @param args the args
-     * @return the v
+     * @param methodName
+     * @param args
+     * @return
      */
     @SafeVarargs
     public final <V> V invoke(String methodName, Object... args) {
@@ -149,9 +149,9 @@ final class ReflectASM<T> {
     /**
      * Invokke.
      *
-     * @param methodName the method name
-     * @param args the args
-     * @return the reflect ASM
+     * @param methodName
+     * @param args
+     * @return
      */
     @SafeVarargs
     public final ReflectASM<T> invokke(String methodName, Object... args) {
@@ -163,8 +163,8 @@ final class ReflectASM<T> {
     /**
      * Gets the field access.
      *
-     * @param fieldName the field name
-     * @return the field access
+     * @param fieldName
+     * @return
      */
     private FieldAccess getFieldAccess(String fieldName) {
         FieldAccess fieldAccess = clsFieldPool.get(cls);
@@ -180,8 +180,8 @@ final class ReflectASM<T> {
     /**
      * Gets the constructor access.
      *
-     * @param cls the cls
-     * @return the constructor access
+     * @param cls
+     * @return
      * @throws SecurityException the security exception
      */
     private ConstructorAccess<T> getConstructorAccess(final Class<T> cls) throws SecurityException {
@@ -198,8 +198,8 @@ final class ReflectASM<T> {
     /**
      * Gets the method access.
      *
-     * @param cls the cls
-     * @return the method access
+     * @param cls
+     * @return
      */
     private MethodAccess getMethodAccess(final Class<?> cls) {
         MethodAccess methodAccess = clsMethodPool.get(cls);

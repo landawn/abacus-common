@@ -98,11 +98,11 @@ public final class HttpProxy {
     /**
      * Creates the client proxy.
      *
-     * @param <T> the generic type
-     * @param interfaceClass the interface class
-     * @param contentFormat the content format
-     * @param url the url
-     * @return the t
+     * @param <T>
+     * @param interfaceClass
+     * @param contentFormat
+     * @param url
+     * @return
      */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url) {
         return createClientProxy(interfaceClass, contentFormat, url, DEFAULT_MAX_CONNECTION, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -111,12 +111,12 @@ public final class HttpProxy {
     /**
      * Creates the client proxy.
      *
-     * @param <T> the generic type
-     * @param interfaceClass the interface class
-     * @param contentFormat the content format
-     * @param url the url
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param interfaceClass
+     * @param contentFormat
+     * @param url
+     * @param config
+     * @return
      */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final Config config) {
         return createClientProxy(interfaceClass, contentFormat, url, DEFAULT_MAX_CONNECTION, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT, config);
@@ -125,12 +125,12 @@ public final class HttpProxy {
     /**
      * Creates the client proxy.
      *
-     * @param <T> the generic type
-     * @param interfaceClass the interface class
-     * @param contentFormat the content format
-     * @param url the url
-     * @param maxConnection the max connection
-     * @return the t
+     * @param <T>
+     * @param interfaceClass
+     * @param contentFormat
+     * @param url
+     * @param maxConnection
+     * @return
      */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection) {
         return createClientProxy(interfaceClass, contentFormat, url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -139,14 +139,14 @@ public final class HttpProxy {
     /**
      * Creates the client proxy.
      *
-     * @param <T> the generic type
-     * @param interfaceClass the interface class
-     * @param contentFormat the content format
-     * @param url the url
-     * @param maxConnection the max connection
-     * @param connTimeout the conn timeout
-     * @param readTimeout the read timeout
-     * @return the t
+     * @param <T>
+     * @param interfaceClass
+     * @param contentFormat
+     * @param url
+     * @param maxConnection
+     * @param connTimeout
+     * @param readTimeout
+     * @return
      */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection,
             final long connTimeout, final long readTimeout) {
@@ -156,15 +156,15 @@ public final class HttpProxy {
     /**
      * Creates the client proxy.
      *
-     * @param <T> the generic type
-     * @param interfaceClass the interface class
-     * @param contentFormat the content format
-     * @param url the url
-     * @param maxConnection the max connection
-     * @param connTimeout the conn timeout
-     * @param readTimeout the read timeout
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param interfaceClass
+     * @param contentFormat
+     * @param url
+     * @param maxConnection
+     * @param connTimeout
+     * @param readTimeout
+     * @param config
+     * @return
      */
     public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection,
             final long connTimeout, final long readTimeout, final Config config) {
@@ -751,8 +751,8 @@ public final class HttpProxy {
      * Gets the set of unique path parameters used in the given URI. If a parameter is used twice
      * in the URI, it will only show up once in the set.
      *
-     * @param path the path
-     * @return the sets the
+     * @param path
+     * @return
      */
     static Set<String> parsePathParameters(final String path) {
         Matcher m = PARAM_URL_REGEX.matcher(path);
@@ -813,7 +813,7 @@ public final class HttpProxy {
         /**
          * Gets the parser.
          *
-         * @return the parser
+         * @return
          */
         public Parser<SerializationConfig<?>, DeserializationConfig<?>> getParser() {
             return parser;
@@ -822,8 +822,8 @@ public final class HttpProxy {
         /**
          * Sets the parser.
          *
-         * @param parser the parser
-         * @return the config
+         * @param parser
+         * @return
          */
         public Config setParser(final Parser<SerializationConfig<?>, DeserializationConfig<?>> parser) {
             this.parser = parser;
@@ -834,7 +834,7 @@ public final class HttpProxy {
         /**
          * Gets the serialization config.
          *
-         * @return the serialization config
+         * @return
          */
         public SerializationConfig<?> getSerializationConfig() {
             return sc;
@@ -843,8 +843,8 @@ public final class HttpProxy {
         /**
          * Sets the serialization config.
          *
-         * @param sc the sc
-         * @return the config
+         * @param sc
+         * @return
          */
         public Config setSerializationConfig(final SerializationConfig<?> sc) {
             this.sc = sc;
@@ -855,7 +855,7 @@ public final class HttpProxy {
         /**
          * Gets the deserialization config.
          *
-         * @return the deserialization config
+         * @return
          */
         public DeserializationConfig<?> getDeserializationConfig() {
             return dc;
@@ -864,8 +864,8 @@ public final class HttpProxy {
         /**
          * Sets the deserialization config.
          *
-         * @param dc the dc
-         * @return the config
+         * @param dc
+         * @return
          */
         public Config setDeserializationConfig(final DeserializationConfig<?> dc) {
             this.dc = dc;
@@ -885,8 +885,8 @@ public final class HttpProxy {
         /**
          * Sets the executed by thread pool.
          *
-         * @param executedByThreadPool the executed by thread pool
-         * @return the config
+         * @param executedByThreadPool
+         * @return
          */
         public Config setExecutedByThreadPool(final boolean executedByThreadPool) {
             this.executedByThreadPool = executedByThreadPool;
@@ -897,7 +897,7 @@ public final class HttpProxy {
         /**
          * Gets the async executor.
          *
-         * @return the async executor
+         * @return
          */
         public Executor getAsyncExecutor() {
             return asyncExecutor;
@@ -906,8 +906,8 @@ public final class HttpProxy {
         /**
          * Sets the async executor.
          *
-         * @param asyncExecutor the async executor
-         * @return the config
+         * @param asyncExecutor
+         * @return
          */
         public Config setAsyncExecutor(final Executor asyncExecutor) {
             this.asyncExecutor = asyncExecutor;
@@ -918,7 +918,7 @@ public final class HttpProxy {
         /**
          * Gets the handler.
          *
-         * @return the handler
+         * @return
          */
         public Handler getHandler() {
             return handler;
@@ -927,8 +927,8 @@ public final class HttpProxy {
         /**
          * Sets the handler.
          *
-         * @param handler the handler
-         * @return the config
+         * @param handler
+         * @return
          */
         public Config setHandler(final Handler handler) {
             this.handler = handler;
@@ -939,7 +939,7 @@ public final class HttpProxy {
         /**
          * Gets the request settings.
          *
-         * @return the request settings
+         * @return
          */
         public HttpSettings getRequestSettings() {
             return requestSettings;
@@ -948,8 +948,8 @@ public final class HttpProxy {
         /**
          * Sets the request settings.
          *
-         * @param requestSettings the request settings
-         * @return the config
+         * @param requestSettings
+         * @return
          */
         public Config setRequestSettings(final HttpSettings requestSettings) {
             this.requestSettings = requestSettings;
@@ -969,8 +969,8 @@ public final class HttpProxy {
         /**
          * Sets the request by operatio name.
          *
-         * @param requestByOperatioName the request by operatio name
-         * @return the config
+         * @param requestByOperatioName
+         * @return
          */
         public Config setRequestByOperatioName(final boolean requestByOperatioName) {
             this.requestByOperatioName = requestByOperatioName;
@@ -981,7 +981,7 @@ public final class HttpProxy {
         /**
          * Gets the request url naming policy.
          *
-         * @return the request url naming policy
+         * @return
          */
         public NamingPolicy getRequestUrlNamingPolicy() {
             return requestUrlNamingPolicy;
@@ -990,8 +990,8 @@ public final class HttpProxy {
         /**
          * Sets the request url naming policy.
          *
-         * @param requestUrlNamingPolicy the request url naming policy
-         * @return the config
+         * @param requestUrlNamingPolicy
+         * @return
          */
         public Config setRequestUrlNamingPolicy(final NamingPolicy requestUrlNamingPolicy) {
             this.requestUrlNamingPolicy = requestUrlNamingPolicy;
@@ -1002,7 +1002,7 @@ public final class HttpProxy {
         /**
          * Gets the request param naming policy.
          *
-         * @return the request param naming policy
+         * @return
          */
         public NamingPolicy getRequestParamNamingPolicy() {
             return requestParamNamingPolicy;
@@ -1011,8 +1011,8 @@ public final class HttpProxy {
         /**
          * Sets the request param naming policy.
          *
-         * @param requestParamNamingPolicy the request param naming policy
-         * @return the config
+         * @param requestParamNamingPolicy
+         * @return
          */
         public Config setRequestParamNamingPolicy(final NamingPolicy requestParamNamingPolicy) {
             this.requestParamNamingPolicy = requestParamNamingPolicy;
@@ -1023,7 +1023,7 @@ public final class HttpProxy {
         /**
          * Gets the operation configs.
          *
-         * @return the operation configs
+         * @return
          */
         public Map<String, OperationConfig> getOperationConfigs() {
             return operationConfigs;
@@ -1032,8 +1032,8 @@ public final class HttpProxy {
         /**
          * Sets the operation configs.
          *
-         * @param operationConfigs the operation configs
-         * @return the config
+         * @param operationConfigs
+         * @return
          */
         public Config setOperationConfigs(final Map<String, OperationConfig> operationConfigs) {
             this.operationConfigs = operationConfigs;
@@ -1044,7 +1044,7 @@ public final class HttpProxy {
         /**
          * Gets the encryption user name.
          *
-         * @return the encryption user name
+         * @return
          */
         public String getEncryptionUserName() {
             return encryptionUserName;
@@ -1053,8 +1053,8 @@ public final class HttpProxy {
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
          *
-         * @param encryptionUserName the encryption user name
-         * @return the config
+         * @param encryptionUserName
+         * @return
          * @see SecurityDTO#encrypt(String, String)
          */
         public Config setEncryptionUserName(final String encryptionUserName) {
@@ -1066,7 +1066,7 @@ public final class HttpProxy {
         /**
          * Gets the encryption password.
          *
-         * @return the encryption password
+         * @return
          */
         public byte[] getEncryptionPassword() {
             return encryptionPassword;
@@ -1075,8 +1075,8 @@ public final class HttpProxy {
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
          *
-         * @param encryptionPassword the encryption password
-         * @return the config
+         * @param encryptionPassword
+         * @return
          * @see SecurityDTO#encrypt(String, String)
          */
         public Config setEncryptionPassword(final byte[] encryptionPassword) {
@@ -1088,7 +1088,7 @@ public final class HttpProxy {
         /**
          * Gets the encryption message.
          *
-         * @return the encryption message
+         * @return
          */
         public MessageEncryption getEncryptionMessage() {
             return encryptionMessage;
@@ -1097,8 +1097,8 @@ public final class HttpProxy {
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
          *
-         * @param encryptionMessage the encryption message
-         * @return the config
+         * @param encryptionMessage
+         * @return
          * @see SecurityDTO#encrypt(String, String)
          */
         public Config setEncryptionMessage(final MessageEncryption encryptionMessage) {
@@ -1110,7 +1110,7 @@ public final class HttpProxy {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1177,7 +1177,7 @@ public final class HttpProxy {
         /**
          * Gets the request url.
          *
-         * @return the request url
+         * @return
          */
         public String getRequestUrl() {
             return requestUrl;
@@ -1186,8 +1186,8 @@ public final class HttpProxy {
         /**
          * Sets the request url.
          *
-         * @param requestUrl the request url
-         * @return the operation config
+         * @param requestUrl
+         * @return
          */
         public OperationConfig setRequestUrl(final String requestUrl) {
             this.requestUrl = requestUrl;
@@ -1204,7 +1204,7 @@ public final class HttpProxy {
         /**
          * Gets the http method.
          *
-         * @return the http method
+         * @return
          */
         public HttpMethod getHttpMethod() {
             return httpMethod;
@@ -1213,8 +1213,8 @@ public final class HttpProxy {
         /**
          * Sets the http method.
          *
-         * @param httpMethod the http method
-         * @return the operation config
+         * @param httpMethod
+         * @return
          */
         public OperationConfig setHttpMethod(final HttpMethod httpMethod) {
             this.httpMethod = httpMethod;
@@ -1225,7 +1225,7 @@ public final class HttpProxy {
         /**
          * Gets the request settings.
          *
-         * @return the request settings
+         * @return
          */
         public HttpSettings getRequestSettings() {
             return requestSettings;
@@ -1234,8 +1234,8 @@ public final class HttpProxy {
         /**
          * Sets the request settings.
          *
-         * @param requestSettings the request settings
-         * @return the operation config
+         * @param requestSettings
+         * @return
          */
         public OperationConfig setRequestSettings(final HttpSettings requestSettings) {
             this.requestSettings = requestSettings;
@@ -1246,7 +1246,7 @@ public final class HttpProxy {
         /**
          * Gets the retry times.
          *
-         * @return the retry times
+         * @return
          */
         public int getRetryTimes() {
             return retryTimes;
@@ -1255,8 +1255,8 @@ public final class HttpProxy {
         /**
          * Sets the retry times.
          *
-         * @param retryTimes the retry times
-         * @return the operation config
+         * @param retryTimes
+         * @return
          */
         public OperationConfig setRetryTimes(final int retryTimes) {
             this.retryTimes = retryTimes;
@@ -1267,7 +1267,7 @@ public final class HttpProxy {
         /**
          * Gets the retry interval.
          *
-         * @return the retry interval
+         * @return
          */
         public long getRetryInterval() {
             return retryInterval;
@@ -1276,8 +1276,8 @@ public final class HttpProxy {
         /**
          * Sets the retry interval.
          *
-         * @param retryInterval the retry interval
-         * @return the operation config
+         * @param retryInterval
+         * @return
          */
         public OperationConfig setRetryInterval(final long retryInterval) {
             this.retryInterval = retryInterval;
@@ -1288,7 +1288,7 @@ public final class HttpProxy {
         /**
          * Gets the if retry.
          *
-         * @return the if retry
+         * @return
          */
         public Function<Throwable, Boolean> getIfRetry() {
             return ifRetry;
@@ -1297,8 +1297,8 @@ public final class HttpProxy {
         /**
          * Sets the if retry.
          *
-         * @param ifRetry the if retry
-         * @return the operation config
+         * @param ifRetry
+         * @return
          */
         public OperationConfig setIfRetry(final Function<Throwable, Boolean> ifRetry) {
             this.ifRetry = ifRetry;
@@ -1309,7 +1309,7 @@ public final class HttpProxy {
         /**
          * Gets the encryption user name.
          *
-         * @return the encryption user name
+         * @return
          */
         public String getEncryptionUserName() {
             return encryptionUserName;
@@ -1318,8 +1318,8 @@ public final class HttpProxy {
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
          *
-         * @param encryptionUserName the encryption user name
-         * @return the operation config
+         * @param encryptionUserName
+         * @return
          * @see SecurityDTO#encrypt(String, String)
          */
         public OperationConfig setEncryptionUserName(final String encryptionUserName) {
@@ -1331,7 +1331,7 @@ public final class HttpProxy {
         /**
          * Gets the encryption password.
          *
-         * @return the encryption password
+         * @return
          */
         public byte[] getEncryptionPassword() {
             return encryptionPassword;
@@ -1340,8 +1340,8 @@ public final class HttpProxy {
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
          *
-         * @param encryptionPassword the encryption password
-         * @return the operation config
+         * @param encryptionPassword
+         * @return
          * @see SecurityDTO#encrypt(String, String)
          */
         public OperationConfig setEncryptionPassword(final byte[] encryptionPassword) {
@@ -1353,7 +1353,7 @@ public final class HttpProxy {
         /**
          * Gets the encryption message.
          *
-         * @return the encryption message
+         * @return
          */
         public MessageEncryption getEncryptionMessage() {
             return encryptionMessage;
@@ -1362,8 +1362,8 @@ public final class HttpProxy {
         /**
          * The target request DTOs must inherit from <code>SecurityDTO</code>.
          *
-         * @param encryptionMessage the encryption message
-         * @return the operation config
+         * @param encryptionMessage
+         * @return
          * @see SecurityDTO#encrypt(String, String)
          */
         public OperationConfig setEncryptionMessage(final MessageEncryption encryptionMessage) {
@@ -1375,7 +1375,7 @@ public final class HttpProxy {
         /**
          * copied from retrofit under the Apache License, Version 2.0 (the "License");
          *
-         * @param name the name
+         * @param name
          */
         void validatePathName(final String name) {
             if (!PARAM_NAME_REGEX.matcher(name).matches()) {
@@ -1391,7 +1391,7 @@ public final class HttpProxy {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -1412,7 +1412,7 @@ public final class HttpProxy {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -1436,7 +1436,7 @@ public final class HttpProxy {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -1453,19 +1453,19 @@ public final class HttpProxy {
         /**
          * Pre invoke.
          *
-         * @param method the method
-         * @param args the args
+         * @param method
+         * @param args
          */
         void preInvoke(final Method method, final Object... args);
 
         /**
          * Post invoke.
          *
-         * @param e the e
-         * @param result the result
-         * @param method the method
-         * @param args the args
-         * @return the object
+         * @param e
+         * @param result
+         * @param method
+         * @param args
+         * @return
          */
         Object postInvoke(final Throwable e, final Object result, final Method method, final Object... args);
     }

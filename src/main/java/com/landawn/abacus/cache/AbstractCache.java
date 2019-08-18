@@ -56,8 +56,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Instantiates a new abstract cache.
      *
-     * @param defaultLiveTime the default live time
-     * @param defaultMaxIdleTime the default max idle time
+     * @param defaultLiveTime
+     * @param defaultMaxIdleTime
      */
     protected AbstractCache(long defaultLiveTime, long defaultMaxIdleTime) {
         this.defaultLiveTime = defaultLiveTime;
@@ -67,8 +67,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Gets the.
      *
-     * @param k the k
-     * @return the optional
+     * @param k
+     * @return
      */
     @Override
     public Optional<V> get(K k) {
@@ -78,8 +78,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Put.
      *
-     * @param key the key
-     * @param value the value
+     * @param key
+     * @param value
      * @return true, if successful
      */
     @Override
@@ -90,8 +90,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Async get.
      *
-     * @param k the k
-     * @return the continuable future
+     * @param k
+     * @return
      */
     @Override
     public ContinuableFuture<Optional<V>> asyncGet(final K k) {
@@ -106,8 +106,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Async gett.
      *
-     * @param k the k
-     * @return the continuable future
+     * @param k
+     * @return
      */
     @Override
     public ContinuableFuture<V> asyncGett(final K k) {
@@ -122,9 +122,9 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Async put.
      *
-     * @param k the k
-     * @param v the v
-     * @return the continuable future
+     * @param k
+     * @param v
+     * @return
      */
     @Override
     public ContinuableFuture<Boolean> asyncPut(final K k, final V v) {
@@ -139,11 +139,11 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Async put.
      *
-     * @param k the k
-     * @param v the v
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
-     * @return the continuable future
+     * @param k
+     * @param v
+     * @param liveTime
+     * @param maxIdleTime
+     * @return
      */
     @Override
     public ContinuableFuture<Boolean> asyncPut(final K k, final V v, final long liveTime, final long maxIdleTime) {
@@ -158,8 +158,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Async remove.
      *
-     * @param k the k
-     * @return the continuable future
+     * @param k
+     * @return
      */
     @Override
     public ContinuableFuture<Void> asyncRemove(final K k) {
@@ -176,8 +176,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Async contains key.
      *
-     * @param k the k
-     * @return the continuable future
+     * @param k
+     * @return
      */
     @Override
     public ContinuableFuture<Boolean> asyncContainsKey(final K k) {
@@ -192,7 +192,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Gets the properties.
      *
-     * @return the properties
+     * @return
      */
     @Override
     public Properties<String, Object> getProperties() {
@@ -202,9 +202,9 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Gets the property.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
-     * @return the property
+     * @param <T>
+     * @param propName
+     * @return
      */
     @Override
     public <T> T getProperty(String propName) {
@@ -214,10 +214,10 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Sets the property.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
-     * @param propValue the prop value
-     * @return the t
+     * @param <T>
+     * @param propName
+     * @param propValue
+     * @return
      */
     @Override
     public <T> T setProperty(String propName, Object propValue) {
@@ -227,9 +227,9 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Removes the property.
      *
-     * @param <T> the generic type
-     * @param propName the prop name
-     * @return the t
+     * @param <T>
+     * @param propName
+     * @return
      */
     @Override
     public <T> T removeProperty(String propName) {

@@ -34,7 +34,7 @@ public @interface RestMethod {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value();
 

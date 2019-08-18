@@ -26,7 +26,7 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     /**
      * Instantiates a new http request.
      *
-     * @param httpClient the http client
+     * @param httpClient
      */
     HttpRequest(HttpClient httpClient) {
         super(httpClient);
@@ -35,8 +35,8 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     /**
      * Creates the.
      *
-     * @param httpClient the http client
-     * @return the http request
+     * @param httpClient
+     * @return
      */
     public static HttpRequest create(final HttpClient httpClient) {
         return new HttpRequest(httpClient);
@@ -45,8 +45,8 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     /**
      * Url.
      *
-     * @param url the url
-     * @return the http request
+     * @param url
+     * @return
      */
     public static HttpRequest url(final String url) {
         return url(url, AbstractHttpClient.DEFAULT_CONNECTION_TIMEOUT, AbstractHttpClient.DEFAULT_READ_TIMEOUT);
@@ -55,10 +55,10 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     /**
      * Url.
      *
-     * @param url the url
-     * @param connTimeout the conn timeout
-     * @param readTimeout the read timeout
-     * @return the http request
+     * @param url
+     * @param connTimeout
+     * @param readTimeout
+     * @return
      */
     public static HttpRequest url(final String url, final long connTimeout, final long readTimeout) {
         return new HttpRequest(HttpClient.create(url, 1, connTimeout, readTimeout));

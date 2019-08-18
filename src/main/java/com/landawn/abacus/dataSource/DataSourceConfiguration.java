@@ -59,12 +59,12 @@ public final class DataSourceConfiguration extends Configuration {
     /**
      * Field PROVIDER. (value is ""provider"")
      */
-    public static final String PROVIDER = "provider"; 
+    public static final String PROVIDER = "provider";
 
     /**
      * Field DBCP2. (value is ""dbcp2"")
      */
-    public static final String DBCP2 = "dbcp2"; 
+    public static final String DBCP2 = "dbcp2";
 
     /**
      * Field HIKARI_CP. (value is ""HikariCP"")
@@ -261,8 +261,8 @@ public final class DataSourceConfiguration extends Configuration {
     /**
      * Instantiates a new data source configuration.
      *
-     * @param element the element
-     * @param properties the properties
+     * @param element
+     * @param properties
      */
     public DataSourceConfiguration(Element element, Map<String, String> properties) {
         super(element, properties);
@@ -279,7 +279,7 @@ public final class DataSourceConfiguration extends Configuration {
     /**
      * Gets the connection props.
      *
-     * @return the connection props
+     * @return
      */
     public Map<String, String> getConnectionProps() {
         return connectionProps;
@@ -288,7 +288,7 @@ public final class DataSourceConfiguration extends Configuration {
     /**
      * Gets the read only connection props.
      *
-     * @return the read only connection props
+     * @return
      */
     public Map<String, String> getReadOnlyConnectionProps() {
         return readOnlyConnectionProps;
@@ -297,7 +297,7 @@ public final class DataSourceConfiguration extends Configuration {
     /**
      * Complex element 2 attr.
      *
-     * @param element the element
+     * @param element
      */
     @Override
     protected void complexElement2Attr(Element element) {

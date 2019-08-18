@@ -55,7 +55,7 @@ public final class Primitives {
     /**
      * Checks if is primitive type.
      *
-     * @param cls the cls
+     * @param cls
      * @return true, if is primitive type
      */
     public static boolean isPrimitiveType(final Class<?> cls) {
@@ -67,7 +67,7 @@ public final class Primitives {
     /**
      * Checks if is wrapper type.
      *
-     * @param cls the cls
+     * @param cls
      * @return true, if is wrapper type
      */
     public static boolean isWrapperType(final Class<?> cls) {
@@ -79,7 +79,7 @@ public final class Primitives {
     /**
      * Checks if is primitive array type.
      *
-     * @param cls the cls
+     * @param cls
      * @return true, if is primitive array type
      */
     public static boolean isPrimitiveArrayType(final Class<?> cls) {
@@ -98,8 +98,8 @@ public final class Primitives {
      *     wrap(String.class) == String.class
      * </pre>
      *
-     * @param cls the cls
-     * @return the class
+     * @param cls
+     * @return
      */
     public static Class<?> wrap(final Class<?> cls) {
         N.checkArgNotNull(cls, "cls");
@@ -119,8 +119,8 @@ public final class Primitives {
      *     unwrap(String.class) == String.class
      * </pre>
      *
-     * @param cls the cls
-     * @return the class
+     * @param cls
+     * @return
      */
     public static Class<?> unwrap(final Class<?> cls) {
         N.checkArgNotNull(cls, "cls");
@@ -155,10 +155,10 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the boolean[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Boolean[] box(final boolean[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -201,10 +201,10 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the character[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Character[] box(final char[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -247,10 +247,10 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Byte[] box(final byte[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -293,10 +293,10 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Short[] box(final short[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -339,10 +339,10 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the integer[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Integer[] box(final int[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -385,10 +385,10 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the long[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Long[] box(final long[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -431,10 +431,10 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Float[] box(final float[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -477,10 +477,10 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Double[] box(final double[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -501,8 +501,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the boolean[][]
+     * @param a
+     * @return
      */
     public static Boolean[][] box(boolean[][] a) {
         if (a == null) {
@@ -521,8 +521,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the character[][]
+     * @param a
+     * @return
      */
     public static Character[][] box(char[][] a) {
         if (a == null) {
@@ -541,8 +541,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the byte[][]
+     * @param a
+     * @return
      */
     public static Byte[][] box(byte[][] a) {
         if (a == null) {
@@ -561,8 +561,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the short[][]
+     * @param a
+     * @return
      */
     public static Short[][] box(short[][] a) {
         if (a == null) {
@@ -581,8 +581,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the integer[][]
+     * @param a
+     * @return
      */
     public static Integer[][] box(int[][] a) {
         if (a == null) {
@@ -601,8 +601,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the long[][]
+     * @param a
+     * @return
      */
     public static Long[][] box(long[][] a) {
         if (a == null) {
@@ -621,8 +621,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the float[][]
+     * @param a
+     * @return
      */
     public static Float[][] box(float[][] a) {
         if (a == null) {
@@ -641,8 +641,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the double[][]
+     * @param a
+     * @return
      */
     public static Double[][] box(double[][] a) {
         if (a == null) {
@@ -661,8 +661,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the boolean[][][]
+     * @param a
+     * @return
      */
     public static Boolean[][][] box(boolean[][][] a) {
         if (a == null) {
@@ -681,8 +681,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the character[][][]
+     * @param a
+     * @return
      */
     public static Character[][][] box(char[][][] a) {
         if (a == null) {
@@ -701,8 +701,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the byte[][][]
+     * @param a
+     * @return
      */
     public static Byte[][][] box(byte[][][] a) {
         if (a == null) {
@@ -721,8 +721,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the short[][][]
+     * @param a
+     * @return
      */
     public static Short[][][] box(short[][][] a) {
         if (a == null) {
@@ -741,8 +741,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the integer[][][]
+     * @param a
+     * @return
      */
     public static Integer[][][] box(int[][][] a) {
         if (a == null) {
@@ -761,8 +761,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the long[][][]
+     * @param a
+     * @return
      */
     public static Long[][][] box(long[][][] a) {
         if (a == null) {
@@ -781,8 +781,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the float[][][]
+     * @param a
+     * @return
      */
     public static Float[][][] box(float[][][] a) {
         if (a == null) {
@@ -801,8 +801,8 @@ public final class Primitives {
     /**
      * Box.
      *
-     * @param a the a
-     * @return the double[][][]
+     * @param a
+     * @return
      */
     public static Double[][][] box(double[][][] a) {
         if (a == null) {
@@ -864,11 +864,11 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param valueForNull the value for null
-     * @return the boolean[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param valueForNull
+     * @return
      */
     public static boolean[] unbox(final Boolean[] a, final int fromIndex, final int toIndex, final boolean valueForNull) {
         if (a == null) {
@@ -933,11 +933,11 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param valueForNull the value for null
-     * @return the char[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param valueForNull
+     * @return
      */
     public static char[] unbox(final Character[] a, final int fromIndex, final int toIndex, final char valueForNull) {
         if (a == null) {
@@ -1001,11 +1001,11 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param valueForNull the value for null
-     * @return the byte[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param valueForNull
+     * @return
      */
     public static byte[] unbox(final Byte[] a, final int fromIndex, final int toIndex, final byte valueForNull) {
         if (a == null) {
@@ -1069,11 +1069,11 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param valueForNull the value for null
-     * @return the short[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param valueForNull
+     * @return
      */
     public static short[] unbox(final Short[] a, final int fromIndex, final int toIndex, final short valueForNull) {
         if (a == null) {
@@ -1137,11 +1137,11 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param valueForNull the value for null
-     * @return the int[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param valueForNull
+     * @return
      */
     public static int[] unbox(final Integer[] a, final int fromIndex, final int toIndex, final int valueForNull) {
         if (a == null) {
@@ -1205,11 +1205,11 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param valueForNull the value for null
-     * @return the long[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param valueForNull
+     * @return
      */
     public static long[] unbox(final Long[] a, final int fromIndex, final int toIndex, final long valueForNull) {
         if (a == null) {
@@ -1273,11 +1273,11 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param valueForNull the value for null
-     * @return the float[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param valueForNull
+     * @return
      */
     public static float[] unbox(final Float[] a, final int fromIndex, final int toIndex, final float valueForNull) {
         if (a == null) {
@@ -1341,11 +1341,11 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param valueForNull the value for null
-     * @return the double[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param valueForNull
+     * @return
      */
     public static double[] unbox(final Double[] a, final int fromIndex, final int toIndex, final double valueForNull) {
         if (a == null) {
@@ -1366,8 +1366,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the boolean[][]
+     * @param a
+     * @return
      */
     public static boolean[][] unbox(Boolean[][] a) {
         return unbox(a, false);
@@ -1376,9 +1376,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the boolean[][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static boolean[][] unbox(Boolean[][] a, boolean valueForNull) {
         if (a == null) {
@@ -1397,8 +1397,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the char[][]
+     * @param a
+     * @return
      */
     public static char[][] unbox(Character[][] a) {
         return unbox(a, (char) 0);
@@ -1407,9 +1407,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the char[][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static char[][] unbox(Character[][] a, char valueForNull) {
         if (a == null) {
@@ -1428,8 +1428,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the byte[][]
+     * @param a
+     * @return
      */
     public static byte[][] unbox(Byte[][] a) {
         return unbox(a, (byte) 0);
@@ -1438,9 +1438,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the byte[][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static byte[][] unbox(Byte[][] a, byte valueForNull) {
         if (a == null) {
@@ -1459,8 +1459,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the short[][]
+     * @param a
+     * @return
      */
     public static short[][] unbox(Short[][] a) {
         return unbox(a, (short) 0);
@@ -1469,9 +1469,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the short[][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static short[][] unbox(Short[][] a, short valueForNull) {
         if (a == null) {
@@ -1490,8 +1490,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the int[][]
+     * @param a
+     * @return
      */
     public static int[][] unbox(Integer[][] a) {
         return unbox(a, 0);
@@ -1500,9 +1500,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the int[][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static int[][] unbox(Integer[][] a, int valueForNull) {
         if (a == null) {
@@ -1521,8 +1521,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the long[][]
+     * @param a
+     * @return
      */
     public static long[][] unbox(Long[][] a) {
         return unbox(a, 0);
@@ -1531,9 +1531,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the long[][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static long[][] unbox(Long[][] a, long valueForNull) {
         if (a == null) {
@@ -1552,8 +1552,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the float[][]
+     * @param a
+     * @return
      */
     public static float[][] unbox(Float[][] a) {
         return unbox(a, 0);
@@ -1562,9 +1562,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the float[][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static float[][] unbox(Float[][] a, float valueForNull) {
         if (a == null) {
@@ -1583,8 +1583,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the double[][]
+     * @param a
+     * @return
      */
     public static double[][] unbox(Double[][] a) {
         return unbox(a, 0);
@@ -1593,9 +1593,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the double[][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static double[][] unbox(Double[][] a, double valueForNull) {
         if (a == null) {
@@ -1614,8 +1614,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the boolean[][][]
+     * @param a
+     * @return
      */
     public static boolean[][][] unbox(Boolean[][][] a) {
         return unbox(a, false);
@@ -1624,9 +1624,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the boolean[][][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static boolean[][][] unbox(Boolean[][][] a, boolean valueForNull) {
         if (a == null) {
@@ -1645,8 +1645,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the char[][][]
+     * @param a
+     * @return
      */
     public static char[][][] unbox(Character[][][] a) {
         return unbox(a, (char) 0);
@@ -1655,9 +1655,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the char[][][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static char[][][] unbox(Character[][][] a, char valueForNull) {
         if (a == null) {
@@ -1676,8 +1676,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the byte[][][]
+     * @param a
+     * @return
      */
     public static byte[][][] unbox(Byte[][][] a) {
         return unbox(a, (byte) 0);
@@ -1686,9 +1686,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the byte[][][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static byte[][][] unbox(Byte[][][] a, byte valueForNull) {
         if (a == null) {
@@ -1707,8 +1707,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the short[][][]
+     * @param a
+     * @return
      */
     public static short[][][] unbox(Short[][][] a) {
         return unbox(a, (short) 0);
@@ -1717,9 +1717,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the short[][][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static short[][][] unbox(Short[][][] a, short valueForNull) {
         if (a == null) {
@@ -1738,8 +1738,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the int[][][]
+     * @param a
+     * @return
      */
     public static int[][][] unbox(Integer[][][] a) {
         return unbox(a, 0);
@@ -1748,9 +1748,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the int[][][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static int[][][] unbox(Integer[][][] a, int valueForNull) {
         if (a == null) {
@@ -1769,8 +1769,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the long[][][]
+     * @param a
+     * @return
      */
     public static long[][][] unbox(Long[][][] a) {
         return unbox(a, 0);
@@ -1779,9 +1779,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the long[][][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static long[][][] unbox(Long[][][] a, long valueForNull) {
         if (a == null) {
@@ -1800,8 +1800,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the float[][][]
+     * @param a
+     * @return
      */
     public static float[][][] unbox(Float[][][] a) {
         return unbox(a, 0);
@@ -1810,9 +1810,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the float[][][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static float[][][] unbox(Float[][][] a, float valueForNull) {
         if (a == null) {
@@ -1831,8 +1831,8 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @return the double[][][]
+     * @param a
+     * @return
      */
     public static double[][][] unbox(Double[][][] a) {
         return unbox(a, 0);
@@ -1841,9 +1841,9 @@ public final class Primitives {
     /**
      * Unbox.
      *
-     * @param a the a
-     * @param valueForNull the value for null
-     * @return the double[][][]
+     * @param a
+     * @param valueForNull
+     * @return
      */
     public static double[][][] unbox(Double[][][] a, double valueForNull) {
         if (a == null) {
@@ -2067,7 +2067,7 @@ public final class Primitives {
         /**
          * Inverts the element from {@code fromIndex} to {@code toIndex}: set it to {@code true} if it's {@code false}, or set it to {@code false} if it's {@code true}.
          *
-         * @param a the a
+         * @param a
          */
         public static void invert(final boolean[] a) {
             if (N.isNullOrEmpty(a)) {
@@ -2080,9 +2080,9 @@ public final class Primitives {
         /**
          * Inverts the element from {@code fromIndex} to {@code toIndex}: set it to {@code true} if it's {@code false}, or set it to {@code false} if it's {@code true}.
          *
-         * @param a the a
-         * @param fromIndex the from index
-         * @param toIndex the to index
+         * @param a
+         * @param fromIndex
+         * @param toIndex
          */
         public static void invert(final boolean[] a, final int fromIndex, final int toIndex) {
             N.checkFromToIndex(fromIndex, toIndex, N.len(a));

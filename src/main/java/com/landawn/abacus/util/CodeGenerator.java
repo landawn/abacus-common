@@ -94,8 +94,8 @@ public final class CodeGenerator {
     /**
      * Gets the simple prop name table class name.
      *
-     * @param className the class name
-     * @return the simple prop name table class name
+     * @param className
+     * @return
      */
     protected static String getSimplePropNameTableClassName(final String className) {
         String simpleClassName = className;
@@ -119,8 +119,8 @@ public final class CodeGenerator {
      * <=====
      * </pre>
      *
-     * @param srcDir the src dir
-     * @param cls the cls
+     * @param srcDir
+     * @param cls
      */
     public static void writeClassMethod(final File srcDir, final Class<?> cls) {
         writeClassMethod(srcDir, cls, false, false, false, null, null, Objects.class);
@@ -137,13 +137,13 @@ public final class CodeGenerator {
      * <=====
      * </pre>
      *
-     * @param srcDir the src dir
-     * @param cls the cls
+     * @param srcDir
+     * @param cls
      * @param constructor generate constructor
      * @param copyMethod generate the copy method.
-     * @param fluentSetter the fluent setter
-     * @param ignoreFieldNames the ignore field names
-     * @param fieldName2MethodName the field name 2 method name
+     * @param fluentSetter
+     * @param ignoreFieldNames
+     * @param fieldName2MethodName
      * @param utilClassForHashEqualsToString is <code>Objects.class</code> by default. It can also be <code>N.class</code> or any classes else which provide the {@code hashCode/equals/toString} method.
      *      Or specify <code>CodeGenerator._N</code> or your own utility class to generate entity classes which not dependent on abacus-util.jar for Methods {@code hashCode/equals/toString}.
      */
@@ -165,15 +165,15 @@ public final class CodeGenerator {
      * </pre>
      *  
      *
-     * @param srcDir the src dir
-     * @param cls the cls
-     * @param constructor the constructor
-     * @param copyMethod the copy method
-     * @param fluentSetter the fluent setter
-     * @param ignoreFieldNames the ignore field names
-     * @param fieldName2MethodName the field name 2 method name
-     * @param parentPropertyModeForHashEquals the parent property mode for hash equals
-     * @param parentPropertyModeForToString the parent property mode for to string
+     * @param srcDir
+     * @param cls
+     * @param constructor
+     * @param copyMethod
+     * @param fluentSetter
+     * @param ignoreFieldNames
+     * @param fieldName2MethodName
+     * @param parentPropertyModeForHashEquals
+     * @param parentPropertyModeForToString
      * @param utilClassForHashEqualsToString is <code>Objects.class</code> by default. It can also be <code>N.class</code> or any classes else which provide the {@code hashCode/equals/toString} method.
      *      Or specify <code>CodeGenerator._N</code> or your own utility class to generate entity classes which not dependent on abacus-util.jar for Methods {@code hashCode/equals/toString}.
      */
@@ -555,20 +555,20 @@ public final class CodeGenerator {
     /**
      * Write class method.
      *
-     * @param cls the cls
-     * @param className the class name
-     * @param parentClass the parent class
-     * @param pkgName the pkg name
-     * @param fieldTypes the field types
-     * @param constructor the constructor
-     * @param copyMethod the copy method
-     * @param fluentSetter the fluent setter
-     * @param parentPropertyModeForHashEquals the parent property mode for hash equals
-     * @param parentPropertyModeForToString the parent property mode for to string
-     * @param fieldName2MethodName the field name 2 method name
-     * @param importedClasses the imported classes
-     * @param utilClass the util class
-     * @param writer the writer
+     * @param cls
+     * @param className
+     * @param parentClass
+     * @param pkgName
+     * @param fieldTypes
+     * @param constructor
+     * @param copyMethod
+     * @param fluentSetter
+     * @param parentPropertyModeForHashEquals
+     * @param parentPropertyModeForToString
+     * @param fieldName2MethodName
+     * @param importedClasses
+     * @param utilClass
+     * @param writer
      * @throws NoSuchFieldException the no such field exception
      * @throws SecurityException the security exception
      */
@@ -940,9 +940,9 @@ public final class CodeGenerator {
     /**
      * Gets the parameter type name.
      *
-     * @param pkgName the pkg name
-     * @param entry the entry
-     * @return the parameter type name
+     * @param pkgName
+     * @param entry
+     * @return
      */
     private static String getParameterTypeName(final String pkgName, Map.Entry<String, Method> entry) {
         String paraTypeName = ClassUtil.getParameterizedTypeNameByMethod(entry.getValue());
@@ -976,8 +976,8 @@ public final class CodeGenerator {
     /**
      * Write util class for hash equals to string.
      *
-     * @param srcDir the src dir
-     * @param pkgName the pkg name
+     * @param srcDir
+     * @param pkgName
      */
     public static void writeUtilClassForHashEqualsToString(final File srcDir, final String pkgName) {
         writeUtilClassForHashEqualsToString(srcDir, pkgName, "_N");
@@ -986,9 +986,9 @@ public final class CodeGenerator {
     /**
      * Write util class for hash equals to string.
      *
-     * @param srcDir the src dir
-     * @param pkgName the pkg name
-     * @param utilClassName the util class name
+     * @param srcDir
+     * @param pkgName
+     * @param utilClassName
      */
     public static void writeUtilClassForHashEqualsToString(final File srcDir, final String pkgName, final String utilClassName) {
         final String utilClassFilePath = srcDir.getAbsolutePath()
@@ -1010,8 +1010,8 @@ public final class CodeGenerator {
     /**
      * Prints the transfer method.
      *
-     * @param sourceClass the source class
-     * @param targetClass the target class
+     * @param sourceClass
+     * @param targetClass
      */
     public static void printTransferMethod(final Class<?> sourceClass, final Class<?> targetClass) {
         printTransferMethod(sourceClass, targetClass, null);
@@ -1020,9 +1020,9 @@ public final class CodeGenerator {
     /**
      * Prints the transfer method.
      *
-     * @param sourceClass the source class
-     * @param targetClass the target class
-     * @param propNameMapping the prop name mapping
+     * @param sourceClass
+     * @param targetClass
+     * @param propNameMapping
      */
     public static void printTransferMethod(final Class<?> sourceClass, final Class<?> targetClass, final Map<String, String> propNameMapping) {
         final String iden = "    ";
@@ -1078,10 +1078,10 @@ public final class CodeGenerator {
     /**
      * Gets the simple type.
      *
-     * @param type the type
-     * @param pkgName the pkg name
-     * @param importedClasses the imported classes
-     * @return the simple type
+     * @param type
+     * @param pkgName
+     * @param importedClasses
+     * @return
      */
     private static String getSimpleType(Type<?> type, final String pkgName, final Map<String, Class<?>> importedClasses) {
         final Class<?> typeClass = type.clazz();

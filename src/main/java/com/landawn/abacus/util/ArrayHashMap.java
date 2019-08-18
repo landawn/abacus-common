@@ -48,7 +48,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Instantiates a new array hash map.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public ArrayHashMap(final int initialCapacity) {
         map = new HashMap<>(initialCapacity);
@@ -57,7 +57,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Instantiates a new array hash map.
      *
-     * @param mapType the map type
+     * @param mapType
      */
     @SuppressWarnings("rawtypes")
     public ArrayHashMap(final Class<? extends Map> mapType) {
@@ -89,7 +89,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Instantiates a new array hash map.
      *
-     * @param m the m
+     * @param m
      */
     public ArrayHashMap(final Map<? extends K, ? extends V> m) {
         if (N.isNullOrEmpty(m)) {
@@ -104,8 +104,8 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Gets the.
      *
-     * @param key the key
-     * @return the v
+     * @param key
+     * @return
      */
     @Override
     public V get(Object key) {
@@ -115,9 +115,9 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Put.
      *
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param key
+     * @param value
+     * @return
      */
     @Override
     public V put(K key, V value) {
@@ -127,7 +127,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Put all.
      *
-     * @param m the m
+     * @param m
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
@@ -143,8 +143,8 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Removes the.
      *
-     * @param key the key
-     * @return the v
+     * @param key
+     * @return
      */
     @Override
     public V remove(Object key) {
@@ -154,7 +154,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Contains key.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     @Override
@@ -165,7 +165,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Contains value.
      *
-     * @param value the value
+     * @param value
      * @return true, if successful
      */
     @Override
@@ -176,7 +176,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -186,7 +186,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Values.
      *
-     * @return the collection
+     * @return
      */
     @Override
     public Collection<V> values() {
@@ -196,7 +196,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Entry set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
@@ -206,7 +206,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -234,7 +234,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -244,7 +244,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -255,7 +255,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -276,7 +276,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Instantiates a new array entry set.
          *
-         * @param set the set
+         * @param set
          */
         ArrayEntrySet(Set<Map.Entry<Wrapper<K>, V>> set) {
             this.set = set;
@@ -285,7 +285,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Adds the.
          *
-         * @param e the e
+         * @param e
          * @return true, if successful
          */
         @Override
@@ -296,7 +296,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Adds the all.
          *
-         * @param c the c
+         * @param c
          * @return true, if successful
          */
         @Override
@@ -307,7 +307,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Removes the.
          *
-         * @param o the o
+         * @param o
          * @return true, if successful
          */
         @Override
@@ -318,7 +318,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Contains all.
          *
-         * @param c the c
+         * @param c
          * @return true, if successful
          */
         @Override
@@ -329,7 +329,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Removes the all.
          *
-         * @param c the c
+         * @param c
          * @return true, if successful
          */
         @Override
@@ -340,7 +340,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Retain all.
          *
-         * @param c the c
+         * @param c
          * @return true, if successful
          */
         @Override
@@ -351,7 +351,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Contains.
          *
-         * @param o the o
+         * @param o
          * @return true, if successful
          */
         @Override
@@ -368,7 +368,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Iterator.
          *
-         * @return the iterator
+         * @return
          */
         @Override
         public Iterator<java.util.Map.Entry<K, V>> iterator() {
@@ -378,7 +378,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * To array.
          *
-         * @return the object[]
+         * @return
          */
         @Override
         public Object[] toArray() {
@@ -401,9 +401,9 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * To array.
          *
-         * @param <T> the generic type
-         * @param a the a
-         * @return the t[]
+         * @param <T>
+         * @param a
+         * @return
          */
         @Override
         public <T> T[] toArray(T[] a) {
@@ -426,7 +426,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Size.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int size() {
@@ -454,7 +454,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -464,7 +464,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -475,7 +475,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -497,7 +497,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Instantiates a new array entry iterator.
          *
-         * @param it the it
+         * @param it
          */
         ArrayEntryIterator(Iterator<Map.Entry<Wrapper<K>, V>> it) {
             this.it = it;
@@ -516,7 +516,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Next.
          *
-         * @return the java.util. map. entry
+         * @return
          */
         @Override
         public java.util.Map.Entry<K, V> next() {
@@ -546,7 +546,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Instantiates a new array entry.
          *
-         * @param entry the entry
+         * @param entry
          */
         ArrayEntry(Map.Entry<Wrapper<K>, V> entry) {
             this.entry = entry;
@@ -555,7 +555,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Gets the key.
          *
-         * @return the key
+         * @return
          */
         @Override
         public K getKey() {
@@ -565,7 +565,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Gets the value.
          *
-         * @return the value
+         * @return
          */
         @Override
         public V getValue() {
@@ -575,8 +575,8 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Sets the value.
          *
-         * @param value the value
-         * @return the v
+         * @param value
+         * @return
          */
         @Override
         public V setValue(V value) {
@@ -586,7 +586,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -596,7 +596,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -607,7 +607,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {

@@ -57,12 +57,12 @@ public final class Maps {
     /**
      * New map.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
-     * @param <E> the element type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @return the map
+     * @param <E>
+     * @param c
+     * @param keyMapper
+     * @return
      * @throws E the e
      */
     public static <T, K, E extends Exception> Map<K, T> newMap(Collection<? extends T> c, final Try.Function<? super T, ? extends K, E> keyMapper) throws E {
@@ -84,12 +84,12 @@ public final class Maps {
     /**
      * New linked hash map.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
-     * @param <E> the element type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @return the map
+     * @param <E>
+     * @param c
+     * @param keyMapper
+     * @return
      * @throws E the e
      */
     public static <T, K, E extends Exception> Map<K, T> newLinkedHashMap(Collection<? extends T> c, final Try.Function<? super T, ? extends K, E> keyMapper)
@@ -112,15 +112,15 @@ public final class Maps {
     /**
      * New map.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -145,17 +145,17 @@ public final class Maps {
     /**
      * New map.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @param mapSupplier the map supplier
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -181,8 +181,8 @@ public final class Maps {
     /**
      * New target map.
      *
-     * @param m the m
-     * @return the map
+     * @param m
+     * @return
      */
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(Map<?, ?> m) {
@@ -192,9 +192,9 @@ public final class Maps {
     /**
      * New target map.
      *
-     * @param m the m
-     * @param size the size
-     * @return the map
+     * @param m
+     * @param size
+     * @return
      */
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(Map<?, ?> m, int size) {
@@ -228,8 +228,8 @@ public final class Maps {
     /**
      * New ordering map.
      *
-     * @param m the m
-     * @return the map
+     * @param m
+     * @return
      */
     @SuppressWarnings("rawtypes")
     static Map newOrderingMap(Map<?, ?> m) {
@@ -265,9 +265,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @return the nullable
+     * @param map
+     * @param key
+     * @return
      */
     public static <K, V> Nullable<V> get(final Map<K, V> map, final Object key) {
         if (N.isNullOrEmpty(map)) {
@@ -289,9 +289,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param keys the keys
-     * @return the if present for each
+     * @param map
+     * @param keys
+     * @return
      */
     public static <K, V> List<V> getIfPresentForEach(final Map<K, V> map, final Collection<?> keys) {
         if (N.isNullOrEmpty(map) || N.isNullOrEmpty(keys)) {
@@ -318,10 +318,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @param defaultValue the default value
-     * @return the or default
+     * @param map
+     * @param key
+     * @param defaultValue
+     * @return
      */
     public static <K, V> V getOrDefault(final Map<K, V> map, final Object key, final V defaultValue) {
         if (N.isNullOrEmpty(map)) {
@@ -342,11 +342,11 @@ public final class Maps {
      * an empty immutable {@code List} if this map contains no mapping for the key.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @return the or empty list
+     * @param map
+     * @param key
+     * @return
      */
     public static <K, E, V extends List<E>> List<E> getOrEmptyList(final Map<K, V> map, final Object key) {
         if (N.isNullOrEmpty(map)) {
@@ -367,11 +367,11 @@ public final class Maps {
      * an empty immutable {@code Set} if this map contains no mapping for the key.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @return the or empty set
+     * @param map
+     * @param key
+     * @return
      */
     public static <K, E, V extends Set<E>> Set<E> getOrEmptySet(final Map<K, V> map, final Object key) {
         if (N.isNullOrEmpty(map)) {
@@ -392,10 +392,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param keys the keys
-     * @param defaultValue the default value
-     * @return the or default for each
+     * @param map
+     * @param keys
+     * @param defaultValue
+     * @return
      */
     public static <K, V> List<V> getOrDefaultForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
         if (N.isNullOrEmpty(keys)) {
@@ -424,10 +424,10 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists in the specified {@code map} contains, or the new put {@code List} if it's absent.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param map the map
-     * @param key the key
-     * @return the and put list if absent
+     * @param <E>
+     * @param map
+     * @param key
+     * @return
      */
     public static <K, E> List<E> getAndPutListIfAbsent(final Map<K, List<E>> map, final K key) {
         List<E> v = map.get(key);
@@ -444,10 +444,10 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists in the specified {@code map} contains, or the new put {@code Set} if it's absent.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param map the map
-     * @param key the key
-     * @return the and put set if absent
+     * @param <E>
+     * @param map
+     * @param key
+     * @return
      */
     public static <K, E> Set<E> getAndPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
@@ -464,10 +464,10 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists in the specified {@code map} contains, or the new put {@code Set} if it's absent.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param map the map
-     * @param key the key
-     * @return the and put linked hash set if absent
+     * @param <E>
+     * @param map
+     * @param key
+     * @return
      */
     public static <K, E> Set<E> getAndPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
@@ -484,11 +484,11 @@ public final class Maps {
      * Returns the value associated with the specified {@code key} if it exists in the specified {@code map} contains, or the new put {@code Map} if it's absent.
      *
      * @param <K> the key type
-     * @param <KK> the generic type
-     * @param <VV> the generic type
-     * @param map the map
-     * @param key the key
-     * @return the and put map if absent
+     * @param <KK>
+     * @param <VV>
+     * @param map
+     * @param key
+     * @return
      */
     public static <K, KK, VV> Map<KK, VV> getAndPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
@@ -504,8 +504,8 @@ public final class Maps {
     /**
      * Check if the specified <code>Map</code> contains the specified <code>Entry</code>.
      *
-     * @param map the map
-     * @param entry the entry
+     * @param map
+     * @param entry
      * @return true, if successful
      */
     public static boolean contains(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
@@ -515,9 +515,9 @@ public final class Maps {
     /**
      * Contains.
      *
-     * @param map the map
-     * @param key the key
-     * @param value the value
+     * @param map
+     * @param key
+     * @param value
      * @return true, if successful
      */
     public static boolean contains(final Map<?, ?> map, final Object key, final Object value) {
@@ -535,9 +535,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param map2 the map 2
-     * @return the map
+     * @param map
+     * @param map2
+     * @return
      */
     public static <K, V> Map<K, V> intersection(final Map<K, V> map, final Map<? extends K, ? extends V> map2) {
         if (N.isNullOrEmpty(map) || N.isNullOrEmpty(map2)) {
@@ -563,9 +563,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param map2 the map 2
-     * @return the map
+     * @param map
+     * @param map2
+     * @return
      */
     public static <K, V> Map<K, Pair<V, Nullable<V>>> difference(final Map<K, V> map, final Map<K, V> map2) {
         if (N.isNullOrEmpty(map)) {
@@ -601,9 +601,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param map2 the map 2
-     * @return the map
+     * @param map
+     * @param map2
+     * @return
      */
     public static <K, V> Map<K, Pair<Nullable<V>, Nullable<V>>> symmetricDifference(final Map<K, V> map, final Map<K, V> map2) {
         final boolean isIdentityHashMap = (N.notNullOrEmpty(map) && map instanceof IdentityHashMap)
@@ -656,10 +656,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param map
+     * @param key
+     * @param value
+     * @return
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, K key, final V value) {
         V v = map.get(key);
@@ -676,10 +676,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @param supplier the supplier
-     * @return the v
+     * @param map
+     * @param key
+     * @param supplier
+     * @return
      */
     public static <K, V> V putIfAbsent(final Map<K, V> map, K key, final Supplier<V> supplier) {
         V v = map.get(key);
@@ -696,8 +696,8 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param entry the entry
+     * @param map
+     * @param entry
      * @return true, if successful
      */
     public static <K, V> boolean remove(final Map<K, V> map, Map.Entry<?, ?> entry) {
@@ -709,9 +709,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @param value the value
+     * @param map
+     * @param key
+     * @param value
      * @return true, if successful
      */
     public static <K, V> boolean remove(final Map<K, V> map, final Object key, final Object value) {
@@ -732,8 +732,8 @@ public final class Maps {
     /**
      * Removes the keys.
      *
-     * @param map the map
-     * @param keysToRemove the keys to remove
+     * @param map
+     * @param keysToRemove
      * @return <code>true</code> if any key/value was removed, otherwise <code>false</code>.
      */
     public static boolean removeKeys(final Map<?, ?> map, final Collection<?> keysToRemove) {
@@ -753,8 +753,8 @@ public final class Maps {
     /**
      * The the entries from the specified <code>Map</code>.
      *
-     * @param map the map
-     * @param entriesToRemove the entries to remove
+     * @param map
+     * @param entriesToRemove
      * @return <code>true</code> if any key/value was removed, otherwise <code>false</code>.
      */
     public static boolean removeEntries(final Map<?, ?> map, final Map<?, ?> entriesToRemove) {
@@ -778,9 +778,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param filter the filter
+     * @param <E>
+     * @param map
+     * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      * @throws E the e
      */
@@ -813,9 +813,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param filter the filter
+     * @param <E>
+     * @param map
+     * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      * @throws E the e
      */
@@ -848,9 +848,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param filter the filter
+     * @param <E>
+     * @param map
+     * @param filter
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      * @throws E the e
      */
@@ -883,10 +883,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @param oldValue the old value
-     * @param newValue the new value
+     * @param map
+     * @param key
+     * @param oldValue
+     * @param newValue
      * @return true, if successful
      */
     public static <K, V> boolean replace(final Map<K, V> map, final K key, final V oldValue, final V newValue) {
@@ -909,10 +909,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param key the key
-     * @param newValue the new value
-     * @return the v
+     * @param map
+     * @param key
+     * @param newValue
+     * @return
      */
     public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) {
         if (N.isNullOrEmpty(map)) {
@@ -933,9 +933,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param function the function
+     * @param <E>
+     * @param map
+     * @param function
      * @throws E the e
      */
     public static <K, V, E extends Exception> void replaceAll(final Map<K, V> map, final Try.BiFunction<? super K, ? super V, ? extends V, E> function)
@@ -975,9 +975,9 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param action the action
+     * @param <E>
+     * @param map
+     * @param action
      * @throws E the e
      */
     public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Try.BiConsumer<? super K, ? super V, E> action) throws E {
@@ -997,10 +997,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param predicate the predicate
-     * @return the map
+     * @param <E>
+     * @param map
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public static <K, V, E extends Exception> Map<K, V> filter(final Map<K, V> map, final Try.BiPredicate<? super K, ? super V, E> predicate) throws E {
@@ -1024,10 +1024,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param predicate the predicate
-     * @return the map
+     * @param <E>
+     * @param map
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public static <K, V, E extends Exception> Map<K, V> filterByKey(final Map<K, V> map, final Try.Predicate<? super K, E> predicate) throws E {
@@ -1051,10 +1051,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param predicate the predicate
-     * @return the map
+     * @param <E>
+     * @param map
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public static <K, V, E extends Exception> Map<K, V> filterByValue(final Map<K, V> map, final Try.Predicate<? super V, E> predicate) throws E {
@@ -1078,8 +1078,8 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the map
+     * @param map
+     * @return
      * @see Multimap#invertFrom(Map, com.landawn.abacus.util.function.Supplier)
      * @see ListMultimap#invertFrom(Map)
      * @see ListMultimap#invertFrom(Map)
@@ -1103,10 +1103,10 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param mergeOp the merge op
-     * @return the map
+     * @param <E>
+     * @param map
+     * @param mergeOp
+     * @return
      * @throws E the e
      */
     public static <K, V, E extends Exception> Map<V, K> invert(final Map<K, V> map, Try.BinaryOperator<K, E> mergeOp) throws E {
@@ -1137,8 +1137,8 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the map
+     * @param map
+     * @return
      * @see Multimap#flatInvertFrom(Map, com.landawn.abacus.util.function.Supplier)
      * @see ListMultimap#flatInvertFrom(Map)
      * @see SetMultimap#flatInvertFrom(Map)
@@ -1173,10 +1173,10 @@ public final class Maps {
     /**
      * Map 2 entity.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param m the m
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param m
+     * @return
      */
     public static <T> T map2Entity(final Class<T> targetClass, final Map<String, Object> m) {
         return map2Entity(targetClass, m, false, true);
@@ -1185,12 +1185,12 @@ public final class Maps {
     /**
      * Map 2 entity.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param m the m
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoreUnknownProperty the ignore unknown property
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param m
+     * @param ignoreNullProperty
+     * @param ignoreUnknownProperty
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T map2Entity(final Class<T> targetClass, final Map<String, Object> m, final boolean ignoreNullProperty,
@@ -1234,11 +1234,11 @@ public final class Maps {
     /**
      * Map 2 entity.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param m the m
-     * @param selectPropNames the select prop names
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param m
+     * @param selectPropNames
+     * @return
      */
     public static <T> T map2Entity(final Class<T> targetClass, final Map<String, Object> m, final Collection<String> selectPropNames) {
         checkEntityClass(targetClass);
@@ -1277,10 +1277,10 @@ public final class Maps {
     /**
      * Map 2 entity.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param mList the m list
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param mList
+     * @return
      */
     public static <T> List<T> map2Entity(final Class<T> targetClass, final Collection<Map<String, Object>> mList) {
         return map2Entity(targetClass, mList, false, true);
@@ -1289,12 +1289,12 @@ public final class Maps {
     /**
      * Map 2 entity.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param mList the m list
-     * @param igoreNullProperty the igore null property
-     * @param ignoreUnknownProperty the ignore unknown property
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param mList
+     * @param igoreNullProperty
+     * @param ignoreUnknownProperty
+     * @return
      */
     public static <T> List<T> map2Entity(final Class<T> targetClass, final Collection<Map<String, Object>> mList, final boolean igoreNullProperty,
             final boolean ignoreUnknownProperty) {
@@ -1312,11 +1312,11 @@ public final class Maps {
     /**
      * Map 2 entity.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param mList the m list
-     * @param selectPropNames the select prop names
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param mList
+     * @param selectPropNames
+     * @return
      */
     public static <T> List<T> map2Entity(final Class<T> targetClass, final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames) {
         checkEntityClass(targetClass);
@@ -1333,8 +1333,8 @@ public final class Maps {
     /**
      * Check entity class.
      *
-     * @param <T> the generic type
-     * @param cls the cls
+     * @param <T>
+     * @param cls
      */
     private static <T> void checkEntityClass(final Class<T> cls) {
         if (!ClassUtil.isEntity(cls)) {
@@ -1345,8 +1345,8 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entity the entity
-     * @return the map
+     * @param entity
+     * @return
      */
     public static Map<String, Object> entity2Map(final Object entity) {
         return entity2Map(entity, false);
@@ -1355,9 +1355,9 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @return
      */
     public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty) {
         return entity2Map(entity, ignoreNullProperty, null);
@@ -1366,9 +1366,9 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entity the entity
-     * @param ignoredPropNames the ignored prop names
-     * @return the map
+     * @param entity
+     * @param ignoredPropNames
+     * @return
      */
     public static Map<String, Object> entity2Map(final Object entity, final Collection<String> ignoredPropNames) {
         return entity2Map(entity, false, ignoredPropNames);
@@ -1377,10 +1377,10 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames) {
         return entity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
@@ -1389,11 +1389,11 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
@@ -1409,10 +1409,10 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param <M> the generic type
-     * @param entity the entity
-     * @param mapSupplier the map supplier
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param entity
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final Object entity, final Supplier<? extends M> mapSupplier) {
         return entity2Map(mapSupplier.get(), entity);
@@ -1421,10 +1421,10 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity) {
         return entity2Map(resultMap, entity, false);
@@ -1433,11 +1433,11 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty) {
         return entity2Map(resultMap, entity, ignoreNullProperty, null);
@@ -1446,11 +1446,11 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoredPropNames the ignored prop names
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoredPropNames
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final Collection<String> ignoredPropNames) {
         return entity2Map(resultMap, entity, false, ignoredPropNames);
@@ -1459,12 +1459,12 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames) {
@@ -1474,13 +1474,13 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
@@ -1600,8 +1600,8 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entityList the entity list
-     * @return the list
+     * @param entityList
+     * @return
      */
     public static List<Map<String, Object>> entity2Map(final Collection<?> entityList) {
         return entity2Map(entityList, false);
@@ -1610,9 +1610,9 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @return
      */
     public static List<Map<String, Object>> entity2Map(final Collection<?> entityList, final boolean ignoreNullProperty) {
         return entity2Map(entityList, ignoreNullProperty, null);
@@ -1621,9 +1621,9 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entityList the entity list
-     * @param ignoredPropNames the ignored prop names
-     * @return the list
+     * @param entityList
+     * @param ignoredPropNames
+     * @return
      */
     public static List<Map<String, Object>> entity2Map(final Collection<?> entityList, final Collection<String> ignoredPropNames) {
         return entity2Map(entityList, false, ignoredPropNames);
@@ -1632,10 +1632,10 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static List<Map<String, Object>> entity2Map(final Collection<?> entityList, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames) {
@@ -1645,11 +1645,11 @@ public final class Maps {
     /**
      * Entity 2 map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static List<Map<String, Object>> entity2Map(final Collection<?> entityList, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
@@ -1665,8 +1665,8 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entity the entity
-     * @return the map
+     * @param entity
+     * @return
      */
     public static Map<String, Object> deepEntity2Map(final Object entity) {
         return deepEntity2Map(entity, false);
@@ -1675,9 +1675,9 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @return
      */
     public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty) {
         return deepEntity2Map(entity, ignoreNullProperty, null);
@@ -1686,9 +1686,9 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entity the entity
-     * @param ignoredPropNames the ignored prop names
-     * @return the map
+     * @param entity
+     * @param ignoredPropNames
+     * @return
      */
     public static Map<String, Object> deepEntity2Map(final Object entity, final Collection<String> ignoredPropNames) {
         return deepEntity2Map(entity, false, ignoredPropNames);
@@ -1697,10 +1697,10 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames) {
         return deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
@@ -1709,11 +1709,11 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
@@ -1729,10 +1729,10 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param <M> the generic type
-     * @param entity the entity
-     * @param mapSupplier the map supplier
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param entity
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final Supplier<? extends M> mapSupplier) {
         return deepEntity2Map(mapSupplier.get(), entity);
@@ -1741,10 +1741,10 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity) {
         return deepEntity2Map(resultMap, entity, false);
@@ -1753,11 +1753,11 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty) {
         return deepEntity2Map(resultMap, entity, ignoreNullProperty, null);
@@ -1766,11 +1766,11 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoredPropNames the ignored prop names
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoredPropNames
+     * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final Collection<String> ignoredPropNames) {
         return deepEntity2Map(resultMap, entity, false, ignoredPropNames);
@@ -1779,12 +1779,12 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames) {
@@ -1794,13 +1794,13 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
@@ -1932,8 +1932,8 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entityList the entity list
-     * @return the list
+     * @param entityList
+     * @return
      */
     public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList) {
         return deepEntity2Map(entityList, false);
@@ -1942,9 +1942,9 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @return
      */
     public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList, final boolean ignoreNullProperty) {
         return deepEntity2Map(entityList, ignoreNullProperty, null);
@@ -1953,9 +1953,9 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entityList the entity list
-     * @param ignoredPropNames the ignored prop names
-     * @return the list
+     * @param entityList
+     * @param ignoredPropNames
+     * @return
      */
     public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList, final Collection<String> ignoredPropNames) {
         final boolean ignoreNullProperty = N.isNullOrEmpty(entityList) ? true
@@ -1967,10 +1967,10 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames) {
@@ -1980,11 +1980,11 @@ public final class Maps {
     /**
      * Deep entity 2 map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
@@ -2000,8 +2000,8 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entity the entity
-     * @return the map
+     * @param entity
+     * @return
      */
     public static Map<String, Object> entity2FlatMap(final Object entity) {
         return entity2FlatMap(entity, false);
@@ -2010,9 +2010,9 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @return
      */
     public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty) {
         return entity2FlatMap(entity, ignoreNullProperty, null);
@@ -2021,9 +2021,9 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entity the entity
-     * @param ignoredPropNames the ignored prop names
-     * @return the map
+     * @param entity
+     * @param ignoredPropNames
+     * @return
      */
     public static Map<String, Object> entity2FlatMap(final Object entity, final Collection<String> ignoredPropNames) {
         return entity2FlatMap(entity, false, ignoredPropNames);
@@ -2032,10 +2032,10 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames) {
         return entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
@@ -2044,11 +2044,11 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the map
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
@@ -2064,10 +2064,10 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param <M> the generic type
-     * @param entity the entity
-     * @param mapSupplier the map supplier
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param entity
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final Supplier<? extends M> mapSupplier) {
         return entity2FlatMap(mapSupplier.get(), entity);
@@ -2076,10 +2076,10 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity) {
         return entity2FlatMap(resultMap, entity, false);
@@ -2088,11 +2088,11 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final boolean ignoreNullProperty) {
         return entity2FlatMap(resultMap, entity, ignoreNullProperty, null);
@@ -2101,11 +2101,11 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoredPropNames the ignored prop names
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoredPropNames
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final Collection<String> ignoredPropNames) {
         return entity2FlatMap(resultMap, entity, false, ignoredPropNames);
@@ -2114,12 +2114,12 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames) {
@@ -2129,13 +2129,13 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param <M> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the input <code>resultMap</code>
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
@@ -2145,14 +2145,14 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param <T> the generic type
-     * @param resultMap the result map
-     * @param entity the entity
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @param parentPropName the parent prop name
-     * @return the input <code>resultMap</code>
+     * @param <T>
+     * @param resultMap
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @param parentPropName
+     * @return
      */
     static <T extends Map<String, Object>> T entity2FlatMap(final T resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName) {
@@ -2400,8 +2400,8 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entityList the entity list
-     * @return the list
+     * @param entityList
+     * @return
      */
     public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList) {
         return entity2FlatMap(entityList, false);
@@ -2410,9 +2410,9 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @return
      */
     public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList, final boolean ignoreNullProperty) {
         return entity2FlatMap(entityList, ignoreNullProperty, null);
@@ -2421,9 +2421,9 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entityList the entity list
-     * @param ignoredPropNames the ignored prop names
-     * @return the list
+     * @param entityList
+     * @param ignoredPropNames
+     * @return
      */
     public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList, final Collection<String> ignoredPropNames) {
         return entity2FlatMap(entityList, false, ignoredPropNames);
@@ -2432,10 +2432,10 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
      */
     public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames) {
@@ -2445,11 +2445,11 @@ public final class Maps {
     /**
      * Entity 2 flat map.
      *
-     * @param entityList the entity list
-     * @param ignoreNullProperty the ignore null property
-     * @param ignoredPropNames the ignored prop names
-     * @param keyNamingPolicy the key naming policy
-     * @return the list
+     * @param entityList
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
      */
     public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
@@ -2465,8 +2465,8 @@ public final class Maps {
     /**
      * Flatten.
      *
-     * @param map the map
-     * @return the map
+     * @param map
+     * @return
      */
     public static Map<String, Object> flatten(Map<String, Object> map) {
         return flatten(map, Suppliers.<String, Object> ofMap());
@@ -2475,10 +2475,10 @@ public final class Maps {
     /**
      * Flatten.
      *
-     * @param <M> the generic type
-     * @param map the map
-     * @param mapSupplier the map supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M flatten(Map<String, Object> map, Supplier<? extends M> mapSupplier) {
         return flatten(map, ".", mapSupplier);
@@ -2487,11 +2487,11 @@ public final class Maps {
     /**
      * Flatten.
      *
-     * @param <M> the generic type
-     * @param map the map
-     * @param delimiter the delimiter
-     * @param mapSupplier the map supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param delimiter
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M flatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier) {
         final M result = mapSupplier.get();
@@ -2504,10 +2504,10 @@ public final class Maps {
     /**
      * Flatten.
      *
-     * @param map the map
-     * @param prefix the prefix
-     * @param delimiter the delimiter
-     * @param output the output
+     * @param map
+     * @param prefix
+     * @param delimiter
+     * @param output
      */
     private static void flatten(Map<String, Object> map, String prefix, String delimiter, Map<String, Object> output) {
         if (N.isNullOrEmpty(map)) {
@@ -2536,8 +2536,8 @@ public final class Maps {
     /**
      * Unflatten.
      *
-     * @param map the map
-     * @return the map
+     * @param map
+     * @return
      */
     public static Map<String, Object> unflatten(Map<String, Object> map) {
         return unflatten(map, Suppliers.<String, Object> ofMap());
@@ -2546,10 +2546,10 @@ public final class Maps {
     /**
      * Unflatten.
      *
-     * @param <M> the generic type
-     * @param map the map
-     * @param mapSupplier the map supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, Supplier<? extends M> mapSupplier) {
         return unflatten(map, ".", mapSupplier);
@@ -2558,11 +2558,11 @@ public final class Maps {
     /**
      * Unflatten.
      *
-     * @param <M> the generic type
-     * @param map the map
-     * @param delimiter the delimiter
-     * @param mapSupplier the map supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param delimiter
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier) {
         final M result = mapSupplier.get();
@@ -2598,8 +2598,8 @@ public final class Maps {
     /**
      * Map type 2 supplier.
      *
-     * @param mapType the map type
-     * @return the supplier
+     * @param mapType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     static Supplier mapType2Supplier(final Class<? extends Map> mapType) {
@@ -2632,8 +2632,8 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @param function the function
+     * @param map
+     * @param function
      */
     static <K, V> void replaceAll(Map<K, V> map, BiFunction<? super K, ? super V, ? extends V> function) {
         N.checkArgNotNull(function);
@@ -2652,11 +2652,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param map the map
-     * @param key the key
-     * @param value the value
-     * @param remappingFunction the remapping function
+     * @param <E>
+     * @param map
+     * @param key
+     * @param value
+     * @param remappingFunction
      * @throws E the e
      */
     static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Try.BiFunction<? super V, ? super V, ? extends V, E> remappingFunction)

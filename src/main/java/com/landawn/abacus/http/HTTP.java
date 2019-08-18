@@ -174,8 +174,8 @@ public final class HTTP {
     /**
      * Gets the content type.
      *
-     * @param contentFormat the content format
-     * @return the content type
+     * @param contentFormat
+     * @return
      */
     public static String getContentType(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
@@ -188,8 +188,8 @@ public final class HTTP {
     /**
      * Gets the content encoding.
      *
-     * @param contentFormat the content format
-     * @return the content encoding
+     * @param contentFormat
+     * @return
      */
     public static String getContentEncoding(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {
@@ -202,9 +202,9 @@ public final class HTTP {
     /**
      * Gets the content format.
      *
-     * @param contentType the content type
-     * @param contentEncoding the content encoding
-     * @return the content format
+     * @param contentType
+     * @param contentEncoding
+     * @return
      */
     public static ContentFormat getContentFormat(String contentType, String contentEncoding) {
         if (contentType == null) {
@@ -235,8 +235,8 @@ public final class HTTP {
     /**
      * Gets the content format.
      *
-     * @param connection the connection
-     * @return the content format
+     * @param connection
+     * @return
      */
     public static ContentFormat getContentFormat(final HttpURLConnection connection) {
         return getContentFormat(connection.getHeaderField(HttpHeaders.Names.CONTENT_TYPE), connection.getHeaderField(HttpHeaders.Names.CONTENT_ENCODING));
@@ -245,10 +245,10 @@ public final class HTTP {
     /**
      * Gets the parser.
      *
-     * @param <SC> the generic type
-     * @param <DC> the generic type
-     * @param contentFormat the content format
-     * @return the parser
+     * @param <SC>
+     * @param <DC>
+     * @param contentFormat
+     * @return
      */
     public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(ContentFormat contentFormat) {
         if (contentFormat == null) {
@@ -267,9 +267,9 @@ public final class HTTP {
     /**
      * Wrap input stream.
      *
-     * @param is the is
-     * @param contentFormat the content format
-     * @return the input stream
+     * @param is
+     * @param contentFormat
+     * @return
      */
     public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE || is == null) {
@@ -290,9 +290,9 @@ public final class HTTP {
     /**
      * Wrap output stream.
      *
-     * @param os the os
-     * @param contentFormat the content format
-     * @return the output stream
+     * @param os
+     * @param contentFormat
+     * @return
      */
     public static OutputStream wrapOutputStream(final OutputStream os, final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE || os == null) {
@@ -313,9 +313,9 @@ public final class HTTP {
     /**
      * Gets the output stream.
      *
-     * @param connection the connection
-     * @param contentFormat the content format
-     * @return the output stream
+     * @param connection
+     * @param contentFormat
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat) throws IOException {
@@ -325,11 +325,11 @@ public final class HTTP {
     /**
      * Gets the output stream.
      *
-     * @param connection the connection
-     * @param contentFormat the content format
-     * @param contentType the content type
-     * @param contentEncoding the content encoding
-     * @return the output stream
+     * @param connection
+     * @param contentFormat
+     * @param contentType
+     * @param contentEncoding
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat, String contentType,
@@ -357,8 +357,8 @@ public final class HTTP {
     /**
      * Gets the input stream.
      *
-     * @param connection the connection
-     * @return the input stream
+     * @param connection
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static InputStream getInputStream(final HttpURLConnection connection) throws IOException {
@@ -368,9 +368,9 @@ public final class HTTP {
     /**
      * Gets the input stream.
      *
-     * @param connection the connection
-     * @param contentFormat the content format
-     * @return the input stream
+     * @param connection
+     * @param contentFormat
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static InputStream getInputStream(final HttpURLConnection connection, ContentFormat contentFormat) throws IOException {
@@ -380,8 +380,8 @@ public final class HTTP {
     /**
      * Gets the input or error stream.
      *
-     * @param connection the connection
-     * @return the input or error stream
+     * @param connection
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static InputStream getInputOrErrorStream(final HttpURLConnection connection) throws IOException {
@@ -391,9 +391,9 @@ public final class HTTP {
     /**
      * Gets the input or error stream.
      *
-     * @param connection the connection
-     * @param contentFormat the content format
-     * @return the input or error stream
+     * @param connection
+     * @param contentFormat
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static InputStream getInputOrErrorStream(final HttpURLConnection connection, ContentFormat contentFormat) throws IOException {
@@ -407,7 +407,7 @@ public final class HTTP {
     /**
      * Flush.
      *
-     * @param os the os
+     * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void flush(OutputStream os) throws IOException {
@@ -423,8 +423,8 @@ public final class HTTP {
     /**
      * Gets the charset.
      *
-     * @param headers the headers
-     * @return the charset
+     * @param headers
+     * @return
      */
     public static Charset getCharset(HttpHeaders headers) {
         Charset charset = Charsets.UTF_8;
@@ -443,8 +443,8 @@ public final class HTTP {
     /**
      * Gets the charset.
      *
-     * @param headers the headers
-     * @return the charset
+     * @param headers
+     * @return
      */
     public static Charset getCharset(Map<String, ?> headers) {
         Charset charset = Charsets.UTF_8;
@@ -474,8 +474,8 @@ public final class HTTP {
     /**
      * Gets the charset.
      *
-     * @param contentType the content type
-     * @return the charset
+     * @param contentType
+     * @return
      */
     public static Charset getCharset(String contentType) {
         if (N.notNullOrEmpty(contentType)) {

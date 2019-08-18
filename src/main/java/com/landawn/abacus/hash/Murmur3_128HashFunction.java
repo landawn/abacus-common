@@ -50,7 +50,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     /**
      * Instantiates a new murmur 3 128 hash function.
      *
-     * @param seed the seed
+     * @param seed
      */
     Murmur3_128HashFunction(int seed) {
         this.seed = seed;
@@ -59,7 +59,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     /**
      * Bits.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int bits() {
@@ -69,7 +69,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -79,7 +79,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -89,7 +89,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     /**
      * Equals.
      *
-     * @param object the object
+     * @param object
      * @return true, if successful
      */
     @Override
@@ -104,7 +104,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -137,7 +137,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         /**
          * Instantiates a new murmur 3 128 hasher.
          *
-         * @param seed the seed
+         * @param seed
          */
         Murmur3_128Hasher(int seed) {
             super(CHUNK_SIZE);
@@ -149,7 +149,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         /**
          * Process.
          *
-         * @param bb the bb
+         * @param bb
          */
         @Override
         protected void process(ByteBuffer bb) {
@@ -162,8 +162,8 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         /**
          * Bmix 64.
          *
-         * @param k1 the k 1
-         * @param k2 the k 2
+         * @param k1
+         * @param k2
          */
         private void bmix64(long k1, long k2) {
             h1 ^= mixK1(k1);
@@ -182,7 +182,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         /**
          * Process remaining.
          *
-         * @param bb the bb
+         * @param bb
          */
         @Override
         protected void processRemaining(ByteBuffer bb) {
@@ -232,7 +232,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         /**
          * Make hash.
          *
-         * @return the hash code
+         * @return
          */
         @Override
         public HashCode makeHash() {
@@ -254,8 +254,8 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         /**
          * Fmix 64.
          *
-         * @param k the k
-         * @return the long
+         * @param k
+         * @return
          */
         private static long fmix64(long k) {
             k ^= k >>> 33;
@@ -269,8 +269,8 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         /**
          * Mix K 1.
          *
-         * @param k1 the k 1
-         * @return the long
+         * @param k1
+         * @return
          */
         private static long mixK1(long k1) {
             k1 *= C1;
@@ -282,8 +282,8 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         /**
          * Mix K 2.
          *
-         * @param k2 the k 2
-         * @return the long
+         * @param k2
+         * @return
          */
         private static long mixK2(long k2) {
             k2 *= C2;

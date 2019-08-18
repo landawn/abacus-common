@@ -29,7 +29,7 @@ import com.landawn.abacus.util.function.Supplier;
  *
  * @author Haiyang Li
  * @param <K> the key type
- * @param <E> the element type
+ * @param <E>
  * @see N#newSetMultimap()
  * @see N#newSetMultimap(Class, Class)
  * @see N#newSetMultimap(Supplier, Supplier)
@@ -47,7 +47,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Instantiates a new sets the multimap.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     SetMultimap(int initialCapacity) {
         this(new HashMap<K, Set<E>>(initialCapacity), HashSet.class);
@@ -56,8 +56,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Instantiates a new sets the multimap.
      *
-     * @param mapType the map type
-     * @param valueType the value type
+     * @param mapType
+     * @param valueType
      */
     @SuppressWarnings("rawtypes")
     SetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
@@ -67,8 +67,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Instantiates a new sets the multimap.
      *
-     * @param mapSupplier the map supplier
-     * @param valueSupplier the value supplier
+     * @param mapSupplier
+     * @param valueSupplier
      */
     SetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier, final Supplier<? extends Set<E>> valueSupplier) {
         super(mapSupplier, valueSupplier);
@@ -77,8 +77,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Instantiates a new sets the multimap.
      *
-     * @param valueMap the value map
-     * @param valueType the value type
+     * @param valueMap
+     * @param valueType
      */
     @Internal
     @SuppressWarnings("rawtypes")
@@ -89,8 +89,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Instantiates a new sets the multimap.
      *
-     * @param valueMap the value map
-     * @param valueSupplier the value supplier
+     * @param valueMap
+     * @param valueSupplier
      */
     @Internal
     SetMultimap(final Map<K, Set<E>> valueMap, final Supplier<? extends Set<E>> valueSupplier) {
@@ -101,10 +101,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Of.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @return the sets the multimap
+     * @param <E>
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1) {
         final SetMultimap<K, E> map = new SetMultimap<>();
@@ -118,12 +118,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Of.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @return the sets the multimap
+     * @param <E>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2) {
         final SetMultimap<K, E> map = new SetMultimap<>();
@@ -138,14 +138,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Of.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @return the sets the multimap
+     * @param <E>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3) {
         final SetMultimap<K, E> map = new SetMultimap<>();
@@ -161,16 +161,16 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Of.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @return the sets the multimap
+     * @param <E>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4) {
         final SetMultimap<K, E> map = new SetMultimap<>();
@@ -187,18 +187,18 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Of.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @return the sets the multimap
+     * @param <E>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5) {
@@ -217,20 +217,20 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Of.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @return the sets the multimap
+     * @param <E>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6) {
@@ -250,22 +250,22 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Of.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @param k7 the k 7
-     * @param v7 the v 7
-     * @return the sets the multimap
+     * @param <E>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6, final K k7, final E v7) {
@@ -286,9 +286,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * From.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param map the map
-     * @return the sets the multimap
+     * @param <E>
+     * @param map
+     * @return
      */
     public static <K, E> SetMultimap<K, E> from(final Map<? extends K, ? extends E> map) {
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
@@ -304,9 +304,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Fromm.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param map the map
-     * @return the sets the multimap
+     * @param <E>
+     * @param map
+     * @return
      */
     public static <K, E> SetMultimap<K, E> fromm(final Map<? extends K, ? extends Collection<? extends E>> map) {
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
@@ -323,12 +323,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * From.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
-     * @param <X> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @return the sets the multimap
+     * @param <X>
+     * @param c
+     * @param keyMapper
+     * @return
      * @throws X the x
      */
     public static <T, K, X extends Exception> SetMultimap<K, T> from(final Collection<? extends T> c, final Try.Function<? super T, ? extends K, X> keyMapper)
@@ -349,15 +349,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * From.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
-     * @param <E> the element type
-     * @param <X> the generic type
-     * @param <X2> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @return the sets the multimap
+     * @param <E>
+     * @param <X>
+     * @param <X2>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
      * @throws X the x
      * @throws X2 the x2
      */
@@ -381,9 +381,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param map the map
-     * @return the sets the multimap
+     * @param <E>
+     * @param map
+     * @return
      * @see Multimap#invertFrom(Map, com.landawn.abacus.util.function.Supplier)
      */
     public static <K, E> SetMultimap<E, K> invertFrom(final Map<K, E> map) {
@@ -402,9 +402,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Flat invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param map the map
-     * @return the sets the multimap
+     * @param <E>
+     * @param map
+     * @return
      * @see Multimap#flatInvertFrom(Map, com.landawn.abacus.util.function.Supplier)
      */
     public static <K, E> SetMultimap<E, K> flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map) {
@@ -429,10 +429,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param map the map
-     * @return the sets the multimap
+     * @param map
+     * @return
      */
     public static <K, E, V extends Collection<E>> SetMultimap<E, K> invertFrom(final Multimap<K, E, V> map) {
         final SetMultimap<E, K> multimap = new SetMultimap<>(Maps.newOrderingMap(map.valueMap), HashSet.class);
@@ -456,10 +456,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Concat.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @return the sets the multimap
+     * @param <E>
+     * @param a
+     * @param b
+     * @return
      */
     public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
         if (a == null) {
@@ -475,11 +475,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Concat.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the sets the multimap
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b,
             final Map<? extends K, ? extends E> c) {
@@ -503,10 +503,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Wrap.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param map the map
-     * @return the sets the multimap
+     * @param map
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map) {
@@ -529,11 +529,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Wrapp.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param map the map
-     * @param valueSupplier the value supplier
-     * @return the sets the multimap
+     * @param map
+     * @param valueSupplier
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrapp(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
@@ -547,12 +547,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * From.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param map the map
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param multimapSupplier
+     * @return
      */
     @Deprecated
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M from(final Map<? extends K, ? extends E> map,
@@ -564,12 +564,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Fromm.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param map the map
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param multimapSupplier
+     * @return
      */
     @Deprecated
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M fromm(final Map<? extends K, ? extends Collection<? extends E>> map,
@@ -580,15 +580,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * From.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <X> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param <X>
+     * @param c
+     * @param keyMapper
+     * @param multimapSupplier
+     * @return
      * @throws X the x
      */
     @Deprecated
@@ -600,18 +600,18 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * From.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <X> the generic type
-     * @param <X2> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param <X>
+     * @param <X2>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @param multimapSupplier
+     * @return
      * @throws X the x
      * @throws X2 the x2
      */
@@ -626,12 +626,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param map the map
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param multimapSupplier
+     * @return
      */
     @Deprecated
     public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M invertFrom(final Map<K, E> map,
@@ -643,12 +643,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Flat invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param map the map
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param map
+     * @param multimapSupplier
+     * @return
      */
     @Deprecated
     public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map,
@@ -660,13 +660,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Invert from.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <VV> the generic type
-     * @param <M> the generic type
-     * @param multimap the multimap
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <VV>
+     * @param <M>
+     * @param multimap
+     * @param multimapSupplier
+     * @return
      */
     @Deprecated
     public static <K, E, V extends Collection<E>, VV extends Collection<K>, M extends Multimap<E, K, VV>> M invertFrom(final Multimap<K, E, V> multimap,
@@ -678,13 +678,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Concat.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param a the a
-     * @param b the b
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param a
+     * @param b
+     * @param multimapSupplier
+     * @return
      */
     @Deprecated
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
@@ -696,14 +696,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Concat.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param multimapSupplier the multimap supplier
-     * @return the m
+     * @param <M>
+     * @param a
+     * @param b
+     * @param c
+     * @param multimapSupplier
+     * @return
      */
     @Deprecated
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
@@ -715,11 +715,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Wrap.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param map the map
-     * @param valueSupplier the value supplier
-     * @return the multimap
+     * @param map
+     * @param valueSupplier
+     * @return
      */
     @Deprecated
     public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
@@ -729,9 +729,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Filter by key.
      *
-     * @param <X> the generic type
-     * @param filter the filter
-     * @return the sets the multimap
+     * @param <X>
+     * @param filter
+     * @return
      * @throws X the x
      */
     @Override
@@ -750,9 +750,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Filter by value.
      *
-     * @param <X> the generic type
-     * @param filter the filter
-     * @return the sets the multimap
+     * @param <X>
+     * @param filter
+     * @return
      * @throws X the x
      */
     @Override
@@ -771,9 +771,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Filter.
      *
-     * @param <X> the generic type
-     * @param filter the filter
-     * @return the sets the multimap
+     * @param <X>
+     * @param filter
+     * @return
      * @throws X the x
      */
     @Override
@@ -792,7 +792,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * Copy.
      *
-     * @return the sets the multimap
+     * @return
      */
     @Override
     public SetMultimap<K, E> copy() {
@@ -806,7 +806,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * To immutable map.
      *
-     * @return the immutable map
+     * @return
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap() {
         final Map<K, ImmutableSet<E>> map = Maps.newOrderingMap(valueMap);
@@ -821,8 +821,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     /**
      * To immutable map.
      *
-     * @param mapSupplier the map supplier
-     * @return the immutable map
+     * @param mapSupplier
+     * @return
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) {
         final Map<K, ImmutableSet<E>> map = mapSupplier.apply(valueMap.size());

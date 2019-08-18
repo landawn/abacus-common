@@ -40,14 +40,14 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Updates this hasher with the given byte.
      *
-     * @param b the b
+     * @param b
      */
     protected abstract void update(byte b);
 
     /**
      * Updates this hasher with the given bytes.
      *
-     * @param b the b
+     * @param b
      */
     protected void update(byte[] b) {
         update(b, 0, b.length);
@@ -56,9 +56,9 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Updates this hasher with {@code len} bytes starting at {@code off} in the given buffer.
      *
-     * @param b the b
-     * @param off the off
-     * @param len the len
+     * @param b
+     * @param off
+     * @param len
      */
     protected void update(byte[] b, int off, int len) {
         for (int i = off; i < off + len; i++) {
@@ -69,8 +69,8 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Put.
      *
-     * @param b the b
-     * @return the hasher
+     * @param b
+     * @return
      */
     @Override
     public Hasher put(byte b) {
@@ -81,8 +81,8 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Put.
      *
-     * @param bytes the bytes
-     * @return the hasher
+     * @param bytes
+     * @return
      */
     @Override
     public Hasher put(byte[] bytes) {
@@ -94,10 +94,10 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Put.
      *
-     * @param bytes the bytes
-     * @param off the off
-     * @param len the len
-     * @return the hasher
+     * @param bytes
+     * @param off
+     * @param len
+     * @return
      */
     @Override
     public Hasher put(byte[] bytes, int off, int len) {
@@ -110,8 +110,8 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Updates the sink with the given number of bytes from the buffer.
      *
-     * @param bytes the bytes
-     * @return the hasher
+     * @param bytes
+     * @return
      */
     private Hasher update(int bytes) {
         try {
@@ -125,8 +125,8 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Put.
      *
-     * @param s the s
-     * @return the hasher
+     * @param s
+     * @return
      */
     @Override
     public Hasher put(short s) {
@@ -137,8 +137,8 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Put.
      *
-     * @param i the i
-     * @return the hasher
+     * @param i
+     * @return
      */
     @Override
     public Hasher put(int i) {
@@ -149,8 +149,8 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Put.
      *
-     * @param l the l
-     * @return the hasher
+     * @param l
+     * @return
      */
     @Override
     public Hasher put(long l) {
@@ -161,8 +161,8 @@ abstract class AbstractByteHasher extends AbstractHasher {
     /**
      * Put.
      *
-     * @param c the c
-     * @return the hasher
+     * @param c
+     * @return
      */
     @Override
     public Hasher put(char c) {

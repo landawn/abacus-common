@@ -30,14 +30,14 @@ public interface DataSourceManager {
     /**
      * Gets the data source selector.
      *
-     * @return the data source selector
+     * @return
      */
     DataSourceSelector getDataSourceSelector();
 
     /**
      * Returns the first(primary) dataSource specified for the live env in the configuration.
      *
-     * @return the primary data source
+     * @return
      */
     DataSource getPrimaryDataSource();
 
@@ -52,14 +52,14 @@ public interface DataSourceManager {
     /**
      * Returns all the active data sources for the live env.
      *
-     * @return the active data sources
+     * @return
      */
     Map<String, DataSource> getActiveDataSources();
 
     /**
      * Gets the properties.
      *
-     * @return the properties used to manage the data source.
+     * @return
      */
     Properties<String, String> getProperties();
 

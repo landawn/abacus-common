@@ -55,7 +55,7 @@ public final class ISO8601Util {
      * Format a date into 'yyyy-MM-ddThh:mm:ssZ' (default timezone, no milliseconds precision).
      *
      * @param date the date to format
-     * @return the date formatted as 'yyyy-MM-ddThh:mm:ssZ'
+     * @return
      */
     public static String format(Date date) {
         return format(date, false, TIMEZONE_Z);
@@ -66,7 +66,7 @@ public final class ISO8601Util {
      * 
      * @param date the date to format
      * @param millis true to include millis precision otherwise false
-     * @return the date formatted as 'yyyy-MM-ddThh:mm:ss[.sss]Z'
+     * @return
      */
     public static String format(Date date, boolean millis) {
         return format(date, millis, TIMEZONE_Z);
@@ -75,10 +75,10 @@ public final class ISO8601Util {
     /**
      * Format.
      *
-     * @param date the date
-     * @param millis the millis
-     * @param tz the tz
-     * @return the string
+     * @param date
+     * @param millis
+     * @param tz
+     * @return
      */
     @Deprecated // since 2.9
     public static String format(Date date, boolean millis, TimeZone tz) {
@@ -91,8 +91,8 @@ public final class ISO8601Util {
      * @param date the date to format
      * @param millis true to include millis precision otherwise false
      * @param tz timezone to use for the formatting (UTC will produce 'Z')
-     * @param loc the loc
-     * @return the date formatted as yyyy-MM-ddThh:mm:ss[.sss][Z|[+-]hh:mm]
+     * @param loc
+     * @return
      * @since 2.9
      */
     public static String format(Date date, boolean millis, TimeZone tz, Locale loc) {
@@ -127,8 +127,8 @@ public final class ISO8601Util {
     /**
      * Parses the.
      *
-     * @param date the date
-     * @return the date
+     * @param date
+     * @return
      */
     public static Date parse(String date) {
         return parse(date, new ParsePosition(0));
@@ -140,7 +140,7 @@ public final class ISO8601Util {
      *
      * @param date ISO string to parse in the appropriate format.
      * @param pos The position to start parsing from, updated to where parsing stopped.
-     * @return the parsed date
+     * @return
      */
     public static Date parse(String date, ParsePosition pos) {
         Exception fail = null;
@@ -308,7 +308,7 @@ public final class ISO8601Util {
      * @param value the string to parse
      * @param beginIndex the start index for the integer in the string
      * @param endIndex the end index for the integer in the string
-     * @return the int
+     * @return
      * @throws NumberFormatException if the value is not a number
      */
     private static int parseInt(String value, int beginIndex, int endIndex) throws NumberFormatException {
@@ -340,9 +340,9 @@ public final class ISO8601Util {
     /**
      * Returns the index of the first character in the string that is not a digit, starting at offset.
      *
-     * @param string the string
-     * @param offset the offset
-     * @return the int
+     * @param string
+     * @param offset
+     * @return
      */
     private static int indexOfNonDigit(String string, int offset) {
         for (int i = offset; i < string.length(); i++) {

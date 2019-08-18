@@ -34,8 +34,8 @@ public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V>
     /**
      * Instantiates a new immutable entry.
      *
-     * @param key the key
-     * @param value the value
+     * @param key
+     * @param value
      */
     public ImmutableEntry(K key, V value) {
         super(key, value);
@@ -44,7 +44,7 @@ public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V>
     /**
      * Instantiates a new immutable entry.
      *
-     * @param entry the entry
+     * @param entry
      */
     public ImmutableEntry(Map.Entry<? extends K, ? extends V> entry) {
         super(entry);
@@ -55,9 +55,9 @@ public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param key the key
-     * @param value the value
-     * @return the immutable entry
+     * @param key
+     * @param value
+     * @return
      */
     public static <K, V> ImmutableEntry<K, V> of(K key, V value) {
         return new ImmutableEntry<>(key, value);
@@ -68,8 +68,8 @@ public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param entry the entry
-     * @return the immutable entry
+     * @param entry
+     * @return
      */
     public static <K, V> ImmutableEntry<K, V> from(Map.Entry<? extends K, ? extends V> entry) {
         return new ImmutableEntry<K, V>(entry.getKey(), entry.getValue());
@@ -78,8 +78,8 @@ public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V>
     /**
      * Always throw UnsupportedOperationException.
      *
-     * @param v the v
-     * @return the v
+     * @param v
+     * @return
      * @throws UnsupportedOperationException the unsupported operation exception
      * @deprecated 
      */

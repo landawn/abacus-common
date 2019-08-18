@@ -53,7 +53,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Constructs a new MutableInt with the specified value.
      * 
-     * @param value  the initial value to store
+     * @param value the initial value to store
      */
     MutableInt(final int value) {
         super();
@@ -63,8 +63,8 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Of.
      *
-     * @param value the value
-     * @return the mutable int
+     * @param value
+     * @return
      */
     public static MutableInt of(final int value) {
         return new MutableInt(value);
@@ -73,7 +73,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Value.
      *
-     * @return the int
+     * @return
      */
     public int value() {
         return value;
@@ -83,7 +83,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Gets the value as a Integer instance.
      * 
-     * @return the value as a Integer, never null
+     * @return
      * @deprecated replace by {@link #value()}.
      */
     @Deprecated
@@ -94,7 +94,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Sets the value.
      * 
-     * @param value  the value to set
+     * @param value the value to set
      */
     public void setValue(final int value) {
         this.value = value;
@@ -103,8 +103,8 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Gets the and set.
      *
-     * @param value the value
-     * @return the and set
+     * @param value
+     * @return
      */
     public int getAndSet(final int value) {
         final int result = this.value;
@@ -115,8 +115,8 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Sets the and get.
      *
-     * @param value the value
-     * @return the int
+     * @param value
+     * @return
      */
     public int setAndGet(final int value) {
         this.value = value;
@@ -127,8 +127,8 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate - test the current value.
      * @return true, if successful
      * @throws E the e
@@ -146,8 +146,8 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate the first parameter is the current value, the second parameter is the new value.
      * @return true, if successful
      * @throws E the e
@@ -184,7 +184,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Adds a value to the value of this instance.
      * 
-     * @param operand  the value to add, not null
+     * @param operand the value to add, not null
      * @since Commons Lang 2.2
      */
     public void add(final int operand) {
@@ -194,7 +194,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Subtracts a value from the value of this instance.
      * 
-     * @param operand  the value to subtract, not null
+     * @param operand the value to subtract, not null
      * @since Commons Lang 2.2
      */
     public void subtract(final int operand) {
@@ -204,7 +204,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Increments by one the current value.
      *
-     * @return the previous value
+     * @return
      */
     public final int getAndIncrement() {
         return value++;
@@ -213,7 +213,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Decrements by one the current value.
      *
-     * @return the previous value
+     * @return
      */
     public final int getAndDecrement() {
         return value--;
@@ -222,7 +222,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Increments by one the current value.
      *
-     * @return the updated value
+     * @return
      */
     public final int incrementAndGet() {
         return ++value;
@@ -231,7 +231,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Decrements by one the current value.
      *
-     * @return the updated value
+     * @return
      */
     public final int decrementAndGet() {
         return --value;
@@ -241,7 +241,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * Adds the given value to the current value.
      *
      * @param delta the value to add
-     * @return the previous value
+     * @return
      */
     public final int getAndAdd(final int delta) {
         final int prev = value;
@@ -253,7 +253,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * Adds the given value to the current value.
      *
      * @param delta the value to add
-     * @return the updated value
+     * @return
      */
     public final int addAndGet(final int delta) {
         return value += delta;
@@ -264,7 +264,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Returns the value of this MutableInt as an int.
      *
-     * @return the numeric value represented by this object after conversion to type int.
+     * @return
      */
     @Override
     public int intValue() {
@@ -274,7 +274,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Returns the value of this MutableInt as a long.
      *
-     * @return the numeric value represented by this object after conversion to type long.
+     * @return
      */
     @Override
     public long longValue() {
@@ -284,7 +284,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Returns the value of this MutableInt as a float.
      *
-     * @return the numeric value represented by this object after conversion to type float.
+     * @return
      */
     @Override
     public float floatValue() {
@@ -294,7 +294,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Returns the value of this MutableInt as a double.
      *
-     * @return the numeric value represented by this object after conversion to type double.
+     * @return
      */
     @Override
     public double doubleValue() {
@@ -305,7 +305,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Compares this mutable to another in ascending order.
      * 
-     * @param other  the other mutable to compare to, not null
+     * @param other the other mutable to compare to, not null
      * @return negative if this is less, zero if equal, positive if greater
      */
     @Override
@@ -319,7 +319,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * not <code>null</code> and is a <code>MutableInt</code> object that contains the same <code>int</code> value
      * as this object.
      * 
-     * @param obj  the object to compare with, null returns false
+     * @param obj the object to compare with, null returns false
      * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
      */
     @Override
@@ -344,7 +344,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     /**
      * Returns the String value of this mutable.
      * 
-     * @return the mutable value as a string
+     * @return
      */
     @Override
     public String toString() {

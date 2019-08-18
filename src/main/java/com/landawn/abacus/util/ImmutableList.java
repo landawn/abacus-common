@@ -28,7 +28,7 @@ import java.util.function.UnaryOperator;
  * The Class ImmutableList.
  *
  * @author Haiyang Li
- * @param <E> the element type
+ * @param <E>
  * @since 0.8
  */
 public final class ImmutableList<E> extends ImmutableCollection<E> implements List<E> {
@@ -43,7 +43,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Instantiates a new immutable list.
      *
-     * @param list the list
+     * @param list
      */
     ImmutableList(List<? extends E> list) {
         super(Collections.unmodifiableList(list));
@@ -53,8 +53,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Empty.
      *
-     * @param <E> the element type
-     * @return the immutable list
+     * @param <E>
+     * @return
      */
     public static <E> ImmutableList<E> empty() {
         return EMPTY;
@@ -63,9 +63,9 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Just.
      *
-     * @param <E> the element type
-     * @param e the e
-     * @return the immutable list
+     * @param <E>
+     * @param e
+     * @return
      */
     public static <E> ImmutableList<E> just(E e) {
         return new ImmutableList<>(Collections.singletonList(e));
@@ -74,9 +74,9 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Of.
      *
-     * @param <E> the element type
-     * @param e the e
-     * @return the immutable list
+     * @param <E>
+     * @param e
+     * @return
      */
     public static <E> ImmutableList<E> of(E e) {
         return new ImmutableList<>(Collections.singletonList(e));
@@ -85,9 +85,9 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Of.
      *
-     * @param <E> the element type
+     * @param <E>
      * @param a the elements in this <code>array</code> are shared by the returned ImmutableList.
-     * @return the immutable list
+     * @return
      */
     @SafeVarargs
     public static <E> ImmutableList<E> of(E... a) {
@@ -101,9 +101,9 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Of.
      *
-     * @param <E> the element type
+     * @param <E>
      * @param list the elements in this <code>list</code> are shared by the returned ImmutableList.
-     * @return the immutable list
+     * @return
      */
     public static <E> ImmutableList<E> of(final List<? extends E> list) {
         if (list == null) {
@@ -118,9 +118,9 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Copy of.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @return the immutable list
+     * @param <E>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <E> ImmutableList<E> copyOf(final E... a) {
@@ -134,9 +134,9 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Copy of.
      *
-     * @param <E> the element type
-     * @param list the list
-     * @return the immutable list
+     * @param <E>
+     * @param list
+     * @return
      */
     public static <E> ImmutableList<E> copyOf(final Collection<? extends E> list) {
         if (N.isNullOrEmpty(list)) {
@@ -149,8 +149,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Gets the.
      *
-     * @param index the index
-     * @return the e
+     * @param index
+     * @return
      */
     @Override
     public E get(int index) {
@@ -160,8 +160,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Index of.
      *
-     * @param o the o
-     * @return the int
+     * @param o
+     * @return
      */
     @Override
     public int indexOf(Object o) {
@@ -171,8 +171,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Last index of.
      *
-     * @param o the o
-     * @return the int
+     * @param o
+     * @return
      */
     @Override
     public int lastIndexOf(Object o) {
@@ -182,7 +182,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * List iterator.
      *
-     * @return the list iterator
+     * @return
      */
     @Override
     public ListIterator<E> listIterator() {
@@ -192,8 +192,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * List iterator.
      *
-     * @param index the index
-     * @return the list iterator
+     * @param index
+     * @return
      */
     @Override
     public ListIterator<E> listIterator(int index) {
@@ -203,9 +203,9 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Sub list.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
@@ -215,8 +215,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param newElements the new elements
+     * @param index
+     * @param newElements
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -229,9 +229,9 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Sets the.
      *
-     * @param index the index
-     * @param element the element
-     * @return the e
+     * @param index
+     * @param element
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -243,8 +243,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Adds the.
      *
-     * @param index the index
-     * @param element the element
+     * @param index
+     * @param element
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -256,8 +256,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Removes the.
      *
-     * @param index the index
-     * @return the e
+     * @param index
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -269,7 +269,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Replace all.
      *
-     * @param operator the operator
+     * @param operator
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -281,7 +281,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Sort.
      *
-     * @param c the c
+     * @param c
      * @deprecated Unsupported operation.
      */
     @Deprecated

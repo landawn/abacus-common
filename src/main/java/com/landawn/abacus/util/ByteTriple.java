@@ -45,9 +45,9 @@ public class ByteTriple {
     /**
      * Instantiates a new byte triple.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
      */
     ByteTriple(byte _1, byte _2, byte _3) {
         this._1 = _1;
@@ -58,10 +58,10 @@ public class ByteTriple {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @return the byte triple
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @return
      */
     public static ByteTriple of(byte _1, byte _2, byte _3) {
         return new ByteTriple(_1, _2, _3);
@@ -70,7 +70,7 @@ public class ByteTriple {
     /**
      * Min.
      *
-     * @return the byte
+     * @return
      */
     public byte min() {
         return N.min(_1, _2, _3);
@@ -79,7 +79,7 @@ public class ByteTriple {
     /**
      * Max.
      *
-     * @return the byte
+     * @return
      */
     public byte max() {
         return N.max(_1, _2, _3);
@@ -88,7 +88,7 @@ public class ByteTriple {
     /**
      * Median.
      *
-     * @return the byte
+     * @return
      */
     public byte median() {
         return N.median(_1, _2, _3);
@@ -97,7 +97,7 @@ public class ByteTriple {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return _1 + _2 + _3;
@@ -106,7 +106,7 @@ public class ByteTriple {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return (0d + _1 + _2 + _3) / 3;
@@ -115,7 +115,7 @@ public class ByteTriple {
     /**
      * Reversed.
      *
-     * @return the byte triple
+     * @return
      */
     public ByteTriple reversed() {
         return new ByteTriple(_3, _2, _1);
@@ -124,7 +124,7 @@ public class ByteTriple {
     /**
      * To array.
      *
-     * @return the byte[]
+     * @return
      */
     public byte[] toArray() {
         return new byte[] { _1, _2, _3 };
@@ -133,7 +133,7 @@ public class ByteTriple {
     /**
      * To list.
      *
-     * @return the byte list
+     * @return
      */
     public ByteList toList() {
         return ByteList.of(_1, _2, _3);
@@ -142,8 +142,8 @@ public class ByteTriple {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.ByteConsumer<E> comsumer) throws E {
@@ -155,8 +155,8 @@ public class ByteTriple {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<ByteTriple, E> action) throws E {
@@ -166,10 +166,10 @@ public class ByteTriple {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<ByteTriple, U, E> mapper) throws E {
@@ -179,9 +179,9 @@ public class ByteTriple {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<ByteTriple> filter(final Try.Predicate<ByteTriple, E> predicate) throws E {
@@ -191,7 +191,7 @@ public class ByteTriple {
     /**
      * Stream.
      *
-     * @return the byte stream
+     * @return
      */
     public ByteStream stream() {
         return ByteStream.of(_1, _2, _3);
@@ -200,7 +200,7 @@ public class ByteTriple {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -210,7 +210,7 @@ public class ByteTriple {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -228,7 +228,7 @@ public class ByteTriple {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

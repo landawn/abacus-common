@@ -629,9 +629,9 @@ public abstract class Fn extends Comparators {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param supplier the supplier
-     * @return the t
+     * @param <T>
+     * @param supplier
+     * @return
      */
     public static <T> T get(final Supplier<T> supplier) {
         return supplier.get();
@@ -640,9 +640,9 @@ public abstract class Fn extends Comparators {
     /**
      * Returns a {@code Supplier} which returns a single instance created by calling the specified {@code supplier.get()}.
      *
-     * @param <T> the generic type
-     * @param supplier the supplier
-     * @return the supplier
+     * @param <T>
+     * @param supplier
+     * @return
      */
     public static <T> Supplier<T> memoize(final Supplier<T> supplier) {
         return new Supplier<T>() {
@@ -668,10 +668,10 @@ public abstract class Fn extends Comparators {
     /**
      * Memoize.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param func the func
-     * @return the function
+     * @param <T>
+     * @param <R>
+     * @param func
+     * @return
      */
     public static <T, R> Function<T, R> memoize(final Function<? super T, ? extends R> func) {
         return new Function<T, R>() {
@@ -719,10 +719,10 @@ public abstract class Fn extends Comparators {
      * The returned Collection will clean up before it's returned every time when {@code get} is called. 
      * Don't save the returned Collection object or use it to save objects.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param supplier the supplier
-     * @return the supplier<? extends c>
+     * @param <T>
+     * @param <C>
+     * @param supplier
+     * @return
      * @see {@code Stream.split/sliding};
      */
     @Beta
@@ -749,10 +749,10 @@ public abstract class Fn extends Comparators {
      * The returned Collection will clean up before it's returned every time when {@code get} is called. 
      * Don't save the returned Collection object or use it to save objects.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param supplier the supplier
-     * @return the int function<? extends c>
+     * @param <T>
+     * @param <C>
+     * @param supplier
+     * @return
      * @see {@code Stream.split/sliding};
      */
     @Beta
@@ -777,8 +777,8 @@ public abstract class Fn extends Comparators {
     /**
      * Close.
      *
-     * @param closeable the closeable
-     * @return the com.landawn.abacus.util.function. runnable
+     * @param closeable
+     * @return
      */
     public static com.landawn.abacus.util.function.Runnable close(final AutoCloseable closeable) {
         return new com.landawn.abacus.util.function.Runnable() {
@@ -799,8 +799,8 @@ public abstract class Fn extends Comparators {
     /**
      * Close all.
      *
-     * @param a the a
-     * @return the com.landawn.abacus.util.function. runnable
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static com.landawn.abacus.util.function.Runnable closeAll(final AutoCloseable... a) {
@@ -822,8 +822,8 @@ public abstract class Fn extends Comparators {
     /**
      * Close all.
      *
-     * @param c the c
-     * @return the com.landawn.abacus.util.function. runnable
+     * @param c
+     * @return
      */
     public static com.landawn.abacus.util.function.Runnable closeAll(final Collection<? extends AutoCloseable> c) {
         return new com.landawn.abacus.util.function.Runnable() {
@@ -844,8 +844,8 @@ public abstract class Fn extends Comparators {
     /**
      * Close quietly.
      *
-     * @param closeable the closeable
-     * @return the com.landawn.abacus.util.function. runnable
+     * @param closeable
+     * @return
      */
     public static com.landawn.abacus.util.function.Runnable closeQuietly(final AutoCloseable closeable) {
         return new com.landawn.abacus.util.function.Runnable() {
@@ -866,8 +866,8 @@ public abstract class Fn extends Comparators {
     /**
      * Close all quietly.
      *
-     * @param a the a
-     * @return the com.landawn.abacus.util.function. runnable
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static com.landawn.abacus.util.function.Runnable closeAllQuietly(final AutoCloseable... a) {
@@ -889,8 +889,8 @@ public abstract class Fn extends Comparators {
     /**
      * Close all quietly.
      *
-     * @param c the c
-     * @return the com.landawn.abacus.util.function. runnable
+     * @param c
+     * @return
      */
     public static com.landawn.abacus.util.function.Runnable closeAllQuietly(final Collection<? extends AutoCloseable> c) {
         return new com.landawn.abacus.util.function.Runnable() {
@@ -911,7 +911,7 @@ public abstract class Fn extends Comparators {
     /**
      * Empty action.
      *
-     * @return the com.landawn.abacus.util.function. runnable
+     * @return
      */
     public static com.landawn.abacus.util.function.Runnable emptyAction() {
         return EMPTY_ACTION;
@@ -920,8 +920,8 @@ public abstract class Fn extends Comparators {
     /**
      * Do nothing.
      *
-     * @param <T> the generic type
-     * @return the consumer
+     * @param <T>
+     * @return
      */
     public static <T> Consumer<T> doNothing() {
         return DO_NOTHING;
@@ -930,8 +930,8 @@ public abstract class Fn extends Comparators {
     /**
      * Close.
      *
-     * @param <T> the generic type
-     * @return the consumer
+     * @param <T>
+     * @return
      */
     public static <T extends AutoCloseable> Consumer<T> close() {
         return (Consumer<T>) CLOSE;
@@ -940,8 +940,8 @@ public abstract class Fn extends Comparators {
     /**
      * Close quietly.
      *
-     * @param <T> the generic type
-     * @return the consumer
+     * @param <T>
+     * @return
      */
     public static <T extends AutoCloseable> Consumer<T> closeQuietly() {
         return (Consumer<T>) CLOSE_QUIETLY;
@@ -950,9 +950,9 @@ public abstract class Fn extends Comparators {
     /**
      * Sleep.
      *
-     * @param <T> the generic type
-     * @param millis the millis
-     * @return the consumer
+     * @param <T>
+     * @param millis
+     * @return
      */
     public static <T> Consumer<T> sleep(final long millis) {
         return new Consumer<T>() {
@@ -966,9 +966,9 @@ public abstract class Fn extends Comparators {
     /**
      * Sleep uninterruptibly.
      *
-     * @param <T> the generic type
-     * @param millis the millis
-     * @return the consumer
+     * @param <T>
+     * @param millis
+     * @return
      */
     public static <T> Consumer<T> sleepUninterruptibly(final long millis) {
         return new Consumer<T>() {
@@ -982,8 +982,8 @@ public abstract class Fn extends Comparators {
     /**
      * Println.
      *
-     * @param <T> the generic type
-     * @return the consumer
+     * @param <T>
+     * @return
      */
     public static <T> Consumer<T> println() {
         return PRINTLN;
@@ -992,10 +992,10 @@ public abstract class Fn extends Comparators {
     /**
      * Println.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param separator the separator
-     * @return the bi consumer
+     * @param <T>
+     * @param <U>
+     * @param separator
+     * @return
      */
     public static <T, U> BiConsumer<T, U> println(final String separator) {
         N.checkArgNotNull(separator);
@@ -1038,8 +1038,8 @@ public abstract class Fn extends Comparators {
     /**
      * To str.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     public static <T> Function<T, String> toStr() {
         return TO_STRING;
@@ -1048,7 +1048,7 @@ public abstract class Fn extends Comparators {
     /**
      * To camel case.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> toCamelCase() {
         return TO_CAMEL_CASE;
@@ -1057,7 +1057,7 @@ public abstract class Fn extends Comparators {
     /**
      * To lower case.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> toLowerCase() {
         return TO_LOWER_CASE;
@@ -1066,7 +1066,7 @@ public abstract class Fn extends Comparators {
     /**
      * To lower case with underscore.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> toLowerCaseWithUnderscore() {
         return TO_LOWER_CASE_WITH_UNDERSCORE;
@@ -1075,7 +1075,7 @@ public abstract class Fn extends Comparators {
     /**
      * To upper case.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> toUpperCase() {
         return TO_UPPER_CASE;
@@ -1084,7 +1084,7 @@ public abstract class Fn extends Comparators {
     /**
      * To upper case with underscore.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> toUpperCaseWithUnderscore() {
         return TO_UPPER_CASE_WITH_UNDERSCORE;
@@ -1093,8 +1093,8 @@ public abstract class Fn extends Comparators {
     /**
      * Identity.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     public static <T> Function<T, T> identity() {
         return IDENTITY;
@@ -1104,9 +1104,9 @@ public abstract class Fn extends Comparators {
      * Keyed.
      *
      * @param <K> the key type
-     * @param <T> the generic type
-     * @param keyMapper the key mapper
-     * @return the function
+     * @param <T>
+     * @param keyMapper
+     * @return
      */
     public static <K, T> Function<T, Keyed<K, T>> keyed(final Function<? super T, K> keyMapper) {
         N.checkArgNotNull(keyMapper);
@@ -1139,8 +1139,8 @@ public abstract class Fn extends Comparators {
      * Val.
      *
      * @param <K> the key type
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, T> Function<Keyed<K, T>, T> val() {
@@ -1150,10 +1150,10 @@ public abstract class Fn extends Comparators {
     /**
      * Kk.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @return the function
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, K, V> Function<Map.Entry<Keyed<K, T>, V>, T> kk() {
@@ -1171,8 +1171,8 @@ public abstract class Fn extends Comparators {
     /**
      * Wrap.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<T, Wrapper<T>> wrap() {
@@ -1182,10 +1182,10 @@ public abstract class Fn extends Comparators {
     /**
      * Wrap.
      *
-     * @param <T> the generic type
-     * @param hashFunction the hash function
-     * @param equalsFunction the equals function
-     * @return the function
+     * @param <T>
+     * @param hashFunction
+     * @param equalsFunction
+     * @return
      */
     public static <T> Function<T, Wrapper<T>> wrap(final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction) {
         N.checkArgNotNull(hashFunction);
@@ -1211,8 +1211,8 @@ public abstract class Fn extends Comparators {
      * Unwrap.
      *
      * @param <K> the key type
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, T> Function<Wrapper<T>, T> unwrap() {
@@ -1224,7 +1224,7 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the function
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Function<Entry<K, V>, K> key() {
@@ -1236,7 +1236,7 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the function
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Function<Entry<K, V>, V> value() {
@@ -1248,7 +1248,7 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the function
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Function<Entry<K, V>, Entry<V, K>> inverse() {
@@ -1260,7 +1260,7 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the bi function
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> BiFunction<K, V, Map.Entry<K, V>> entry() {
@@ -1271,9 +1271,9 @@ public abstract class Fn extends Comparators {
      * Entry.
      *
      * @param <K> the key type
-     * @param <T> the generic type
-     * @param key the key
-     * @return the function
+     * @param <T>
+     * @param key
+     * @return
      */
     public static <K, T> Function<T, Map.Entry<K, T>> entry(final K key) {
         return new Function<T, Map.Entry<K, T>>() {
@@ -1288,9 +1288,9 @@ public abstract class Fn extends Comparators {
      * Entry.
      *
      * @param <K> the key type
-     * @param <T> the generic type
-     * @param keyMapper the key mapper
-     * @return the function
+     * @param <T>
+     * @param keyMapper
+     * @return
      */
     public static <K, T> Function<T, Map.Entry<K, T>> entry(final Function<? super T, K> keyMapper) {
         N.checkArgNotNull(keyMapper);
@@ -1306,9 +1306,9 @@ public abstract class Fn extends Comparators {
     /**
      * Pair.
      *
-     * @param <L> the generic type
-     * @param <R> the generic type
-     * @return the bi function
+     * @param <L>
+     * @param <R>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <L, R> BiFunction<L, R, Pair<L, R>> pair() {
@@ -1318,10 +1318,10 @@ public abstract class Fn extends Comparators {
     /**
      * Triple.
      *
-     * @param <L> the generic type
-     * @param <M> the generic type
-     * @param <R> the generic type
-     * @return the tri function
+     * @param <L>
+     * @param <M>
+     * @param <R>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <L, M, R> TriFunction<L, M, R, Triple<L, M, R>> triple() {
@@ -1331,8 +1331,8 @@ public abstract class Fn extends Comparators {
     /**
      * Tuple 1.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<T, Tuple1<T>> tuple1() {
@@ -1342,9 +1342,9 @@ public abstract class Fn extends Comparators {
     /**
      * Tuple 2.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @return the bi function
+     * @param <T>
+     * @param <U>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, U> BiFunction<T, U, Tuple2<T, U>> tuple2() {
@@ -1354,10 +1354,10 @@ public abstract class Fn extends Comparators {
     /**
      * Tuple 3.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @return the tri function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <A, B, C> TriFunction<A, B, C, Tuple3<A, B, C>> tuple3() {
@@ -1367,11 +1367,11 @@ public abstract class Fn extends Comparators {
     /**
      * Tuple 4.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <D> the generic type
-     * @return the quad function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <D>
+     * @return
      */
     @SuppressWarnings({ "rawtypes" })
     public static <A, B, C, D> QuadFunction<A, B, C, D, Tuple4<A, B, C, D>> tuple4() {
@@ -1381,7 +1381,7 @@ public abstract class Fn extends Comparators {
     /**
      * Trim.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> trim() {
         return TRIM;
@@ -1390,7 +1390,7 @@ public abstract class Fn extends Comparators {
     /**
      * Trim to empty.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> trimToEmpty() {
         return TRIM_TO_EMPTY;
@@ -1399,7 +1399,7 @@ public abstract class Fn extends Comparators {
     /**
      * Trim to null.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> trimToNull() {
         return TRIM_TO_NULL;
@@ -1408,7 +1408,7 @@ public abstract class Fn extends Comparators {
     /**
      * Null to empty.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, String> nullToEmpty() {
         return NULL_TO_EMPTY;
@@ -1417,8 +1417,8 @@ public abstract class Fn extends Comparators {
     /**
      * Null to empty L.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<List<T>, List<T>> nullToEmptyL() {
@@ -1428,8 +1428,8 @@ public abstract class Fn extends Comparators {
     /**
      * Null to empty S.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<Set<T>, Set<T>> nullToEmptyS() {
@@ -1441,7 +1441,7 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the function
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Function<Map<K, V>, Map<K, V>> nullToEmptyM() {
@@ -1451,8 +1451,8 @@ public abstract class Fn extends Comparators {
     /**
      * Length.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     public static <T extends CharSequence> Function<T, Integer> length() {
         return (Function<T, Integer>) LENGTH;
@@ -1461,8 +1461,8 @@ public abstract class Fn extends Comparators {
     /**
      * Len.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<T[], Integer> len() {
@@ -1472,8 +1472,8 @@ public abstract class Fn extends Comparators {
     /**
      * Size.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> Function<T, Integer> size() {
@@ -1483,8 +1483,8 @@ public abstract class Fn extends Comparators {
     /**
      * Size M.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> Function<T, Integer> sizeM() {
@@ -1494,10 +1494,10 @@ public abstract class Fn extends Comparators {
     /**
      * Cast.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param clazz the clazz
-     * @return the function
+     * @param <T>
+     * @param <U>
+     * @param clazz
+     * @return
      */
     public static <T, U> Function<T, U> cast(final Class<U> clazz) {
         N.checkArgNotNull(clazz);
@@ -1513,8 +1513,8 @@ public abstract class Fn extends Comparators {
     /**
      * Always true.
      *
-     * @param <T> the generic type
-     * @return the predicate
+     * @param <T>
+     * @return
      */
     public static <T> Predicate<T> alwaysTrue() {
         return ALWAYS_TRUE;
@@ -1523,8 +1523,8 @@ public abstract class Fn extends Comparators {
     /**
      * Always false.
      *
-     * @param <T> the generic type
-     * @return the predicate
+     * @param <T>
+     * @return
      */
     public static <T> Predicate<T> alwaysFalse() {
         return ALWAYS_FALSE;
@@ -1533,8 +1533,8 @@ public abstract class Fn extends Comparators {
     /**
      * Checks if is null.
      *
-     * @param <T> the generic type
-     * @return the predicate
+     * @param <T>
+     * @return
      */
     public static <T> Predicate<T> isNull() {
         return IS_NULL;
@@ -1543,8 +1543,8 @@ public abstract class Fn extends Comparators {
     /**
      * Checks if is null or empty.
      *
-     * @param <T> the generic type
-     * @return the predicate
+     * @param <T>
+     * @return
      */
     public static <T extends CharSequence> Predicate<T> isNullOrEmpty() {
         return (Predicate<T>) IS_NULL_OR_EMPTY;
@@ -1553,8 +1553,8 @@ public abstract class Fn extends Comparators {
     /**
      * Checks if is null or empty or blank.
      *
-     * @param <T> the generic type
-     * @return the predicate
+     * @param <T>
+     * @return
      */
     public static <T extends CharSequence> Predicate<T> isNullOrEmptyOrBlank() {
         return (Predicate<T>) IS_NULL_OR_EMPTY_OR_BLANK;
@@ -1563,8 +1563,8 @@ public abstract class Fn extends Comparators {
     /**
      * Not null.
      *
-     * @param <T> the generic type
-     * @return the predicate
+     * @param <T>
+     * @return
      */
     public static <T> Predicate<T> notNull() {
         return NOT_NULL;
@@ -1573,8 +1573,8 @@ public abstract class Fn extends Comparators {
     /**
      * Not null or empty.
      *
-     * @param <T> the generic type
-     * @return the predicate
+     * @param <T>
+     * @return
      */
     public static <T extends CharSequence> Predicate<T> notNullOrEmpty() {
         return (Predicate<T>) NOT_NULL_OR_EMPTY;
@@ -1583,8 +1583,8 @@ public abstract class Fn extends Comparators {
     /**
      * Not null or empty or blank.
      *
-     * @param <T> the generic type
-     * @return the predicate
+     * @param <T>
+     * @return
      */
     public static <T extends CharSequence> Predicate<T> notNullOrEmptyOrBlank() {
         return (Predicate<T>) NOT_NULL_OR_EMPTY_OR_BLANK;
@@ -1593,7 +1593,7 @@ public abstract class Fn extends Comparators {
     /**
      * Checks if is file.
      *
-     * @return the predicate
+     * @return
      */
     public static Predicate<File> isFile() {
         return IS_FILE;
@@ -1602,7 +1602,7 @@ public abstract class Fn extends Comparators {
     /**
      * Checks if is directory.
      *
-     * @return the predicate
+     * @return
      */
     public static Predicate<File> isDirectory() {
         return IS_DIRECTORY;
@@ -1611,9 +1611,9 @@ public abstract class Fn extends Comparators {
     /**
      * Equal.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the predicate
+     * @param <T>
+     * @param target
+     * @return
      */
     public static <T> Predicate<T> equal(final Object target) {
         return new Predicate<T>() {
@@ -1627,9 +1627,9 @@ public abstract class Fn extends Comparators {
     /**
      * Not equal.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the predicate
+     * @param <T>
+     * @param target
+     * @return
      */
     public static <T> Predicate<T> notEqual(final Object target) {
         return new Predicate<T>() {
@@ -1643,9 +1643,9 @@ public abstract class Fn extends Comparators {
     /**
      * Greater than.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the predicate
+     * @param <T>
+     * @param target
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Predicate<T> greaterThan(final T target) {
@@ -1660,9 +1660,9 @@ public abstract class Fn extends Comparators {
     /**
      * Greater equal.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the predicate
+     * @param <T>
+     * @param target
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Predicate<T> greaterEqual(final T target) {
@@ -1677,9 +1677,9 @@ public abstract class Fn extends Comparators {
     /**
      * Less than.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the predicate
+     * @param <T>
+     * @param target
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Predicate<T> lessThan(final T target) {
@@ -1694,9 +1694,9 @@ public abstract class Fn extends Comparators {
     /**
      * Less equal.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the predicate
+     * @param <T>
+     * @param target
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Predicate<T> lessEqual(final T target) {
@@ -1711,10 +1711,10 @@ public abstract class Fn extends Comparators {
     /**
      * Checks if the value/element: {@code minValue < e < maxValue}.
      *
-     * @param <T> the generic type
-     * @param minValue the min value
-     * @param maxValue the max value
-     * @return the predicate
+     * @param <T>
+     * @param minValue
+     * @param maxValue
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Predicate<T> between(final T minValue, final T maxValue) {
@@ -1729,9 +1729,9 @@ public abstract class Fn extends Comparators {
     /**
      * In.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the predicate
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Predicate<T> in(final Collection<?> c) {
         N.checkArgNotNull(c);
@@ -1747,9 +1747,9 @@ public abstract class Fn extends Comparators {
     /**
      * Not in.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the predicate
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Predicate<T> notIn(final Collection<?> c) {
         N.checkArgNotNull(c);
@@ -1765,9 +1765,9 @@ public abstract class Fn extends Comparators {
     /**
      * Instance of.
      *
-     * @param <T> the generic type
-     * @param clazz the clazz
-     * @return the predicate
+     * @param <T>
+     * @param clazz
+     * @return
      */
     public static <T> Predicate<T> instanceOf(final Class<?> clazz) {
         N.checkArgNotNull(clazz);
@@ -1783,8 +1783,8 @@ public abstract class Fn extends Comparators {
     /**
      * Subtype of.
      *
-     * @param clazz the clazz
-     * @return the predicate
+     * @param clazz
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static Predicate<Class> subtypeOf(final Class<?> clazz) {
@@ -1801,8 +1801,8 @@ public abstract class Fn extends Comparators {
     /**
      * Starts with.
      *
-     * @param prefix the prefix
-     * @return the predicate
+     * @param prefix
+     * @return
      */
     public static Predicate<String> startsWith(final String prefix) {
         N.checkArgNotNull(prefix);
@@ -1818,8 +1818,8 @@ public abstract class Fn extends Comparators {
     /**
      * Ends with.
      *
-     * @param suffix the suffix
-     * @return the predicate
+     * @param suffix
+     * @return
      */
     public static Predicate<String> endsWith(final String suffix) {
         N.checkArgNotNull(suffix);
@@ -1835,8 +1835,8 @@ public abstract class Fn extends Comparators {
     /**
      * Contains.
      *
-     * @param str the str
-     * @return the predicate
+     * @param str
+     * @return
      */
     public static Predicate<String> contains(final String str) {
         N.checkArgNotNull(str);
@@ -1852,8 +1852,8 @@ public abstract class Fn extends Comparators {
     /**
      * Not starts with.
      *
-     * @param prefix the prefix
-     * @return the predicate
+     * @param prefix
+     * @return
      */
     public static Predicate<String> notStartsWith(final String prefix) {
         N.checkArgNotNull(prefix);
@@ -1869,8 +1869,8 @@ public abstract class Fn extends Comparators {
     /**
      * Not ends with.
      *
-     * @param suffix the suffix
-     * @return the predicate
+     * @param suffix
+     * @return
      */
     public static Predicate<String> notEndsWith(final String suffix) {
         N.checkArgNotNull(suffix);
@@ -1886,8 +1886,8 @@ public abstract class Fn extends Comparators {
     /**
      * Not contains.
      *
-     * @param str the str
-     * @return the predicate
+     * @param str
+     * @return
      */
     public static Predicate<String> notContains(final String str) {
         N.checkArgNotNull(str);
@@ -1903,8 +1903,8 @@ public abstract class Fn extends Comparators {
     /**
      * Matches.
      *
-     * @param pattern the pattern
-     * @return the predicate
+     * @param pattern
+     * @return
      */
     public static Predicate<CharSequence> matches(final Pattern pattern) {
         N.checkArgNotNull(pattern);
@@ -1920,9 +1920,9 @@ public abstract class Fn extends Comparators {
     /**
      * Equal.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @return
      */
     public static <T, U> BiPredicate<T, U> equal() {
         return BiPredicates.EQUAL;
@@ -1931,9 +1931,9 @@ public abstract class Fn extends Comparators {
     /**
      * Not equal.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @return
      */
     public static <T, U> BiPredicate<T, U> notEqual() {
         return BiPredicates.NOT_EQUAL;
@@ -1942,8 +1942,8 @@ public abstract class Fn extends Comparators {
     /**
      * Greater than.
      *
-     * @param <T> the generic type
-     * @return the bi predicate
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> BiPredicate<T, T> greaterThan() {
@@ -1953,8 +1953,8 @@ public abstract class Fn extends Comparators {
     /**
      * Greater equal.
      *
-     * @param <T> the generic type
-     * @return the bi predicate
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> BiPredicate<T, T> greaterEqual() {
@@ -1964,8 +1964,8 @@ public abstract class Fn extends Comparators {
     /**
      * Less than.
      *
-     * @param <T> the generic type
-     * @return the bi predicate
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> BiPredicate<T, T> lessThan() {
@@ -1975,8 +1975,8 @@ public abstract class Fn extends Comparators {
     /**
      * Less equal.
      *
-     * @param <T> the generic type
-     * @return the bi predicate
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> BiPredicate<T, T> lessEqual() {
@@ -1986,9 +1986,9 @@ public abstract class Fn extends Comparators {
     /**
      * Not.
      *
-     * @param <T> the generic type
-     * @param predicate the predicate
-     * @return the predicate
+     * @param <T>
+     * @param predicate
+     * @return
      */
     public static <T> Predicate<T> not(final Predicate<T> predicate) {
         N.checkArgNotNull(predicate);
@@ -2004,10 +2004,10 @@ public abstract class Fn extends Comparators {
     /**
      * Not.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param biPredicate the bi predicate
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param biPredicate
+     * @return
      */
     public static <T, U> BiPredicate<T, U> not(final BiPredicate<T, U> biPredicate) {
         N.checkArgNotNull(biPredicate);
@@ -2023,11 +2023,11 @@ public abstract class Fn extends Comparators {
     /**
      * Not.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param triPredicate the tri predicate
-     * @return the tri predicate
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param triPredicate
+     * @return
      */
     public static <A, B, C> TriPredicate<A, B, C> not(final TriPredicate<A, B, C> triPredicate) {
         N.checkArgNotNull(triPredicate);
@@ -2043,9 +2043,9 @@ public abstract class Fn extends Comparators {
     /**
      * And.
      *
-     * @param first the first
-     * @param second the second
-     * @return the boolean supplier
+     * @param first
+     * @param second
+     * @return
      */
     public static BooleanSupplier and(final BooleanSupplier first, final BooleanSupplier second) {
         N.checkArgNotNull(first);
@@ -2062,10 +2062,10 @@ public abstract class Fn extends Comparators {
     /**
      * And.
      *
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the boolean supplier
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static BooleanSupplier and(final BooleanSupplier first, final BooleanSupplier second, final BooleanSupplier third) {
         N.checkArgNotNull(first);
@@ -2083,10 +2083,10 @@ public abstract class Fn extends Comparators {
     /**
      * And.
      *
-     * @param <T> the generic type
-     * @param first the first
-     * @param second the second
-     * @return the predicate
+     * @param <T>
+     * @param first
+     * @param second
+     * @return
      */
     public static <T> Predicate<T> and(final Predicate<? super T> first, final Predicate<? super T> second) {
         N.checkArgNotNull(first);
@@ -2103,11 +2103,11 @@ public abstract class Fn extends Comparators {
     /**
      * And.
      *
-     * @param <T> the generic type
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the predicate
+     * @param <T>
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static <T> Predicate<T> and(final Predicate<? super T> first, final Predicate<? super T> second, final Predicate<? super T> third) {
         N.checkArgNotNull(first);
@@ -2125,9 +2125,9 @@ public abstract class Fn extends Comparators {
     /**
      * And.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the predicate
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Predicate<T> and(final Collection<Predicate<? super T>> c) {
         N.checkArgNotNullOrEmpty(c, "c");
@@ -2149,11 +2149,11 @@ public abstract class Fn extends Comparators {
     /**
      * And.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param first the first
-     * @param second the second
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param first
+     * @param second
+     * @return
      */
     public static <T, U> BiPredicate<T, U> and(final BiPredicate<? super T, ? super U> first, final BiPredicate<? super T, ? super U> second) {
         N.checkArgNotNull(first);
@@ -2170,12 +2170,12 @@ public abstract class Fn extends Comparators {
     /**
      * And.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static <T, U> BiPredicate<T, U> and(final BiPredicate<? super T, ? super U> first, final BiPredicate<? super T, ? super U> second,
             final BiPredicate<? super T, ? super U> third) {
@@ -2194,10 +2194,10 @@ public abstract class Fn extends Comparators {
     /**
      * And.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param c the c
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @return
      */
     public static <T, U> BiPredicate<T, U> and(final List<BiPredicate<? super T, ? super U>> c) {
         N.checkArgNotNullOrEmpty(c, "c");
@@ -2219,9 +2219,9 @@ public abstract class Fn extends Comparators {
     /**
      * Or.
      *
-     * @param first the first
-     * @param second the second
-     * @return the boolean supplier
+     * @param first
+     * @param second
+     * @return
      */
     public static BooleanSupplier or(final BooleanSupplier first, final BooleanSupplier second) {
         N.checkArgNotNull(first);
@@ -2238,10 +2238,10 @@ public abstract class Fn extends Comparators {
     /**
      * Or.
      *
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the boolean supplier
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static BooleanSupplier or(final BooleanSupplier first, final BooleanSupplier second, final BooleanSupplier third) {
         N.checkArgNotNull(first);
@@ -2259,10 +2259,10 @@ public abstract class Fn extends Comparators {
     /**
      * Or.
      *
-     * @param <T> the generic type
-     * @param first the first
-     * @param second the second
-     * @return the predicate
+     * @param <T>
+     * @param first
+     * @param second
+     * @return
      */
     public static <T> Predicate<T> or(final Predicate<? super T> first, final Predicate<? super T> second) {
         N.checkArgNotNull(first);
@@ -2279,11 +2279,11 @@ public abstract class Fn extends Comparators {
     /**
      * Or.
      *
-     * @param <T> the generic type
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the predicate
+     * @param <T>
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static <T> Predicate<T> or(final Predicate<? super T> first, final Predicate<? super T> second, final Predicate<? super T> third) {
         N.checkArgNotNull(first);
@@ -2301,9 +2301,9 @@ public abstract class Fn extends Comparators {
     /**
      * Or.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the predicate
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Predicate<T> or(final Collection<Predicate<? super T>> c) {
         N.checkArgNotNullOrEmpty(c, "c");
@@ -2325,11 +2325,11 @@ public abstract class Fn extends Comparators {
     /**
      * Or.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param first the first
-     * @param second the second
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param first
+     * @param second
+     * @return
      */
     public static <T, U> BiPredicate<T, U> or(final BiPredicate<? super T, ? super U> first, final BiPredicate<? super T, ? super U> second) {
         N.checkArgNotNull(first);
@@ -2346,12 +2346,12 @@ public abstract class Fn extends Comparators {
     /**
      * Or.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param first the first
-     * @param second the second
-     * @param third the third
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param first
+     * @param second
+     * @param third
+     * @return
      */
     public static <T, U> BiPredicate<T, U> or(final BiPredicate<? super T, ? super U> first, final BiPredicate<? super T, ? super U> second,
             final BiPredicate<? super T, ? super U> third) {
@@ -2370,10 +2370,10 @@ public abstract class Fn extends Comparators {
     /**
      * Or.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param c the c
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @return
      */
     public static <T, U> BiPredicate<T, U> or(final List<BiPredicate<? super T, ? super U>> c) {
         N.checkArgNotNullOrEmpty(c, "c");
@@ -2397,8 +2397,8 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate the predicate
-     * @return the predicate
+     * @param predicate
+     * @return
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testByKey(final Predicate<? super K> predicate) {
         N.checkArgNotNull(predicate);
@@ -2416,8 +2416,8 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate the predicate
-     * @return the predicate
+     * @param predicate
+     * @return
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testByValue(final Predicate<? super V> predicate) {
         N.checkArgNotNull(predicate);
@@ -2433,9 +2433,9 @@ public abstract class Fn extends Comparators {
     /**
      * Returns the specified instance.
      *
-     * @param <T> the generic type
-     * @param predicate the predicate
-     * @return the predicate
+     * @param <T>
+     * @param predicate
+     * @return
      * @deprecated replaced by {@link Fn#p(Predicate)}.
      */
     @Deprecated
@@ -2446,10 +2446,10 @@ public abstract class Fn extends Comparators {
     /**
      * Returns the specified instance.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param predicate the predicate
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param predicate
+     * @return
      * @deprecated replaced by {@link Fn#p(BiPredicate)}.
      */
     @Deprecated
@@ -2460,11 +2460,11 @@ public abstract class Fn extends Comparators {
     /**
      * Returns the specified instance.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param predicate the predicate
-     * @return the tri predicate
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param predicate
+     * @return
      * @deprecated 
      */
     @Deprecated
@@ -2477,8 +2477,8 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer the consumer
-     * @return the consumer
+     * @param consumer
+     * @return
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptByKey(final Consumer<? super K> consumer) {
         N.checkArgNotNull(consumer);
@@ -2496,8 +2496,8 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer the consumer
-     * @return the consumer
+     * @param consumer
+     * @return
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptByValue(final Consumer<? super V> consumer) {
         N.checkArgNotNull(consumer);
@@ -2515,9 +2515,9 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R> the generic type
-     * @param func the func
-     * @return the function
+     * @param <R>
+     * @param func
+     * @return
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final Function<? super K, R> func) {
         N.checkArgNotNull(func);
@@ -2535,9 +2535,9 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R> the generic type
-     * @param func the func
-     * @return the function
+     * @param <R>
+     * @param func
+     * @return
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final Function<? super V, R> func) {
         N.checkArgNotNull(func);
@@ -2553,13 +2553,13 @@ public abstract class Fn extends Comparators {
     /**
      * Apply if not null or default.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param mapperA the mapper A
-     * @param mapperB the mapper B
-     * @param defaultValue the default value
-     * @return the function
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param defaultValue
+     * @return
      */
     public static <A, B, R> Function<A, R> applyIfNotNullOrDefault(final Function<A, B> mapperA, final Function<B, R> mapperB, final R defaultValue) {
         N.checkArgNotNull(mapperA);
@@ -2586,15 +2586,15 @@ public abstract class Fn extends Comparators {
     /**
      * Apply if not null or default.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param mapperA the mapper A
-     * @param mapperB the mapper B
-     * @param mapperC the mapper C
-     * @param defaultValue the default value
-     * @return the function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param mapperC
+     * @param defaultValue
+     * @return
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrDefault(final Function<A, B> mapperA, final Function<B, C> mapperB, final Function<C, R> mapperC,
             final R defaultValue) {
@@ -2629,17 +2629,17 @@ public abstract class Fn extends Comparators {
     /**
      * Apply if not null or default.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <D> the generic type
-     * @param <R> the generic type
-     * @param mapperA the mapper A
-     * @param mapperB the mapper B
-     * @param mapperC the mapper C
-     * @param mapperD the mapper D
-     * @param defaultValue the default value
-     * @return the function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <D>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param mapperC
+     * @param mapperD
+     * @param defaultValue
+     * @return
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrDefault(final Function<A, B> mapperA, final Function<B, C> mapperB,
             final Function<C, D> mapperC, final Function<D, R> mapperD, final R defaultValue) {
@@ -2681,13 +2681,13 @@ public abstract class Fn extends Comparators {
     /**
      * Apply if not null or get.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param mapperA the mapper A
-     * @param mapperB the mapper B
-     * @param supplier the supplier
-     * @return the function
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param supplier
+     * @return
      */
     public static <A, B, R> Function<A, R> applyIfNotNullOrGet(final Function<A, B> mapperA, final Function<B, R> mapperB, final Supplier<R> supplier) {
         N.checkArgNotNull(mapperA);
@@ -2714,15 +2714,15 @@ public abstract class Fn extends Comparators {
     /**
      * Apply if not null or get.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param mapperA the mapper A
-     * @param mapperB the mapper B
-     * @param mapperC the mapper C
-     * @param supplier the supplier
-     * @return the function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param mapperC
+     * @param supplier
+     * @return
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrGet(final Function<A, B> mapperA, final Function<B, C> mapperB, final Function<C, R> mapperC,
             final Supplier<R> supplier) {
@@ -2757,17 +2757,17 @@ public abstract class Fn extends Comparators {
     /**
      * Apply if not null or get.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <D> the generic type
-     * @param <R> the generic type
-     * @param mapperA the mapper A
-     * @param mapperB the mapper B
-     * @param mapperC the mapper C
-     * @param mapperD the mapper D
-     * @param supplier the supplier
-     * @return the function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <D>
+     * @param <R>
+     * @param mapperA
+     * @param mapperB
+     * @param mapperC
+     * @param mapperD
+     * @param supplier
+     * @return
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrGet(final Function<A, B> mapperA, final Function<B, C> mapperB, final Function<C, D> mapperC,
             final Function<D, R> mapperD, final Supplier<R> supplier) {
@@ -2811,9 +2811,9 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <KK> the generic type
-     * @param func the func
-     * @return the function
+     * @param <KK>
+     * @param func
+     * @return
      */
     public static <K, V, KK> Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapKey(final Function<? super K, ? extends KK> func) {
         N.checkArgNotNull(func);
@@ -2831,9 +2831,9 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <VV> the generic type
-     * @param func the func
-     * @return the function
+     * @param <VV>
+     * @param func
+     * @return
      */
     public static <K, V, VV> Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapValue(final Function<? super V, ? extends VV> func) {
         N.checkArgNotNull(func);
@@ -2851,8 +2851,8 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param predicate the predicate
-     * @return the predicate
+     * @param predicate
+     * @return
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testKeyVal(final BiPredicate<? super K, ? super V> predicate) {
         N.checkArgNotNull(predicate);
@@ -2870,8 +2870,8 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param consumer the consumer
-     * @return the consumer
+     * @param consumer
+     * @return
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptKeyVal(final BiConsumer<? super K, ? super V> consumer) {
         N.checkArgNotNull(consumer);
@@ -2889,9 +2889,9 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <R> the generic type
-     * @param func the func
-     * @return the function
+     * @param <R>
+     * @param func
+     * @return
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final BiFunction<? super K, ? super V, R> func) {
         N.checkArgNotNull(func);
@@ -2915,7 +2915,7 @@ public abstract class Fn extends Comparators {
     /**
      * Parses the byte.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, Byte> parseByte() {
         return PARSE_BYTE_FUNC;
@@ -2932,7 +2932,7 @@ public abstract class Fn extends Comparators {
     /**
      * Parses the short.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, Short> parseShort() {
         return PARSE_SHORT_FUNC;
@@ -2949,7 +2949,7 @@ public abstract class Fn extends Comparators {
     /**
      * Parses the int.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, Integer> parseInt() {
         return PARSE_INT_FUNC;
@@ -2966,7 +2966,7 @@ public abstract class Fn extends Comparators {
     /**
      * Parses the long.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, Long> parseLong() {
         return PARSE_LONG_FUNC;
@@ -2983,7 +2983,7 @@ public abstract class Fn extends Comparators {
     /**
      * Parses the float.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, Float> parseFloat() {
         return PARSE_FLOAT_FUNC;
@@ -3000,7 +3000,7 @@ public abstract class Fn extends Comparators {
     /**
      * Parses the double.
      *
-     * @return the function
+     * @return
      */
     public static Function<String, Double> parseDouble() {
         return PARSE_DOUBLE_FUNC;
@@ -3022,7 +3022,7 @@ public abstract class Fn extends Comparators {
     /**
      * Creates the number.
      *
-     * @return the function
+     * @return
      * @see StringUtil#createNumber(String)
      */
     public static Function<String, Number> createNumber() {
@@ -3032,8 +3032,8 @@ public abstract class Fn extends Comparators {
     /**
      * Num to int.
      *
-     * @param <T> the generic type
-     * @return the to int function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToIntFunction<T> numToInt() {
@@ -3043,8 +3043,8 @@ public abstract class Fn extends Comparators {
     /**
      * Num to long.
      *
-     * @param <T> the generic type
-     * @return the to long function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToLongFunction<T> numToLong() {
@@ -3054,8 +3054,8 @@ public abstract class Fn extends Comparators {
     /**
      * Num to double.
      *
-     * @param <T> the generic type
-     * @return the to double function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Number> ToDoubleFunction<T> numToDouble() {
@@ -3065,10 +3065,10 @@ public abstract class Fn extends Comparators {
     /**
      * Limit then filter.
      *
-     * @param <T> the generic type
-     * @param limit the limit
-     * @param predicate the predicate
-     * @return the predicate
+     * @param <T>
+     * @param limit
+     * @param predicate
+     * @return
      */
     public static <T> Predicate<T> limitThenFilter(final int limit, final Predicate<T> predicate) {
         N.checkArgNotNull(predicate);
@@ -3086,11 +3086,11 @@ public abstract class Fn extends Comparators {
     /**
      * Limit then filter.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param limit the limit
-     * @param predicate the predicate
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param limit
+     * @param predicate
+     * @return
      */
     public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final BiPredicate<T, U> predicate) {
         N.checkArgNotNull(predicate);
@@ -3108,10 +3108,10 @@ public abstract class Fn extends Comparators {
     /**
      * Filter then limit.
      *
-     * @param <T> the generic type
-     * @param predicate the predicate
-     * @param limit the limit
-     * @return the predicate
+     * @param <T>
+     * @param predicate
+     * @param limit
+     * @return
      */
     public static <T> Predicate<T> filterThenLimit(final Predicate<T> predicate, final int limit) {
         N.checkArgNotNull(predicate);
@@ -3129,11 +3129,11 @@ public abstract class Fn extends Comparators {
     /**
      * Filter then limit.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param predicate the predicate
-     * @param limit the limit
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param predicate
+     * @param limit
+     * @return
      */
     public static <T, U> BiPredicate<T, U> filterThenLimit(final BiPredicate<T, U> predicate, final int limit) {
         N.checkArgNotNull(predicate);
@@ -3151,9 +3151,9 @@ public abstract class Fn extends Comparators {
     /**
      * Time limit.
      *
-     * @param <T> the generic type
-     * @param timeInMillis the time in millis
-     * @return the predicate
+     * @param <T>
+     * @param timeInMillis
+     * @return
      */
     public static <T> Predicate<T> timeLimit(final long timeInMillis) {
         N.checkArgNotNegative(timeInMillis, "timeInMillis");
@@ -3180,9 +3180,9 @@ public abstract class Fn extends Comparators {
     /**
      * Time limit.
      *
-     * @param <T> the generic type
-     * @param duration the duration
-     * @return the predicate
+     * @param <T>
+     * @param duration
+     * @return
      */
     public static <T> Predicate<T> timeLimit(final Duration duration) {
         N.checkArgNotNull(duration, "duration");
@@ -3193,8 +3193,8 @@ public abstract class Fn extends Comparators {
     /**
      * Returns a stateful <code>Function</code> which should not be used in parallel stream.
      *
-     * @param <T> the generic type
-     * @return the function
+     * @param <T>
+     * @return
      */
     @SequentialOnly
     public static <T> Function<T, Indexed<T>> indexed() {
@@ -3211,9 +3211,9 @@ public abstract class Fn extends Comparators {
     /**
      * Returns a stateful <code>Predicate</code> which should not be used in parallel stream.
      *
-     * @param <T> the generic type
-     * @param predicate the predicate
-     * @return the predicate
+     * @param <T>
+     * @param predicate
+     * @return
      */
     @SequentialOnly
     public static <T> Predicate<T> indexed(final IndexedPredicate<T> predicate) {
@@ -3223,10 +3223,10 @@ public abstract class Fn extends Comparators {
     /**
      * Returns a stateful <code>BiPredicate</code> which should not be used in parallel stream.
      *
-     * @param <U> the generic type
-     * @param <T> the generic type
-     * @param predicate the predicate
-     * @return the bi predicate
+     * @param <U>
+     * @param <T>
+     * @param predicate
+     * @return
      * @deprecated replaced by {@code BiPredicates#indexed(IndexedBiPredicate)}.
      */
     @Deprecated
@@ -3237,10 +3237,10 @@ public abstract class Fn extends Comparators {
     /**
      * Returns a stateful <code>Function</code> which should not be used in parallel stream.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param func the func
-     * @return the function
+     * @param <T>
+     * @param <R>
+     * @param func
+     * @return
      * @deprecated replaced by {@code Functions#indexed(IndexedFunction)}.
      */
     @Deprecated
@@ -3251,11 +3251,11 @@ public abstract class Fn extends Comparators {
     /**
      * Returns a stateful <code>BiFunction</code> which should not be used in parallel stream.
      *
-     * @param <U> the generic type
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param func the func
-     * @return the bi function
+     * @param <U>
+     * @param <T>
+     * @param <R>
+     * @param func
+     * @return
      * @deprecated replaced by {@code BiFunctions#indexed(IndexedBiFunction)}.
      */
     @Deprecated
@@ -3266,9 +3266,9 @@ public abstract class Fn extends Comparators {
     /**
      * Returns a stateful <code>Consumer</code> which should not be used in parallel stream.
      *
-     * @param <T> the generic type
-     * @param action the action
-     * @return the consumer
+     * @param <T>
+     * @param action
+     * @return
      * @deprecated replaced by {@code Consumers#indexed(IndexedConsumer)}.
      */
     @Deprecated
@@ -3279,10 +3279,10 @@ public abstract class Fn extends Comparators {
     /**
      * Returns a stateful <code>BiConsumer</code> which should not be used in parallel stream.
      *
-     * @param <U> the generic type
-     * @param <T> the generic type
-     * @param action the action
-     * @return the bi consumer
+     * @param <U>
+     * @param <T>
+     * @param action
+     * @return
      * @deprecated replaced by {@code BiConsumers#indexed(IndexedBiConsumer)}.
      */
     @Deprecated
@@ -3293,9 +3293,9 @@ public abstract class Fn extends Comparators {
     /**
      * Compare to.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @return the function
+     * @param <T>
+     * @param target
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Function<T, Integer> compareTo(final T target) {
@@ -3310,10 +3310,10 @@ public abstract class Fn extends Comparators {
     /**
      * Compare to.
      *
-     * @param <T> the generic type
-     * @param target the target
-     * @param cmp the cmp
-     * @return the function
+     * @param <T>
+     * @param target
+     * @param cmp
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> cmp) {
@@ -3334,8 +3334,8 @@ public abstract class Fn extends Comparators {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @return the bi function
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> BiFunction<T, T, Integer> compare() {
@@ -3345,9 +3345,9 @@ public abstract class Fn extends Comparators {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param cmp the cmp
-     * @return the bi function
+     * @param <T>
+     * @param cmp
+     * @return
      */
     public static <T> BiFunction<T, T, Integer> compare(final Comparator<? super T> cmp) {
         // N.checkArgNotNull(cmp);
@@ -3367,9 +3367,9 @@ public abstract class Fn extends Comparators {
     /**
      * P.
      *
-     * @param <T> the generic type
-     * @param predicate the predicate
-     * @return the predicate
+     * @param <T>
+     * @param predicate
+     * @return
      */
     @Beta
     public static <T> Predicate<T> p(final Predicate<T> predicate) {
@@ -3379,11 +3379,11 @@ public abstract class Fn extends Comparators {
     /**
      * P.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param a the a
-     * @param biPredicate the bi predicate
-     * @return the predicate
+     * @param <A>
+     * @param <T>
+     * @param a
+     * @param biPredicate
+     * @return
      */
     @Beta
     public static <A, T> Predicate<T> p(final A a, final BiPredicate<A, T> biPredicate) {
@@ -3400,13 +3400,13 @@ public abstract class Fn extends Comparators {
     /**
      * P.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param triPredicate the tri predicate
-     * @return the predicate
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param a
+     * @param b
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, B, T> Predicate<T> p(final A a, final B b, final TriPredicate<A, B, T> triPredicate) {
@@ -3423,10 +3423,10 @@ public abstract class Fn extends Comparators {
     /**
      * P.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param biPredicate the bi predicate
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param biPredicate
+     * @return
      */
     @Beta
     public static <T, U> BiPredicate<T, U> p(final BiPredicate<T, U> biPredicate) {
@@ -3436,12 +3436,12 @@ public abstract class Fn extends Comparators {
     /**
      * P.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param a the a
-     * @param triPredicate the tri predicate
-     * @return the bi predicate
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, T, U> BiPredicate<T, U> p(final A a, final TriPredicate<A, T, U> triPredicate) {
@@ -3458,11 +3458,11 @@ public abstract class Fn extends Comparators {
     /**
      * P.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param triPredicate the tri predicate
-     * @return the tri predicate
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, B, C> TriPredicate<A, B, C> p(final TriPredicate<A, B, C> triPredicate) {
@@ -3472,9 +3472,9 @@ public abstract class Fn extends Comparators {
     /**
      * C.
      *
-     * @param <T> the generic type
-     * @param predicate the predicate
-     * @return the consumer
+     * @param <T>
+     * @param predicate
+     * @return
      */
     @Beta
     public static <T> Consumer<T> c(final Consumer<T> predicate) {
@@ -3484,11 +3484,11 @@ public abstract class Fn extends Comparators {
     /**
      * C.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param a the a
-     * @param biConsumer the bi consumer
-     * @return the consumer
+     * @param <A>
+     * @param <T>
+     * @param a
+     * @param biConsumer
+     * @return
      */
     @Beta
     public static <A, T> Consumer<T> c(final A a, final BiConsumer<A, T> biConsumer) {
@@ -3505,13 +3505,13 @@ public abstract class Fn extends Comparators {
     /**
      * C.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param triConsumer the tri consumer
-     * @return the consumer
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param a
+     * @param b
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, B, T> Consumer<T> c(final A a, final B b, final TriConsumer<A, B, T> triConsumer) {
@@ -3528,10 +3528,10 @@ public abstract class Fn extends Comparators {
     /**
      * C.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param biConsumer the bi consumer
-     * @return the bi consumer
+     * @param <T>
+     * @param <U>
+     * @param biConsumer
+     * @return
      */
     @Beta
     public static <T, U> BiConsumer<T, U> c(final BiConsumer<T, U> biConsumer) {
@@ -3541,12 +3541,12 @@ public abstract class Fn extends Comparators {
     /**
      * C.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param a the a
-     * @param triConsumer the tri consumer
-     * @return the bi consumer
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, T, U> BiConsumer<T, U> c(final A a, final TriConsumer<A, T, U> triConsumer) {
@@ -3563,11 +3563,11 @@ public abstract class Fn extends Comparators {
     /**
      * C.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param triConsumer the tri consumer
-     * @return the tri consumer
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, B, C> TriConsumer<A, B, C> c(final TriConsumer<A, B, C> triConsumer) {
@@ -3577,10 +3577,10 @@ public abstract class Fn extends Comparators {
     /**
      * F.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param predicate the predicate
-     * @return the function
+     * @param <T>
+     * @param <R>
+     * @param predicate
+     * @return
      */
     @Beta
     public static <T, R> Function<T, R> f(final Function<T, R> predicate) {
@@ -3590,12 +3590,12 @@ public abstract class Fn extends Comparators {
     /**
      * F.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param biFunction the bi function
-     * @return the function
+     * @param <A>
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param biFunction
+     * @return
      */
     @Beta
     public static <A, T, R> Function<T, R> f(final A a, final BiFunction<A, T, R> biFunction) {
@@ -3612,14 +3612,14 @@ public abstract class Fn extends Comparators {
     /**
      * F.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param b the b
-     * @param triFunction the tri function
-     * @return the function
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, B, T, R> Function<T, R> f(final A a, final B b, final TriFunction<A, B, T, R> triFunction) {
@@ -3636,11 +3636,11 @@ public abstract class Fn extends Comparators {
     /**
      * F.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param biFunction the bi function
-     * @return the bi function
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param biFunction
+     * @return
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> f(final BiFunction<T, U, R> biFunction) {
@@ -3650,13 +3650,13 @@ public abstract class Fn extends Comparators {
     /**
      * F.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param a the a
-     * @param triFunction the tri function
-     * @return the bi function
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param a
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, T, U, R> BiFunction<T, U, R> f(final A a, final TriFunction<A, T, U, R> triFunction) {
@@ -3673,12 +3673,12 @@ public abstract class Fn extends Comparators {
     /**
      * F.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param triFunction the tri function
-     * @return the tri function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, B, C, R> TriFunction<A, B, C, R> f(final TriFunction<A, B, C, R> triFunction) {
@@ -3688,10 +3688,10 @@ public abstract class Fn extends Comparators {
     /**
      * Ep.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the try. predicate
+     * @param <T>
+     * @param <E>
+     * @param predicate
+     * @return
      */
     @Beta
     public static <T, E extends Exception> Try.Predicate<T, E> ep(final Try.Predicate<T, E> predicate) {
@@ -3701,12 +3701,12 @@ public abstract class Fn extends Comparators {
     /**
      * Ep.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param biPredicate the bi predicate
-     * @return the try. predicate
+     * @param <A>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param biPredicate
+     * @return
      */
     @Beta
     public static <A, T, E extends Exception> Try.Predicate<T, E> ep(final A a, final Try.BiPredicate<A, T, E> biPredicate) {
@@ -3723,14 +3723,14 @@ public abstract class Fn extends Comparators {
     /**
      * Ep.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param triPredicate the tri predicate
-     * @return the try. predicate
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, B, T, E extends Exception> Try.Predicate<T, E> ep(final A a, final B b, final Try.TriPredicate<A, B, T, E> triPredicate) {
@@ -3747,11 +3747,11 @@ public abstract class Fn extends Comparators {
     /**
      * Ep.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param biPredicate the bi predicate
-     * @return the try. bi predicate
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param biPredicate
+     * @return
      */
     @Beta
     public static <T, U, E extends Exception> Try.BiPredicate<T, U, E> ep(final Try.BiPredicate<T, U, E> biPredicate) {
@@ -3761,13 +3761,13 @@ public abstract class Fn extends Comparators {
     /**
      * Ep.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param triPredicate the tri predicate
-     * @return the try. bi predicate
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, T, U, E extends Exception> Try.BiPredicate<T, U, E> ep(final A a, final Try.TriPredicate<A, T, U, E> triPredicate) {
@@ -3784,12 +3784,12 @@ public abstract class Fn extends Comparators {
     /**
      * Ep.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param triPredicate the tri predicate
-     * @return the try. tri predicate
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, B, C, E extends Exception> Try.TriPredicate<A, B, C, E> ep(final Try.TriPredicate<A, B, C, E> triPredicate) {
@@ -3799,10 +3799,10 @@ public abstract class Fn extends Comparators {
     /**
      * Ec.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the try. consumer
+     * @param <T>
+     * @param <E>
+     * @param predicate
+     * @return
      */
     @Beta
     public static <T, E extends Exception> Try.Consumer<T, E> ec(final Try.Consumer<T, E> predicate) {
@@ -3812,12 +3812,12 @@ public abstract class Fn extends Comparators {
     /**
      * Ec.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param biConsumer the bi consumer
-     * @return the try. consumer
+     * @param <A>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param biConsumer
+     * @return
      */
     @Beta
     public static <A, T, E extends Exception> Try.Consumer<T, E> ec(final A a, final Try.BiConsumer<A, T, E> biConsumer) {
@@ -3834,14 +3834,14 @@ public abstract class Fn extends Comparators {
     /**
      * Ec.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param triConsumer the tri consumer
-     * @return the try. consumer
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, B, T, E extends Exception> Try.Consumer<T, E> ec(final A a, final B b, final Try.TriConsumer<A, B, T, E> triConsumer) {
@@ -3858,11 +3858,11 @@ public abstract class Fn extends Comparators {
     /**
      * Ec.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param biConsumer the bi consumer
-     * @return the try. bi consumer
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param biConsumer
+     * @return
      */
     @Beta
     public static <T, U, E extends Exception> Try.BiConsumer<T, U, E> ec(final Try.BiConsumer<T, U, E> biConsumer) {
@@ -3872,13 +3872,13 @@ public abstract class Fn extends Comparators {
     /**
      * Ec.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param triConsumer the tri consumer
-     * @return the try. bi consumer
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, T, U, E extends Exception> Try.BiConsumer<T, U, E> ec(final A a, final Try.TriConsumer<A, T, U, E> triConsumer) {
@@ -3895,12 +3895,12 @@ public abstract class Fn extends Comparators {
     /**
      * Ec.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param triConsumer the tri consumer
-     * @return the try. tri consumer
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, B, C, E extends Exception> Try.TriConsumer<A, B, C, E> ec(final Try.TriConsumer<A, B, C, E> triConsumer) {
@@ -3910,11 +3910,11 @@ public abstract class Fn extends Comparators {
     /**
      * Ef.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the try. function
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param predicate
+     * @return
      */
     @Beta
     public static <T, R, E extends Exception> Try.Function<T, R, E> ef(final Try.Function<T, R, E> predicate) {
@@ -3924,13 +3924,13 @@ public abstract class Fn extends Comparators {
     /**
      * Ef.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param biFunction the bi function
-     * @return the try. function
+     * @param <A>
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param biFunction
+     * @return
      */
     @Beta
     public static <A, T, R, E extends Exception> Try.Function<T, R, E> ef(final A a, final Try.BiFunction<A, T, R, E> biFunction) {
@@ -3947,15 +3947,15 @@ public abstract class Fn extends Comparators {
     /**
      * Ef.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param triFunction the tri function
-     * @return the try. function
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, B, T, R, E extends Exception> Try.Function<T, R, E> ef(final A a, final B b, final Try.TriFunction<A, B, T, R, E> triFunction) {
@@ -3972,12 +3972,12 @@ public abstract class Fn extends Comparators {
     /**
      * Ef.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param biFunction the bi function
-     * @return the try. bi function
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param biFunction
+     * @return
      */
     @Beta
     public static <T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> ef(final Try.BiFunction<T, U, R, E> biFunction) {
@@ -3987,14 +3987,14 @@ public abstract class Fn extends Comparators {
     /**
      * Ef.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param triFunction the tri function
-     * @return the try. bi function
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> ef(final A a, final Try.TriFunction<A, T, U, R, E> triFunction) {
@@ -4011,13 +4011,13 @@ public abstract class Fn extends Comparators {
     /**
      * Ef.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param triFunction the tri function
-     * @return the try. tri function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, B, C, R, E extends Exception> Try.TriFunction<A, B, C, R, E> ef(final Try.TriFunction<A, B, C, R, E> triFunction) {
@@ -4027,10 +4027,10 @@ public abstract class Fn extends Comparators {
     /**
      * Pp.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the predicate
+     * @param <T>
+     * @param <E>
+     * @param predicate
+     * @return
      */
     @Beta
     public static <T, E extends Exception> Predicate<T> pp(final Try.Predicate<T, E> predicate) {
@@ -4051,12 +4051,12 @@ public abstract class Fn extends Comparators {
     /**
      * Pp.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param biPredicate the bi predicate
-     * @return the predicate
+     * @param <A>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param biPredicate
+     * @return
      */
     @Beta
     public static <A, T, E extends Exception> Predicate<T> pp(final A a, final Try.BiPredicate<A, T, E> biPredicate) {
@@ -4077,14 +4077,14 @@ public abstract class Fn extends Comparators {
     /**
      * Pp.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param triPredicate the tri predicate
-     * @return the predicate
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, B, T, E extends Exception> Predicate<T> pp(final A a, final B b, final Try.TriPredicate<A, B, T, E> triPredicate) {
@@ -4105,11 +4105,11 @@ public abstract class Fn extends Comparators {
     /**
      * Pp.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param biPredicate the bi predicate
-     * @return the bi predicate
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param biPredicate
+     * @return
      */
     @Beta
     public static <T, U, E extends Exception> BiPredicate<T, U> pp(final Try.BiPredicate<T, U, E> biPredicate) {
@@ -4130,13 +4130,13 @@ public abstract class Fn extends Comparators {
     /**
      * Pp.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param triPredicate the tri predicate
-     * @return the bi predicate
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, T, U, E extends Exception> BiPredicate<T, U> pp(final A a, final Try.TriPredicate<A, T, U, E> triPredicate) {
@@ -4157,12 +4157,12 @@ public abstract class Fn extends Comparators {
     /**
      * Pp.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param triPredicate the tri predicate
-     * @return the tri predicate
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, B, C, E extends Exception> TriPredicate<A, B, C> pp(final Try.TriPredicate<A, B, C, E> triPredicate) {
@@ -4183,10 +4183,10 @@ public abstract class Fn extends Comparators {
     /**
      * Cc.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param consumer the consumer
-     * @return the consumer
+     * @param <T>
+     * @param <E>
+     * @param consumer
+     * @return
      */
     @Beta
     public static <T, E extends Exception> Consumer<T> cc(final Try.Consumer<T, E> consumer) {
@@ -4207,12 +4207,12 @@ public abstract class Fn extends Comparators {
     /**
      * Cc.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param biConsumer the bi consumer
-     * @return the consumer
+     * @param <A>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param biConsumer
+     * @return
      */
     @Beta
     public static <A, T, E extends Exception> Consumer<T> cc(final A a, final Try.BiConsumer<A, T, E> biConsumer) {
@@ -4233,14 +4233,14 @@ public abstract class Fn extends Comparators {
     /**
      * Cc.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param triConsumer the tri consumer
-     * @return the consumer
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, B, T, E extends Exception> Consumer<T> cc(final A a, final B b, final Try.TriConsumer<A, B, T, E> triConsumer) {
@@ -4261,11 +4261,11 @@ public abstract class Fn extends Comparators {
     /**
      * Cc.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param biConsumer the bi consumer
-     * @return the bi consumer
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param biConsumer
+     * @return
      */
     @Beta
     public static <T, U, E extends Exception> BiConsumer<T, U> cc(final Try.BiConsumer<T, U, E> biConsumer) {
@@ -4286,13 +4286,13 @@ public abstract class Fn extends Comparators {
     /**
      * Cc.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param triConsumer the tri consumer
-     * @return the bi consumer
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, T, U, E extends Exception> BiConsumer<T, U> cc(final A a, final Try.TriConsumer<A, T, U, E> triConsumer) {
@@ -4313,12 +4313,12 @@ public abstract class Fn extends Comparators {
     /**
      * Cc.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param triConsumer the tri consumer
-     * @return the tri consumer
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param triConsumer
+     * @return
      */
     @Beta
     public static <A, B, C, E extends Exception> TriConsumer<A, B, C> cc(final Try.TriConsumer<A, B, C, E> triConsumer) {
@@ -4339,11 +4339,11 @@ public abstract class Fn extends Comparators {
     /**
      * Ff.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param function the function
-     * @return the function
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param function
+     * @return
      */
     @Beta
     public static <T, R, E extends Exception> Function<T, R> ff(final Try.Function<T, R, E> function) {
@@ -4364,13 +4364,13 @@ public abstract class Fn extends Comparators {
     /**
      * Ff.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param biFunction the bi function
-     * @return the function
+     * @param <A>
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param biFunction
+     * @return
      */
     @Beta
     public static <A, T, R, E extends Exception> Function<T, R> ff(final A a, final Try.BiFunction<A, T, R, E> biFunction) {
@@ -4391,15 +4391,15 @@ public abstract class Fn extends Comparators {
     /**
      * Ff.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param triFunction the tri function
-     * @return the function
+     * @param <A>
+     * @param <B>
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, B, T, R, E extends Exception> Function<T, R> ff(final A a, final B b, final Try.TriFunction<A, B, T, R, E> triFunction) {
@@ -4420,12 +4420,12 @@ public abstract class Fn extends Comparators {
     /**
      * Ff.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param biFunction the bi function
-     * @return the bi function
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param biFunction
+     * @return
      */
     @Beta
     public static <T, U, R, E extends Exception> BiFunction<T, U, R> ff(final Try.BiFunction<T, U, R, E> biFunction) {
@@ -4446,14 +4446,14 @@ public abstract class Fn extends Comparators {
     /**
      * Ff.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param triFunction the tri function
-     * @return the bi function
+     * @param <A>
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, T, U, R, E extends Exception> BiFunction<T, U, R> ff(final A a, final Try.TriFunction<A, T, U, R, E> triFunction) {
@@ -4474,13 +4474,13 @@ public abstract class Fn extends Comparators {
     /**
      * Ff.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param triFunction the tri function
-     * @return the tri function
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param triFunction
+     * @return
      */
     @Beta
     public static <A, B, C, R, E extends Exception> TriFunction<A, B, C, R> ff(final Try.TriFunction<A, B, C, R, E> triFunction) {
@@ -4501,10 +4501,10 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code Predicate}.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param mutex to synchronized on
-     * @param predicate the predicate
-     * @return the predicate
+     * @param predicate
+     * @return
      */
     @Beta
     public static <T> Predicate<T> sp(final Object mutex, final Predicate<T> predicate) {
@@ -4524,12 +4524,12 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code Predicate}.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
+     * @param <A>
+     * @param <T>
      * @param mutex to synchronized on
-     * @param a the a
-     * @param biPredicate the bi predicate
-     * @return the predicate
+     * @param a
+     * @param biPredicate
+     * @return
      */
     @Beta
     public static <A, T> Predicate<T> sp(final Object mutex, final A a, final BiPredicate<A, T> biPredicate) {
@@ -4549,14 +4549,14 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code Predicate}.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <T> the generic type
+     * @param <A>
+     * @param <B>
+     * @param <T>
      * @param mutex to synchronized on
-     * @param a the a
-     * @param b the b
-     * @param triPredicate the tri predicate
-     * @return the predicate
+     * @param a
+     * @param b
+     * @param triPredicate
+     * @return
      */
     @Beta
     public static <A, B, T> Predicate<T> sp(final Object mutex, final A a, final B b, final TriPredicate<A, B, T> triPredicate) {
@@ -4576,11 +4576,11 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code BiPredicate}.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
+     * @param <T>
+     * @param <U>
      * @param mutex to synchronized on
-     * @param biPredicate the bi predicate
-     * @return the bi predicate
+     * @param biPredicate
+     * @return
      */
     @Beta
     public static <T, U> BiPredicate<T, U> sp(final Object mutex, final BiPredicate<T, U> biPredicate) {
@@ -4600,10 +4600,10 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code Consumer}.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param mutex to synchronized on
-     * @param consumer the consumer
-     * @return the consumer
+     * @param consumer
+     * @return
      */
     @Beta
     public static <T> Consumer<T> sc(final Object mutex, final Consumer<T> consumer) {
@@ -4623,12 +4623,12 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code Consumer}.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
+     * @param <A>
+     * @param <T>
      * @param mutex to synchronized on
-     * @param a the a
-     * @param biConsumer the bi consumer
-     * @return the consumer
+     * @param a
+     * @param biConsumer
+     * @return
      */
     @Beta
     public static <A, T> Consumer<T> sc(final Object mutex, final A a, final BiConsumer<A, T> biConsumer) {
@@ -4648,11 +4648,11 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code BiConsumer}.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
+     * @param <T>
+     * @param <U>
      * @param mutex to synchronized on
-     * @param biConsumer the bi consumer
-     * @return the bi consumer
+     * @param biConsumer
+     * @return
      */
     @Beta
     public static <T, U> BiConsumer<T, U> sc(final Object mutex, final BiConsumer<T, U> biConsumer) {
@@ -4672,11 +4672,11 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code Function}.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
+     * @param <T>
+     * @param <R>
      * @param mutex to synchronized on
-     * @param function the function
-     * @return the function
+     * @param function
+     * @return
      */
     @Beta
     public static <T, R> Function<T, R> sf(final Object mutex, final Function<T, R> function) {
@@ -4696,13 +4696,13 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code Function}.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param <R> the generic type
+     * @param <A>
+     * @param <T>
+     * @param <R>
      * @param mutex to synchronized on
-     * @param a the a
-     * @param biFunction the bi function
-     * @return the function
+     * @param a
+     * @param biFunction
+     * @return
      */
     @Beta
     public static <A, T, R> Function<T, R> sf(final Object mutex, final A a, final BiFunction<A, T, R> biFunction) {
@@ -4722,12 +4722,12 @@ public abstract class Fn extends Comparators {
     /**
      * Synchronized {@code BiFunction}.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <R> the generic type
+     * @param <T>
+     * @param <U>
+     * @param <R>
      * @param mutex to synchronized on
-     * @param biFunction the bi function
-     * @return the bi function
+     * @param biFunction
+     * @return
      */
     @Beta
     public static <T, U, R> BiFunction<T, U, R> sf(final Object mutex, final BiFunction<T, U, R> biFunction) {
@@ -4754,10 +4754,10 @@ public abstract class Fn extends Comparators {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param duration the duration
-     * @param startTime the start time
-     * @return the function
+     * @param <T>
+     * @param duration
+     * @param startTime
+     * @return
      */
     public static <T> Function<Stream<Timed<T>>, Stream<Stream<Timed<T>>>> window(final Duration duration, final LongSupplier startTime) {
         return window(duration, duration.toMillis(), startTime);
@@ -4766,10 +4766,10 @@ public abstract class Fn extends Comparators {
     /**
      * Window to list.
      *
-     * @param <T> the generic type
-     * @param duration the duration
-     * @param startTime the start time
-     * @return the function
+     * @param <T>
+     * @param duration
+     * @param startTime
+     * @return
      * @see #window(Duration, LongSupplier)
      */
     public static <T> Function<Stream<Timed<T>>, Stream<List<Timed<T>>>> windowToList(final Duration duration, final LongSupplier startTime) {
@@ -4779,10 +4779,10 @@ public abstract class Fn extends Comparators {
     /**
      * Window to set.
      *
-     * @param <T> the generic type
-     * @param duration the duration
-     * @param startTime the start time
-     * @return the function
+     * @param <T>
+     * @param duration
+     * @param startTime
+     * @return
      */
     public static <T> Function<Stream<Timed<T>>, Stream<Set<Timed<T>>>> windowToSet(final Duration duration, final LongSupplier startTime) {
         return window(duration, startTime, Suppliers.<Timed<T>> ofSet());
@@ -4791,12 +4791,12 @@ public abstract class Fn extends Comparators {
     /**
      * Window.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param duration the duration
-     * @param startTime the start time
-     * @param collectionSupplier the collection supplier
-     * @return the function
+     * @param <T>
+     * @param <C>
+     * @param duration
+     * @param startTime
+     * @param collectionSupplier
+     * @return
      */
     public static <T, C extends Collection<Timed<T>>> Function<Stream<Timed<T>>, Stream<C>> window(final Duration duration, final LongSupplier startTime,
             final Supplier<? extends C> collectionSupplier) {
@@ -4806,13 +4806,13 @@ public abstract class Fn extends Comparators {
     /**
      * Window.
      *
-     * @param <T> the generic type
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param duration the duration
-     * @param startTime the start time
-     * @param collector the collector
-     * @return the function
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param duration
+     * @param startTime
+     * @param collector
+     * @return
      * @see #window(Duration, LongSupplier)
      */
     public static <T, A, R> Function<Stream<Timed<T>>, Stream<R>> window(final Duration duration, final LongSupplier startTime,
@@ -4823,11 +4823,11 @@ public abstract class Fn extends Comparators {
     /**
      * Window.
      *
-     * @param <T> the generic type
-     * @param duration the duration
-     * @param incrementInMillis the increment in millis
-     * @param startTime the start time
-     * @return the function
+     * @param <T>
+     * @param duration
+     * @param incrementInMillis
+     * @param startTime
+     * @return
      * @see #window(Duration, LongSupplier)
      */
     public static <T> Function<Stream<Timed<T>>, Stream<Stream<Timed<T>>>> window(final Duration duration, final long incrementInMillis,
@@ -4850,11 +4850,11 @@ public abstract class Fn extends Comparators {
     /**
      * Window to list.
      *
-     * @param <T> the generic type
-     * @param duration the duration
-     * @param incrementInMillis the increment in millis
-     * @param startTime the start time
-     * @return the function
+     * @param <T>
+     * @param duration
+     * @param incrementInMillis
+     * @param startTime
+     * @return
      * @see #window(Duration, LongSupplier)
      */
     public static <T> Function<Stream<Timed<T>>, Stream<List<Timed<T>>>> windowToList(final Duration duration, final long incrementInMillis,
@@ -4865,11 +4865,11 @@ public abstract class Fn extends Comparators {
     /**
      * Window to set.
      *
-     * @param <T> the generic type
-     * @param duration the duration
-     * @param incrementInMillis the increment in millis
-     * @param startTime the start time
-     * @return the function
+     * @param <T>
+     * @param duration
+     * @param incrementInMillis
+     * @param startTime
+     * @return
      * @see #window(Duration, LongSupplier)
      */
     public static <T> Function<Stream<Timed<T>>, Stream<Set<Timed<T>>>> windowToSet(final Duration duration, final long incrementInMillis,
@@ -4880,13 +4880,13 @@ public abstract class Fn extends Comparators {
     /**
      * Window.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param duration the duration
-     * @param incrementInMillis the increment in millis
-     * @param startTime the start time
-     * @param collectionSupplier the collection supplier
-     * @return the function
+     * @param <T>
+     * @param <C>
+     * @param duration
+     * @param incrementInMillis
+     * @param startTime
+     * @param collectionSupplier
+     * @return
      * @see #window(Duration, LongSupplier)
      */
     public static <T, C extends Collection<Timed<T>>> Function<Stream<Timed<T>>, Stream<C>> window(final Duration duration, final long incrementInMillis,
@@ -5050,14 +5050,14 @@ public abstract class Fn extends Comparators {
     /**
      * Window.
      *
-     * @param <T> the generic type
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param duration the duration
-     * @param incrementInMillis the increment in millis
-     * @param startTime the start time
-     * @param collector the collector
-     * @return the function
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param duration
+     * @param incrementInMillis
+     * @param startTime
+     * @param collector
+     * @return
      * @see #window(Duration, LongSupplier)
      */
     public static <T, A, R> Function<Stream<Timed<T>>, Stream<R>> window(final Duration duration, final long incrementInMillis, final LongSupplier startTime,
@@ -5236,11 +5236,11 @@ public abstract class Fn extends Comparators {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param maxWindowSize the max window size
-     * @param maxDuration the max duration
-     * @param startTime the start time
-     * @return the function
+     * @param <T>
+     * @param maxWindowSize
+     * @param maxDuration
+     * @param startTime
+     * @return
      */
     public static <T> Function<Stream<Timed<T>>, Stream<Stream<Timed<T>>>> window(final int maxWindowSize, final Duration maxDuration,
             final LongSupplier startTime) {
@@ -5262,13 +5262,13 @@ public abstract class Fn extends Comparators {
     /**
      * Split this stream at where {@code maxWindowSize} or {@code maxDuration} reaches first.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param maxWindowSize the max window size
-     * @param maxDuration the max duration
-     * @param startTime the start time
-     * @param collectionSupplier the collection supplier
-     * @return the function
+     * @param <T>
+     * @param <C>
+     * @param maxWindowSize
+     * @param maxDuration
+     * @param startTime
+     * @param collectionSupplier
+     * @return
      * @see #window(Duration, long, LongSupplier, Supplier)
      */
     public static <T, C extends Collection<Timed<T>>> Function<Stream<Timed<T>>, Stream<C>> window(final int maxWindowSize, final Duration maxDuration,
@@ -5369,14 +5369,14 @@ public abstract class Fn extends Comparators {
     /**
      * Split this stream at where {@code maxWindowSize} or {@code maxDuration} reaches first.
      *
-     * @param <T> the generic type
-     * @param <A> the generic type
-     * @param <R> the generic type
-     * @param maxWindowSize the max window size
-     * @param maxDuration the max duration
-     * @param startTime the start time
-     * @param collector the collector
-     * @return the function
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param maxWindowSize
+     * @param maxDuration
+     * @param startTime
+     * @param collector
+     * @return
      * @see #window(Duration, long, LongSupplier, Collector)
      */
     public static <T, A, R> Function<Stream<Timed<T>>, Stream<R>> window(final int maxWindowSize, final Duration maxDuration, final LongSupplier startTime,
@@ -5485,9 +5485,9 @@ public abstract class Fn extends Comparators {
     /**
      * Callable.
      *
-     * @param <R> the generic type
-     * @param callable the callable
-     * @return the com.landawn.abacus.util.function. callable
+     * @param <R>
+     * @param callable
+     * @return
      */
     public static <R> com.landawn.abacus.util.function.Callable<R> callable(final com.landawn.abacus.util.function.Callable<R> callable) {
         N.checkArgNotNull(callable);
@@ -5498,8 +5498,8 @@ public abstract class Fn extends Comparators {
     /**
      * Runnable.
      *
-     * @param runnable the runnable
-     * @return the com.landawn.abacus.util.function. runnable
+     * @param runnable
+     * @return
      */
     public static com.landawn.abacus.util.function.Runnable runnable(final com.landawn.abacus.util.function.Runnable runnable) {
         N.checkArgNotNull(runnable);
@@ -5510,8 +5510,8 @@ public abstract class Fn extends Comparators {
     /**
      * To callable.
      *
-     * @param runnable the runnable
-     * @return the com.landawn.abacus.util.function. callable
+     * @param runnable
+     * @return
      */
     public static com.landawn.abacus.util.function.Callable<Void> toCallable(final com.landawn.abacus.util.function.Runnable runnable) {
         N.checkArgNotNull(runnable);
@@ -5528,9 +5528,9 @@ public abstract class Fn extends Comparators {
     /**
      * To runnable.
      *
-     * @param <R> the generic type
-     * @param callable the callable
-     * @return the com.landawn.abacus.util.function. runnable
+     * @param <R>
+     * @param callable
+     * @return
      */
     public static <R> com.landawn.abacus.util.function.Runnable toRunnable(final com.landawn.abacus.util.function.Callable<R> callable) {
         N.checkArgNotNull(callable);
@@ -5546,8 +5546,8 @@ public abstract class Fn extends Comparators {
     /**
      * Throwing merger.
      *
-     * @param <T> the generic type
-     * @return the binary operator
+     * @param <T>
+     * @return
      */
     public static <T> BinaryOperator<T> throwingMerger() {
         return BinaryOperators.THROWING_MERGER;
@@ -5556,8 +5556,8 @@ public abstract class Fn extends Comparators {
     /**
      * Ignoring merger.
      *
-     * @param <T> the generic type
-     * @return the binary operator
+     * @param <T>
+     * @return
      */
     public static <T> BinaryOperator<T> ignoringMerger() {
         return BinaryOperators.IGNORING_MERGER;
@@ -5566,8 +5566,8 @@ public abstract class Fn extends Comparators {
     /**
      * Replacing merger.
      *
-     * @param <T> the generic type
-     * @return the binary operator
+     * @param <T>
+     * @return
      */
     public static <T> BinaryOperator<T> replacingMerger() {
         return BinaryOperators.REPLACING_MERGER;
@@ -5576,9 +5576,9 @@ public abstract class Fn extends Comparators {
     /**
      * Adds the all.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @return the bi consumer
+     * @param <T>
+     * @param <C>
+     * @return
      * @deprecated replaced by {@code BiConsumers#ofAddAll()}
      */
     @Deprecated
@@ -5591,8 +5591,8 @@ public abstract class Fn extends Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @return the bi consumer
+     * @param <M>
+     * @return
      * @deprecated replaced by {@code BiConsumers#ofPutAll()}
      */
     @Deprecated
@@ -5948,7 +5948,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of boolean array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<boolean[]> ofBooleanArray() {
             return BOOLEAN_ARRAY;
@@ -5957,7 +5957,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of char array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<char[]> ofCharArray() {
             return CHAR_ARRAY;
@@ -5966,7 +5966,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of byte array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<byte[]> ofByteArray() {
             return BYTE_ARRAY;
@@ -5975,7 +5975,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of short array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<short[]> ofShortArray() {
             return SHORT_ARRAY;
@@ -5984,7 +5984,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of int array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<int[]> ofIntArray() {
             return INT_ARRAY;
@@ -5993,7 +5993,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of long array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<long[]> ofLongArray() {
             return LONG_ARRAY;
@@ -6002,7 +6002,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of float array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<float[]> ofFloatArray() {
             return FLOAT_ARRAY;
@@ -6011,7 +6011,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of double array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<double[]> ofDoubleArray() {
             return DOUBLE_ARRAY;
@@ -6020,7 +6020,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of string array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<String[]> ofStringArray() {
             return STRING_ARRAY;
@@ -6029,7 +6029,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of object array.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<Object[]> ofObjectArray() {
             return OBJECT_ARRAY;
@@ -6038,7 +6038,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of boolean list.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<BooleanList> ofBooleanList() {
             return BOOLEAN_LIST;
@@ -6047,7 +6047,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of char list.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<CharList> ofCharList() {
             return CHAR_LIST;
@@ -6056,7 +6056,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of byte list.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<ByteList> ofByteList() {
             return BYTE_LIST;
@@ -6065,7 +6065,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of short list.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<ShortList> ofShortList() {
             return SHORT_LIST;
@@ -6074,7 +6074,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of int list.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<IntList> ofIntList() {
             return INT_LIST;
@@ -6083,7 +6083,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of long list.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<LongList> ofLongList() {
             return LONG_LIST;
@@ -6092,7 +6092,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of float list.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<FloatList> ofFloatList() {
             return FLOAT_LIST;
@@ -6101,7 +6101,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of double list.
          *
-         * @return the int function
+         * @return
          */
         public static IntFunction<DoubleList> ofDoubleList() {
             return DOUBLE_LIST;
@@ -6110,8 +6110,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of list.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<List<T>> ofList() {
@@ -6121,8 +6121,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of linked list.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LinkedList<T>> ofLinkedList() {
@@ -6132,8 +6132,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of set.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Set<T>> ofSet() {
@@ -6143,8 +6143,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of linked hash set.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LinkedHashSet<T>> ofLinkedHashSet() {
@@ -6154,8 +6154,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of sorted set.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<SortedSet<T>> ofSortedSet() {
@@ -6165,8 +6165,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of navigable set.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<NavigableSet<T>> ofNavigableSet() {
@@ -6176,8 +6176,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of tree set.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<TreeSet<T>> ofTreeSet() {
@@ -6187,8 +6187,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of queue.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Queue<T>> ofQueue() {
@@ -6198,8 +6198,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of deque.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Deque<T>> ofDeque() {
@@ -6209,8 +6209,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of array deque.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<ArrayDeque<T>> ofArrayDeque() {
@@ -6220,8 +6220,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of linked blocking queue.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LinkedBlockingQueue<T>> ofLinkedBlockingQueue() {
@@ -6231,8 +6231,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of concurrent linked queue.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue() {
@@ -6242,8 +6242,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of priority queue.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<PriorityQueue<T>> ofPriorityQueue() {
@@ -6255,7 +6255,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<Map<K, V>> ofMap() {
@@ -6267,7 +6267,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<LinkedHashMap<K, V>> ofLinkedHashMap() {
@@ -6279,7 +6279,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<IdentityHashMap<K, V>> ofIdentityHashMap() {
@@ -6291,7 +6291,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<SortedMap<K, V>> ofSortedMap() {
@@ -6303,7 +6303,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<NavigableMap<K, V>> ofNavigableMap() {
@@ -6315,7 +6315,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<TreeMap<K, V>> ofTreeMap() {
@@ -6327,7 +6327,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<ConcurrentMap<K, V>> ofConcurrentMap() {
@@ -6339,7 +6339,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
@@ -6351,7 +6351,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the int function
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<BiMap<K, V>> ofBiMap() {
@@ -6361,8 +6361,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of multiset.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<Multiset<T>> ofMultiset() {
@@ -6372,8 +6372,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of long multiset.
          *
-         * @param <T> the generic type
-         * @return the int function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LongMultiset<T>> ofLongMultiset() {
@@ -6384,8 +6384,8 @@ public abstract class Fn extends Comparators {
          * Of list multimap.
          *
          * @param <K> the key type
-         * @param <E> the element type
-         * @return the int function
+         * @param <E>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> IntFunction<ListMultimap<K, E>> ofListMultimap() {
@@ -6396,8 +6396,8 @@ public abstract class Fn extends Comparators {
          * Of set multimap.
          *
          * @param <K> the key type
-         * @param <E> the element type
-         * @return the int function
+         * @param <E>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> IntFunction<SetMultimap<K, E>> ofSetMultimap() {
@@ -6407,7 +6407,7 @@ public abstract class Fn extends Comparators {
         /**
          * Won't work.
          *
-         * @return the int function
+         * @return
          * @throws UnsupportedOperationException the unsupported operation exception
          */
         @Deprecated
@@ -6418,7 +6418,7 @@ public abstract class Fn extends Comparators {
         /**
          * Won't work.
          *
-         * @return the int function
+         * @return
          * @throws UnsupportedOperationException the unsupported operation exception
          */
         @Deprecated
@@ -6429,7 +6429,7 @@ public abstract class Fn extends Comparators {
         /**
          * Won't work.
          *
-         * @return the int function
+         * @return
          * @throws UnsupportedOperationException the unsupported operation exception
          */
         @Deprecated
@@ -6440,10 +6440,10 @@ public abstract class Fn extends Comparators {
         /**
          * Single.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @param supplier the supplier
-         * @return the int function<? extends c>
+         * @param <T>
+         * @param <C>
+         * @param supplier
+         * @return
          */
         @Deprecated
         public static <T, C extends Collection<T>> IntFunction<? extends C> single(final IntFunction<? extends C> supplier) {
@@ -6849,9 +6849,9 @@ public abstract class Fn extends Comparators {
         /**
          * Returns a supplier that always supplies {@code instance}.
          *
-         * @param <T> the generic type
-         * @param instance the instance
-         * @return the supplier
+         * @param <T>
+         * @param instance
+         * @return
          */
         public static <T> Supplier<T> ofInstance(final T instance) {
             return new Supplier<T>() {
@@ -6865,7 +6865,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of UUID.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<String> ofUUID() {
             return UUID;
@@ -6874,7 +6874,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of GUID.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<String> ofGUID() {
             return GUID;
@@ -6883,7 +6883,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty boolean array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<boolean[]> ofEmptyBooleanArray() {
             return EMPTY_BOOLEAN_ARRAY;
@@ -6892,7 +6892,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty char array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<char[]> ofEmptyCharArray() {
             return EMPTY_CHAR_ARRAY;
@@ -6901,7 +6901,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty byte array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<byte[]> ofEmptyByteArray() {
             return EMPTY_BYTE_ARRAY;
@@ -6910,7 +6910,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty short array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<short[]> ofEmptyShortArray() {
             return EMPTY_SHORT_ARRAY;
@@ -6919,7 +6919,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty int array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<int[]> ofEmptyIntArray() {
             return EMPTY_INT_ARRAY;
@@ -6928,7 +6928,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty long array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<long[]> ofEmptyLongArray() {
             return EMPTY_LONG_ARRAY;
@@ -6937,7 +6937,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty float array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<float[]> ofEmptyFloatArray() {
             return EMPTY_FLOAT_ARRAY;
@@ -6946,7 +6946,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty double array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<double[]> ofEmptyDoubleArray() {
             return EMPTY_DOUBLE_ARRAY;
@@ -6955,7 +6955,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty string array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<String[]> ofEmptyStringArray() {
             return EMPTY_STRING_ARRAY;
@@ -6964,7 +6964,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of empty object array.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<Object[]> ofEmptyObjectArray() {
             return EMPTY_OBJECT_ARRAY;
@@ -6973,7 +6973,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of boolean list.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<BooleanList> ofBooleanList() {
             return BOOLEAN_LIST;
@@ -6982,7 +6982,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of char list.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<CharList> ofCharList() {
             return CHAR_LIST;
@@ -6991,7 +6991,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of byte list.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<ByteList> ofByteList() {
             return BYTE_LIST;
@@ -7000,7 +7000,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of short list.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<ShortList> ofShortList() {
             return SHORT_LIST;
@@ -7009,7 +7009,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of int list.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<IntList> ofIntList() {
             return INT_LIST;
@@ -7018,7 +7018,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of long list.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<LongList> ofLongList() {
             return LONG_LIST;
@@ -7027,7 +7027,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of float list.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<FloatList> ofFloatList() {
             return FLOAT_LIST;
@@ -7036,7 +7036,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of double list.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<DoubleList> ofDoubleList() {
             return DOUBLE_LIST;
@@ -7045,8 +7045,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of list.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<List<T>> ofList() {
@@ -7056,8 +7056,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of linked list.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LinkedList<T>> ofLinkedList() {
@@ -7067,8 +7067,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of set.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Set<T>> ofSet() {
@@ -7078,8 +7078,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of linked hash set.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LinkedHashSet<T>> ofLinkedHashSet() {
@@ -7089,8 +7089,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of sorted set.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<SortedSet<T>> ofSortedSet() {
@@ -7100,8 +7100,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of navigable set.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<NavigableSet<T>> ofNavigableSet() {
@@ -7111,8 +7111,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of tree set.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<TreeSet<T>> ofTreeSet() {
@@ -7122,8 +7122,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of queue.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Queue<T>> ofQueue() {
@@ -7133,8 +7133,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of deque.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Deque<T>> ofDeque() {
@@ -7144,8 +7144,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of array deque.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<ArrayDeque<T>> ofArrayDeque() {
@@ -7155,8 +7155,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of linked blocking queue.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LinkedBlockingQueue<T>> ofLinkedBlockingQueue() {
@@ -7166,8 +7166,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of concurrent linked queue.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue() {
@@ -7177,8 +7177,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of priority queue.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<PriorityQueue<T>> ofPriorityQueue() {
@@ -7190,7 +7190,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<Map<K, V>> ofMap() {
@@ -7202,7 +7202,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<LinkedHashMap<K, V>> ofLinkedHashMap() {
@@ -7214,7 +7214,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<IdentityHashMap<K, V>> ofIdentityHashMap() {
@@ -7226,7 +7226,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<SortedMap<K, V>> ofSortedMap() {
@@ -7238,7 +7238,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<NavigableMap<K, V>> ofNavigableMap() {
@@ -7250,7 +7250,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<TreeMap<K, V>> ofTreeMap() {
@@ -7262,7 +7262,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<ConcurrentMap<K, V>> ofConcurrentMap() {
@@ -7274,7 +7274,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
@@ -7286,7 +7286,7 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @return the supplier
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<BiMap<K, V>> ofBiMap() {
@@ -7296,8 +7296,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of multiset.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Multiset<T>> ofMultiset() {
@@ -7307,8 +7307,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of long multiset.
          *
-         * @param <T> the generic type
-         * @return the supplier
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LongMultiset<T>> ofLongMultiset() {
@@ -7319,8 +7319,8 @@ public abstract class Fn extends Comparators {
          * Of list multimap.
          *
          * @param <K> the key type
-         * @param <E> the element type
-         * @return the supplier
+         * @param <E>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap() {
@@ -7331,8 +7331,8 @@ public abstract class Fn extends Comparators {
          * Of set multimap.
          *
          * @param <K> the key type
-         * @param <E> the element type
-         * @return the supplier
+         * @param <E>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap() {
@@ -7342,7 +7342,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of string builder.
          *
-         * @return the supplier
+         * @return
          */
         public static Supplier<StringBuilder> ofStringBuilder() {
             return STRING_BUILDER;
@@ -7351,7 +7351,7 @@ public abstract class Fn extends Comparators {
         /**
          * Won't work.
          *
-         * @return the supplier
+         * @return
          * @throws UnsupportedOperationException the unsupported operation exception
          */
         @Deprecated
@@ -7362,7 +7362,7 @@ public abstract class Fn extends Comparators {
         /**
          * Won't work.
          *
-         * @return the supplier
+         * @return
          * @throws UnsupportedOperationException the unsupported operation exception
          */
         @Deprecated
@@ -7373,7 +7373,7 @@ public abstract class Fn extends Comparators {
         /**
          * Won't work.
          *
-         * @return the supplier
+         * @return
          * @throws UnsupportedOperationException the unsupported operation exception
          */
         @Deprecated
@@ -7384,10 +7384,10 @@ public abstract class Fn extends Comparators {
         /**
          * Single.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @param supplier the supplier
-         * @return the supplier<? extends c>
+         * @param <T>
+         * @param <C>
+         * @param supplier
+         * @return
          */
         @Deprecated
         public static <T, C extends Collection<T>> Supplier<? extends C> single(final Supplier<? extends C> supplier) {
@@ -7423,9 +7423,9 @@ public abstract class Fn extends Comparators {
         /**
          * Indexed.
          *
-         * @param <T> the generic type
-         * @param predicate the predicate
-         * @return the predicate
+         * @param <T>
+         * @param predicate
+         * @return
          */
         public static <T> Predicate<T> indexed(final IndexedPredicate<T> predicate) {
             N.checkArgNotNull(predicate);
@@ -7443,8 +7443,8 @@ public abstract class Fn extends Comparators {
         /**
          * Distinct.
          *
-         * @param <T> the generic type
-         * @return the predicate
+         * @param <T>
+         * @return
          */
         public static <T> Predicate<T> distinct() {
             return new Predicate<T>() {
@@ -7460,9 +7460,9 @@ public abstract class Fn extends Comparators {
         /**
          * Distinct by.
          *
-         * @param <T> the generic type
-         * @param mapper the mapper
-         * @return the predicate
+         * @param <T>
+         * @param mapper
+         * @return
          */
         public static <T> Predicate<T> distinctBy(final Function<? super T, ?> mapper) {
             return new Predicate<T>() {
@@ -7478,8 +7478,8 @@ public abstract class Fn extends Comparators {
         /**
          * Concurrent distinct.
          *
-         * @param <T> the generic type
-         * @return the predicate
+         * @param <T>
+         * @return
          */
         public static <T> Predicate<T> concurrentDistinct() {
             return new Predicate<T>() {
@@ -7495,9 +7495,9 @@ public abstract class Fn extends Comparators {
         /**
          * Concurrent distinct by.
          *
-         * @param <T> the generic type
-         * @param mapper the mapper
-         * @return the predicate
+         * @param <T>
+         * @param mapper
+         * @return
          */
         public static <T> Predicate<T> concurrentDistinctBy(final Function<? super T, ?> mapper) {
             return new Predicate<T>() {
@@ -7514,8 +7514,8 @@ public abstract class Fn extends Comparators {
          * Remove the continuous repeat elements.
          * Returns a stateful predicate which should not be used in parallel stream.
          *
-         * @param <T> the generic type
-         * @return the predicate
+         * @param <T>
+         * @return
          */
         public static <T> Predicate<T> skipRepeats() {
             return new Predicate<T>() {
@@ -7533,10 +7533,10 @@ public abstract class Fn extends Comparators {
         /**
          * {@code true/false} are repeatedly returned after each specified duration.
          *
-         * @param <T> the generic type
-         * @param periodInMillis the period in millis
+         * @param <T>
+         * @param periodInMillis
          * @param cancellationFlag the underline scheduled {@code Task} will be cancelled if {@code cancellationFlag} is set to true.
-         * @return the predicate
+         * @return
          */
         public static <T> Predicate<T> invertedByDuration(final long periodInMillis, final MutableBoolean cancellationFlag) {
             final MutableBoolean switcher = MutableBoolean.of(true);
@@ -7565,11 +7565,11 @@ public abstract class Fn extends Comparators {
         /**
          * {@code true/false} are repeatedly returned after each specified duration.
          *
-         * @param <T> the generic type
-         * @param periodInMillis the period in millis
+         * @param <T>
+         * @param periodInMillis
          * @param cancellationFlag the underline scheduled {@code Task} will be cancelled if {@code cancellationFlag} is set to true.
          * @param update called at the beginning of each duration.
-         * @return the predicate
+         * @return
          */
         public static <T> Predicate<T> invertedByDuration(final long periodInMillis, final MutableBoolean cancellationFlag, final Runnable update) {
             final MutableBoolean switcher = MutableBoolean.of(true);
@@ -7599,11 +7599,11 @@ public abstract class Fn extends Comparators {
         /**
          * {@code true/false} are repeatedly returned after each specified duration.
          *
-         * @param <T> the generic type
-         * @param delayInMillis the delay in millis
-         * @param periodInMillis the period in millis
+         * @param <T>
+         * @param delayInMillis
+         * @param periodInMillis
          * @param cancellationFlag the underline scheduled {@code Task} will be cancelled if {@code cancellationFlag} is set to true.
-         * @return the predicate
+         * @return
          */
         public static <T> Predicate<T> invertedByDuration(final long delayInMillis, final long periodInMillis, final MutableBoolean cancellationFlag) {
             final MutableBoolean switcher = MutableBoolean.of(true);
@@ -7632,12 +7632,12 @@ public abstract class Fn extends Comparators {
         /**
          * {@code true/false} are repeatedly returned after each specified duration.
          *
-         * @param <T> the generic type
-         * @param delayInMillis the delay in millis
-         * @param periodInMillis the period in millis
+         * @param <T>
+         * @param delayInMillis
+         * @param periodInMillis
          * @param cancellationFlag the underline scheduled {@code Task} will be cancelled if {@code cancellationFlag} is set to true.
          * @param update called at the beginning of each duration.
-         * @return the predicate
+         * @return
          */
         public static <T> Predicate<T> invertedByDuration(final long delayInMillis, final long periodInMillis, final MutableBoolean cancellationFlag,
                 final Runnable update) {
@@ -7753,9 +7753,9 @@ public abstract class Fn extends Comparators {
         /**
          * Always true.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @return the bi predicate
+         * @param <T>
+         * @param <U>
+         * @return
          */
         public static <T, U> BiPredicate<T, U> alwaysTrue() {
             return ALWAYS_TRUE;
@@ -7764,9 +7764,9 @@ public abstract class Fn extends Comparators {
         /**
          * Always false.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @return the bi predicate
+         * @param <T>
+         * @param <U>
+         * @return
          */
         public static <T, U> BiPredicate<T, U> alwaysFalse() {
             return ALWAYS_FALSE;
@@ -7775,10 +7775,10 @@ public abstract class Fn extends Comparators {
         /**
          * Indexed.
          *
-         * @param <U> the generic type
-         * @param <T> the generic type
-         * @param predicate the predicate
-         * @return the bi predicate
+         * @param <U>
+         * @param <T>
+         * @param predicate
+         * @return
          */
         public static <U, T> BiPredicate<U, T> indexed(final IndexedBiPredicate<U, T> predicate) {
             N.checkArgNotNull(predicate);
@@ -7827,10 +7827,10 @@ public abstract class Fn extends Comparators {
         /**
          * Always true.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <C> the generic type
-         * @return the tri predicate
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @return
          */
         public static <A, B, C> TriPredicate<A, B, C> alwaysTrue() {
             return ALWAYS_TRUE;
@@ -7839,10 +7839,10 @@ public abstract class Fn extends Comparators {
         /**
          * Always false.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <C> the generic type
-         * @return the tri predicate
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @return
          */
         public static <A, B, C> TriPredicate<A, B, C> alwaysFalse() {
             return ALWAYS_FALSE;
@@ -7865,9 +7865,9 @@ public abstract class Fn extends Comparators {
         /**
          * Returns a <code>Consumer</code> which calls the specified <code>func</code>.
          *
-         * @param <T> the generic type
-         * @param func the func
-         * @return the consumer
+         * @param <T>
+         * @param func
+         * @return
          */
         public static <T> Consumer<T> convert(final Function<? super T, ?> func) {
             N.checkArgNotNull(func);
@@ -7883,9 +7883,9 @@ public abstract class Fn extends Comparators {
         /**
          * Indexed.
          *
-         * @param <T> the generic type
-         * @param action the action
-         * @return the consumer
+         * @param <T>
+         * @param action
+         * @return
          */
         public static <T> Consumer<T> indexed(final IndexedConsumer<T> action) {
             N.checkArgNotNull(action);
@@ -8015,9 +8015,9 @@ public abstract class Fn extends Comparators {
         /**
          * Do nothing.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @return the bi consumer
+         * @param <T>
+         * @param <U>
+         * @return
          */
         public static <T, U> BiConsumer<T, U> doNothing() {
             return DO_NOTHING;
@@ -8026,9 +8026,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of add.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the bi consumer
+         * @param <T>
+         * @param <C>
+         * @return
          */
         public static <T, C extends Collection<? super T>> BiConsumer<C, T> ofAdd() {
             return (BiConsumer<C, T>) ADD;
@@ -8037,9 +8037,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of add all.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the bi consumer
+         * @param <T>
+         * @param <C>
+         * @return
          */
         public static <T, C extends Collection<T>> BiConsumer<C, C> ofAddAll() {
             return (BiConsumer<C, C>) ADD_ALL;
@@ -8048,8 +8048,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of add alll.
          *
-         * @param <T> the generic type
-         * @return the bi consumer
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiConsumer<T, T> ofAddAlll() {
@@ -8059,9 +8059,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of remove.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the bi consumer
+         * @param <T>
+         * @param <C>
+         * @return
          */
         public static <T, C extends Collection<? super T>> BiConsumer<C, T> ofRemove() {
             return (BiConsumer<C, T>) REMOVE;
@@ -8070,9 +8070,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of remove all.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the bi consumer
+         * @param <T>
+         * @param <C>
+         * @return
          */
         public static <T, C extends Collection<T>> BiConsumer<C, C> ofRemoveAll() {
             return (BiConsumer<C, C>) REMOVE_ALL;
@@ -8081,8 +8081,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of remove alll.
          *
-         * @param <T> the generic type
-         * @return the bi consumer
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiConsumer<T, T> ofRemoveAlll() {
@@ -8094,9 +8094,9 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param <E> the element type
-         * @return the bi consumer
+         * @param <M>
+         * @param <E>
+         * @return
          */
         public static <K, V, M extends Map<K, V>, E extends Map.Entry<K, V>> BiConsumer<M, E> ofPut() {
             return (BiConsumer<M, E>) PUT;
@@ -8107,8 +8107,8 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @return the bi consumer
+         * @param <M>
+         * @return
          */
         public static <K, V, M extends Map<K, V>> BiConsumer<M, M> ofPutAll() {
             return (BiConsumer<M, M>) PUT_ALL;
@@ -8119,8 +8119,8 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @return the bi consumer
+         * @param <M>
+         * @return
          */
         public static <K, V, M extends Map<K, V>> BiConsumer<M, K> ofRemoveByKey() {
             return (BiConsumer<M, K>) REMOVE_BY_KEY;
@@ -8129,7 +8129,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of merge.
          *
-         * @return the bi consumer
+         * @return
          */
         public static BiConsumer<Joiner, Joiner> ofMerge() {
             return MERGE;
@@ -8138,8 +8138,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of append.
          *
-         * @param <T> the generic type
-         * @return the bi consumer
+         * @param <T>
+         * @return
          */
         public static <T> BiConsumer<StringBuilder, T> ofAppend() {
             return (BiConsumer<StringBuilder, T>) APPEND;
@@ -8148,10 +8148,10 @@ public abstract class Fn extends Comparators {
         /**
          * Returns a <code>BiConsumer</code> which calls the specified <code>func</code>.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param func the func
-         * @return the bi consumer
+         * @param <T>
+         * @param <U>
+         * @param func
+         * @return
          */
         public static <T, U> BiConsumer<T, U> convert(final BiFunction<? super T, ? super U, ?> func) {
             N.checkArgNotNull(func);
@@ -8167,10 +8167,10 @@ public abstract class Fn extends Comparators {
         /**
          * Indexed.
          *
-         * @param <U> the generic type
-         * @param <T> the generic type
-         * @param action the action
-         * @return the bi consumer
+         * @param <U>
+         * @param <T>
+         * @param action
+         * @return
          */
         public static <U, T> BiConsumer<U, T> indexed(final IndexedBiConsumer<U, T> action) {
             N.checkArgNotNull(action);
@@ -8201,11 +8201,11 @@ public abstract class Fn extends Comparators {
         /**
          * Returns a <code>TriConsumer</code> which calls the specified <code>func</code>.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <C> the generic type
-         * @param func the func
-         * @return the tri consumer
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param func
+         * @return
          */
         public static <A, B, C> TriConsumer<A, B, C> convert(final TriFunction<? super A, ? super B, ? super C, ?> func) {
             N.checkArgNotNull(func);
@@ -8234,9 +8234,9 @@ public abstract class Fn extends Comparators {
         /**
          * Convert.
          *
-         * @param <T> the generic type
-         * @param action the action
-         * @return the function
+         * @param <T>
+         * @param action
+         * @return
          */
         public static <T> Function<T, Void> convert(final Consumer<? super T> action) {
             N.checkArgNotNull(action);
@@ -8253,10 +8253,10 @@ public abstract class Fn extends Comparators {
         /**
          * Indexed.
          *
-         * @param <T> the generic type
-         * @param <R> the generic type
-         * @param func the func
-         * @return the function
+         * @param <T>
+         * @param <R>
+         * @param func
+         * @return
          */
         public static <T, R> Function<T, R> indexed(final IndexedFunction<T, R> func) {
             N.checkArgNotNull(func);
@@ -8274,8 +8274,8 @@ public abstract class Fn extends Comparators {
         /**
          * Pair to list.
          *
-         * @param <T> the generic type
-         * @return the function
+         * @param <T>
+         * @return
          * @deprecated replaced by PairFn#toList();
          */
         @Deprecated
@@ -8286,8 +8286,8 @@ public abstract class Fn extends Comparators {
         /**
          * Pair to set.
          *
-         * @param <T> the generic type
-         * @return the function
+         * @param <T>
+         * @return
          * @deprecated replaced by PairFn#toSet();
          */
         @Deprecated
@@ -8298,8 +8298,8 @@ public abstract class Fn extends Comparators {
         /**
          * Triple to list.
          *
-         * @param <T> the generic type
-         * @return the function
+         * @param <T>
+         * @return
          * @deprecated replaced by TripleFn#toList();
          */
         @Deprecated
@@ -8310,8 +8310,8 @@ public abstract class Fn extends Comparators {
         /**
          * Triple to set.
          *
-         * @param <T> the generic type
-         * @return the function
+         * @param <T>
+         * @return
          * @deprecated replaced by TripleFn#toSet();
          */
         @Deprecated
@@ -8450,9 +8450,9 @@ public abstract class Fn extends Comparators {
         /**
          * Return first.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @return the bi function
+         * @param <T>
+         * @param <U>
+         * @return
          */
         public static <T, U> BiFunction<T, U, T> returnFirst() {
             return (BiFunction<T, U, T>) RETURN_FIRST;
@@ -8461,9 +8461,9 @@ public abstract class Fn extends Comparators {
         /**
          * Return second.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @return the bi function
+         * @param <T>
+         * @param <U>
+         * @return
          */
         public static <T, U> BiFunction<T, U, U> returnSecond() {
             return (BiFunction<T, U, U>) RETURN_SECOND;
@@ -8472,9 +8472,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of add.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the bi function
+         * @param <T>
+         * @param <C>
+         * @return
          */
         public static <T, C extends Collection<? super T>> BiFunction<C, T, C> ofAdd() {
             return (BiFunction<C, T, C>) ADD;
@@ -8483,9 +8483,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of add all.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the bi function
+         * @param <T>
+         * @param <C>
+         * @return
          */
         public static <T, C extends Collection<T>> BiFunction<C, C, C> ofAddAll() {
             return (BiFunction<C, C, C>) ADD_ALL;
@@ -8494,8 +8494,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of add alll.
          *
-         * @param <T> the generic type
-         * @return the bi function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiFunction<T, T, T> ofAddAlll() {
@@ -8505,9 +8505,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of remove.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the bi function
+         * @param <T>
+         * @param <C>
+         * @return
          */
         public static <T, C extends Collection<? super T>> BiFunction<C, T, C> ofRemove() {
             return (BiFunction<C, T, C>) REMOVE;
@@ -8516,9 +8516,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of remove all.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the bi function
+         * @param <T>
+         * @param <C>
+         * @return
          */
         public static <T, C extends Collection<T>> BiFunction<C, C, C> ofRemoveAll() {
             return (BiFunction<C, C, C>) REMOVE_ALL;
@@ -8527,8 +8527,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of remove alll.
          *
-         * @param <T> the generic type
-         * @return the bi function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T extends PrimitiveList> BiFunction<T, T, T> ofRemoveAlll() {
@@ -8540,9 +8540,9 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param <E> the element type
-         * @return the bi function
+         * @param <M>
+         * @param <E>
+         * @return
          */
         public static <K, V, M extends Map<K, V>, E extends Map.Entry<K, V>> BiFunction<M, E, M> ofPut() {
             return (BiFunction<M, E, M>) PUT;
@@ -8553,8 +8553,8 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @return the bi function
+         * @param <M>
+         * @return
          */
         public static <K, V, M extends Map<K, V>> BiFunction<M, M, M> ofPutAll() {
             return (BiFunction<M, M, M>) PUT_ALL;
@@ -8565,9 +8565,9 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param <U> the generic type
-         * @return the bi function
+         * @param <M>
+         * @param <U>
+         * @return
          */
         public static <K, V, M extends Map<K, V>, U> BiFunction<M, K, M> ofRemoveByKey() {
             return (BiFunction<M, K, M>) REMOVE_BY_KEY;
@@ -8576,7 +8576,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of merge.
          *
-         * @return the bi function
+         * @return
          */
         public static BiFunction<Joiner, Joiner, Joiner> ofMerge() {
             return MERGE;
@@ -8585,8 +8585,8 @@ public abstract class Fn extends Comparators {
         /**
          * Of append.
          *
-         * @param <T> the generic type
-         * @return the bi function
+         * @param <T>
+         * @return
          */
         public static <T> BiFunction<StringBuilder, T, StringBuilder> ofAppend() {
             return (BiFunction<StringBuilder, T, StringBuilder>) APPEND;
@@ -8595,10 +8595,10 @@ public abstract class Fn extends Comparators {
         /**
          * Convert.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param action the action
-         * @return the bi function
+         * @param <T>
+         * @param <U>
+         * @param action
+         * @return
          */
         public static <T, U> BiFunction<T, U, Void> convert(final BiConsumer<? super T, ? super U> action) {
             N.checkArgNotNull(action);
@@ -8615,11 +8615,11 @@ public abstract class Fn extends Comparators {
         /**
          * Indexed.
          *
-         * @param <U> the generic type
-         * @param <T> the generic type
-         * @param <R> the generic type
-         * @param func the func
-         * @return the bi function
+         * @param <U>
+         * @param <T>
+         * @param <R>
+         * @param func
+         * @return
          */
         public static <U, T, R> BiFunction<U, T, R> indexed(final IndexedBiFunction<U, T, R> func) {
             N.checkArgNotNull(func);
@@ -8650,11 +8650,11 @@ public abstract class Fn extends Comparators {
         /**
          * Convert.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <C> the generic type
-         * @param action the action
-         * @return the tri function
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param action
+         * @return
          */
         public static <A, B, C> TriFunction<A, B, C, Void> convert(final TriConsumer<? super A, ? super B, ? super C> action) {
             N.checkArgNotNull(action);
@@ -8872,9 +8872,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of add all.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the binary operator
+         * @param <T>
+         * @param <C>
+         * @return
          * @deprecated replaced by {@code #ofAddAllToFirst()}
          */
         @Deprecated
@@ -8886,9 +8886,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of add all to first.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the binary operator
+         * @param <T>
+         * @param <C>
+         * @return
          */
         @SuppressWarnings("unchecked")
         public static <T, C extends Collection<T>> BinaryOperator<C> ofAddAllToFirst() {
@@ -8898,9 +8898,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of add all to bigger.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the binary operator
+         * @param <T>
+         * @param <C>
+         * @return
          */
         @SuppressWarnings("unchecked")
         public static <T, C extends Collection<T>> BinaryOperator<C> ofAddAllToBigger() {
@@ -8910,9 +8910,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of remove all.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the binary operator
+         * @param <T>
+         * @param <C>
+         * @return
          * @deprecated replaced by {@code #ofRemoveAllFromFirst()}.
          */
         @Deprecated
@@ -8924,9 +8924,9 @@ public abstract class Fn extends Comparators {
         /**
          * Of remove all from first.
          *
-         * @param <T> the generic type
-         * @param <C> the generic type
-         * @return the binary operator
+         * @param <T>
+         * @param <C>
+         * @return
          */
         @SuppressWarnings("unchecked")
         public static <T, C extends Collection<T>> BinaryOperator<C> ofRemoveAllFromFirst() {
@@ -8938,8 +8938,8 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @return the binary operator
+         * @param <M>
+         * @return
          * @deprecated replaced by {@code #ofPutAllToFirst()}
          */
         @Deprecated
@@ -8953,8 +8953,8 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @return the binary operator
+         * @param <M>
+         * @return
          */
         @SuppressWarnings("unchecked")
         public static <K, V, M extends Map<K, V>> BinaryOperator<M> ofPutAllToFirst() {
@@ -8966,8 +8966,8 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @return the binary operator
+         * @param <M>
+         * @return
          */
         @SuppressWarnings("unchecked")
         public static <K, V, M extends Map<K, V>> BinaryOperator<M> ofPutAllToBigger() {
@@ -8977,7 +8977,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of merge.
          *
-         * @return the binary operator
+         * @return
          * @deprecated replaced by {@code #ofMergeToFirst}.
          */
         @Deprecated
@@ -8988,7 +8988,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of merge to first.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<Joiner> ofMergeToFirst() {
             return MERGE_TO_FIRST;
@@ -8997,7 +8997,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of merge to bigger.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<Joiner> ofMergeToBigger() {
             return MERGE_TO_BIGGER;
@@ -9006,7 +9006,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of append.
          *
-         * @return the binary operator
+         * @return
          * @deprecated replaced by {@code #ofAppendToFirst()}
          */
         @Deprecated
@@ -9017,7 +9017,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of append to first.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<StringBuilder> ofAppendToFirst() {
             return APPEND_TO_FIRST;
@@ -9026,7 +9026,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of append to bigger.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<StringBuilder> ofAppendToBigger() {
             return APPEND_TO_BIGGER;
@@ -9035,7 +9035,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of concat.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<String> ofConcat() {
             return CONCAT;
@@ -9044,7 +9044,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of add int.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<Integer> ofAddInt() {
             return ADD_INTEGER;
@@ -9053,7 +9053,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of add long.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<Long> ofAddLong() {
             return ADD_LONG;
@@ -9062,7 +9062,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of add double.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<Double> ofAddDouble() {
             return ADD_DOUBLE;
@@ -9071,7 +9071,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of add big integer.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<BigInteger> ofAddBigInteger() {
             return ADD_BIG_INTEGER;
@@ -9080,7 +9080,7 @@ public abstract class Fn extends Comparators {
         /**
          * Of add big decimal.
          *
-         * @return the binary operator
+         * @return
          */
         public static BinaryOperator<BigDecimal> ofAddBigDecimal() {
             return ADD_BIG_DECIMAL;
@@ -9089,8 +9089,8 @@ public abstract class Fn extends Comparators {
         /**
          * Min.
          *
-         * @param <T> the generic type
-         * @return the binary operator
+         * @param <T>
+         * @return
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <T extends Comparable<? super T>> BinaryOperator<T> min() {
@@ -9100,8 +9100,8 @@ public abstract class Fn extends Comparators {
         /**
          * Max.
          *
-         * @param <T> the generic type
-         * @return the binary operator
+         * @param <T>
+         * @return
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <T extends Comparable<? super T>> BinaryOperator<T> max() {
@@ -9111,9 +9111,9 @@ public abstract class Fn extends Comparators {
         /**
          * Min by.
          *
-         * @param <T> the generic type
-         * @param comparator the comparator
-         * @return the binary operator
+         * @param <T>
+         * @param comparator
+         * @return
          */
         public static <T> BinaryOperator<T> minBy(final Comparator<? super T> comparator) {
             N.checkArgNotNull(comparator);
@@ -9129,9 +9129,9 @@ public abstract class Fn extends Comparators {
         /**
          * Max by.
          *
-         * @param <T> the generic type
-         * @param comparator the comparator
-         * @return the binary operator
+         * @param <T>
+         * @param comparator
+         * @return
          */
         public static <T> BinaryOperator<T> maxBy(final Comparator<? super T> comparator) {
             N.checkArgNotNull(comparator);
@@ -9169,8 +9169,8 @@ public abstract class Fn extends Comparators {
         /**
          * Identity.
          *
-         * @param <T> the generic type
-         * @return the unary operator
+         * @param <T>
+         * @return
          */
         public static <T> UnaryOperator<T> identity() {
             return IDENTITY;
@@ -9194,9 +9194,9 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <T> the generic type
-         * @param f the f
-         * @return the function
+         * @param <T>
+         * @param f
+         * @return
          */
         public static <K, V, T> Function<Map.Entry<K, V>, T> f(final BiFunction<? super K, ? super V, ? extends T> f) {
             N.checkArgNotNull(f, "BiFunction");
@@ -9214,8 +9214,8 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param p the p
-         * @return the predicate
+         * @param p
+         * @return
          */
         public static <K, V> Predicate<Map.Entry<K, V>> p(final BiPredicate<? super K, ? super V> p) {
             N.checkArgNotNull(p, "BiPredicate");
@@ -9234,8 +9234,8 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param c the c
-         * @return the consumer
+         * @param c
+         * @return
          */
         public static <K, V> Consumer<Map.Entry<K, V>> c(final BiConsumer<? super K, ? super V> c) {
             N.checkArgNotNull(c, "BiConsumer");
@@ -9253,10 +9253,10 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param f the f
-         * @return the try. function
+         * @param <T>
+         * @param <E>
+         * @param f
+         * @return
          */
         public static <K, V, T, E extends Exception> Try.Function<Map.Entry<K, V>, T, E> ef(final Try.BiFunction<? super K, ? super V, ? extends T, E> f) {
             N.checkArgNotNull(f, "BiFunction");
@@ -9274,9 +9274,9 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <E> the element type
-         * @param p the p
-         * @return the try. predicate
+         * @param <E>
+         * @param p
+         * @return
          */
         public static <K, V, E extends Exception> Try.Predicate<Map.Entry<K, V>, E> ep(final Try.BiPredicate<? super K, ? super V, E> p) {
             N.checkArgNotNull(p, "BiPredicate");
@@ -9295,9 +9295,9 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <E> the element type
-         * @param c the c
-         * @return the try. consumer
+         * @param <E>
+         * @param c
+         * @return
          */
         public static <K, V, E extends Exception> Try.Consumer<Map.Entry<K, V>, E> ec(final Try.BiConsumer<? super K, ? super V, E> c) {
             N.checkArgNotNull(c, "BiConsumer");
@@ -9315,10 +9315,10 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param f the f
-         * @return the function
+         * @param <T>
+         * @param <E>
+         * @param f
+         * @return
          */
         public static <K, V, T, E extends Exception> Function<Map.Entry<K, V>, T> ff(final Try.BiFunction<? super K, ? super V, ? extends T, E> f) {
             N.checkArgNotNull(f, "BiFunction");
@@ -9340,9 +9340,9 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <E> the element type
-         * @param p the p
-         * @return the predicate
+         * @param <E>
+         * @param p
+         * @return
          */
         public static <K, V, E extends Exception> Predicate<Map.Entry<K, V>> pp(final Try.BiPredicate<? super K, ? super V, E> p) {
             N.checkArgNotNull(p, "BiPredicate");
@@ -9364,9 +9364,9 @@ public abstract class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <E> the element type
-         * @param c the c
-         * @return the consumer
+         * @param <E>
+         * @param c
+         * @return
          */
         public static <K, V, E extends Exception> Consumer<Map.Entry<K, V>> cc(final Try.BiConsumer<? super K, ? super V, E> c) {
             N.checkArgNotNull(c, "BiConsumer");
@@ -9417,8 +9417,8 @@ public abstract class Fn extends Comparators {
         /**
          * To list.
          *
-         * @param <T> the generic type
-         * @return the function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Pair<T, T>, List<T>> toList() {
@@ -9428,8 +9428,8 @@ public abstract class Fn extends Comparators {
         /**
          * To set.
          *
-         * @param <T> the generic type
-         * @return the function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Pair<T, T>, Set<T>> toSet() {
@@ -9471,8 +9471,8 @@ public abstract class Fn extends Comparators {
         /**
          * To list.
          *
-         * @param <T> the generic type
-         * @return the function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Triple<T, T, T>, List<T>> toList() {
@@ -9482,8 +9482,8 @@ public abstract class Fn extends Comparators {
         /**
          * To set.
          *
-         * @param <T> the generic type
-         * @return the function
+         * @param <T>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T> Function<Triple<T, T, T>, Set<T>> toSet() {
@@ -9524,9 +9524,9 @@ public abstract class Fn extends Comparators {
         /**
          * Clone array.
          *
-         * @param <T> the generic type
-         * @param <A> the generic type
-         * @return the function
+         * @param <T>
+         * @param <A>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T, A extends DisposableArray<T>> Function<A, T[]> cloneArray() {
@@ -9536,8 +9536,8 @@ public abstract class Fn extends Comparators {
         /**
          * To str.
          *
-         * @param <A> the generic type
-         * @return the function
+         * @param <A>
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <A extends DisposableArray> Function<A, String> toStr() {
@@ -9547,9 +9547,9 @@ public abstract class Fn extends Comparators {
         /**
          * Join.
          *
-         * @param <A> the generic type
-         * @param delimiter the delimiter
-         * @return the function
+         * @param <A>
+         * @param delimiter
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <A extends DisposableArray> Function<A, String> join(final String delimiter) {
@@ -9644,7 +9644,7 @@ public abstract class Fn extends Comparators {
         /**
          * Positve.
          *
-         * @return the char predicate
+         * @return
          */
         public static CharPredicate positve() {
             return POSITIVE;
@@ -9653,7 +9653,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not negative.
          *
-         * @return the char predicate
+         * @return
          */
         public static CharPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -9662,7 +9662,7 @@ public abstract class Fn extends Comparators {
         /**
          * Equal.
          *
-         * @return the char bi predicate
+         * @return
          */
         public static CharBiPredicate equal() {
             return EQUAL;
@@ -9671,7 +9671,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not equal.
          *
-         * @return the char bi predicate
+         * @return
          */
         public static CharBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -9680,7 +9680,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater than.
          *
-         * @return the char bi predicate
+         * @return
          */
         public static CharBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -9689,7 +9689,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater equal.
          *
-         * @return the char bi predicate
+         * @return
          */
         public static CharBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -9698,7 +9698,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less than.
          *
-         * @return the char bi predicate
+         * @return
          */
         public static CharBiPredicate lessThan() {
             return LESS_THAN;
@@ -9707,7 +9707,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less equal.
          *
-         * @return the char bi predicate
+         * @return
          */
         public static CharBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -9716,7 +9716,7 @@ public abstract class Fn extends Comparators {
         /**
          * Alternate.
          *
-         * @return the char bi function
+         * @return
          */
         public static CharBiFunction<Nth> alternate() {
             return new CharBiFunction<Nth>() {
@@ -9812,7 +9812,7 @@ public abstract class Fn extends Comparators {
         /**
          * Positve.
          *
-         * @return the byte predicate
+         * @return
          */
         public static BytePredicate positve() {
             return POSITIVE;
@@ -9821,7 +9821,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not negative.
          *
-         * @return the byte predicate
+         * @return
          */
         public static BytePredicate notNegative() {
             return NOT_NEGATIVE;
@@ -9830,7 +9830,7 @@ public abstract class Fn extends Comparators {
         /**
          * Equal.
          *
-         * @return the byte bi predicate
+         * @return
          */
         public static ByteBiPredicate equal() {
             return EQUAL;
@@ -9839,7 +9839,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not equal.
          *
-         * @return the byte bi predicate
+         * @return
          */
         public static ByteBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -9848,7 +9848,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater than.
          *
-         * @return the byte bi predicate
+         * @return
          */
         public static ByteBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -9857,7 +9857,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater equal.
          *
-         * @return the byte bi predicate
+         * @return
          */
         public static ByteBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -9866,7 +9866,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less than.
          *
-         * @return the byte bi predicate
+         * @return
          */
         public static ByteBiPredicate lessThan() {
             return LESS_THAN;
@@ -9875,7 +9875,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less equal.
          *
-         * @return the byte bi predicate
+         * @return
          */
         public static ByteBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -9884,7 +9884,7 @@ public abstract class Fn extends Comparators {
         /**
          * Alternate.
          *
-         * @return the byte bi function
+         * @return
          */
         public static ByteBiFunction<Nth> alternate() {
             return new ByteBiFunction<Nth>() {
@@ -9980,7 +9980,7 @@ public abstract class Fn extends Comparators {
         /**
          * Positve.
          *
-         * @return the short predicate
+         * @return
          */
         public static ShortPredicate positve() {
             return POSITIVE;
@@ -9989,7 +9989,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not negative.
          *
-         * @return the short predicate
+         * @return
          */
         public static ShortPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -9998,7 +9998,7 @@ public abstract class Fn extends Comparators {
         /**
          * Equal.
          *
-         * @return the short bi predicate
+         * @return
          */
         public static ShortBiPredicate equal() {
             return EQUAL;
@@ -10007,7 +10007,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not equal.
          *
-         * @return the short bi predicate
+         * @return
          */
         public static ShortBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -10016,7 +10016,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater than.
          *
-         * @return the short bi predicate
+         * @return
          */
         public static ShortBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -10025,7 +10025,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater equal.
          *
-         * @return the short bi predicate
+         * @return
          */
         public static ShortBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -10034,7 +10034,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less than.
          *
-         * @return the short bi predicate
+         * @return
          */
         public static ShortBiPredicate lessThan() {
             return LESS_THAN;
@@ -10043,7 +10043,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less equal.
          *
-         * @return the short bi predicate
+         * @return
          */
         public static ShortBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -10052,7 +10052,7 @@ public abstract class Fn extends Comparators {
         /**
          * Alternate.
          *
-         * @return the short bi function
+         * @return
          */
         public static ShortBiFunction<Nth> alternate() {
             return new ShortBiFunction<Nth>() {
@@ -10148,7 +10148,7 @@ public abstract class Fn extends Comparators {
         /**
          * Positve.
          *
-         * @return the int predicate
+         * @return
          */
         public static IntPredicate positve() {
             return POSITIVE;
@@ -10157,7 +10157,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not negative.
          *
-         * @return the int predicate
+         * @return
          */
         public static IntPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -10166,7 +10166,7 @@ public abstract class Fn extends Comparators {
         /**
          * Equal.
          *
-         * @return the int bi predicate
+         * @return
          */
         public static IntBiPredicate equal() {
             return EQUAL;
@@ -10175,7 +10175,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not equal.
          *
-         * @return the int bi predicate
+         * @return
          */
         public static IntBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -10184,7 +10184,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater than.
          *
-         * @return the int bi predicate
+         * @return
          */
         public static IntBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -10193,7 +10193,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater equal.
          *
-         * @return the int bi predicate
+         * @return
          */
         public static IntBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -10202,7 +10202,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less than.
          *
-         * @return the int bi predicate
+         * @return
          */
         public static IntBiPredicate lessThan() {
             return LESS_THAN;
@@ -10211,7 +10211,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less equal.
          *
-         * @return the int bi predicate
+         * @return
          */
         public static IntBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -10220,7 +10220,7 @@ public abstract class Fn extends Comparators {
         /**
          * Alternate.
          *
-         * @return the int bi function
+         * @return
          */
         public static IntBiFunction<Nth> alternate() {
             return new IntBiFunction<Nth>() {
@@ -10316,7 +10316,7 @@ public abstract class Fn extends Comparators {
         /**
          * Positve.
          *
-         * @return the long predicate
+         * @return
          */
         public static LongPredicate positve() {
             return POSITIVE;
@@ -10325,7 +10325,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not negative.
          *
-         * @return the long predicate
+         * @return
          */
         public static LongPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -10334,7 +10334,7 @@ public abstract class Fn extends Comparators {
         /**
          * Equal.
          *
-         * @return the long bi predicate
+         * @return
          */
         public static LongBiPredicate equal() {
             return EQUAL;
@@ -10343,7 +10343,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not equal.
          *
-         * @return the long bi predicate
+         * @return
          */
         public static LongBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -10352,7 +10352,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater than.
          *
-         * @return the long bi predicate
+         * @return
          */
         public static LongBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -10361,7 +10361,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater equal.
          *
-         * @return the long bi predicate
+         * @return
          */
         public static LongBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -10370,7 +10370,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less than.
          *
-         * @return the long bi predicate
+         * @return
          */
         public static LongBiPredicate lessThan() {
             return LESS_THAN;
@@ -10379,7 +10379,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less equal.
          *
-         * @return the long bi predicate
+         * @return
          */
         public static LongBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -10388,7 +10388,7 @@ public abstract class Fn extends Comparators {
         /**
          * Alternate.
          *
-         * @return the long bi function
+         * @return
          */
         public static LongBiFunction<Nth> alternate() {
             return new LongBiFunction<Nth>() {
@@ -10484,7 +10484,7 @@ public abstract class Fn extends Comparators {
         /**
          * Positve.
          *
-         * @return the float predicate
+         * @return
          */
         public static FloatPredicate positve() {
             return POSITIVE;
@@ -10493,7 +10493,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not negative.
          *
-         * @return the float predicate
+         * @return
          */
         public static FloatPredicate notNegative() {
             return NOT_NEGATIVE;
@@ -10502,7 +10502,7 @@ public abstract class Fn extends Comparators {
         /**
          * Equal.
          *
-         * @return the float bi predicate
+         * @return
          */
         public static FloatBiPredicate equal() {
             return EQUAL;
@@ -10511,7 +10511,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not equal.
          *
-         * @return the float bi predicate
+         * @return
          */
         public static FloatBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -10520,7 +10520,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater than.
          *
-         * @return the float bi predicate
+         * @return
          */
         public static FloatBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -10529,7 +10529,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater equal.
          *
-         * @return the float bi predicate
+         * @return
          */
         public static FloatBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -10538,7 +10538,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less than.
          *
-         * @return the float bi predicate
+         * @return
          */
         public static FloatBiPredicate lessThan() {
             return LESS_THAN;
@@ -10547,7 +10547,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less equal.
          *
-         * @return the float bi predicate
+         * @return
          */
         public static FloatBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -10556,7 +10556,7 @@ public abstract class Fn extends Comparators {
         /**
          * Alternate.
          *
-         * @return the float bi function
+         * @return
          */
         public static FloatBiFunction<Nth> alternate() {
             return new FloatBiFunction<Nth>() {
@@ -10652,7 +10652,7 @@ public abstract class Fn extends Comparators {
         /**
          * Positve.
          *
-         * @return the double predicate
+         * @return
          */
         public static DoublePredicate positve() {
             return POSITIVE;
@@ -10661,7 +10661,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not negative.
          *
-         * @return the double predicate
+         * @return
          */
         public static DoublePredicate notNegative() {
             return NOT_NEGATIVE;
@@ -10670,7 +10670,7 @@ public abstract class Fn extends Comparators {
         /**
          * Equal.
          *
-         * @return the double bi predicate
+         * @return
          */
         public static DoubleBiPredicate equal() {
             return EQUAL;
@@ -10679,7 +10679,7 @@ public abstract class Fn extends Comparators {
         /**
          * Not equal.
          *
-         * @return the double bi predicate
+         * @return
          */
         public static DoubleBiPredicate notEqual() {
             return NOT_EQUAL;
@@ -10688,7 +10688,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater than.
          *
-         * @return the double bi predicate
+         * @return
          */
         public static DoubleBiPredicate greaterThan() {
             return GREATER_THAN;
@@ -10697,7 +10697,7 @@ public abstract class Fn extends Comparators {
         /**
          * Greater equal.
          *
-         * @return the double bi predicate
+         * @return
          */
         public static DoubleBiPredicate greaterEqual() {
             return GREATER_EQUAL;
@@ -10706,7 +10706,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less than.
          *
-         * @return the double bi predicate
+         * @return
          */
         public static DoubleBiPredicate lessThan() {
             return LESS_THAN;
@@ -10715,7 +10715,7 @@ public abstract class Fn extends Comparators {
         /**
          * Less equal.
          *
-         * @return the double bi predicate
+         * @return
          */
         public static DoubleBiPredicate lessEqual() {
             return LESS_EQUAL;
@@ -10724,7 +10724,7 @@ public abstract class Fn extends Comparators {
         /**
          * Alternate.
          *
-         * @return the double bi function
+         * @return
          */
         public static DoubleBiFunction<Nth> alternate() {
             return new DoubleBiFunction<Nth>() {
@@ -10756,7 +10756,7 @@ public abstract class Fn extends Comparators {
         /**
          * Unbox B.
          *
-         * @return the to byte function
+         * @return
          */
         public static ToByteFunction<Byte> unboxB() {
             return ToByteFunction.UNBOX;
@@ -10765,7 +10765,7 @@ public abstract class Fn extends Comparators {
         /**
          * Unbox C.
          *
-         * @return the to char function
+         * @return
          */
         public static ToCharFunction<Character> unboxC() {
             return ToCharFunction.UNBOX;
@@ -10774,7 +10774,7 @@ public abstract class Fn extends Comparators {
         /**
          * Unbox S.
          *
-         * @return the to short function
+         * @return
          */
         public static ToShortFunction<Short> unboxS() {
             return ToShortFunction.UNBOX;
@@ -10783,7 +10783,7 @@ public abstract class Fn extends Comparators {
         /**
          * Unbox I.
          *
-         * @return the to int function
+         * @return
          */
         public static ToIntFunction<Integer> unboxI() {
             return ToIntFunction.UNBOX;
@@ -10792,7 +10792,7 @@ public abstract class Fn extends Comparators {
         /**
          * Unbox L.
          *
-         * @return the to long function
+         * @return
          */
         public static ToLongFunction<Long> unboxL() {
             return ToLongFunction.UNBOX;
@@ -10801,7 +10801,7 @@ public abstract class Fn extends Comparators {
         /**
          * Unbox F.
          *
-         * @return the to float function
+         * @return
          */
         public static ToFloatFunction<Float> unboxF() {
             return ToFloatFunction.UNBOX;
@@ -10810,7 +10810,7 @@ public abstract class Fn extends Comparators {
         /**
          * Unbox D.
          *
-         * @return the to double function
+         * @return
          */
         public static ToDoubleFunction<Double> unboxD() {
             return ToDoubleFunction.UNBOX;
@@ -10819,8 +10819,8 @@ public abstract class Fn extends Comparators {
         /**
          * Cp.
          *
-         * @param p the p
-         * @return the char predicate
+         * @param p
+         * @return
          */
         public static CharPredicate cp(final CharPredicate p) {
             N.checkArgNotNull(p);
@@ -10831,8 +10831,8 @@ public abstract class Fn extends Comparators {
         /**
          * Bp.
          *
-         * @param p the p
-         * @return the byte predicate
+         * @param p
+         * @return
          */
         public static BytePredicate bp(final BytePredicate p) {
             N.checkArgNotNull(p);
@@ -10843,8 +10843,8 @@ public abstract class Fn extends Comparators {
         /**
          * Sp.
          *
-         * @param p the p
-         * @return the short predicate
+         * @param p
+         * @return
          */
         public static ShortPredicate sp(final ShortPredicate p) {
             N.checkArgNotNull(p);
@@ -10855,8 +10855,8 @@ public abstract class Fn extends Comparators {
         /**
          * Ip.
          *
-         * @param p the p
-         * @return the int predicate
+         * @param p
+         * @return
          */
         public static IntPredicate ip(final IntPredicate p) {
             N.checkArgNotNull(p);
@@ -10867,8 +10867,8 @@ public abstract class Fn extends Comparators {
         /**
          * Lp.
          *
-         * @param p the p
-         * @return the long predicate
+         * @param p
+         * @return
          */
         public static LongPredicate lp(final LongPredicate p) {
             N.checkArgNotNull(p);
@@ -10879,8 +10879,8 @@ public abstract class Fn extends Comparators {
         /**
          * Fp.
          *
-         * @param p the p
-         * @return the float predicate
+         * @param p
+         * @return
          */
         public static FloatPredicate fp(final FloatPredicate p) {
             N.checkArgNotNull(p);
@@ -10891,8 +10891,8 @@ public abstract class Fn extends Comparators {
         /**
          * Dp.
          *
-         * @param p the p
-         * @return the double predicate
+         * @param p
+         * @return
          */
         public static DoublePredicate dp(final DoublePredicate p) {
             N.checkArgNotNull(p);
@@ -10903,9 +10903,9 @@ public abstract class Fn extends Comparators {
         /**
          * Cf.
          *
-         * @param <R> the generic type
-         * @param f the f
-         * @return the char function
+         * @param <R>
+         * @param f
+         * @return
          */
         public static <R> CharFunction<R> cf(final CharFunction<R> f) {
             N.checkArgNotNull(f);
@@ -10916,9 +10916,9 @@ public abstract class Fn extends Comparators {
         /**
          * Bf.
          *
-         * @param <R> the generic type
-         * @param f the f
-         * @return the byte function
+         * @param <R>
+         * @param f
+         * @return
          */
         public static <R> ByteFunction<R> bf(final ByteFunction<R> f) {
             N.checkArgNotNull(f);
@@ -10929,9 +10929,9 @@ public abstract class Fn extends Comparators {
         /**
          * Sf.
          *
-         * @param <R> the generic type
-         * @param f the f
-         * @return the short function
+         * @param <R>
+         * @param f
+         * @return
          */
         public static <R> ShortFunction<R> sf(final ShortFunction<R> f) {
             N.checkArgNotNull(f);
@@ -10942,9 +10942,9 @@ public abstract class Fn extends Comparators {
         /**
          * I F.
          *
-         * @param <R> the generic type
-         * @param f the f
-         * @return the int function
+         * @param <R>
+         * @param f
+         * @return
          */
         public static <R> IntFunction<R> iF(final IntFunction<R> f) {
             N.checkArgNotNull(f);
@@ -10955,9 +10955,9 @@ public abstract class Fn extends Comparators {
         /**
          * Lf.
          *
-         * @param <R> the generic type
-         * @param f the f
-         * @return the long function
+         * @param <R>
+         * @param f
+         * @return
          */
         public static <R> LongFunction<R> lf(final LongFunction<R> f) {
             N.checkArgNotNull(f);
@@ -10968,9 +10968,9 @@ public abstract class Fn extends Comparators {
         /**
          * Ff.
          *
-         * @param <R> the generic type
-         * @param f the f
-         * @return the float function
+         * @param <R>
+         * @param f
+         * @return
          */
         public static <R> FloatFunction<R> ff(final FloatFunction<R> f) {
             N.checkArgNotNull(f);
@@ -10981,9 +10981,9 @@ public abstract class Fn extends Comparators {
         /**
          * Df.
          *
-         * @param <R> the generic type
-         * @param f the f
-         * @return the double function
+         * @param <R>
+         * @param f
+         * @return
          */
         public static <R> DoubleFunction<R> df(final DoubleFunction<R> f) {
             N.checkArgNotNull(f);
@@ -10994,8 +10994,8 @@ public abstract class Fn extends Comparators {
         /**
          * Cc.
          *
-         * @param c the c
-         * @return the char consumer
+         * @param c
+         * @return
          */
         public static CharConsumer cc(final CharConsumer c) {
             N.checkArgNotNull(c);
@@ -11006,8 +11006,8 @@ public abstract class Fn extends Comparators {
         /**
          * Bc.
          *
-         * @param c the c
-         * @return the byte consumer
+         * @param c
+         * @return
          */
         public static ByteConsumer bc(final ByteConsumer c) {
             N.checkArgNotNull(c);
@@ -11018,8 +11018,8 @@ public abstract class Fn extends Comparators {
         /**
          * Sc.
          *
-         * @param c the c
-         * @return the short consumer
+         * @param c
+         * @return
          */
         public static ShortConsumer sc(final ShortConsumer c) {
             N.checkArgNotNull(c);
@@ -11030,8 +11030,8 @@ public abstract class Fn extends Comparators {
         /**
          * Ic.
          *
-         * @param c the c
-         * @return the int consumer
+         * @param c
+         * @return
          */
         public static IntConsumer ic(final IntConsumer c) {
             N.checkArgNotNull(c);
@@ -11042,8 +11042,8 @@ public abstract class Fn extends Comparators {
         /**
          * Lc.
          *
-         * @param c the c
-         * @return the long consumer
+         * @param c
+         * @return
          */
         public static LongConsumer lc(final LongConsumer c) {
             N.checkArgNotNull(c);
@@ -11054,8 +11054,8 @@ public abstract class Fn extends Comparators {
         /**
          * Fc.
          *
-         * @param c the c
-         * @return the float consumer
+         * @param c
+         * @return
          */
         public static FloatConsumer fc(final FloatConsumer c) {
             N.checkArgNotNull(c);
@@ -11066,8 +11066,8 @@ public abstract class Fn extends Comparators {
         /**
          * Dc.
          *
-         * @param c the c
-         * @return the double consumer
+         * @param c
+         * @return
          */
         public static DoubleConsumer dc(final DoubleConsumer c) {
             N.checkArgNotNull(c);
@@ -11094,9 +11094,9 @@ public abstract class Fn extends Comparators {
         /**
          * Identity.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @return the try. function
+         * @param <T>
+         * @param <E>
+         * @return
          */
         public static <T, E extends Exception> Try.Function<T, T, E> identity() {
             return Fn.IDENTITY;
@@ -11105,8 +11105,8 @@ public abstract class Fn extends Comparators {
         /**
          * Empty action.
          *
-         * @param <E> the element type
-         * @return the try. runnable
+         * @param <E>
+         * @return
          */
         public static <E extends Exception> Try.Runnable<E> emptyAction() {
             return (Try.Runnable<E>) Fn.EMPTY_ACTION;
@@ -11115,9 +11115,9 @@ public abstract class Fn extends Comparators {
         /**
          * Do nothing.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @return the try. consumer
+         * @param <T>
+         * @param <E>
+         * @return
          */
         public static <T, E extends Exception> Try.Consumer<T, E> doNothing() {
             return Fn.DO_NOTHING;
@@ -11126,10 +11126,10 @@ public abstract class Fn extends Comparators {
         /**
          * Sleep.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param millis the millis
-         * @return the try. consumer
+         * @param <T>
+         * @param <E>
+         * @param millis
+         * @return
          */
         public static <T, E extends Exception> Try.Consumer<T, E> sleep(final long millis) {
             return new Try.Consumer<T, E>() {
@@ -11143,10 +11143,10 @@ public abstract class Fn extends Comparators {
         /**
          * Sleep uninterruptibly.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param millis the millis
-         * @return the try. consumer
+         * @param <T>
+         * @param <E>
+         * @param millis
+         * @return
          */
         public static <T, E extends Exception> Try.Consumer<T, E> sleepUninterruptibly(final long millis) {
             return new Try.Consumer<T, E>() {
@@ -11164,9 +11164,9 @@ public abstract class Fn extends Comparators {
         /**
          * Close quietly.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @return the try. consumer
+         * @param <T>
+         * @param <E>
+         * @return
          */
         public static <T extends AutoCloseable, E extends Exception> Try.Consumer<T, E> closeQuietly() {
             return (Try.Consumer<T, E>) Fn.CLOSE_QUIETLY;
@@ -11175,9 +11175,9 @@ public abstract class Fn extends Comparators {
         /**
          * Println.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @return the try. consumer
+         * @param <T>
+         * @param <E>
+         * @return
          */
         public static <T, E extends Exception> Try.Consumer<T, E> println() {
             return Fn.PRINTLN;
@@ -11186,11 +11186,11 @@ public abstract class Fn extends Comparators {
         /**
          * Println.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param separator the separator
-         * @return the try. bi consumer
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param separator
+         * @return
          */
         public static <T, U, E extends Exception> Try.BiConsumer<T, U, E> println(final String separator) {
             return cc(Fn.<T, U> println(separator));
@@ -11199,10 +11199,10 @@ public abstract class Fn extends Comparators {
         /**
          * Pp.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param predicate the predicate
-         * @return the try. predicate
+         * @param <T>
+         * @param <E>
+         * @param predicate
+         * @return
          */
         @Beta
         public static <T, E extends Exception> Try.Predicate<T, E> pp(final Predicate<T> predicate) {
@@ -11214,12 +11214,12 @@ public abstract class Fn extends Comparators {
         /**
          * Pp.
          *
-         * @param <A> the generic type
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param biPredicate the bi predicate
-         * @return the try. predicate
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param biPredicate
+         * @return
          */
         @Beta
         public static <A, T, E extends Exception> Try.Predicate<T, E> pp(final A a, final BiPredicate<A, T> biPredicate) {
@@ -11236,14 +11236,14 @@ public abstract class Fn extends Comparators {
         /**
          * Pp.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param b the b
-         * @param triPredicate the tri predicate
-         * @return the try. predicate
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triPredicate
+         * @return
          */
         @Beta
         public static <A, B, T, E extends Exception> Try.Predicate<T, E> pp(final A a, final B b, final TriPredicate<A, B, T> triPredicate) {
@@ -11260,11 +11260,11 @@ public abstract class Fn extends Comparators {
         /**
          * Pp.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param biPredicate the bi predicate
-         * @return the try. bi predicate
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param biPredicate
+         * @return
          */
         @Beta
         public static <T, U, E extends Exception> Try.BiPredicate<T, U, E> pp(final BiPredicate<T, U> biPredicate) {
@@ -11276,13 +11276,13 @@ public abstract class Fn extends Comparators {
         /**
          * Pp.
          *
-         * @param <A> the generic type
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param triPredicate the tri predicate
-         * @return the try. bi predicate
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param a
+         * @param triPredicate
+         * @return
          */
         @Beta
         public static <A, T, U, E extends Exception> Try.BiPredicate<T, U, E> pp(final A a, final TriPredicate<A, T, U> triPredicate) {
@@ -11299,12 +11299,12 @@ public abstract class Fn extends Comparators {
         /**
          * Pp.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <C> the generic type
-         * @param <E> the element type
-         * @param triPredicate the tri predicate
-         * @return the try. tri predicate
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <E>
+         * @param triPredicate
+         * @return
          */
         @Beta
         public static <A, B, C, E extends Exception> Try.TriPredicate<A, B, C, E> pp(final TriPredicate<A, B, C> triPredicate) {
@@ -11316,10 +11316,10 @@ public abstract class Fn extends Comparators {
         /**
          * Cc.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param consumer the consumer
-         * @return the try. consumer
+         * @param <T>
+         * @param <E>
+         * @param consumer
+         * @return
          */
         @Beta
         public static <T, E extends Exception> Try.Consumer<T, E> cc(final Consumer<T> consumer) {
@@ -11331,12 +11331,12 @@ public abstract class Fn extends Comparators {
         /**
          * Cc.
          *
-         * @param <A> the generic type
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param biConsumer the bi consumer
-         * @return the try. consumer
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param biConsumer
+         * @return
          */
         @Beta
         public static <A, T, E extends Exception> Try.Consumer<T, E> cc(final A a, final BiConsumer<A, T> biConsumer) {
@@ -11353,14 +11353,14 @@ public abstract class Fn extends Comparators {
         /**
          * Cc.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param b the b
-         * @param triConsumer the tri consumer
-         * @return the try. consumer
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triConsumer
+         * @return
          */
         @Beta
         public static <A, B, T, E extends Exception> Try.Consumer<T, E> cc(final A a, final B b, final TriConsumer<A, B, T> triConsumer) {
@@ -11377,11 +11377,11 @@ public abstract class Fn extends Comparators {
         /**
          * Cc.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param biConsumer the bi consumer
-         * @return the try. bi consumer
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param biConsumer
+         * @return
          */
         @Beta
         public static <T, U, E extends Exception> Try.BiConsumer<T, U, E> cc(final BiConsumer<T, U> biConsumer) {
@@ -11393,13 +11393,13 @@ public abstract class Fn extends Comparators {
         /**
          * Cc.
          *
-         * @param <A> the generic type
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param triConsumer the tri consumer
-         * @return the try. bi consumer
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param a
+         * @param triConsumer
+         * @return
          */
         @Beta
         public static <A, T, U, E extends Exception> Try.BiConsumer<T, U, E> cc(final A a, final TriConsumer<A, T, U> triConsumer) {
@@ -11416,12 +11416,12 @@ public abstract class Fn extends Comparators {
         /**
          * Cc.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <C> the generic type
-         * @param <E> the element type
-         * @param triConsumer the tri consumer
-         * @return the try. tri consumer
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <E>
+         * @param triConsumer
+         * @return
          */
         @Beta
         public static <A, B, C, E extends Exception> Try.TriConsumer<A, B, C, E> cc(final TriConsumer<A, B, C> triConsumer) {
@@ -11433,11 +11433,11 @@ public abstract class Fn extends Comparators {
         /**
          * Ff.
          *
-         * @param <T> the generic type
-         * @param <R> the generic type
-         * @param <E> the element type
-         * @param function the function
-         * @return the try. function
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param function
+         * @return
          */
         @Beta
         public static <T, R, E extends Exception> Try.Function<T, R, E> ff(final Function<T, R> function) {
@@ -11449,13 +11449,13 @@ public abstract class Fn extends Comparators {
         /**
          * Ff.
          *
-         * @param <A> the generic type
-         * @param <T> the generic type
-         * @param <R> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param biFunction the bi function
-         * @return the try. function
+         * @param <A>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param biFunction
+         * @return
          */
         @Beta
         public static <A, T, R, E extends Exception> Try.Function<T, R, E> ff(final A a, final BiFunction<A, T, R> biFunction) {
@@ -11472,15 +11472,15 @@ public abstract class Fn extends Comparators {
         /**
          * Ff.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <T> the generic type
-         * @param <R> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param b the b
-         * @param triFunction the tri function
-         * @return the try. function
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triFunction
+         * @return
          */
         @Beta
         public static <A, B, T, R, E extends Exception> Try.Function<T, R, E> ff(final A a, final B b, final TriFunction<A, B, T, R> triFunction) {
@@ -11501,12 +11501,12 @@ public abstract class Fn extends Comparators {
         /**
          * Ff.
          *
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param <R> the generic type
-         * @param <E> the element type
-         * @param biFunction the bi function
-         * @return the try. bi function
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param biFunction
+         * @return
          */
         @Beta
         public static <T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> ff(final BiFunction<T, U, R> biFunction) {
@@ -11518,14 +11518,14 @@ public abstract class Fn extends Comparators {
         /**
          * Ff.
          *
-         * @param <A> the generic type
-         * @param <T> the generic type
-         * @param <U> the generic type
-         * @param <R> the generic type
-         * @param <E> the element type
-         * @param a the a
-         * @param triFunction the tri function
-         * @return the try. bi function
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param triFunction
+         * @return
          */
         @Beta
         public static <A, T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> ff(final A a, final TriFunction<A, T, U, R> triFunction) {
@@ -11542,13 +11542,13 @@ public abstract class Fn extends Comparators {
         /**
          * Ff.
          *
-         * @param <A> the generic type
-         * @param <B> the generic type
-         * @param <C> the generic type
-         * @param <R> the generic type
-         * @param <E> the element type
-         * @param triFunction the tri function
-         * @return the try. tri function
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <R>
+         * @param <E>
+         * @param triFunction
+         * @return
          */
         @Beta
         public static <A, B, C, R, E extends Exception> Try.TriFunction<A, B, C, R, E> ff(final TriFunction<A, B, C, R> triFunction) {
@@ -11560,9 +11560,9 @@ public abstract class Fn extends Comparators {
         /**
          * Throwing merger.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @return the try. binary operator
+         * @param <T>
+         * @param <E>
+         * @return
          */
         public static <T, E extends Exception> Try.BinaryOperator<T, E> throwingMerger() {
             return BinaryOperators.THROWING_MERGER;
@@ -11571,9 +11571,9 @@ public abstract class Fn extends Comparators {
         /**
          * Ignoring merger.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @return the try. binary operator
+         * @param <T>
+         * @param <E>
+         * @return
          */
         public static <T, E extends Exception> Try.BinaryOperator<T, E> ignoringMerger() {
             return BinaryOperators.IGNORING_MERGER;
@@ -11582,9 +11582,9 @@ public abstract class Fn extends Comparators {
         /**
          * Replacing merger.
          *
-         * @param <T> the generic type
-         * @param <E> the element type
-         * @return the try. binary operator
+         * @param <T>
+         * @param <E>
+         * @return
          */
         public static <T, E extends Exception> Try.BinaryOperator<T, E> replacingMerger() {
             return BinaryOperators.REPLACING_MERGER;
@@ -11593,10 +11593,10 @@ public abstract class Fn extends Comparators {
         /**
          * Callable.
          *
-         * @param <R> the generic type
-         * @param <E> the element type
-         * @param callable the callable
-         * @return the try. callable
+         * @param <R>
+         * @param <E>
+         * @param callable
+         * @return
          */
         public static <R, E extends Exception> Try.Callable<R, E> callable(final Try.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
@@ -11607,9 +11607,9 @@ public abstract class Fn extends Comparators {
         /**
          * Runnable.
          *
-         * @param <E> the element type
-         * @param runnable the runnable
-         * @return the try. runnable
+         * @param <E>
+         * @param runnable
+         * @return
          */
         public static <E extends Exception> Try.Runnable<E> runnable(final Try.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
@@ -11620,9 +11620,9 @@ public abstract class Fn extends Comparators {
         /**
          * To callable.
          *
-         * @param <E> the element type
-         * @param runnable the runnable
-         * @return the try. callable
+         * @param <E>
+         * @param runnable
+         * @return
          */
         public static <E extends Exception> Try.Callable<Void, E> toCallable(final Try.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
@@ -11639,10 +11639,10 @@ public abstract class Fn extends Comparators {
         /**
          * To runnable.
          *
-         * @param <R> the generic type
-         * @param <E> the element type
-         * @param callable the callable
-         * @return the try. runnable
+         * @param <R>
+         * @param <E>
+         * @param callable
+         * @return
          */
         public static <R, E extends Exception> Try.Runnable<E> toRunnable(final Try.Callable<R, E> callable) {
             N.checkArgNotNull(callable);

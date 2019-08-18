@@ -45,7 +45,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Constructs a new MutableChar with the specified value.
      * 
-     * @param value  the initial value to store
+     * @param value the initial value to store
      */
     MutableChar(final char value) {
         super();
@@ -55,8 +55,8 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Of.
      *
-     * @param value the value
-     * @return the mutable char
+     * @param value
+     * @return
      */
     public static MutableChar of(final char value) {
         return new MutableChar(value);
@@ -65,7 +65,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Value.
      *
-     * @return the char
+     * @return
      */
     public char value() {
         return value;
@@ -75,7 +75,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Gets the value as a Char instance.
      * 
-     * @return the value as a Char, never null
+     * @return
      * @deprecated replace by {@link #value()}.
      */
     @Deprecated
@@ -86,7 +86,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Sets the value.
      * 
-     * @param value  the value to set
+     * @param value the value to set
      */
     public void setValue(final char value) {
         this.value = value;
@@ -95,8 +95,8 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Gets the and set.
      *
-     * @param value the value
-     * @return the and set
+     * @param value
+     * @return
      */
     public char getAndSet(final char value) {
         final char result = this.value;
@@ -107,8 +107,8 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Sets the and get.
      *
-     * @param value the value
-     * @return the char
+     * @param value
+     * @return
      */
     public char setAndGet(final char value) {
         this.value = value;
@@ -119,8 +119,8 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate - test the current value.
      * @return true, if successful
      * @throws E the e
@@ -138,8 +138,8 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate the first parameter is the current value, the second parameter is the new value.
      * @return true, if successful
      * @throws E the e
@@ -176,7 +176,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Adds a value to the value of this instance.
      * 
-     * @param operand  the value to add, not null
+     * @param operand the value to add, not null
      * @since Commons Lang 2.2
      */
     public void add(final char operand) {
@@ -186,7 +186,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Subtracts a value from the value of this instance.
      * 
-     * @param operand  the value to subtract, not null
+     * @param operand the value to subtract, not null
      * @since Commons Lang 2.2
      */
     public void subtract(final char operand) {
@@ -196,7 +196,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Increments by one the current value.
      *
-     * @return the previous value
+     * @return
      */
     public final char getAndIncrement() {
         return value++;
@@ -205,7 +205,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Decrements by one the current value.
      *
-     * @return the previous value
+     * @return
      */
     public final char getAndDecrement() {
         return value--;
@@ -214,7 +214,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Increments by one the current value.
      *
-     * @return the updated value
+     * @return
      */
     public final char incrementAndGet() {
         return ++value;
@@ -223,7 +223,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Decrements by one the current value.
      *
-     * @return the updated value
+     * @return
      */
     public final char decrementAndGet() {
         return --value;
@@ -233,7 +233,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * Adds the given value to the current value.
      *
      * @param delta the value to add
-     * @return the previous value
+     * @return
      */
     public final char getAndAdd(final char delta) {
         final char prev = value;
@@ -245,7 +245,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * Adds the given value to the current value.
      *
      * @param delta the value to add
-     * @return the updated value
+     * @return
      */
     public final char addAndGet(final char delta) {
         return value += delta;
@@ -255,7 +255,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Compares this mutable to another in ascending order.
      * 
-     * @param other  the other mutable to compare to, not null
+     * @param other the other mutable to compare to, not null
      * @return negative if this is less, zero if equal, positive if greater
      */
     @Override
@@ -269,7 +269,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * not <code>null</code> and is a <code>MutableChar</code> object that contains the same <code>char</code> value
      * as this object.
      * 
-     * @param obj  the object to compare with, null returns false
+     * @param obj the object to compare with, null returns false
      * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
      */
     @Override
@@ -295,7 +295,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     /**
      * Returns the String value of this mutable.
      * 
-     * @return the mutable value as a string
+     * @return
      */
     @Override
     public String toString() {

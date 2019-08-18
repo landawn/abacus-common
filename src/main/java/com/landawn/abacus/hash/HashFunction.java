@@ -135,7 +135,7 @@ public interface HashFunction {
      *       .putBoolean(isActive)
      *       .hash();}</pre>
      *
-     * @return the hasher
+     * @return
      */
     Hasher newHasher();
 
@@ -144,8 +144,8 @@ public interface HashFunction {
      * size of the input (in bytes). This is only important for non-streaming hash functions (hash
      * functions that need to buffer their whole input before processing any of it).
      *
-     * @param expectedInputSize the expected input size
-     * @return the hasher
+     * @param expectedInputSize
+     * @return
      */
     Hasher newHasher(int expectedInputSize);
 
@@ -156,8 +156,8 @@ public interface HashFunction {
      * {@code int} value, interpreted in little-endian byte order. The implementation <i>might</i>
      * perform better than its longhand equivalent, but should not perform worse.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      * @since 12.0
      */
     HashCode hash(int input);
@@ -167,8 +167,8 @@ public interface HashFunction {
      * {@code long} value, interpreted in little-endian byte order. The implementation <i>might</i>
      * perform better than its longhand equivalent, but should not perform worse.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     HashCode hash(long input);
 
@@ -190,8 +190,8 @@ public interface HashFunction {
      * Shortcut for {@code newHasher().putBytes(input).hash()}. The implementation <i>might</i>
      * perform better than its longhand equivalent, but should not perform worse.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     HashCode hash(byte[] input);
 
@@ -199,10 +199,10 @@ public interface HashFunction {
      * Shortcut for {@code newHasher().putBytes(input, off, len).hash()}. The implementation
      * <i>might</i> perform better than its longhand equivalent, but should not perform worse.
      *
-     * @param input the input
-     * @param off the off
-     * @param len the len
-     * @return the hash code
+     * @param input
+     * @param off
+     * @param len
+     * @return
      * @throws IndexOutOfBoundsException if {@code off < 0} or {@code off + len > bytes.length} or
      *     {@code len < 0}
      */
@@ -219,8 +219,8 @@ public interface HashFunction {
      * {@link #hashString}, usually with a charset of UTF-8. For other use cases, use {@code
      * hashUnencodedChars}.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      * @since 15.0 (since 11.0 as hashString(CharSequence)).
      */
     HashCode hash(CharSequence input);
@@ -235,9 +235,9 @@ public interface HashFunction {
      * faster, produces the same output across Java releases, and hashes every {@code char} in the
      * input, even if some are invalid.
      *
-     * @param input the input
-     * @param charset the charset
-     * @return the hash code
+     * @param input
+     * @param charset
+     * @return
      */
     HashCode hash(CharSequence input, Charset charset);
 
@@ -245,10 +245,10 @@ public interface HashFunction {
      * Shortcut for {@code newHasher().putObject(instance, funnel).hash()}. The implementation
      * <i>might</i> perform better than its longhand equivalent, but should not perform worse.
      *
-     * @param <T> the generic type
-     * @param instance the instance
-     * @param funnel the funnel
-     * @return the hash code
+     * @param <T>
+     * @param instance
+     * @param funnel
+     * @return
      * @since 14.0
      */
     <T> HashCode hash(T instance, BiConsumer<? super T, ? super Hasher> funnel);
@@ -257,7 +257,7 @@ public interface HashFunction {
      * Returns the number of bits (a multiple of 32) that each hash code produced by this hash
      * function has.
      *
-     * @return the int
+     * @return
      */
     int bits();
 }

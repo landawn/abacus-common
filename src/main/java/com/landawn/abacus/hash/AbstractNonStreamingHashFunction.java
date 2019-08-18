@@ -36,7 +36,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -46,8 +46,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     /**
      * New hasher.
      *
-     * @param expectedInputSize the expected input size
-     * @return the hasher
+     * @param expectedInputSize
+     * @return
      */
     @Override
     public Hasher newHasher(int expectedInputSize) {
@@ -58,10 +58,10 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     /**
      * Hash.
      *
-     * @param <T> the generic type
-     * @param instance the instance
-     * @param funnel the funnel
-     * @return the hash code
+     * @param <T>
+     * @param instance
+     * @param funnel
+     * @return
      */
     @Override
     public <T> HashCode hash(T instance, BiConsumer<? super T, ? super Hasher> funnel) {
@@ -71,8 +71,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     /**
      * Hash.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(CharSequence input) {
@@ -87,9 +87,9 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     /**
      * Hash.
      *
-     * @param input the input
-     * @param charset the charset
-     * @return the hash code
+     * @param input
+     * @param charset
+     * @return
      */
     @Override
     public HashCode hash(CharSequence input, Charset charset) {
@@ -104,8 +104,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     /**
      * Hash.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(int input) {
@@ -115,8 +115,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     /**
      * Hash.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(long input) {
@@ -136,8 +136,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     /**
      * Hash.
      *
-     * @param input the input
-     * @return the hash code
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(byte[] input) {
@@ -158,7 +158,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Instantiates a new buffering hasher.
          *
-         * @param expectedInputSize the expected input size
+         * @param expectedInputSize
          */
         BufferingHasher(int expectedInputSize) {
             this.stream = new ExposedByteArrayOutputStream(expectedInputSize);
@@ -167,8 +167,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Put.
          *
-         * @param b the b
-         * @return the hasher
+         * @param b
+         * @return
          */
         @Override
         public Hasher put(byte b) {
@@ -179,8 +179,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Put.
          *
-         * @param bytes the bytes
-         * @return the hasher
+         * @param bytes
+         * @return
          */
         @Override
         public Hasher put(byte[] bytes) {
@@ -195,10 +195,10 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Put.
          *
-         * @param bytes the bytes
-         * @param off the off
-         * @param len the len
-         * @return the hasher
+         * @param bytes
+         * @param off
+         * @param len
+         * @return
          */
         @Override
         public Hasher put(byte[] bytes, int off, int len) {
@@ -209,8 +209,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Put.
          *
-         * @param s the s
-         * @return the hasher
+         * @param s
+         * @return
          */
         @Override
         public Hasher put(short s) {
@@ -222,8 +222,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Put.
          *
-         * @param i the i
-         * @return the hasher
+         * @param i
+         * @return
          */
         @Override
         public Hasher put(int i) {
@@ -237,8 +237,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Put.
          *
-         * @param l the l
-         * @return the hasher
+         * @param l
+         * @return
          */
         @Override
         public Hasher put(long l) {
@@ -251,8 +251,8 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Put.
          *
-         * @param c the c
-         * @return the hasher
+         * @param c
+         * @return
          */
         @Override
         public Hasher put(char c) {
@@ -264,10 +264,10 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Put.
          *
-         * @param <T> the generic type
-         * @param instance the instance
-         * @param funnel the funnel
-         * @return the hasher
+         * @param <T>
+         * @param instance
+         * @param funnel
+         * @return
          */
         @Override
         public <T> Hasher put(T instance, BiConsumer<? super T, ? super Hasher> funnel) {
@@ -278,7 +278,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Hash.
          *
-         * @return the hash code
+         * @return
          */
         @Override
         public HashCode hash() {
@@ -295,7 +295,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Instantiates a new exposed byte array output stream.
          *
-         * @param expectedInputSize the expected input size
+         * @param expectedInputSize
          */
         ExposedByteArrayOutputStream(int expectedInputSize) {
             super(expectedInputSize);
@@ -304,7 +304,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Byte array.
          *
-         * @return the byte[]
+         * @return
          */
         byte[] byteArray() {
             return buf;
@@ -313,7 +313,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         /**
          * Length.
          *
-         * @return the int
+         * @return
          */
         int length() {
             return count;

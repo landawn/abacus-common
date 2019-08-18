@@ -40,7 +40,7 @@ public abstract class HashCode {
     /**
      * Returns the number of bits in this hash code; a positive multiple of 8.
      *
-     * @return the int
+     * @return
      */
     public abstract int bits();
 
@@ -48,7 +48,7 @@ public abstract class HashCode {
      * Returns the first four bytes of {@linkplain #asBytes() this hashcode's bytes}, converted to an
      * {@code int} value in little-endian order.
      *
-     * @return the int
+     * @return
      * @throws IllegalStateException if {@code bits() < 32}
      */
     public abstract int asInt();
@@ -57,7 +57,7 @@ public abstract class HashCode {
      * Returns the first eight bytes of {@linkplain #asBytes() this hashcode's bytes}, converted to a
      * {@code long} value in little-endian order.
      *
-     * @return the long
+     * @return
      * @throws IllegalStateException if {@code bits() < 64}
      */
     public abstract long asLong();
@@ -67,7 +67,7 @@ public abstract class HashCode {
      * value with {@code asBytes()} as the least-significant bytes and {@code 0x00} as the remaining
      * most-significant bytes.
      *
-     * @return the long
+     * @return
      * @since 14.0 (since 11.0 as {@code Hashing.padToLong(HashCode)})
      */
     public abstract long padToLong();
@@ -77,7 +77,7 @@ public abstract class HashCode {
      * changes to it will <i>not</i> be reflected in this {@code HashCode} object or any other arrays
      * returned by this method.
      *
-     * @return the byte[]
+     * @return
      */
     // TODO(user): consider ByteString here, when that is available
     public abstract byte[] asBytes();
@@ -88,7 +88,7 @@ public abstract class HashCode {
      * @param dest the byte array into which the hash code will be written
      * @param offset the start offset in the data
      * @param maxLength the maximum number of bytes to write
-     * @return the number of bytes written to {@code dest}
+     * @return
      * @throws IndexOutOfBoundsException if there is not enough room in {@code dest}
      */
 
@@ -102,9 +102,9 @@ public abstract class HashCode {
     /**
      * Write bytes to impl.
      *
-     * @param dest the dest
-     * @param offset the offset
-     * @param maxLength the max length
+     * @param dest
+     * @param offset
+     * @param maxLength
      */
     abstract void writeBytesToImpl(byte[] dest, int offset, int maxLength);
 
@@ -113,7 +113,7 @@ public abstract class HashCode {
      * byte-based hashcode. Otherwise it returns {@link HashCode#asBytes}. Do <i>not</i> mutate this
      * array or else you will break the immutability contract of {@code HashCode}.
      *
-     * @return the bytes internal
+     * @return
      */
     byte[] getBytesInternal() {
         return asBytes();
@@ -123,7 +123,7 @@ public abstract class HashCode {
      * Returns whether this {@code HashCode} and that {@code HashCode} have the same value, given that
      * they have the same number of bits.
      *
-     * @param that the that
+     * @param that
      * @return true, if successful
      */
     abstract boolean equalsSameBits(HashCode that);
@@ -132,8 +132,8 @@ public abstract class HashCode {
      * Creates a 32-bit {@code HashCode} representation of the given int value. The underlying bytes
      * are interpreted in little endian order.
      *
-     * @param hash the hash
-     * @return the hash code
+     * @param hash
+     * @return
      * @since 15.0 (since 12.0 in HashCodes)
      */
     public static HashCode fromInt(int hash) {
@@ -151,7 +151,7 @@ public abstract class HashCode {
         /**
          * Instantiates a new int hash code.
          *
-         * @param hash the hash
+         * @param hash
          */
         IntHashCode(int hash) {
             this.hash = hash;
@@ -160,7 +160,7 @@ public abstract class HashCode {
         /**
          * Bits.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int bits() {
@@ -170,7 +170,7 @@ public abstract class HashCode {
         /**
          * As bytes.
          *
-         * @return the byte[]
+         * @return
          */
         @Override
         public byte[] asBytes() {
@@ -180,7 +180,7 @@ public abstract class HashCode {
         /**
          * As int.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int asInt() {
@@ -190,7 +190,7 @@ public abstract class HashCode {
         /**
          * As long.
          *
-         * @return the long
+         * @return
          */
         @Override
         public long asLong() {
@@ -200,7 +200,7 @@ public abstract class HashCode {
         /**
          * Pad to long.
          *
-         * @return the long
+         * @return
          */
         @Override
         public long padToLong() {
@@ -210,9 +210,9 @@ public abstract class HashCode {
         /**
          * Write bytes to impl.
          *
-         * @param dest the dest
-         * @param offset the offset
-         * @param maxLength the max length
+         * @param dest
+         * @param offset
+         * @param maxLength
          */
         @Override
         void writeBytesToImpl(byte[] dest, int offset, int maxLength) {
@@ -224,7 +224,7 @@ public abstract class HashCode {
         /**
          * Equals same bits.
          *
-         * @param that the that
+         * @param that
          * @return true, if successful
          */
         @Override
@@ -240,8 +240,8 @@ public abstract class HashCode {
      * Creates a 64-bit {@code HashCode} representation of the given long value. The underlying bytes
      * are interpreted in little endian order.
      *
-     * @param hash the hash
-     * @return the hash code
+     * @param hash
+     * @return
      * @since 15.0 (since 12.0 in HashCodes)
      */
     public static HashCode fromLong(long hash) {
@@ -259,7 +259,7 @@ public abstract class HashCode {
         /**
          * Instantiates a new long hash code.
          *
-         * @param hash the hash
+         * @param hash
          */
         LongHashCode(long hash) {
             this.hash = hash;
@@ -268,7 +268,7 @@ public abstract class HashCode {
         /**
          * Bits.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int bits() {
@@ -278,7 +278,7 @@ public abstract class HashCode {
         /**
          * As bytes.
          *
-         * @return the byte[]
+         * @return
          */
         @Override
         public byte[] asBytes() {
@@ -289,7 +289,7 @@ public abstract class HashCode {
         /**
          * As int.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int asInt() {
@@ -299,7 +299,7 @@ public abstract class HashCode {
         /**
          * As long.
          *
-         * @return the long
+         * @return
          */
         @Override
         public long asLong() {
@@ -309,7 +309,7 @@ public abstract class HashCode {
         /**
          * Pad to long.
          *
-         * @return the long
+         * @return
          */
         @Override
         public long padToLong() {
@@ -319,9 +319,9 @@ public abstract class HashCode {
         /**
          * Write bytes to impl.
          *
-         * @param dest the dest
-         * @param offset the offset
-         * @param maxLength the max length
+         * @param dest
+         * @param offset
+         * @param maxLength
          */
         @Override
         void writeBytesToImpl(byte[] dest, int offset, int maxLength) {
@@ -333,7 +333,7 @@ public abstract class HashCode {
         /**
          * Equals same bits.
          *
-         * @param that the that
+         * @param that
          * @return true, if successful
          */
         @Override
@@ -349,8 +349,8 @@ public abstract class HashCode {
      * Creates a {@code HashCode} from a byte array. The array is defensively copied to preserve the
      * immutability contract of {@code HashCode}. The array cannot be empty.
      *
-     * @param bytes the bytes
-     * @return the hash code
+     * @param bytes
+     * @return
      * @since 15.0 (since 12.0 in HashCodes)
      */
     public static HashCode fromBytes(byte[] bytes) {
@@ -362,8 +362,8 @@ public abstract class HashCode {
      * Creates a {@code HashCode} from a byte array. The array is <i>not</i> copied defensively, so it
      * must be handed-off so as to preserve the immutability contract of {@code HashCode}.
      *
-     * @param bytes the bytes
-     * @return the hash code
+     * @param bytes
+     * @return
      */
     static HashCode fromBytesNoCopy(byte[] bytes) {
         return new BytesHashCode(bytes);
@@ -380,7 +380,7 @@ public abstract class HashCode {
         /**
          * Instantiates a new bytes hash code.
          *
-         * @param bytes the bytes
+         * @param bytes
          */
         BytesHashCode(byte[] bytes) {
             this.bytes = N.checkArgNotNull(bytes);
@@ -389,7 +389,7 @@ public abstract class HashCode {
         /**
          * Bits.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int bits() {
@@ -399,7 +399,7 @@ public abstract class HashCode {
         /**
          * As bytes.
          *
-         * @return the byte[]
+         * @return
          */
         @Override
         public byte[] asBytes() {
@@ -409,7 +409,7 @@ public abstract class HashCode {
         /**
          * As int.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int asInt() {
@@ -420,7 +420,7 @@ public abstract class HashCode {
         /**
          * As long.
          *
-         * @return the long
+         * @return
          */
         @Override
         public long asLong() {
@@ -431,7 +431,7 @@ public abstract class HashCode {
         /**
          * Pad to long.
          *
-         * @return the long
+         * @return
          */
         @Override
         public long padToLong() {
@@ -445,9 +445,9 @@ public abstract class HashCode {
         /**
          * Write bytes to impl.
          *
-         * @param dest the dest
-         * @param offset the offset
-         * @param maxLength the max length
+         * @param dest
+         * @param offset
+         * @param maxLength
          */
         @Override
         void writeBytesToImpl(byte[] dest, int offset, int maxLength) {
@@ -457,7 +457,7 @@ public abstract class HashCode {
         /**
          * Gets the bytes internal.
          *
-         * @return the bytes internal
+         * @return
          */
         @Override
         byte[] getBytesInternal() {
@@ -467,7 +467,7 @@ public abstract class HashCode {
         /**
          * Equals same bits.
          *
-         * @param that the that
+         * @param that
          * @return true, if successful
          */
         @Override
@@ -497,8 +497,8 @@ public abstract class HashCode {
      * lenient {@code base 16} decoding, please use {@link com.google.common.io.BaseEncoding#decode}
      * (and pass the result to {@link #fromBytes}).
      *
-     * @param string the string
-     * @return the hash code
+     * @param string
+     * @return
      * @since 15.0
      */
     public static HashCode fromString(String string) {
@@ -517,8 +517,8 @@ public abstract class HashCode {
     /**
      * Decode.
      *
-     * @param ch the ch
-     * @return the int
+     * @param ch
+     * @return
      */
     private static int decode(char ch) {
         if (ch >= '0' && ch <= '9') {
@@ -537,7 +537,7 @@ public abstract class HashCode {
      * <p><b>Security note:</b> this method uses a constant-time (not short-circuiting) implementation
      * to protect against <a href="http://en.wikipedia.org/wiki/Timing_attack">timing attacks</a>.
      *
-     * @param object the object
+     * @param object
      * @return true, if successful
      */
     @Override
@@ -554,7 +554,7 @@ public abstract class HashCode {
      * example, you can safely put {@code HashCode} instances into a {@code
      * HashSet}) but is otherwise probably not what you want to use.
      *
-     * @return the int
+     * @return
      */
     @Override
     public final int hashCode() {
@@ -583,7 +583,7 @@ public abstract class HashCode {
      * 
      * <p>To create a {@code HashCode} from its string representation, see {@link #fromString}.
      *
-     * @return the string
+     * @return
      */
     @Override
     public final String toString() {

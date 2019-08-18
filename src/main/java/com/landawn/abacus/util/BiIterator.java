@@ -32,8 +32,8 @@ import com.landawn.abacus.util.stream.Stream;
  * The Class BiIterator.
  *
  * @author Haiyang Li
- * @param <A> the generic type
- * @param <B> the generic type
+ * @param <A>
+ * @param <B>
  * @since 1.2.10
  */
 public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
@@ -67,9 +67,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Empty.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @return
      */
     public static <A, B> BiIterator<A, B> empty() {
         return EMPTY;
@@ -80,8 +80,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the bi iterator
+     * @param map
+     * @return
      */
     public static <K, V> BiIterator<K, V> of(final Map<K, V> map) {
         if (N.isNullOrEmpty(map)) {
@@ -96,8 +96,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param iter the iter
-     * @return the bi iterator
+     * @param iter
+     * @return
      */
     public static <K, V> BiIterator<K, V> of(final Iterator<Map.Entry<K, V>> iter) {
         if (iter == null) {
@@ -154,10 +154,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Returns an infinite {@code BiIterator}.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
+     * @param <A>
+     * @param <B>
      * @param output transfer the next values.
-     * @return the bi iterator
+     * @return
      */
     public static <A, B> BiIterator<A, B> generate(final Consumer<Pair<A, B>> output) {
         return generate(BooleanSupplier.TRUE, output);
@@ -166,11 +166,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Generate.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param hasNext the has next
-     * @param output the output
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param hasNext
+     * @param output
+     * @return
      */
     public static <A, B> BiIterator<A, B> generate(final BooleanSupplier hasNext, final Consumer<Pair<A, B>> output) {
         N.checkArgNotNull(hasNext);
@@ -234,12 +234,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Generate.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param output the output
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param fromIndex
+     * @param toIndex
+     * @param output
+     * @return
      */
     public static <A, B> BiIterator<A, B> generate(final int fromIndex, final int toIndex, final IndexedConsumer<Pair<A, B>> output) {
         N.checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
@@ -304,11 +304,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @param b
+     * @return
      */
     public static <A, B> BiIterator<A, B> zip(final A[] a, final B[] b) {
         return zip(Array.asList(a), Array.asList(b));
@@ -317,13 +317,13 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @return
      */
     public static <A, B> BiIterator<A, B> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB) {
         return zip(Array.asList(a), Array.asList(b), valueForNoneA, valueForNoneB);
@@ -332,11 +332,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @param b
+     * @return
      */
     public static <A, B> BiIterator<A, B> zip(final Collection<A> a, final Collection<B> b) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator());
@@ -345,13 +345,13 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @return
      */
     public static <A, B> BiIterator<A, B> zip(final Collection<A> a, final Collection<B> b, final A valueForNoneA, final B valueForNoneB) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), valueForNoneA, valueForNoneB);
@@ -360,11 +360,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param iterA the iter A
-     * @param iterB the iter B
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param iterA
+     * @param iterB
+     * @return
      */
     public static <A, B> BiIterator<A, B> zip(final Iterator<A> iterA, final Iterator<B> iterB) {
         if (iterA == null || iterB == null) {
@@ -421,13 +421,13 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param iterA the iter A
-     * @param iterB the iter B
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @return the bi iterator
+     * @param <A>
+     * @param <B>
+     * @param iterA
+     * @param iterB
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @return
      */
     public static <A, B> BiIterator<A, B> zip(final Iterator<A> iterA, final Iterator<B> iterB, final A valueForNoneA, final B valueForNoneB) {
         final Iterator<A> iter1 = iterA == null ? ObjIterator.<A> empty() : iterA;
@@ -483,12 +483,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Unzip.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
-     * @param <R> the generic type
-     * @param iter the iter
+     * @param <T>
+     * @param <L>
+     * @param <R>
+     * @param iter
      * @param unzip output parameter.
-     * @return the bi iterator
+     * @return
      */
     public static <T, L, R> BiIterator<L, R> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<L, R>> unzip) {
         if (iter == null) {
@@ -515,8 +515,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * For each remaining.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public abstract <E extends Exception> void forEachRemaining(final Try.BiConsumer<? super A, ? super B, E> action) throws E;
@@ -524,7 +524,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * It's preferred to call <code>forEachRemaining(Try.BiConsumer)</code> to avoid the create the unnecessary <code>Pair</code> Objects.
      *
-     * @param action the action
+     * @param action
      * @deprecated 
      */
     @Override
@@ -536,18 +536,18 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Map.
      *
-     * @param <R> the generic type
-     * @param mapper the mapper
-     * @return the obj iterator
+     * @param <R>
+     * @param mapper
+     * @return
      */
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, R> mapper);
 
     /**
      * Stream.
      *
-     * @param <R> the generic type
-     * @param mapper the mapper
-     * @return the stream
+     * @param <R>
+     * @param mapper
+     * @return
      */
     public <R> Stream<R> stream(final BiFunction<? super A, ? super B, R> mapper) {
         N.checkArgNotNull(mapper);

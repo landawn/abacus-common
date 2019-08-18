@@ -334,7 +334,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * <br />
      * All elements will be loaded to memory.
      *
-     * @return the new stream
+     * @return
      */
     @ParallelSupported
     S sorted();
@@ -492,7 +492,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * <br />
      * Remember to close this Stream after the iteration is done, if required.
      *
-     * @return the element iterator for this stream
+     * @return
      */
     @SequentialOnly
     ITER iterator();

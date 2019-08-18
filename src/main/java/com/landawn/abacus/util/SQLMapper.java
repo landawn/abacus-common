@@ -94,7 +94,7 @@ public final class SQLMapper {
      * From file.
      *
      * @param filePath it could be multiple file paths separated by ',' or ';'
-     * @return the SQL mapper
+     * @return
      */
     public static SQLMapper fromFile(String filePath) {
         String[] filePaths = Splitter.with(WD.COMMA).trim(true).splitToArray(filePath);
@@ -142,7 +142,7 @@ public final class SQLMapper {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     public Set<String> keySet() {
         return namedSQLMap.keySet();
@@ -151,8 +151,8 @@ public final class SQLMapper {
     /**
      * Gets the.
      *
-     * @param id the id
-     * @return the named SQL
+     * @param id
+     * @return
      */
     public NamedSQL get(String id) {
         if (N.isNullOrEmpty(id) || id.length() > MAX_ID_LENGTH) {
@@ -165,8 +165,8 @@ public final class SQLMapper {
     /**
      * Gets the attrs.
      *
-     * @param id the id
-     * @return the attrs
+     * @param id
+     * @return
      */
     public Map<String, String> getAttrs(String id) {
         if (N.isNullOrEmpty(id) || id.length() > MAX_ID_LENGTH) {
@@ -179,9 +179,9 @@ public final class SQLMapper {
     /**
      * Adds the.
      *
-     * @param id the id
-     * @param namedSQL the named SQL
-     * @return the named SQL
+     * @param id
+     * @param namedSQL
+     * @return
      */
     public NamedSQL add(String id, NamedSQL namedSQL) {
         checkId(id);
@@ -192,9 +192,9 @@ public final class SQLMapper {
     /**
      * Adds the.
      *
-     * @param id the id
-     * @param sql the sql
-     * @param attrs the attrs
+     * @param id
+     * @param sql
+     * @param attrs
      */
     public void add(String id, String sql, Map<String, String> attrs) {
         checkId(id);
@@ -206,7 +206,7 @@ public final class SQLMapper {
     /**
      * Check id.
      *
-     * @param id the id
+     * @param id
      */
     private void checkId(String id) {
         N.checkArgNotNullOrEmpty(id, "id");
@@ -223,7 +223,7 @@ public final class SQLMapper {
     /**
      * Removes the.
      *
-     * @param id the id
+     * @param id
      */
     public void remove(String id) {
         if (N.isNullOrEmpty(id) || id.length() > MAX_ID_LENGTH) {
@@ -236,7 +236,7 @@ public final class SQLMapper {
     /**
      * Save to.
      *
-     * @param file the file
+     * @param file
      */
     public void saveTo(File file) {
         OutputStream os = null;
@@ -283,7 +283,7 @@ public final class SQLMapper {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -293,7 +293,7 @@ public final class SQLMapper {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -304,7 +304,7 @@ public final class SQLMapper {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

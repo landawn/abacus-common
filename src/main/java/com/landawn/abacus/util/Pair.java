@@ -28,8 +28,8 @@ import com.landawn.abacus.util.stream.Stream;
  * The Class Pair.
  *
  * @author Haiyang Li
- * @param <L> the generic type
- * @param <R> the generic type
+ * @param <L>
+ * @param <R>
  * @since 0.8
  */
 public final class Pair<L, R> {
@@ -49,8 +49,8 @@ public final class Pair<L, R> {
     /**
      * Instantiates a new pair.
      *
-     * @param l the l
-     * @param r the r
+     * @param l
+     * @param r
      */
     Pair(final L l, final R r) {
         this.left = l;
@@ -60,11 +60,11 @@ public final class Pair<L, R> {
     /**
      * Of.
      *
-     * @param <L> the generic type
-     * @param <R> the generic type
-     * @param l the l
-     * @param r the r
-     * @return the pair
+     * @param <L>
+     * @param <R>
+     * @param l
+     * @param r
+     * @return
      */
     public static <L, R> Pair<L, R> of(final L l, final R r) {
         return new Pair<>(l, r);
@@ -75,8 +75,8 @@ public final class Pair<L, R> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param entry the entry
-     * @return the pair
+     * @param entry
+     * @return
      */
     public static <K, V> Pair<K, V> from(final Map.Entry<K, V> entry) {
         return new Pair<>(entry.getKey(), entry.getValue());
@@ -85,7 +85,7 @@ public final class Pair<L, R> {
     /**
      * Gets the left.
      *
-     * @return the left
+     * @return
      */
     public L getLeft() {
         return left;
@@ -103,7 +103,7 @@ public final class Pair<L, R> {
     /**
      * Gets the right.
      *
-     * @return the right
+     * @return
      */
     public R getRight() {
         return right;
@@ -121,8 +121,8 @@ public final class Pair<L, R> {
     /**
      * Sets the.
      *
-     * @param left the left
-     * @param right the right
+     * @param left
+     * @param right
      */
     public void set(final L left, final R right) {
         this.left = left;
@@ -132,8 +132,8 @@ public final class Pair<L, R> {
     /**
      * Gets the and set left.
      *
-     * @param newLeft the new left
-     * @return the and set left
+     * @param newLeft
+     * @return
      */
     public L getAndSetLeft(L newLeft) {
         final L res = left;
@@ -144,8 +144,8 @@ public final class Pair<L, R> {
     /**
      * Sets the and get left.
      *
-     * @param newLeft the new left
-     * @return the l
+     * @param newLeft
+     * @return
      */
     public L setAndGetLeft(L newLeft) {
         left = newLeft;
@@ -155,8 +155,8 @@ public final class Pair<L, R> {
     /**
      * Gets the and set right.
      *
-     * @param newRight the new right
-     * @return the and set right
+     * @param newRight
+     * @return
      */
     public R getAndSetRight(R newRight) {
         final R res = newRight;
@@ -167,8 +167,8 @@ public final class Pair<L, R> {
     /**
      * Sets the and get right.
      *
-     * @param newRight the new right
-     * @return the r
+     * @param newRight
+     * @return
      */
     public R setAndGetRight(R newRight) {
         right = newRight;
@@ -180,8 +180,8 @@ public final class Pair<L, R> {
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newLeft the new left
+     * @param <E>
+     * @param newLeft
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newLeft</code>
      * @return true, if successful
@@ -201,8 +201,8 @@ public final class Pair<L, R> {
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newRight the new right
+     * @param <E>
+     * @param newRight
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newRight</code>
      * @return true, if successful
@@ -222,9 +222,9 @@ public final class Pair<L, R> {
      * if <code>predicate</code> returns true. Otherwise returns
      * <code>false</code> without setting the left/right to new values.
      *
-     * @param <E> the element type
-     * @param newLeft the new left
-     * @param newRight the new right
+     * @param <E>
+     * @param newLeft
+     * @param newRight
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newLeft</code>, the third parameter is the <code>newRight</code>.
      * @return true, if successful
@@ -306,7 +306,7 @@ public final class Pair<L, R> {
     /**
      * Copy.
      *
-     * @return the pair
+     * @return
      */
     public Pair<L, R> copy() {
         return new Pair<>(this.left, this.right);
@@ -315,7 +315,7 @@ public final class Pair<L, R> {
     /**
      * To array.
      *
-     * @return the object[]
+     * @return
      */
     public Object[] toArray() {
         return new Object[] { left, right };
@@ -324,9 +324,9 @@ public final class Pair<L, R> {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param a the a
-     * @return the a[]
+     * @param <A>
+     * @param a
+     * @return
      */
     public <A> A[] toArray(A[] a) {
         if (a.length < 2) {
@@ -342,8 +342,8 @@ public final class Pair<L, R> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.Consumer<?, E> comsumer) throws E {
@@ -356,8 +356,8 @@ public final class Pair<L, R> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(final Try.BiConsumer<? super L, ? super R, E> action) throws E {
@@ -367,8 +367,8 @@ public final class Pair<L, R> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(final Try.Consumer<? super Pair<L, R>, E> action) throws E {
@@ -378,10 +378,10 @@ public final class Pair<L, R> {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(final Try.BiFunction<? super L, ? super R, U, E> mapper) throws E {
@@ -391,10 +391,10 @@ public final class Pair<L, R> {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(final Try.Function<? super Pair<L, R>, U, E> mapper) throws E {
@@ -404,9 +404,9 @@ public final class Pair<L, R> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Try.BiPredicate<? super L, ? super R, E> predicate) throws E {
@@ -416,9 +416,9 @@ public final class Pair<L, R> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Try.Predicate<? super Pair<L, R>, E> predicate) throws E {
@@ -428,7 +428,7 @@ public final class Pair<L, R> {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<Pair<L, R>> stream() {
         return Stream.of(this);
@@ -437,7 +437,7 @@ public final class Pair<L, R> {
     /**
      * To tuple.
      *
-     * @return the tuple 2
+     * @return
      */
     public Tuple2<L, R> toTuple() {
         return Tuple.of(left, right);
@@ -446,7 +446,7 @@ public final class Pair<L, R> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -460,7 +460,7 @@ public final class Pair<L, R> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -481,7 +481,7 @@ public final class Pair<L, R> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

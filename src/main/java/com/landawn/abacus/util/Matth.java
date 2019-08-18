@@ -257,7 +257,7 @@ public abstract class Matth {
      * 
      * <p>To test larger numbers, use {@link BigInteger#isProbablePrime}.
      *
-     * @param n the n
+     * @param n
      * @return true, if is prime
      * @throws IllegalArgumentException if {@code n} is negative
      * @since 20.0
@@ -297,7 +297,7 @@ public abstract class Matth {
     /**
      * Checks if is perfect square.
      *
-     * @param n the n
+     * @param n
      * @return true, if is perfect square
      */
     public static boolean isPerfectSquare(int n) {
@@ -321,7 +321,7 @@ public abstract class Matth {
     /**
      * Checks if is perfect square.
      *
-     * @param n the n
+     * @param n
      * @return true, if is perfect square
      */
     public static boolean isPerfectSquare(long n) {
@@ -345,7 +345,7 @@ public abstract class Matth {
     /**
      * Checks if is power of two.
      *
-     * @param x the x
+     * @param x
      * @return true, if is power of two
      */
     public static boolean isPowerOfTwo(int x) {
@@ -355,7 +355,7 @@ public abstract class Matth {
     /**
      * Checks if is power of two.
      *
-     * @param x the x
+     * @param x
      * @return true, if is power of two
      */
     public static boolean isPowerOfTwo(long x) {
@@ -365,7 +365,7 @@ public abstract class Matth {
     /**
      * Checks if is power of two.
      *
-     * @param x the x
+     * @param x
      * @return true, if is power of two
      */
     public static boolean isPowerOfTwo(double x) {
@@ -375,7 +375,7 @@ public abstract class Matth {
     /**
      * Returns {@code true} if {@code x} represents a power of two.
      *
-     * @param x the x
+     * @param x
      * @return true, if is power of two
      */
     public static boolean isPowerOfTwo(BigInteger x) {
@@ -394,8 +394,8 @@ public abstract class Matth {
     /**
      * Log.
      *
-     * @param a the a
-     * @return the double
+     * @param a
+     * @return
      */
     public static double log(double a) {
         return Math.log(a);
@@ -404,9 +404,9 @@ public abstract class Matth {
     /**
      * Log 2.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      */
     public static int log2(int x, RoundingMode mode) {
         checkPositive("x", x);
@@ -440,9 +440,9 @@ public abstract class Matth {
     /**
      * Returns the base-2 logarithm of {@code x}, rounded according to the specified rounding mode.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
@@ -493,8 +493,8 @@ public abstract class Matth {
      * <p>If the result of this method will be immediately rounded to an {@code int},
      * {@link #log2(double, RoundingMode)} is faster.
      *
-     * @param x the x
-     * @return the double
+     * @param x
+     * @return
      */
     public static double log2(double x) {
         return Math.log(x) / LN_2; // surprisingly within 1 ulp according to tests
@@ -506,9 +506,9 @@ public abstract class Matth {
      * 
      * <p>Regardless of the rounding mode, this is faster than {@code (int) log2(x)}.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      * @throws IllegalArgumentException if {@code x <= 0.0}, {@code x} is NaN, or {@code x} is
      *     infinite
      */
@@ -555,9 +555,9 @@ public abstract class Matth {
     /**
      * Returns the base-2 logarithm of {@code x}, rounded according to the specified rounding mode.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
@@ -605,9 +605,9 @@ public abstract class Matth {
     /**
      * Log 10.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      */
     public static int log10(int x, RoundingMode mode) {
         checkPositive("x", x);
@@ -636,8 +636,8 @@ public abstract class Matth {
     /**
      * Log 10 floor.
      *
-     * @param x the x
-     * @return the int
+     * @param x
+     * @return
      */
     private static int log10Floor(int x) {
         /*
@@ -658,9 +658,9 @@ public abstract class Matth {
     /**
      * Returns the base-10 logarithm of {@code x}, rounded according to the specified rounding mode.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
@@ -694,8 +694,8 @@ public abstract class Matth {
     /**
      * Log 10.
      *
-     * @param x the x
-     * @return the double
+     * @param x
+     * @return
      */
     public static double log10(double x) {
         return Math.log10(x);
@@ -715,9 +715,9 @@ public abstract class Matth {
     /**
      * Returns the base-10 logarithm of {@code x}, rounded according to the specified rounding mode.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
@@ -792,7 +792,7 @@ public abstract class Matth {
     /**
      * Fits in long.
      *
-     * @param x the x
+     * @param x
      * @return true, if successful
      */
     static boolean fitsInLong(BigInteger x) {
@@ -808,9 +808,9 @@ public abstract class Matth {
     /**
      * Pow.
      *
-     * @param b the b
-     * @param k the k
-     * @return the int
+     * @param b
+     * @param k
+     * @return
      */
     public static int pow(int b, int k) {
         checkNonNegative("exponent", k);
@@ -850,9 +850,9 @@ public abstract class Matth {
      * {@code BigInteger.valueOf(b).pow(k).longValue()}. This implementation runs in {@code O(log k)}
      * time.
      *
-     * @param b the b
-     * @param k the k
-     * @return the long
+     * @param b
+     * @param k
+     * @return
      * @throws IllegalArgumentException if {@code k < 0}
      */
     public static long pow(long b, int k) {
@@ -894,8 +894,8 @@ public abstract class Matth {
      * Returns the smallest power of two greater than or equal to {@code x}.  This is equivalent to
      * {@code checkedPow(2, log2(x, CEILING))}.
      *
-     * @param x the x
-     * @return the long
+     * @param x
+     * @return
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException of the next-higher power of two is not representable as a
      *         {@code long}, i.e. when {@code x > 2^62}
@@ -912,8 +912,8 @@ public abstract class Matth {
     /**
      * Ceiling power of two.
      *
-     * @param x the x
-     * @return the big integer
+     * @param x
+     * @return
      */
     public static BigInteger ceilingPowerOfTwo(BigInteger x) {
         return BigInteger.ZERO.setBit(log2(x, RoundingMode.CEILING));
@@ -923,8 +923,8 @@ public abstract class Matth {
      * Returns the largest power of two less than or equal to {@code x}.  This is equivalent to
      * {@code checkedPow(2, log2(x, FLOOR))}.
      *
-     * @param x the x
-     * @return the long
+     * @param x
+     * @return
      * @throws IllegalArgumentException if {@code x <= 0}
      * @since 20.0
      */
@@ -939,8 +939,8 @@ public abstract class Matth {
     /**
      * Floor power of two.
      *
-     * @param x the x
-     * @return the big integer
+     * @param x
+     * @return
      */
     public static BigInteger floorPowerOfTwo(BigInteger x) {
         return BigInteger.ZERO.setBit(log2(x, RoundingMode.FLOOR));
@@ -949,9 +949,9 @@ public abstract class Matth {
     /**
      * Returns the square root of {@code x}, rounded with the specified rounding mode.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      * @throws IllegalArgumentException if {@code x < 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code sqrt(x)} is not an integer
@@ -993,8 +993,8 @@ public abstract class Matth {
     /**
      * Sqrt floor.
      *
-     * @param x the x
-     * @return the int
+     * @param x
+     * @return
      */
     private static int sqrtFloor(int x) {
         // There is no loss of precision in converting an int to a double, according to
@@ -1005,9 +1005,9 @@ public abstract class Matth {
     /**
      * Returns the square root of {@code x}, rounded with the specified rounding mode.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the long
+     * @param x
+     * @param mode
+     * @return
      * @throws IllegalArgumentException if {@code x < 0}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *     {@code sqrt(x)} is not an integer
@@ -1079,9 +1079,9 @@ public abstract class Matth {
     /**
      * Sqrt.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the big integer
+     * @param x
+     * @param mode
+     * @return
      */
     public static BigInteger sqrt(BigInteger x, RoundingMode mode) {
         checkNonNegative("x", x);
@@ -1119,8 +1119,8 @@ public abstract class Matth {
     /**
      * Sqrt floor.
      *
-     * @param x the x
-     * @return the big integer
+     * @param x
+     * @return
      */
     private static BigInteger sqrtFloor(BigInteger x) {
         /*
@@ -1168,8 +1168,8 @@ public abstract class Matth {
     /**
      * Sqrt approx with doubles.
      *
-     * @param x the x
-     * @return the big integer
+     * @param x
+     * @return
      */
     private static BigInteger sqrtApproxWithDoubles(BigInteger x) {
         return roundToBigInteger(Math.sqrt(bigToDouble(x)), HALF_EVEN);
@@ -1179,10 +1179,10 @@ public abstract class Matth {
      * Returns the result of dividing {@code p} by {@code q}, rounding using the specified
      * {@code RoundingMode}.
      *
-     * @param p the p
-     * @param q the q
-     * @param mode the mode
-     * @return the int
+     * @param p
+     * @param q
+     * @param mode
+     * @return
      * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
      *         is not an integer multiple of {@code b}
      */
@@ -1247,10 +1247,10 @@ public abstract class Matth {
      * Returns the result of dividing {@code p} by {@code q}, rounding using the specified
      * {@code RoundingMode}.
      *
-     * @param p the p
-     * @param q the q
-     * @param mode the mode
-     * @return the long
+     * @param p
+     * @param q
+     * @param mode
+     * @return
      * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
      *     is not an integer multiple of {@code b}
      */
@@ -1311,10 +1311,10 @@ public abstract class Matth {
     /**
      * Divide.
      *
-     * @param p the p
-     * @param q the q
-     * @param mode the mode
-     * @return the big integer
+     * @param p
+     * @param q
+     * @param mode
+     * @return
      */
     public static BigInteger divide(BigInteger p, BigInteger q, RoundingMode mode) {
         BigDecimal pDec = new BigDecimal(p);
@@ -1334,9 +1334,9 @@ public abstract class Matth {
      * mod(-8, 4) == 0
      * mod(8, 4) == 0}</pre>
      *
-     * @param x the x
-     * @param m the m
-     * @return the int
+     * @param x
+     * @param m
+     * @return
      * @throws ArithmeticException if {@code m <= 0}
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *      Remainder Operator</a>
@@ -1363,9 +1363,9 @@ public abstract class Matth {
      * mod(-8, 4) == 0
      * mod(8, 4) == 0}</pre>
      *
-     * @param x the x
-     * @param m the m
-     * @return the int
+     * @param x
+     * @param m
+     * @return
      * @throws ArithmeticException if {@code m <= 0}
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *     Remainder Operator</a>
@@ -1389,9 +1389,9 @@ public abstract class Matth {
      * mod(-8, 4) == 0
      * mod(8, 4) == 0}</pre>
      *
-     * @param x the x
-     * @param m the m
-     * @return the long
+     * @param x
+     * @param m
+     * @return
      * @throws ArithmeticException if {@code m <= 0}
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *     Remainder Operator</a>
@@ -1408,9 +1408,9 @@ public abstract class Matth {
      * Returns the greatest common divisor of {@code a, b}. Returns {@code 0} if
      * {@code a == 0 && b == 0}.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      * @throws IllegalArgumentException if {@code a < 0} or {@code b < 0}
      */
     public static int gcd(int a, int b) {
@@ -1462,9 +1462,9 @@ public abstract class Matth {
      * Returns the greatest common divisor of {@code a, b}. Returns {@code 0} if
      * {@code a == 0 && b == 0}.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long
+     * @param a
+     * @param b
+     * @return
      * @throws IllegalArgumentException if {@code a < 0} or {@code b < 0}
      */
     public static long gcd(long a, long b) {
@@ -1529,7 +1529,7 @@ public abstract class Matth {
      *
      * @param a Number.
      * @param b Number.
-     * @return the least common multiple, never negative.
+     * @return
      * @throws ArithmeticException if the result cannot be represented as
      * a non-negative {@code int} value.
      * @since 1.1
@@ -1562,7 +1562,7 @@ public abstract class Matth {
      *
      * @param a Number.
      * @param b Number.
-     * @return the least common multiple, never negative.
+     * @return
      * @throws ArithmeticException if the result cannot be represented
      * as a non-negative {@code long} value.
      * @since 2.1
@@ -1581,9 +1581,9 @@ public abstract class Matth {
     /**
      * Returns the sum of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      * @throws ArithmeticException if {@code a + b} overflows in signed {@code int} arithmetic
      */
     public static int addExact(int a, int b) {
@@ -1595,9 +1595,9 @@ public abstract class Matth {
     /**
      * Returns the sum of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long
+     * @param a
+     * @param b
+     * @return
      * @throws ArithmeticException if {@code a + b} overflows in signed {@code long} arithmetic
      */
     public static long addExact(long a, long b) {
@@ -1609,9 +1609,9 @@ public abstract class Matth {
     /**
      * Returns the difference of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      * @throws ArithmeticException if {@code a - b} overflows in signed {@code int} arithmetic
      */
     public static int subtractExact(int a, int b) {
@@ -1623,9 +1623,9 @@ public abstract class Matth {
     /**
      * Returns the difference of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long
+     * @param a
+     * @param b
+     * @return
      * @throws ArithmeticException if {@code a - b} overflows in signed {@code long} arithmetic
      */
     public static long subtractExact(long a, long b) {
@@ -1637,9 +1637,9 @@ public abstract class Matth {
     /**
      * Returns the product of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      * @throws ArithmeticException if {@code a * b} overflows in signed {@code int} arithmetic
      */
     public static int multiplyExact(int a, int b) {
@@ -1651,9 +1651,9 @@ public abstract class Matth {
     /**
      * Returns the product of {@code a} and {@code b}, provided it does not overflow.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long
+     * @param a
+     * @param b
+     * @return
      * @throws ArithmeticException if {@code a * b} overflows in signed {@code long} arithmetic
      */
     public static long multiplyExact(long a, long b) {
@@ -1684,9 +1684,9 @@ public abstract class Matth {
      * 
      * <p>{@link #pow} may be faster, but does not check for overflow.
      *
-     * @param b the b
-     * @param k the k
-     * @return the int
+     * @param b
+     * @param k
+     * @return
      * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed
      *         {@code int} arithmetic
      */
@@ -1731,9 +1731,9 @@ public abstract class Matth {
     /**
      * Returns the {@code b} to the {@code k}th power, provided it does not overflow.
      *
-     * @param b the b
-     * @param k the k
-     * @return the long
+     * @param b
+     * @param k
+     * @return
      * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed
      *     {@code long} arithmetic
      */
@@ -1781,7 +1781,7 @@ public abstract class Matth {
      * Returns the {@code int} value that is equal to {@code value}, if possible.
      *
      * @param value any value in the range of the {@code int} type
-     * @return the {@code int} value that equals {@code value}
+     * @return
      * @throws IllegalArgumentException if {@code value} is greater than {@link Integer#MAX_VALUE} or
      *     less than {@link Integer#MIN_VALUE}
      */
@@ -1798,9 +1798,9 @@ public abstract class Matth {
      * Returns the sum of {@code a} and {@code b} unless it would overflow or underflow in which case
      * {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} is returned, respectively.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      * @since 20.0
      */
     public static int saturatedAdd(int a, int b) {
@@ -1811,9 +1811,9 @@ public abstract class Matth {
      * Returns the sum of {@code a} and {@code b} unless it would overflow or underflow in which case
      * {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE} is returned, respectively.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long
+     * @param a
+     * @param b
+     * @return
      * @since 20.0
      */
     public static long saturatedAdd(long a, long b) {
@@ -1831,9 +1831,9 @@ public abstract class Matth {
      * Returns the difference of {@code a} and {@code b} unless it would overflow or underflow in
      * which case {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} is returned, respectively.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      * @since 20.0
      */
     public static int saturatedSubtract(int a, int b) {
@@ -1844,9 +1844,9 @@ public abstract class Matth {
      * Returns the difference of {@code a} and {@code b} unless it would overflow or underflow in
      * which case {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE} is returned, respectively.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long
+     * @param a
+     * @param b
+     * @return
      * @since 20.0
      */
     public static long saturatedSubtract(long a, long b) {
@@ -1864,9 +1864,9 @@ public abstract class Matth {
      * Returns the product of {@code a} and {@code b} unless it would overflow or underflow in which
      * case {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} is returned, respectively.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      * @since 20.0
      */
     public static int saturatedMultiply(int a, int b) {
@@ -1877,9 +1877,9 @@ public abstract class Matth {
      * Returns the product of {@code a} and {@code b} unless it would overflow or underflow in which
      * case {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE} is returned, respectively.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long
+     * @param a
+     * @param b
+     * @return
      * @since 20.0
      */
     public static long saturatedMultiply(long a, long b) {
@@ -1905,9 +1905,9 @@ public abstract class Matth {
      * Returns the {@code b} to the {@code k}th power, unless it would overflow or underflow in which
      * case {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} is returned, respectively.
      *
-     * @param b the b
-     * @param k the k
-     * @return the int
+     * @param b
+     * @param k
+     * @return
      * @since 20.0
      */
     public static int saturatedPow(int b, int k) {
@@ -1960,9 +1960,9 @@ public abstract class Matth {
      * Returns the {@code b} to the {@code k}th power, unless it would overflow or underflow in which
      * case {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE} is returned, respectively.
      *
-     * @param b the b
-     * @param k the k
-     * @return the long
+     * @param b
+     * @param k
+     * @return
      * @since 20.0
      */
     public static long saturatedPow(long b, int k) {
@@ -2017,7 +2017,7 @@ public abstract class Matth {
      * Returns the {@code int} nearest in value to {@code value}.
      *
      * @param value any {@code long} value
-     * @return the same value cast to {@code int} if it is in the range of the {@code int} type,
+     * @return
      *     {@link Integer#MAX_VALUE} if it is too large, or {@link Integer#MIN_VALUE} if it is too
      *     small
      */
@@ -2036,8 +2036,8 @@ public abstract class Matth {
      * integers, {@code 1} if {@code n == 0}, or {@link Integer#MAX_VALUE} if the
      * result does not fit in a {@code int}.
      *
-     * @param n the n
-     * @return the int
+     * @param n
+     * @return
      * @throws IllegalArgumentException if {@code n < 0}
      */
     public static int factorial(int n) {
@@ -2049,8 +2049,8 @@ public abstract class Matth {
      * Returns {@code n!}, that is, the product of the first {@code n} positive integers, {@code 1} if
      * {@code n == 0}, or {@link Long#MAX_VALUE} if the result does not fit in a {@code long}.
      *
-     * @param n the n
-     * @return the long
+     * @param n
+     * @return
      * @throws IllegalArgumentException if {@code n < 0}
      */
     public static long factoriall(int n) {
@@ -2065,8 +2065,8 @@ public abstract class Matth {
      * 
      * <p>The result is within 1 ulp of the true value.
      *
-     * @param n the n
-     * @return the double
+     * @param n
+     * @return
      * @throws IllegalArgumentException if {@code n < 0}
      */
     public static double factorialll(int n) {
@@ -2094,8 +2094,8 @@ public abstract class Matth {
      * multiplies. It also removes all the 2s from the intermediate products (shifting them back in at
      * the end).
      *
-     * @param n the n
-     * @return the big integer
+     * @param n
+     * @return
      * @throws IllegalArgumentException if {@code n < 0}
      */
     public static BigInteger facttorial(int n) {
@@ -2156,8 +2156,8 @@ public abstract class Matth {
     /**
      * List product.
      *
-     * @param nums the nums
-     * @return the big integer
+     * @param nums
+     * @return
      */
     static BigInteger listProduct(List<BigInteger> nums) {
         return listProduct(nums, 0, nums.size());
@@ -2166,10 +2166,10 @@ public abstract class Matth {
     /**
      * List product.
      *
-     * @param nums the nums
-     * @param start the start
-     * @param end the end
-     * @return the big integer
+     * @param nums
+     * @param start
+     * @param end
+     * @return
      */
     static BigInteger listProduct(List<BigInteger> nums, int start, int end) {
         switch (end - start) {
@@ -2192,9 +2192,9 @@ public abstract class Matth {
      * Returns {@code n} choose {@code k}, also known as the binomial coefficient of {@code n} and
      * {@code k}, or {@link Integer#MAX_VALUE} if the result does not fit in an {@code int}.
      *
-     * @param n the n
-     * @param k the k
-     * @return the int
+     * @param n
+     * @param k
+     * @return
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0} or {@code k > n}
      */
     public static int binomial(int n, int k) {
@@ -2226,9 +2226,9 @@ public abstract class Matth {
      * Returns {@code n} choose {@code k}, also known as the binomial coefficient of {@code n} and
      * {@code k}, or {@link Long#MAX_VALUE} if the result does not fit in a {@code long}.
      *
-     * @param n the n
-     * @param k the k
-     * @return the long
+     * @param n
+     * @param k
+     * @return
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      */
     public static long binomiall(int n, int k) {
@@ -2297,9 +2297,9 @@ public abstract class Matth {
      * 
      * <p><b>Warning:</b> the result can take as much as <i>O(k log n)</i> space.
      *
-     * @param n the n
-     * @param k the k
-     * @return the big integer
+     * @param n
+     * @param k
+     * @return
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      */
     public static BigInteger binnomial(int n, int k) {
@@ -2349,9 +2349,9 @@ public abstract class Matth {
      * Returns the arithmetic mean of {@code x} and {@code y}, rounded towards
      * negative infinity. This method is overflow resilient.
      *
-     * @param x the x
-     * @param y the y
-     * @return the int
+     * @param x
+     * @param y
+     * @return
      * @since 14.0
      */
     public static int mean(int x, int y) {
@@ -2365,9 +2365,9 @@ public abstract class Matth {
      * Returns the arithmetic mean of {@code x} and {@code y}, rounded toward negative infinity. This
      * method is resilient to overflow.
      *
-     * @param x the x
-     * @param y the y
-     * @return the long
+     * @param x
+     * @param y
+     * @return
      * @since 14.0
      */
     public static long mean(long x, long y) {
@@ -2380,9 +2380,9 @@ public abstract class Matth {
     /**
      * Mean.
      *
-     * @param x the x
-     * @param y the y
-     * @return the double
+     * @param x
+     * @param y
+     * @return
      */
     public static double mean(double x, double y) {
         return checkFinite(x) + (checkFinite(x) - x) / 2;
@@ -2396,7 +2396,7 @@ public abstract class Matth {
      * the arithmetic mean of the population.
      *
      * @param values a nonempty series of values
-     * @return the double
+     * @return
      * @throws IllegalArgumentException if {@code values} is empty
      */
     @SafeVarargs
@@ -2421,7 +2421,7 @@ public abstract class Matth {
      *
      * @param values a nonempty series of values, which will be converted to {@code double} values
      *     (this may cause loss of precision for longs of magnitude over 2^53 (slightly over 9e15))
-     * @return the double
+     * @return
      * @throws IllegalArgumentException if {@code values} is empty
      */
     @SafeVarargs
@@ -2440,8 +2440,8 @@ public abstract class Matth {
     /**
      * Mean.
      *
-     * @param values the values
-     * @return the double
+     * @param values
+     * @return
      */
     @SafeVarargs
     public static double mean(double... values) {
@@ -2460,8 +2460,8 @@ public abstract class Matth {
     /**
      * Check finite.
      *
-     * @param argument the argument
-     * @return the double
+     * @param argument
+     * @return
      */
     private static double checkFinite(double argument) {
         N.checkArgument(isFinite(argument));
@@ -2471,9 +2471,9 @@ public abstract class Matth {
     /**
      * Round intermediate.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the double
+     * @param x
+     * @param mode
+     * @return
      */
     static double roundIntermediate(double x, RoundingMode mode) {
         if (!isFinite(x)) {
@@ -2538,9 +2538,9 @@ public abstract class Matth {
      * Returns the {@code int} value that is equal to {@code x} rounded with the specified rounding
      * mode, if possible.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the int
+     * @param x
+     * @param mode
+     * @return
      * @throws ArithmeticException if
      *     <ul>
      *     <li>{@code x} is infinite or NaN
@@ -2561,9 +2561,9 @@ public abstract class Matth {
      * Returns the {@code long} value that is equal to {@code x} rounded with the specified rounding
      * mode, if possible.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the long
+     * @param x
+     * @param mode
+     * @return
      * @throws ArithmeticException if
      *     <ul>
      *     <li>{@code x} is infinite or NaN
@@ -2584,9 +2584,9 @@ public abstract class Matth {
      * Returns the {@code BigInteger} value that is equal to {@code x} rounded with the specified
      * rounding mode, if possible.
      *
-     * @param x the x
-     * @param mode the mode
-     * @return the big integer
+     * @param x
+     * @param mode
+     * @return
      * @throws ArithmeticException if
      *     <ul>
      *     <li>{@code x} is infinite or NaN
@@ -2634,9 +2634,9 @@ public abstract class Matth {
      * equivalence relation and <em>not</em> suitable for use in {@link Object#equals}
      * implementations.
      *
-     * @param a the a
-     * @param b the b
-     * @param tolerance the tolerance
+     * @param a
+     * @param b
+     * @param tolerance
      * @return true, if successful
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      * @since 13.0
@@ -2660,10 +2660,10 @@ public abstract class Matth {
      * <p>This is <em>not</em> a total ordering and is <em>not</em> suitable for use in
      * {@link Comparable#compareTo} implementations. In particular, it is not transitive.
      *
-     * @param a the a
-     * @param b the b
-     * @param tolerance the tolerance
-     * @return the int
+     * @param a
+     * @param b
+     * @param tolerance
+     * @return
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      * @since 13.0
      */
@@ -2685,7 +2685,7 @@ public abstract class Matth {
      * <p>This is equivalent to, but not necessarily implemented as, the expression {@code
      * !Double.isNaN(x) && !Double.isInfinite(x) && x == Math.rint(x)}.
      *
-     * @param x the x
+     * @param x
      * @return true, if is mathematical integer
      */
     public static boolean isMathematicalInteger(double x) {
@@ -2697,9 +2697,9 @@ public abstract class Matth {
      * signed long. The implementation is branch-free, and benchmarks suggest it is measurably faster
      * than the straightforward ternary expression.
      *
-     * @param x the x
-     * @param y the y
-     * @return the int
+     * @param x
+     * @param y
+     * @return
      */
     static int lessThanBranchFree(long x, long y) {
         // Returns the sign bit of x - y.
@@ -2709,8 +2709,8 @@ public abstract class Matth {
     /**
      * Log 10 floor.
      *
-     * @param x the x
-     * @return the int
+     * @param x
+     * @return
      */
     static int log10Floor(long x) {
         /*
@@ -2731,10 +2731,10 @@ public abstract class Matth {
     /**
      * Returns (x * numerator / denominator), which is assumed to come out to an integral value.
      *
-     * @param x the x
-     * @param numerator the numerator
-     * @param denominator the denominator
-     * @return the long
+     * @param x
+     * @param numerator
+     * @param denominator
+     * @return
      */
     static long multiplyFraction(long x, long numerator, long denominator) {
         if (x == 1) {
@@ -2751,8 +2751,8 @@ public abstract class Matth {
     /**
      * Next down.
      *
-     * @param d the d
-     * @return the double
+     * @param d
+     * @return
      */
     static double nextDown(double d) {
         return -Math.nextUp(-d);
@@ -2761,8 +2761,8 @@ public abstract class Matth {
     /**
      * Gets the significand.
      *
-     * @param d the d
-     * @return the significand
+     * @param d
+     * @return
      */
     static long getSignificand(double d) {
         N.checkArgument(isFinite(d), "not a normal value");
@@ -2778,7 +2778,7 @@ public abstract class Matth {
     /**
      * Checks if is finite.
      *
-     * @param d the d
+     * @param d
      * @return true, if is finite
      */
     static boolean isFinite(double d) {
@@ -2788,7 +2788,7 @@ public abstract class Matth {
     /**
      * Checks if is normal.
      *
-     * @param d the d
+     * @param d
      * @return true, if is normal
      */
     static boolean isNormal(double d) {
@@ -2798,8 +2798,8 @@ public abstract class Matth {
     /**
      * Scale normalize.
      *
-     * @param x the x
-     * @return the double
+     * @param x
+     * @return
      */
     /*
      * Returns x scaled by a power of 2 such that it is in the range [1, 2). Assumes x is positive,
@@ -2813,8 +2813,8 @@ public abstract class Matth {
     /**
      * Big to double.
      *
-     * @param x the x
-     * @return the double
+     * @param x
+     * @return
      */
     static double bigToDouble(BigInteger x) {
         // This is an extremely fast implementation of BigInteger.doubleValue(). JDK patch pending.
@@ -2862,8 +2862,8 @@ public abstract class Matth {
     /**
      * Returns its argument if it is non-negative, zero if it is negative.
      *
-     * @param value the value
-     * @return the double
+     * @param value
+     * @return
      */
     static double ensureNonNegative(double value) {
         N.checkArgument(!isNaN(value));
@@ -2877,9 +2877,9 @@ public abstract class Matth {
     /**
      * Less than branch free.
      *
-     * @param x the x
-     * @param y the y
-     * @return the int
+     * @param x
+     * @param y
+     * @return
      */
     static int lessThanBranchFree(int x, int y) {
         // The double negation is optimized away by normal Java, but is necessary for GWT
@@ -2893,7 +2893,7 @@ public abstract class Matth {
     /**
      * Fits in int.
      *
-     * @param x the x
+     * @param x
      * @return true, if successful
      */
     static boolean fitsInInt(long x) {
@@ -2903,9 +2903,9 @@ public abstract class Matth {
     /**
      * Check positive.
      *
-     * @param role the role
-     * @param x the x
-     * @return the int
+     * @param role
+     * @param x
+     * @return
      */
     static int checkPositive(String role, int x) {
         if (x <= 0) {
@@ -2917,9 +2917,9 @@ public abstract class Matth {
     /**
      * Check positive.
      *
-     * @param role the role
-     * @param x the x
-     * @return the long
+     * @param role
+     * @param x
+     * @return
      */
     static long checkPositive(String role, long x) {
         if (x <= 0) {
@@ -2931,9 +2931,9 @@ public abstract class Matth {
     /**
      * Check positive.
      *
-     * @param role the role
-     * @param x the x
-     * @return the big integer
+     * @param role
+     * @param x
+     * @return
      */
     static BigInteger checkPositive(String role, BigInteger x) {
         if (x.signum() <= 0) {
@@ -2945,9 +2945,9 @@ public abstract class Matth {
     /**
      * Check non negative.
      *
-     * @param role the role
-     * @param x the x
-     * @return the int
+     * @param role
+     * @param x
+     * @return
      */
     static int checkNonNegative(String role, int x) {
         if (x < 0) {
@@ -2959,9 +2959,9 @@ public abstract class Matth {
     /**
      * Check non negative.
      *
-     * @param role the role
-     * @param x the x
-     * @return the long
+     * @param role
+     * @param x
+     * @return
      */
     static long checkNonNegative(String role, long x) {
         if (x < 0) {
@@ -2973,9 +2973,9 @@ public abstract class Matth {
     /**
      * Check non negative.
      *
-     * @param role the role
-     * @param x the x
-     * @return the big integer
+     * @param role
+     * @param x
+     * @return
      */
     static BigInteger checkNonNegative(String role, BigInteger x) {
         if (x.signum() < 0) {
@@ -2987,9 +2987,9 @@ public abstract class Matth {
     /**
      * Check non negative.
      *
-     * @param role the role
-     * @param x the x
-     * @return the double
+     * @param role
+     * @param x
+     * @return
      */
     static double checkNonNegative(String role, double x) {
         if (!(x >= 0)) { // not x < 0, to work with NaN.
@@ -3001,7 +3001,7 @@ public abstract class Matth {
     /**
      * Check rounding unnecessary.
      *
-     * @param condition the condition
+     * @param condition
      */
     static void checkRoundingUnnecessary(boolean condition) {
         if (!condition) {
@@ -3012,7 +3012,7 @@ public abstract class Matth {
     /**
      * Check in range.
      *
-     * @param condition the condition
+     * @param condition
      */
     static void checkInRange(boolean condition) {
         if (!condition) {
@@ -3023,7 +3023,7 @@ public abstract class Matth {
     /**
      * Check no overflow.
      *
-     * @param condition the condition
+     * @param condition
      */
     static void checkNoOverflow(boolean condition) {
         if (!condition) {
@@ -3122,8 +3122,8 @@ public abstract class Matth {
          * longs, that is, {@code a <= b} as unsigned longs if and only if {@code flip(a) <= flip(b)} as
          * signed longs.
          *
-         * @param a the a
-         * @return the long
+         * @param a
+         * @return
          */
         private static long flip(long a) {
             return a ^ Long.MIN_VALUE;
@@ -3148,7 +3148,7 @@ public abstract class Matth {
          *
          * @param dividend the dividend (numerator)
          * @param divisor the divisor (denominator)
-         * @return the long
+         * @return
          * @throws ArithmeticException if divisor is 0
          * @since 11.0
          */
@@ -3282,8 +3282,8 @@ public abstract class Matth {
         /**
          * Test.
          *
-         * @param base the base
-         * @param n the n
+         * @param base
+         * @param n
          * @return true, if successful
          */
         static boolean test(long base, long n) {
@@ -3295,29 +3295,29 @@ public abstract class Matth {
         /**
          * Returns a * b mod m.
          *
-         * @param a the a
-         * @param b the b
-         * @param m the m
-         * @return the long
+         * @param a
+         * @param b
+         * @param m
+         * @return
          */
         abstract long mulMod(long a, long b, long m);
 
         /**
          * Returns a^2 mod m.
          *
-         * @param a the a
-         * @param m the m
-         * @return the long
+         * @param a
+         * @param m
+         * @return
          */
         abstract long squareMod(long a, long m);
 
         /**
          * Returns a^p mod m.
          *
-         * @param a the a
-         * @param p the p
-         * @param m the m
-         * @return the long
+         * @param a
+         * @param p
+         * @param m
+         * @return
          */
         private long powMod(long a, long p, long m) {
             long res = 1;
@@ -3333,8 +3333,8 @@ public abstract class Matth {
         /**
          * Returns true if n is a strong probable prime relative to the specified base.
          *
-         * @param base the base
-         * @param n the n
+         * @param base
+         * @param n
          * @return true, if successful
          */
         private boolean testWitness(long base, long n) {

@@ -115,9 +115,9 @@ public final class Clazz {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @return the class
+     * @param <T>
+     * @param cls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<T> of(Class<? super T> cls) {
@@ -127,8 +127,8 @@ public final class Clazz {
     /**
      * Of list.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofList() {
@@ -138,9 +138,9 @@ public final class Clazz {
     /**
      * Of list.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofList(final Class<T> eleCls) {
@@ -150,8 +150,8 @@ public final class Clazz {
     /**
      * Of linked list.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofLinkedList() {
@@ -161,9 +161,9 @@ public final class Clazz {
     /**
      * Of linked list.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<List<T>> ofLinkedList(final Class<T> eleCls) {
@@ -175,9 +175,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<List<Map<K, V>>> ofListOfMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -189,9 +189,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Set<Map<K, V>>> ofSetOfMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -201,8 +201,8 @@ public final class Clazz {
     /**
      * Of set.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Set<T>> ofSet() {
@@ -212,9 +212,9 @@ public final class Clazz {
     /**
      * Of set.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Set<T>> ofSet(final Class<T> eleCls) {
@@ -224,8 +224,8 @@ public final class Clazz {
     /**
      * Of linked hash set.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Set<T>> ofLinkedHashSet() {
@@ -235,9 +235,9 @@ public final class Clazz {
     /**
      * Of linked hash set.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Set<T>> ofLinkedHashSet(final Class<T> eleCls) {
@@ -247,8 +247,8 @@ public final class Clazz {
     /**
      * Of sorted set.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<SortedSet<T>> ofSortedSet() {
@@ -258,9 +258,9 @@ public final class Clazz {
     /**
      * Of sorted set.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<SortedSet<T>> ofSortedSet(final Class<T> eleCls) {
@@ -270,8 +270,8 @@ public final class Clazz {
     /**
      * Of navigable set.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<NavigableSet<T>> ofNavigableSet() {
@@ -281,9 +281,9 @@ public final class Clazz {
     /**
      * Of navigable set.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<NavigableSet<T>> ofNavigableSet(final Class<T> eleCls) {
@@ -293,8 +293,8 @@ public final class Clazz {
     /**
      * Of tree set.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<NavigableSet<T>> ofTreeSet() {
@@ -304,9 +304,9 @@ public final class Clazz {
     /**
      * Of tree set.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<NavigableSet<T>> ofTreeSet(final Class<T> eleCls) {
@@ -316,8 +316,8 @@ public final class Clazz {
     /**
      * Of queue.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofQueue() {
@@ -327,9 +327,9 @@ public final class Clazz {
     /**
      * Of queue.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofQueue(final Class<T> eleCls) {
@@ -339,8 +339,8 @@ public final class Clazz {
     /**
      * Of deque.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Deque<T>> ofDeque() {
@@ -350,9 +350,9 @@ public final class Clazz {
     /**
      * Of deque.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Deque<T>> ofDeque(final Class<T> eleCls) {
@@ -362,8 +362,8 @@ public final class Clazz {
     /**
      * Of array deque.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Deque<T>> ofArrayDeque() {
@@ -373,9 +373,9 @@ public final class Clazz {
     /**
      * Of array deque.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Deque<T>> ofArrayDeque(final Class<T> eleCls) {
@@ -385,8 +385,8 @@ public final class Clazz {
     /**
      * Of concurrent linked queue.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofConcurrentLinkedQueue() {
@@ -396,9 +396,9 @@ public final class Clazz {
     /**
      * Of concurrent linked queue.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofConcurrentLinkedQueue(final Class<T> eleCls) {
@@ -408,8 +408,8 @@ public final class Clazz {
     /**
      * Of priority queue.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofPriorityQueue() {
@@ -419,9 +419,9 @@ public final class Clazz {
     /**
      * Of priority queue.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Queue<T>> ofPriorityQueue(final Class<T> eleCls) {
@@ -431,8 +431,8 @@ public final class Clazz {
     /**
      * Of linked blocking queue.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<BlockingQueue<T>> ofLinkedBlockingQueue() {
@@ -442,9 +442,9 @@ public final class Clazz {
     /**
      * Of linked blocking queue.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<BlockingQueue<T>> ofLinkedBlockingQueue(final Class<T> eleCls) {
@@ -454,8 +454,8 @@ public final class Clazz {
     /**
      * Of collection.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Collection<T>> ofCollection() {
@@ -465,9 +465,9 @@ public final class Clazz {
     /**
      * Of collection.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Collection<T>> ofCollection(final Class<T> eleCls) {
@@ -479,7 +479,7 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the class
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Map<K, V>> ofMap() {
@@ -491,9 +491,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Map<K, V>> ofMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -505,7 +505,7 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the class
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Map<K, V>> ofLinkedHashMap() {
@@ -517,9 +517,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<Map<K, V>> ofLinkedHashMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -531,7 +531,7 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the class
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<SortedMap<K, V>> ofSortedMap() {
@@ -543,9 +543,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<SortedMap<K, V>> ofSortedMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -557,7 +557,7 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the class
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<NavigableMap<K, V>> ofNavigableMap() {
@@ -569,9 +569,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<NavigableMap<K, V>> ofNavigableMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -583,7 +583,7 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the class
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<NavigableMap<K, V>> ofTreeMap() {
@@ -595,9 +595,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<NavigableMap<K, V>> ofTreeMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -609,7 +609,7 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the class
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentMap() {
@@ -621,9 +621,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -635,7 +635,7 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the class
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentHashMap() {
@@ -647,9 +647,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentHashMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -661,7 +661,7 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the class
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<BiMap<K, V>> ofBiMap() {
@@ -673,9 +673,9 @@ public final class Clazz {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyCls the key cls
-     * @param valueCls the value cls
-     * @return the class
+     * @param keyCls
+     * @param valueCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Class<BiMap<K, V>> ofBiMap(final Class<K> keyCls, final Class<V> valueCls) {
@@ -685,8 +685,8 @@ public final class Clazz {
     /**
      * Of multiset.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Multiset<T>> ofMultiset() {
@@ -696,9 +696,9 @@ public final class Clazz {
     /**
      * Of multiset.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<Multiset<T>> ofMultiset(final Class<T> eleCls) {
@@ -708,8 +708,8 @@ public final class Clazz {
     /**
      * Of long multiset.
      *
-     * @param <T> the generic type
-     * @return the class
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<LongMultiset<T>> ofLongMultiset() {
@@ -719,9 +719,9 @@ public final class Clazz {
     /**
      * Of long multiset.
      *
-     * @param <T> the generic type
-     * @param eleCls the ele cls
-     * @return the class
+     * @param <T>
+     * @param eleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Class<LongMultiset<T>> ofLongMultiset(final Class<T> eleCls) {
@@ -732,8 +732,8 @@ public final class Clazz {
      * Of list multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @return the class
+     * @param <E>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Class<ListMultimap<K, E>> ofListMultimap() {
@@ -744,10 +744,10 @@ public final class Clazz {
      * Of list multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param keyCls the key cls
-     * @param valueEleCls the value ele cls
-     * @return the class
+     * @param <E>
+     * @param keyCls
+     * @param valueEleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Class<ListMultimap<K, E>> ofListMultimap(final Class<K> keyCls, final Class<E> valueEleCls) {
@@ -758,8 +758,8 @@ public final class Clazz {
      * Of set multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @return the class
+     * @param <E>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Class<SetMultimap<K, E>> ofSetMultimap() {
@@ -770,10 +770,10 @@ public final class Clazz {
      * Of set multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param keyCls the key cls
-     * @param valueEleCls the value ele cls
-     * @return the class
+     * @param <E>
+     * @param keyCls
+     * @param valueEleCls
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Class<SetMultimap<K, E>> ofSetMultimap(final Class<K> keyCls, final Class<E> valueEleCls) {

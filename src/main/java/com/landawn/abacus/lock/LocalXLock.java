@@ -29,7 +29,7 @@ import com.landawn.abacus.util.N;
  * The Class LocalXLock.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class LocalXLock<T> extends AbstractXLock<T> {
@@ -53,7 +53,7 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     /**
      * Instantiates a new local X lock.
      *
-     * @param timeout the timeout
+     * @param timeout
      */
     public LocalXLock(long timeout) {
         this.timeout = timeout;
@@ -62,10 +62,10 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     /**
      * Lock.
      *
-     * @param target the target
-     * @param lockMode the lock mode
-     * @param refLockCode the ref lock code
-     * @return the string
+     * @param target
+     * @param lockMode
+     * @param refLockCode
+     * @return
      */
     @Override
     public String lock(T target, LockMode lockMode, String refLockCode) {
@@ -75,11 +75,11 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     /**
      * Lock.
      *
-     * @param target the target
-     * @param lockMode the lock mode
-     * @param refLockCode the ref lock code
-     * @param timeout the timeout
-     * @return the string
+     * @param target
+     * @param lockMode
+     * @param refLockCode
+     * @param timeout
+     * @return
      */
     @Override
     public String lock(T target, LockMode lockMode, String refLockCode, long timeout) {
@@ -151,9 +151,9 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     /**
      * Checks if is locked.
      *
-     * @param target the target
-     * @param requiredLockMode the required lock mode
-     * @param refLockCode the ref lock code
+     * @param target
+     * @param requiredLockMode
+     * @param refLockCode
      * @return true, if is locked
      */
     @Override
@@ -175,8 +175,8 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     /**
      * Unlock.
      *
-     * @param target the target
-     * @param refLockCode the ref lock code
+     * @param target
+     * @param refLockCode
      * @return true, if successful
      */
     @Override
@@ -213,8 +213,8 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     /**
      * Gets the target lock.
      *
-     * @param target the target
-     * @return the target lock
+     * @param target
+     * @return
      */
     private ModeLock getTargetLock(T target) {
         synchronized (blockedLockPool) {
@@ -225,8 +225,8 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     /**
      * Gets the or create lock.
      *
-     * @param target the target
-     * @return the or create lock
+     * @param target
+     * @return
      */
     private ModeLock getOrCreateLock(T target) {
         ModeLock modeLock = null;
@@ -249,8 +249,8 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     /**
      * Close lock.
      *
-     * @param target the target
-     * @param modeLock the mode lock
+     * @param target
+     * @param modeLock
      */
     private void closeLock(T target, ModeLock modeLock) {
         synchronized (blockedLockPool) {

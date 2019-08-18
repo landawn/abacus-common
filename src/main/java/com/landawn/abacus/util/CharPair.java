@@ -42,8 +42,8 @@ public final class CharPair {
     /**
      * Instantiates a new char pair.
      *
-     * @param _1 the  1
-     * @param _2 the  2
+     * @param _1 the 1
+     * @param _2 the 2
      */
     CharPair(char _1, char _2) {
         this._1 = _1;
@@ -53,9 +53,9 @@ public final class CharPair {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @return the char pair
+     * @param _1 the 1
+     * @param _2 the 2
+     * @return
      */
     public static CharPair of(char _1, char _2) {
         return new CharPair(_1, _2);
@@ -64,7 +64,7 @@ public final class CharPair {
     /**
      * Min.
      *
-     * @return the char
+     * @return
      */
     public char min() {
         return N.min(_1, _2);
@@ -73,7 +73,7 @@ public final class CharPair {
     /**
      * Max.
      *
-     * @return the char
+     * @return
      */
     public char max() {
         return N.max(_1, _2);
@@ -82,7 +82,7 @@ public final class CharPair {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return _1 + _2;
@@ -91,7 +91,7 @@ public final class CharPair {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return (0d + _1 + _2) / 2;
@@ -100,7 +100,7 @@ public final class CharPair {
     /**
      * Reversed.
      *
-     * @return the char pair
+     * @return
      */
     public CharPair reversed() {
         return new CharPair(_2, _1);
@@ -109,7 +109,7 @@ public final class CharPair {
     /**
      * To array.
      *
-     * @return the char[]
+     * @return
      */
     public char[] toArray() {
         return new char[] { _1, _2 };
@@ -118,7 +118,7 @@ public final class CharPair {
     /**
      * To list.
      *
-     * @return the char list
+     * @return
      */
     public CharList toList() {
         return CharList.of(_1, _2);
@@ -127,8 +127,8 @@ public final class CharPair {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.CharConsumer<E> comsumer) throws E {
@@ -139,8 +139,8 @@ public final class CharPair {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<CharPair, E> action) throws E {
@@ -150,10 +150,10 @@ public final class CharPair {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<CharPair, U, E> mapper) throws E {
@@ -163,9 +163,9 @@ public final class CharPair {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<CharPair> filter(Try.Predicate<CharPair, E> predicate) throws E {
@@ -175,7 +175,7 @@ public final class CharPair {
     /**
      * Stream.
      *
-     * @return the char stream
+     * @return
      */
     public CharStream stream() {
         return CharStream.of(_1, _2);
@@ -184,7 +184,7 @@ public final class CharPair {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -194,7 +194,7 @@ public final class CharPair {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -212,7 +212,7 @@ public final class CharPair {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

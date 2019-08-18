@@ -55,7 +55,7 @@ public @interface Path {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value();
 

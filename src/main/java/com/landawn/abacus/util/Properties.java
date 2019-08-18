@@ -55,8 +55,8 @@ public class Properties<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the properties
+     * @param map
+     * @return
      */
     public static <K, V> Properties<K, V> from(final Map<? extends K, ? extends V> map) {
         return new Properties<K, V>(new ConcurrentHashMap<K, V>(map));
@@ -65,8 +65,8 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Gets the.
      *
-     * @param propName the prop name
-     * @return the v
+     * @param propName
+     * @return
      */
     @Override
     public V get(Object propName) {
@@ -76,10 +76,10 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * To avoid <code>NullPointerException</code> for primitive type if the target property is null or not set.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param propName the prop name
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param propName
+     * @return
      */
     @SuppressWarnings("unchecked")
     public <T> T get(Class<T> targetClass, Object propName) {
@@ -89,10 +89,10 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Gets the or default.
      *
-     * @param propName the prop name
-     * @param defaultValue            is returned if the specified {@code propName} is not contained in this Properties instance or it's
+     * @param propName
+     * @param defaultValue is returned if the specified {@code propName} is not contained in this Properties instance or it's
      *            null.
-     * @return the or default
+     * @return
      */
     @SuppressWarnings("unchecked")
     public V getOrDefault(Object propName, V defaultValue) {
@@ -108,11 +108,11 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Gets the or default.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param propName the prop name
-     * @param defaultValue            is returned if the specified {@code propName} is not contained in this Properties instance or it's null.
-     * @return the or default
+     * @param <T>
+     * @param targetClass
+     * @param propName
+     * @param defaultValue is returned if the specified {@code propName} is not contained in this Properties instance or it's null.
+     * @return
      */
     public <T> T getOrDefault(Class<T> targetClass, Object propName, T defaultValue) {
         Object result = values.get(propName);
@@ -127,9 +127,9 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Sets the.
      *
-     * @param propName the prop name
-     * @param propValue the prop value
-     * @return the same property
+     * @param propName
+     * @param propValue
+     * @return
      */
     public Properties<K, V> set(K propName, V propValue) {
         put(propName, propValue);
@@ -140,9 +140,9 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Put.
      *
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param key
+     * @param value
+     * @return
      */
     @Override
     public V put(K key, V value) {
@@ -152,7 +152,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Put all.
      *
-     * @param m the m
+     * @param m
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
@@ -162,9 +162,9 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Put if absent.
      *
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param key
+     * @param value
+     * @return
      */
     public V putIfAbsent(K key, V value) {
         V v = get(key);
@@ -179,8 +179,8 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Removes the.
      *
-     * @param key the key
-     * @return the v
+     * @param key
+     * @return
      */
     @Override
     public V remove(Object key) {
@@ -191,8 +191,8 @@ public class Properties<K, V> implements Map<K, V> {
      * Removes the entry for the specified key only if it is currently
      * mapped to the specified value.
      *
-     * @param key the key
-     * @param value the value
+     * @param key
+     * @param value
      * @return true, if successful
      */
     public boolean remove(Object key, Object value) {
@@ -211,9 +211,9 @@ public class Properties<K, V> implements Map<K, V> {
      * Replaces the entry for the specified key only if it is
      * currently mapped to some value.
      *
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param key
+     * @param value
+     * @return
      */
     public V replace(K key, V value) {
         V curValue;
@@ -227,9 +227,9 @@ public class Properties<K, V> implements Map<K, V> {
      * Replaces the entry for the specified key only if currently
      * mapped to the specified value.
      *
-     * @param key the key
-     * @param oldValue the old value
-     * @param newValue the new value
+     * @param key
+     * @param oldValue
+     * @param newValue
      * @return true, if successful
      */
     public boolean replace(K key, V oldValue, V newValue) {
@@ -244,7 +244,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Contains key.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     @Override
@@ -255,7 +255,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Contains value.
      *
-     * @param value the value
+     * @param value
      * @return true, if successful
      */
     @Override
@@ -266,7 +266,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -276,7 +276,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Values.
      *
-     * @return the collection
+     * @return
      */
     @Override
     public Collection<V> values() {
@@ -286,7 +286,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Entry set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
@@ -306,7 +306,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -324,7 +324,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Copy.
      *
-     * @return the properties
+     * @return
      */
     public Properties<K, V> copy() {
         final Properties<K, V> copy = new Properties<K, V>();
@@ -337,7 +337,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -347,7 +347,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -358,7 +358,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

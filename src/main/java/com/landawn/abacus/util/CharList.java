@@ -69,7 +69,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Instantiates a new char list.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public CharList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_CHAR_ARRAY : new char[initialCapacity];
@@ -78,7 +78,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * The specified array is used as the element array for this list without copying action.
      *
-     * @param a the a
+     * @param a
      */
     public CharList(char[] a) {
         this(a, a.length);
@@ -87,8 +87,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Instantiates a new char list.
      *
-     * @param a the a
-     * @param size the size
+     * @param a
+     * @param size
      */
     public CharList(char[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -100,8 +100,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the char list
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static CharList of(final char... a) {
@@ -111,9 +111,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param size the size
-     * @return the char list
+     * @param a
+     * @param size
+     * @return
      */
     public static CharList of(final char[] a, final int size) {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -124,8 +124,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Copy of.
      *
-     * @param a the a
-     * @return the char list
+     * @param a
+     * @return
      */
     public static CharList copyOf(final char[] a) {
         return of(N.clone(a));
@@ -134,10 +134,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Copy of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the char list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static CharList copyOf(final char[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -146,8 +146,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * From.
      *
-     * @param c the c
-     * @return the char list
+     * @param c
+     * @return
      */
     public static CharList from(Collection<Character> c) {
         if (N.isNullOrEmpty(c)) {
@@ -160,9 +160,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the char list
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static CharList from(Collection<Character> c, char defaultForNull) {
         if (N.isNullOrEmpty(c)) {
@@ -182,10 +182,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the char list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -200,11 +200,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the char list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex, char defaultForNull) {
         return of(N.toCharArray(c, fromIndex, toIndex, defaultForNull));
@@ -213,9 +213,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Range.
      *
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @return the char list
+     * @param startInclusive
+     * @param endExclusive
+     * @return
      */
     public static CharList range(char startInclusive, final char endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
@@ -224,10 +224,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Range.
      *
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @param by the by
-     * @return the char list
+     * @param startInclusive
+     * @param endExclusive
+     * @param by
+     * @return
      */
     public static CharList range(char startInclusive, final char endExclusive, final int by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -236,9 +236,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Range closed.
      *
-     * @param startInclusive the start inclusive
-     * @param endInclusive the end inclusive
-     * @return the char list
+     * @param startInclusive
+     * @param endInclusive
+     * @return
      */
     public static CharList rangeClosed(char startInclusive, final char endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
@@ -247,10 +247,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Range closed.
      *
-     * @param startInclusive the start inclusive
-     * @param endInclusive the end inclusive
-     * @param by the by
-     * @return the char list
+     * @param startInclusive
+     * @param endInclusive
+     * @param by
+     * @return
      */
     public static CharList rangeClosed(char startInclusive, final char endInclusive, final int by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -259,9 +259,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Repeat.
      *
-     * @param element the element
-     * @param len the len
-     * @return the char list
+     * @param element
+     * @param len
+     * @return
      */
     public static CharList repeat(char element, final int len) {
         return of(Array.repeat(element, len));
@@ -270,8 +270,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Random.
      *
-     * @param len the len
-     * @return the char list
+     * @param len
+     * @return
      */
     public static CharList random(final int len) {
         final char[] a = new char[len];
@@ -287,10 +287,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Random.
      *
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @param len the len
-     * @return the char list
+     * @param startInclusive
+     * @param endExclusive
+     * @param len
+     * @return
      */
     public static CharList random(final char startInclusive, final char endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
@@ -310,9 +310,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Random.
      *
-     * @param candicates the candicates
-     * @param len the len
-     * @return the char list
+     * @param candicates
+     * @param len
+     * @return
      */
     public static CharList random(final char[] candicates, final int len) {
         if (N.isNullOrEmpty(candicates) || candicates.length >= Integer.MAX_VALUE) {
@@ -334,7 +334,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the original element array without copying.
      *
-     * @return the char[]
+     * @return
      */
     @Override
     public char[] array() {
@@ -344,8 +344,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Gets the.
      *
-     * @param index the index
-     * @return the char
+     * @param index
+     * @return
      */
     public char get(int index) {
         rangeCheck(index);
@@ -356,7 +356,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Range check.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheck(int index) {
         if (index >= size) {
@@ -367,9 +367,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Sets the.
      *
-     * @param index the index
-     * @param e the e
-     * @return the old value in the specified position.
+     * @param index
+     * @param e
+     * @return
      */
     public char set(int index, char e) {
         rangeCheck(index);
@@ -384,7 +384,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      */
     public void add(char e) {
         ensureCapacityInternal(size + 1);
@@ -395,8 +395,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Adds the.
      *
-     * @param index the index
-     * @param e the e
+     * @param index
+     * @param e
      */
     public void add(int index, char e) {
         rangeCheckForAdd(index);
@@ -417,7 +417,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Adds the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(CharList c) {
@@ -439,8 +439,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param c the c
+     * @param index
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(int index, CharList c) {
@@ -470,7 +470,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Adds the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -481,8 +481,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param a the a
+     * @param index
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -513,7 +513,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Range check for add.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheckForAdd(int index) {
         if (index > size || index < 0) {
@@ -524,7 +524,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes the.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(char e) {
@@ -543,7 +543,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes the all occurrences.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean removeAllOccurrences(char e) {
@@ -569,7 +569,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Fast remove.
      *
-     * @param index the index
+     * @param index
      */
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
@@ -584,7 +584,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean removeAll(CharList c) {
@@ -598,7 +598,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -613,8 +613,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes the if.
      *
-     * @param <E> the element type
-     * @param p the p
+     * @param <E>
+     * @param p
      * @return true, if successful
      * @throws E the e
      */
@@ -641,7 +641,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Retain all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean retainAll(CharList c) {
@@ -657,7 +657,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Retain all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public boolean retainAll(char[] a) {
@@ -673,9 +673,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Batch remove.
      *
-     * @param c the c
-     * @param complement the complement
-     * @return the int
+     * @param c
+     * @param complement
+     * @return
      */
     private int batchRemove(CharList c, boolean complement) {
         final char[] elementData = this.elementData;
@@ -712,8 +712,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Delete.
      *
-     * @param index the index
-     * @return the deleted element
+     * @param index
+     * @return
      */
     public char delete(int index) {
         rangeCheck(index);
@@ -728,7 +728,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Delete all.
      *
-     * @param indices the indices
+     * @param indices
      */
     @Override
     @SafeVarargs
@@ -742,8 +742,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Delete range.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) {
@@ -767,9 +767,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replace all.
      *
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public int replaceAll(char oldVal, char newVal) {
         if (size() == 0) {
@@ -792,8 +792,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replace all.
      *
-     * @param <E> the element type
-     * @param operator the operator
+     * @param <E>
+     * @param operator
      * @throws E the e
      */
     public <E extends Exception> void replaceAll(Try.CharUnaryOperator<E> operator) throws E {
@@ -805,9 +805,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replace if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @param newValue the new value
+     * @param <E>
+     * @param predicate
+     * @param newValue
      * @return true, if successful
      * @throws E the e
      */
@@ -828,7 +828,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Fill.
      *
-     * @param val the val
+     * @param val
      */
     public void fill(final char val) {
         fill(0, size(), val);
@@ -837,9 +837,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Fill.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public void fill(final int fromIndex, final int toIndex, final char val) {
         checkFromToIndex(fromIndex, toIndex);
@@ -850,7 +850,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Contains.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     public boolean contains(char e) {
@@ -860,7 +860,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAll(CharList c) {
@@ -896,7 +896,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Contains all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -913,7 +913,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Contains any.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAny(CharList c) {
@@ -927,7 +927,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Contains any.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -942,7 +942,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Disjoint.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean disjoint(final CharList c) {
@@ -976,7 +976,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Disjoint.
      *
-     * @param b the b
+     * @param b
      * @return true, if successful
      */
     @Override
@@ -991,8 +991,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Intersection.
      *
-     * @param b the b
-     * @return the char list
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public CharList intersection(final CharList b) {
@@ -1016,8 +1016,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @return the char list
+     * @param a
+     * @return
      */
     public CharList intersection(final char[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1030,8 +1030,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Difference.
      *
-     * @param b the b
-     * @return the char list
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public CharList difference(CharList b) {
@@ -1055,8 +1055,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Difference.
      *
-     * @param a the a
-     * @return the char list
+     * @param a
+     * @return
      */
     public CharList difference(final char[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1069,7 +1069,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Symmetric difference.
      *
-     * @param b the b
+     * @param b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
@@ -1105,8 +1105,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @return the char list
+     * @param a
+     * @return
      */
     public CharList symmetricDifference(final char[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1121,8 +1121,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Occurrences of.
      *
-     * @param objectToFind the object to find
-     * @return the int
+     * @param objectToFind
+     * @return
      */
     public int occurrencesOf(final char objectToFind) {
         return N.occurrencesOf(elementData, objectToFind);
@@ -1131,8 +1131,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int indexOf(char e) {
         return indexOf(0, e);
@@ -1141,9 +1141,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Index of.
      *
-     * @param fromIndex the from index
-     * @param e the e
-     * @return the int
+     * @param fromIndex
+     * @param e
+     * @return
      */
     public int indexOf(final int fromIndex, char e) {
         checkFromToIndex(fromIndex, size);
@@ -1160,8 +1160,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Last index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(char e) {
         return lastIndexOf(size, e);
@@ -1171,8 +1171,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Last index of.
      *
      * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(final int fromIndex, char e) {
         checkFromToIndex(0, fromIndex);
@@ -1189,7 +1189,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Min.
      *
-     * @return the optional char
+     * @return
      */
     public OptionalChar min() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.min(elementData, 0, size));
@@ -1198,9 +1198,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Min.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional char
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalChar min(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1211,7 +1211,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Median.
      *
-     * @return the optional char
+     * @return
      */
     public OptionalChar median() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, 0, size));
@@ -1220,9 +1220,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Median.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional char
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalChar median(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1233,7 +1233,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Max.
      *
-     * @return the optional char
+     * @return
      */
     public OptionalChar max() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.max(elementData, 0, size));
@@ -1242,9 +1242,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Max.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional char
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalChar max(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1255,8 +1255,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Kth largest.
      *
-     * @param k the k
-     * @return the optional char
+     * @param k
+     * @return
      */
     public OptionalChar kthLargest(final int k) {
         return kthLargest(0, size(), k);
@@ -1265,10 +1265,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Kth largest.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param k the k
-     * @return the optional char
+     * @param fromIndex
+     * @param toIndex
+     * @param k
+     * @return
      */
     public OptionalChar kthLargest(final int fromIndex, final int toIndex, final int k) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1280,7 +1280,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return sum(0, size());
@@ -1289,9 +1289,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Sum.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public int sum(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1302,7 +1302,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Average.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1311,9 +1311,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Average.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalDouble average(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1324,8 +1324,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.CharConsumer<E> action) throws E {
@@ -1335,10 +1335,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.CharConsumer<E> action) throws E {
@@ -1360,7 +1360,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * First.
      *
-     * @return the optional char
+     * @return
      */
     public OptionalChar first() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[0]);
@@ -1369,7 +1369,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Last.
      *
-     * @return the optional char
+     * @return
      */
     public OptionalChar last() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[size() - 1]);
@@ -1378,9 +1378,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Find first.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional char
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalChar findFirst(Try.CharPredicate<E> predicate) throws E {
@@ -1396,9 +1396,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Find last.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional char
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalChar findLast(Try.CharPredicate<E> predicate) throws E {
@@ -1414,9 +1414,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Find first index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findFirstIndex(Try.CharPredicate<E> predicate) throws E {
@@ -1432,9 +1432,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Find last index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findLastIndex(Try.CharPredicate<E> predicate) throws E {
@@ -1450,8 +1450,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns whether all elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1462,10 +1462,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * All match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1486,8 +1486,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns whether any elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1498,10 +1498,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Any match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1522,8 +1522,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns whether no elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1534,10 +1534,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * None match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1558,9 +1558,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(Try.CharPredicate<E> filter) throws E {
@@ -1570,11 +1570,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter) throws E {
@@ -1586,8 +1586,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1598,11 +1598,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the char list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> CharList filter(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter) throws E {
@@ -1614,9 +1614,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @param max the max
+     * @param <E>
+     * @param filter
+     * @param max
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1627,12 +1627,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @return the char list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public <E extends Exception> CharList filter(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter, final int max) throws E {
@@ -1644,9 +1644,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the char list
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> CharList map(final Try.CharUnaryOperator<E> mapper) throws E {
@@ -1656,11 +1656,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the char list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> CharList map(final int fromIndex, final int toIndex, final Try.CharUnaryOperator<E> mapper) throws E {
@@ -1678,10 +1678,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final Try.CharFunction<? extends T, E> mapper) throws E {
@@ -1691,12 +1691,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.CharFunction<? extends T, E> mapper) throws E {
@@ -1729,9 +1729,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param accumulator the accumulator
-     * @return the optional char
+     * @param <E>
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalChar reduce(final Try.CharBinaryOperator<E> accumulator) throws E {
@@ -1766,10 +1766,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param identity the identity
-     * @param accumulator the accumulator
-     * @return the char
+     * @param <E>
+     * @param identity
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> char reduce(final char identity, final Try.CharBinaryOperator<E> accumulator) throws E {
@@ -1799,9 +1799,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Distinct.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the char list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public CharList distinct(final int fromIndex, final int toIndex) {
@@ -1846,8 +1846,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * This List should be sorted first.
      *
-     * @param key the key
-     * @return the int
+     * @param key
+     * @return
      */
     public int binarySearch(final char key) {
         return N.binarySearch(elementData, key);
@@ -1856,10 +1856,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public int binarySearch(final int fromIndex, final int toIndex, final char key) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1880,8 +1880,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Reverse.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) {
@@ -1895,7 +1895,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Rotate.
      *
-     * @param distance the distance
+     * @param distance
      */
     @Override
     public void rotate(int distance) {
@@ -1917,7 +1917,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Shuffle.
      *
-     * @param rnd the rnd
+     * @param rnd
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -1929,8 +1929,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Swap.
      *
-     * @param i the i
-     * @param j the j
+     * @param i
+     * @param j
      */
     @Override
     public void swap(int i, int j) {
@@ -1943,7 +1943,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Copy.
      *
-     * @return the char list
+     * @return
      */
     @Override
     public CharList copy() {
@@ -1953,9 +1953,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Copy.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the char list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public CharList copy(final int fromIndex, final int toIndex) {
@@ -1967,10 +1967,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Copy.
      *
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the char list
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1984,10 +1984,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Returns List of {@code CharList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return the list
+     * @return
      */
     @Override
     public List<CharList> split(final int fromIndex, final int toIndex, final int chunkSize) {
@@ -2035,10 +2035,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) {
@@ -2050,10 +2050,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) {
@@ -2065,7 +2065,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Trim to size.
      *
-     * @return the char list
+     * @return
      */
     @Override
     public CharList trimToSize() {
@@ -2101,7 +2101,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -2111,7 +2111,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Boxed.
      *
-     * @return the list
+     * @return
      */
     public List<Character> boxed() {
         return boxed(0, size);
@@ -2120,9 +2120,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Boxed.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public List<Character> boxed(int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2139,7 +2139,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * To array.
      *
-     * @return the char[]
+     * @return
      */
     @Override
     public char[] toArray() {
@@ -2149,7 +2149,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * To int list.
      *
-     * @return the int list
+     * @return
      */
     public IntList toIntList() {
         final int[] a = new int[size];
@@ -2164,11 +2164,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public <C extends Collection<Character>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
@@ -2186,10 +2186,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * To multiset.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the multiset
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public Multiset<Character> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Character>> supplier) {
@@ -2209,11 +2209,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2227,13 +2227,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2249,13 +2249,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2270,15 +2270,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2298,12 +2298,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @return
      * @throws E the e
      */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.CharFunction<? extends K, E> keyMapper, Collector<Character, A, D> downstream) throws E {
@@ -2314,14 +2314,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.CharFunction<? extends K, E> keyMapper,
@@ -2360,7 +2360,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Iterator.
      *
-     * @return the char iterator
+     * @return
      */
     public CharIterator iterator() {
         if (isEmpty()) {
@@ -2373,7 +2373,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Stream.
      *
-     * @return the char stream
+     * @return
      */
     public CharStream stream() {
         return CharStream.of(elementData, 0, size());
@@ -2382,9 +2382,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Stream.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the char stream
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public CharStream stream(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2395,10 +2395,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2409,10 +2409,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Apply if not empty.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the optional
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2423,8 +2423,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2435,8 +2435,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2449,7 +2449,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2459,7 +2459,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -2480,7 +2480,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -2490,7 +2490,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Ensure capacity internal.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_CHAR_ARRAY) {
@@ -2503,7 +2503,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Ensure explicit capacity.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
@@ -2514,7 +2514,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Grow.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void grow(int minCapacity) {
         int oldCapacity = elementData.length;

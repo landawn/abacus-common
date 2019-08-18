@@ -49,8 +49,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param map the map
-     * @return the JSON object
+     * @param map
+     * @return
      */
     public static JSONObject wrap(final Map<String, Object> map) {
         return new JSONObject(map);
@@ -59,8 +59,8 @@ public final class JSONUtil {
     /**
      * wrap(entity) -> wrap(Maps.deepEntity2Map(entity, true))
      *
-     * @param entity the entity
-     * @return the JSON object
+     * @param entity
+     * @return
      * @see Maps#deepEntity2Map(Object)
      */
     @SuppressWarnings("unchecked")
@@ -71,8 +71,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final boolean[] array) throws JSONException {
@@ -82,8 +82,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final char[] array) throws JSONException {
@@ -93,8 +93,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final byte[] array) throws JSONException {
@@ -104,8 +104,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final short[] array) throws JSONException {
@@ -115,8 +115,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final int[] array) throws JSONException {
@@ -126,8 +126,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final long[] array) throws JSONException {
@@ -137,8 +137,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final float[] array) throws JSONException {
@@ -148,8 +148,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final double[] array) throws JSONException {
@@ -159,8 +159,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param array the array
-     * @return the JSON array
+     * @param array
+     * @return
      * @throws JSONException the JSON exception
      */
     public static JSONArray wrap(final Object[] array) throws JSONException {
@@ -170,8 +170,8 @@ public final class JSONUtil {
     /**
      * Wrap.
      *
-     * @param coll the coll
-     * @return the JSON array
+     * @param coll
+     * @return
      */
     public static JSONArray wrap(final Collection<?> coll) {
         return new JSONArray(coll);
@@ -180,8 +180,8 @@ public final class JSONUtil {
     /**
      * Unwrap.
      *
-     * @param jsonObject the json object
-     * @return the map
+     * @param jsonObject
+     * @return
      * @throws JSONException the JSON exception
      */
     public static Map<String, Object> unwrap(final JSONObject jsonObject) throws JSONException {
@@ -191,10 +191,10 @@ public final class JSONUtil {
     /**
      * Unwrap.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @param jsonObject the json object
-     * @return the t
+     * @param <T>
+     * @param cls
+     * @param jsonObject
+     * @return
      * @throws JSONException the JSON exception
      */
     public static <T> T unwrap(final Class<? extends T> cls, final JSONObject jsonObject) throws JSONException {
@@ -204,10 +204,10 @@ public final class JSONUtil {
     /**
      * Unwrap.
      *
-     * @param <T> the generic type
-     * @param type the type
-     * @param jsonObject the json object
-     * @return the t
+     * @param <T>
+     * @param type
+     * @param jsonObject
+     * @return
      * @throws JSONException the JSON exception
      */
     @SuppressWarnings("unchecked")
@@ -277,9 +277,9 @@ public final class JSONUtil {
     /**
      * Unwrap.
      *
-     * @param <T> the generic type
-     * @param jsonArray the json array
-     * @return the list
+     * @param <T>
+     * @param jsonArray
+     * @return
      * @throws JSONException the JSON exception
      */
     public static <T> List<T> unwrap(final JSONArray jsonArray) throws JSONException {
@@ -289,10 +289,10 @@ public final class JSONUtil {
     /**
      * Unwrap.
      *
-     * @param <T> the generic type
-     * @param cls            array or collection class
-     * @param jsonArray the json array
-     * @return the t
+     * @param <T>
+     * @param cls array or collection class
+     * @param jsonArray
+     * @return
      * @throws JSONException the JSON exception
      */
     public static <T> T unwrap(final Class<? extends T> cls, final JSONArray jsonArray) throws JSONException {
@@ -302,10 +302,10 @@ public final class JSONUtil {
     /**
      * Unwrap.
      *
-     * @param <T> the generic type
-     * @param type the type
-     * @param jsonArray the json array
-     * @return the t
+     * @param <T>
+     * @param type
+     * @param jsonArray
+     * @return
      * @throws JSONException the JSON exception
      */
     @SuppressWarnings("unchecked")

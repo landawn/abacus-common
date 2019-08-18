@@ -25,7 +25,7 @@ import com.landawn.abacus.util.N;
  * The Class MemcachedRWLock.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public class MemcachedRWLock<T> extends AbstractRWLock<T> {
@@ -70,7 +70,7 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Instantiates a new memcached RW lock.
      *
-     * @param servers the servers
+     * @param servers
      */
     public MemcachedRWLock(String servers) {
         this(servers, N.EMPTY_STRING, DEFAULT_LIVE_TIME, DEFAULT_TIMEOUT);
@@ -79,9 +79,9 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Instantiates a new memcached RW lock.
      *
-     * @param servers the servers
-     * @param keyPrefix the key prefix
-     * @param liveTime the live time
+     * @param servers
+     * @param keyPrefix
+     * @param liveTime
      */
     public MemcachedRWLock(String servers, String keyPrefix, String liveTime) {
         this(servers, keyPrefix, Long.valueOf(liveTime), DEFAULT_TIMEOUT);
@@ -90,10 +90,10 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Instantiates a new memcached RW lock.
      *
-     * @param servers the servers
-     * @param keyPrefix the key prefix
-     * @param liveTime the live time
-     * @param timeout the timeout
+     * @param servers
+     * @param keyPrefix
+     * @param liveTime
+     * @param timeout
      */
     public MemcachedRWLock(String servers, String keyPrefix, long liveTime, long timeout) {
         this.mLock = new MemcachedLock<String, Number>(servers);
@@ -109,7 +109,7 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Lock write on.
      *
-     * @param target the target
+     * @param target
      */
     @Override
     public void lockWriteOn(T target) {
@@ -119,8 +119,8 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Lock write on.
      *
-     * @param target the target
-     * @param timeout the timeout
+     * @param target
+     * @param timeout
      */
     @Override
     public void lockWriteOn(T target, long timeout) {
@@ -217,7 +217,7 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Unlock write on.
      *
-     * @param target the target
+     * @param target
      */
     @Override
     public void unlockWriteOn(T target) {
@@ -233,7 +233,7 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Lock read on.
      *
-     * @param target the target
+     * @param target
      */
     @Override
     public void lockReadOn(T target) {
@@ -243,8 +243,8 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Lock read on.
      *
-     * @param target the target
-     * @param timeout the timeout
+     * @param target
+     * @param timeout
      */
     @Override
     public void lockReadOn(T target, long timeout) {
@@ -308,7 +308,7 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Unlock read on.
      *
-     * @param target the target
+     * @param target
      */
     @Override
     public void unlockReadOn(T target) {
@@ -324,9 +324,9 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     /**
      * Generate key.
      *
-     * @param keyPrefix the key prefix
-     * @param obj the obj
-     * @return the string
+     * @param keyPrefix
+     * @param obj
+     * @return
      */
     protected String generateKey(String keyPrefix, T obj) {
         return N.isNullOrEmpty(keyPrefix) ? N.base64Encode(N.stringOf(obj).getBytes()) : (keyPrefix + N.base64Encode(N.stringOf(obj).getBytes()));

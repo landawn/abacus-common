@@ -33,7 +33,7 @@ public @interface Table {
     /**
      * Value.
      *
-     * @return the string
+     * @return
      */
     String value() default "";
 }

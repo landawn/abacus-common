@@ -97,11 +97,11 @@ public abstract class AbstractPool implements Pool {
     /**
      * Instantiates a new abstract pool.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param evictionPolicy the eviction policy
-     * @param autoBalance the auto balance
-     * @param balanceFactor the balance factor
+     * @param capacity
+     * @param evictDelay
+     * @param evictionPolicy
+     * @param autoBalance
+     * @param balanceFactor
      */
     protected AbstractPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
         if (capacity < 0 || evictDelay < 0 || balanceFactor < 0) {
@@ -149,7 +149,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Gets the capacity.
      *
-     * @return the capacity
+     * @return
      */
     @Override
     public int getCapacity() {
@@ -159,7 +159,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Put count.
      *
-     * @return the long
+     * @return
      */
     @Override
     public long putCount() {
@@ -169,7 +169,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Hit count.
      *
-     * @return the long
+     * @return
      */
     @Override
     public long hitCount() {
@@ -179,7 +179,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Miss count.
      *
-     * @return the long
+     * @return
      */
     @Override
     public long missCount() {
@@ -189,7 +189,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Eviction count.
      *
-     * @return the long
+     * @return
      */
     @Override
     public long evictionCount() {

@@ -586,9 +586,9 @@ public final class N {
     /**
      * Type of.
      *
-     * @param <T> the generic type
-     * @param typeName the type name
-     * @return the type
+     * @param <T>
+     * @param typeName
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(final String typeName) {
@@ -610,9 +610,9 @@ public final class N {
     /**
      * Type of.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @return the type
+     * @param <T>
+     * @param cls
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(final Class<?> cls) {
@@ -633,10 +633,10 @@ public final class N {
     /**
      * Value of.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param str the str
-     * @return the default value of the specified <code>targetClass</code> if the specified string is null.
+     * @param <T>
+     * @param targetClass
+     * @param str
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T valueOf(final Class<? extends T> targetClass, final String str) {
@@ -646,9 +646,9 @@ public final class N {
     /**
      * Default value of.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @return the t
+     * @param <T>
+     * @param cls
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T defaultValueOf(final Class<T> cls) {
@@ -658,7 +658,7 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
+     * @param b
      * @return true, if successful
      */
     public static boolean defaultIfNull(Boolean b) {
@@ -672,8 +672,8 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @param defaultForNull the default for null
+     * @param b
+     * @param defaultForNull
      * @return true, if successful
      */
     public static boolean defaultIfNull(Boolean b, boolean defaultForNull) {
@@ -687,8 +687,8 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param c the c
-     * @return the char
+     * @param c
+     * @return
      */
     public static char defaultIfNull(Character c) {
         if (c == null) {
@@ -701,9 +701,9 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the char
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static char defaultIfNull(Character c, char defaultForNull) {
         if (c == null) {
@@ -716,8 +716,8 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @return the byte
+     * @param b
+     * @return
      */
     public static byte defaultIfNull(Byte b) {
         if (b == null) {
@@ -730,9 +730,9 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @param defaultForNull the default for null
-     * @return the byte
+     * @param b
+     * @param defaultForNull
+     * @return
      */
     public static byte defaultIfNull(Byte b, byte defaultForNull) {
         if (b == null) {
@@ -745,8 +745,8 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @return the short
+     * @param b
+     * @return
      */
     public static short defaultIfNull(Short b) {
         if (b == null) {
@@ -759,9 +759,9 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @param defaultForNull the default for null
-     * @return the short
+     * @param b
+     * @param defaultForNull
+     * @return
      */
     public static short defaultIfNull(Short b, short defaultForNull) {
         if (b == null) {
@@ -774,8 +774,8 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @return the int
+     * @param b
+     * @return
      */
     public static int defaultIfNull(Integer b) {
         if (b == null) {
@@ -788,9 +788,9 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @param defaultForNull the default for null
-     * @return the int
+     * @param b
+     * @param defaultForNull
+     * @return
      */
     public static int defaultIfNull(Integer b, int defaultForNull) {
         if (b == null) {
@@ -803,8 +803,8 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @return the long
+     * @param b
+     * @return
      */
     public static long defaultIfNull(Long b) {
         if (b == null) {
@@ -817,9 +817,9 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @param defaultForNull the default for null
-     * @return the long
+     * @param b
+     * @param defaultForNull
+     * @return
      */
     public static long defaultIfNull(Long b, long defaultForNull) {
         if (b == null) {
@@ -832,8 +832,8 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @return the float
+     * @param b
+     * @return
      */
     public static float defaultIfNull(Float b) {
         if (b == null) {
@@ -846,9 +846,9 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @param defaultForNull the default for null
-     * @return the float
+     * @param b
+     * @param defaultForNull
+     * @return
      */
     public static float defaultIfNull(Float b, float defaultForNull) {
         if (b == null) {
@@ -861,8 +861,8 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @return the double
+     * @param b
+     * @return
      */
     public static double defaultIfNull(Double b) {
         if (b == null) {
@@ -875,9 +875,9 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param b the b
-     * @param defaultForNull the default for null
-     * @return the double
+     * @param b
+     * @param defaultForNull
+     * @return
      */
     public static double defaultIfNull(Double b, double defaultForNull) {
         if (b == null) {
@@ -890,10 +890,10 @@ public final class N {
     /**
      * Default if null.
      *
-     * @param <T> the generic type
-     * @param obj the obj
-     * @param defaultForNull the default for null
-     * @return the t
+     * @param <T>
+     * @param obj
+     * @param defaultForNull
+     * @return
      */
     public static <T> T defaultIfNull(final T obj, final T defaultForNull) {
         return obj == null ? defaultForNull : obj;
@@ -902,8 +902,8 @@ public final class N {
     /**
      * String of.
      *
-     * @param val the val
-     * @return the string
+     * @param val
+     * @return
      */
     public static String stringOf(final boolean val) {
         return String.valueOf(val);
@@ -912,8 +912,8 @@ public final class N {
     /**
      * String of.
      *
-     * @param val the val
-     * @return the string
+     * @param val
+     * @return
      */
     public static String stringOf(final char val) {
         if (val < 128) {
@@ -926,8 +926,8 @@ public final class N {
     /**
      * String of.
      *
-     * @param val the val
-     * @return the string
+     * @param val
+     * @return
      */
     public static String stringOf(final byte val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -940,8 +940,8 @@ public final class N {
     /**
      * String of.
      *
-     * @param val the val
-     * @return the string
+     * @param val
+     * @return
      */
     public static String stringOf(final short val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -954,8 +954,8 @@ public final class N {
     /**
      * String of.
      *
-     * @param val the val
-     * @return the string
+     * @param val
+     * @return
      */
     public static String stringOf(final int val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -968,8 +968,8 @@ public final class N {
     /**
      * String of.
      *
-     * @param val the val
-     * @return the string
+     * @param val
+     * @return
      */
     public static String stringOf(final long val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -982,8 +982,8 @@ public final class N {
     /**
      * String of.
      *
-     * @param val the val
-     * @return the string
+     * @param val
+     * @return
      */
     public static String stringOf(final float val) {
         return String.valueOf(val);
@@ -992,8 +992,8 @@ public final class N {
     /**
      * String of.
      *
-     * @param val the val
-     * @return the string
+     * @param val
+     * @return
      */
     public static String stringOf(final double val) {
         return String.valueOf(val);
@@ -1002,7 +1002,7 @@ public final class N {
     /**
      * String of.
      *
-     * @param obj the obj
+     * @param obj
      * @return <code>null</code> if the specified object is null.
      */
     public static String stringOf(final Object obj) {
@@ -1012,9 +1012,9 @@ public final class N {
     /**
      * Enum list of.
      *
-     * @param <E> the element type
-     * @param enumClass the enum class
-     * @return the list
+     * @param <E>
+     * @param enumClass
+     * @return
      */
     public static <E extends Enum<E>> List<E> enumListOf(final Class<E> enumClass) {
         List<E> enumList = (List<E>) enumListPool.get(enumClass);
@@ -1031,9 +1031,9 @@ public final class N {
     /**
      * Enum set of.
      *
-     * @param <E> the element type
-     * @param enumClass the enum class
-     * @return the sets the
+     * @param <E>
+     * @param enumClass
+     * @return
      */
     public static <E extends Enum<E>> Set<E> enumSetOf(final Class<E> enumClass) {
         Set<E> enumSet = (Set<E>) enumSetPool.get(enumClass);
@@ -1050,9 +1050,9 @@ public final class N {
     /**
      * Enum map of.
      *
-     * @param <E> the element type
-     * @param enumClass the enum class
-     * @return the bi map
+     * @param <E>
+     * @param enumClass
+     * @return
      */
     public static <E extends Enum<E>> BiMap<E, String> enumMapOf(final Class<E> enumClass) {
         BiMap<E, String> enumMap = (BiMap<E, String>) enumMapPool.get(enumClass);
@@ -1077,8 +1077,8 @@ public final class N {
     /**
      * Method newInstance.
      *
-     * @param <T> the generic type
-     * @param cls the cls
+     * @param <T>
+     * @param cls
      * @return T
      */
     public static <T> T newInstance(final Class<T> cls) {
@@ -1142,10 +1142,10 @@ public final class N {
     /**
      * Invoke.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param args the args
-     * @return the t
+     * @param <T>
+     * @param c
+     * @param args
+     * @return
      * @throws InstantiationException the instantiation exception
      * @throws IllegalAccessException the illegal access exception
      * @throws IllegalArgumentException the illegal argument exception
@@ -1164,10 +1164,10 @@ public final class N {
     /**
      * New proxy instance.
      *
-     * @param <T> the generic type
-     * @param interfaceClass the interface class
-     * @param h the h
-     * @return the t
+     * @param <T>
+     * @param interfaceClass
+     * @param h
+     * @return
      */
     public static <T> T newProxyInstance(final Class<T> interfaceClass, final InvocationHandler h) {
         return newProxyInstance(N.asArray(interfaceClass), h);
@@ -1176,10 +1176,10 @@ public final class N {
     /**
      * Refer to {@code java.lang.reflect}
      *
-     * @param <T> the generic type
-     * @param interfaceClasses the interface classes
-     * @param h the h
-     * @return the t
+     * @param <T>
+     * @param interfaceClasses
+     * @param h
+     * @return
      */
     public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
         return (T) Proxy.newProxyInstance(N.class.getClassLoader(), interfaceClasses, h);
@@ -1188,9 +1188,9 @@ public final class N {
     /**
      * Method newArray.
      *
-     * @param <T> the generic type
-     * @param componentType the component type
-     * @param length the length
+     * @param <T>
+     * @param componentType
+     * @param length
      * @return T[]
      */
     @SuppressWarnings("unchecked")
@@ -1201,9 +1201,9 @@ public final class N {
     /**
      * New entity.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @return the t
+     * @param <T>
+     * @param cls
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T newEntity(final Class<T> cls) {
@@ -1213,10 +1213,10 @@ public final class N {
     /**
      * New entity.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @param entityName the entity name
-     * @return the t
+     * @param <T>
+     * @param cls
+     * @param entityName
+     * @return
      */
     public static <T> T newEntity(final Class<T> cls, final String entityName) {
         if (MapEntity.class.isAssignableFrom(cls)) {
@@ -1235,9 +1235,9 @@ public final class N {
     /**
      * Returns a set backed by the specified map.
      *
-     * @param <E> the element type
+     * @param <E>
      * @param map the backing map
-     * @return the set backed by the map
+     * @return
      * @see Collections#newSetFromMap(Map)
      */
     public static <E> Set<E> newSetFromMap(final Map<E, Boolean> map) {
@@ -1247,8 +1247,8 @@ public final class N {
     /**
      * Inits the hash capacity.
      *
-     * @param size the size
-     * @return the int
+     * @param size
+     * @return
      */
     public static int initHashCapacity(final int size) {
         N.checkArgNotNegative(size, "size");
@@ -1277,8 +1277,8 @@ public final class N {
     /**
      * New array list.
      *
-     * @param <T> the generic type
-     * @return the array list
+     * @param <T>
+     * @return
      */
     public static <T> ArrayList<T> newArrayList() {
         return new ArrayList<>();
@@ -1287,9 +1287,9 @@ public final class N {
     /**
      * New array list.
      *
-     * @param <T> the generic type
-     * @param initialCapacity the initial capacity
-     * @return the array list
+     * @param <T>
+     * @param initialCapacity
+     * @return
      */
     public static <T> ArrayList<T> newArrayList(int initialCapacity) {
         return new ArrayList<>(initialCapacity);
@@ -1298,9 +1298,9 @@ public final class N {
     /**
      * New array list.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the array list
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> ArrayList<T> newArrayList(Collection<? extends T> c) {
         return N.isNullOrEmpty(c) ? new ArrayList<T>() : new ArrayList<T>(c);
@@ -1309,8 +1309,8 @@ public final class N {
     /**
      * New linked list.
      *
-     * @param <T> the generic type
-     * @return the linked list
+     * @param <T>
+     * @return
      */
     public static <T> LinkedList<T> newLinkedList() {
         return new LinkedList<>();
@@ -1319,9 +1319,9 @@ public final class N {
     /**
      * New linked list.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the linked list
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> LinkedList<T> newLinkedList(Collection<? extends T> c) {
         return N.isNullOrEmpty(c) ? new LinkedList<T>() : new LinkedList<>(c);
@@ -1330,8 +1330,8 @@ public final class N {
     /**
      * New hash set.
      *
-     * @param <T> the generic type
-     * @return the hash set
+     * @param <T>
+     * @return
      */
     public static <T> HashSet<T> newHashSet() {
         return new HashSet<>();
@@ -1340,9 +1340,9 @@ public final class N {
     /**
      * New hash set.
      *
-     * @param <T> the generic type
-     * @param initialCapacity the initial capacity
-     * @return the hash set
+     * @param <T>
+     * @param initialCapacity
+     * @return
      */
     public static <T> HashSet<T> newHashSet(int initialCapacity) {
         return new HashSet<>(initialCapacity);
@@ -1351,9 +1351,9 @@ public final class N {
     /**
      * New hash set.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the hash set
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> HashSet<T> newHashSet(Collection<? extends T> c) {
         return N.isNullOrEmpty(c) ? new HashSet<T>() : new HashSet<>(c);
@@ -1362,8 +1362,8 @@ public final class N {
     /**
      * New linked hash set.
      *
-     * @param <T> the generic type
-     * @return the linked hash set
+     * @param <T>
+     * @return
      */
     public static <T> LinkedHashSet<T> newLinkedHashSet() {
         return new LinkedHashSet<>();
@@ -1372,9 +1372,9 @@ public final class N {
     /**
      * New linked hash set.
      *
-     * @param <T> the generic type
-     * @param initialCapacity the initial capacity
-     * @return the linked hash set
+     * @param <T>
+     * @param initialCapacity
+     * @return
      */
     public static <T> LinkedHashSet<T> newLinkedHashSet(int initialCapacity) {
         return new LinkedHashSet<>(initialCapacity);
@@ -1383,9 +1383,9 @@ public final class N {
     /**
      * New linked hash set.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the linked hash set
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> LinkedHashSet<T> newLinkedHashSet(Collection<? extends T> c) {
         return N.isNullOrEmpty(c) ? new LinkedHashSet<T>() : new LinkedHashSet<>(c);
@@ -1394,8 +1394,8 @@ public final class N {
     /**
      * New tree set.
      *
-     * @param <T> the generic type
-     * @return the tree set
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> TreeSet<T> newTreeSet() {
@@ -1405,9 +1405,9 @@ public final class N {
     /**
      * New tree set.
      *
-     * @param <T> the generic type
-     * @param comparator the comparator
-     * @return the tree set
+     * @param <T>
+     * @param comparator
+     * @return
      */
     public static <T> TreeSet<T> newTreeSet(Comparator<? super T> comparator) {
         return new TreeSet<>(comparator);
@@ -1416,9 +1416,9 @@ public final class N {
     /**
      * New tree set.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the tree set
+     * @param <T>
+     * @param c
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> TreeSet<T> newTreeSet(Collection<? extends T> c) {
@@ -1428,9 +1428,9 @@ public final class N {
     /**
      * New tree set.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the tree set
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> TreeSet<T> newTreeSet(SortedSet<T> c) {
         return N.isNullOrEmpty(c) ? new TreeSet<T>() : new TreeSet<>(c);
@@ -1439,8 +1439,8 @@ public final class N {
     /**
      * New multiset.
      *
-     * @param <T> the generic type
-     * @return the multiset
+     * @param <T>
+     * @return
      */
     public static <T> Multiset<T> newMultiset() {
         return new Multiset<>();
@@ -1449,9 +1449,9 @@ public final class N {
     /**
      * New multiset.
      *
-     * @param <T> the generic type
-     * @param initialCapacity the initial capacity
-     * @return the multiset
+     * @param <T>
+     * @param initialCapacity
+     * @return
      */
     public static <T> Multiset<T> newMultiset(final int initialCapacity) {
         return new Multiset<>(initialCapacity);
@@ -1460,9 +1460,9 @@ public final class N {
     /**
      * New multiset.
      *
-     * @param <T> the generic type
-     * @param valueMapType the value map type
-     * @return the multiset
+     * @param <T>
+     * @param valueMapType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Multiset<T> newMultiset(final Class<? extends Map> valueMapType) {
@@ -1472,9 +1472,9 @@ public final class N {
     /**
      * New multiset.
      *
-     * @param <T> the generic type
-     * @param mapSupplier the map supplier
-     * @return the multiset
+     * @param <T>
+     * @param mapSupplier
+     * @return
      */
     public static <T> Multiset<T> newMultiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
         return new Multiset<>(mapSupplier);
@@ -1483,9 +1483,9 @@ public final class N {
     /**
      * New multiset.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the multiset
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Multiset<T> newMultiset(final Collection<? extends T> c) {
         return new Multiset<>(c);
@@ -1494,8 +1494,8 @@ public final class N {
     /**
      * New array deque.
      *
-     * @param <T> the generic type
-     * @return the array deque
+     * @param <T>
+     * @return
      */
     public static <T> ArrayDeque<T> newArrayDeque() {
         return new ArrayDeque<>();
@@ -1504,9 +1504,9 @@ public final class N {
     /**
      * Constructs an empty array deque with an initial capacity sufficient to hold the specified number of elements.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param numElements lower bound on initial capacity of the deque.
-     * @return the array deque
+     * @return
      */
     public static <T> ArrayDeque<T> newArrayDeque(int numElements) {
         return new ArrayDeque<>(numElements);
@@ -1515,9 +1515,9 @@ public final class N {
     /**
      * Constructs a deque containing the elements of the specified collection, in the order they are returned by the collection's iterator.
      *
-     * @param <E> the element type
-     * @param c the c
-     * @return the array deque
+     * @param <E>
+     * @param c
+     * @return
      */
     public static <E> ArrayDeque<E> newArrayDeque(Collection<? extends E> c) {
         return new ArrayDeque<>(c);
@@ -1528,9 +1528,9 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param key the key
-     * @param value the value
-     * @return the map. entry
+     * @param key
+     * @param value
+     * @return
      */
     public static <K, V> Map.Entry<K, V> newEntry(K key, V value) {
         return new AbstractMap.SimpleEntry<>(key, value);
@@ -1541,9 +1541,9 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param key the key
-     * @param value the value
-     * @return the immutable entry
+     * @param key
+     * @param value
+     * @return
      */
     public static <K, V> ImmutableEntry<K, V> newImmutableEntry(K key, V value) {
         return new ImmutableEntry<>(key, value);
@@ -1554,7 +1554,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the hash map
+     * @return
      */
     public static <K, V> HashMap<K, V> newHashMap() {
         return new HashMap<>();
@@ -1565,8 +1565,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param initialCapacity the initial capacity
-     * @return the hash map
+     * @param initialCapacity
+     * @return
      */
     public static <K, V> HashMap<K, V> newHashMap(int initialCapacity) {
         return new HashMap<>(initialCapacity);
@@ -1577,8 +1577,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param m the m
-     * @return the hash map
+     * @param m
+     * @return
      */
     public static <K, V> HashMap<K, V> newHashMap(Map<? extends K, ? extends V> m) {
         return N.isNullOrEmpty(m) ? new HashMap<K, V>() : new HashMap<K, V>(m);
@@ -1589,10 +1589,10 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @return the hash map
+     * @param <E>
+     * @param c
+     * @param keyMapper
+     * @return
      * @throws E the e
      */
     public static <K, V, E extends Exception> HashMap<K, V> newHashMap(final Collection<? extends V> c, final Try.Function<? super V, ? extends K, E> keyMapper)
@@ -1617,7 +1617,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the linked hash map
+     * @return
      */
     public static <K, V> LinkedHashMap<K, V> newLinkedHashMap() {
         return new LinkedHashMap<>();
@@ -1628,8 +1628,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param initialCapacity the initial capacity
-     * @return the linked hash map
+     * @param initialCapacity
+     * @return
      */
     public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int initialCapacity) {
         return new LinkedHashMap<>(initialCapacity);
@@ -1640,8 +1640,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param m the m
-     * @return the linked hash map
+     * @param m
+     * @return
      */
     public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Map<? extends K, ? extends V> m) {
         return N.isNullOrEmpty(m) ? new LinkedHashMap<K, V>() : new LinkedHashMap<K, V>(m);
@@ -1652,10 +1652,10 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @return the linked hash map
+     * @param <E>
+     * @param c
+     * @param keyMapper
+     * @return
      * @throws E the e
      */
     public static <K, V, E extends Exception> LinkedHashMap<K, V> newLinkedHashMap(final Collection<? extends V> c,
@@ -1680,7 +1680,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the tree map
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K extends Comparable, V> TreeMap<K, V> newTreeMap() {
@@ -1690,11 +1690,11 @@ public final class N {
     /**
      * New tree map.
      *
-     * @param <C> the generic type
+     * @param <C>
      * @param <K> the key type
      * @param <V> the value type
-     * @param comparator the comparator
-     * @return the tree map
+     * @param comparator
+     * @return
      */
     public static <C, K extends C, V> TreeMap<K, V> newTreeMap(Comparator<C> comparator) {
         return new TreeMap<>(comparator);
@@ -1705,8 +1705,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param m the m
-     * @return the tree map
+     * @param m
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K extends Comparable, V> TreeMap<K, V> newTreeMap(Map<? extends K, ? extends V> m) {
@@ -1718,8 +1718,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param m the m
-     * @return the tree map
+     * @param m
+     * @return
      */
     public static <K, V> TreeMap<K, V> newTreeMap(SortedMap<K, ? extends V> m) {
         return N.isNullOrEmpty(m) ? new TreeMap<K, V>() : new TreeMap<K, V>(m);
@@ -1730,7 +1730,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the identity hash map
+     * @return
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap() {
         return new IdentityHashMap<>();
@@ -1741,8 +1741,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param initialCapacity the initial capacity
-     * @return the identity hash map
+     * @param initialCapacity
+     * @return
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(int initialCapacity) {
         return new IdentityHashMap<>(initialCapacity);
@@ -1753,8 +1753,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param m the m
-     * @return the identity hash map
+     * @param m
+     * @return
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(Map<? extends K, ? extends V> m) {
         return N.isNullOrEmpty(m) ? new IdentityHashMap<K, V>() : new IdentityHashMap<K, V>(m);
@@ -1765,7 +1765,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the concurrent hash map
+     * @return
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap() {
         return new ConcurrentHashMap<>();
@@ -1776,8 +1776,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param initialCapacity the initial capacity
-     * @return the concurrent hash map
+     * @param initialCapacity
+     * @return
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(int initialCapacity) {
         return new ConcurrentHashMap<>(initialCapacity);
@@ -1788,8 +1788,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param m the m
-     * @return the concurrent hash map
+     * @param m
+     * @return
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(Map<? extends K, ? extends V> m) {
         return N.isNullOrEmpty(m) ? new ConcurrentHashMap<K, V>() : new ConcurrentHashMap<K, V>(m);
@@ -1800,7 +1800,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the bi map
+     * @return
      */
     public static <K, V> BiMap<K, V> newBiMap() {
         return new BiMap<>();
@@ -1811,8 +1811,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param initialCapacity the initial capacity
-     * @return the bi map
+     * @param initialCapacity
+     * @return
      */
     public static <K, V> BiMap<K, V> newBiMap(int initialCapacity) {
         return new BiMap<>(initialCapacity);
@@ -1823,9 +1823,9 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param initialCapacity the initial capacity
-     * @param loadFactor the load factor
-     * @return the bi map
+     * @param initialCapacity
+     * @param loadFactor
+     * @return
      */
     public static <K, V> BiMap<K, V> newBiMap(int initialCapacity, float loadFactor) {
         return new BiMap<>(initialCapacity, loadFactor);
@@ -1836,9 +1836,9 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapType the key map type
-     * @param valueMapType the value map type
-     * @return the bi map
+     * @param keyMapType
+     * @param valueMapType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> BiMap<K, V> newBiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
@@ -1850,9 +1850,9 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapSupplier the key map supplier
-     * @param valueMapSupplier the value map supplier
-     * @return the bi map
+     * @param keyMapSupplier
+     * @param valueMapSupplier
+     * @return
      */
     public static <K, V> BiMap<K, V> newBiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
         return new BiMap<>(keyMapSupplier, valueMapSupplier);
@@ -1862,11 +1862,11 @@ public final class N {
      * New multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
+     * @param <E>
      * @param <V> the value type
-     * @param mapSupplier the map supplier
-     * @param valueSupplier the value supplier
-     * @return the multimap
+     * @param mapSupplier
+     * @param valueSupplier
+     * @return
      */
     public static <K, E, V extends Collection<E>> Multimap<K, E, V> newMultimap(final Supplier<? extends Map<K, V>> mapSupplier,
             final Supplier<? extends V> valueSupplier) {
@@ -1877,8 +1877,8 @@ public final class N {
      * New list multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @return the list multimap
+     * @param <E>
+     * @return
      */
     public static <K, E> ListMultimap<K, E> newListMultimap() {
         return new ListMultimap<>();
@@ -1888,9 +1888,9 @@ public final class N {
      * New list multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param initialCapacity the initial capacity
-     * @return the list multimap
+     * @param <E>
+     * @param initialCapacity
+     * @return
      */
     public static <K, E> ListMultimap<K, E> newListMultimap(final int initialCapacity) {
         return new ListMultimap<>(initialCapacity);
@@ -1900,9 +1900,9 @@ public final class N {
      * New list multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param m the m
-     * @return the list multimap
+     * @param <E>
+     * @param m
+     * @return
      */
     public static <K, E> ListMultimap<K, E> newListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = newListMultimap();
@@ -1916,8 +1916,8 @@ public final class N {
      * New list linked multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @return the list multimap
+     * @param <E>
+     * @return
      */
     public static <K, E> ListMultimap<K, E> newListLinkedMultimap() {
         return new ListMultimap<>(LinkedHashMap.class, ArrayList.class);
@@ -1927,9 +1927,9 @@ public final class N {
      * New list linked multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param initialCapacity the initial capacity
-     * @return the list multimap
+     * @param <E>
+     * @param initialCapacity
+     * @return
      */
     public static <K, E> ListMultimap<K, E> newListLinkedMultimap(final int initialCapacity) {
         return new ListMultimap<>(new LinkedHashMap<K, List<E>>(initialCapacity), ArrayList.class);
@@ -1939,9 +1939,9 @@ public final class N {
      * New list linked multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param m the m
-     * @return the list multimap
+     * @param <E>
+     * @param m
+     * @return
      */
     public static <K, E> ListMultimap<K, E> newListLinkedMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(new LinkedHashMap<K, List<E>>(), ArrayList.class);
@@ -1955,8 +1955,8 @@ public final class N {
      * New list sorted multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @return the list multimap
+     * @param <E>
+     * @return
      */
     public static <K extends Comparable<K>, E> ListMultimap<K, E> newListSortedMultimap() {
         return new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
@@ -1966,9 +1966,9 @@ public final class N {
      * New list sorted multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param m the m
-     * @return the list multimap
+     * @param <E>
+     * @param m
+     * @return
      */
     public static <K extends Comparable<K>, E> ListMultimap<K, E> newListSortedMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
@@ -1982,9 +1982,9 @@ public final class N {
      * New list multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param mapType the map type
-     * @return the list multimap
+     * @param <E>
+     * @param mapType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> ListMultimap<K, E> newListMultimap(final Class<? extends Map> mapType) {
@@ -1995,10 +1995,10 @@ public final class N {
      * New list multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param mapType the map type
-     * @param valueType the value type
-     * @return the list multimap
+     * @param <E>
+     * @param mapType
+     * @param valueType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> ListMultimap<K, E> newListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
@@ -2009,10 +2009,10 @@ public final class N {
      * New list multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param mapSupplier the map supplier
-     * @param valueSupplier the value supplier
-     * @return the list multimap
+     * @param <E>
+     * @param mapSupplier
+     * @param valueSupplier
+     * @return
      */
     public static <K, E> ListMultimap<K, E> newListMultimap(final Supplier<? extends Map<K, List<E>>> mapSupplier,
             final Supplier<? extends List<E>> valueSupplier) {
@@ -2023,8 +2023,8 @@ public final class N {
      * New set multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @return the sets the multimap
+     * @param <E>
+     * @return
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap() {
         return new SetMultimap<>();
@@ -2034,9 +2034,9 @@ public final class N {
      * New set multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param initialCapacity the initial capacity
-     * @return the sets the multimap
+     * @param <E>
+     * @param initialCapacity
+     * @return
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final int initialCapacity) {
         return new SetMultimap<>(initialCapacity);
@@ -2046,9 +2046,9 @@ public final class N {
      * New set multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param m the m
-     * @return the sets the multimap
+     * @param <E>
+     * @param m
+     * @return
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = newSetMultimap();
@@ -2062,8 +2062,8 @@ public final class N {
      * New set linked multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @return the sets the multimap
+     * @param <E>
+     * @return
      */
     public static <K, E> SetMultimap<K, E> newSetLinkedMultimap() {
         return new SetMultimap<>(LinkedHashMap.class, HashSet.class);
@@ -2073,9 +2073,9 @@ public final class N {
      * New set linked multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param initialCapacity the initial capacity
-     * @return the sets the multimap
+     * @param <E>
+     * @param initialCapacity
+     * @return
      */
     public static <K, E> SetMultimap<K, E> newSetLinkedMultimap(final int initialCapacity) {
         return new SetMultimap<>(new LinkedHashMap<K, Set<E>>(initialCapacity), HashSet.class);
@@ -2085,9 +2085,9 @@ public final class N {
      * New set linked multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param m the m
-     * @return the sets the multimap
+     * @param <E>
+     * @param m
+     * @return
      */
     public static <K, E> SetMultimap<K, E> newSetLinkedMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(new LinkedHashMap<K, Set<E>>(), HashSet.class);
@@ -2101,8 +2101,8 @@ public final class N {
      * New set sorted multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @return the sets the multimap
+     * @param <E>
+     * @return
      */
     public static <K extends Comparable<K>, E> SetMultimap<K, E> newSetSortedMultimap() {
         return new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
@@ -2112,9 +2112,9 @@ public final class N {
      * New set sorted multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param m the m
-     * @return the sets the multimap
+     * @param <E>
+     * @param m
+     * @return
      */
     public static <K extends Comparable<K>, E> SetMultimap<K, E> newSetSortedMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
@@ -2128,9 +2128,9 @@ public final class N {
      * New set multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param mapType the map type
-     * @return the sets the multimap
+     * @param <E>
+     * @param mapType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Class<? extends Map> mapType) {
@@ -2141,10 +2141,10 @@ public final class N {
      * New set multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param mapType the map type
-     * @param valueType the value type
-     * @return the sets the multimap
+     * @param <E>
+     * @param mapType
+     * @param valueType
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
@@ -2155,10 +2155,10 @@ public final class N {
      * New set multimap.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param mapSupplier the map supplier
-     * @param valueSupplier the value supplier
-     * @return the sets the multimap
+     * @param <E>
+     * @param mapSupplier
+     * @param valueSupplier
+     * @return
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier,
             final Supplier<? extends Set<E>> valueSupplier) {
@@ -2174,7 +2174,7 @@ public final class N {
     /**
      * New empty data set.
      *
-     * @return the data set
+     * @return
      */
     public static DataSet newEmptyDataSet() {
         return new RowDataSet(new ArrayList<String>(), new ArrayList<List<Object>>());
@@ -2183,8 +2183,8 @@ public final class N {
     /**
      * New empty data set.
      *
-     * @param columnNames the column names
-     * @return the data set
+     * @param columnNames
+     * @return
      */
     public static DataSet newEmptyDataSet(final Collection<String> columnNames) {
         if (N.isNullOrEmpty(columnNames)) {
@@ -2203,10 +2203,10 @@ public final class N {
     /**
      * Convert the specified Map to a two columns <code>DataSet</code>: one column is for keys and one column is for values.
      *
-     * @param keyColumnName the key column name
-     * @param valueColumnName the value column name
-     * @param m the m
-     * @return the data set
+     * @param keyColumnName
+     * @param valueColumnName
+     * @param m
+     * @return
      */
     public static DataSet newDataSet(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
         final List<Object> keyColumn = new ArrayList<>(m.size());
@@ -2226,9 +2226,9 @@ public final class N {
     /**
      * Converts a list of row(which can be: Map/Entity) into a <code>DataSet</code>.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param rows list of row which can be: Map/Entity.
-     * @return the data set
+     * @return
      */
     public static <T> DataSet newDataSet(final Collection<T> rows) {
         return newDataSet(null, rows);
@@ -2237,10 +2237,10 @@ public final class N {
     /**
      * Converts a list of row(which can be: Map/Entity/Array/Collection) into a <code>DataSet</code>.
      *
-     * @param <T> the generic type
-     * @param columnNames the column names
-     * @param rowList the row list
-     * @return the data set
+     * @param <T>
+     * @param columnNames
+     * @param rowList
+     * @return
      */
     public static <T> DataSet newDataSet(Collection<String> columnNames, Collection<T> rowList) {
         if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(rowList)) {
@@ -2391,9 +2391,9 @@ public final class N {
     /**
      * As map entity.
      *
-     * @param entityName the entity name
-     * @param props the props
-     * @return the map entity
+     * @param entityName
+     * @param props
+     * @return
      */
     static MapEntity asMapEntity(final String entityName, final Object... props) {
         final MapEntity mapEntity = new MapEntity(entityName);
@@ -2446,9 +2446,9 @@ public final class N {
     /**
      * New data set.
      *
-     * @param <C> the generic type
+     * @param <C>
      * @param map keys are column names, values are columns
-     * @return the data set
+     * @return
      */
     public static <C extends Collection<?>> DataSet newDataSet(final Map<String, C> map) {
         if (N.isNullOrEmpty(map)) {
@@ -2485,8 +2485,8 @@ public final class N {
     /**
      * Returns an empty array if the specified collection is null or empty.
      *
-     * @param c the c
-     * @return the object[]
+     * @param c
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static Object[] toArray(final Collection<?> c) {
@@ -2500,10 +2500,10 @@ public final class N {
     /**
      * To array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the object[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static Object[] toArray(final Collection<?> c, final int fromIndex, final int toIndex) {
@@ -2537,11 +2537,11 @@ public final class N {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param c the c
-     * @param a the a
-     * @return the a[]
+     * @param <A>
+     * @param <T>
+     * @param c
+     * @param a
+     * @return
      */
     public static <A, T extends A> A[] toArray(final Collection<T> c, final A[] a) {
         N.checkArgNotNull(a);
@@ -2556,13 +2556,13 @@ public final class N {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param a the a
-     * @return the a[]
+     * @param <A>
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param a
+     * @return
      */
     public static <A, T extends A> A[] toArray(final Collection<T> c, final int fromIndex, final int toIndex, final A[] a) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -2596,11 +2596,11 @@ public final class N {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param c the c
-     * @param arraySupplier the array supplier
-     * @return the a[]
+     * @param <A>
+     * @param <T>
+     * @param c
+     * @param arraySupplier
+     * @return
      */
     public static <A, T extends A> A[] toArray(final Collection<T> c, final IntFunction<A[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier);
@@ -2615,13 +2615,13 @@ public final class N {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param arraySupplier the array supplier
-     * @return the a[]
+     * @param <A>
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param arraySupplier
+     * @return
      */
     public static <A, T extends A> A[] toArray(final Collection<T> c, final int fromIndex, final int toIndex, final IntFunction<A[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier);
@@ -2655,11 +2655,11 @@ public final class N {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param c the c
-     * @return the a[]
+     * @param <A>
+     * @param <T>
+     * @param targetClass
+     * @param c
+     * @return
      */
     public static <A, T extends A> A[] toArray(final Class<A[]> targetClass, final Collection<T> c) {
         N.checkArgNotNull(targetClass);
@@ -2674,13 +2674,13 @@ public final class N {
     /**
      * To array.
      *
-     * @param <A> the generic type
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the a[]
+     * @param <A>
+     * @param <T>
+     * @param targetClass
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <A, T extends A> A[] toArray(final Class<A[]> targetClass, final Collection<T> c, final int fromIndex, final int toIndex) {
         N.checkArgNotNull(targetClass);
@@ -2715,8 +2715,8 @@ public final class N {
     /**
      * To boolean array.
      *
-     * @param c the c
-     * @return the boolean[]
+     * @param c
+     * @return
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c) {
         return toBooleanArray(c, false);
@@ -2725,10 +2725,10 @@ public final class N {
     /**
      * To boolean array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the boolean[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c, final int fromIndex, final int toIndex) {
         return toBooleanArray(c, fromIndex, toIndex, false);
@@ -2737,9 +2737,9 @@ public final class N {
     /**
      * To boolean array.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the boolean[]
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c, final boolean defaultForNull) {
         return toBooleanArray(c, 0, size(c), defaultForNull);
@@ -2748,11 +2748,11 @@ public final class N {
     /**
      * To boolean array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the boolean[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c, final int fromIndex, final int toIndex, final boolean defaultForNull) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -2803,8 +2803,8 @@ public final class N {
     /**
      * To char array.
      *
-     * @param c the c
-     * @return the char[]
+     * @param c
+     * @return
      */
     public static char[] toCharArray(final Collection<Character> c) {
         return toCharArray(c, (char) 0);
@@ -2813,10 +2813,10 @@ public final class N {
     /**
      * To char array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the char[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static char[] toCharArray(final Collection<Character> c, final int fromIndex, final int toIndex) {
         return toCharArray(c, fromIndex, toIndex, (char) 0);
@@ -2825,9 +2825,9 @@ public final class N {
     /**
      * To char array.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the char[]
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static char[] toCharArray(final Collection<Character> c, final char defaultForNull) {
         return toCharArray(c, 0, size(c), defaultForNull);
@@ -2836,11 +2836,11 @@ public final class N {
     /**
      * To char array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the char[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static char[] toCharArray(final Collection<Character> c, final int fromIndex, final int toIndex, final char defaultForNull) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -2891,8 +2891,8 @@ public final class N {
     /**
      * To byte array.
      *
-     * @param c the c
-     * @return the byte[]
+     * @param c
+     * @return
      */
     public static byte[] toByteArray(final Collection<? extends Number> c) {
         return toByteArray(c, (byte) 0);
@@ -2901,10 +2901,10 @@ public final class N {
     /**
      * To byte array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static byte[] toByteArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toByteArray(c, fromIndex, toIndex, (byte) 0);
@@ -2913,9 +2913,9 @@ public final class N {
     /**
      * To byte array.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the byte[]
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static byte[] toByteArray(final Collection<? extends Number> c, final byte defaultForNull) {
         return toByteArray(c, 0, size(c), defaultForNull);
@@ -2924,11 +2924,11 @@ public final class N {
     /**
      * To byte array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the byte[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static byte[] toByteArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final byte defaultForNull) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -2979,8 +2979,8 @@ public final class N {
     /**
      * To short array.
      *
-     * @param c the c
-     * @return the short[]
+     * @param c
+     * @return
      */
     public static short[] toShortArray(final Collection<? extends Number> c) {
         return toShortArray(c, (short) 0);
@@ -2989,10 +2989,10 @@ public final class N {
     /**
      * To short array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static short[] toShortArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toShortArray(c, fromIndex, toIndex, (short) 0);
@@ -3001,9 +3001,9 @@ public final class N {
     /**
      * To short array.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the short[]
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static short[] toShortArray(final Collection<? extends Number> c, final short defaultForNull) {
         return toShortArray(c, 0, size(c), defaultForNull);
@@ -3012,11 +3012,11 @@ public final class N {
     /**
      * To short array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the short[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static short[] toShortArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final short defaultForNull) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -3067,8 +3067,8 @@ public final class N {
     /**
      * To int array.
      *
-     * @param c the c
-     * @return the int[]
+     * @param c
+     * @return
      */
     public static int[] toIntArray(final Collection<? extends Number> c) {
         return toIntArray(c, 0);
@@ -3077,10 +3077,10 @@ public final class N {
     /**
      * To int array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int[] toIntArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toIntArray(c, fromIndex, toIndex, 0);
@@ -3089,9 +3089,9 @@ public final class N {
     /**
      * To int array.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the int[]
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static int[] toIntArray(final Collection<? extends Number> c, final int defaultForNull) {
         return toIntArray(c, 0, size(c), defaultForNull);
@@ -3100,11 +3100,11 @@ public final class N {
     /**
      * To int array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the int[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static int[] toIntArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final int defaultForNull) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -3155,8 +3155,8 @@ public final class N {
     /**
      * To long array.
      *
-     * @param c the c
-     * @return the long[]
+     * @param c
+     * @return
      */
     public static long[] toLongArray(final Collection<? extends Number> c) {
         return toLongArray(c, 0);
@@ -3165,10 +3165,10 @@ public final class N {
     /**
      * To long array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the long[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static long[] toLongArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toLongArray(c, fromIndex, toIndex, 0);
@@ -3177,9 +3177,9 @@ public final class N {
     /**
      * To long array.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the long[]
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static long[] toLongArray(final Collection<? extends Number> c, final long defaultForNull) {
         return toLongArray(c, 0, size(c), defaultForNull);
@@ -3188,11 +3188,11 @@ public final class N {
     /**
      * To long array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the long[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static long[] toLongArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final long defaultForNull) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -3243,8 +3243,8 @@ public final class N {
     /**
      * To float array.
      *
-     * @param c the c
-     * @return the float[]
+     * @param c
+     * @return
      */
     public static float[] toFloatArray(final Collection<? extends Number> c) {
         return toFloatArray(c, 0);
@@ -3253,10 +3253,10 @@ public final class N {
     /**
      * To float array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static float[] toFloatArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toFloatArray(c, fromIndex, toIndex, 0);
@@ -3265,9 +3265,9 @@ public final class N {
     /**
      * To float array.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the float[]
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static float[] toFloatArray(final Collection<? extends Number> c, final float defaultForNull) {
         return toFloatArray(c, 0, size(c), defaultForNull);
@@ -3276,11 +3276,11 @@ public final class N {
     /**
      * To float array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the float[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static float[] toFloatArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final float defaultForNull) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -3331,8 +3331,8 @@ public final class N {
     /**
      * To double array.
      *
-     * @param c the c
-     * @return the double[]
+     * @param c
+     * @return
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c) {
         return toDoubleArray(c, 0);
@@ -3341,10 +3341,10 @@ public final class N {
     /**
      * To double array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toDoubleArray(c, fromIndex, toIndex, 0);
@@ -3353,9 +3353,9 @@ public final class N {
     /**
      * To double array.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the double[]
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c, final double defaultForNull) {
         return toDoubleArray(c, 0, size(c), defaultForNull);
@@ -3364,11 +3364,11 @@ public final class N {
     /**
      * To double array.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the double[]
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final double defaultForNull) {
         N.checkFromToIndex(fromIndex, toIndex, size(c));
@@ -3419,8 +3419,8 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public static List<Boolean> toList(final boolean[] a) {
         return toList(a, 0, len(a));
@@ -3429,10 +3429,10 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static List<Boolean> toList(final boolean[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3453,8 +3453,8 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public static List<Character> toList(final char[] a) {
         return toList(a, 0, len(a));
@@ -3463,10 +3463,10 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static List<Character> toList(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3487,8 +3487,8 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public static List<Byte> toList(final byte[] a) {
         return toList(a, 0, len(a));
@@ -3497,10 +3497,10 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static List<Byte> toList(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3521,8 +3521,8 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public static List<Short> toList(final short[] a) {
         return toList(a, 0, len(a));
@@ -3531,10 +3531,10 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static List<Short> toList(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3555,8 +3555,8 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public static List<Integer> toList(final int[] a) {
         return toList(a, 0, len(a));
@@ -3565,10 +3565,10 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static List<Integer> toList(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3589,8 +3589,8 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public static List<Long> toList(final long[] a) {
         return toList(a, 0, len(a));
@@ -3599,10 +3599,10 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static List<Long> toList(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3623,8 +3623,8 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public static List<Float> toList(final float[] a) {
         return toList(a, 0, len(a));
@@ -3633,10 +3633,10 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static List<Float> toList(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3657,8 +3657,8 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @return the list
+     * @param a
+     * @return
      */
     public static List<Double> toList(final double[] a) {
         return toList(a, 0, len(a));
@@ -3667,10 +3667,10 @@ public final class N {
     /**
      * To list.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static List<Double> toList(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3691,9 +3691,9 @@ public final class N {
     /**
      * To list.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the list
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T> List<T> toList(final T[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -3706,11 +3706,11 @@ public final class N {
     /**
      * To list.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T> List<T> toList(final T[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3733,8 +3733,8 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @return the sets the
+     * @param a
+     * @return
      */
     public static Set<Boolean> toSet(final boolean[] a) {
         return toSet(a, 0, len(a));
@@ -3743,10 +3743,10 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Set<Boolean> toSet(final boolean[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3767,8 +3767,8 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @return the sets the
+     * @param a
+     * @return
      */
     public static Set<Character> toSet(final char[] a) {
         return toSet(a, 0, len(a));
@@ -3777,10 +3777,10 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Set<Character> toSet(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3801,8 +3801,8 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @return the sets the
+     * @param a
+     * @return
      */
     public static Set<Byte> toSet(final byte[] a) {
         return toSet(a, 0, len(a));
@@ -3811,10 +3811,10 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Set<Byte> toSet(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3835,8 +3835,8 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @return the sets the
+     * @param a
+     * @return
      */
     public static Set<Short> toSet(final short[] a) {
         return toSet(a, 0, len(a));
@@ -3845,10 +3845,10 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Set<Short> toSet(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3869,8 +3869,8 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @return the sets the
+     * @param a
+     * @return
      */
     public static Set<Integer> toSet(final int[] a) {
         return toSet(a, 0, len(a));
@@ -3879,10 +3879,10 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Set<Integer> toSet(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3903,8 +3903,8 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @return the sets the
+     * @param a
+     * @return
      */
     public static Set<Long> toSet(final long[] a) {
         return toSet(a, 0, len(a));
@@ -3913,10 +3913,10 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Set<Long> toSet(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3937,8 +3937,8 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @return the sets the
+     * @param a
+     * @return
      */
     public static Set<Float> toSet(final float[] a) {
         return toSet(a, 0, len(a));
@@ -3947,10 +3947,10 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Set<Float> toSet(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -3971,8 +3971,8 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @return the sets the
+     * @param a
+     * @return
      */
     public static Set<Double> toSet(final double[] a) {
         return toSet(a, 0, len(a));
@@ -3981,10 +3981,10 @@ public final class N {
     /**
      * To set.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static Set<Double> toSet(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -4005,9 +4005,9 @@ public final class N {
     /**
      * To set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the sets the
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T> Set<T> toSet(final T[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -4020,11 +4020,11 @@ public final class N {
     /**
      * To set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the sets the
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T> Set<T> toSet(final T[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -4045,10 +4045,10 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
@@ -4057,12 +4057,12 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) {
@@ -4084,10 +4084,10 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Character>> C toCollection(final char[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
@@ -4096,12 +4096,12 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Character>> C toCollection(final char[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) {
@@ -4123,10 +4123,10 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Byte>> C toCollection(final byte[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
@@ -4135,12 +4135,12 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Byte>> C toCollection(final byte[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -4161,10 +4161,10 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Short>> C toCollection(final short[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
@@ -4173,12 +4173,12 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Short>> C toCollection(final short[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) {
@@ -4200,10 +4200,10 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Integer>> C toCollection(final int[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
@@ -4212,12 +4212,12 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Integer>> C toCollection(final int[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) {
@@ -4239,10 +4239,10 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Long>> C toCollection(final long[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
@@ -4251,12 +4251,12 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Long>> C toCollection(final long[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -4277,10 +4277,10 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Float>> C toCollection(final float[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
@@ -4289,12 +4289,12 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Float>> C toCollection(final float[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) {
@@ -4316,10 +4316,10 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Double>> C toCollection(final double[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
@@ -4328,12 +4328,12 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <C extends Collection<Double>> C toCollection(final double[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) {
@@ -4355,11 +4355,11 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param a the a
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <C>
+     * @param a
+     * @param supplier
+     * @return
      */
     public static <T, C extends Collection<T>> C toCollection(final T[] a, final IntFunction<? extends C> supplier) {
         if (N.isNullOrEmpty(a)) {
@@ -4372,13 +4372,13 @@ public final class N {
     /**
      * To collection.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <C>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     public static <T, C extends Collection<T>> C toCollection(final T[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
@@ -4403,9 +4403,9 @@ public final class N {
     /**
      * The input array is returned.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the t[]
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> T[] asArray(final T... a) {
@@ -4417,10 +4417,10 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <T> the generic type
-     * @param m the m
-     * @param a the a
-     * @return the t
+     * @param <T>
+     * @param m
+     * @param a
+     * @return
      */
     @SuppressWarnings("unchecked")
     static <K, V, T extends Map<K, V>> T newMap(final T m, final Object... a) {
@@ -4456,11 +4456,11 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @return the map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1) {
         final Map<K, V> map = new HashMap<>();
@@ -4473,13 +4473,13 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @return the map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2) {
         final Map<K, V> map = new HashMap<>();
@@ -4493,15 +4493,15 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @return the map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
         final Map<K, V> map = new HashMap<>();
@@ -4516,17 +4516,17 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @return the map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4) {
@@ -4543,19 +4543,19 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @return the map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5) {
@@ -4573,21 +4573,21 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @return the map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6) {
@@ -4606,23 +4606,23 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @param k7 the k 7
-     * @param v7 the v 7
-     * @return the map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
@@ -4642,8 +4642,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param a the a
-     * @return the map
+     * @param a
+     * @return
      */
     @SafeVarargs
     @NullSafe
@@ -4658,9 +4658,9 @@ public final class N {
     /**
      * As props.
      *
-     * @param a            pairs of property name and value or a Java Entity Object what
+     * @param a pairs of property name and value or a Java Entity Object what
      *            allows access to properties using getter and setter methods.
-     * @return the map
+     * @return
      */
     @SafeVarargs
     public static Map<String, Object> asProps(final Object... a) {
@@ -4676,11 +4676,11 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @return the linked hash map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1) {
         final LinkedHashMap<K, V> map = new LinkedHashMap<>();
@@ -4693,13 +4693,13 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @return the linked hash map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2) {
         final LinkedHashMap<K, V> map = new LinkedHashMap<>();
@@ -4713,15 +4713,15 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @return the linked hash map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
         final LinkedHashMap<K, V> map = new LinkedHashMap<>();
@@ -4736,17 +4736,17 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @return the linked hash map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3,
             final k k4, final v v4) {
@@ -4763,19 +4763,19 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @return the linked hash map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3,
             final k k4, final v v4, final k k5, final v v5) {
@@ -4793,21 +4793,21 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @return the linked hash map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3,
             final k k4, final v v4, final k k5, final v v5, final k k6, final v v6) {
@@ -4826,23 +4826,23 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @param k7 the k 7
-     * @param v7 the v 7
-     * @return the linked hash map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3,
             final k k4, final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
@@ -4862,8 +4862,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param a the a
-     * @return the linked hash map
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <K, V> LinkedHashMap<K, V> asLinkedHashMap(final Object... a) {
@@ -4877,9 +4877,9 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e the e
-     * @return the list
+     * @param <T>
+     * @param e
+     * @return
      */
     public static <T> List<T> asList(final T e) {
         final List<T> list = new ArrayList<>(1);
@@ -4890,10 +4890,10 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @return the list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @return
      */
     public static <T> List<T> asList(final T e1, final T e2) {
         final List<T> list = new ArrayList<>(2);
@@ -4905,11 +4905,11 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @return the list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @return
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3) {
         final List<T> list = new ArrayList<>(3);
@@ -4922,12 +4922,12 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @return the list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @return
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4) {
         final List<T> list = new ArrayList<>(4);
@@ -4941,13 +4941,13 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @return the list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @return
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5) {
         final List<T> list = new ArrayList<>(5);
@@ -4962,14 +4962,14 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @return the list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @return
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         final List<T> list = new ArrayList<>(6);
@@ -4985,15 +4985,15 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @param e7 the e 7
-     * @return the list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @return
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         final List<T> list = new ArrayList<>(7);
@@ -5010,16 +5010,16 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @param e7 the e 7
-     * @param e8 the e 8
-     * @return the list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @return
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
         final List<T> list = new ArrayList<>(8);
@@ -5037,17 +5037,17 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @param e7 the e 7
-     * @param e8 the e 8
-     * @param e9 the e 9
-     * @return the list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @param e9
+     * @return
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
         final List<T> list = new ArrayList<>(9);
@@ -5066,9 +5066,9 @@ public final class N {
     /**
      * As list.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the list
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     @NullSafe
@@ -5093,9 +5093,9 @@ public final class N {
     /**
      * As linked list.
      *
-     * @param <T> the generic type
-     * @param e the e
-     * @return the linked list
+     * @param <T>
+     * @param e
+     * @return
      */
     public static <T> LinkedList<T> asLinkedList(final T e) {
         final LinkedList<T> list = new LinkedList<>();
@@ -5106,10 +5106,10 @@ public final class N {
     /**
      * As linked list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @return the linked list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @return
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2) {
         final LinkedList<T> list = new LinkedList<>();
@@ -5121,11 +5121,11 @@ public final class N {
     /**
      * As linked list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @return the linked list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @return
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3) {
         final LinkedList<T> list = new LinkedList<>();
@@ -5138,12 +5138,12 @@ public final class N {
     /**
      * As linked list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @return the linked list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @return
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4) {
         final LinkedList<T> list = new LinkedList<>();
@@ -5157,13 +5157,13 @@ public final class N {
     /**
      * As linked list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @return the linked list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @return
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5) {
         final LinkedList<T> list = new LinkedList<>();
@@ -5178,14 +5178,14 @@ public final class N {
     /**
      * As linked list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @return the linked list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @return
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         final LinkedList<T> list = new LinkedList<>();
@@ -5201,15 +5201,15 @@ public final class N {
     /**
      * As linked list.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @param e7 the e 7
-     * @return the linked list
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @return
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         final LinkedList<T> list = new LinkedList<>();
@@ -5226,9 +5226,9 @@ public final class N {
     /**
      * As linked list.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the linked list
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     @NullSafe
@@ -5249,9 +5249,9 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e the e
-     * @return the sets the
+     * @param <T>
+     * @param e
+     * @return
      */
     public static <T> Set<T> asSet(final T e) {
         final Set<T> set = new HashSet<>(1);
@@ -5262,10 +5262,10 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @return the sets the
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2) {
         final Set<T> set = new HashSet<>(2);
@@ -5277,11 +5277,11 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @return the sets the
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3) {
         final Set<T> set = new HashSet<>(3);
@@ -5294,12 +5294,12 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @return the sets the
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4) {
         final Set<T> set = new HashSet<>(4);
@@ -5313,13 +5313,13 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @return the sets the
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
         final Set<T> set = new HashSet<>(5);
@@ -5334,14 +5334,14 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @return the sets the
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         final Set<T> set = new HashSet<>(6);
@@ -5357,15 +5357,15 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @param e7 the e 7
-     * @return the sets the
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         final Set<T> set = new HashSet<>(7);
@@ -5382,16 +5382,16 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @param e7 the e 7
-     * @param e8 the e 8
-     * @return the sets the
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
         final Set<T> set = new HashSet<>(8);
@@ -5409,17 +5409,17 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @param e7 the e 7
-     * @param e8 the e 8
-     * @param e9 the e 9
-     * @return the sets the
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @param e9
+     * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
         final Set<T> set = new HashSet<>(9);
@@ -5438,9 +5438,9 @@ public final class N {
     /**
      * As set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the sets the
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     @NullSafe
@@ -5461,9 +5461,9 @@ public final class N {
     /**
      * As linked linked hash set.
      *
-     * @param <T> the generic type
-     * @param e the e
-     * @return the linked hash set
+     * @param <T>
+     * @param e
+     * @return
      */
     public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e) {
         final LinkedHashSet<T> set = new LinkedHashSet<>(1);
@@ -5474,10 +5474,10 @@ public final class N {
     /**
      * As linked linked hash set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @return the linked hash set
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @return
      */
     public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2) {
         final LinkedHashSet<T> set = new LinkedHashSet<>(2);
@@ -5489,11 +5489,11 @@ public final class N {
     /**
      * As linked linked hash set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @return the linked hash set
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @return
      */
     public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3) {
         final LinkedHashSet<T> set = new LinkedHashSet<>(3);
@@ -5506,12 +5506,12 @@ public final class N {
     /**
      * As linked linked hash set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @return the linked hash set
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @return
      */
     public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3, final T e4) {
         final LinkedHashSet<T> set = new LinkedHashSet<>(4);
@@ -5525,13 +5525,13 @@ public final class N {
     /**
      * As linked linked hash set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @return the linked hash set
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @return
      */
     public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
         final LinkedHashSet<T> set = new LinkedHashSet<>(5);
@@ -5546,14 +5546,14 @@ public final class N {
     /**
      * As linked linked hash set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @return the linked hash set
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @return
      */
     public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         final LinkedHashSet<T> set = new LinkedHashSet<>(6);
@@ -5569,15 +5569,15 @@ public final class N {
     /**
      * As linked linked hash set.
      *
-     * @param <T> the generic type
-     * @param e1 the e 1
-     * @param e2 the e 2
-     * @param e3 the e 3
-     * @param e4 the e 4
-     * @param e5 the e 5
-     * @param e6 the e 6
-     * @param e7 the e 7
-     * @return the linked hash set
+     * @param <T>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @return
      */
     public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         final LinkedHashSet<T> set = new LinkedHashSet<>(7);
@@ -5594,9 +5594,9 @@ public final class N {
     /**
      * As linked hash set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the linked hash set
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     @NullSafe
@@ -5617,9 +5617,9 @@ public final class N {
     /**
      * As sorted set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the sorted set
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     @NullSafe
@@ -5640,9 +5640,9 @@ public final class N {
     /**
      * As navigable set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the navigable set
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> NavigableSet<T> asNavigableSet(final T... a) {
@@ -5662,9 +5662,9 @@ public final class N {
     /**
      * As queue.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the queue
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> Queue<T> asQueue(final T... a) {
@@ -5674,9 +5674,9 @@ public final class N {
     /**
      * As array blocking queue.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the array blocking queue
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> ArrayBlockingQueue<T> asArrayBlockingQueue(final T... a) {
@@ -5696,9 +5696,9 @@ public final class N {
     /**
      * As linked blocking queue.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the linked blocking queue
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> LinkedBlockingQueue<T> asLinkedBlockingQueue(final T... a) {
@@ -5718,9 +5718,9 @@ public final class N {
     /**
      * As concurrent linked queue.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the concurrent linked queue
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> ConcurrentLinkedQueue<T> asConcurrentLinkedQueue(final T... a) {
@@ -5740,9 +5740,9 @@ public final class N {
     /**
      * As delay queue.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the delay queue
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T extends Delayed> DelayQueue<T> asDelayQueue(final T... a) {
@@ -5762,9 +5762,9 @@ public final class N {
     /**
      * As priority queue.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the priority queue
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> PriorityQueue<T> asPriorityQueue(final T... a) {
@@ -5784,9 +5784,9 @@ public final class N {
     /**
      * As deque.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the deque
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> Deque<T> asDeque(final T... a) {
@@ -5796,9 +5796,9 @@ public final class N {
     /**
      * As array deque.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the array deque
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> ArrayDeque<T> asArrayDeque(final T... a) {
@@ -5818,9 +5818,9 @@ public final class N {
     /**
      * As linked blocking deque.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the linked blocking deque
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> LinkedBlockingDeque<T> asLinkedBlockingDeque(final T... a) {
@@ -5840,9 +5840,9 @@ public final class N {
     /**
      * As concurrent linked deque.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the concurrent linked deque
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> ConcurrentLinkedDeque<T> asConcurrentLinkedDeque(final T... a) {
@@ -5862,9 +5862,9 @@ public final class N {
     /**
      * As multiset.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the multiset
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> Multiset<T> asMultiset(final T... a) {
@@ -5874,9 +5874,9 @@ public final class N {
     /**
      * Wrap the specified value with a singleton list.
      *
-     * @param <T> the generic type
-     * @param o the o
-     * @return the list
+     * @param <T>
+     * @param o
+     * @return
      * @see java.util.Collections#singletonList(Object)
      */
     public static <T> List<T> asSingletonList(final T o) {
@@ -5886,9 +5886,9 @@ public final class N {
     /**
      * Wrap the specified value with a singleton set.
      *
-     * @param <T> the generic type
-     * @param o the o
-     * @return the sets the
+     * @param <T>
+     * @param o
+     * @return
      * @see java.util.Collections#singleton(Object)
      */
     public static <T> Set<T> asSingletonSet(final T o) {
@@ -5900,9 +5900,9 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param key the key
-     * @param value the value
-     * @return the map
+     * @param key
+     * @param value
+     * @return
      * @see java.util.Collections#singletonMap(Object, Object)
      */
     public static <K, V> Map<K, V> asSingletonMap(final K key, final V value) {
@@ -5915,10 +5915,10 @@ public final class N {
      * {@code sourceObject} is null. An instance of {@code targetClass} is returned if
      * convert successfully
      *
-     * @param <T> the generic type
-     * @param obj the obj
-     * @param targetClass the target class
-     * @return the t
+     * @param <T>
+     * @param obj
+     * @param targetClass
+     * @return
      */
     public static <T> T convert(final Object obj, final Class<? extends T> targetClass) {
         if (obj == null) {
@@ -5932,10 +5932,10 @@ public final class N {
     /**
      * Convert.
      *
-     * @param <T> the generic type
-     * @param obj the obj
-     * @param targetType the target type
-     * @return the t
+     * @param <T>
+     * @param obj
+     * @param targetType
+     * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> T convert(final Object obj, final Type<? extends T> targetType) {
@@ -6031,7 +6031,7 @@ public final class N {
      *
      * @param str
      *            a string.
-     * @return the <code>Boolean</code> value represented by the string.
+     * @return
      */
     public static boolean parseBoolean(final String str) {
         return isNullOrEmpty(str) ? false : Boolean.valueOf(str);
@@ -6040,8 +6040,8 @@ public final class N {
     /**
      * Parses the char.
      *
-     * @param str the str
-     * @return the char
+     * @param str
+     * @return
      */
     public static char parseChar(final String str) {
         return isNullOrEmpty(str) ? CHAR_0 : ((str.length() == 1) ? str.charAt(0) : (char) Integer.parseInt(str));
@@ -6052,8 +6052,8 @@ public final class N {
      * is not {@code null}, otherwise, the default value 0 for {@code byte} is
      * returned.
      *
-     * @param str the str
-     * @return the byte
+     * @param str
+     * @return
      */
     public static byte parseByte(final String str) {
         if (N.isNullOrEmpty(str)) {
@@ -6079,8 +6079,8 @@ public final class N {
      * is not {@code null}, otherwise, the default value 0 for {@code short} is
      * returned.
      *
-     * @param str the str
-     * @return the short
+     * @param str
+     * @return
      */
     public static short parseShort(final String str) {
         if (N.isNullOrEmpty(str)) {
@@ -6102,8 +6102,8 @@ public final class N {
      * {@code str} is not {@code null}, otherwise, the default value 0 for
      * {@code int} is returned.
      *
-     * @param str the str
-     * @return the int
+     * @param str
+     * @return
      */
     public static int parseInt(final String str) {
         if (N.isNullOrEmpty(str)) {
@@ -6125,8 +6125,8 @@ public final class N {
      * is not {@code null}, otherwise, the default value 0 for {@code long} is
      * returned.
      *
-     * @param str the str
-     * @return the long
+     * @param str
+     * @return
      */
     public static long parseLong(final String str) {
         if (N.isNullOrEmpty(str)) {
@@ -6148,8 +6148,8 @@ public final class N {
      * is not {@code null}, otherwise, the default value 0f for {@code float} is
      * returned.
      *
-     * @param str the str
-     * @return the float
+     * @param str
+     * @return
      */
     public static float parseFloat(final String str) {
         if (isNullOrEmpty(str)) {
@@ -6164,8 +6164,8 @@ public final class N {
      * is not {@code null}, otherwise, the default value 0d for {@code double} is
      * returned.
      *
-     * @param str the str
-     * @return the double
+     * @param str
+     * @return
      */
     public static double parseDouble(final String str) {
         return isNullOrEmpty(str) ? 0d : Double.parseDouble(str);
@@ -6174,8 +6174,8 @@ public final class N {
     /**
      * Base 64 encode.
      *
-     * @param binaryData the binary data
-     * @return the string
+     * @param binaryData
+     * @return
      */
     public static String base64Encode(final byte[] binaryData) {
         if (N.isNullOrEmpty(binaryData)) {
@@ -6188,8 +6188,8 @@ public final class N {
     /**
      * Base 64 encode chunked.
      *
-     * @param binaryData the binary data
-     * @return the string
+     * @param binaryData
+     * @return
      */
     public static String base64EncodeChunked(final byte[] binaryData) {
         if (N.isNullOrEmpty(binaryData)) {
@@ -6202,8 +6202,8 @@ public final class N {
     /**
      * Base 64 decode.
      *
-     * @param base64String the base 64 string
-     * @return the byte[]
+     * @param base64String
+     * @return
      */
     public static byte[] base64Decode(final String base64String) {
         if (N.isNullOrEmpty(base64String)) {
@@ -6216,8 +6216,8 @@ public final class N {
     /**
      * Base 64 decode to string.
      *
-     * @param base64String the base 64 string
-     * @return the string
+     * @param base64String
+     * @return
      */
     public static String base64DecodeToString(final String base64String) {
         if (N.isNullOrEmpty(base64String)) {
@@ -6230,8 +6230,8 @@ public final class N {
     /**
      * Base 64 url encode.
      *
-     * @param binaryData the binary data
-     * @return the string
+     * @param binaryData
+     * @return
      */
     public static String base64UrlEncode(final byte[] binaryData) {
         if (N.isNullOrEmpty(binaryData)) {
@@ -6244,8 +6244,8 @@ public final class N {
     /**
      * Base 64 url decode.
      *
-     * @param base64String the base 64 string
-     * @return the byte[]
+     * @param base64String
+     * @return
      */
     public static byte[] base64UrlDecode(final String base64String) {
         if (N.isNullOrEmpty(base64String)) {
@@ -6258,8 +6258,8 @@ public final class N {
     /**
      * Base 64 url decode to string.
      *
-     * @param base64String the base 64 string
-     * @return the string
+     * @param base64String
+     * @return
      */
     public static String base64UrlDecodeToString(final String base64String) {
         if (N.isNullOrEmpty(base64String)) {
@@ -6272,8 +6272,8 @@ public final class N {
     /**
      * Url encode.
      *
-     * @param parameters the parameters
-     * @return the string
+     * @param parameters
+     * @return
      */
     public static String urlEncode(final Object parameters) {
         if (parameters == null) {
@@ -6286,9 +6286,9 @@ public final class N {
     /**
      * Url encode.
      *
-     * @param parameters the parameters
-     * @param charset the charset
-     * @return the string
+     * @param parameters
+     * @param charset
+     * @return
      */
     public static String urlEncode(final Object parameters, final Charset charset) {
         if (parameters == null) {
@@ -6301,8 +6301,8 @@ public final class N {
     /**
      * Url decode.
      *
-     * @param urlQuery the url query
-     * @return the map
+     * @param urlQuery
+     * @return
      */
     public static Map<String, String> urlDecode(final String urlQuery) {
         if (N.isNullOrEmpty(urlQuery)) {
@@ -6315,9 +6315,9 @@ public final class N {
     /**
      * Url decode.
      *
-     * @param urlQuery the url query
-     * @param charset the charset
-     * @return the map
+     * @param urlQuery
+     * @param charset
+     * @return
      */
     public static Map<String, String> urlDecode(final String urlQuery, final Charset charset) {
         if (N.isNullErrorMsg(urlQuery)) {
@@ -6330,10 +6330,10 @@ public final class N {
     /**
      * Url decode.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param urlQuery the url query
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param urlQuery
+     * @return
      */
     public static <T> T urlDecode(final Class<? extends T> targetClass, final String urlQuery) {
         if (N.isNullErrorMsg(urlQuery)) {
@@ -6346,11 +6346,11 @@ public final class N {
     /**
      * Url decode.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param urlQuery the url query
-     * @param charset the charset
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param urlQuery
+     * @param charset
+     * @return
      */
     public static <T> T urlDecode(final Class<? extends T> targetClass, final String urlQuery, final Charset charset) {
         if (N.isNullOrEmpty(urlQuery)) {
@@ -6363,7 +6363,7 @@ public final class N {
     /**
      * Returns the UUID without '-'.
      *
-     * @return the string
+     * @return
      * @see UUID#randomUUID().
      */
     public static String guid() {
@@ -6373,7 +6373,7 @@ public final class N {
     /**
      * Returns an UUID.
      *
-     * @return the string
+     * @return
      * @see UUID#randomUUID().
      */
     public static String uuid() {
@@ -6383,7 +6383,7 @@ public final class N {
     /**
      * Checks if is entity.
      *
-     * @param cls the cls
+     * @param cls
      * @return true, if is entity
      * @see ClassUtil#isEntity(Class)
      * @deprecated replaced by {@code ClassUtil.isEntity(Class)}
@@ -6396,7 +6396,7 @@ public final class N {
     /**
      * Checks if is dirty marker.
      *
-     * @param cls the cls
+     * @param cls
      * @return true, if is dirty marker
      * @see DirtyMarkerUtil#isDirtyMarker(Class)
      * @deprecated replaced by {@code ClassUtil.isDirtyMarker(Class)}
@@ -6412,9 +6412,9 @@ public final class N {
     /**
      * Clone.
      *
-     * @param <T> the generic type
-     * @param entity the entity
-     * @return the t
+     * @param <T>
+     * @param entity
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(final T entity) {
@@ -6425,12 +6425,12 @@ public final class N {
      * Deeply copy by: entity -> serialize -> String/bytes -> deserialize -> new
      * entity.
      *
-     * @param <T> the generic type
-     * @param targetClass            a Java Object what allows access to properties using getter
+     * @param <T>
+     * @param targetClass a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param entity            a Java Object what allows access to properties using getter
+     * @param entity a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @return the t
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(final Class<? extends T> targetClass, final Object entity) {
@@ -6461,10 +6461,10 @@ public final class N {
      * Returns a new created instance of the same class and set with same
      * properties retrieved by 'getXXX' method in the specified {@code entity}.
      *
-     * @param <T> the generic type
-     * @param entity            a Java Object what allows access to properties using getter
+     * @param <T>
+     * @param entity a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @return the t
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T copy(final T entity) {
@@ -6474,10 +6474,10 @@ public final class N {
     /**
      * Copy.
      *
-     * @param <T> the generic type
-     * @param entity the entity
-     * @param selectPropNames the select prop names
-     * @return the t
+     * @param <T>
+     * @param entity
+     * @param selectPropNames
+     * @return
      */
     public static <T> T copy(final T entity, final Collection<String> selectPropNames) {
         return copy((Class<T>) entity.getClass(), entity, selectPropNames);
@@ -6486,10 +6486,10 @@ public final class N {
     /**
      * Copy.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param entity the entity
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param entity
+     * @return
      */
     public static <T> T copy(final Class<? extends T> targetClass, final Object entity) {
         return copy(targetClass, entity, null);
@@ -6500,13 +6500,13 @@ public final class N {
      * same properties retrieved by 'getXXX' method in the specified
      * {@code entity}.
      *
-     * @param <T> the generic type
-     * @param targetClass            a Java Object what allows access to properties using getter
+     * @param <T>
+     * @param targetClass a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param entity            a Java Object what allows access to properties using getter
+     * @param entity a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param selectPropNames the select prop names
-     * @return the t
+     * @param selectPropNames
+     * @return
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final Collection<String> selectPropNames) {
@@ -6539,12 +6539,12 @@ public final class N {
     /**
      * Copy.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param entity the entity
-     * @param ignoreUnknownProperty the ignore unknown property
-     * @param ignorePropNames the ignore prop names
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param entity
+     * @param ignoreUnknownProperty
+     * @param ignorePropNames
+     * @return
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final boolean ignoreUnknownProperty,
@@ -6578,8 +6578,8 @@ public final class N {
     /**
      * Merge.
      *
-     * @param sourceEntity the source entity
-     * @param targetEntity the target entity
+     * @param sourceEntity
+     * @param targetEntity
      */
     public static void merge(final Object sourceEntity, final Object targetEntity) {
         merge(sourceEntity, targetEntity, null);
@@ -6589,11 +6589,11 @@ public final class N {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceEntity} to the specified {@code targetEntity}.
      *
-     * @param sourceEntity            a Java Object what allows access to properties using getter
+     * @param sourceEntity a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param targetEntity            a Java Object what allows access to properties using getter
+     * @param targetEntity a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param selectPropNames the select prop names
+     * @param selectPropNames
      */
     public static void merge(final Object sourceEntity, final Object targetEntity, final Collection<String> selectPropNames) {
         final Class<?> srcCls = sourceEntity.getClass();
@@ -6646,10 +6646,10 @@ public final class N {
     /**
      * Merge.
      *
-     * @param sourceEntity the source entity
-     * @param targetEntity the target entity
-     * @param ignoreUnknownProperty the ignore unknown property
-     * @param ignorePropNames the ignore prop names
+     * @param sourceEntity
+     * @param targetEntity
+     * @param ignoreUnknownProperty
+     * @param ignorePropNames
      */
     public static void merge(final Object sourceEntity, final Object targetEntity, final boolean ignoreUnknownProperty, final Set<String> ignorePropNames) {
         final Class<?> srcCls = sourceEntity.getClass();
@@ -6693,8 +6693,8 @@ public final class N {
     /**
      * Erase.
      *
-     * @param entity the entity
-     * @param propNames the prop names
+     * @param entity
+     * @param propNames
      */
     @SafeVarargs
     public static void erase(final Object entity, final String... propNames) {
@@ -6720,8 +6720,8 @@ public final class N {
     /**
      * Erase.
      *
-     * @param entity the entity
-     * @param propNames the prop names
+     * @param entity
+     * @param propNames
      */
     public static void erase(final Object entity, final Collection<String> propNames) {
         if (entity == null || N.isNullOrEmpty(propNames)
@@ -6744,7 +6744,7 @@ public final class N {
     /**
      * Erase all.
      *
-     * @param entity the entity
+     * @param entity
      */
     public static void eraseAll(final Object entity) {
         if (entity == null) {
@@ -6783,8 +6783,8 @@ public final class N {
     /**
      * Returns an empty {@code List} that is immutable.
      *
-     * @param <T> the generic type
-     * @return the list
+     * @param <T>
+     * @return
      * @see Collections#emptyList()
      */
     public static <T> List<T> emptyList() {
@@ -6794,8 +6794,8 @@ public final class N {
     /**
      * Returns an empty {@code Set} that is immutable.
      *
-     * @param <T> the generic type
-     * @return the sets the
+     * @param <T>
+     * @return
      * @see Collections#emptySet()
      */
     public static <T> Set<T> emptySet() {
@@ -6805,8 +6805,8 @@ public final class N {
     /**
      * Returns an empty {@code SortedSet} that is immutable.
      *
-     * @param <T> the generic type
-     * @return the sorted set
+     * @param <T>
+     * @return
      * @see Collections#emptySortedSet()
      */
     public static <T> SortedSet<T> emptySortedSet() {
@@ -6816,8 +6816,8 @@ public final class N {
     /**
      * Returns an empty {@code emptyNavigableSet} that is immutable.
      *
-     * @param <T> the generic type
-     * @return the navigable set
+     * @param <T>
+     * @return
      * @see Collections#emptyNavigableSet()
      */
     public static <T> NavigableSet<T> emptyNavigableSet() {
@@ -6829,7 +6829,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the map
+     * @return
      * @see Collections#emptyMap()
      */
     public static <K, V> Map<K, V> emptyMap() {
@@ -6841,7 +6841,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the sorted map
+     * @return
      * @see Collections#emptySortedMap()
      */
     public static <K, V> SortedMap<K, V> emptySortedMap() {
@@ -6853,7 +6853,7 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the navigable map
+     * @return
      * @see Collections#emptyNavigableMap()
      */
     public static <K, V> NavigableMap<K, V> emptyNavigableMap() {
@@ -6863,8 +6863,8 @@ public final class N {
     /**
      * Returns an empty {@code Iterator} that is immutable.
      *
-     * @param <T> the generic type
-     * @return the iterator
+     * @param <T>
+     * @return
      * @see Collections#emptyIterator()
      */
     public static <T> Iterator<T> emptyIterator() {
@@ -6874,8 +6874,8 @@ public final class N {
     /**
      * Returns an empty {@code ListIterator} that is immutable.
      *
-     * @param <T> the generic type
-     * @return the list iterator
+     * @param <T>
+     * @return
      * @see Collections#emptyListIterator()
      */
     public static <T> ListIterator<T> emptyListIterator() {
@@ -6888,7 +6888,7 @@ public final class N {
     /**
      * Empty input stream.
      *
-     * @return the input stream
+     * @return
      */
     public static InputStream emptyInputStream() {
         return EMPTY_INPUT_STREAM;
@@ -6897,9 +6897,9 @@ public final class N {
     /**
      * Any null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
+     * @param <T>
+     * @param a
+     * @param b
      * @return true, if successful
      */
     public static <T> boolean anyNull(final T a, final T b) {
@@ -6909,10 +6909,10 @@ public final class N {
     /**
      * Any null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
      * @return true, if successful
      */
     public static <T> boolean anyNull(final T a, final T b, final T c) {
@@ -6922,8 +6922,8 @@ public final class N {
     /**
      * Any null.
      *
-     * @param <T> the generic type
-     * @param a the a
+     * @param <T>
+     * @param a
      * @return true, if successful
      */
     @SafeVarargs
@@ -6944,8 +6944,8 @@ public final class N {
     /**
      * Any null.
      *
-     * @param <T> the generic type
-     * @param c the c
+     * @param <T>
+     * @param c
      * @return true, if successful
      */
     public static <T> boolean anyNull(final Collection<T> c) {
@@ -6965,9 +6965,9 @@ public final class N {
     /**
      * All null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
+     * @param <T>
+     * @param a
+     * @param b
      * @return true, if successful
      */
     public static <T> boolean allNull(final T a, final T b) {
@@ -6977,10 +6977,10 @@ public final class N {
     /**
      * All null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
      * @return true, if successful
      */
     public static <T> boolean allNull(final T a, final T b, final T c) {
@@ -6990,8 +6990,8 @@ public final class N {
     /**
      * All null.
      *
-     * @param <T> the generic type
-     * @param a the a
+     * @param <T>
+     * @param a
      * @return true, if successful
      */
     @SafeVarargs
@@ -7012,8 +7012,8 @@ public final class N {
     /**
      * All null.
      *
-     * @param <T> the generic type
-     * @param c the c
+     * @param <T>
+     * @param c
      * @return true, if successful
      */
     public static <T> boolean allNull(final Collection<T> c) {
@@ -7033,9 +7033,9 @@ public final class N {
     /**
      * Any null or empty.
      *
-     * @param cs1 the cs 1
-     * @param cs2 the cs 2
-     * @param cs3 the cs 3
+     * @param cs1
+     * @param cs2
+     * @param cs3
      * @return true, if successful
      */
     public static boolean anyNullOrEmpty(final CharSequence cs1, final CharSequence cs2, final CharSequence cs3) {
@@ -7045,7 +7045,7 @@ public final class N {
     /**
      * Any null or empty.
      *
-     * @param css the css
+     * @param css
      * @return true, if successful
      */
     @SafeVarargs
@@ -7066,7 +7066,7 @@ public final class N {
     /**
      * Any null or empty.
      *
-     * @param css the css
+     * @param css
      * @return true, if successful
      */
     public static boolean anyNullOrEmpty(final Collection<? extends CharSequence> css) {
@@ -7086,9 +7086,9 @@ public final class N {
     /**
      * All null or empty.
      *
-     * @param cs1 the cs 1
-     * @param cs2 the cs 2
-     * @param cs3 the cs 3
+     * @param cs1
+     * @param cs2
+     * @param cs3
      * @return true, if successful
      */
     public static boolean allNullOrEmpty(final CharSequence cs1, final CharSequence cs2, final CharSequence cs3) {
@@ -7098,7 +7098,7 @@ public final class N {
     /**
      * All null or empty.
      *
-     * @param css the css
+     * @param css
      * @return true, if successful
      */
     @SafeVarargs
@@ -7119,7 +7119,7 @@ public final class N {
     /**
      * All null or empty.
      *
-     * @param css the css
+     * @param css
      * @return true, if successful
      */
     public static boolean allNullOrEmpty(final Collection<? extends CharSequence> css) {
@@ -7139,9 +7139,9 @@ public final class N {
     /**
      * First.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the nullable
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Nullable<T> first(final Collection<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -7158,9 +7158,9 @@ public final class N {
     /**
      * Last.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the nullable
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Nullable<T> last(final Collection<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -7185,10 +7185,10 @@ public final class N {
     /**
      * First non null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the optional
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b) {
         return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : Optional.<T> empty());
@@ -7197,11 +7197,11 @@ public final class N {
     /**
      * First non null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the optional
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b, final T c) {
         return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : (c != null ? Optional.of(c) : Optional.<T> empty()));
@@ -7210,9 +7210,9 @@ public final class N {
     /**
      * First non null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the optional
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> Optional<T> firstNonNull(final T... a) {
@@ -7232,9 +7232,9 @@ public final class N {
     /**
      * First non null.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the optional
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Optional<T> firstNonNull(final Collection<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -7253,10 +7253,10 @@ public final class N {
     /**
      * Last non null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the optional
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T> Optional<T> lastNonNull(final T a, final T b) {
         return b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.<T> empty());
@@ -7265,11 +7265,11 @@ public final class N {
     /**
      * Last non null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the optional
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static <T> Optional<T> lastNonNull(final T a, final T b, final T c) {
         return c != null ? Optional.of(c) : (b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.<T> empty()));
@@ -7278,9 +7278,9 @@ public final class N {
     /**
      * Last non null.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the optional
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> Optional<T> lastNonNull(final T... a) {
@@ -7300,9 +7300,9 @@ public final class N {
     /**
      * Last non null.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the optional
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> Optional<T> lastNonNull(final Collection<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -7349,8 +7349,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the optional
+     * @param map
+     * @return
      */
     public static <K, V> Optional<Map.Entry<K, V>> firstEntry(final Map<K, V> map) {
         if (map == null || map.isEmpty()) {
@@ -7365,8 +7365,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the optional
+     * @param map
+     * @return
      */
     public static <K, V> Optional<Map.Entry<K, V>> lastEntry(final Map<K, V> map) {
         if (map == null || map.isEmpty()) {
@@ -7379,9 +7379,9 @@ public final class N {
     /**
      * First or null if empty.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the t
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> T firstOrNullIfEmpty(final Collection<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -7398,9 +7398,9 @@ public final class N {
     /**
      * Last or null if empty.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the t
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> T lastOrNullIfEmpty(final Collection<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -7432,8 +7432,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param s the s
-     * @return the int
+     * @param s
+     * @return
      */
     public static int len(final CharSequence s) {
         return s == null ? 0 : s.length();
@@ -7442,8 +7442,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final boolean[] a) {
         return a == null ? 0 : a.length;
@@ -7452,8 +7452,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final char[] a) {
         return a == null ? 0 : a.length;
@@ -7462,8 +7462,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final byte[] a) {
         return a == null ? 0 : a.length;
@@ -7472,8 +7472,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final short[] a) {
         return a == null ? 0 : a.length;
@@ -7482,8 +7482,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final int[] a) {
         return a == null ? 0 : a.length;
@@ -7492,8 +7492,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final long[] a) {
         return a == null ? 0 : a.length;
@@ -7502,8 +7502,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final float[] a) {
         return a == null ? 0 : a.length;
@@ -7512,8 +7512,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final double[] a) {
         return a == null ? 0 : a.length;
@@ -7522,8 +7522,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      */
     public static int len(final Object[] a) {
         return a == null ? 0 : a.length;
@@ -7532,8 +7532,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param c the c
-     * @return the int
+     * @param c
+     * @return
      */
     public static int size(final Collection<?> c) {
         return c == null ? 0 : c.size();
@@ -7542,8 +7542,8 @@ public final class N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param m the m
-     * @return the int
+     * @param m
+     * @return
      */
     public static int size(final Map<?, ?> m) {
         return m == null ? 0 : m.size();
@@ -7552,9 +7552,9 @@ public final class N {
     /**
      * Returns an immutable empty list if the specified List is <code>null</code>, otherwise itself is returned.
      *
-     * @param <T> the generic type
-     * @param list the list
-     * @return the list
+     * @param <T>
+     * @param list
+     * @return
      */
     public static <T> List<T> nullToEmpty(final List<T> list) {
         return list == null ? N.<T> emptyList() : list;
@@ -7563,9 +7563,9 @@ public final class N {
     /**
      * Returns an immutable empty set if the specified Set is <code>null</code>, otherwise itself is returned.
      *
-     * @param <T> the generic type
-     * @param set the set
-     * @return the sets the
+     * @param <T>
+     * @param set
+     * @return
      */
     public static <T> Set<T> nullToEmpty(final Set<T> set) {
         return set == null ? N.<T> emptySet() : set;
@@ -7574,9 +7574,9 @@ public final class N {
     /**
      * Returns an immutable empty <code>SortedSet</code> if the specified SortedSet is <code>null</code>, otherwise itself is returned.
      *
-     * @param <T> the generic type
-     * @param set the set
-     * @return the sorted set
+     * @param <T>
+     * @param set
+     * @return
      */
     public static <T> SortedSet<T> nullToEmpty(final SortedSet<T> set) {
         return set == null ? N.<T> emptySortedSet() : set;
@@ -7585,9 +7585,9 @@ public final class N {
     /**
      * Returns an immutable empty <code>NavigableSet</code> if the specified NavigableSet is <code>null</code>, otherwise itself is returned.
      *
-     * @param <T> the generic type
-     * @param set the set
-     * @return the navigable set
+     * @param <T>
+     * @param set
+     * @return
      */
     public static <T> NavigableSet<T> nullToEmpty(final NavigableSet<T> set) {
         return set == null ? N.<T> emptyNavigableSet() : set;
@@ -7598,8 +7598,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the map
+     * @param map
+     * @return
      */
     public static <K, V> Map<K, V> nullToEmpty(final Map<K, V> map) {
         return map == null ? N.<K, V> emptyMap() : map;
@@ -7610,8 +7610,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the sorted map
+     * @param map
+     * @return
      */
     public static <K, V> SortedMap<K, V> nullToEmpty(final SortedMap<K, V> map) {
         return map == null ? N.<K, V> emptySortedMap() : map;
@@ -7622,8 +7622,8 @@ public final class N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the navigable map
+     * @param map
+     * @return
      */
     public static <K, V> NavigableMap<K, V> nullToEmpty(final NavigableMap<K, V> map) {
         return map == null ? N.<K, V> emptyNavigableMap() : map;
@@ -7632,9 +7632,9 @@ public final class N {
     /**
      * Returns an immutable empty <code>Iterator</code> if the specified Iterator is <code>null</code>, otherwise itself is returned.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the iterator
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> Iterator<T> nullToEmpty(final Iterator<T> iter) {
         return iter == null ? N.<T> emptyIterator() : iter;
@@ -7643,9 +7643,9 @@ public final class N {
     /**
      * Returns an immutable empty <code>ListIterator</code> if the specified ListIterator is <code>null</code>, otherwise itself is returned.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the list iterator
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> ListIterator<T> nullToEmpty(final ListIterator<T> iter) {
         return iter == null ? N.<T> emptyListIterator() : iter;
@@ -7654,8 +7654,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param str the str
-     * @return the string
+     * @param str
+     * @return
      */
     public static String nullToEmpty(final String str) {
         return str == null ? EMPTY_STRING : str;
@@ -7664,8 +7664,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the boolean[]
+     * @param a
+     * @return
      */
     public static boolean[] nullToEmpty(final boolean[] a) {
         return a == null ? EMPTY_BOOLEAN_ARRAY : a;
@@ -7674,8 +7674,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the char[]
+     * @param a
+     * @return
      */
     public static char[] nullToEmpty(final char[] a) {
         return a == null ? EMPTY_CHAR_ARRAY : a;
@@ -7684,8 +7684,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the byte[]
+     * @param a
+     * @return
      */
     public static byte[] nullToEmpty(final byte[] a) {
         return a == null ? EMPTY_BYTE_ARRAY : a;
@@ -7694,8 +7694,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the short[]
+     * @param a
+     * @return
      */
     public static short[] nullToEmpty(final short[] a) {
         return a == null ? EMPTY_SHORT_ARRAY : a;
@@ -7704,8 +7704,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the int[]
+     * @param a
+     * @return
      */
     public static int[] nullToEmpty(final int[] a) {
         return a == null ? EMPTY_INT_ARRAY : a;
@@ -7714,8 +7714,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the long[]
+     * @param a
+     * @return
      */
     public static long[] nullToEmpty(final long[] a) {
         return a == null ? EMPTY_LONG_ARRAY : a;
@@ -7724,8 +7724,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the float[]
+     * @param a
+     * @return
      */
     public static float[] nullToEmpty(final float[] a) {
         return a == null ? EMPTY_FLOAT_ARRAY : a;
@@ -7734,8 +7734,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the double[]
+     * @param a
+     * @return
      */
     public static double[] nullToEmpty(final double[] a) {
         return a == null ? EMPTY_DOUBLE_ARRAY : a;
@@ -7744,8 +7744,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the string[]
+     * @param a
+     * @return
      */
     public static String[] nullToEmpty(final String[] a) {
         return a == null ? EMPTY_STRING_ARRAY : a;
@@ -7754,8 +7754,8 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param a the a
-     * @return the object[]
+     * @param a
+     * @return
      * @deprecated replaced by {@link N#nullToEmpty(Class, Object[])}
      */
     @Deprecated
@@ -7766,10 +7766,10 @@ public final class N {
     /**
      * Null to empty.
      *
-     * @param <T> the generic type
-     * @param arrayType the array type
-     * @param a the a
-     * @return the t[]
+     * @param <T>
+     * @param arrayType
+     * @param a
+     * @return
      */
     public static <T> T[] nullToEmpty(final Class<T[]> arrayType, final T[] a) {
         return a == null ? (T[]) N.newArray(arrayType.getComponentType(), 0) : a;
@@ -7778,7 +7778,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param s the s
+     * @param s
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final CharSequence s) {
@@ -7788,7 +7788,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final boolean[] a) {
@@ -7798,7 +7798,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final char[] a) {
@@ -7808,7 +7808,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final byte[] a) {
@@ -7818,7 +7818,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final short[] a) {
@@ -7828,7 +7828,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final int[] a) {
@@ -7838,7 +7838,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final long[] a) {
@@ -7848,7 +7848,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final float[] a) {
@@ -7858,7 +7858,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final double[] a) {
@@ -7868,7 +7868,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final Object[] a) {
@@ -7878,7 +7878,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param c the c
+     * @param c
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final Collection<?> c) {
@@ -7888,7 +7888,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param m the m
+     * @param m
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final Map<?, ?> m) {
@@ -7898,7 +7898,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param list the list
+     * @param list
      * @return true, if is null or empty
      */
     @SuppressWarnings("rawtypes")
@@ -7909,7 +7909,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param s the s
+     * @param s
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final Multiset<?> s) {
@@ -7919,7 +7919,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param s the s
+     * @param s
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final LongMultiset<?> s) {
@@ -7929,7 +7929,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param m the m
+     * @param m
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final Multimap<?, ?, ?> m) {
@@ -7939,7 +7939,7 @@ public final class N {
     /**
      * Checks if is null or empty.
      *
-     * @param rs the rs
+     * @param rs
      * @return true, if is null or empty
      */
     public static boolean isNullOrEmpty(final DataSet rs) {
@@ -7949,7 +7949,7 @@ public final class N {
     /**
      * Checks if is null or empty or blank.
      *
-     * @param s the s
+     * @param s
      * @return true, if is null or empty or blank
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
@@ -7970,7 +7970,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param s the s
+     * @param s
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final CharSequence s) {
@@ -7980,7 +7980,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final boolean[] a) {
@@ -7990,7 +7990,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final char[] a) {
@@ -8000,7 +8000,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final byte[] a) {
@@ -8010,7 +8010,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final short[] a) {
@@ -8020,7 +8020,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final int[] a) {
@@ -8030,7 +8030,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final long[] a) {
@@ -8040,7 +8040,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final float[] a) {
@@ -8050,7 +8050,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final double[] a) {
@@ -8060,7 +8060,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final Object[] a) {
@@ -8070,7 +8070,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final Collection<?> c) {
@@ -8080,7 +8080,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param m the m
+     * @param m
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final Map<?, ?> m) {
@@ -8090,7 +8090,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param list the list
+     * @param list
      * @return true, if successful
      */
     @SuppressWarnings("rawtypes")
@@ -8101,7 +8101,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param s the s
+     * @param s
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final Multiset<?> s) {
@@ -8111,7 +8111,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param s the s
+     * @param s
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final LongMultiset<?> s) {
@@ -8121,7 +8121,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param m the m
+     * @param m
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final Multimap<?, ?, ?> m) {
@@ -8131,7 +8131,7 @@ public final class N {
     /**
      * Not null or empty.
      *
-     * @param rs the rs
+     * @param rs
      * @return true, if successful
      */
     public static boolean notNullOrEmpty(final DataSet rs) {
@@ -8141,7 +8141,7 @@ public final class N {
     /**
      * Not null or empty or blank.
      *
-     * @param s the s
+     * @param s
      * @return true, if successful
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
@@ -8152,7 +8152,7 @@ public final class N {
     /**
      * Checks if is null error msg.
      *
-     * @param msg the msg
+     * @param msg
      * @return true, if is null error msg
      */
     private static boolean isNullErrorMsg(final String msg) {
@@ -8163,8 +8163,8 @@ public final class N {
     /**
      * Check index.
      *
-     * @param index the index
-     * @param length the length
+     * @param index
+     * @param length
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
     public static void checkIndex(final int index, final int length) throws IndexOutOfBoundsException {
@@ -8176,9 +8176,9 @@ public final class N {
     /**
      * Check from to index.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param length the length
+     * @param fromIndex
+     * @param toIndex
+     * @param length
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
     public static void checkFromToIndex(final int fromIndex, final int toIndex, final int length) throws IndexOutOfBoundsException {
@@ -8190,9 +8190,9 @@ public final class N {
     /**
      * Check from index size.
      *
-     * @param fromIndex the from index
-     * @param size the size
-     * @param length the length
+     * @param fromIndex
+     * @param size
+     * @param length
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
     public static void checkFromIndexSize(final int fromIndex, final int size, final int length) throws IndexOutOfBoundsException {
@@ -8232,9 +8232,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, boolean p) {
         if (!b) {
@@ -8247,10 +8247,10 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, boolean p1, boolean p2) {
         if (!b) {
@@ -8263,11 +8263,11 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, boolean p1, boolean p2, boolean p3) {
         if (!b) {
@@ -8280,9 +8280,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, char p) {
         if (!b) {
@@ -8295,9 +8295,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, byte p) {
         if (!b) {
@@ -8310,9 +8310,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, short p) {
         if (!b) {
@@ -8325,9 +8325,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, int p) {
         if (!b) {
@@ -8340,10 +8340,10 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2) {
         if (!b) {
@@ -8356,11 +8356,11 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2, int p3) {
         if (!b) {
@@ -8373,9 +8373,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, long p) {
         if (!b) {
@@ -8388,10 +8388,10 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2) {
         if (!b) {
@@ -8404,11 +8404,11 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2, long p3) {
         if (!b) {
@@ -8421,9 +8421,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, float p) {
         if (!b) {
@@ -8436,10 +8436,10 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, float p1, float p2) {
         if (!b) {
@@ -8452,11 +8452,11 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, float p1, float p2, float p3) {
         if (!b) {
@@ -8469,9 +8469,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, double p) {
         if (!b) {
@@ -8484,10 +8484,10 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, double p1, double p2) {
         if (!b) {
@@ -8500,11 +8500,11 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, double p1, double p2, double p3) {
         if (!b) {
@@ -8517,9 +8517,9 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, Object p) {
         if (!b) {
@@ -8532,10 +8532,10 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2) {
         if (!b) {
@@ -8548,11 +8548,11 @@ public final class N {
      * 
      * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2, Object p3) {
         if (!b) {
@@ -8563,9 +8563,9 @@ public final class N {
     /**
      * Check argument.
      *
-     * @param <E> the element type
-     * @param b the b
-     * @param errorMessageSupplier the error message supplier
+     * @param <E>
+     * @param b
+     * @param errorMessageSupplier
      * @throws E the e
      */
     public static <E extends Exception> void checkArgument(boolean b, Try.Supplier<String, E> errorMessageSupplier) throws E {
@@ -8577,9 +8577,9 @@ public final class N {
     /**
      * Check arg not null.
      *
-     * @param <T> the generic type
-     * @param obj the obj
-     * @return the t
+     * @param <T>
+     * @param obj
+     * @return
      * @throws IllegalArgumentException if {@code obj} is {@code null}
      */
     public static <T> T checkArgNotNull(final T obj) {
@@ -8593,10 +8593,10 @@ public final class N {
     /**
      * Check arg not null.
      *
-     * @param <T> the generic type
-     * @param obj the obj
-     * @param errorMessage the error message
-     * @return the t
+     * @param <T>
+     * @param obj
+     * @param errorMessage
+     * @return
      * @throws IllegalArgumentException if {@code obj} is {@code null}
      */
     public static <T> T checkArgNotNull(final T obj, final String errorMessage) {
@@ -8614,10 +8614,10 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T> the generic type
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the t
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends CharSequence> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
@@ -8635,9 +8635,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the boolean[]
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static boolean[] checkArgNotNullOrEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
@@ -8655,9 +8655,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the char[]
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static char[] checkArgNotNullOrEmpty(final char[] arg, final String argNameOrErrorMsg) {
@@ -8675,9 +8675,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the byte[]
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static byte[] checkArgNotNullOrEmpty(final byte[] arg, final String argNameOrErrorMsg) {
@@ -8695,9 +8695,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the short[]
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static short[] checkArgNotNullOrEmpty(final short[] arg, final String argNameOrErrorMsg) {
@@ -8715,9 +8715,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the int[]
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static int[] checkArgNotNullOrEmpty(final int[] arg, final String argNameOrErrorMsg) {
@@ -8735,9 +8735,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the long[]
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static long[] checkArgNotNullOrEmpty(final long[] arg, final String argNameOrErrorMsg) {
@@ -8755,9 +8755,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the float[]
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static float[] checkArgNotNullOrEmpty(final float[] arg, final String argNameOrErrorMsg) {
@@ -8775,9 +8775,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the double[]
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static double[] checkArgNotNullOrEmpty(final double[] arg, final String argNameOrErrorMsg) {
@@ -8795,10 +8795,10 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T> the generic type
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the t[]
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T> T[] checkArgNotNullOrEmpty(final T[] arg, final String argNameOrErrorMsg) {
@@ -8816,10 +8816,10 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T> the generic type
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the t
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends Collection<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
@@ -8837,10 +8837,10 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T> the generic type
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the t
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends Map<?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
@@ -8858,10 +8858,10 @@ public final class N {
     /**
      * Check if the specified parameter is null or empty or blank.
      *
-     * @param <T> the generic type
-     * @param arg the arg
+     * @param <T>
+     * @param arg
      * @param msg name of parameter or error message
-     * @return the input parameter
+     * @return
      * @throws IllegalArgumentException if the specified parameter is null or empty.
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
@@ -8880,9 +8880,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the int
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
     public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
@@ -8900,9 +8900,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the long
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
     public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
@@ -8920,9 +8920,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the double
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
     public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) {
@@ -8940,9 +8940,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the int
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
     public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
@@ -8960,9 +8960,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the long
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
     public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) {
@@ -8980,9 +8980,9 @@ public final class N {
     /**
      * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg the arg
-     * @param argNameOrErrorMsg the arg name or error msg
-     * @return the double
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
      * @throws IllegalArgumentException if the specified {@code arg} is negative.
      */
     public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) {
@@ -9031,9 +9031,9 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkState(boolean b, String errorMessageTemplate, int p) {
         if (!b) {
@@ -9047,10 +9047,10 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkState(boolean b, String errorMessageTemplate, int p1, int p2) {
         if (!b) {
@@ -9064,11 +9064,11 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkState(boolean b, String errorMessageTemplate, int p1, int p2, int p3) {
         if (!b) {
@@ -9082,9 +9082,9 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkState(boolean b, String errorMessageTemplate, long p) {
         if (!b) {
@@ -9098,10 +9098,10 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkState(boolean b, String errorMessageTemplate, long p1, long p2) {
         if (!b) {
@@ -9115,11 +9115,11 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkState(boolean b, String errorMessageTemplate, long p1, long p2, long p3) {
         if (!b) {
@@ -9133,9 +9133,9 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkState(boolean b, String errorMessageTemplate, float p) {
         if (!b) {
@@ -9149,10 +9149,10 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkState(boolean b, String errorMessageTemplate, float p1, float p2) {
         if (!b) {
@@ -9166,11 +9166,11 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkState(boolean b, String errorMessageTemplate, float p1, float p2, float p3) {
         if (!b) {
@@ -9184,9 +9184,9 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkState(boolean b, String errorMessageTemplate, double p) {
         if (!b) {
@@ -9200,10 +9200,10 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkState(boolean b, String errorMessageTemplate, double p1, double p2) {
         if (!b) {
@@ -9217,11 +9217,11 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkState(boolean b, String errorMessageTemplate, double p1, double p2, double p3) {
         if (!b) {
@@ -9235,9 +9235,9 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p the p
+     * @param b
+     * @param errorMessageTemplate
+     * @param p
      */
     public static void checkState(boolean b, String errorMessageTemplate, Object p) {
         if (!b) {
@@ -9251,10 +9251,10 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
      */
     public static void checkState(boolean b, String errorMessageTemplate, Object p1, Object p2) {
         if (!b) {
@@ -9268,11 +9268,11 @@ public final class N {
      * 
      * <p>See {@link #checkState(boolean, String, Object...)} for details.
      *
-     * @param b the b
-     * @param errorMessageTemplate the error message template
-     * @param p1 the p 1
-     * @param p2 the p 2
-     * @param p3 the p 3
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     * @param p3
      */
     public static void checkState(boolean b, String errorMessageTemplate, Object p1, Object p2, Object p3) {
         if (!b) {
@@ -9283,9 +9283,9 @@ public final class N {
     /**
      * Check state.
      *
-     * @param <E> the element type
-     * @param b the b
-     * @param errorMessageSupplier the error message supplier
+     * @param <E>
+     * @param b
+     * @param errorMessageSupplier
      * @throws E the e
      */
     public static <E extends Exception> void checkState(boolean b, Try.Supplier<String, E> errorMessageSupplier) throws E {
@@ -9297,9 +9297,9 @@ public final class N {
     /**
      * Format.
      *
-     * @param template the template
-     * @param arg the arg
-     * @return the string
+     * @param template
+     * @param arg
+     * @return
      */
     static String format(String template, Object arg) {
         template = String.valueOf(template); // null -> "null"
@@ -9335,10 +9335,10 @@ public final class N {
     /**
      * Format.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @return the string
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @return
      */
     static String format(String template, Object arg1, Object arg2) {
         template = String.valueOf(template); // null -> "null"
@@ -9396,11 +9396,11 @@ public final class N {
     /**
      * Format.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
-     * @return the string
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     * @return
      */
     static String format(String template, Object arg1, Object arg2, Object arg3) {
         template = String.valueOf(template); // null -> "null"
@@ -9480,7 +9480,7 @@ public final class N {
      * @param template a non-null string containing 0 or more {@code %s} placeholders.
      * @param args the arguments to be substituted into the message template. Arguments are converted
      *     to strings using {@link String#valueOf(Object)}. Arguments can be null.
-     * @return the string
+     * @return
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
     static String format(String template, Object... args) {
@@ -9533,9 +9533,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final boolean a, final boolean b) {
         return (a == b) ? 0 : (a ? 1 : -1);
@@ -9544,9 +9544,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final byte a, final byte b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
@@ -9555,9 +9555,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final short a, final short b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
@@ -9566,9 +9566,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final int a, final int b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
@@ -9577,9 +9577,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final long a, final long b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
@@ -9588,9 +9588,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final float a, final float b) {
         return Float.compare(a, b);
@@ -9599,9 +9599,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final double a, final double b) {
         return Double.compare(a, b);
@@ -9610,10 +9610,10 @@ public final class N {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T extends Comparable<? super T>> int compare(final T a, final T b) {
         return a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareTo(b));
@@ -9651,13 +9651,13 @@ public final class N {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param a1 the a 1
-     * @param b1 the b 1
-     * @param a2 the a 2
-     * @param b2 the b 2
-     * @return the int
+     * @param <T1>
+     * @param <T2>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @return
      */
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>> int compare(T1 a1, T1 b1, T2 a2, T2 b2) {
         int res = N.compare(a1, b1);
@@ -9669,16 +9669,16 @@ public final class N {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param a1 the a 1
-     * @param b1 the b 1
-     * @param a2 the a 2
-     * @param b2 the b 2
-     * @param a3 the a 3
-     * @param b3 the b 3
-     * @return the int
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @return
      */
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>> int compare(T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3) {
         int res = 0;
@@ -9696,19 +9696,19 @@ public final class N {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param a1 the a 1
-     * @param b1 the b 1
-     * @param a2 the a 2
-     * @param b2 the b 2
-     * @param a3 the a 3
-     * @param b3 the b 3
-     * @param a4 the a 4
-     * @param b4 the b 4
-     * @return the int
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @param a4
+     * @param b4
+     * @return
      */
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>> int compare(T1 a1, T1 b1, T2 a2,
             T2 b2, T3 a3, T3 b3, T4 a4, T4 b4) {
@@ -9729,22 +9729,22 @@ public final class N {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param a1 the a 1
-     * @param b1 the b 1
-     * @param a2 the a 2
-     * @param b2 the b 2
-     * @param a3 the a 3
-     * @param b3 the b 3
-     * @param a4 the a 4
-     * @param b4 the b 4
-     * @param a5 the a 5
-     * @param b5 the b 5
-     * @return the int
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @param a4
+     * @param b4
+     * @param a5
+     * @param b5
+     * @return
      */
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5) {
@@ -9767,25 +9767,25 @@ public final class N {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param a1 the a 1
-     * @param b1 the b 1
-     * @param a2 the a 2
-     * @param b2 the b 2
-     * @param a3 the a 3
-     * @param b3 the b 3
-     * @param a4 the a 4
-     * @param b4 the b 4
-     * @param a5 the a 5
-     * @param b5 the b 5
-     * @param a6 the a 6
-     * @param b6 the b 6
-     * @return the int
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @param a4
+     * @param b4
+     * @param a5
+     * @param b5
+     * @param a6
+     * @param b6
+     * @return
      */
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6) {
@@ -9810,28 +9810,28 @@ public final class N {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), (a7, b7)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <T4> the generic type
-     * @param <T5> the generic type
-     * @param <T6> the generic type
-     * @param <T7> the generic type
-     * @param a1 the a 1
-     * @param b1 the b 1
-     * @param a2 the a 2
-     * @param b2 the b 2
-     * @param a3 the a 3
-     * @param b3 the b 3
-     * @param a4 the a 4
-     * @param b4 the b 4
-     * @param a5 the a 5
-     * @param b5 the b 5
-     * @param a6 the a 6
-     * @param b6 the b 6
-     * @param a7 the a 7
-     * @param b7 the b 7
-     * @return the int
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @param a4
+     * @param b4
+     * @param a5
+     * @param b5
+     * @param a6
+     * @param b6
+     * @param a7
+     * @param b7
+     * @return
      */
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>, T7 extends Comparable<T7>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6, T7 a7, T7 b7) {
@@ -9857,9 +9857,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final boolean[] a, final boolean[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -9880,12 +9880,12 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static int compare(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len) {
         N.checkArgNotNegative(len, "len");
@@ -9908,9 +9908,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final char[] a, final char[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -9931,12 +9931,12 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static int compare(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len) {
         N.checkArgNotNegative(len, "len");
@@ -9959,9 +9959,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final byte[] a, final byte[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -9982,12 +9982,12 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static int compare(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len) {
         N.checkArgNotNegative(len, "len");
@@ -10010,9 +10010,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final short[] a, final short[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -10033,12 +10033,12 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static int compare(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len) {
         N.checkArgNotNegative(len, "len");
@@ -10061,9 +10061,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final int[] a, final int[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -10084,12 +10084,12 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static int compare(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len) {
         N.checkArgNotNegative(len, "len");
@@ -10112,9 +10112,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final long[] a, final long[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -10135,12 +10135,12 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static int compare(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len) {
         N.checkArgNotNegative(len, "len");
@@ -10163,9 +10163,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final float[] a, final float[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -10188,12 +10188,12 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static int compare(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len) {
         N.checkArgNotNegative(len, "len");
@@ -10218,9 +10218,9 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final double[] a, final double[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -10243,12 +10243,12 @@ public final class N {
     /**
      * Compare.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static int compare(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len) {
         N.checkArgNotNegative(len, "len");
@@ -10273,10 +10273,10 @@ public final class N {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final T[] b) {
         final Comparator<T> cmp = NATURAL_ORDER;
@@ -10287,13 +10287,13 @@ public final class N {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len) {
         final Comparator<T> cmp = NATURAL_ORDER;
@@ -10304,11 +10304,11 @@ public final class N {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param cmp the cmp
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
      */
     public static <T> int compare(final T[] a, final T[] b, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
@@ -10333,14 +10333,14 @@ public final class N {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @param cmp the cmp
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @param cmp
+     * @return
      */
     public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp) {
         N.checkArgNotNegative(len, "len");
@@ -10367,10 +10367,10 @@ public final class N {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T extends Comparable<? super T>> int compare(final Collection<T> a, final Collection<T> b) {
         final Comparator<T> cmp = NATURAL_ORDER;
@@ -10381,11 +10381,11 @@ public final class N {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param cmp the cmp
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
      */
     public static <T> int compare(final Collection<T> a, final Collection<T> b, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
@@ -10412,14 +10412,14 @@ public final class N {
     /**
      * Compare.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
-     * @param cmp the cmp
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @param cmp
+     * @return
      */
     public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len, Comparator<? super T> cmp) {
         N.checkArgNotNegative(len, "len");
@@ -10456,9 +10456,9 @@ public final class N {
     /**
      * Compare ignore case.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int
+     * @param a
+     * @param b
+     * @return
      */
     public static int compareIgnoreCase(final String a, final String b) {
         return a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareToIgnoreCase(b));
@@ -10467,8 +10467,8 @@ public final class N {
     /**
      * Method equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final boolean a, final boolean b) {
@@ -10478,8 +10478,8 @@ public final class N {
     /**
      * Method equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final char a, final char b) {
@@ -10489,8 +10489,8 @@ public final class N {
     /**
      * Method equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final byte a, final byte b) {
@@ -10500,8 +10500,8 @@ public final class N {
     /**
      * Method equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final short a, final short b) {
@@ -10511,8 +10511,8 @@ public final class N {
     /**
      * Method equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final int a, final int b) {
@@ -10522,8 +10522,8 @@ public final class N {
     /**
      * Method equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final long a, final long b) {
@@ -10533,8 +10533,8 @@ public final class N {
     /**
      * Method equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final float a, final float b) {
@@ -10544,8 +10544,8 @@ public final class N {
     /**
      * Method equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final double a, final double b) {
@@ -10555,8 +10555,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return true, if successful
      */
     public static boolean equals(final String a, final String b) {
@@ -10566,8 +10566,8 @@ public final class N {
     /**
      * Equals ignore case.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return true, if successful
      */
     public static boolean equalsIgnoreCase(final String a, final String b) {
@@ -10578,8 +10578,8 @@ public final class N {
      * compare {@code a} and {@code b} by
      * {@link Arrays#equals(Object[], Object[])} if both of them are array.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean equals(final Object a, final Object b) {
@@ -10608,8 +10608,8 @@ public final class N {
      * compare {@code a} and {@code b} by
      * {@link Arrays#equals(Object[], Object[])} if both of them are array.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      */
     public static boolean deepEquals(final Object a, final Object b) {
@@ -10627,8 +10627,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(boolean[], boolean[])
      */
@@ -10639,11 +10639,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len) {
@@ -10667,8 +10667,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(char[], char[])
      */
@@ -10679,11 +10679,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len) {
@@ -10707,8 +10707,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(byte[], byte[])
      */
@@ -10719,11 +10719,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len) {
@@ -10747,8 +10747,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(short[], short[])
      */
@@ -10759,11 +10759,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len) {
@@ -10787,8 +10787,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(int[], int[])
      */
@@ -10799,11 +10799,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len) {
@@ -10827,8 +10827,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(long[], long[])
      */
@@ -10839,11 +10839,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len) {
@@ -10867,8 +10867,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(float[], float[])
      */
@@ -10879,11 +10879,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len) {
@@ -10907,8 +10907,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(double[], double[])
      */
@@ -10919,11 +10919,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len) {
@@ -10947,8 +10947,8 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return boolean
      * @see Arrays#equals(Object[], Object[])
      */
@@ -10959,11 +10959,11 @@ public final class N {
     /**
      * Equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len) {
@@ -10989,8 +10989,8 @@ public final class N {
     /**
      * Deep equals.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return true, if successful
      * @see Arrays#deepEquals(Object[], Object[])
      */
@@ -11001,11 +11001,11 @@ public final class N {
     /**
      * Deep equals.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len) {
@@ -11031,8 +11031,8 @@ public final class N {
     /**
      * Equals ignore case.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return true, if successful
      */
     public static boolean equalsIgnoreCase(final String[] a, final String[] b) {
@@ -11042,11 +11042,11 @@ public final class N {
     /**
      * Equals ignore case.
      *
-     * @param a the a
-     * @param fromIndexA the from index A
-     * @param b the b
-     * @param fromIndexB the from index B
-     * @param len the len
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
      * @return true, if successful
      */
     public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len) {
@@ -11072,7 +11072,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static int hashCode(final boolean value) {
@@ -11082,7 +11082,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static int hashCode(final char value) {
@@ -11092,7 +11092,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static int hashCode(final byte value) {
@@ -11102,7 +11102,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static int hashCode(final short value) {
@@ -11112,7 +11112,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static int hashCode(final int value) {
@@ -11122,7 +11122,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static int hashCode(final long value) {
@@ -11132,7 +11132,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static int hashCode(final float value) {
@@ -11142,7 +11142,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static int hashCode(final double value) {
@@ -11154,7 +11154,7 @@ public final class N {
     /**
      * Method hashCode.
      *
-     * @param obj the obj
+     * @param obj
      * @return int
      */
     public static int hashCode(final Object obj) {
@@ -11172,7 +11172,7 @@ public final class N {
     /**
      * Method deepHashCode.
      *
-     * @param obj the obj
+     * @param obj
      * @return int
      */
     public static int deepHashCode(final Object obj) {
@@ -11190,8 +11190,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(boolean[])
      */
     public static int hashCode(final boolean[] a) {
@@ -11201,10 +11201,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final boolean[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11223,8 +11223,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(char[])
      */
     public static int hashCode(final char[] a) {
@@ -11234,10 +11234,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final char[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11256,8 +11256,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(byte[])
      */
     public static int hashCode(final byte[] a) {
@@ -11267,10 +11267,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final byte[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11289,8 +11289,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(short[])
      */
     public static int hashCode(final short[] a) {
@@ -11300,10 +11300,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final short[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11322,8 +11322,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(int[])
      */
     public static int hashCode(final int[] a) {
@@ -11333,10 +11333,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final int[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11355,8 +11355,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(long[])
      */
     public static int hashCode(final long[] a) {
@@ -11366,10 +11366,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final long[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11388,8 +11388,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(float[])
      */
     public static int hashCode(final float[] a) {
@@ -11399,10 +11399,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final float[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11421,8 +11421,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(double[])
      */
     public static int hashCode(final double[] a) {
@@ -11432,10 +11432,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final double[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11455,8 +11455,8 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#hashCode(Object[])
      */
     public static int hashCode(final Object[] a) {
@@ -11466,10 +11466,10 @@ public final class N {
     /**
      * Hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int hashCode(final Object[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11488,8 +11488,8 @@ public final class N {
     /**
      * Deep hash code.
      *
-     * @param a the a
-     * @return the int
+     * @param a
+     * @return
      * @see Arrays#deepHashCode(Object[])
      */
     public static int deepHashCode(final Object[] a) {
@@ -11499,10 +11499,10 @@ public final class N {
     /**
      * Deep hash code.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int deepHashCode(final Object[] a, final int fromIndex, final int toIndex) {
         if (a == null) {
@@ -11521,7 +11521,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static String toString(final boolean value) {
@@ -11531,7 +11531,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static String toString(final char value) {
@@ -11541,7 +11541,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static String toString(final byte value) {
@@ -11551,7 +11551,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static String toString(final short value) {
@@ -11561,7 +11561,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static String toString(final int value) {
@@ -11571,7 +11571,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static String toString(final long value) {
@@ -11581,7 +11581,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static String toString(final float value) {
@@ -11591,7 +11591,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param value the value
+     * @param value
      * @return int
      */
     public static String toString(final double value) {
@@ -11601,7 +11601,7 @@ public final class N {
     /**
      * Method toString.
      *
-     * @param obj the obj
+     * @param obj
      * @return int
      */
     public static String toString(final Object obj) {
@@ -11663,7 +11663,7 @@ public final class N {
     /**
      * Method deepToString.
      *
-     * @param obj the obj
+     * @param obj
      * @return int
      */
     public static String deepToString(final Object obj) {
@@ -11681,8 +11681,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(boolean[])
      */
     public static String toString(final boolean[] a) {
@@ -11700,10 +11700,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final boolean[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -11720,8 +11720,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final boolean[] a) {
         if (a == null) {
@@ -11736,10 +11736,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final boolean[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -11758,8 +11758,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(char[])
      */
     public static String toString(final char[] a) {
@@ -11775,10 +11775,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final char[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -11795,8 +11795,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final char[] a) {
         if (a == null) {
@@ -11811,10 +11811,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final char[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -11833,8 +11833,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(byte[])
      */
     public static String toString(final byte[] a) {
@@ -11850,10 +11850,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final byte[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -11870,8 +11870,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final byte[] a) {
         if (a == null) {
@@ -11886,10 +11886,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final byte[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -11908,8 +11908,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(short[])
      */
     public static String toString(final short[] a) {
@@ -11925,10 +11925,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final short[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -11945,8 +11945,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final short[] a) {
         if (a == null) {
@@ -11961,10 +11961,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final short[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -11983,8 +11983,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(int[])
      */
     public static String toString(final int[] a) {
@@ -12000,10 +12000,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final int[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -12020,8 +12020,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final int[] a) {
         if (a == null) {
@@ -12036,10 +12036,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final int[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -12058,8 +12058,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(long[])
      */
     public static String toString(final long[] a) {
@@ -12075,10 +12075,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final long[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -12095,8 +12095,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final long[] a) {
         if (a == null) {
@@ -12111,10 +12111,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final long[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -12133,8 +12133,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(float[])
      */
     public static String toString(final float[] a) {
@@ -12150,10 +12150,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final float[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -12170,8 +12170,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final float[] a) {
         if (a == null) {
@@ -12186,10 +12186,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final float[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -12208,8 +12208,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(double[])
      */
     public static String toString(final double[] a) {
@@ -12225,10 +12225,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final double[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -12245,8 +12245,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final double[] a) {
         if (a == null) {
@@ -12261,10 +12261,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final double[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -12283,8 +12283,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#toString(Object[])
      */
     public static String toString(final Object[] a) {
@@ -12300,10 +12300,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String toString(final Object[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -12320,8 +12320,8 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
+     * @param sb
+     * @param a
      */
     static void toString(final StringBuilder sb, final Object[] a) {
         if (a == null) {
@@ -12336,10 +12336,10 @@ public final class N {
     /**
      * To string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
      */
     static void toString(final StringBuilder sb, final Object[] a, final int from, final int to) {
         sb.append(WD._BRACKET_L);
@@ -12358,9 +12358,9 @@ public final class N {
     /**
      * To string.
      *
-     * @param a the a
-     * @param defaultIfNull the default if null
-     * @return the string
+     * @param a
+     * @param defaultIfNull
+     * @return
      */
     public static String toString(final Object a, final String defaultIfNull) {
         return a == null ? defaultIfNull : toString(a);
@@ -12369,8 +12369,8 @@ public final class N {
     /**
      * Deep to string.
      *
-     * @param a the a
-     * @return the string
+     * @param a
+     * @return
      * @see Arrays#deepToString(Object[])
      */
     public static String deepToString(final Object[] a) {
@@ -12386,10 +12386,10 @@ public final class N {
     /**
      * Deep to string.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static String deepToString(final Object[] a, final int from, final int to) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -12408,9 +12408,9 @@ public final class N {
     /**
      * Deep to string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param processedElements the processed elements
+     * @param sb
+     * @param a
+     * @param processedElements
      */
     static void deepToString(final StringBuilder sb, final Object[] a, final Set<Object[]> processedElements) {
         deepToString(sb, a, 0, a.length, processedElements);
@@ -12419,11 +12419,11 @@ public final class N {
     /**
      * Deep to string.
      *
-     * @param sb the sb
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param processedElements the processed elements
+     * @param sb
+     * @param a
+     * @param from
+     * @param to
+     * @param processedElements
      */
     static void deepToString(final StringBuilder sb, final Object[] a, final int from, final int to, final Set<Object[]> processedElements) {
         processedElements.add(a);
@@ -12509,9 +12509,9 @@ public final class N {
     /**
      * Deep to string.
      *
-     * @param a the a
-     * @param defaultIfNull the default if null
-     * @return the string
+     * @param a
+     * @param defaultIfNull
+     * @return
      */
     public static String deepToString(final Object[] a, final String defaultIfNull) {
         return a == null ? defaultIfNull : deepToString(a);
@@ -12522,7 +12522,7 @@ public final class N {
      * Reverses the order of the given array.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final boolean[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12537,9 +12537,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final boolean[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12562,7 +12562,7 @@ public final class N {
      * Reverses the order of the given array.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final char[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12577,9 +12577,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final char[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12602,7 +12602,7 @@ public final class N {
      * Reverses the order of the given array.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final byte[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12617,9 +12617,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final byte[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12642,7 +12642,7 @@ public final class N {
      * Reverses the order of the given array.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final short[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12657,9 +12657,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final short[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12682,7 +12682,7 @@ public final class N {
      * Reverses the order of the given array.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final int[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12697,9 +12697,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final int[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12722,7 +12722,7 @@ public final class N {
      * Reverses the order of the given array.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final long[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12737,9 +12737,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final long[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12762,7 +12762,7 @@ public final class N {
      * Reverses the order of the given array.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final float[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12777,9 +12777,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final float[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12802,7 +12802,7 @@ public final class N {
      * Reverses the order of the given array.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final double[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12817,9 +12817,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final double[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12848,7 +12848,7 @@ public final class N {
      * There is no special handling for multi-dimensional arrays.
      * </p>
      *
-     * @param a the a
+     * @param a
      */
     public static void reverse(final Object[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -12863,9 +12863,9 @@ public final class N {
      * Reverses the order of the given array in the given range.
      * </p>
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final Object[] a, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -12886,7 +12886,7 @@ public final class N {
     /**
      * Reverse.
      *
-     * @param list the list
+     * @param list
      */
     public static void reverse(final List<?> list) {
         if (N.isNullOrEmpty(list)) {
@@ -12899,9 +12899,9 @@ public final class N {
     /**
      * Reverse.
      *
-     * @param list the list
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param list
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverse(final List<?> list, int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex, size(list));
@@ -12931,7 +12931,7 @@ public final class N {
     /**
      * Reverse.
      *
-     * @param c the c
+     * @param c
      */
     @SuppressWarnings("rawtypes")
     public static void reverse(final Collection<?> c) {
@@ -12952,8 +12952,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final boolean[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -12991,8 +12991,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final char[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -13030,8 +13030,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final byte[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -13069,8 +13069,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final short[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -13108,8 +13108,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final int[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -13147,8 +13147,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final long[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -13186,8 +13186,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final float[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -13225,8 +13225,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final double[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -13264,8 +13264,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param a the a
-     * @param distance the distance
+     * @param a
+     * @param distance
      */
     public static void rotate(final Object[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -13303,8 +13303,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param list the list
-     * @param distance the distance
+     * @param list
+     * @param distance
      * @see java.util.Collections#rotate(List, int)
      */
     public static void rotate(final List<?> list, final int distance) {
@@ -13318,8 +13318,8 @@ public final class N {
     /**
      * Rotate.
      *
-     * @param c the c
-     * @param distance the distance
+     * @param c
+     * @param distance
      */
     @SuppressWarnings("rawtypes")
     public static void rotate(final Collection<?> c, final int distance) {
@@ -13340,7 +13340,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
+     * @param a
      */
     public static void shuffle(final boolean[] a) {
         shuffle(a, RAND);
@@ -13349,8 +13349,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
-     * @param rnd the rnd
+     * @param a
+     * @param rnd
      */
     public static void shuffle(final boolean[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13365,7 +13365,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
+     * @param a
      */
     public static void shuffle(final char[] a) {
         shuffle(a, RAND);
@@ -13374,8 +13374,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
-     * @param rnd the rnd
+     * @param a
+     * @param rnd
      */
     public static void shuffle(final char[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13390,7 +13390,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
+     * @param a
      */
     public static void shuffle(final byte[] a) {
         shuffle(a, RAND);
@@ -13399,8 +13399,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
-     * @param rnd the rnd
+     * @param a
+     * @param rnd
      */
     public static void shuffle(final byte[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13415,7 +13415,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
+     * @param a
      */
     public static void shuffle(final short[] a) {
         shuffle(a, RAND);
@@ -13424,8 +13424,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
-     * @param rnd the rnd
+     * @param a
+     * @param rnd
      */
     public static void shuffle(final short[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13440,7 +13440,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
+     * @param a
      */
     public static void shuffle(final int[] a) {
         shuffle(a, RAND);
@@ -13449,8 +13449,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
-     * @param rnd the rnd
+     * @param a
+     * @param rnd
      */
     public static void shuffle(final int[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13465,7 +13465,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
+     * @param a
      */
     public static void shuffle(final long[] a) {
         shuffle(a, RAND);
@@ -13474,8 +13474,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
-     * @param rnd the rnd
+     * @param a
+     * @param rnd
      */
     public static void shuffle(final long[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13490,7 +13490,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
+     * @param a
      */
     public static void shuffle(final float[] a) {
         shuffle(a, RAND);
@@ -13499,8 +13499,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
-     * @param rnd the rnd
+     * @param a
+     * @param rnd
      */
     public static void shuffle(final float[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13515,7 +13515,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
+     * @param a
      */
     public static void shuffle(final double[] a) {
         shuffle(a, RAND);
@@ -13524,8 +13524,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param a the a
-     * @param rnd the rnd
+     * @param a
+     * @param rnd
      */
     public static void shuffle(final double[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13540,8 +13540,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param <T> the generic type
-     * @param a the a
+     * @param <T>
+     * @param a
      */
     public static <T> void shuffle(final T[] a) {
         shuffle(a, RAND);
@@ -13550,9 +13550,9 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param rnd the rnd
+     * @param <T>
+     * @param a
+     * @param rnd
      */
     public static <T> void shuffle(final T[] a, final Random rnd) {
         if (N.isNullOrEmpty(a) || a.length == 1) {
@@ -13567,7 +13567,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param list the list
+     * @param list
      */
     public static void shuffle(final List<?> list) {
         shuffle(list, RAND);
@@ -13576,8 +13576,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param list the list
-     * @param rnd the rnd
+     * @param list
+     * @param rnd
      * @see java.util.Collections#shuffle(List, Random)
      */
     public static void shuffle(final List<?> list, final Random rnd) {
@@ -13591,7 +13591,7 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param c the c
+     * @param c
      */
     @SuppressWarnings("rawtypes")
     public static void shuffle(final Collection<?> c) {
@@ -13612,8 +13612,8 @@ public final class N {
     /**
      * Shuffle.
      *
-     * @param c the c
-     * @param rnd the rnd
+     * @param c
+     * @param rnd
      */
     @SuppressWarnings("rawtypes")
     public static void shuffle(final Collection<?> c, final Random rnd) {
@@ -13634,9 +13634,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final boolean[] a, final int i, final int j) {
         final boolean tmp = a[i];
@@ -13647,9 +13647,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final char[] a, final int i, final int j) {
         final char tmp = a[i];
@@ -13660,9 +13660,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final byte[] a, final int i, final int j) {
         final byte tmp = a[i];
@@ -13673,9 +13673,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final short[] a, final int i, final int j) {
         final short tmp = a[i];
@@ -13686,9 +13686,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final int[] a, final int i, final int j) {
         final int tmp = a[i];
@@ -13699,9 +13699,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final long[] a, final int i, final int j) {
         final long tmp = a[i];
@@ -13712,9 +13712,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final float[] a, final int i, final int j) {
         final float tmp = a[i];
@@ -13725,9 +13725,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final double[] a, final int i, final int j) {
         final double tmp = a[i];
@@ -13738,9 +13738,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param a the a
-     * @param i the i
-     * @param j the j
+     * @param a
+     * @param i
+     * @param j
      */
     public static void swap(final Object[] a, final int i, final int j) {
         final Object tmp = a[i];
@@ -13751,9 +13751,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param list the list
-     * @param i the i
-     * @param j the j
+     * @param list
+     * @param i
+     * @param j
      */
     public static void swap(final List<?> list, final int i, final int j) {
         Collections.swap(list, i, j);
@@ -13762,8 +13762,8 @@ public final class N {
     /**
      * Swap.
      *
-     * @param <T> the generic type
-     * @param pair the pair
+     * @param <T>
+     * @param pair
      */
     public static <T> void swap(final Pair<T, T> pair) {
         pair.set(pair.right, pair.left);
@@ -13772,10 +13772,10 @@ public final class N {
     /**
      * Swap if.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param pair the pair
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param pair
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -13791,9 +13791,9 @@ public final class N {
     /**
      * Swap.
      *
-     * @param <T> the generic type
-     * @param <M> the generic type
-     * @param triple the triple
+     * @param <T>
+     * @param <M>
+     * @param triple
      */
     public static <T, M> void swap(final Triple<T, M, T> triple) {
         final T left = triple.left;
@@ -13804,11 +13804,11 @@ public final class N {
     /**
      * Swap if.
      *
-     * @param <T> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param triple the triple
-     * @param predicate the predicate
+     * @param <T>
+     * @param <M>
+     * @param <E>
+     * @param triple
+     * @param predicate
      * @return true, if successful
      * @throws E the e
      */
@@ -13826,8 +13826,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final boolean[] a, final boolean val) {
         Arrays.fill(a, val);
@@ -13836,10 +13836,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final boolean[] a, final int fromIndex, final int toIndex, final boolean val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -13848,8 +13848,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final char[] a, final char val) {
         Arrays.fill(a, val);
@@ -13858,10 +13858,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final char[] a, final int fromIndex, final int toIndex, final char val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -13870,8 +13870,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final byte[] a, final byte val) {
         Arrays.fill(a, val);
@@ -13880,10 +13880,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final byte[] a, final int fromIndex, final int toIndex, final byte val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -13892,8 +13892,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final short[] a, final short val) {
         Arrays.fill(a, val);
@@ -13902,10 +13902,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final short[] a, final int fromIndex, final int toIndex, final short val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -13914,8 +13914,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final int[] a, final int val) {
         Arrays.fill(a, val);
@@ -13924,10 +13924,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final int[] a, final int fromIndex, final int toIndex, final int val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -13936,8 +13936,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final long[] a, final long val) {
         Arrays.fill(a, val);
@@ -13946,10 +13946,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final long[] a, final int fromIndex, final int toIndex, final long val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -13958,8 +13958,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final float[] a, final float val) {
         Arrays.fill(a, val);
@@ -13968,10 +13968,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final float[] a, final int fromIndex, final int toIndex, final float val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -13980,8 +13980,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final double[] a, final double val) {
         Arrays.fill(a, val);
@@ -13990,10 +13990,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final double[] a, final int fromIndex, final int toIndex, final double val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -14002,8 +14002,8 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param val the val
+     * @param a
+     * @param val
      */
     public static void fill(final Object[] a, final Object val) {
         Arrays.fill(a, val);
@@ -14012,10 +14012,10 @@ public final class N {
     /**
      * Fill.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static void fill(final Object[] a, final int fromIndex, final int toIndex, final Object val) {
         Arrays.fill(a, fromIndex, toIndex, val);
@@ -14024,9 +14024,9 @@ public final class N {
     /**
      * Fill.
      *
-     * @param <T> the generic type
-     * @param list the list
-     * @param val the val
+     * @param <T>
+     * @param list
+     * @param val
      */
     public static <T> void fill(final List<? super T> list, final T val) {
         fill(list, 0, list.size(), val);
@@ -14036,11 +14036,11 @@ public final class N {
      * The specified value will be added/inserted into the specified List.
      * The List will be extended automatically if the size of the List is less than the specified toIndex.
      *
-     * @param <T> the generic type
-     * @param list the list
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param <T>
+     * @param list
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val) {
         checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
@@ -14090,9 +14090,9 @@ public final class N {
     /**
      * Fill the properties of the entity with random values.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param entityClass entity class with getter/setter methods
-     * @return the t
+     * @return
      */
     public static <T> T fill(Class<T> entityClass) {
         return TestUtil.fill(entityClass);
@@ -14101,10 +14101,10 @@ public final class N {
     /**
      * Fill the properties of the entity with random values.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param entityClass entity class with getter/setter methods
-     * @param count the count
-     * @return the list
+     * @param count
+     * @return
      */
     public static <T> List<T> fill(Class<T> entityClass, int count) {
         return TestUtil.fill(entityClass, count);
@@ -14113,10 +14113,10 @@ public final class N {
     /**
      * Repeat.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param value
+     * @param n
+     * @return
      */
     public static <T> List<T> repeat(final T value, final int n) {
         N.checkArgNotNegative(n, "n");
@@ -14135,10 +14135,10 @@ public final class N {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param n
+     * @return
      */
     public static <T> List<T> repeatEach(final Collection<T> c, final int n) {
         N.checkArgNotNegative(n, "n");
@@ -14165,10 +14165,10 @@ public final class N {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param n
+     * @return
      */
     public static <T> List<T> repeatAll(final Collection<T> c, final int n) {
         N.checkArgNotNegative(n, "n");
@@ -14195,10 +14195,10 @@ public final class N {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param size the size
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param size
+     * @return
      */
     public static <T> List<T> repeatEachToSize(final Collection<T> c, final int size) {
         N.checkArgNotNegative(size, "size");
@@ -14233,10 +14233,10 @@ public final class N {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param size the size
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param size
+     * @return
      */
     public static <T> List<T> repeatAllToSize(final Collection<T> c, final int size) {
         N.checkArgNotNegative(size, "size");
@@ -14272,9 +14272,9 @@ public final class N {
      * 
      * This method runs in linear time.
      *
-     * @param <T> the generic type
-     * @param src the src
-     * @param dest the dest
+     * @param <T>
+     * @param src
+     * @param dest
      * @throws IndexOutOfBoundsException if the destination list is too small
      *         to contain the entire source List.
      * @throws UnsupportedOperationException if the destination list's
@@ -14292,12 +14292,12 @@ public final class N {
     /**
      * Copy.
      *
-     * @param <T> the generic type
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param <T>
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length) {
         if (src.size() < srcPos + length) {
@@ -14338,11 +14338,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14372,11 +14372,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final char[] src, final int srcPos, final char[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14406,11 +14406,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14440,11 +14440,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final short[] src, final int srcPos, final short[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14474,11 +14474,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final int[] src, final int srcPos, final int[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14508,11 +14508,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final long[] src, final int srcPos, final long[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14542,11 +14542,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final float[] src, final int srcPos, final float[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14576,11 +14576,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final double[] src, final int srcPos, final double[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14610,11 +14610,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      */
     public static void copy(final Object[] src, final int srcPos, final Object[] dest, final int destPos, final int length) {
         if (src.length < srcPos + length) {
@@ -14644,11 +14644,11 @@ public final class N {
     /**
      * Copy.
      *
-     * @param src the src
-     * @param srcPos the src pos
-     * @param dest the dest
-     * @param destPos the dest pos
-     * @param length the length
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
      * @see System#arraycopy(Object, int, Object, int, int) is called
      */
     public static void copy(final Object src, final int srcPos, final Object dest, final int destPos, final int length) {
@@ -14666,9 +14666,9 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param original the original
-     * @param newLength the new length
-     * @return the boolean[]
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(boolean[], int)
      */
     public static boolean[] copyOf(final boolean[] original, final int newLength) {
@@ -14688,9 +14688,9 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param original the original
-     * @param newLength the new length
-     * @return the char[]
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(char[], int)
      */
     public static char[] copyOf(final char[] original, final int newLength) {
@@ -14710,9 +14710,9 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param original the original
-     * @param newLength the new length
-     * @return the byte[]
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(byte[], int)
      */
     public static byte[] copyOf(final byte[] original, final int newLength) {
@@ -14732,9 +14732,9 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param original the original
-     * @param newLength the new length
-     * @return the short[]
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(short[], int)
      */
     public static short[] copyOf(final short[] original, final int newLength) {
@@ -14754,9 +14754,9 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param original the original
-     * @param newLength the new length
-     * @return the int[]
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(int[], int)
      */
     public static int[] copyOf(final int[] original, final int newLength) {
@@ -14776,9 +14776,9 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param original the original
-     * @param newLength the new length
-     * @return the long[]
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(long[], int)
      */
     public static long[] copyOf(final long[] original, final int newLength) {
@@ -14798,9 +14798,9 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param original the original
-     * @param newLength the new length
-     * @return the float[]
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(float[], int)
      */
     public static float[] copyOf(final float[] original, final int newLength) {
@@ -14820,9 +14820,9 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param original the original
-     * @param newLength the new length
-     * @return the double[]
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(double[], int)
      */
     public static double[] copyOf(final double[] original, final int newLength) {
@@ -14842,10 +14842,10 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param <T> the generic type
-     * @param original the original
-     * @param newLength the new length
-     * @return the t[]
+     * @param <T>
+     * @param original
+     * @param newLength
+     * @return
      * @see Arrays#copyOf(Object[], int)
      */
     public static <T> T[] copyOf(final T[] original, final int newLength) {
@@ -14859,12 +14859,12 @@ public final class N {
     /**
      * Copy of.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param original the original
-     * @param newLength the new length
-     * @param newType the new type
-     * @return the t[]
+     * @param <T>
+     * @param <U>
+     * @param original
+     * @param newLength
+     * @param newType
+     * @return
      * @see Arrays#copyOf(Object[], int, Class)
      */
     public static <T, U> T[] copyOf(final U[] original, final int newLength, final Class<? extends T[]> newType) {
@@ -14880,10 +14880,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the boolean[]
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(boolean[], int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, final int from, final int to) {
@@ -14900,11 +14900,11 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the boolean[]
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, int from, final int to, final int step) {
@@ -14936,10 +14936,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the char[]
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(char[], int, int)
      */
     public static char[] copyOfRange(final char[] original, final int from, final int to) {
@@ -14956,11 +14956,11 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the char[]
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     public static char[] copyOfRange(final char[] original, int from, final int to, final int step) {
@@ -14992,10 +14992,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the byte[]
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(byte[], int, int)
      */
     public static byte[] copyOfRange(final byte[] original, final int from, final int to) {
@@ -15012,11 +15012,11 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the byte[]
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     public static byte[] copyOfRange(final byte[] original, int from, final int to, final int step) {
@@ -15048,10 +15048,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the short[]
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(short[], int, int)
      */
     public static short[] copyOfRange(final short[] original, final int from, final int to) {
@@ -15068,11 +15068,11 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the short[]
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     public static short[] copyOfRange(final short[] original, int from, final int to, final int step) {
@@ -15104,10 +15104,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the int[]
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(int[], int, int)
      */
     public static int[] copyOfRange(final int[] original, final int from, final int to) {
@@ -15137,11 +15137,11 @@ public final class N {
      * </code>
      * </pre>
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the int[]
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      */
     public static int[] copyOfRange(final int[] original, int from, final int to, final int step) {
         N.checkFromToIndex(from < to ? from : (to == -1 ? 0 : to), from < to ? to : from, original.length);
@@ -15172,10 +15172,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the long[]
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(long[], int, int)
      */
     public static long[] copyOfRange(final long[] original, final int from, final int to) {
@@ -15192,11 +15192,11 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the long[]
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     public static long[] copyOfRange(final long[] original, int from, final int to, final int step) {
@@ -15228,10 +15228,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the float[]
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(float[], int, int)
      */
     public static float[] copyOfRange(final float[] original, final int from, final int to) {
@@ -15248,11 +15248,11 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the float[]
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     public static float[] copyOfRange(final float[] original, int from, final int to, final int step) {
@@ -15284,10 +15284,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the double[]
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(double[], int, int)
      */
     public static double[] copyOfRange(final double[] original, final int from, final int to) {
@@ -15304,11 +15304,11 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the double[]
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     public static double[] copyOfRange(final double[] original, int from, final int to, final int step) {
@@ -15340,11 +15340,11 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param <T> the generic type
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @return the t[]
+     * @param <T>
+     * @param original
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(T[], int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, final int from, final int to) {
@@ -15358,12 +15358,12 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param <T> the generic type
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the t[]
+     * @param <T>
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @return
      */
     public static <T> T[] copyOfRange(final T[] original, final int from, final int to, final int step) {
         return copyOfRange(original, from, to, step, (Class<T[]>) original.getClass());
@@ -15372,13 +15372,13 @@ public final class N {
     /**
      * {@link Arrays#copyOfRange(Object[], int, int, Class)}.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param newType the new type
-     * @return the t[]
+     * @param <T>
+     * @param <U>
+     * @param original
+     * @param from
+     * @param to
+     * @param newType
+     * @return
      */
     public static <T, U> T[] copyOfRange(final U[] original, final int from, final int to, final Class<? extends T[]> newType) {
         final int newLength = to - from;
@@ -15390,13 +15390,13 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param <T> the generic type
-     * @param original the original
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @param newType the new type
-     * @return the t[]
+     * @param <T>
+     * @param original
+     * @param from
+     * @param to
+     * @param step
+     * @param newType
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, int from, final int to, final int step, final Class<? extends T[]> newType) {
@@ -15428,11 +15428,11 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @return
      * @see Arrays#copyOfRange(T[], int, int)
      */
     public static <T> List<T> copyOfRange(final List<T> c, final int from, final int to) {
@@ -15446,12 +15446,12 @@ public final class N {
     /**
      * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @param step
+     * @return
      */
     public static <T> List<T> copyOfRange(final List<T> c, int from, final int to, final int step) {
         N.checkFromToIndex(from < to ? from : (to == -1 ? 0 : to), from < to ? to : from, c.size());
@@ -15491,9 +15491,9 @@ public final class N {
      * The returned list may share the same elements with the specified array <code>a</code>.
      * That's to say any change on the List/Array will affect the Array/List.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the list
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     private static <T> List<T> createList(final T... a) {
@@ -15521,10 +15521,10 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param str the str
-     * @param from the from
-     * @param to the to
-     * @return the string
+     * @param str
+     * @param from
+     * @param to
+     * @return
      */
     public static String copyOfRange(final String str, final int from, final int to) {
         return str.substring(from, to);
@@ -15533,11 +15533,11 @@ public final class N {
     /**
      * Copy of range.
      *
-     * @param str the str
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the string
+     * @param str
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
@@ -15562,8 +15562,8 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the boolean[]
+     * @param original
+     * @return
      */
     public static boolean[] clone(final boolean[] original) {
         if (original == null) {
@@ -15576,8 +15576,8 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the char[]
+     * @param original
+     * @return
      */
     public static char[] clone(final char[] original) {
         if (original == null) {
@@ -15590,8 +15590,8 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the byte[]
+     * @param original
+     * @return
      */
     public static byte[] clone(final byte[] original) {
         if (original == null) {
@@ -15604,8 +15604,8 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the short[]
+     * @param original
+     * @return
      */
     public static short[] clone(final short[] original) {
         if (original == null) {
@@ -15618,8 +15618,8 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the int[]
+     * @param original
+     * @return
      */
     public static int[] clone(final int[] original) {
         if (original == null) {
@@ -15632,8 +15632,8 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the long[]
+     * @param original
+     * @return
      */
     public static long[] clone(final long[] original) {
         if (original == null) {
@@ -15646,8 +15646,8 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the float[]
+     * @param original
+     * @return
      */
     public static float[] clone(final float[] original) {
         if (original == null) {
@@ -15660,8 +15660,8 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the double[]
+     * @param original
+     * @return
      */
     public static double[] clone(final double[] original) {
         if (original == null) {
@@ -15674,9 +15674,9 @@ public final class N {
     /**
      * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param <T> the generic type
-     * @param original the original
-     * @return the t[]
+     * @param <T>
+     * @param original
+     * @return
      */
     public static <T> T[] clone(final T[] original) {
         if (original == null) {
@@ -15689,8 +15689,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the boolean[][]
+     * @param original
+     * @return
      */
     public static boolean[][] clone(final boolean[][] original) {
         if (original == null) {
@@ -15709,8 +15709,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the char[][]
+     * @param original
+     * @return
      */
     public static char[][] clone(final char[][] original) {
         if (original == null) {
@@ -15729,8 +15729,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the byte[][]
+     * @param original
+     * @return
      */
     public static byte[][] clone(final byte[][] original) {
         if (original == null) {
@@ -15749,8 +15749,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the short[][]
+     * @param original
+     * @return
      */
     public static short[][] clone(final short[][] original) {
         if (original == null) {
@@ -15769,8 +15769,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the int[][]
+     * @param original
+     * @return
      */
     public static int[][] clone(final int[][] original) {
         if (original == null) {
@@ -15789,8 +15789,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the long[][]
+     * @param original
+     * @return
      */
     public static long[][] clone(final long[][] original) {
         if (original == null) {
@@ -15809,8 +15809,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the float[][]
+     * @param original
+     * @return
      */
     public static float[][] clone(final float[][] original) {
         if (original == null) {
@@ -15829,8 +15829,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the double[][]
+     * @param original
+     * @return
      */
     public static double[][] clone(final double[][] original) {
         if (original == null) {
@@ -15849,9 +15849,9 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param <T> the generic type
-     * @param original the original
-     * @return the t[][]
+     * @param <T>
+     * @param original
+     * @return
      */
     public static <T> T[][] clone(final T[][] original) {
         if (original == null) {
@@ -15870,8 +15870,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the boolean[][][]
+     * @param original
+     * @return
      */
     public static boolean[][][] clone(final boolean[][][] original) {
         if (original == null) {
@@ -15890,8 +15890,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the char[][][]
+     * @param original
+     * @return
      */
     public static char[][][] clone(final char[][][] original) {
         if (original == null) {
@@ -15910,8 +15910,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the byte[][][]
+     * @param original
+     * @return
      */
     public static byte[][][] clone(final byte[][][] original) {
         if (original == null) {
@@ -15930,8 +15930,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the short[][][]
+     * @param original
+     * @return
      */
     public static short[][][] clone(final short[][][] original) {
         if (original == null) {
@@ -15950,8 +15950,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the int[][][]
+     * @param original
+     * @return
      */
     public static int[][][] clone(final int[][][] original) {
         if (original == null) {
@@ -15970,8 +15970,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the long[][][]
+     * @param original
+     * @return
      */
     public static long[][][] clone(final long[][][] original) {
         if (original == null) {
@@ -15990,8 +15990,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the float[][][]
+     * @param original
+     * @return
      */
     public static float[][][] clone(final float[][][] original) {
         if (original == null) {
@@ -16010,8 +16010,8 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param original the original
-     * @return the double[][][]
+     * @param original
+     * @return
      */
     public static double[][][] clone(final double[][][] original) {
         if (original == null) {
@@ -16030,9 +16030,9 @@ public final class N {
     /**
      * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
      *
-     * @param <T> the generic type
-     * @param original the original
-     * @return the t[][][]
+     * @param <T>
+     * @param original
+     * @return
      */
     public static <T> T[][][] clone(final T[][][] original) {
         if (original == null) {
@@ -16051,10 +16051,10 @@ public final class N {
     /**
      * Copy.
      *
-     * @param <T> the generic type
-     * @param newType the new type
-     * @param a the a
-     * @return the t[]
+     * @param <T>
+     * @param newType
+     * @param a
+     * @return
      */
     public static <T> T[] copy(Class<T[]> newType, Object[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -16067,10 +16067,10 @@ public final class N {
     /**
      * Copy.
      *
-     * @param <T> the generic type
-     * @param newType the new type
-     * @param a the a
-     * @return the t[][]
+     * @param <T>
+     * @param newType
+     * @param a
+     * @return
      */
     public static <T> T[][] copy(Class<T[][]> newType, Object[][] a) {
         final Class<T[]> componentType = (Class<T[]>) newType.getComponentType();
@@ -16092,10 +16092,10 @@ public final class N {
     /**
      * Copy.
      *
-     * @param <T> the generic type
-     * @param newType the new type
-     * @param a the a
-     * @return the t[][][]
+     * @param <T>
+     * @param newType
+     * @param a
+     * @return
      */
     public static <T> T[][][] copy(Class<T[][][]> newType, Object[][][] a) {
         final Class<T[][]> componentType = (Class<T[][]>) newType.getComponentType();
@@ -16117,7 +16117,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final boolean[] a) {
         Array.sort(a);
@@ -16126,7 +16126,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final char[] a) {
         Array.sort(a);
@@ -16135,9 +16135,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void sort(final char[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16146,7 +16146,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final byte[] a) {
         Array.sort(a);
@@ -16155,9 +16155,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void sort(final byte[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16166,7 +16166,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final short[] a) {
         Array.sort(a);
@@ -16175,9 +16175,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void sort(final short[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16186,7 +16186,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final int[] a) {
         Array.sort(a);
@@ -16195,9 +16195,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void sort(final int[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16206,7 +16206,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final long[] a) {
         Array.sort(a);
@@ -16215,9 +16215,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void sort(final long[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16226,7 +16226,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final float[] a) {
         Array.sort(a);
@@ -16235,9 +16235,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void sort(final float[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16246,7 +16246,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final double[] a) {
         Array.sort(a);
@@ -16255,9 +16255,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void sort(final double[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16266,7 +16266,7 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void sort(final Object[] a) {
         Array.sort(a);
@@ -16275,9 +16275,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void sort(final Object[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16286,9 +16286,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param cmp the cmp
+     * @param <T>
+     * @param a
+     * @param cmp
      */
     public static <T> void sort(final T[] a, final Comparator<? super T> cmp) {
         Array.sort(a, cmp);
@@ -16297,11 +16297,11 @@ public final class N {
     /**
      * Sort.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param cmp the cmp
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
      */
     public static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         Array.sort(a, fromIndex, toIndex, cmp);
@@ -16310,8 +16310,8 @@ public final class N {
     /**
      * Sort.
      *
-     * @param <T> the generic type
-     * @param c the c
+     * @param <T>
+     * @param c
      */
     public static <T extends Comparable<? super T>> void sort(final List<? extends T> c) {
         Array.sort(c);
@@ -16320,10 +16320,10 @@ public final class N {
     /**
      * Sort.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      */
     public static <T extends Comparable<? super T>> void sort(final List<? extends T> c, final int fromIndex, final int toIndex) {
         Array.sort(c, fromIndex, toIndex);
@@ -16332,9 +16332,9 @@ public final class N {
     /**
      * Sort.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
+     * @param <T>
+     * @param c
+     * @param cmp
      */
     public static <T> void sort(final List<? extends T> c, final Comparator<? super T> cmp) {
         Array.sort(c, cmp);
@@ -16343,11 +16343,11 @@ public final class N {
     /**
      * Sort.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param cmp the cmp
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
      */
     public static <T> void sort(final List<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         Array.sort(c, fromIndex, toIndex, cmp);
@@ -16356,10 +16356,10 @@ public final class N {
     /**
      * Sort by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param keyMapper
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> void sortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
@@ -16369,10 +16369,10 @@ public final class N {
     /**
      * Sort by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @param keyMapper
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> void sortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
@@ -16382,9 +16382,9 @@ public final class N {
     /**
      * Sort by int.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param a
+     * @param keyMapper
      */
     public static <T> void sortByInt(final T[] a, final ToIntFunction<? super T> keyMapper) {
         sort(a, Comparators.comparingInt(keyMapper));
@@ -16393,9 +16393,9 @@ public final class N {
     /**
      * Sort by int.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param c
+     * @param keyMapper
      */
     public static <T> void sortByInt(final List<? extends T> c, final ToIntFunction<? super T> keyMapper) {
         sort(c, Comparators.comparingInt(keyMapper));
@@ -16404,9 +16404,9 @@ public final class N {
     /**
      * Sort by long.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param a
+     * @param keyMapper
      */
     public static <T> void sortByLong(final T[] a, final ToLongFunction<? super T> keyMapper) {
         sort(a, Comparators.comparingLong(keyMapper));
@@ -16415,9 +16415,9 @@ public final class N {
     /**
      * Sort by long.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param c
+     * @param keyMapper
      */
     public static <T> void sortByLong(final List<? extends T> c, final ToLongFunction<? super T> keyMapper) {
         sort(c, Comparators.comparingLong(keyMapper));
@@ -16426,9 +16426,9 @@ public final class N {
     /**
      * Sort by float.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param a
+     * @param keyMapper
      */
     public static <T> void sortByFloat(final T[] a, final ToFloatFunction<? super T> keyMapper) {
         sort(a, Comparators.comparingFloat(keyMapper));
@@ -16437,9 +16437,9 @@ public final class N {
     /**
      * Sort by float.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param c
+     * @param keyMapper
      */
     public static <T> void sortByFloat(final List<? extends T> c, final ToFloatFunction<? super T> keyMapper) {
         sort(c, Comparators.comparingFloat(keyMapper));
@@ -16448,9 +16448,9 @@ public final class N {
     /**
      * Sort by double.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param a
+     * @param keyMapper
      */
     public static <T> void sortByDouble(final T[] a, final ToDoubleFunction<? super T> keyMapper) {
         sort(a, Comparators.comparingDouble(keyMapper));
@@ -16459,9 +16459,9 @@ public final class N {
     /**
      * Sort by double.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param c
+     * @param keyMapper
      */
     public static <T> void sortByDouble(final List<? extends T> c, final ToDoubleFunction<? super T> keyMapper) {
         sort(c, Comparators.comparingDouble(keyMapper));
@@ -16470,7 +16470,7 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void parallelSort(final char[] a) {
         Array.parallelSort(a);
@@ -16479,9 +16479,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void parallelSort(final char[] a, final int fromIndex, final int toIndex) {
         Array.parallelSort(a, fromIndex, toIndex);
@@ -16490,7 +16490,7 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void parallelSort(final byte[] a) {
         Array.parallelSort(a);
@@ -16499,9 +16499,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) {
         Array.parallelSort(a, fromIndex, toIndex);
@@ -16510,7 +16510,7 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void parallelSort(final short[] a) {
         Array.parallelSort(a);
@@ -16519,9 +16519,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void parallelSort(final short[] a, final int fromIndex, final int toIndex) {
         Array.parallelSort(a, fromIndex, toIndex);
@@ -16530,7 +16530,7 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void parallelSort(final int[] a) {
         Array.parallelSort(a);
@@ -16539,9 +16539,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void parallelSort(final int[] a, final int fromIndex, final int toIndex) {
         Array.parallelSort(a, fromIndex, toIndex);
@@ -16550,7 +16550,7 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void parallelSort(final long[] a) {
         Array.parallelSort(a);
@@ -16559,9 +16559,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void parallelSort(final long[] a, final int fromIndex, final int toIndex) {
         Array.parallelSort(a, fromIndex, toIndex);
@@ -16570,7 +16570,7 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void parallelSort(final float[] a) {
         Array.parallelSort(a);
@@ -16579,9 +16579,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void parallelSort(final float[] a, final int fromIndex, final int toIndex) {
         Array.parallelSort(a, fromIndex, toIndex);
@@ -16590,7 +16590,7 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void parallelSort(final double[] a) {
         Array.parallelSort(a);
@@ -16599,9 +16599,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void parallelSort(final double[] a, final int fromIndex, final int toIndex) {
         Array.parallelSort(a, fromIndex, toIndex);
@@ -16610,7 +16610,7 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void parallelSort(final Object[] a) {
         Array.parallelSort(a);
@@ -16619,9 +16619,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void parallelSort(final Object[] a, final int fromIndex, final int toIndex) {
         Array.parallelSort(a, fromIndex, toIndex);
@@ -16630,9 +16630,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param cmp the cmp
+     * @param <T>
+     * @param a
+     * @param cmp
      */
     public static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) {
         Array.parallelSort(a, cmp);
@@ -16641,11 +16641,11 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param cmp the cmp
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
      */
     public static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         Array.parallelSort(a, fromIndex, toIndex, cmp);
@@ -16654,8 +16654,8 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param <T> the generic type
-     * @param c the c
+     * @param <T>
+     * @param c
      */
     public static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> c) {
         Array.parallelSort(c);
@@ -16664,10 +16664,10 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      */
     public static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> c, final int fromIndex, final int toIndex) {
         Array.parallelSort(c, fromIndex, toIndex);
@@ -16676,9 +16676,9 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
+     * @param <T>
+     * @param c
+     * @param cmp
      */
     public static <T> void parallelSort(final List<? extends T> c, final Comparator<? super T> cmp) {
         Array.parallelSort(c, cmp);
@@ -16687,11 +16687,11 @@ public final class N {
     /**
      * Parallel sort.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param cmp the cmp
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
      */
     public static <T> void parallelSort(final List<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         Array.parallelSort(c, fromIndex, toIndex, cmp);
@@ -16700,10 +16700,10 @@ public final class N {
     /**
      * Parallel sort by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param keyMapper
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> void parallelSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
@@ -16713,10 +16713,10 @@ public final class N {
     /**
      * Parallel sort by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @param keyMapper
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> void parallelSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
@@ -16726,9 +16726,9 @@ public final class N {
     /**
      * Parallel sort by int.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param a
+     * @param keyMapper
      */
     public static <T> void parallelSortByInt(final T[] a, final ToIntFunction<? super T> keyMapper) {
         parallelSort(a, Comparators.comparingInt(keyMapper));
@@ -16737,9 +16737,9 @@ public final class N {
     /**
      * Parallel sort by int.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param c
+     * @param keyMapper
      */
     public static <T> void parallelSortByInt(final List<? extends T> c, final ToIntFunction<? super T> keyMapper) {
         parallelSort(c, Comparators.comparingInt(keyMapper));
@@ -16748,9 +16748,9 @@ public final class N {
     /**
      * Parallel sort by long.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param a
+     * @param keyMapper
      */
     public static <T> void parallelSortByLong(final T[] a, final ToLongFunction<? super T> keyMapper) {
         parallelSort(a, Comparators.comparingLong(keyMapper));
@@ -16759,9 +16759,9 @@ public final class N {
     /**
      * Parallel sort by long.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param c
+     * @param keyMapper
      */
     public static <T> void parallelSortByLong(final List<? extends T> c, final ToLongFunction<? super T> keyMapper) {
         parallelSort(c, Comparators.comparingLong(keyMapper));
@@ -16770,9 +16770,9 @@ public final class N {
     /**
      * Parallel sort by float.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param a
+     * @param keyMapper
      */
     public static <T> void parallelSortByFloat(final T[] a, final ToFloatFunction<? super T> keyMapper) {
         parallelSort(a, Comparators.comparingFloat(keyMapper));
@@ -16781,9 +16781,9 @@ public final class N {
     /**
      * Parallel sort by float.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param c
+     * @param keyMapper
      */
     public static <T> void parallelSortByFloat(final List<? extends T> c, final ToFloatFunction<? super T> keyMapper) {
         parallelSort(c, Comparators.comparingFloat(keyMapper));
@@ -16792,9 +16792,9 @@ public final class N {
     /**
      * Parallel sort by double.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param a
+     * @param keyMapper
      */
     public static <T> void parallelSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyMapper) {
         parallelSort(a, Comparators.comparingDouble(keyMapper));
@@ -16803,9 +16803,9 @@ public final class N {
     /**
      * Parallel sort by double.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param c
+     * @param keyMapper
      */
     public static <T> void parallelSortByDouble(final List<? extends T> c, final ToDoubleFunction<? super T> keyMapper) {
         parallelSort(c, Comparators.comparingDouble(keyMapper));
@@ -16814,7 +16814,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final boolean[] a) {
         Array.reverseSort(a);
@@ -16823,7 +16823,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final char[] a) {
         Array.sort(a);
@@ -16833,9 +16833,9 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverseSort(final char[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16845,7 +16845,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final byte[] a) {
         Array.sort(a);
@@ -16855,9 +16855,9 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverseSort(final byte[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16867,7 +16867,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final short[] a) {
         Array.sort(a);
@@ -16877,9 +16877,9 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverseSort(final short[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16889,7 +16889,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final int[] a) {
         Array.sort(a);
@@ -16899,9 +16899,9 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverseSort(final int[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16911,7 +16911,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final long[] a) {
         Array.sort(a);
@@ -16921,9 +16921,9 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverseSort(final long[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16933,7 +16933,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final float[] a) {
         Array.sort(a);
@@ -16943,9 +16943,9 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverseSort(final float[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16955,7 +16955,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final double[] a) {
         Array.sort(a);
@@ -16965,9 +16965,9 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverseSort(final double[] a, final int fromIndex, final int toIndex) {
         Array.sort(a, fromIndex, toIndex);
@@ -16977,7 +16977,7 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void reverseSort(final Object[] a) {
         sort(a, Fn.reversedOrder());
@@ -16986,9 +16986,9 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void reverseSort(final Object[] a, final int fromIndex, final int toIndex) {
         sort(a, fromIndex, toIndex, Fn.reversedOrder());
@@ -16997,8 +16997,8 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param <T> the generic type
-     * @param c the c
+     * @param <T>
+     * @param c
      */
     public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> c) {
         sort(c, Fn.reversedOrder());
@@ -17007,10 +17007,10 @@ public final class N {
     /**
      * Reverse sort.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      */
     public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> c, final int fromIndex, final int toIndex) {
         sort(c, fromIndex, toIndex, Fn.reversedOrder());
@@ -17019,10 +17019,10 @@ public final class N {
     /**
      * Reverse sort by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param keyMapper
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> void reverseSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
@@ -17032,10 +17032,10 @@ public final class N {
     /**
      * Reverse sort by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @param keyMapper
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> void reverseSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
@@ -17045,7 +17045,7 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void bucketSort(final int[] a) {
         Array.bucketSort(a);
@@ -17054,9 +17054,9 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void bucketSort(final int[] a, final int fromIndex, final int toIndex) {
         Array.bucketSort(a, fromIndex, toIndex);
@@ -17065,7 +17065,7 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void bucketSort(final long[] a) {
         Array.bucketSort(a);
@@ -17074,9 +17074,9 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void bucketSort(final long[] a, final int fromIndex, final int toIndex) {
         Array.bucketSort(a, fromIndex, toIndex);
@@ -17085,7 +17085,7 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void bucketSort(final float[] a) {
         Array.bucketSort(a);
@@ -17094,9 +17094,9 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void bucketSort(final float[] a, final int fromIndex, final int toIndex) {
         Array.bucketSort(a, fromIndex, toIndex);
@@ -17105,7 +17105,7 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param a the a
+     * @param a
      */
     public static void bucketSort(final double[] a) {
         Array.bucketSort(a);
@@ -17114,9 +17114,9 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static void bucketSort(final double[] a, final int fromIndex, final int toIndex) {
         Array.bucketSort(a, fromIndex, toIndex);
@@ -17125,7 +17125,7 @@ public final class N {
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
      *
-     * @param a the a
+     * @param a
      */
     public static void bucketSort(final Object[] a) {
         Array.bucketSort(a);
@@ -17135,8 +17135,8 @@ public final class N {
      * Note: All the objects with same value will be replaced with first element with the same value.
      *
      * @param a the elements in the array must implements the <code>Comparable</code> interface.
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     public static void bucketSort(final Object[] a, final int fromIndex, final int toIndex) {
         Array.bucketSort(a, fromIndex, toIndex);
@@ -17145,9 +17145,9 @@ public final class N {
     /**
      * Bucket sort.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param cmp the cmp
+     * @param <T>
+     * @param a
+     * @param cmp
      */
     public static <T> void bucketSort(final T[] a, final Comparator<? super T> cmp) {
         Array.bucketSort(a, cmp);
@@ -17156,11 +17156,11 @@ public final class N {
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param cmp the cmp
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
      */
     public static <T> void bucketSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         Array.bucketSort(a, fromIndex, toIndex, cmp);
@@ -17169,8 +17169,8 @@ public final class N {
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
      *
-     * @param <T> the generic type
-     * @param c the c
+     * @param <T>
+     * @param c
      */
     public static <T extends Comparable<T>> void bucketSort(final List<T> c) {
         Array.bucketSort(c);
@@ -17179,10 +17179,10 @@ public final class N {
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      */
     public static <T extends Comparable<T>> void bucketSort(final List<T> c, final int fromIndex, final int toIndex) {
         Array.bucketSort(c, fromIndex, toIndex);
@@ -17191,9 +17191,9 @@ public final class N {
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
+     * @param <T>
+     * @param c
+     * @param cmp
      */
     public static <T> void bucketSort(final List<? extends T> c, final Comparator<? super T> cmp) {
         Array.bucketSort(c, cmp);
@@ -17202,11 +17202,11 @@ public final class N {
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param cmp the cmp
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
      */
     public static <T> void bucketSort(final List<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         Array.bucketSort(c, fromIndex, toIndex, cmp);
@@ -17215,10 +17215,10 @@ public final class N {
     /**
      * Bucket sort by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param keyMapper
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
@@ -17228,10 +17228,10 @@ public final class N {
     /**
      * Bucket sort by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @param keyMapper
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> void bucketSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
@@ -17241,9 +17241,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(boolean[], boolean)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     static int binarySearch(final boolean[] a, final boolean key) {
         return Array.binarySearch(a, key);
@@ -17252,9 +17252,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(char[], char)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     public static int binarySearch(final char[] a, final char key) {
         return Array.binarySearch(a, key);
@@ -17263,11 +17263,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(char[], int, int, char)}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static int binarySearch(final char[] a, final int fromIndex, final int toIndex, final char key) {
         return Array.binarySearch(a, fromIndex, toIndex, key);
@@ -17276,9 +17276,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(byte[], byte)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     public static int binarySearch(final byte[] a, final byte key) {
         return Array.binarySearch(a, key);
@@ -17287,11 +17287,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(byte[], int, int, byte)}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static int binarySearch(final byte[] a, final int fromIndex, final int toIndex, final byte key) {
         return Array.binarySearch(a, fromIndex, toIndex, key);
@@ -17300,9 +17300,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(short[], short)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     public static int binarySearch(final short[] a, final short key) {
         return Array.binarySearch(a, key);
@@ -17311,11 +17311,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(short[], int, int, short)}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static int binarySearch(final short[] a, final int fromIndex, final int toIndex, final short key) {
         return Array.binarySearch(a, fromIndex, toIndex, key);
@@ -17324,9 +17324,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(int[], int)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     public static int binarySearch(final int[] a, final int key) {
         return Array.binarySearch(a, key);
@@ -17335,11 +17335,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(int[], int, int, int)}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static int binarySearch(final int[] a, final int fromIndex, final int toIndex, final int key) {
         return Array.binarySearch(a, fromIndex, toIndex, key);
@@ -17348,9 +17348,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(long[], long)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     public static int binarySearch(final long[] a, final long key) {
         return Array.binarySearch(a, key);
@@ -17359,11 +17359,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(long[], int, int, long)}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static int binarySearch(final long[] a, final int fromIndex, final int toIndex, final long key) {
         return Array.binarySearch(a, fromIndex, toIndex, key);
@@ -17372,9 +17372,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(float[], float)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     public static int binarySearch(final float[] a, final float key) {
         return Array.binarySearch(a, key);
@@ -17383,11 +17383,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(float[], int, int, float)}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static int binarySearch(final float[] a, final int fromIndex, final int toIndex, final float key) {
         return Array.binarySearch(a, fromIndex, toIndex, key);
@@ -17396,9 +17396,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(double[], double)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     public static int binarySearch(final double[] a, final double key) {
         return Array.binarySearch(a, key);
@@ -17407,11 +17407,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(double[], int, int, double)}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static int binarySearch(final double[] a, final int fromIndex, final int toIndex, final double key) {
         return Array.binarySearch(a, fromIndex, toIndex, key);
@@ -17420,9 +17420,9 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(Object[], Object)}.
      *
-     * @param a the a
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param key
+     * @return
      */
     public static int binarySearch(final Object[] a, final Object key) {
         return Array.binarySearch(a, key);
@@ -17431,11 +17431,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(Object[], int, int, Object)}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static int binarySearch(final Object[] a, final int fromIndex, final int toIndex, final Object key) {
         return Array.binarySearch(a, fromIndex, toIndex, key);
@@ -17444,11 +17444,11 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(Object[], Object, Comparator)}.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param key the key
-     * @param cmp the cmp
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param key
+     * @param cmp
+     * @return
      */
     public static <T> int binarySearch(final T[] a, final T key, final Comparator<? super T> cmp) {
         return Array.binarySearch(a, key, cmp);
@@ -17457,13 +17457,13 @@ public final class N {
     /**
      * {@link Arrays#binarySearch(Object[], int, int, Object, Comparator)}.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @param cmp the cmp
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @param cmp
+     * @return
      */
     public static <T> int binarySearch(final T[] a, final int fromIndex, final int toIndex, final T key, final Comparator<? super T> cmp) {
         return Array.binarySearch(a, fromIndex, toIndex, key, cmp);
@@ -17472,10 +17472,10 @@ public final class N {
     /**
      * {@link Collections#binarySearch(List, Object)}.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param key the key
-     * @return the int
+     * @param <T>
+     * @param c
+     * @param key
+     * @return
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> c, final T key) {
         return Array.binarySearch(c, key);
@@ -17484,12 +17484,12 @@ public final class N {
     /**
      * Binary search.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> c, final int fromIndex, final int toIndex, final T key) {
         return Array.binarySearch(c, fromIndex, toIndex, key);
@@ -17498,11 +17498,11 @@ public final class N {
     /**
      * Binary search.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param key the key
-     * @param cmp the cmp
-     * @return the int
+     * @param <T>
+     * @param c
+     * @param key
+     * @param cmp
+     * @return
      */
     public static <T> int binarySearch(final List<? extends T> c, final T key, final Comparator<? super T> cmp) {
         return Array.binarySearch(c, key, cmp);
@@ -17511,13 +17511,13 @@ public final class N {
     /**
      * Binary search.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @param cmp the cmp
-     * @return the int
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @param cmp
+     * @return
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> c, final int fromIndex, final int toIndex, final T key, final Comparator<? super T> cmp) {
@@ -17527,12 +17527,12 @@ public final class N {
     /**
      * Binary search by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param a the a
-     * @param key the key
-     * @param keyMapper the key mapper
-     * @return the int
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param key
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> int binarySearchBy(final T[] a, final T key, final Function<? super T, ? extends U> keyMapper) {
@@ -17542,12 +17542,12 @@ public final class N {
     /**
      * Binary search by.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param c the c
-     * @param key the key
-     * @param keyMapper the key mapper
-     * @return the int
+     * @param <T>
+     * @param <U>
+     * @param c
+     * @param key
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, U extends Comparable> int binarySearchBy(final List<? extends T> c, final T key, final Function<? super T, ? extends U> keyMapper) {
@@ -17557,9 +17557,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final boolean[] a, final boolean e) {
         return indexOf(a, 0, e);
@@ -17568,10 +17568,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final boolean[] a, final int fromIndex, final boolean e) {
         if (N.isNullOrEmpty(a)) {
@@ -17590,9 +17590,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final char[] a, final char e) {
         return indexOf(a, 0, e);
@@ -17601,10 +17601,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final char[] a, final int fromIndex, final char e) {
         if (N.isNullOrEmpty(a)) {
@@ -17623,9 +17623,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final byte[] a, final byte e) {
         return indexOf(a, 0, e);
@@ -17635,10 +17635,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final byte[] a, final int fromIndex, final byte e) {
         if (N.isNullOrEmpty(a)) {
@@ -17657,9 +17657,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final short[] a, final short e) {
         return indexOf(a, 0, e);
@@ -17668,10 +17668,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final short[] a, final int fromIndex, final short e) {
         if (N.isNullOrEmpty(a)) {
@@ -17690,9 +17690,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final int[] a, final int e) {
         return indexOf(a, 0, e);
@@ -17701,10 +17701,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final int[] a, final int fromIndex, final int e) {
         if (N.isNullOrEmpty(a)) {
@@ -17723,9 +17723,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final long[] a, final long e) {
         return indexOf(a, 0, e);
@@ -17734,10 +17734,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final long[] a, final int fromIndex, final long e) {
         if (N.isNullOrEmpty(a)) {
@@ -17756,9 +17756,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final float[] a, final float e) {
         return indexOf(a, 0, e);
@@ -17767,10 +17767,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final float[] a, final int fromIndex, final float e) {
         if (N.isNullOrEmpty(a)) {
@@ -17789,9 +17789,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final double[] a, final double e) {
         return indexOf(a, 0, e);
@@ -17800,10 +17800,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final double[] a, final int fromIndex, final double e) {
         if (N.isNullOrEmpty(a)) {
@@ -17822,9 +17822,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int indexOf(final Object[] a, final Object e) {
         return indexOf(a, 0, e);
@@ -17833,10 +17833,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param a the a
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final Object[] a, final int fromIndex, final Object e) {
         if (N.isNullOrEmpty(a)) {
@@ -17855,9 +17855,9 @@ public final class N {
     /**
      * Index of.
      *
-     * @param list the list
-     * @param e the e
-     * @return the int
+     * @param list
+     * @param e
+     * @return
      */
     public static int indexOf(final List<?> list, final Object e) {
         return indexOf(list, 0, e);
@@ -17866,10 +17866,10 @@ public final class N {
     /**
      * Index of.
      *
-     * @param list the list
-     * @param fromIndex            the index from which to start the search.
-     * @param e the e
-     * @return the int
+     * @param list
+     * @param fromIndex the index from which to start the search.
+     * @param e
+     * @return
      */
     public static int indexOf(final List<?> list, final int fromIndex, final Object e) {
         if (N.isNullOrEmpty(list)) {
@@ -17888,9 +17888,9 @@ public final class N {
     /**
      * Index of sub list.
      *
-     * @param sourceList the source list
-     * @param targetSubList the target sub list
-     * @return the int
+     * @param sourceList
+     * @param targetSubList
+     * @return
      * @see java.util.Collections#indexOfSubList(List, List)
      */
     public static int indexOfSubList(final List<?> sourceList, final List<?> targetSubList) {
@@ -17904,9 +17904,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final boolean[] a, final boolean e) {
         return lastIndexOf(a, a.length - 1, e);
@@ -17915,10 +17915,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final boolean[] a, final int fromIndex, final boolean e) {
         if (N.isNullOrEmpty(a)) {
@@ -17937,9 +17937,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final char[] a, final char e) {
         if (N.isNullOrEmpty(a)) {
@@ -17952,10 +17952,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final char[] a, final int fromIndex, final char e) {
         if (N.isNullOrEmpty(a)) {
@@ -17974,9 +17974,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final byte[] a, final byte e) {
         if (N.isNullOrEmpty(a)) {
@@ -17990,10 +17990,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final byte[] a, final int fromIndex, final byte e) {
         if (N.isNullOrEmpty(a)) {
@@ -18012,9 +18012,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final short[] a, final short e) {
         if (N.isNullOrEmpty(a)) {
@@ -18027,10 +18027,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final short[] a, final int fromIndex, final short e) {
         if (N.isNullOrEmpty(a)) {
@@ -18049,9 +18049,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final int[] a, final int e) {
         if (N.isNullOrEmpty(a)) {
@@ -18064,10 +18064,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final int[] a, final int fromIndex, final int e) {
         if (N.isNullOrEmpty(a)) {
@@ -18086,9 +18086,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final long[] a, final long e) {
         if (N.isNullOrEmpty(a)) {
@@ -18101,10 +18101,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final long[] a, final int fromIndex, final long e) {
         if (N.isNullOrEmpty(a)) {
@@ -18123,9 +18123,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final float[] a, final float e) {
         if (N.isNullOrEmpty(a)) {
@@ -18138,10 +18138,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final float[] a, final int fromIndex, final float e) {
         if (N.isNullOrEmpty(a)) {
@@ -18160,9 +18160,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final double[] a, final double e) {
         if (N.isNullOrEmpty(a)) {
@@ -18175,10 +18175,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final double[] a, final int fromIndex, final double e) {
         if (N.isNullOrEmpty(a)) {
@@ -18197,9 +18197,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final Object[] a, final Object e) {
         if (N.isNullOrEmpty(a)) {
@@ -18212,10 +18212,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param a the a
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param a
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final Object[] a, final int fromIndex, final Object e) {
         if (N.isNullOrEmpty(a)) {
@@ -18234,9 +18234,9 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param list the list
-     * @param e the e
-     * @return the int
+     * @param list
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final List<?> list, final Object e) {
         if (N.isNullOrEmpty(list)) {
@@ -18249,10 +18249,10 @@ public final class N {
     /**
      * Last index of.
      *
-     * @param list the list
-     * @param fromIndex            the start index to traverse backwards from
-     * @param e the e
-     * @return the int
+     * @param list
+     * @param fromIndex the start index to traverse backwards from
+     * @param e
+     * @return
      */
     public static int lastIndexOf(final List<?> list, final int fromIndex, final Object e) {
         if (N.isNullOrEmpty(list)) {
@@ -18271,9 +18271,9 @@ public final class N {
     /**
      * Last index of sub list.
      *
-     * @param sourceList the source list
-     * @param targetSubList the target sub list
-     * @return the int
+     * @param sourceList
+     * @param targetSubList
+     * @return
      * @see java.util.Collections#lastIndexOfSubList(List, List)
      */
     public static int lastIndexOfSubList(final List<?> sourceList, final List<?> targetSubList) {
@@ -18287,9 +18287,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final boolean[] a, final boolean objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18310,9 +18310,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final char[] a, final char objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18333,9 +18333,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final byte[] a, final byte objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18356,9 +18356,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final short[] a, final short objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18379,9 +18379,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final int[] a, final int objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18402,9 +18402,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final long[] a, final long objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18425,9 +18425,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final float[] a, final float objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18448,9 +18448,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final double[] a, final double objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18471,9 +18471,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param a the a
-     * @param objectToFind the object to find
-     * @return the int
+     * @param a
+     * @param objectToFind
+     * @return
      */
     public static int occurrencesOf(final Object[] a, final Object objectToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -18502,9 +18502,9 @@ public final class N {
     /**
      * Occurrences of.
      *
-     * @param c the c
-     * @param objectToFind the object to find
-     * @return the int
+     * @param c
+     * @param objectToFind
+     * @return
      * @see java.util.Collections#frequency(Collection, Object)
      */
     public static int occurrencesOf(final Collection<?> c, final Object objectToFind) {
@@ -18518,8 +18518,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final boolean[] a, final boolean objectToFind) {
@@ -18529,8 +18529,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final char[] a, final char objectToFind) {
@@ -18540,8 +18540,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final byte[] a, final byte objectToFind) {
@@ -18551,8 +18551,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final short[] a, final short objectToFind) {
@@ -18562,8 +18562,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final int[] a, final int objectToFind) {
@@ -18573,8 +18573,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final long[] a, final long objectToFind) {
@@ -18584,8 +18584,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final float[] a, final float objectToFind) {
@@ -18595,8 +18595,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final double[] a, final double objectToFind) {
@@ -18606,8 +18606,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param a the a
-     * @param objectToFind the object to find
+     * @param a
+     * @param objectToFind
      * @return true, if successful
      */
     public static boolean contains(final Object[] a, final Object objectToFind) {
@@ -18617,8 +18617,8 @@ public final class N {
     /**
      * Contains.
      *
-     * @param c the c
-     * @param e the e
+     * @param c
+     * @param e
      * @return true, if successful
      */
     public static boolean contains(final Collection<?> c, final Object e) {
@@ -18632,10 +18632,10 @@ public final class N {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @param action the action
+     * @param <E>
+     * @param startInclusive
+     * @param endExclusive
+     * @param action
      * @throws E the e
      */
     public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Try.IntConsumer<E> action) throws E {
@@ -18645,11 +18645,11 @@ public final class N {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @param step the step
-     * @param action the action
+     * @param <E>
+     * @param startInclusive
+     * @param endExclusive
+     * @param step
+     * @param action
      * @throws E the e
      */
     public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Try.IntConsumer<E> action) throws E {
@@ -18671,12 +18671,12 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @param a the a
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param startInclusive
+     * @param endExclusive
+     * @param a
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final T a, Try.ObjIntConsumer<? super T, E> action)
@@ -18687,13 +18687,13 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param startInclusive the start inclusive
-     * @param endExclusive the end exclusive
-     * @param step the step
-     * @param a the a
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param startInclusive
+     * @param endExclusive
+     * @param step
+     * @param a
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final T a,
@@ -18716,10 +18716,10 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final T[] a, final Try.Consumer<? super T, E> action) throws E {
@@ -18737,12 +18737,12 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex, final Try.Consumer<? super T, E> action) throws E {
@@ -18767,10 +18767,10 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final T[] a, final Try.IndexedConsumer<? super T, E> action) throws E {
@@ -18786,12 +18786,12 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex, final Try.IndexedConsumer<? super T, E> action)
@@ -18817,11 +18817,11 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
+     * @param <T>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param action
      * @throws E the e
      */
     public static <T, C extends Collection<? extends T>, E extends Exception> void forEach(final C c, final Try.Consumer<? super T, E> action) throws E {
@@ -18843,13 +18843,13 @@ public final class N {
      * Note: This is NOT a replacement of traditional for loop statement.
      * The traditional for loop is still recommended in regular programming.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <T>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public static <T, C extends Collection<? extends T>, E extends Exception> void forEach(final C c, int fromIndex, final int toIndex,
@@ -18918,11 +18918,11 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
+     * @param <T>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param action
      * @throws E the e
      */
     public static <T, C extends Collection<? extends T>, E extends Exception> void forEach(final C c, final Try.IndexedConsumer<? super T, E> action) throws E {
@@ -18945,13 +18945,13 @@ public final class N {
      * Note: This is NOT a replacement of traditional for loop statement.
      * The traditional for loop is still recommended in regular programming.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <T>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public static <T, C extends Collection<? extends T>, E extends Exception> void forEach(final C c, int fromIndex, final int toIndex,
@@ -19020,13 +19020,13 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param a the a
-     * @param flatMapper the flat mapper
-     * @param action the action
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param flatMapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -19053,13 +19053,13 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param c the c
-     * @param flatMapper the flat mapper
-     * @param action the action
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param flatMapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -19086,16 +19086,16 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param a the a
-     * @param flatMapper the flat mapper
-     * @param flatMapper2 the flat mapper 2
-     * @param action the action
+     * @param <T>
+     * @param <T2>
+     * @param <T3>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param a
+     * @param flatMapper
+     * @param flatMapper2
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -19131,16 +19131,16 @@ public final class N {
     /**
      * For each.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param c the c
-     * @param flatMapper the flat mapper
-     * @param flatMapper2 the flat mapper 2
-     * @param action the action
+     * @param <T>
+     * @param <T2>
+     * @param <T3>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param c
+     * @param flatMapper
+     * @param flatMapper2
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -19176,12 +19176,12 @@ public final class N {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param action
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final Try.BiConsumer<? super A, ? super B, E> action) throws E {
@@ -19199,12 +19199,12 @@ public final class N {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param action
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b, final Try.BiConsumer<? super A, ? super B, E> action)
@@ -19226,14 +19226,14 @@ public final class N {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param action
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final A[] a, final B[] b, final C[] c,
@@ -19252,14 +19252,14 @@ public final class N {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param action
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b, final Collection<C> c,
@@ -19282,14 +19282,14 @@ public final class N {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param action
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
@@ -19307,14 +19307,14 @@ public final class N {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param action
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b, final A valueForNoneA, final B valueForNoneB,
@@ -19334,17 +19334,17 @@ public final class N {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param valueForNoneC the value for none C
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param action
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
@@ -19363,17 +19363,17 @@ public final class N {
     /**
      * For each.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param valueForNoneC the value for none C
-     * @param action the action
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param action
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b, final Collection<C> c, final A valueForNoneA,
@@ -19395,10 +19395,10 @@ public final class N {
     /**
      * For each non null.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachNonNull(final T[] a, final Try.Consumer<? super T, E> action) throws E {
@@ -19418,10 +19418,10 @@ public final class N {
     /**
      * For each non null.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachNonNull(final Collection<T> c, final Try.Consumer<? super T, E> action) throws E {
@@ -19441,13 +19441,13 @@ public final class N {
     /**
      * For each non null.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param a the a
-     * @param flatMapper the flat mapper
-     * @param action the action
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param flatMapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -19478,13 +19478,13 @@ public final class N {
     /**
      * For each non null.
      *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param c the c
-     * @param flatMapper the flat mapper
-     * @param action the action
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param flatMapper
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      */
@@ -19515,16 +19515,16 @@ public final class N {
     /**
      * For each non null.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param a the a
-     * @param flatMapper the flat mapper
-     * @param flatMapper2 the flat mapper 2
-     * @param action the action
+     * @param <T>
+     * @param <T2>
+     * @param <T3>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param a
+     * @param flatMapper
+     * @param flatMapper2
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -19566,16 +19566,16 @@ public final class N {
     /**
      * For each non null.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <T3> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param c the c
-     * @param flatMapper the flat mapper
-     * @param flatMapper2 the flat mapper 2
-     * @param action the action
+     * @param <T>
+     * @param <T2>
+     * @param <T3>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param c
+     * @param flatMapper
+     * @param flatMapper2
+     * @param action
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -19617,10 +19617,10 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the boolean list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> BooleanList filter(final boolean[] a, final Try.BooleanPredicate<E> filter) throws E {
@@ -19636,11 +19636,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the boolean list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> BooleanList filter(final boolean[] a, final Try.BooleanPredicate<E> filter, final int max) throws E {
@@ -19656,12 +19656,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the boolean list
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> BooleanList filter(final boolean[] a, final int fromIndex, final int toIndex, final Try.BooleanPredicate<E> filter)
@@ -19673,13 +19673,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @param max maximum return result.
-     * @return the boolean list
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> BooleanList filter(final boolean[] a, final int fromIndex, final int toIndex, final Try.BooleanPredicate<E> filter,
@@ -19706,10 +19706,10 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the char list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> CharList filter(final char[] a, final Try.CharPredicate<E> filter) throws E {
@@ -19725,11 +19725,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the char list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> CharList filter(final char[] a, final Try.CharPredicate<E> filter, final int max) throws E {
@@ -19745,12 +19745,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the char list
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> CharList filter(final char[] a, final int fromIndex, final int toIndex, final Try.CharPredicate<E> filter) throws E {
@@ -19761,13 +19761,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @param max maximum return result.
-     * @return the char list
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> CharList filter(final char[] a, final int fromIndex, final int toIndex, final Try.CharPredicate<E> filter,
@@ -19794,10 +19794,10 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the byte list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> ByteList filter(final byte[] a, final Try.BytePredicate<E> filter) throws E {
@@ -19813,11 +19813,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the byte list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> ByteList filter(final byte[] a, final Try.BytePredicate<E> filter, final int max) throws E {
@@ -19833,12 +19833,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the byte list
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> ByteList filter(final byte[] a, final int fromIndex, final int toIndex, final Try.BytePredicate<E> filter) throws E {
@@ -19849,13 +19849,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @param max maximum return result.
-     * @return the byte list
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> ByteList filter(final byte[] a, final int fromIndex, final int toIndex, final Try.BytePredicate<E> filter,
@@ -19882,10 +19882,10 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the short list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> ShortList filter(final short[] a, final Try.ShortPredicate<E> filter) throws E {
@@ -19901,11 +19901,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the short list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> ShortList filter(final short[] a, final Try.ShortPredicate<E> filter, final int max) throws E {
@@ -19921,12 +19921,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the short list
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> ShortList filter(final short[] a, final int fromIndex, final int toIndex, final Try.ShortPredicate<E> filter) throws E {
@@ -19937,13 +19937,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @param max maximum return result.
-     * @return the short list
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> ShortList filter(final short[] a, final int fromIndex, final int toIndex, final Try.ShortPredicate<E> filter,
@@ -19970,10 +19970,10 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> IntList filter(final int[] a, final Try.IntPredicate<E> filter) throws E {
@@ -19989,11 +19989,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the int list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> IntList filter(final int[] a, final Try.IntPredicate<E> filter, final int max) throws E {
@@ -20009,12 +20009,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int list
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> IntList filter(final int[] a, final int fromIndex, final int toIndex, final Try.IntPredicate<E> filter) throws E {
@@ -20025,13 +20025,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @param max maximum return result.
-     * @return the int list
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> IntList filter(final int[] a, final int fromIndex, final int toIndex, final Try.IntPredicate<E> filter, final int max)
@@ -20058,10 +20058,10 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the long list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> LongList filter(final long[] a, final Try.LongPredicate<E> filter) throws E {
@@ -20077,11 +20077,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the long list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> LongList filter(final long[] a, final Try.LongPredicate<E> filter, final int max) throws E {
@@ -20097,12 +20097,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the long list
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> LongList filter(final long[] a, final int fromIndex, final int toIndex, final Try.LongPredicate<E> filter) throws E {
@@ -20113,13 +20113,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @param max maximum return result.
-     * @return the long list
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> LongList filter(final long[] a, final int fromIndex, final int toIndex, final Try.LongPredicate<E> filter,
@@ -20146,10 +20146,10 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the float list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> FloatList filter(final float[] a, final Try.FloatPredicate<E> filter) throws E {
@@ -20165,11 +20165,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the float list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> FloatList filter(final float[] a, final Try.FloatPredicate<E> filter, final int max) throws E {
@@ -20185,12 +20185,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the float list
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> FloatList filter(final float[] a, final int fromIndex, final int toIndex, final Try.FloatPredicate<E> filter) throws E {
@@ -20201,13 +20201,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @param max maximum return result.
-     * @return the float list
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> FloatList filter(final float[] a, final int fromIndex, final int toIndex, final Try.FloatPredicate<E> filter,
@@ -20234,10 +20234,10 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the double list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> DoubleList filter(final double[] a, final Try.DoublePredicate<E> filter) throws E {
@@ -20253,11 +20253,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the double list
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> DoubleList filter(final double[] a, final Try.DoublePredicate<E> filter, final int max) throws E {
@@ -20273,12 +20273,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the double list
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> DoubleList filter(final double[] a, final int fromIndex, final int toIndex, final Try.DoublePredicate<E> filter)
@@ -20290,13 +20290,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @param max maximum return result.
-     * @return the double list
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> DoubleList filter(final double[] a, final int fromIndex, final int toIndex, final Try.DoublePredicate<E> filter,
@@ -20323,11 +20323,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
@@ -20343,12 +20343,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final T[] a, final Try.Predicate<? super T, E> filter, final int max) throws E {
@@ -20364,13 +20364,13 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Try.Predicate<? super T, E> filter)
@@ -20382,14 +20382,14 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Try.Predicate<? super T, E> filter,
@@ -20416,11 +20416,11 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
@@ -20436,12 +20436,12 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
-     * @param max the max
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter, final int max) throws E {
@@ -20457,13 +20457,13 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -20474,14 +20474,14 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -20536,13 +20536,13 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param supplier the supplier
-     * @return the r
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Try.Predicate<? super T, E> filter,
@@ -20559,14 +20559,14 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @param max the max
-     * @param supplier the supplier
-     * @return the r
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Try.Predicate<? super T, E> filter, final int max,
@@ -20583,15 +20583,15 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param supplier the supplier
-     * @return the r
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final int fromIndex, final int toIndex,
@@ -20603,16 +20603,16 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @param supplier the supplier
-     * @return the r
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final int fromIndex, final int toIndex,
@@ -20639,13 +20639,13 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
-     * @param supplier the supplier
-     * @return the r
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param filter
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter,
@@ -20662,14 +20662,14 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
-     * @param max the max
-     * @param supplier the supplier
-     * @return the r
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter,
@@ -20686,15 +20686,15 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param supplier the supplier
-     * @return the r
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -20705,16 +20705,16 @@ public final class N {
     /**
      * Filter.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @param supplier the supplier
-     * @return the r
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -20773,11 +20773,11 @@ public final class N {
     /**
      * Map to boolean.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the boolean list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> BooleanList mapToBoolean(final T[] a, final Try.ToBooleanFunction<? super T, E> func) throws E {
@@ -20794,13 +20794,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the boolean list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> BooleanList mapToBoolean(final T[] a, final int fromIndex, final int toIndex,
@@ -20824,11 +20824,11 @@ public final class N {
     /**
      * Map to boolean.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the boolean list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> BooleanList mapToBoolean(final Collection<? extends T> c, final Try.ToBooleanFunction<? super T, E> func) throws E {
@@ -20845,13 +20845,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the boolean list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> BooleanList mapToBoolean(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -20893,11 +20893,11 @@ public final class N {
     /**
      * Map to char.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the char list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> CharList mapToChar(final T[] a, final Try.ToCharFunction<? super T, E> func) throws E {
@@ -20914,13 +20914,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the char list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> CharList mapToChar(final T[] a, final int fromIndex, final int toIndex, final Try.ToCharFunction<? super T, E> func)
@@ -20944,11 +20944,11 @@ public final class N {
     /**
      * Map to char.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the char list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> CharList mapToChar(final Collection<? extends T> c, final Try.ToCharFunction<? super T, E> func) throws E {
@@ -20965,13 +20965,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the char list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> CharList mapToChar(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21013,11 +21013,11 @@ public final class N {
     /**
      * Map to byte.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the byte list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ByteList mapToByte(final T[] a, final Try.ToByteFunction<? super T, E> func) throws E {
@@ -21034,13 +21034,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the byte list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ByteList mapToByte(final T[] a, final int fromIndex, final int toIndex, final Try.ToByteFunction<? super T, E> func)
@@ -21064,11 +21064,11 @@ public final class N {
     /**
      * Map to byte.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the byte list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ByteList mapToByte(final Collection<? extends T> c, final Try.ToByteFunction<? super T, E> func) throws E {
@@ -21085,13 +21085,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the byte list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ByteList mapToByte(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21133,11 +21133,11 @@ public final class N {
     /**
      * Map to short.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the short list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ShortList mapToShort(final T[] a, final Try.ToShortFunction<? super T, E> func) throws E {
@@ -21154,13 +21154,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the short list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ShortList mapToShort(final T[] a, final int fromIndex, final int toIndex,
@@ -21184,11 +21184,11 @@ public final class N {
     /**
      * Map to short.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the short list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ShortList mapToShort(final Collection<? extends T> c, final Try.ToShortFunction<? super T, E> func) throws E {
@@ -21205,13 +21205,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the short list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> ShortList mapToShort(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21253,11 +21253,11 @@ public final class N {
     /**
      * Map to int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the int list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> IntList mapToInt(final T[] a, final Try.ToIntFunction<? super T, E> func) throws E {
@@ -21274,13 +21274,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the int list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> IntList mapToInt(final T[] a, final int fromIndex, final int toIndex, final Try.ToIntFunction<? super T, E> func)
@@ -21304,11 +21304,11 @@ public final class N {
     /**
      * Map to int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the int list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> IntList mapToInt(final Collection<? extends T> c, final Try.ToIntFunction<? super T, E> func) throws E {
@@ -21325,13 +21325,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the int list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> IntList mapToInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21373,11 +21373,11 @@ public final class N {
     /**
      * Map to long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the long list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> LongList mapToLong(final T[] a, final Try.ToLongFunction<? super T, E> func) throws E {
@@ -21394,13 +21394,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the long list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> LongList mapToLong(final T[] a, final int fromIndex, final int toIndex, final Try.ToLongFunction<? super T, E> func)
@@ -21424,11 +21424,11 @@ public final class N {
     /**
      * Map to long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the long list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> LongList mapToLong(final Collection<? extends T> c, final Try.ToLongFunction<? super T, E> func) throws E {
@@ -21445,13 +21445,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the long list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> LongList mapToLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21493,11 +21493,11 @@ public final class N {
     /**
      * Map to float.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the float list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> FloatList mapToFloat(final T[] a, final Try.ToFloatFunction<? super T, E> func) throws E {
@@ -21514,13 +21514,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the float list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> FloatList mapToFloat(final T[] a, final int fromIndex, final int toIndex,
@@ -21544,11 +21544,11 @@ public final class N {
     /**
      * Map to float.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the float list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> FloatList mapToFloat(final Collection<? extends T> c, final Try.ToFloatFunction<? super T, E> func) throws E {
@@ -21565,13 +21565,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the float list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> FloatList mapToFloat(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21613,11 +21613,11 @@ public final class N {
     /**
      * Map to double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the double list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> DoubleList mapToDouble(final T[] a, final Try.ToDoubleFunction<? super T, E> func) throws E {
@@ -21634,13 +21634,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the double list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> DoubleList mapToDouble(final T[] a, final int fromIndex, final int toIndex,
@@ -21664,11 +21664,11 @@ public final class N {
     /**
      * Map to double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the double list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> DoubleList mapToDouble(final Collection<? extends T> c, final Try.ToDoubleFunction<? super T, E> func) throws E {
@@ -21685,13 +21685,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the double list
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> DoubleList mapToDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21733,12 +21733,12 @@ public final class N {
     /**
      * Map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> map(final T[] a, final Try.Function<? super T, ? extends R, E> func) throws E {
@@ -21755,14 +21755,14 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> map(final T[] a, final int fromIndex, final int toIndex,
@@ -21786,12 +21786,12 @@ public final class N {
     /**
      * Map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> map(final Collection<? extends T> c, final Try.Function<? super T, ? extends R, E> func) throws E {
@@ -21808,14 +21808,14 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21857,14 +21857,14 @@ public final class N {
     /**
      * Map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final Try.Function<? super T, ? extends R, E> func,
@@ -21882,16 +21882,16 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final int fromIndex, final int toIndex,
@@ -21915,14 +21915,14 @@ public final class N {
     /**
      * Map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final Collection<? extends T> c,
@@ -21940,16 +21940,16 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -21991,12 +21991,12 @@ public final class N {
     /**
      * Flat map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final Try.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
@@ -22013,14 +22013,14 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final int fromIndex, final int toIndex,
@@ -22047,12 +22047,12 @@ public final class N {
     /**
      * Flat map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final Collection<? extends T> c,
@@ -22070,14 +22070,14 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -22123,14 +22123,14 @@ public final class N {
     /**
      * Flat map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a,
@@ -22148,16 +22148,16 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a, final int fromIndex, final int toIndex,
@@ -22184,14 +22184,14 @@ public final class N {
     /**
      * Flat map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Collection<? extends T> c,
@@ -22209,16 +22209,16 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -22265,16 +22265,16 @@ public final class N {
     /**
      * Flat map.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param a the a
-     * @param func the func
-     * @param func2 the func 2
-     * @return the list
+     * @param <T>
+     * @param <T2>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param func
+     * @param func2
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -22289,17 +22289,17 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param a the a
-     * @param func the func
-     * @param func2 the func 2
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <T2>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param func
+     * @param func2
+     * @param supplier
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -22335,16 +22335,16 @@ public final class N {
     /**
      * Flat map.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param c the c
-     * @param func the func
-     * @param func2 the func 2
-     * @return the list
+     * @param <T>
+     * @param <T2>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param func
+     * @param func2
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -22359,17 +22359,17 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <T2> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param c the c
-     * @param func the func
-     * @param func2 the func 2
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <T2>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param func
+     * @param func2
+     * @param supplier
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -22405,12 +22405,12 @@ public final class N {
     /**
      * Flatt map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flattMap(final T[] a, final Try.Function<? super T, ? extends R[], E> func) throws E {
@@ -22427,14 +22427,14 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flattMap(final T[] a, final int fromIndex, final int toIndex,
@@ -22461,12 +22461,12 @@ public final class N {
     /**
      * Flatt map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flattMap(final Collection<? extends T> c, final Try.Function<? super T, ? extends R[], E> func) throws E {
@@ -22483,14 +22483,14 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the list
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flattMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -22536,14 +22536,14 @@ public final class N {
     /**
      * Flatt map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final T[] a, final Try.Function<? super T, ? extends R[], E> func,
@@ -22561,16 +22561,16 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final T[] a, final int fromIndex, final int toIndex,
@@ -22597,14 +22597,14 @@ public final class N {
     /**
      * Flatt map.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final Collection<? extends T> c,
@@ -22622,16 +22622,16 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <C> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <R>
+     * @param <C>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -22678,9 +22678,9 @@ public final class N {
     /**
      * Sum int.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the int
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Number> int sumInt(final T[] a) {
         return N.sumInt(a, Fn.numToInt());
@@ -22689,11 +22689,11 @@ public final class N {
     /**
      * Sum int.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> int sumInt(final T[] a, final int fromIndex, final int toIndex) {
         return N.sumInt(a, fromIndex, toIndex, Fn.numToInt());
@@ -22702,11 +22702,11 @@ public final class N {
     /**
      * Sum int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the int
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int sumInt(final T[] a, final Try.ToIntFunction<? super T, E> func) throws E {
@@ -22720,13 +22720,13 @@ public final class N {
     /**
      * Sum int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the int
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int sumInt(final T[] a, final int fromIndex, final int toIndex, final Try.ToIntFunction<? super T, E> func)
@@ -22749,9 +22749,9 @@ public final class N {
     /**
      * Sum int.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the int
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Number> int sumInt(final Collection<? extends T> c) {
         return N.sumInt(c, Fn.numToInt());
@@ -22760,11 +22760,11 @@ public final class N {
     /**
      * Sum int.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         return N.sumInt(c, fromIndex, toIndex, Fn.numToInt());
@@ -22773,11 +22773,11 @@ public final class N {
     /**
      * Sum int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the int
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int sumInt(final Collection<? extends T> c, final Try.ToIntFunction<? super T, E> func) throws E {
@@ -22797,13 +22797,13 @@ public final class N {
     /**
      * Sum int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the int
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -22844,9 +22844,9 @@ public final class N {
     /**
      * Sum long.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the long
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Number> long sumLong(final T[] a) {
         return N.sumLong(a, Fn.numToLong());
@@ -22855,11 +22855,11 @@ public final class N {
     /**
      * Sum long.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the long
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> long sumLong(final T[] a, final int fromIndex, final int toIndex) {
         return N.sumLong(a, fromIndex, toIndex, Fn.numToLong());
@@ -22868,11 +22868,11 @@ public final class N {
     /**
      * Sum long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the long
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> long sumLong(final T[] a, final Try.ToLongFunction<? super T, E> func) throws E {
@@ -22886,13 +22886,13 @@ public final class N {
     /**
      * Sum long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the long
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> long sumLong(final T[] a, final int fromIndex, final int toIndex, final Try.ToLongFunction<? super T, E> func)
@@ -22915,9 +22915,9 @@ public final class N {
     /**
      * Sum long.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the long
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Number> long sumLong(final Collection<? extends T> c) {
         return N.sumLong(c, Fn.numToLong());
@@ -22926,11 +22926,11 @@ public final class N {
     /**
      * Sum long.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the long
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> long sumLong(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         return N.sumLong(c, fromIndex, toIndex, Fn.numToLong());
@@ -22939,11 +22939,11 @@ public final class N {
     /**
      * Sum long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the long
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> long sumLong(final Collection<? extends T> c, final Try.ToLongFunction<? super T, E> func) throws E {
@@ -22963,13 +22963,13 @@ public final class N {
     /**
      * Sum long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the long
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> long sumLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -23010,9 +23010,9 @@ public final class N {
     /**
      * Sum double.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the double
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Number> double sumDouble(final T[] a) {
         return N.sumDouble(a, Fn.numToDouble());
@@ -23021,11 +23021,11 @@ public final class N {
     /**
      * Sum double.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> double sumDouble(final T[] a, final int fromIndex, final int toIndex) {
         return N.sumDouble(a, fromIndex, toIndex, Fn.numToDouble());
@@ -23034,11 +23034,11 @@ public final class N {
     /**
      * Sum double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the double
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> double sumDouble(final T[] a, final Try.ToDoubleFunction<? super T, E> func) throws E {
@@ -23052,13 +23052,13 @@ public final class N {
     /**
      * Sum double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the double
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> double sumDouble(final T[] a, final int fromIndex, final int toIndex, final Try.ToDoubleFunction<? super T, E> func)
@@ -23081,9 +23081,9 @@ public final class N {
     /**
      * Sum double.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the double
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Number> double sumDouble(final Collection<? extends T> c) {
         return N.sumDouble(c, Fn.numToDouble());
@@ -23092,11 +23092,11 @@ public final class N {
     /**
      * Sum double.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> double sumDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         return N.sumDouble(c, fromIndex, toIndex, Fn.numToDouble());
@@ -23105,11 +23105,11 @@ public final class N {
     /**
      * Sum double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the double
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> double sumDouble(final Collection<? extends T> c, final Try.ToDoubleFunction<? super T, E> func) throws E {
@@ -23129,13 +23129,13 @@ public final class N {
     /**
      * Sum double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the double
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> double sumDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -23176,9 +23176,9 @@ public final class N {
     /**
      * Average int.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the optional double
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Number> OptionalDouble averageInt(final T[] a) {
         return N.averageInt(a, Fn.numToInt());
@@ -23187,11 +23187,11 @@ public final class N {
     /**
      * Average int.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex) {
         return N.averageInt(a, fromIndex, toIndex, Fn.numToInt());
@@ -23200,11 +23200,11 @@ public final class N {
     /**
      * Average int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final T[] a, final Try.ToIntFunction<? super T, E> func) throws E {
@@ -23218,13 +23218,13 @@ public final class N {
     /**
      * Average int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex,
@@ -23247,9 +23247,9 @@ public final class N {
     /**
      * Average int.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the optional double
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Number> OptionalDouble averageInt(final Collection<? extends T> c) {
         return N.averageInt(c, Fn.numToInt());
@@ -23258,11 +23258,11 @@ public final class N {
     /**
      * Average int.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         return N.averageInt(c, fromIndex, toIndex, Fn.numToInt());
@@ -23271,11 +23271,11 @@ public final class N {
     /**
      * Average int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final Collection<? extends T> c, final Try.ToIntFunction<? super T, E> func) throws E {
@@ -23295,13 +23295,13 @@ public final class N {
     /**
      * Average int.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -23342,9 +23342,9 @@ public final class N {
     /**
      * Average long.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the optional double
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Number> OptionalDouble averageLong(final T[] a) {
         return N.averageLong(a, Fn.numToLong());
@@ -23353,11 +23353,11 @@ public final class N {
     /**
      * Average long.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex) {
         return N.averageLong(a, fromIndex, toIndex, Fn.numToLong());
@@ -23366,11 +23366,11 @@ public final class N {
     /**
      * Average long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final T[] a, final Try.ToLongFunction<? super T, E> func) throws E {
@@ -23384,13 +23384,13 @@ public final class N {
     /**
      * Average long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex,
@@ -23407,9 +23407,9 @@ public final class N {
     /**
      * Average long.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the optional double
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Number> OptionalDouble averageLong(final Collection<? extends T> c) {
         return N.averageLong(c, Fn.numToLong());
@@ -23418,11 +23418,11 @@ public final class N {
     /**
      * Average long.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         return N.averageLong(c, fromIndex, toIndex, Fn.numToLong());
@@ -23431,11 +23431,11 @@ public final class N {
     /**
      * Average long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final Collection<? extends T> c, final Try.ToLongFunction<? super T, E> func) throws E {
@@ -23449,13 +23449,13 @@ public final class N {
     /**
      * Average long.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -23472,9 +23472,9 @@ public final class N {
     /**
      * Average double.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the optional double
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Number> OptionalDouble averageDouble(final T[] a) {
         return N.averageDouble(a, Fn.numToDouble());
@@ -23483,11 +23483,11 @@ public final class N {
     /**
      * Average double.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex) {
         return N.averageDouble(a, fromIndex, toIndex, Fn.numToDouble());
@@ -23496,11 +23496,11 @@ public final class N {
     /**
      * Average double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final T[] a, final Try.ToDoubleFunction<? super T, E> func) throws E {
@@ -23514,13 +23514,13 @@ public final class N {
     /**
      * Average double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex,
@@ -23543,9 +23543,9 @@ public final class N {
     /**
      * Average double.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the optional double
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Number> OptionalDouble averageDouble(final Collection<? extends T> c) {
         return N.averageDouble(c, Fn.numToDouble());
@@ -23554,11 +23554,11 @@ public final class N {
     /**
      * Average double.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Number> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         return N.averageDouble(c, fromIndex, toIndex, Fn.numToDouble());
@@ -23567,11 +23567,11 @@ public final class N {
     /**
      * Average double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final Collection<? extends T> c, final Try.ToDoubleFunction<? super T, E> func)
@@ -23592,13 +23592,13 @@ public final class N {
     /**
      * Average double.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param func the func
-     * @return the optional double
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -23640,10 +23640,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final boolean[] a, final Try.BooleanPredicate<E> filter) throws E {
@@ -23660,12 +23660,12 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final boolean[] a, final int fromIndex, final int toIndex, final Try.BooleanPredicate<E> filter) throws E {
@@ -23691,10 +23691,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final char[] a, final Try.CharPredicate<E> filter) throws E {
@@ -23711,12 +23711,12 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final char[] a, final int fromIndex, final int toIndex, final Try.CharPredicate<E> filter) throws E {
@@ -23742,10 +23742,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final byte[] a, final Try.BytePredicate<E> filter) throws E {
@@ -23762,12 +23762,12 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final byte[] a, final int fromIndex, final int toIndex, final Try.BytePredicate<E> filter) throws E {
@@ -23793,10 +23793,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final short[] a, final Try.ShortPredicate<E> filter) throws E {
@@ -23813,12 +23813,12 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final short[] a, final int fromIndex, final int toIndex, final Try.ShortPredicate<E> filter) throws E {
@@ -23844,10 +23844,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final int[] a, final Try.IntPredicate<E> filter) throws E {
@@ -23864,12 +23864,12 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final int[] a, final int fromIndex, final int toIndex, final Try.IntPredicate<E> filter) throws E {
@@ -23895,10 +23895,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final long[] a, final Try.LongPredicate<E> filter) throws E {
@@ -23915,12 +23915,12 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final long[] a, final int fromIndex, final int toIndex, final Try.LongPredicate<E> filter) throws E {
@@ -23946,10 +23946,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final float[] a, final Try.FloatPredicate<E> filter) throws E {
@@ -23966,12 +23966,12 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final float[] a, final int fromIndex, final int toIndex, final Try.FloatPredicate<E> filter) throws E {
@@ -23997,10 +23997,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final double[] a, final Try.DoublePredicate<E> filter) throws E {
@@ -24017,12 +24017,12 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> int count(final double[] a, final int fromIndex, final int toIndex, final Try.DoublePredicate<E> filter) throws E {
@@ -24048,11 +24048,11 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
-     * @return the int
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int count(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
@@ -24069,13 +24069,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int count(final T[] a, final int fromIndex, final int toIndex, final Try.Predicate<? super T, E> filter) throws E {
@@ -24101,11 +24101,11 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
-     * @return the int
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int count(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
@@ -24122,13 +24122,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> int count(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -24174,9 +24174,9 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @return the short[]
+     * @param a
+     * @param n
+     * @return
      */
     public static short[] top(final short[] a, final int n) {
         return top(a, n, null);
@@ -24185,10 +24185,10 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @param cmp the cmp
-     * @return the short[]
+     * @param a
+     * @param n
+     * @param cmp
+     * @return
      */
     public static short[] top(final short[] a, final int n, final Comparator<? super Short> cmp) {
         return top(a, 0, len(a), n, cmp);
@@ -24197,11 +24197,11 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the short[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static short[] top(final short[] a, final int fromIndex, final int toIndex, final int n) {
         return top(a, fromIndex, toIndex, n, null);
@@ -24210,12 +24210,12 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the short[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public static short[] top(final short[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Short> cmp) {
         N.checkArgNotNegative(n, "n");
@@ -24254,9 +24254,9 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @return the int[]
+     * @param a
+     * @param n
+     * @return
      */
     public static int[] top(final int[] a, final int n) {
         return top(a, n, null);
@@ -24265,10 +24265,10 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @param cmp the cmp
-     * @return the int[]
+     * @param a
+     * @param n
+     * @param cmp
+     * @return
      */
     public static int[] top(final int[] a, final int n, final Comparator<? super Integer> cmp) {
         return top(a, 0, len(a), n, cmp);
@@ -24277,11 +24277,11 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the int[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static int[] top(final int[] a, final int fromIndex, final int toIndex, final int n) {
         return top(a, fromIndex, toIndex, n, null);
@@ -24290,12 +24290,12 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the int[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public static int[] top(final int[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Integer> cmp) {
         N.checkArgNotNegative(n, "n");
@@ -24334,9 +24334,9 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @return the long[]
+     * @param a
+     * @param n
+     * @return
      */
     public static long[] top(final long[] a, final int n) {
         return top(a, n, null);
@@ -24345,10 +24345,10 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @param cmp the cmp
-     * @return the long[]
+     * @param a
+     * @param n
+     * @param cmp
+     * @return
      */
     public static long[] top(final long[] a, final int n, final Comparator<? super Long> cmp) {
         return top(a, 0, len(a), n, cmp);
@@ -24357,11 +24357,11 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the long[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static long[] top(final long[] a, final int fromIndex, final int toIndex, final int n) {
         return top(a, fromIndex, toIndex, n, null);
@@ -24370,12 +24370,12 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the long[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public static long[] top(final long[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Long> cmp) {
         N.checkArgNotNegative(n, "n");
@@ -24414,9 +24414,9 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @return the float[]
+     * @param a
+     * @param n
+     * @return
      */
     public static float[] top(final float[] a, final int n) {
         return top(a, n, null);
@@ -24425,10 +24425,10 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @param cmp the cmp
-     * @return the float[]
+     * @param a
+     * @param n
+     * @param cmp
+     * @return
      */
     public static float[] top(final float[] a, final int n, final Comparator<? super Float> cmp) {
         return top(a, 0, len(a), n, cmp);
@@ -24437,11 +24437,11 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the float[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static float[] top(final float[] a, final int fromIndex, final int toIndex, final int n) {
         return top(a, fromIndex, toIndex, n, null);
@@ -24450,12 +24450,12 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the float[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public static float[] top(final float[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Float> cmp) {
         N.checkArgNotNegative(n, "n");
@@ -24494,9 +24494,9 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @return the double[]
+     * @param a
+     * @param n
+     * @return
      */
     public static double[] top(final double[] a, final int n) {
         return top(a, n, null);
@@ -24505,10 +24505,10 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param n the n
-     * @param cmp the cmp
-     * @return the double[]
+     * @param a
+     * @param n
+     * @param cmp
+     * @return
      */
     public static double[] top(final double[] a, final int n, final Comparator<? super Double> cmp) {
         return top(a, 0, len(a), n, cmp);
@@ -24517,11 +24517,11 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the double[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static double[] top(final double[] a, final int fromIndex, final int toIndex, final int n) {
         return top(a, fromIndex, toIndex, n, null);
@@ -24530,12 +24530,12 @@ public final class N {
     /**
      * Top.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the double[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public static double[] top(final double[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Double> cmp) {
         N.checkArgNotNegative(n, "n");
@@ -24574,10 +24574,10 @@ public final class N {
     /**
      * Top.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param n
+     * @return
      */
     public static <T extends Comparable<T>> List<T> top(final T[] a, final int n) {
         return top(a, n, N.NATURAL_ORDER);
@@ -24586,11 +24586,11 @@ public final class N {
     /**
      * Top.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param n
+     * @param cmp
+     * @return
      */
     public static <T> List<T> top(final T[] a, final int n, final Comparator<? super T> cmp) {
         return top(a, 0, len(a), n, cmp);
@@ -24599,12 +24599,12 @@ public final class N {
     /**
      * Top.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static <T extends Comparable<T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n) {
         return top(a, fromIndex, toIndex, n, N.NATURAL_ORDER);
@@ -24613,13 +24613,13 @@ public final class N {
     /**
      * Top.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
         N.checkArgNotNegative(n, "n");
@@ -24650,10 +24650,10 @@ public final class N {
     /**
      * Top.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param n
+     * @return
      */
     public static <T extends Comparable<T>> List<T> top(final Collection<? extends T> c, final int n) {
         return top(c, n, null);
@@ -24662,11 +24662,11 @@ public final class N {
     /**
      * Top.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param n
+     * @param cmp
+     * @return
      */
     public static <T> List<T> top(final Collection<? extends T> c, final int n, final Comparator<? super T> cmp) {
         return top(c, 0, size(c), n, cmp);
@@ -24675,12 +24675,12 @@ public final class N {
     /**
      * Top.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static <T extends Comparable<T>> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n) {
         return top(c, fromIndex, toIndex, n, null);
@@ -24689,13 +24689,13 @@ public final class N {
     /**
      * Top.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public static <T> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
         N.checkArgNotNegative(n, "n");
@@ -24771,10 +24771,10 @@ public final class N {
     /**
      * The present order is kept in the result list.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param n
+     * @return
      */
     public static <T extends Comparable<T>> List<T> topp(final T[] a, final int n) {
         return topp(a, n, N.NATURAL_ORDER);
@@ -24783,11 +24783,11 @@ public final class N {
     /**
      * The present order is kept in the result list.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param n
+     * @param cmp
+     * @return
      */
     public static <T> List<T> topp(final T[] a, final int n, final Comparator<? super T> cmp) {
         return topp(a, 0, len(a), n, cmp);
@@ -24796,12 +24796,12 @@ public final class N {
     /**
      * The present order is kept in the result list.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static <T extends Comparable<T>> List<T> topp(final T[] a, final int fromIndex, final int toIndex, final int n) {
         return topp(a, fromIndex, toIndex, n, N.NATURAL_ORDER);
@@ -24810,13 +24810,13 @@ public final class N {
     /**
      * The present order is kept in the result list.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> List<T> topp(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
@@ -24877,10 +24877,10 @@ public final class N {
     /**
      * The present order is kept in the result list.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param n
+     * @return
      */
     public static <T extends Comparable<T>> List<T> topp(final Collection<? extends T> c, final int n) {
         return topp(c, n, null);
@@ -24889,11 +24889,11 @@ public final class N {
     /**
      * The present order is kept in the result list.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param n
+     * @param cmp
+     * @return
      */
     public static <T> List<T> topp(final Collection<? extends T> c, final int n, final Comparator<? super T> cmp) {
         return topp(c, 0, size(c), n, cmp);
@@ -24902,12 +24902,12 @@ public final class N {
     /**
      * The present order is kept in the result list.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public static <T extends Comparable<T>> List<T> topp(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n) {
         return topp(c, fromIndex, toIndex, n, null);
@@ -24916,13 +24916,13 @@ public final class N {
     /**
      * The present order is kept in the result list.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> List<T> topp(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
@@ -25032,8 +25032,8 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @return the boolean[]
+     * @param a
+     * @return
      */
     public static boolean[] distinct(final boolean[] a) {
         return distinct(a, 0, len(a));
@@ -25043,10 +25043,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the boolean[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean[] distinct(final boolean[] a, final int fromIndex, final int toIndex) {
         return N.removeDuplicates(a, fromIndex, toIndex, false);
@@ -25056,8 +25056,8 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @return the char[]
+     * @param a
+     * @return
      */
     public static char[] distinct(final char[] a) {
         return distinct(a, 0, len(a));
@@ -25067,10 +25067,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the char[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static char[] distinct(final char[] a, final int fromIndex, final int toIndex) {
         return N.removeDuplicates(a, fromIndex, toIndex, false);
@@ -25080,8 +25080,8 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @return the byte[]
+     * @param a
+     * @return
      */
     public static byte[] distinct(final byte[] a) {
         return distinct(a, 0, len(a));
@@ -25091,10 +25091,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the byte[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static byte[] distinct(final byte[] a, final int fromIndex, final int toIndex) {
         return N.removeDuplicates(a, fromIndex, toIndex, false);
@@ -25104,8 +25104,8 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @return the short[]
+     * @param a
+     * @return
      */
     public static short[] distinct(final short[] a) {
         return distinct(a, 0, len(a));
@@ -25115,10 +25115,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the short[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static short[] distinct(final short[] a, final int fromIndex, final int toIndex) {
         return N.removeDuplicates(a, fromIndex, toIndex, false);
@@ -25128,8 +25128,8 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @return the int[]
+     * @param a
+     * @return
      */
     public static int[] distinct(final int[] a) {
         return distinct(a, 0, len(a));
@@ -25139,10 +25139,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static int[] distinct(final int[] a, final int fromIndex, final int toIndex) {
         return N.removeDuplicates(a, fromIndex, toIndex, false);
@@ -25152,8 +25152,8 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @return the long[]
+     * @param a
+     * @return
      */
     public static long[] distinct(final long[] a) {
         return distinct(a, 0, len(a));
@@ -25163,10 +25163,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the long[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static long[] distinct(final long[] a, final int fromIndex, final int toIndex) {
         return N.removeDuplicates(a, fromIndex, toIndex, false);
@@ -25176,8 +25176,8 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @return the float[]
+     * @param a
+     * @return
      */
     public static float[] distinct(final float[] a) {
         return distinct(a, 0, len(a));
@@ -25187,10 +25187,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the float[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static float[] distinct(final float[] a, final int fromIndex, final int toIndex) {
         return N.removeDuplicates(a, fromIndex, toIndex, false);
@@ -25200,8 +25200,8 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @return the double[]
+     * @param a
+     * @return
      */
     public static double[] distinct(final double[] a) {
         return distinct(a, 0, len(a));
@@ -25211,10 +25211,10 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double[]
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static double[] distinct(final double[] a, final int fromIndex, final int toIndex) {
         return N.removeDuplicates(a, fromIndex, toIndex, false);
@@ -25224,9 +25224,9 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the list
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T> List<T> distinct(final T[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -25240,11 +25240,11 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T> List<T> distinct(final T[] a, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25269,9 +25269,9 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the list
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> List<T> distinct(final Collection<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -25285,11 +25285,11 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T> List<T> distinct(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -25337,11 +25337,11 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
+     * @param <T>
+     * @param <E>
+     * @param a
      * @param keyMapper don't change value of the input parameter.
-     * @return the list
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final T[] a, final Try.Function<? super T, ?, E> keyMapper) throws E {
@@ -25358,13 +25358,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param keyMapper don't change value of the input parameter.
-     * @return the list
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final T[] a, final int fromIndex, final int toIndex,
@@ -25393,11 +25393,11 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
+     * @param <T>
+     * @param <E>
+     * @param c
      * @param keyMapper don't change value of the input parameter.
-     * @return the list
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final Collection<? extends T> c, final Try.Function<? super T, ?, E> keyMapper) throws E {
@@ -25414,13 +25414,13 @@ public final class N {
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      * @param keyMapper don't change value of the input parameter.
-     * @return the list
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final Collection<? extends T> c, final int fromIndex, final int toIndex,
@@ -25467,8 +25467,8 @@ public final class N {
     /**
      * Hash key.
      *
-     * @param obj the obj
-     * @return the object
+     * @param obj
+     * @return
      */
     private static Object hashKey(Object obj) {
         return obj == null || obj.getClass().isArray() == false ? obj : Wrapper.of(obj);
@@ -25478,9 +25478,9 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same size (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<boolean[]> split(final boolean[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25503,11 +25503,11 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<boolean[]> split(final boolean[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25531,9 +25531,9 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<char[]> split(final char[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25556,11 +25556,11 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<char[]> split(final char[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25584,9 +25584,9 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<byte[]> split(final byte[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25609,11 +25609,11 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<byte[]> split(final byte[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25637,9 +25637,9 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<short[]> split(final short[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25662,11 +25662,11 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<short[]> split(final short[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25690,9 +25690,9 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<int[]> split(final int[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25715,11 +25715,11 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<int[]> split(final int[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25743,9 +25743,9 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<long[]> split(final long[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25768,11 +25768,11 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<long[]> split(final long[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25796,9 +25796,9 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<float[]> split(final float[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25821,11 +25821,11 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<float[]> split(final float[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25849,9 +25849,9 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<double[]> split(final double[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25874,11 +25874,11 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<double[]> split(final double[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25902,10 +25902,10 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param <T> the generic type
-     * @param a the a
+     * @param <T>
+     * @param a
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static <T> List<T[]> split(final T[] a, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25928,12 +25928,12 @@ public final class N {
      * Returns consecutive sub arrays of an array, each of the same chunkSize (the final list may be smaller),
      * or an empty List if the specified array is null or empty.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub array (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static <T> List<T[]> split(final T[] a, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -25957,10 +25957,10 @@ public final class N {
      * Returns consecutive sub lists of a collection, each of the same chunkSize (the final list may be smaller).
      * or an empty List if the specified collection is null or empty. The order of elements in the original collection is kept
      *
-     * @param <T> the generic type
-     * @param c the c
+     * @param <T>
+     * @param c
      * @param chunkSize the desired size of each sub list (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static <T> List<List<T>> split(final Collection<? extends T> c, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -25976,12 +25976,12 @@ public final class N {
      * Returns consecutive sub lists of a collection, each of the same chunkSize (the final list may be smaller).
      * or an empty List if the specified collection is null or empty. The order of elements in the original collection is kept
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub list (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static <T> List<List<T>> split(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int chunkSize) {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -26027,9 +26027,9 @@ public final class N {
      * Returns consecutive substring of the specified string, each of the same length (the final list may be smaller),
      * or an empty array if the specified string is null or empty.
      *
-     * @param str the str
+     * @param str
      * @param chunkSize the desired size of each sub String (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<String> split(final CharSequence str, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
@@ -26045,11 +26045,11 @@ public final class N {
      * Returns consecutive substring of the specified string, each of the same length (the final list may be smaller),
      * or an empty array if the specified string is null or empty.
      *
-     * @param str the str
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param str
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub String (the last may be smaller).
-     * @return the list
+     * @return
      */
     public static List<String> split(final CharSequence str, final int fromIndex, final int toIndex, final int chunkSize) {
         N.checkFromToIndex(fromIndex, toIndex, len(str));
@@ -26072,9 +26072,9 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @param b the b
-     * @return the boolean[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static boolean[] intersection(final boolean[] a, final boolean[] b) {
@@ -26088,9 +26088,9 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @param b the b
-     * @return the char[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static char[] intersection(final char[] a, final char[] b) {
@@ -26104,9 +26104,9 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @param b the b
-     * @return the byte[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static byte[] intersection(final byte[] a, final byte[] b) {
@@ -26120,9 +26120,9 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @param b the b
-     * @return the short[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static short[] intersection(final short[] a, final short[] b) {
@@ -26146,9 +26146,9 @@ public final class N {
      * int[] c = intersection(a, b); // The elements c in a will b: [1, 2].
      * </pre>
      *
-     * @param a the a
-     * @param b the b
-     * @return the int[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static int[] intersection(final int[] a, final int[] b) {
@@ -26162,9 +26162,9 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static long[] intersection(final long[] a, final long[] b) {
@@ -26178,9 +26178,9 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @param b the b
-     * @return the float[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static float[] intersection(final float[] a, final float[] b) {
@@ -26194,9 +26194,9 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param a the a
-     * @param b the b
-     * @return the double[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static double[] intersection(final double[] a, final double[] b) {
@@ -26210,10 +26210,10 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static <T> List<T> intersection(final T[] a, final Object[] b) {
@@ -26236,10 +26236,10 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public static <T> List<T> intersection(final Collection<? extends T> a, final Collection<?> b) {
@@ -26263,9 +26263,9 @@ public final class N {
     /**
      * Intersection.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the list
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> List<T> intersection(final Collection<? extends Collection<? extends T>> c) {
         if (N.isNullOrEmpty(c)) {
@@ -26297,9 +26297,9 @@ public final class N {
     /**
      * Difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the boolean[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static boolean[] difference(final boolean[] a, final boolean[] b) {
@@ -26315,9 +26315,9 @@ public final class N {
     /**
      * Difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the char[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static char[] difference(final char[] a, final char[] b) {
@@ -26333,9 +26333,9 @@ public final class N {
     /**
      * Difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the byte[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static byte[] difference(final byte[] a, final byte[] b) {
@@ -26351,9 +26351,9 @@ public final class N {
     /**
      * Difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the short[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static short[] difference(final short[] a, final short[] b) {
@@ -26379,9 +26379,9 @@ public final class N {
      * int[] c = difference(a, b); // The elements c in a will b: [0, 2, 3].
      * </pre>
      *
-     * @param a the a
-     * @param b the b
-     * @return the int[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static int[] difference(final int[] a, final int[] b) {
@@ -26397,9 +26397,9 @@ public final class N {
     /**
      * Difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static long[] difference(final long[] a, final long[] b) {
@@ -26415,9 +26415,9 @@ public final class N {
     /**
      * Difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the float[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static float[] difference(final float[] a, final float[] b) {
@@ -26433,9 +26433,9 @@ public final class N {
     /**
      * Difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the double[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static double[] difference(final double[] a, final double[] b) {
@@ -26451,10 +26451,10 @@ public final class N {
     /**
      * Difference.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static <T> List<T> difference(final T[] a, final Object[] b) {
@@ -26479,10 +26479,10 @@ public final class N {
     /**
      * Difference.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public static <T> List<T> difference(final Collection<? extends T> a, final Collection<?> b) {
@@ -26508,9 +26508,9 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the boolean[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static boolean[] symmetricDifference(final boolean[] a, final boolean[] b) {
@@ -26526,9 +26526,9 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the char[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static char[] symmetricDifference(final char[] a, final char[] b) {
@@ -26544,9 +26544,9 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the byte[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static byte[] symmetricDifference(final byte[] a, final byte[] b) {
@@ -26562,9 +26562,9 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the short[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static short[] symmetricDifference(final short[] a, final short[] b) {
@@ -26584,9 +26584,9 @@ public final class N {
      * int[] c = symmetricDifference(a, b); // The elements c in a will b: [0, 2, 3, 5].
      * </pre>
      *
-     * @param a the a
-     * @param b the b
-     * @return the int[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      * @see N#difference(int[], int[])
      */
@@ -26603,9 +26603,9 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static long[] symmetricDifference(final long[] a, final long[] b) {
@@ -26621,9 +26621,9 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the float[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static float[] symmetricDifference(final float[] a, final float[] b) {
@@ -26639,9 +26639,9 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @param b the b
-     * @return the double[]
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static double[] symmetricDifference(final double[] a, final double[] b) {
@@ -26657,10 +26657,10 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static <T> List<T> symmetricDifference(final T[] a, final T[] b) {
@@ -26696,10 +26696,10 @@ public final class N {
     /**
      * Symmetric difference.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      * @see IntList#symmetricDifference(IntList)
      */
     public static <T> List<T> symmetricDifference(final Collection<? extends T> a, final Collection<? extends T> b) {
@@ -26734,9 +26734,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param a the a
-     * @param b the b
-     * @return the boolean[]
+     * @param a
+     * @param b
+     * @return
      */
     public static boolean[] concat(final boolean[] a, final boolean[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -26756,8 +26756,8 @@ public final class N {
     /**
      * Concat.
      *
-     * @param aa the aa
-     * @return the boolean[]
+     * @param aa
+     * @return
      */
     @SafeVarargs
     public static boolean[] concat(final boolean[]... aa) {
@@ -26796,9 +26796,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param a the a
-     * @param b the b
-     * @return the char[]
+     * @param a
+     * @param b
+     * @return
      */
     public static char[] concat(final char[] a, final char[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -26818,8 +26818,8 @@ public final class N {
     /**
      * Concat.
      *
-     * @param aa the aa
-     * @return the char[]
+     * @param aa
+     * @return
      */
     @SafeVarargs
     public static char[] concat(final char[]... aa) {
@@ -26858,9 +26858,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param a the a
-     * @param b the b
-     * @return the byte[]
+     * @param a
+     * @param b
+     * @return
      */
     public static byte[] concat(final byte[] a, final byte[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -26880,8 +26880,8 @@ public final class N {
     /**
      * Concat.
      *
-     * @param aa the aa
-     * @return the byte[]
+     * @param aa
+     * @return
      */
     @SafeVarargs
     public static byte[] concat(final byte[]... aa) {
@@ -26920,9 +26920,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param a the a
-     * @param b the b
-     * @return the short[]
+     * @param a
+     * @param b
+     * @return
      */
     public static short[] concat(final short[] a, final short[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -26942,8 +26942,8 @@ public final class N {
     /**
      * Concat.
      *
-     * @param aa the aa
-     * @return the short[]
+     * @param aa
+     * @return
      */
     @SafeVarargs
     public static short[] concat(final short[]... aa) {
@@ -26982,9 +26982,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param a the a
-     * @param b the b
-     * @return the int[]
+     * @param a
+     * @param b
+     * @return
      */
     public static int[] concat(final int[] a, final int[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -27004,8 +27004,8 @@ public final class N {
     /**
      * Concat.
      *
-     * @param aa the aa
-     * @return the int[]
+     * @param aa
+     * @return
      */
     @SafeVarargs
     public static int[] concat(final int[]... aa) {
@@ -27044,9 +27044,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param a the a
-     * @param b the b
-     * @return the long[]
+     * @param a
+     * @param b
+     * @return
      */
     public static long[] concat(final long[] a, final long[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -27066,8 +27066,8 @@ public final class N {
     /**
      * Concat.
      *
-     * @param aa the aa
-     * @return the long[]
+     * @param aa
+     * @return
      */
     @SafeVarargs
     public static long[] concat(final long[]... aa) {
@@ -27106,9 +27106,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param a the a
-     * @param b the b
-     * @return the float[]
+     * @param a
+     * @param b
+     * @return
      */
     public static float[] concat(final float[] a, final float[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -27128,8 +27128,8 @@ public final class N {
     /**
      * Concat.
      *
-     * @param aa the aa
-     * @return the float[]
+     * @param aa
+     * @return
      */
     @SafeVarargs
     public static float[] concat(final float[]... aa) {
@@ -27168,9 +27168,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param a the a
-     * @param b the b
-     * @return the double[]
+     * @param a
+     * @param b
+     * @return
      */
     public static double[] concat(final double[] a, final double[] b) {
         if (N.isNullOrEmpty(a)) {
@@ -27190,8 +27190,8 @@ public final class N {
     /**
      * Concat.
      *
-     * @param aa the aa
-     * @return the double[]
+     * @param aa
+     * @return
      */
     @SafeVarargs
     public static double[] concat(final double[]... aa) {
@@ -27230,10 +27230,10 @@ public final class N {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the t[]
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] concat(final T[] a, final T[] b) {
@@ -27254,9 +27254,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param aa the aa
-     * @return the t[]
+     * @param <T>
+     * @param aa
+     * @return
      * @throws NullPointerException if the specified <code>aa</code> is <code>null</code>.
      */
     @SafeVarargs
@@ -27296,10 +27296,10 @@ public final class N {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T> List<T> concat(final Collection<? extends T> a, final Collection<? extends T> b) {
         if (N.isNullOrEmpty(a)) {
@@ -27319,9 +27319,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the list
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> List<T> concat(final Collection<? extends T>... a) {
@@ -27335,9 +27335,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the list
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> List<T> concat(final Collection<? extends Collection<? extends T>> c) {
         return concat(c, Factory.<T> ofList());
@@ -27346,11 +27346,11 @@ public final class N {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param <C> the generic type
-     * @param c the c
-     * @param supplier the supplier
-     * @return the c
+     * @param <T>
+     * @param <C>
+     * @param c
+     * @param supplier
+     * @return
      */
     public static <T, C extends Collection<T>> C concat(final Collection<? extends Collection<? extends T>> c, final IntFunction<? extends C> supplier) {
         if (N.isNullOrEmpty(c)) {
@@ -27379,10 +27379,10 @@ public final class N {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T> ObjIterator<T> concat(final Iterator<? extends T> a, final Iterator<? extends T> b) {
         return Iterators.concat(a, b);
@@ -27391,9 +27391,9 @@ public final class N {
     /**
      * Concat.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static <T> ObjIterator<T> concat(final Iterator<? extends T>... a) {
@@ -27403,9 +27403,9 @@ public final class N {
     /**
      * Concatt.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the obj iterator
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T> ObjIterator<T> concatt(final Collection<? extends Iterator<? extends T>> c) {
         return Iterators.concat(c);
@@ -27414,10 +27414,10 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static int replaceAll(final boolean[] a, final boolean oldVal, final boolean newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27440,10 +27440,10 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static int replaceAll(final char[] a, final char oldVal, final char newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27466,10 +27466,10 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static int replaceAll(final byte[] a, final byte oldVal, final byte newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27492,10 +27492,10 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static int replaceAll(final short[] a, final short oldVal, final short newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27518,10 +27518,10 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static int replaceAll(final int[] a, final int oldVal, final int newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27544,10 +27544,10 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static int replaceAll(final long[] a, final long oldVal, final long newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27570,10 +27570,10 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static int replaceAll(final float[] a, final float oldVal, final float newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27596,10 +27596,10 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static int replaceAll(final double[] a, final double oldVal, final double newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27622,11 +27622,11 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param <T>
+     * @param a
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static <T> int replaceAll(final T[] a, final Object oldVal, final T newVal) {
         if (N.isNullOrEmpty(a)) {
@@ -27659,11 +27659,11 @@ public final class N {
     /**
      * Replace all.
      *
-     * @param <T> the generic type
-     * @param list the list
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param <T>
+     * @param list
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public static <T> int replaceAll(final List<T> list, final Object oldVal, final T newVal) {
         if (N.isNullOrEmpty(list)) {
@@ -27722,8 +27722,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static boolean[] add(final boolean[] a, final boolean element) {
@@ -27744,8 +27744,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static char[] add(final char[] a, final char element) {
@@ -27766,8 +27766,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static byte[] add(final byte[] a, final byte element) {
@@ -27788,8 +27788,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static short[] add(final short[] a, final short element) {
@@ -27810,8 +27810,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static int[] add(final int[] a, final int element) {
@@ -27832,8 +27832,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static long[] add(final long[] a, final long element) {
@@ -27854,8 +27854,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static float[] add(final float[] a, final float element) {
@@ -27876,8 +27876,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static double[] add(final double[] a, final double element) {
@@ -27898,8 +27898,8 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      */
     public static String[] add(final String[] a, final String element) {
@@ -27920,9 +27920,9 @@ public final class N {
      * Copies the given array and adds the given element at the end of the new
      * array.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param element the element
+     * @param <T>
+     * @param a
+     * @param element
      * @return A new array containing the existing elements plus the new element
      * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
      */
@@ -28171,9 +28171,9 @@ public final class N {
      * Adds all the elements of the given arrays into a new array.
      * </p>
      *
-     * @param <T> the generic type
-     * @param a            the first array whose elements are added to the new array.
-     * @param b            the second array whose elements are added to the new array.
+     * @param <T>
+     * @param a the first array whose elements are added to the new array.
+     * @param b the second array whose elements are added to the new array.
      * @return A new array containing the elements from a and b
      * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
      */
@@ -28206,9 +28206,9 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      */
     public static boolean[] insert(final boolean[] a, final int index, final boolean element) {
@@ -28244,9 +28244,9 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      */
     public static char[] insert(final char[] a, final int index, final char element) {
@@ -28282,9 +28282,9 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      */
     public static byte[] insert(final byte[] a, final int index, final byte element) {
@@ -28320,9 +28320,9 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      */
     public static short[] insert(final short[] a, final int index, final short element) {
@@ -28358,9 +28358,9 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      */
     public static int[] insert(final int[] a, final int index, final int element) {
@@ -28396,9 +28396,9 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      */
     public static long[] insert(final long[] a, final int index, final long element) {
@@ -28434,9 +28434,9 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      */
     public static float[] insert(final float[] a, final int index, final float element) {
@@ -28472,9 +28472,9 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      */
     public static double[] insert(final double[] a, final int index, final double element) {
@@ -28500,10 +28500,10 @@ public final class N {
     /**
      * Insert.
      *
-     * @param a the a
-     * @param index the index
-     * @param element the element
-     * @return the string[]
+     * @param a
+     * @param index
+     * @param element
+     * @return
      */
     public static String[] insert(final String[] a, final int index, final String element) {
         if (N.isNullOrEmpty(a) && index == 0) {
@@ -28538,10 +28538,10 @@ public final class N {
      * the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param index            the position of the new object
-     * @param element            the object to add
+     * @param <T>
+     * @param a
+     * @param index the position of the new object
+     * @param element the object to add
      * @return A new array containing the existing elements and the new element
      * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
      */
@@ -28854,10 +28854,10 @@ public final class N {
     /**
      * Insert all.
      *
-     * @param a the a
-     * @param index the index
-     * @param b the b
-     * @return the string[]
+     * @param a
+     * @param index
+     * @param b
+     * @return
      */
     @SafeVarargs
     public static String[] insertAll(final String[] a, final int index, final String... b) {
@@ -28887,10 +28887,10 @@ public final class N {
      * elements to the right (adds one to their indices).
      * </p>
      *
-     * @param <T> the generic type
-     * @param a            the first array whose elements are added to the new array.
-     * @param index            the position of the new elements start from
-     * @param b            the second array whose elements are added to the new array.
+     * @param <T>
+     * @param a the first array whose elements are added to the new array.
+     * @param index the position of the new elements start from
+     * @param b the second array whose elements are added to the new array.
      * @return A new array containing the elements from a and b
      * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
      */
@@ -28926,8 +28926,8 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -28958,8 +28958,8 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -28990,8 +28990,8 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -29022,8 +29022,8 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -29054,8 +29054,8 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -29086,8 +29086,8 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -29118,8 +29118,8 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -29150,8 +29150,8 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -29182,9 +29182,9 @@ public final class N {
      * returned array is always the same as that of the input array.
      * </p>
      *
-     * @param <T>            the component type of the array
-     * @param a the a
-     * @param index            the position of the element to be removed
+     * @param <T> the component type of the array
+     * @param a
+     * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
      */
@@ -29297,8 +29297,8 @@ public final class N {
      * N.deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
-     * @param a the a
-     * @param indices            the positions of the elements to be removed
+     * @param a
+     * @param indices the positions of the elements to be removed
      * @return A new array containing the existing elements except those at the
      *         specified positions.
      */
@@ -29368,8 +29368,8 @@ public final class N {
      * N.deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
-     * @param a the a
-     * @param indices            the positions of the elements to be removed
+     * @param a
+     * @param indices the positions of the elements to be removed
      * @return A new array containing the existing elements except those at the
      *         specified positions.
      */
@@ -29439,8 +29439,8 @@ public final class N {
      * N.deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
-     * @param a the a
-     * @param indices            the positions of the elements to be removed
+     * @param a
+     * @param indices the positions of the elements to be removed
      * @return A new array containing the existing elements except those at the
      *         specified positions.
      */
@@ -29510,8 +29510,8 @@ public final class N {
      * N.deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
-     * @param a the a
-     * @param indices            the positions of the elements to be removed
+     * @param a
+     * @param indices the positions of the elements to be removed
      * @return A new array containing the existing elements except those at the
      *         specified positions.
      * @throws IndexOutOfBoundsException             if any index is out of range (index &lt; 0 || index &gt;=
@@ -29656,8 +29656,8 @@ public final class N {
      * N.deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
-     * @param a the a
-     * @param indices            the positions of the elements to be removed
+     * @param a
+     * @param indices the positions of the elements to be removed
      * @return A new array containing the existing elements except those at the
      *         specified positions.
      */
@@ -29727,8 +29727,8 @@ public final class N {
      * N.deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
-     * @param a the a
-     * @param indices            the positions of the elements to be removed
+     * @param a
+     * @param indices the positions of the elements to be removed
      * @return A new array containing the existing elements except those at the
      *         specified positions.
      */
@@ -29795,9 +29795,9 @@ public final class N {
      * N.deleteAll(["a", "b", "c"], 1, 2) = ["a"]
      * </pre>
      *
-     * @param <T>            the component type of the array
-     * @param a the a
-     * @param indices            the positions of the elements to be removed
+     * @param <T> the component type of the array
+     * @param a
+     * @param indices the positions of the elements to be removed
      * @return A new array containing the existing elements except those at the
      *         specified positions.
      * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
@@ -29820,10 +29820,10 @@ public final class N {
     /**
      * Delete all by sorted indices.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param indices the indices
-     * @return the t[]
+     * @param <T>
+     * @param a
+     * @param indices
+     * @return
      */
     private static <T> T[] deleteAllBySortedIndices(final T[] a, int... indices) {
         final int lastIndex = indices[indices.length - 1];
@@ -29864,8 +29864,8 @@ public final class N {
     /**
      * Removes the elements at the specified positions from the specified List.
      *
-     * @param list the list
-     * @param indices the indices
+     * @param list
+     * @param indices
      * @return true, if successful
      */
     @SuppressWarnings("rawtypes")
@@ -29916,9 +29916,9 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) {
@@ -29944,9 +29944,9 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) {
@@ -29972,9 +29972,9 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) {
@@ -30000,9 +30000,9 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) {
@@ -30028,9 +30028,9 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) {
@@ -30056,9 +30056,9 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) {
@@ -30084,9 +30084,9 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) {
@@ -30112,9 +30112,9 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) {
@@ -30140,10 +30140,10 @@ public final class N {
     /**
      * Deletes the values from {@code fromIndex} to {@code toIndex}.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return a new array
      */
     public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) {
@@ -30169,10 +30169,10 @@ public final class N {
     /**
      * Returns {@code true} if the {@code List} is updated when {@code fromIndex < toIndex}, otherwise {@code false} is returned when {@code fromIndex == toIndex}.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      * @return true, if successful
      */
     @SuppressWarnings("unchecked")
@@ -30234,8 +30234,8 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param element            the element to be removed
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30263,8 +30263,8 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param element            the element to be removed
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30292,8 +30292,8 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param element            the element to be removed
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30321,8 +30321,8 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param element            the element to be removed
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30350,8 +30350,8 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param element            the element to be removed
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30379,8 +30379,8 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param element            the element to be removed
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30408,8 +30408,8 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param element            the element to be removed
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30437,8 +30437,8 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param a the a
-     * @param element            the element to be removed
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30466,9 +30466,9 @@ public final class N {
      * of the returned array is always the same as that of the input array.
      * </p>
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param element            the element to be removed
+     * @param <T>
+     * @param a
+     * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
@@ -30489,7 +30489,7 @@ public final class N {
      * elements are removed from the collection.
      * </p>
      *
-     * @param c the c
+     * @param c
      * @param element the element to be removed
      * @return <tt>true</tt> if this collection changed as a result of the call
      */
@@ -30507,8 +30507,8 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30537,8 +30537,8 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30567,8 +30567,8 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30597,8 +30597,8 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30627,8 +30627,8 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30657,8 +30657,8 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30687,8 +30687,8 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30717,8 +30717,8 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param a the a
-     * @param element the element
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30747,9 +30747,9 @@ public final class N {
      * from their indices). If the array doesn't contains such an element, no
      * elements are removed from the array.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param element the element
+     * @param <T>
+     * @param a
+     * @param element
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
@@ -30775,8 +30775,8 @@ public final class N {
     /**
      * Removes the all occurrences.
      *
-     * @param c the c
-     * @param element the element
+     * @param c
+     * @param element
      * @return true, if successful
      */
     public static boolean removeAllOccurrences(Collection<?> c, final Object element) {
@@ -30790,9 +30790,9 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param a the a
-     * @param elements the elements
-     * @return the boolean[]
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -30813,9 +30813,9 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param a the a
-     * @param elements the elements
-     * @return the char[]
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -30836,9 +30836,9 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param a the a
-     * @param elements the elements
-     * @return the byte[]
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -30859,9 +30859,9 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param a the a
-     * @param elements the elements
-     * @return the short[]
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -30882,9 +30882,9 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param a the a
-     * @param elements the elements
-     * @return the int[]
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -30905,9 +30905,9 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param a the a
-     * @param elements the elements
-     * @return the long[]
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -30928,9 +30928,9 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param a the a
-     * @param elements the elements
-     * @return the float[]
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -30951,9 +30951,9 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param a the a
-     * @param elements the elements
-     * @return the double[]
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -30974,10 +30974,10 @@ public final class N {
     /**
      * Returns a new array with removes all the occurrences of specified elements from <code>a</code>.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param elements the elements
-     * @return the t[]
+     * @param <T>
+     * @param a
+     * @param elements
+     * @return
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
@@ -31005,8 +31005,8 @@ public final class N {
     /**
      * Removes the all.
      *
-     * @param c the c
-     * @param elements the elements
+     * @param c
+     * @param elements
      * @return true, if successful
      */
     @SafeVarargs
@@ -31021,8 +31021,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @return the boolean[]
+     * @param a
+     * @return
      */
     public static boolean[] removeDuplicates(final boolean[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -31035,9 +31035,9 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the boolean[]
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static boolean[] removeDuplicates(final boolean[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31050,11 +31050,11 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the boolean[]
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static boolean[] removeDuplicates(final boolean[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31082,8 +31082,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @return the char[]
+     * @param a
+     * @return
      */
     public static char[] removeDuplicates(final char[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -31096,9 +31096,9 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the char[]
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static char[] removeDuplicates(final char[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31111,11 +31111,11 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the char[]
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static char[] removeDuplicates(final char[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31164,8 +31164,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @return the byte[]
+     * @param a
+     * @return
      */
     public static byte[] removeDuplicates(final byte[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -31178,9 +31178,9 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the byte[]
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static byte[] removeDuplicates(final byte[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31193,11 +31193,11 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the byte[]
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static byte[] removeDuplicates(final byte[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31246,8 +31246,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @return the short[]
+     * @param a
+     * @return
      */
     public static short[] removeDuplicates(final short[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -31260,9 +31260,9 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the short[]
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static short[] removeDuplicates(final short[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31275,11 +31275,11 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the short[]
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static short[] removeDuplicates(final short[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31328,8 +31328,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @return the int[]
+     * @param a
+     * @return
      */
     public static int[] removeDuplicates(final int[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -31342,9 +31342,9 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the int[]
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static int[] removeDuplicates(final int[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31357,11 +31357,11 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the int[]
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static int[] removeDuplicates(final int[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31411,8 +31411,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @return the long[]
+     * @param a
+     * @return
      */
     public static long[] removeDuplicates(final long[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -31425,9 +31425,9 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the long[]
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static long[] removeDuplicates(final long[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31440,11 +31440,11 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the long[]
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static long[] removeDuplicates(final long[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31493,8 +31493,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @return the float[]
+     * @param a
+     * @return
      */
     public static float[] removeDuplicates(final float[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -31507,9 +31507,9 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the float[]
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static float[] removeDuplicates(final float[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31522,11 +31522,11 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the float[]
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static float[] removeDuplicates(final float[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31576,8 +31576,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @return the double[]
+     * @param a
+     * @return
      */
     public static double[] removeDuplicates(final double[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -31590,9 +31590,9 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the double[]
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static double[] removeDuplicates(final double[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31605,11 +31605,11 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the double[]
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static double[] removeDuplicates(final double[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31664,8 +31664,8 @@ public final class N {
      * N.removeElements(["a", "b", "a"]) = ["a", "b"]
      * </pre>
      *
-     * @param <T>            the component type of the array
-     * @param a the a
+     * @param <T> the component type of the array
+     * @param a
      * @return A new array containing the existing elements except the duplicates
      * @throws NullPointerException if the specified array <code>a</code> is null.
      */
@@ -31680,10 +31680,10 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param isSorted the is sorted
-     * @return the t[]
+     * @param <T>
+     * @param a
+     * @param isSorted
+     * @return
      */
     public static <T> T[] removeDuplicates(final T[] a, final boolean isSorted) {
         if (N.isNullOrEmpty(a)) {
@@ -31696,12 +31696,12 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param isSorted the is sorted
-     * @return the t[]
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @param isSorted
+     * @return
      */
     public static <T> T[] removeDuplicates(final T[] a, final int from, final int to, final boolean isSorted) {
         checkFromToIndex(from, to, len(a));
@@ -31734,7 +31734,7 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param c the c
+     * @param c
      * @return <code>true</code> if there is one or more duplicated elements are removed. otherwise <code>false</code> is returned.
      */
     public static boolean removeDuplicates(final Collection<?> c) {
@@ -31748,8 +31748,8 @@ public final class N {
     /**
      * Removes the duplicates.
      *
-     * @param c the c
-     * @param isSorted the is sorted
+     * @param c
+     * @param isSorted
      * @return <code>true</code> if there is one or more duplicated elements are removed. otherwise <code>false</code> is returned.
      */
     @SuppressWarnings("rawtypes")
@@ -31794,7 +31794,7 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean hasDuplicates(final char[] a) {
@@ -31804,8 +31804,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
+     * @param a
+     * @param isSorted
      * @return true, if successful
      */
     public static boolean hasDuplicates(final char[] a, final boolean isSorted) {
@@ -31819,10 +31819,10 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param isSorted the is sorted
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param isSorted
      * @return true, if successful
      */
     static boolean hasDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
@@ -31860,7 +31860,7 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean hasDuplicates(final byte[] a) {
@@ -31870,8 +31870,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
+     * @param a
+     * @param isSorted
      * @return true, if successful
      */
     public static boolean hasDuplicates(final byte[] a, final boolean isSorted) {
@@ -31885,10 +31885,10 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param isSorted the is sorted
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param isSorted
      * @return true, if successful
      */
     static boolean hasDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
@@ -31926,7 +31926,7 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean hasDuplicates(final short[] a) {
@@ -31936,8 +31936,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
+     * @param a
+     * @param isSorted
      * @return true, if successful
      */
     public static boolean hasDuplicates(final short[] a, final boolean isSorted) {
@@ -31951,10 +31951,10 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param isSorted the is sorted
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param isSorted
      * @return true, if successful
      */
     static boolean hasDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
@@ -31992,7 +31992,7 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean hasDuplicates(final int[] a) {
@@ -32002,8 +32002,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
+     * @param a
+     * @param isSorted
      * @return true, if successful
      */
     public static boolean hasDuplicates(final int[] a, final boolean isSorted) {
@@ -32017,10 +32017,10 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param isSorted the is sorted
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param isSorted
      * @return true, if successful
      */
     static boolean hasDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
@@ -32058,7 +32058,7 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean hasDuplicates(final long[] a) {
@@ -32068,8 +32068,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
+     * @param a
+     * @param isSorted
      * @return true, if successful
      */
     public static boolean hasDuplicates(final long[] a, final boolean isSorted) {
@@ -32083,10 +32083,10 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param isSorted the is sorted
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param isSorted
      * @return true, if successful
      */
     static boolean hasDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
@@ -32124,7 +32124,7 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean hasDuplicates(final float[] a) {
@@ -32134,8 +32134,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
+     * @param a
+     * @param isSorted
      * @return true, if successful
      */
     public static boolean hasDuplicates(final float[] a, final boolean isSorted) {
@@ -32149,10 +32149,10 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param isSorted the is sorted
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param isSorted
      * @return true, if successful
      */
     static boolean hasDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
@@ -32190,7 +32190,7 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public static boolean hasDuplicates(final double[] a) {
@@ -32200,8 +32200,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param isSorted the is sorted
+     * @param a
+     * @param isSorted
      * @return true, if successful
      */
     public static boolean hasDuplicates(final double[] a, final boolean isSorted) {
@@ -32215,10 +32215,10 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param isSorted the is sorted
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param isSorted
      * @return true, if successful
      */
     static boolean hasDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
@@ -32256,8 +32256,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param <T> the generic type
-     * @param a the a
+     * @param <T>
+     * @param a
      * @return true, if successful
      */
     public static <T> boolean hasDuplicates(final T[] a) {
@@ -32267,9 +32267,9 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param isSorted the is sorted
+     * @param <T>
+     * @param a
+     * @param isSorted
      * @return true, if successful
      */
     public static <T> boolean hasDuplicates(final T[] a, final boolean isSorted) {
@@ -32283,11 +32283,11 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param isSorted the is sorted
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param isSorted
      * @return true, if successful
      */
     static <T> boolean hasDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
@@ -32325,7 +32325,7 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public static boolean hasDuplicates(final Collection<?> c) {
@@ -32335,8 +32335,8 @@ public final class N {
     /**
      * Checks for duplicates.
      *
-     * @param c the c
-     * @param isSorted the is sorted
+     * @param c
+     * @param isSorted
      * @return true, if successful
      */
     public static boolean hasDuplicates(final Collection<?> c, final boolean isSorted) {
@@ -32375,7 +32375,7 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
+     * @param a
      * @return a long number
      */
     @SafeVarargs
@@ -32390,10 +32390,10 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the int
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static int sum(final char[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32418,7 +32418,7 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
+     * @param a
      * @return a long number
      */
     @SafeVarargs
@@ -32433,10 +32433,10 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the int
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static int sum(final byte[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32461,7 +32461,7 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
+     * @param a
      * @return a long number
      */
     @SafeVarargs
@@ -32476,10 +32476,10 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the int
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static int sum(final short[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32504,7 +32504,7 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
+     * @param a
      * @return a long number
      */
     @SafeVarargs
@@ -32519,10 +32519,10 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the int
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static int sum(final int[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32547,7 +32547,7 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
+     * @param a
      * @return a long number
      */
     @SafeVarargs
@@ -32562,10 +32562,10 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the long
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static long sum(final long[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32590,7 +32590,7 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32605,10 +32605,10 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the float
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static float sum(final float[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32633,7 +32633,7 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32648,10 +32648,10 @@ public final class N {
     /**
      * Sum.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double sum(final double[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32676,7 +32676,7 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32691,10 +32691,10 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double average(final char[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32721,7 +32721,7 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32736,10 +32736,10 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double average(final byte[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32766,7 +32766,7 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32781,10 +32781,10 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double average(final short[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32811,7 +32811,7 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32826,10 +32826,10 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double average(final int[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32856,7 +32856,7 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32871,10 +32871,10 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double average(final long[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32901,7 +32901,7 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32916,10 +32916,10 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double average(final float[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32946,7 +32946,7 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
+     * @param a
      * @return a double number
      */
     @SafeVarargs
@@ -32961,10 +32961,10 @@ public final class N {
     /**
      * Average.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double average(final double[] a, final int from, final int to) {
         checkFromToIndex(from, to, len(a));
@@ -32993,9 +32993,9 @@ public final class N {
      * Gets the minimum of two <code>char</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the smallest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static char min(final char a, final char b) {
         return (a <= b) ? a : b;
@@ -33006,9 +33006,9 @@ public final class N {
      * Gets the minimum of two <code>byte</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the smallest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static byte min(final byte a, final byte b) {
         return (a <= b) ? a : b;
@@ -33019,9 +33019,9 @@ public final class N {
      * Gets the minimum of two <code>short</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the smallest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static short min(final short a, final short b) {
         return (a <= b) ? a : b;
@@ -33032,9 +33032,9 @@ public final class N {
      * Gets the minimum of two <code>int</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the smallest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static int min(final int a, final int b) {
         return (a <= b) ? a : b;
@@ -33045,9 +33045,9 @@ public final class N {
      * Gets the minimum of two <code>long</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the smallest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static long min(final long a, final long b) {
         return (a <= b) ? a : b;
@@ -33058,9 +33058,9 @@ public final class N {
      * Gets the minimum of two <code>float</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the smallest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static float min(final float a, final float b) {
         return Math.min(a, b);
@@ -33071,9 +33071,9 @@ public final class N {
      * Gets the minimum of two <code>double</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the smallest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static double min(final double a, final double b) {
         return Math.min(a, b);
@@ -33082,10 +33082,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T extends Comparable<? super T>> T min(final T a, final T b) {
         return (T) min(a, b, NULL_MAX_COMPARATOR);
@@ -33094,11 +33094,11 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
      */
     public static <T> T min(final T a, final T b, final Comparator<? super T> cmp) {
         return (cmp == null ? NULL_MAX_COMPARATOR : cmp).compare(a, b) <= 0 ? a : b;
@@ -33109,10 +33109,10 @@ public final class N {
      * Gets the minimum of three <code>char</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the char
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static char min(final char a, final char b, final char c) {
         final char m = (a <= b) ? a : b;
@@ -33125,10 +33125,10 @@ public final class N {
      * Gets the minimum of three <code>byte</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the byte
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static byte min(final byte a, final byte b, final byte c) {
         final byte m = (a <= b) ? a : b;
@@ -33141,10 +33141,10 @@ public final class N {
      * Gets the minimum of three <code>short</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the short
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static short min(final short a, final short b, final short c) {
         final short m = (a <= b) ? a : b;
@@ -33157,10 +33157,10 @@ public final class N {
      * Gets the minimum of three <code>int</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the int
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static int min(final int a, final int b, final int c) {
         final int m = (a <= b) ? a : b;
@@ -33173,10 +33173,10 @@ public final class N {
      * Gets the minimum of three <code>long</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the long
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static long min(final long a, final long b, final long c) {
         final long m = (a <= b) ? a : b;
@@ -33189,10 +33189,10 @@ public final class N {
      * Gets the minimum of three <code>float</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the float
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static float min(final float a, final float b, final float c) {
         return Math.min(Math.min(a, b), c);
@@ -33203,10 +33203,10 @@ public final class N {
      * Gets the minimum of three <code>double</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the double
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static double min(final double a, final double b, final double c) {
         return Math.min(Math.min(a, b), c);
@@ -33215,11 +33215,11 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static <T extends Comparable<? super T>> T min(final T a, final T b, final T c) {
         return (T) min(a, b, c, NULL_MAX_COMPARATOR);
@@ -33228,12 +33228,12 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @param cmp
+     * @return
      */
     public static <T> T min(final T a, final T b, final T c, final Comparator<? super T> cmp) {
         return min(min(a, b, cmp), c, cmp);
@@ -33246,7 +33246,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @return
      */
     @SafeVarargs
     public static char min(final char... a) {
@@ -33262,10 +33262,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the char
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static char min(final char[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -33289,7 +33289,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @return
      */
     @SafeVarargs
     public static byte min(final byte... a) {
@@ -33301,10 +33301,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the byte
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static byte min(final byte[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -33328,7 +33328,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @return
      */
     @SafeVarargs
     public static short min(final short... a) {
@@ -33340,10 +33340,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the short
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static short min(final short[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -33367,7 +33367,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @return
      */
     @SafeVarargs
     public static int min(final int... a) {
@@ -33379,10 +33379,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the int
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static int min(final int[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -33408,7 +33408,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @return
      */
     @SafeVarargs
     public static long min(final long... a) {
@@ -33420,10 +33420,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the long
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static long min(final long[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -33447,7 +33447,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @return
      * @see IEEE754rUtil#min(float[]) IEEE754rUtils for a version of this method
      *      that handles NaN differently
      */
@@ -33461,10 +33461,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the float
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static float min(final float[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -33490,7 +33490,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @return
      * @see IEEE754rUtil#min(double[]) IEEE754rUtils for a version of this
      *      method that handles NaN differently
      */
@@ -33504,10 +33504,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double min(final double[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -33529,9 +33529,9 @@ public final class N {
     /**
      * Returns the minimum element in the array.
      *
-     * @param <T> the generic type
-     * @param a            an array, must not be null or empty
-     * @return the minimum value in the array
+     * @param <T>
+     * @param a an array, must not be null or empty
+     * @return
      */
     public static <T extends Comparable<? super T>> T min(final T[] a) {
         N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can not be null or empty");
@@ -33542,11 +33542,11 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static <T extends Comparable<? super T>> T min(final T[] a, final int from, final int to) {
         return (T) min(a, from, to, NULL_MAX_COMPARATOR);
@@ -33555,10 +33555,10 @@ public final class N {
     /**
      * Returns the minimum element in the array.
      *
-     * @param <T> the generic type
-     * @param a            an array, must not be null or empty
-     * @param cmp the cmp
-     * @return the minimum value in the array
+     * @param <T>
+     * @param a an array, must not be null or empty
+     * @param cmp
+     * @return
      */
     public static <T> T min(final T[] a, final Comparator<? super T> cmp) {
         N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can not be null or empty");
@@ -33569,12 +33569,12 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @param cmp
+     * @return
      */
     public static <T> T min(final T[] a, final int from, final int to, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -33600,9 +33600,9 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the t
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c) {
         N.checkArgNotNullOrEmpty(c, "The spcified collection 'c' can not be null or empty");
@@ -33613,11 +33613,11 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @return the t
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @return
      */
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int from, final int to) {
         N.checkArgNotNullOrEmpty(c, "The spcified collection 'c' can not be null or empty");
@@ -33628,10 +33628,10 @@ public final class N {
     /**
      * Min.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return
      */
     public static <T> T min(final Collection<? extends T> c, Comparator<? super T> cmp) {
         N.checkArgNotNullOrEmpty(c, "The spcified collection 'c' can not be null or empty");
@@ -33642,12 +33642,12 @@ public final class N {
     /**
      * Returns the minimum element in the collection.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @param cmp the cmp
-     * @return the minimum value in the Collection
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @param cmp
+     * @return
      */
     public static <T> T min(final Collection<? extends T> c, final int from, final int to, Comparator<? super T> cmp) {
         checkFromToIndex(from, to, size(c));
@@ -33705,9 +33705,9 @@ public final class N {
     /**
      * Min all.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the list
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Comparable<T>> List<T> minAll(final T[] a) {
         return minAll(a, NULL_MAX_COMPARATOR);
@@ -33716,10 +33716,10 @@ public final class N {
     /**
      * Min all.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param cmp
+     * @return
      */
     public static <T> List<T> minAll(final T[] a, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
@@ -33752,9 +33752,9 @@ public final class N {
     /**
      * Min all.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the list
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Comparable<T>> List<T> minAll(final Collection<T> c) {
         return minAll(c, NULL_MAX_COMPARATOR);
@@ -33763,10 +33763,10 @@ public final class N {
     /**
      * Min all.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return
      */
     public static <T> List<T> minAll(final Collection<T> c, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(c)) {
@@ -33804,9 +33804,9 @@ public final class N {
      * Gets the maximum of two <code>char</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the largest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static char max(final char a, final char b) {
         return (a >= b) ? a : b;
@@ -33817,9 +33817,9 @@ public final class N {
      * Gets the maximum of two <code>byte</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the largest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static byte max(final byte a, final byte b) {
         return (a >= b) ? a : b;
@@ -33830,9 +33830,9 @@ public final class N {
      * Gets the maximum of two <code>short</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the largest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static short max(final short a, final short b) {
         return (a >= b) ? a : b;
@@ -33843,9 +33843,9 @@ public final class N {
      * Gets the maximum of two <code>int</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the largest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static int max(final int a, final int b) {
         return (a >= b) ? a : b;
@@ -33856,9 +33856,9 @@ public final class N {
      * Gets the maximum of two <code>long</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the largest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static long max(final long a, final long b) {
         return (a >= b) ? a : b;
@@ -33869,9 +33869,9 @@ public final class N {
      * Gets the maximum of two <code>float</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the largest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static float max(final float a, final float b) {
         return Math.max(a, b);
@@ -33882,9 +33882,9 @@ public final class N {
      * Gets the maximum of two <code>double</code> values.
      * </p>
      *
-     * @param a the a
-     * @param b the b
-     * @return the largest of the values
+     * @param a
+     * @param b
+     * @return
      */
     public static double max(final double a, final double b) {
         return Math.max(a, b);
@@ -33893,10 +33893,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T extends Comparable<? super T>> T max(final T a, final T b) {
         return (T) max(a, b, NULL_MIN_COMPARATOR);
@@ -33905,11 +33905,11 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param b
+     * @param cmp
+     * @return
      */
     public static <T> T max(final T a, final T b, final Comparator<? super T> cmp) {
         return (cmp == null ? NULL_MIN_COMPARATOR : cmp).compare(a, b) >= 0 ? a : b;
@@ -33918,10 +33918,10 @@ public final class N {
     /**
      * Gets the maximum of three <code>char</code> values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the char
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static char max(final char a, final char b, final char c) {
         final char m = (a >= b) ? a : b;
@@ -33932,10 +33932,10 @@ public final class N {
     /**
      * Gets the maximum of three <code>byte</code> values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the byte
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static byte max(final byte a, final byte b, final byte c) {
         final byte m = (a >= b) ? a : b;
@@ -33946,10 +33946,10 @@ public final class N {
     /**
      * Gets the maximum of three <code>short</code> values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the short
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static short max(final short a, final short b, final short c) {
         final short m = (a >= b) ? a : b;
@@ -33960,10 +33960,10 @@ public final class N {
     /**
      * Gets the maximum of three <code>int</code> values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the int
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static int max(final int a, final int b, final int c) {
         final int m = (a >= b) ? a : b;
@@ -33974,10 +33974,10 @@ public final class N {
     /**
      * Gets the maximum of three <code>long</code> values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the long
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static long max(final long a, final long b, final long c) {
         final long m = (a >= b) ? a : b;
@@ -33988,10 +33988,10 @@ public final class N {
     /**
      * Gets the maximum of three <code>float</code> values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the float
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static float max(final float a, final float b, final float c) {
         return Math.max(Math.max(a, b), c);
@@ -34000,10 +34000,10 @@ public final class N {
     /**
      * Gets the maximum of three <code>double</code> values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the double
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static double max(final double a, final double b, final double c) {
         return Math.max(Math.max(a, b), c);
@@ -34012,11 +34012,11 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static <T extends Comparable<? super T>> T max(final T a, final T b, final T c) {
         return (T) max(a, b, c, NULL_MIN_COMPARATOR);
@@ -34025,12 +34025,12 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @param cmp
+     * @return
      */
     public static <T> T max(final T a, final T b, final T c, final Comparator<? super T> cmp) {
         return max(max(a, b, cmp), c, cmp);
@@ -34043,7 +34043,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the maximum value in the array
+     * @return
      */
     @SafeVarargs
     public static char max(final char... a) {
@@ -34055,10 +34055,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the char
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static char max(final char[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34082,7 +34082,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the maximum value in the array
+     * @return
      */
     @SafeVarargs
     public static byte max(final byte... a) {
@@ -34094,10 +34094,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the byte
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static byte max(final byte[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34121,7 +34121,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the maximum value in the array
+     * @return
      */
     @SafeVarargs
     public static short max(final short... a) {
@@ -34133,10 +34133,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the short
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static short max(final short[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34160,7 +34160,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the maximum value in the array
+     * @return
      */
     @SafeVarargs
     public static int max(final int... a) {
@@ -34172,10 +34172,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the int
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static int max(final int[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34199,7 +34199,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the maximum value in the array
+     * @return
      */
     @SafeVarargs
     public static long max(final long... a) {
@@ -34211,10 +34211,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the long
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static long max(final long[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34238,7 +34238,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the maximum value in the array
+     * @return
      * @see IEEE754rUtil#max(float[]) IEEE754rUtils for a version of this method
      *      that handles NaN differently
      */
@@ -34252,10 +34252,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the float
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static float max(final float[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34281,7 +34281,7 @@ public final class N {
      *
      * @param a
      *            an array, must not be null or empty
-     * @return the maximum value in the array
+     * @return
      * @see IEEE754rUtil#max(double[]) IEEE754rUtils for a version of this
      *      method that handles NaN differently
      */
@@ -34295,10 +34295,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double max(final double[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34320,9 +34320,9 @@ public final class N {
     /**
      * Returns the maximum element in the array.
      *
-     * @param <T> the generic type
-     * @param a            an array, must not be null or empty
-     * @return the maximum value in the array
+     * @param <T>
+     * @param a an array, must not be null or empty
+     * @return
      * @throws IllegalArgumentException             if <code>a</code> is <code>null</code> or empty.
      */
     public static <T extends Comparable<? super T>> T max(final T[] a) {
@@ -34334,11 +34334,11 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static <T extends Comparable<? super T>> T max(final T[] a, final int from, final int to) {
         return (T) max(a, from, to, NULL_MIN_COMPARATOR);
@@ -34347,10 +34347,10 @@ public final class N {
     /**
      * Returns the maximum element in the array.
      *
-     * @param <T> the generic type
-     * @param a            an array, must not be null or empty
-     * @param cmp the cmp
-     * @return the maximum value in the array
+     * @param <T>
+     * @param a an array, must not be null or empty
+     * @param cmp
+     * @return
      */
     public static <T> T max(final T[] a, final Comparator<? super T> cmp) {
         N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can not be null or empty");
@@ -34361,12 +34361,12 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @param cmp
+     * @return
      */
     public static <T> T max(final T[] a, final int from, final int to, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34392,9 +34392,9 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the t
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c) {
         N.checkArgNotNullOrEmpty(c, "The spcified collection 'c' can not be null or empty");
@@ -34405,11 +34405,11 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @return the t
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @return
      */
     public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c, final int from, final int to) {
         N.checkArgNotNullOrEmpty(c, "The spcified collection 'c' can not be null or empty");
@@ -34420,10 +34420,10 @@ public final class N {
     /**
      * Max.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return
      */
     public static <T> T max(final Collection<? extends T> c, Comparator<? super T> cmp) {
         N.checkArgNotNullOrEmpty(c, "The spcified collection 'c' can not be null or empty");
@@ -34434,12 +34434,12 @@ public final class N {
     /**
      * Returns the maximum element in the collection.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @param cmp the cmp
-     * @return the maximum value in the Collection
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @param cmp
+     * @return
      */
     public static <T> T max(final Collection<? extends T> c, final int from, final int to, Comparator<? super T> cmp) {
         checkFromToIndex(from, to, size(c));
@@ -34497,9 +34497,9 @@ public final class N {
     /**
      * Max all.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the list
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Comparable<T>> List<T> maxAll(final T[] a) {
         return maxAll(a, NULL_MIN_COMPARATOR);
@@ -34508,10 +34508,10 @@ public final class N {
     /**
      * Max all.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param a
+     * @param cmp
+     * @return
      */
     public static <T> List<T> maxAll(final T[] a, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
@@ -34544,9 +34544,9 @@ public final class N {
     /**
      * Max all.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the list
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Comparable<T>> List<T> maxAll(final Collection<T> c) {
         return maxAll(c, NULL_MIN_COMPARATOR);
@@ -34555,10 +34555,10 @@ public final class N {
     /**
      * Max all.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
-     * @return the list
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return
      */
     public static <T> List<T> maxAll(final Collection<T> c, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(c)) {
@@ -34594,10 +34594,10 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the median of the values
+     * @param a
+     * @param b
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static char median(final char a, final char b, final char c) {
@@ -34613,10 +34613,10 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the median of the values
+     * @param a
+     * @param b
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static byte median(final byte a, final byte b, final byte c) {
@@ -34632,10 +34632,10 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the median of the values
+     * @param a
+     * @param b
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static short median(final short a, final short b, final short c) {
@@ -34651,10 +34651,10 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the median of the values
+     * @param a
+     * @param b
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static int median(final int a, final int b, final int c) {
@@ -34670,10 +34670,10 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the median of the values
+     * @param a
+     * @param b
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static long median(final long a, final long b, final long c) {
@@ -34689,10 +34689,10 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the median of the values
+     * @param a
+     * @param b
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static float median(final float a, final float b, final float c) {
@@ -34712,10 +34712,10 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the median of the values
+     * @param a
+     * @param b
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static double median(final double a, final double b, final double c) {
@@ -34735,11 +34735,11 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @return the median of the values
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static <T extends Comparable<? super T>> T median(final T a, final T b, final T c) {
@@ -34749,12 +34749,12 @@ public final class N {
     /**
      * Gets the median of three values.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param cmp the cmp
-     * @return the median of the values
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @param cmp
+     * @return
      * @see #median(int...)
      */
     public static <T> T median(final T a, final T b, final T c, Comparator<? super T> cmp) {
@@ -34777,7 +34777,7 @@ public final class N {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param a an array, must not be null or empty
-     * @return the median value in the array
+     * @return
      * @see #median(int...)
      */
     @SafeVarargs
@@ -34790,10 +34790,10 @@ public final class N {
     /**
      * Median.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the char
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static char median(final char[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34819,7 +34819,7 @@ public final class N {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param a an array, must not be null or empty
-     * @return the median value in the array
+     * @return
      * @see #median(int...)
      */
     @SafeVarargs
@@ -34832,10 +34832,10 @@ public final class N {
     /**
      * Median.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the byte
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static byte median(final byte[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34861,7 +34861,7 @@ public final class N {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param a an array, must not be null or empty
-     * @return the median value in the array
+     * @return
      * @see #median(int...)
      */
     @SafeVarargs
@@ -34874,10 +34874,10 @@ public final class N {
     /**
      * Median.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the short
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static short median(final short[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34903,7 +34903,7 @@ public final class N {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param a an array, must not be null or empty
-     * @return the median value in the array
+     * @return
      * @see #median(int...)
      */
     @SafeVarargs
@@ -34916,10 +34916,10 @@ public final class N {
     /**
      * Median.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the int
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static int median(final int[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34945,7 +34945,7 @@ public final class N {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param a an array, must not be null or empty
-     * @return the median value in the array
+     * @return
      * @see #median(int...)
      */
     @SafeVarargs
@@ -34958,10 +34958,10 @@ public final class N {
     /**
      * Median.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the long
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static long median(final long[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -34987,7 +34987,7 @@ public final class N {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param a an array, must not be null or empty
-     * @return the median value in the array
+     * @return
      * @see #median(int...)
      */
     @SafeVarargs
@@ -35000,10 +35000,10 @@ public final class N {
     /**
      * Median.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the float
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static float median(final float[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -35029,7 +35029,7 @@ public final class N {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param a an array, must not be null or empty
-     * @return the median value in the array
+     * @return
      * @see #median(int...)
      */
     @SafeVarargs
@@ -35042,10 +35042,10 @@ public final class N {
     /**
      * Median.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the double
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static double median(final double[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -35070,9 +35070,9 @@ public final class N {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param a an array, must not be null or empty
-     * @return the median value in the array
+     * @return
      * @see #median(int...)
      */
     public static <T extends Comparable<? super T>> T median(final T[] a) {
@@ -35084,11 +35084,11 @@ public final class N {
     /**
      * Median.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @return
      */
     public static <T extends Comparable<? super T>> T median(final T[] a, final int from, final int to) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -35101,10 +35101,10 @@ public final class N {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param a an array, must not be null or empty
-     * @param cmp the cmp
-     * @return the median value in the array
+     * @param cmp
+     * @return
      * @see #median(int...)
      */
     public static <T> T median(final T[] a, Comparator<? super T> cmp) {
@@ -35116,12 +35116,12 @@ public final class N {
     /**
      * Median.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @param cmp
+     * @return
      */
     public static <T> T median(final T[] a, final int from, final int to, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a) || to - from < 1) {
@@ -35140,9 +35140,9 @@ public final class N {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the median value in the array
+     * @param <T>
+     * @param c
+     * @return
      * @see #median(int...)
      */
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c) {
@@ -35154,11 +35154,11 @@ public final class N {
     /**
      * Median.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @return the t
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @return
      */
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c, final int from, final int to) {
         return (T) median(c, from, to, NATURAL_ORDER);
@@ -35167,10 +35167,10 @@ public final class N {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
-     * @return the median value in the array
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return
      * @see #median(int...)
      */
     public static <T> T median(final Collection<? extends T> c, Comparator<? super T> cmp) {
@@ -35182,12 +35182,12 @@ public final class N {
     /**
      * Median.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @param cmp the cmp
-     * @return the t
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @param cmp
+     * @return
      */
     public static <T> T median(final Collection<? extends T> c, final int from, final int to, Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(c) || to - from < 1) {
@@ -35206,9 +35206,9 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param k the k
-     * @return the kth largest element.
+     * @param a
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static char kthLargest(final char[] a, final int k) {
@@ -35220,11 +35220,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static char kthLargest(final char[] a, final int from, final int to, final int k) {
@@ -35238,9 +35238,9 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param k the k
-     * @return the kth largest element.
+     * @param a
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static byte kthLargest(final byte[] a, final int k) {
@@ -35252,11 +35252,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static byte kthLargest(final byte[] a, final int from, final int to, final int k) {
@@ -35270,9 +35270,9 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param k the k
-     * @return the kth largest element.
+     * @param a
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static short kthLargest(final short[] a, final int k) {
@@ -35284,11 +35284,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static short kthLargest(final short[] a, final int from, final int to, final int k) {
@@ -35302,9 +35302,9 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param k the k
-     * @return the kth largest element.
+     * @param a
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static int kthLargest(final int[] a, final int k) {
@@ -35316,11 +35316,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static int kthLargest(final int[] a, final int from, final int to, final int k) {
@@ -35334,9 +35334,9 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param k the k
-     * @return the kth largest element.
+     * @param a
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static long kthLargest(final long[] a, final int k) {
@@ -35348,11 +35348,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static long kthLargest(final long[] a, final int from, final int to, final int k) {
@@ -35366,9 +35366,9 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param k the k
-     * @return the kth largest element.
+     * @param a
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static float kthLargest(final float[] a, final int k) {
@@ -35380,11 +35380,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static float kthLargest(final float[] a, final int from, final int to, final int k) {
@@ -35398,9 +35398,9 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param k the k
-     * @return the kth largest element.
+     * @param a
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static double kthLargest(final double[] a, final int k) {
@@ -35412,11 +35412,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static double kthLargest(final double[] a, final int from, final int to, final int k) {
@@ -35430,10 +35430,10 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param k the k
-     * @return the kth largest element.
+     * @param <T>
+     * @param a
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static <T extends Comparable<T>> T kthLargest(final T[] a, final int k) {
@@ -35445,12 +35445,12 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static <T extends Comparable<T>> T kthLargest(final T[] a, final int from, final int to, final int k) {
@@ -35464,11 +35464,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param k the k
-     * @param cmp the cmp
-     * @return the kth largest element.
+     * @param <T>
+     * @param a
+     * @param k
+     * @param cmp
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
@@ -35480,13 +35480,13 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @param cmp the cmp
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param <T>
+     * @param a
+     * @param from
+     * @param to
+     * @param k
+     * @param cmp
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static <T> T kthLargest(final T[] a, final int from, final int to, final int k, final Comparator<? super T> cmp) {
@@ -35500,10 +35500,10 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param k the k
-     * @return the kth largest element.
+     * @param <T>
+     * @param c
+     * @param k
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static <T extends Comparable<T>> T kthLargest(final Collection<? extends T> c, final int k) {
@@ -35515,12 +35515,12 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @param k
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static <T extends Comparable<T>> T kthLargest(final Collection<? extends T> c, final int from, final int to, final int k) {
@@ -35534,11 +35534,11 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param k the k
-     * @param cmp the cmp
-     * @return the kth largest element.
+     * @param <T>
+     * @param c
+     * @param k
+     * @param cmp
+     * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
@@ -35550,13 +35550,13 @@ public final class N {
     /**
      * Kth largest.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param from the from
-     * @param to the to
-     * @param k the k
-     * @param cmp the cmp
-     * @return the kth largest element from <code>a[from]</code> to <code>a[to]</code>
+     * @param <T>
+     * @param c
+     * @param from
+     * @param to
+     * @param k
+     * @param cmp
+     * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int from, final int to, final int k, final Comparator<? super T> cmp) {
@@ -35570,8 +35570,8 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param sortedArray the sorted array
-     * @return the map
+     * @param sortedArray
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static Map<Percentage, Character> percentiles(final char[] sortedArray) {
@@ -35590,8 +35590,8 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param sortedArray the sorted array
-     * @return the map
+     * @param sortedArray
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static Map<Percentage, Byte> percentiles(final byte[] sortedArray) {
@@ -35610,8 +35610,8 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param sortedArray the sorted array
-     * @return the map
+     * @param sortedArray
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static Map<Percentage, Short> percentiles(final short[] sortedArray) {
@@ -35630,8 +35630,8 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param sortedArray the sorted array
-     * @return the map
+     * @param sortedArray
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static Map<Percentage, Integer> percentiles(final int[] sortedArray) {
@@ -35650,8 +35650,8 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param sortedArray the sorted array
-     * @return the map
+     * @param sortedArray
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static Map<Percentage, Long> percentiles(final long[] sortedArray) {
@@ -35670,8 +35670,8 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param sortedArray the sorted array
-     * @return the map
+     * @param sortedArray
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static Map<Percentage, Float> percentiles(final float[] sortedArray) {
@@ -35690,8 +35690,8 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param sortedArray the sorted array
-     * @return the map
+     * @param sortedArray
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static Map<Percentage, Double> percentiles(final double[] sortedArray) {
@@ -35710,9 +35710,9 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param <T> the generic type
-     * @param sortedArray the sorted array
-     * @return the map
+     * @param <T>
+     * @param sortedArray
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static <T> Map<Percentage, T> percentiles(final T[] sortedArray) {
@@ -35731,9 +35731,9 @@ public final class N {
     /**
      * Returns the elements at: <code>Percentage</code> * length of the specified array.
      *
-     * @param <T> the generic type
-     * @param sortedList the sorted list
-     * @return the map
+     * @param <T>
+     * @param sortedList
+     * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
     public static <T> Map<Percentage, T> percentiles(final List<T> sortedList) {
@@ -35752,8 +35752,8 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param obj the obj
-     * @return the string
+     * @param obj
+     * @return
      */
     public static String toJSON(final Object obj) {
         return Utils.jsonParser.serialize(obj, Utils.jsc);
@@ -35762,9 +35762,9 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param obj the obj
-     * @param prettyFormat the pretty format
-     * @return the string
+     * @param obj
+     * @param prettyFormat
+     * @return
      */
     public static String toJSON(final Object obj, final boolean prettyFormat) {
         return Utils.jsonParser.serialize(obj, prettyFormat ? Utils.jscPrettyFormat : Utils.jsc);
@@ -35773,9 +35773,9 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param obj the obj
-     * @param config the config
-     * @return the string
+     * @param obj
+     * @param config
+     * @return
      */
     public static String toJSON(final Object obj, final JSONSerializationConfig config) {
         return Utils.jsonParser.serialize(obj, config);
@@ -35784,8 +35784,8 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param file the file
-     * @param obj the obj
+     * @param file
+     * @param obj
      */
     public static void toJSON(final File file, final Object obj) {
         Utils.jsonParser.serialize(file, obj);
@@ -35794,9 +35794,9 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param file the file
-     * @param obj the obj
-     * @param config the config
+     * @param file
+     * @param obj
+     * @param config
      */
     public static void toJSON(final File file, final Object obj, final JSONSerializationConfig config) {
         Utils.jsonParser.serialize(file, obj, config);
@@ -35805,8 +35805,8 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param os the os
-     * @param obj the obj
+     * @param os
+     * @param obj
      */
     public static void toJSON(final OutputStream os, final Object obj) {
         Utils.jsonParser.serialize(os, obj);
@@ -35815,9 +35815,9 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param os the os
-     * @param obj the obj
-     * @param config the config
+     * @param os
+     * @param obj
+     * @param config
      */
     public static void toJSON(final OutputStream os, final Object obj, final JSONSerializationConfig config) {
         Utils.jsonParser.serialize(os, obj, config);
@@ -35826,8 +35826,8 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param writer the writer
-     * @param obj the obj
+     * @param writer
+     * @param obj
      */
     public static void toJSON(final Writer writer, final Object obj) {
         Utils.jsonParser.serialize(writer, obj);
@@ -35836,9 +35836,9 @@ public final class N {
     /**
      * To JSON.
      *
-     * @param writer the writer
-     * @param obj the obj
-     * @param config the config
+     * @param writer
+     * @param obj
+     * @param config
      */
     public static void toJSON(final Writer writer, final Object obj, final JSONSerializationConfig config) {
         Utils.jsonParser.serialize(writer, obj, config);
@@ -35847,10 +35847,10 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final String json) {
         return Utils.jsonParser.deserialize(targetClass, json);
@@ -35859,11 +35859,11 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetClass, json, config);
@@ -35872,10 +35872,10 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final File json) {
         return Utils.jsonParser.deserialize(targetClass, json);
@@ -35884,11 +35884,11 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final File json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetClass, json, config);
@@ -35897,10 +35897,10 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final InputStream json) {
         return Utils.jsonParser.deserialize(targetClass, json);
@@ -35909,11 +35909,11 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final InputStream json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetClass, json, config);
@@ -35922,10 +35922,10 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final Reader json) {
         return Utils.jsonParser.deserialize(targetClass, json);
@@ -35934,11 +35934,11 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final Reader json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetClass, json, config);
@@ -35947,12 +35947,12 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final int fromIndex, final int toIndex) {
         return Utils.jsonParser.deserialize(targetClass, json, fromIndex, toIndex);
@@ -35961,13 +35961,13 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param json the json
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final int fromIndex, final int toIndex,
             final JSONDeserializationConfig config) {
@@ -35977,10 +35977,10 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @return the t
+     * @param json
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final String json) {
         return fromJSON(targetType, json, null);
@@ -35989,11 +35989,11 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @param config the config
-     * @return the t
+     * @param json
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
@@ -36002,10 +36002,10 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @return the t
+     * @param json
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final File json) {
         return fromJSON(targetType, json, null);
@@ -36014,11 +36014,11 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @param config the config
-     * @return the t
+     * @param json
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final File json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
@@ -36027,10 +36027,10 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @return the t
+     * @param json
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final InputStream json) {
         return fromJSON(targetType, json, null);
@@ -36039,11 +36039,11 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @param config the config
-     * @return the t
+     * @param json
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final InputStream json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
@@ -36052,10 +36052,10 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @return the t
+     * @param json
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final Reader json) {
         return fromJSON(targetType, json, null);
@@ -36064,11 +36064,11 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @param config the config
-     * @return the t
+     * @param json
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final Reader json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
@@ -36077,12 +36077,12 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the t
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final int fromIndex, final int toIndex) {
         return fromJSON(targetType, json, fromIndex, toIndex, null);
@@ -36091,13 +36091,13 @@ public final class N {
     /**
      * From JSON.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param json the json
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param config the config
-     * @return the t
+     * @param json
+     * @param fromIndex
+     * @param toIndex
+     * @param config
+     * @return
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final int fromIndex, final int toIndex,
             final JSONDeserializationConfig config) {
@@ -36107,8 +36107,8 @@ public final class N {
     /**
      * Format JSON.
      *
-     * @param json the json
-     * @return the string
+     * @param json
+     * @return
      */
     public static String formatJSON(final String json) {
         return formatJSON(Object.class, json);
@@ -36117,9 +36117,9 @@ public final class N {
     /**
      * Format JSON.
      *
-     * @param type the type
-     * @param json the json
-     * @return the string
+     * @param type
+     * @param json
+     * @return
      */
     public static String formatJSON(final Class<?> type, final String json) {
         return toJSON(fromJSON(type, json), Utils.jscPrettyFormat);
@@ -36128,9 +36128,9 @@ public final class N {
     /**
      * Format JSON.
      *
-     * @param type the type
-     * @param json the json
-     * @return the string
+     * @param type
+     * @param json
+     * @return
      */
     public static String formatJSON(final Type<?> type, final String json) {
         return toJSON(fromJSON(type, json), Utils.jscPrettyFormat);
@@ -36139,8 +36139,8 @@ public final class N {
     /**
      * To XML.
      *
-     * @param obj the obj
-     * @return the string
+     * @param obj
+     * @return
      */
     public static String toXML(final Object obj) {
         return Utils.xmlParser.serialize(obj);
@@ -36149,9 +36149,9 @@ public final class N {
     /**
      * To XML.
      *
-     * @param obj the obj
-     * @param prettyFormat the pretty format
-     * @return the string
+     * @param obj
+     * @param prettyFormat
+     * @return
      */
     public static String toXML(final Object obj, final boolean prettyFormat) {
         return Utils.xmlParser.serialize(obj, prettyFormat ? Utils.xscPrettyFormat : Utils.xsc);
@@ -36160,9 +36160,9 @@ public final class N {
     /**
      * To XML.
      *
-     * @param obj the obj
-     * @param config the config
-     * @return the string
+     * @param obj
+     * @param config
+     * @return
      */
     public static String toXML(final Object obj, final XMLSerializationConfig config) {
         return Utils.xmlParser.serialize(obj, config);
@@ -36171,8 +36171,8 @@ public final class N {
     /**
      * To XML.
      *
-     * @param file the file
-     * @param obj the obj
+     * @param file
+     * @param obj
      */
     public static void toXML(final File file, final Object obj) {
         Utils.xmlParser.serialize(file, obj);
@@ -36181,9 +36181,9 @@ public final class N {
     /**
      * To XML.
      *
-     * @param file the file
-     * @param obj the obj
-     * @param config the config
+     * @param file
+     * @param obj
+     * @param config
      */
     public static void toXML(final File file, final Object obj, final XMLSerializationConfig config) {
         Utils.xmlParser.serialize(file, obj, config);
@@ -36192,8 +36192,8 @@ public final class N {
     /**
      * To XML.
      *
-     * @param os the os
-     * @param obj the obj
+     * @param os
+     * @param obj
      */
     public static void toXML(final OutputStream os, final Object obj) {
         Utils.xmlParser.serialize(os, obj);
@@ -36202,9 +36202,9 @@ public final class N {
     /**
      * To XML.
      *
-     * @param os the os
-     * @param obj the obj
-     * @param config the config
+     * @param os
+     * @param obj
+     * @param config
      */
     public static void toXML(final OutputStream os, final Object obj, final XMLSerializationConfig config) {
         Utils.xmlParser.serialize(os, obj, config);
@@ -36213,8 +36213,8 @@ public final class N {
     /**
      * To XML.
      *
-     * @param writer the writer
-     * @param obj the obj
+     * @param writer
+     * @param obj
      */
     public static void toXML(final Writer writer, final Object obj) {
         Utils.xmlParser.serialize(writer, obj);
@@ -36223,9 +36223,9 @@ public final class N {
     /**
      * To XML.
      *
-     * @param writer the writer
-     * @param obj the obj
-     * @param config the config
+     * @param writer
+     * @param obj
+     * @param config
      */
     public static void toXML(final Writer writer, final Object obj, final XMLSerializationConfig config) {
         Utils.xmlParser.serialize(writer, obj, config);
@@ -36234,10 +36234,10 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param xml the xml
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param xml
+     * @return
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final String xml) {
         return Utils.xmlParser.deserialize(targetClass, xml);
@@ -36246,11 +36246,11 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param xml the xml
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param xml
+     * @param config
+     * @return
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final String xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetClass, xml, config);
@@ -36259,10 +36259,10 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param xml the xml
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param xml
+     * @return
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final File xml) {
         return Utils.xmlParser.deserialize(targetClass, xml);
@@ -36271,11 +36271,11 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param xml the xml
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param xml
+     * @param config
+     * @return
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final File xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetClass, xml, config);
@@ -36284,10 +36284,10 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param xml the xml
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param xml
+     * @return
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final InputStream xml) {
         return Utils.xmlParser.deserialize(targetClass, xml);
@@ -36296,11 +36296,11 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param xml the xml
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param xml
+     * @param config
+     * @return
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final InputStream xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetClass, xml, config);
@@ -36309,10 +36309,10 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param xml the xml
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param xml
+     * @return
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final Reader xml) {
         return Utils.xmlParser.deserialize(targetClass, xml);
@@ -36321,11 +36321,11 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param xml the xml
-     * @param config the config
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param xml
+     * @param config
+     * @return
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final Reader xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetClass, xml, config);
@@ -36334,10 +36334,10 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param xml the xml
-     * @return the t
+     * @param xml
+     * @return
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final String xml) {
         return fromJSON(targetType, xml, null);
@@ -36346,11 +36346,11 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param xml the xml
-     * @param config the config
-     * @return the t
+     * @param xml
+     * @param config
+     * @return
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final String xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
@@ -36359,10 +36359,10 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param xml the xml
-     * @return the t
+     * @param xml
+     * @return
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final File xml) {
         return fromJSON(targetType, xml, null);
@@ -36371,11 +36371,11 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param xml the xml
-     * @param config the config
-     * @return the t
+     * @param xml
+     * @param config
+     * @return
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final File xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
@@ -36384,10 +36384,10 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param xml the xml
-     * @return the t
+     * @param xml
+     * @return
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final InputStream xml) {
         return fromJSON(targetType, xml, null);
@@ -36396,11 +36396,11 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param xml the xml
-     * @param config the config
-     * @return the t
+     * @param xml
+     * @param config
+     * @return
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final InputStream xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
@@ -36409,10 +36409,10 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param xml the xml
-     * @return the t
+     * @param xml
+     * @return
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final Reader xml) {
         return fromJSON(targetType, xml, null);
@@ -36421,11 +36421,11 @@ public final class N {
     /**
      * From XML.
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
-     * @param xml the xml
-     * @param config the config
-     * @return the t
+     * @param xml
+     * @param config
+     * @return
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final Reader xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
@@ -36434,11 +36434,11 @@ public final class N {
     /**
      * Sets the config.
      *
-     * @param <C> the generic type
-     * @param targetType the target type
-     * @param config the config
-     * @param isJSON the is JSON
-     * @return the c
+     * @param <C>
+     * @param targetType
+     * @param config
+     * @param isJSON
+     * @return
      */
     private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, boolean isJSON) {
         C res = config;
@@ -36468,8 +36468,8 @@ public final class N {
     /**
      * Xml 2 JSON.
      *
-     * @param xml the xml
-     * @return the string
+     * @param xml
+     * @return
      */
     public static String xml2JSON(final String xml) {
         return xml2JSON(Map.class, xml);
@@ -36478,9 +36478,9 @@ public final class N {
     /**
      * Xml 2 JSON.
      *
-     * @param cls the cls
-     * @param xml the xml
-     * @return the string
+     * @param cls
+     * @param xml
+     * @return
      */
     public static String xml2JSON(final Class<?> cls, final String xml) {
         return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(cls, xml), Utils.jsc);
@@ -36489,8 +36489,8 @@ public final class N {
     /**
      * Json 2 XML.
      *
-     * @param json the json
-     * @return the string
+     * @param json
+     * @return
      */
     public static String json2XML(final String json) {
         return json2XML(Map.class, json);
@@ -36499,9 +36499,9 @@ public final class N {
     /**
      * Json 2 XML.
      *
-     * @param cls the cls
-     * @param json the json
-     * @return the string
+     * @param cls
+     * @param json
+     * @return
      */
     public static String json2XML(final Class<?> cls, final String json) {
         return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(cls, json));
@@ -36510,10 +36510,10 @@ public final class N {
     /**
      * Execute.
      *
-     * @param cmd the cmd
-     * @param retryTimes the retry times
-     * @param retryInterval the retry interval
-     * @param retryCondition the retry condition
+     * @param cmd
+     * @param retryTimes
+     * @param retryInterval
+     * @param retryCondition
      */
     public static void execute(final Try.Runnable<? extends Exception> cmd, final int retryTimes, final long retryInterval,
             final Predicate<? super Exception> retryCondition) {
@@ -36527,12 +36527,12 @@ public final class N {
     /**
      * Execute.
      *
-     * @param <T> the generic type
-     * @param cmd the cmd
-     * @param retryTimes the retry times
-     * @param retryInterval the retry interval
-     * @param retryCondition the retry condition
-     * @return the t
+     * @param <T>
+     * @param cmd
+     * @param retryTimes
+     * @param retryInterval
+     * @param retryCondition
+     * @return
      */
     public static <T> T execute(final Callable<T> cmd, final int retryTimes, final long retryInterval,
             final BiPredicate<? super T, ? super Exception> retryCondition) {
@@ -36547,8 +36547,8 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param command the command
-     * @return the continuable future
+     * @param command
+     * @return
      */
     public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command) {
         return asyncExecutor.execute(command);
@@ -36557,9 +36557,9 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param command the command
-     * @param delayInMillis the delay in millis
-     * @return the continuable future
+     * @param command
+     * @param delayInMillis
+     * @return
      */
     public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command, final long delayInMillis) {
         return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(FN.toCallable(command), delayInMillis, TimeUnit.MILLISECONDS));
@@ -36568,8 +36568,8 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param commands the commands
-     * @return the list
+     * @param commands
+     * @return
      */
     @SafeVarargs
     public static List<ContinuableFuture<Void>> asyncExecute(final Try.Runnable<? extends Exception>... commands) {
@@ -36579,8 +36579,8 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param commands the commands
-     * @return the list
+     * @param commands
+     * @return
      */
     public static List<ContinuableFuture<Void>> asyncExecute(final List<? extends Try.Runnable<? extends Exception>> commands) {
         return asyncExecutor.execute(commands);
@@ -36589,9 +36589,9 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param <T> the generic type
-     * @param command the command
-     * @return the continuable future
+     * @param <T>
+     * @param command
+     * @return
      */
     public static <T> ContinuableFuture<T> asyncExecute(final Callable<T> command) {
         return asyncExecutor.execute(command);
@@ -36600,10 +36600,10 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param <T> the generic type
-     * @param command the command
-     * @param delayInMillis the delay in millis
-     * @return the continuable future
+     * @param <T>
+     * @param command
+     * @param delayInMillis
+     * @return
      */
     public static <T> ContinuableFuture<T> asyncExecute(final Callable<T> command, final long delayInMillis) {
         return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(command, delayInMillis, TimeUnit.MILLISECONDS));
@@ -36612,9 +36612,9 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param <T> the generic type
-     * @param commands the commands
-     * @return the list
+     * @param <T>
+     * @param commands
+     * @return
      */
     @SafeVarargs
     public static <T> List<ContinuableFuture<T>> asyncExecute(final Callable<T>... commands) {
@@ -36624,9 +36624,9 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param <T> the generic type
-     * @param commands the commands
-     * @return the list
+     * @param <T>
+     * @param commands
+     * @return
      */
     public static <T> List<ContinuableFuture<T>> asyncExecute(final Collection<? extends Callable<T>> commands) {
         return asyncExecutor.execute(commands);
@@ -36635,11 +36635,11 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param cmd the cmd
-     * @param retryTimes the retry times
-     * @param retryIntervalInMillis the retry interval in millis
-     * @param retryCondition the retry condition
-     * @return the continuable future
+     * @param cmd
+     * @param retryTimes
+     * @param retryIntervalInMillis
+     * @param retryCondition
+     * @return
      */
     public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervalInMillis,
             final Predicate<? super Exception> retryCondition) {
@@ -36655,12 +36655,12 @@ public final class N {
     /**
      * Async execute.
      *
-     * @param <T> the generic type
-     * @param cmd the cmd
-     * @param retryTimes the retry times
-     * @param retryIntervalInMillis the retry interval in millis
-     * @param retryCondition the retry condition
-     * @return the continuable future
+     * @param <T>
+     * @param cmd
+     * @param retryTimes
+     * @param retryIntervalInMillis
+     * @param retryCondition
+     * @return
      */
     public static <T> ContinuableFuture<T> asyncExecute(final Callable<T> cmd, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super T, ? super Exception> retryCondition) {
@@ -36676,16 +36676,17 @@ public final class N {
     /**
      * To runtime exception.
      *
-     * @param e the e
-     * @return the runtime exception
+     * @param e
+     * @return
      */
     public static RuntimeException toRuntimeException(Throwable e) {
         return ExceptionUtil.toRuntimeException(e);
     }
+
     /**
      * Sleep.
      *
-     * @param timeoutInMillis the timeout in millis
+     * @param timeoutInMillis
      */
     public static void sleep(final long timeoutInMillis) {
         if (timeoutInMillis <= 0) {
@@ -36702,8 +36703,8 @@ public final class N {
     /**
      * Sleep.
      *
-     * @param timeout the timeout
-     * @param unit the unit
+     * @param timeout
+     * @param unit
      */
     public static void sleep(final long timeout, final TimeUnit unit) {
         N.checkArgNotNull(unit, "unit");
@@ -36727,7 +36728,7 @@ public final class N {
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      *
-     * @param timeoutInMillis the timeout in millis
+     * @param timeoutInMillis
      */
     public static void sleepUninterruptibly(final long timeoutInMillis) {
         if (timeoutInMillis <= 0) {
@@ -36766,8 +36767,8 @@ public final class N {
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      *
-     * @param timeout the timeout
-     * @param unit the unit
+     * @param timeout
+     * @param unit
      */
     public static void sleepUninterruptibly(final long timeout, final TimeUnit unit) {
         N.checkArgNotNull(unit, "unit");
@@ -36808,7 +36809,7 @@ public final class N {
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      *
-     * @param cmd the cmd
+     * @param cmd
      */
     public static void runUninterruptibly(final Try.Runnable<InterruptedException> cmd) {
         N.checkArgNotNull(cmd);
@@ -36839,8 +36840,8 @@ public final class N {
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      *
-     * @param timeoutInMillis the timeout in millis
-     * @param cmd the cmd
+     * @param timeoutInMillis
+     * @param cmd
      */
     public static void runUninterruptibly(final long timeoutInMillis, final Try.LongConsumer<InterruptedException> cmd) {
         N.checkArgNotNull(cmd);
@@ -36876,9 +36877,9 @@ public final class N {
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      *
-     * @param timeout the timeout
-     * @param unit the unit
-     * @param cmd the cmd
+     * @param timeout
+     * @param unit
+     * @param cmd
      */
     public static void runUninterruptibly(final long timeout, final TimeUnit unit, final Try.BiConsumer<Long, TimeUnit, InterruptedException> cmd) {
         N.checkArgNotNull(unit, "unit");
@@ -36915,9 +36916,9 @@ public final class N {
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      *
-     * @param <T> the generic type
-     * @param cmd the cmd
-     * @return the t
+     * @param <T>
+     * @param cmd
+     * @return
      */
     public static <T> T callUninterruptibly(Try.Callable<T, InterruptedException> cmd) {
         N.checkArgNotNull(cmd);
@@ -36946,10 +36947,10 @@ public final class N {
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      *
-     * @param <T> the generic type
-     * @param timeoutInMillis the timeout in millis
-     * @param cmd the cmd
-     * @return the t
+     * @param <T>
+     * @param timeoutInMillis
+     * @param cmd
+     * @return
      */
     public static <T> T callUninterruptibly(final long timeoutInMillis, final Try.LongFunction<T, InterruptedException> cmd) {
         N.checkArgNotNull(cmd);
@@ -36984,11 +36985,11 @@ public final class N {
      * If a thread is interrupted during such a call, the call continues to block until the result is available or the
      * timeout elapses, and only then re-interrupts the thread.
      *
-     * @param <T> the generic type
-     * @param timeout the timeout
-     * @param unit the unit
-     * @param cmd the cmd
-     * @return the t
+     * @param <T>
+     * @param timeout
+     * @param unit
+     * @param cmd
+     * @return
      */
     public static <T> T callUninterruptibly(final long timeout, final TimeUnit unit, final Try.BiFunction<Long, TimeUnit, T, InterruptedException> cmd) {
         N.checkArgNotNull(unit, "unit");
@@ -37019,9 +37020,9 @@ public final class N {
     /**
      * Println.
      *
-     * @param <T> the generic type
-     * @param obj the obj
-     * @return the input <code>obj</code>
+     * @param <T>
+     * @param obj
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> T println(final T obj) {
@@ -37039,10 +37040,10 @@ public final class N {
     /**
      * Fprintln.
      *
-     * @param <T> the generic type
-     * @param format the format
-     * @param args the args
-     * @return the input <code>args</code>
+     * @param <T>
+     * @param format
+     * @param args
+     * @return
      */
     @SafeVarargs
     public static <T> T[] fprintln(final String format, final T... args) {
@@ -37055,7 +37056,7 @@ public final class N {
      * Returns the value of the {@code long} argument; throwing an exception if the value overflows an {@code int}.
      *
      * @param value the long value
-     * @return the argument as an int
+     * @return
      * @throws ArithmeticException if the {@code argument} overflows an int
      */
     public static int toIntExact(long value) {
@@ -37070,10 +37071,10 @@ public final class N {
      * Returns an empty <code>Nullable</code> if {@code val} is {@code null} while {@code targetType} is primitive or can not be assigned to {@code targetType}.
      * Please be aware that {@code null} can be assigned to any {@code Object} type except primitive types: {@code boolean/char/byte/short/int/long/double}.
      *
-     * @param <T> the generic type
-     * @param val the val
-     * @param targetType the target type
-     * @return the nullable
+     * @param <T>
+     * @param val
+     * @param targetType
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> Nullable<T> castIfAssignable(final Object val, final Class<T> targetType) {
@@ -37087,9 +37088,9 @@ public final class N {
     /**
      * Returns a {@code Nullable} with the value returned by {@code action} or an empty {@code Nullable} if exception happens.
      *
-     * @param <R> the generic type
-     * @param cmd the cmd
-     * @return the nullable
+     * @param <R>
+     * @param cmd
+     * @return
      */
     public static <R> Nullable<R> tryOrEmpty(final Callable<R> cmd) {
         try {
@@ -37102,12 +37103,12 @@ public final class N {
     /**
      * Returns a {@code Nullable} with the value returned by {@code func.apply(init)} or an empty {@code Nullable} if exception happens.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param init the init
-     * @param func the func
-     * @return the nullable
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param init
+     * @param func
+     * @return
      */
     public static <T, R, E extends Exception> Nullable<R> tryOrEmpty(final T init, final Try.Function<? super T, R, E> func) {
         try {
@@ -37121,11 +37122,11 @@ public final class N {
      * Returns a {@code Nullable} with value got from the specified {@code supplier} if {@code b} is {@code true},
      * otherwise returns an empty {@code Nullable} if {@code b} is false.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param supplier the supplier
-     * @return the nullable
+     * @param <R>
+     * @param <E>
+     * @param b
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <R, E extends Exception> Nullable<R> ifOrEmpty(final boolean b, final Try.Supplier<R, E> supplier) throws E {
@@ -37140,13 +37141,13 @@ public final class N {
      * Returns a {@code Nullable} with value returned by {@code func.apply(init)} if {@code b} is {@code true},
      * otherwise returns an empty {@code Nullable} if {@code b} is false.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param b the b
-     * @param init the init
-     * @param func the func
-     * @return the nullable
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param b
+     * @param init
+     * @param func
+     * @return
      * @throws E the e
      */
     public static <T, R, E extends Exception> Nullable<R> ifOrEmpty(final boolean b, final T init, final Try.Function<? super T, R, E> func) throws E {
@@ -37160,9 +37161,9 @@ public final class N {
     /**
      * If or else.
      *
-     * @param <E1> the generic type
-     * @param <E2> the generic type
-     * @param b the b
+     * @param <E1>
+     * @param <E2>
+     * @param b
      * @param actionForTrue do nothing if it's {@code null} even {@code b} is true.
      * @param actionForFalse do nothing if it's {@code null} even {@code b} is false.
      * @throws E1 the e1
@@ -37184,11 +37185,11 @@ public final class N {
     /**
      * If or else.
      *
-     * @param <T> the generic type
-     * @param <E1> the generic type
-     * @param <E2> the generic type
-     * @param b the b
-     * @param init the init
+     * @param <T>
+     * @param <E1>
+     * @param <E2>
+     * @param b
+     * @param init
      * @param actionForTrue do nothing if it's {@code null} even {@code b} is true.
      * @param actionForFalse do nothing if it's {@code null} even {@code b} is false.
      * @throws E1 the e1
@@ -37210,9 +37211,9 @@ public final class N {
     /**
      * Iterate.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @return
      * @see Iterators#concat(Object[]...)
      */
     @SafeVarargs
@@ -37223,9 +37224,9 @@ public final class N {
     /**
      * Iterate.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the obj iterator
+     * @param <T>
+     * @param a
+     * @return
      * @see Iterators#concat(Collection)
      */
     @SafeVarargs
@@ -37236,9 +37237,9 @@ public final class N {
     /**
      * Iterate.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the obj iterator
+     * @param <T>
+     * @param c
+     * @return
      * @see Iterators#concatt(Collection)
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Collection<? extends T>> c) {
@@ -37248,8 +37249,8 @@ public final class N {
     /**
      * Disjoint.
      *
-     * @param a the a
-     * @param b the b
+     * @param a
+     * @param b
      * @return true, if successful
      */
     public static boolean disjoint(final Object[] a, final Object[] b) {
@@ -37263,8 +37264,8 @@ public final class N {
     /**
      * Returns {@code true} if the two specified arrays have no elements in common.
      *
-     * @param c1 the c 1
-     * @param c2 the c 2
+     * @param c1
+     * @param c2
      * @return {@code true} if the two specified arrays have no elements in common.
      * @see Collections#disjoint(Collection, Collection)
      */
@@ -37293,12 +37294,12 @@ public final class N {
     /**
      * Merge.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param nextSelector the next selector
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param nextSelector
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b, final Try.BiFunction<? super T, ? super T, Nth, E> nextSelector) throws E {
@@ -37336,12 +37337,12 @@ public final class N {
     /**
      * Merge.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param nextSelector the next selector
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param nextSelector
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> merge(final Collection<? extends T> a, final Collection<? extends T> b,
@@ -37411,14 +37412,14 @@ public final class N {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final Try.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
@@ -37439,14 +37440,14 @@ public final class N {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final Collection<A> a, final Collection<B> b,
@@ -37470,16 +37471,16 @@ public final class N {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c,
@@ -37501,16 +37502,16 @@ public final class N {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c,
@@ -37535,16 +37536,16 @@ public final class N {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
@@ -37564,16 +37565,16 @@ public final class N {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final Collection<A> a, final Collection<B> b, final A valueForNoneA, final B valueForNoneB,
@@ -37595,19 +37596,19 @@ public final class N {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param valueForNoneC the value for none C
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
@@ -37628,19 +37629,19 @@ public final class N {
     /**
      * Zip.
      *
-     * @param <A> the generic type
-     * @param <B> the generic type
-     * @param <C> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param c the c
-     * @param valueForNoneA the value for none A
-     * @param valueForNoneB the value for none B
-     * @param valueForNoneC the value for none C
-     * @param zipFunction the zip function
-     * @return the list
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c, final A valueForNoneA,
@@ -37665,13 +37666,13 @@ public final class N {
     /**
      * Unzip.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
+     * @param <T>
+     * @param <L>
+     * @param <R>
+     * @param <E>
+     * @param c
      * @param unzip the second parameter is an output parameter.
-     * @return the pair
+     * @return
      * @throws E the e
      */
     public static <T, L, R, E extends Exception> Pair<List<L>, List<R>> unzip(final Collection<? extends T> c,
@@ -37697,16 +37698,16 @@ public final class N {
     /**
      * Unzip.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
-     * @param <R> the generic type
-     * @param <LC> the generic type
-     * @param <RC> the generic type
-     * @param <E> the element type
-     * @param c the c
+     * @param <T>
+     * @param <L>
+     * @param <R>
+     * @param <LC>
+     * @param <RC>
+     * @param <E>
+     * @param c
      * @param unzip the second parameter is an output parameter.
-     * @param supplier the supplier
-     * @return the pair
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, L, R, LC extends Collection<L>, RC extends Collection<R>, E extends Exception> Pair<LC, RC> unzip(final Collection<? extends T> c,
@@ -37732,14 +37733,14 @@ public final class N {
     /**
      * Unzipp.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
-     * @param <M> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
+     * @param <T>
+     * @param <L>
+     * @param <M>
+     * @param <R>
+     * @param <E>
+     * @param c
      * @param unzip the second parameter is an output parameter.
-     * @return the triple
+     * @return
      * @throws E the e
      */
     public static <T, L, M, R, E extends Exception> Triple<List<L>, List<M>, List<R>> unzipp(final Collection<? extends T> c,
@@ -37767,18 +37768,18 @@ public final class N {
     /**
      * Unzipp.
      *
-     * @param <T> the generic type
-     * @param <L> the generic type
-     * @param <M> the generic type
-     * @param <R> the generic type
-     * @param <LC> the generic type
-     * @param <MC> the generic type
-     * @param <RC> the generic type
-     * @param <E> the element type
-     * @param c the c
+     * @param <T>
+     * @param <L>
+     * @param <M>
+     * @param <R>
+     * @param <LC>
+     * @param <MC>
+     * @param <RC>
+     * @param <E>
+     * @param c
      * @param unzip the second parameter is an output parameter.
-     * @param supplier the supplier
-     * @return the triple
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, L, M, R, LC extends Collection<L>, MC extends Collection<M>, RC extends Collection<R>, E extends Exception> Triple<LC, MC, RC> unzipp(
@@ -37807,9 +37808,9 @@ public final class N {
     /**
      * Creates the mask.
      *
-     * @param <T> the generic type
-     * @param interfaceClass the interface class
-     * @return the t
+     * @param <T>
+     * @param interfaceClass
+     * @return
      */
     static <T> T createMask(final Class<T> interfaceClass) {
         InvocationHandler h = new InvocationHandler() {
@@ -37839,7 +37840,7 @@ public final class N {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -37849,7 +37850,7 @@ public final class N {
         /**
          * Read resolve.
          *
-         * @return the object
+         * @return
          */
         private Object readResolve() {
             return NULL_MASK;

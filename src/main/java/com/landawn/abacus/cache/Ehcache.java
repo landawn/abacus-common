@@ -38,7 +38,7 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     /**
      * Instantiates a new ehcache.
      *
-     * @param cache the cache
+     * @param cache
      */
     public Ehcache(Cache<K, V> cache) {
         this.cacheImpl = cache;
@@ -47,8 +47,8 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     /**
      * Gets the t.
      *
-     * @param k the k
-     * @return the t
+     * @param k
+     * @return
      */
     @Override
     public V gett(K k) {
@@ -60,10 +60,10 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     /**
      * Put.
      *
-     * @param k the k
-     * @param v the v
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
+     * @param k
+     * @param v
+     * @param liveTime
+     * @param maxIdleTime
      * @return true, if successful
      */
     @Override
@@ -78,7 +78,7 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     /**
      * Removes the.
      *
-     * @param k the k
+     * @param k
      */
     @Override
     public void remove(K k) {
@@ -90,7 +90,7 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     /**
      * Contains key.
      *
-     * @param k the k
+     * @param k
      * @return true, if successful
      */
     @Override
@@ -103,7 +103,7 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -113,7 +113,7 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {

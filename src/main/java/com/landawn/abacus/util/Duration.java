@@ -40,7 +40,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Instantiates a new duration.
      *
-     * @param milliseconds the milliseconds
+     * @param milliseconds
      */
     Duration(long milliseconds) {
         this.milliseconds = milliseconds;
@@ -49,8 +49,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Creates the.
      *
-     * @param milliseconds the milliseconds
-     * @return the duration
+     * @param milliseconds
+     * @return
      */
     private static Duration create(long milliseconds) {
         if (milliseconds == 0) {
@@ -63,8 +63,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Of days.
      *
-     * @param days the days
-     * @return the duration
+     * @param days
+     * @return
      */
     public static Duration ofDays(long days) {
         return create(Matth.multiplyExact(days, MILLIS_PER_DAY));
@@ -73,8 +73,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Of hours.
      *
-     * @param hours the hours
-     * @return the duration
+     * @param hours
+     * @return
      */
     public static Duration ofHours(long hours) {
         return create(Matth.multiplyExact(hours, MILLIS_PER_HOUR));
@@ -83,8 +83,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Of minutes.
      *
-     * @param minutes the minutes
-     * @return the duration
+     * @param minutes
+     * @return
      */
     public static Duration ofMinutes(long minutes) {
         return create(Matth.multiplyExact(minutes, MILLIS_PER_MINUTE));
@@ -93,8 +93,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Of seconds.
      *
-     * @param seconds the seconds
-     * @return the duration
+     * @param seconds
+     * @return
      */
     public static Duration ofSeconds(long seconds) {
         return create(Matth.multiplyExact(seconds, MILLIS_PER_SECOND));
@@ -103,8 +103,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Of millis.
      *
-     * @param millis the millis
-     * @return the duration
+     * @param millis
+     * @return
      */
     public static Duration ofMillis(long millis) {
         return create(millis);
@@ -131,8 +131,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Plus.
      *
-     * @param duration the duration
-     * @return the duration
+     * @param duration
+     * @return
      */
     public Duration plus(Duration duration) {
         return plusMillis(duration.milliseconds);
@@ -141,8 +141,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Plus days.
      *
-     * @param daysToAdd the days to add
-     * @return the duration
+     * @param daysToAdd
+     * @return
      */
     public Duration plusDays(long daysToAdd) {
         return plusMillis(Matth.multiplyExact(daysToAdd, MILLIS_PER_DAY));
@@ -151,8 +151,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Plus hours.
      *
-     * @param hoursToAdd the hours to add
-     * @return the duration
+     * @param hoursToAdd
+     * @return
      */
     public Duration plusHours(long hoursToAdd) {
         return plusMillis(Matth.multiplyExact(hoursToAdd, MILLIS_PER_HOUR));
@@ -161,8 +161,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Plus minutes.
      *
-     * @param minutesToAdd the minutes to add
-     * @return the duration
+     * @param minutesToAdd
+     * @return
      */
     public Duration plusMinutes(long minutesToAdd) {
         return plusMillis(Matth.multiplyExact(minutesToAdd, MILLIS_PER_MINUTE));
@@ -171,8 +171,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Plus seconds.
      *
-     * @param secondsToAdd the seconds to add
-     * @return the duration
+     * @param secondsToAdd
+     * @return
      */
     public Duration plusSeconds(long secondsToAdd) {
         return plusMillis(Matth.multiplyExact(secondsToAdd, MILLIS_PER_SECOND));
@@ -181,8 +181,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Plus millis.
      *
-     * @param millisToAdd the millis to add
-     * @return the duration
+     * @param millisToAdd
+     * @return
      */
     public Duration plusMillis(long millisToAdd) {
         if (millisToAdd == 0) {
@@ -195,8 +195,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Minus.
      *
-     * @param duration the duration
-     * @return the duration
+     * @param duration
+     * @return
      */
     public Duration minus(Duration duration) {
         return minusMillis(duration.milliseconds);
@@ -205,8 +205,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Minus days.
      *
-     * @param daysToSubtract the days to subtract
-     * @return the duration
+     * @param daysToSubtract
+     * @return
      */
     public Duration minusDays(long daysToSubtract) {
         return minusMillis(Matth.multiplyExact(daysToSubtract, MILLIS_PER_DAY));
@@ -215,8 +215,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Minus hours.
      *
-     * @param hoursToSubtract the hours to subtract
-     * @return the duration
+     * @param hoursToSubtract
+     * @return
      */
     public Duration minusHours(long hoursToSubtract) {
         return minusMillis(Matth.multiplyExact(hoursToSubtract, MILLIS_PER_HOUR));
@@ -225,8 +225,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Minus minutes.
      *
-     * @param minutesToSubtract the minutes to subtract
-     * @return the duration
+     * @param minutesToSubtract
+     * @return
      */
     public Duration minusMinutes(long minutesToSubtract) {
         return minusMillis(Matth.multiplyExact(minutesToSubtract, MILLIS_PER_MINUTE));
@@ -235,8 +235,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Minus seconds.
      *
-     * @param secondsToSubtract the seconds to subtract
-     * @return the duration
+     * @param secondsToSubtract
+     * @return
      */
     public Duration minusSeconds(long secondsToSubtract) {
         return minusMillis(Matth.multiplyExact(secondsToSubtract, MILLIS_PER_SECOND));
@@ -245,8 +245,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Minus millis.
      *
-     * @param millisToSubtract the millis to subtract
-     * @return the duration
+     * @param millisToSubtract
+     * @return
      */
     public Duration minusMillis(long millisToSubtract) {
         if (millisToSubtract == 0) {
@@ -259,8 +259,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Multiplied by.
      *
-     * @param multiplicand the multiplicand
-     * @return the duration
+     * @param multiplicand
+     * @return
      */
     public Duration multipliedBy(long multiplicand) {
         if (multiplicand == 0) {
@@ -275,8 +275,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Divided by.
      *
-     * @param divisor the divisor
-     * @return the duration
+     * @param divisor
+     * @return
      */
     public Duration dividedBy(long divisor) {
         if (divisor == 0) {
@@ -291,7 +291,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Negated.
      *
-     * @return the duration
+     * @return
      */
     public Duration negated() {
         return multipliedBy(-1);
@@ -300,7 +300,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Abs.
      *
-     * @return the duration
+     * @return
      */
     public Duration abs() {
         return isNegative() ? negated() : this;
@@ -309,7 +309,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * To days.
      *
-     * @return the long
+     * @return
      */
     public long toDays() {
         return milliseconds / MILLIS_PER_DAY;
@@ -318,7 +318,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * To hours.
      *
-     * @return the long
+     * @return
      */
     public long toHours() {
         return milliseconds / MILLIS_PER_HOUR;
@@ -327,7 +327,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * To minutes.
      *
-     * @return the long
+     * @return
      */
     public long toMinutes() {
         return milliseconds / MILLIS_PER_MINUTE;
@@ -336,7 +336,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * To seconds.
      *
-     * @return the long
+     * @return
      */
     public long toSeconds() {
         return milliseconds / MILLIS_PER_SECOND;
@@ -345,7 +345,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * To millis.
      *
-     * @return the long
+     * @return
      */
     public long toMillis() {
         return milliseconds;
@@ -354,8 +354,8 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Compare to.
      *
-     * @param other the other
-     * @return the int
+     * @param other
+     * @return
      */
     @Override
     public int compareTo(Duration other) {
@@ -365,7 +365,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -380,7 +380,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -390,7 +390,7 @@ public final class Duration implements Comparable<Duration> {
     /**
      * To string.
      *
-     * @return the value as an ISO8601 string
+     * @return
      */
     @Override
     public String toString() {

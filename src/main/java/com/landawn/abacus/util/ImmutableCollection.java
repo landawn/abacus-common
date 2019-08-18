@@ -26,7 +26,7 @@ import com.landawn.abacus.util.stream.Stream;
  * The Class ImmutableCollection.
  *
  * @author Haiyang Li
- * @param <E> the element type
+ * @param <E>
  * @since 0.8
  */
 abstract class ImmutableCollection<E> extends AbstractCollection<E> {
@@ -37,7 +37,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Instantiates a new immutable collection.
      *
-     * @param c the c
+     * @param c
      */
     protected ImmutableCollection(Collection<? extends E> c) {
         this.coll = (Collection<E>) c;
@@ -46,7 +46,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -59,7 +59,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Adds the all.
      *
-     * @param newElements the new elements
+     * @param newElements
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -72,7 +72,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Removes the.
      *
-     * @param object the object
+     * @param object
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -85,7 +85,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Removes the if.
      *
-     * @param filter the filter
+     * @param filter
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -98,7 +98,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Removes the all.
      *
-     * @param oldElements the old elements
+     * @param oldElements
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -111,7 +111,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Retain all.
      *
-     * @param elementsToKeep the elements to keep
+     * @param elementsToKeep
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -135,7 +135,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Contains.
      *
-     * @param o the o
+     * @param o
      * @return true, if successful
      */
     @Override
@@ -146,7 +146,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Iterator.
      *
-     * @return the iterator
+     * @return
      */
     @Override
     public Iterator<E> iterator() {
@@ -156,7 +156,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -166,7 +166,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * To array.
      *
-     * @return the object[]
+     * @return
      */
     @Override
     public Object[] toArray() {
@@ -176,9 +176,9 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * To array.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the t[]
+     * @param <T>
+     * @param a
+     * @return
      */
     @Override
     public <T> T[] toArray(T[] a) {
@@ -188,7 +188,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Streamm.
      *
-     * @return the stream
+     * @return
      */
     public Stream<E> streamm() {
         return Stream.of(coll);
@@ -197,7 +197,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -208,7 +208,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -218,7 +218,7 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

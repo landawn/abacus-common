@@ -45,9 +45,9 @@ public final class CharTriple {
     /**
      * Instantiates a new char triple.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
      */
     CharTriple(char _1, char _2, char _3) {
         this._1 = _1;
@@ -58,10 +58,10 @@ public final class CharTriple {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @return the char triple
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @return
      */
     public static CharTriple of(char _1, char _2, char _3) {
         return new CharTriple(_1, _2, _3);
@@ -70,7 +70,7 @@ public final class CharTriple {
     /**
      * Min.
      *
-     * @return the char
+     * @return
      */
     public char min() {
         return N.min(_1, _2, _3);
@@ -79,7 +79,7 @@ public final class CharTriple {
     /**
      * Max.
      *
-     * @return the char
+     * @return
      */
     public char max() {
         return N.max(_1, _2, _3);
@@ -88,7 +88,7 @@ public final class CharTriple {
     /**
      * Median.
      *
-     * @return the char
+     * @return
      */
     public char median() {
         return N.median(_1, _2, _3);
@@ -97,7 +97,7 @@ public final class CharTriple {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return _1 + _2 + _3;
@@ -106,7 +106,7 @@ public final class CharTriple {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return (0d + _1 + _2 + _3) / 3;
@@ -115,7 +115,7 @@ public final class CharTriple {
     /**
      * Reversed.
      *
-     * @return the char triple
+     * @return
      */
     public CharTriple reversed() {
         return new CharTriple(_3, _2, _1);
@@ -124,7 +124,7 @@ public final class CharTriple {
     /**
      * To array.
      *
-     * @return the char[]
+     * @return
      */
     public char[] toArray() {
         return new char[] { _1, _2, _3 };
@@ -133,7 +133,7 @@ public final class CharTriple {
     /**
      * To list.
      *
-     * @return the char list
+     * @return
      */
     public CharList toList() {
         return CharList.of(_1, _2, _3);
@@ -142,8 +142,8 @@ public final class CharTriple {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.CharConsumer<E> comsumer) throws E {
@@ -155,8 +155,8 @@ public final class CharTriple {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<CharTriple, E> action) throws E {
@@ -166,10 +166,10 @@ public final class CharTriple {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<CharTriple, U, E> mapper) throws E {
@@ -179,9 +179,9 @@ public final class CharTriple {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<CharTriple> filter(Try.Predicate<CharTriple, E> predicate) throws E {
@@ -191,7 +191,7 @@ public final class CharTriple {
     /**
      * Stream.
      *
-     * @return the char stream
+     * @return
      */
     public CharStream stream() {
         return CharStream.of(_1, _2, _3);
@@ -200,7 +200,7 @@ public final class CharTriple {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -210,7 +210,7 @@ public final class CharTriple {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -228,7 +228,7 @@ public final class CharTriple {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

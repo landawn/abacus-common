@@ -50,8 +50,8 @@ public final class LoggerFactory {
     /**
      * Gets the logger.
      *
-     * @param clazz the clazz
-     * @return the logger
+     * @param clazz
+     * @return
      */
     public static synchronized Logger getLogger(Class<?> clazz) {
         return getLogger(clazz.getName());
@@ -60,8 +60,8 @@ public final class LoggerFactory {
     /**
      * Gets the logger.
      *
-     * @param name the name
-     * @return the logger
+     * @param name
+     * @return
      */
     public static synchronized Logger getLogger(String name) {
         Logger logger = namedLoggers.get(name);

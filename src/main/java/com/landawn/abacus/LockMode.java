@@ -108,7 +108,7 @@ public enum LockMode {
     /**
      * Constructor.
      *
-     * @param value the value
+     * @param value
      */
     private LockMode(int value) {
         intValue = value;
@@ -126,7 +126,7 @@ public enum LockMode {
     /**
      * Method valueOf.
      *
-     * @param intValue the int value
+     * @param intValue
      * @return LockMode
      */
     public static LockMode valueOf(int intValue) {
@@ -184,7 +184,7 @@ public enum LockMode {
     /**
      * Check if this {@code LockMode} is locked by the specified {@code byLockMode}.
      *
-     * @param lockMode the lock mode
+     * @param lockMode
      * @return boolean
      */
     public boolean isXLockOf(LockMode lockMode) {

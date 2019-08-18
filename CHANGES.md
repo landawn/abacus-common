@@ -1,3 +1,9 @@
+### 1.8.13
+
+* Improve Java Docs.
+* Improvements and bug fix.
+
+
 ### 1.8.12
 
 * Improve `JdbcUtil.Dao`.

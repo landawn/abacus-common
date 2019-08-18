@@ -42,8 +42,8 @@ public class ShortPair {
     /**
      * Instantiates a new short pair.
      *
-     * @param _1 the  1
-     * @param _2 the  2
+     * @param _1 the 1
+     * @param _2 the 2
      */
     ShortPair(short _1, short _2) {
         this._1 = _1;
@@ -53,9 +53,9 @@ public class ShortPair {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @return the short pair
+     * @param _1 the 1
+     * @param _2 the 2
+     * @return
      */
     public static ShortPair of(short _1, short _2) {
         return new ShortPair(_1, _2);
@@ -64,7 +64,7 @@ public class ShortPair {
     /**
      * Min.
      *
-     * @return the short
+     * @return
      */
     public short min() {
         return N.min(_1, _2);
@@ -73,7 +73,7 @@ public class ShortPair {
     /**
      * Max.
      *
-     * @return the short
+     * @return
      */
     public short max() {
         return N.max(_1, _2);
@@ -82,7 +82,7 @@ public class ShortPair {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return _1 + _2;
@@ -91,7 +91,7 @@ public class ShortPair {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return (0d + _1 + _2) / 2;
@@ -100,7 +100,7 @@ public class ShortPair {
     /**
      * Reversed.
      *
-     * @return the short pair
+     * @return
      */
     public ShortPair reversed() {
         return new ShortPair(_2, _1);
@@ -109,7 +109,7 @@ public class ShortPair {
     /**
      * To array.
      *
-     * @return the short[]
+     * @return
      */
     public short[] toArray() {
         return new short[] { _1, _2 };
@@ -118,7 +118,7 @@ public class ShortPair {
     /**
      * To list.
      *
-     * @return the short list
+     * @return
      */
     public ShortList toList() {
         return ShortList.of(_1, _2);
@@ -127,8 +127,8 @@ public class ShortPair {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.ShortConsumer<E> comsumer) throws E {
@@ -139,8 +139,8 @@ public class ShortPair {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<ShortPair, E> action) throws E {
@@ -150,10 +150,10 @@ public class ShortPair {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<ShortPair, U, E> mapper) throws E {
@@ -163,9 +163,9 @@ public class ShortPair {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<ShortPair> filter(final Try.Predicate<ShortPair, E> predicate) throws E {
@@ -175,7 +175,7 @@ public class ShortPair {
     /**
      * Stream.
      *
-     * @return the short stream
+     * @return
      */
     public ShortStream stream() {
         return ShortStream.of(_1, _2);
@@ -184,7 +184,7 @@ public class ShortPair {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -194,7 +194,7 @@ public class ShortPair {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -212,7 +212,7 @@ public class ShortPair {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

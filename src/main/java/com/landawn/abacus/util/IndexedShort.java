@@ -29,8 +29,8 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Instantiates a new indexed short.
      *
-     * @param index the index
-     * @param value the value
+     * @param index
+     * @param value
      */
     IndexedShort(long index, short value) {
         super(index);
@@ -40,9 +40,9 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param value the value
-     * @param index the index
-     * @return the indexed short
+     * @param value
+     * @param index
+     * @return
      */
     public static IndexedShort of(short value, int index) {
         N.checkArgNotNegative(index, "index");
@@ -53,9 +53,9 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param value the value
-     * @param index the index
-     * @return the indexed short
+     * @param value
+     * @param index
+     * @return
      */
     public static IndexedShort of(short value, long index) {
         N.checkArgNotNegative(index, "index");
@@ -66,8 +66,8 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param iter the iter
-     * @return the obj iterator
+     * @param iter
+     * @return
      */
     public static ObjIterator<IndexedShort> of(final ShortIterator iter) {
         return of(iter, 0);
@@ -76,9 +76,9 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param iter the iter
-     * @param startIndex the start index
-     * @return the obj iterator
+     * @param iter
+     * @param startIndex
+     * @return
      */
     public static ObjIterator<IndexedShort> of(final ShortIterator iter, final int startIndex) {
         return of(iter, (long) startIndex);
@@ -87,9 +87,9 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param iter the iter
-     * @param startIndex the start index
-     * @return the obj iterator
+     * @param iter
+     * @param startIndex
+     * @return
      */
     public static ObjIterator<IndexedShort> of(final ShortIterator iter, final long startIndex) {
         if (startIndex < 0) {
@@ -114,7 +114,7 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Value.
      *
-     * @return the short
+     * @return
      */
     public short value() {
         return value;
@@ -123,7 +123,7 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -133,7 +133,7 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -144,7 +144,7 @@ public final class IndexedShort extends AbstractIndexed {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

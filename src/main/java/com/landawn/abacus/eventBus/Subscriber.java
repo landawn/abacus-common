@@ -19,7 +19,7 @@ package com.landawn.abacus.eventBus;
  * The Interface Subscriber.
  *
  * @author Haiyang Li
- * @param <E> the element type
+ * @param <E>
  * @since 0.8
  */
 public interface Subscriber<E> {
@@ -27,7 +27,7 @@ public interface Subscriber<E> {
     /**
      * On.
      *
-     * @param event the event
+     * @param event
      */
     public void on(E event);
 }

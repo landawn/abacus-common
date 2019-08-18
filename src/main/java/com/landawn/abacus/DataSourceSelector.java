@@ -30,12 +30,12 @@ public interface DataSourceSelector {
      * select data source by sql statement and parameters. 
      * Generally, the <code>DataSource</code> specified by option <code>QUERY_WITH_DATA_SOURCE</code> should be checked/returned first if it exists.
      *
-     * @param dataSourceManager the data source manager
-     * @param entityName the entity name
-     * @param sql the sql
-     * @param parameters the parameters
+     * @param dataSourceManager
+     * @param entityName
+     * @param sql
+     * @param parameters
      * @param options the target data source may be specified by <code>com.landawn.abacus.util.Options.Query.QUERY_WITH_DATA_SOURCE</code>
-     * @return the data source
+     * @return
      */
     DataSource select(DataSourceManager dataSourceManager, String entityName, String sql, Object[] parameters, Map<String, Object> options);
 
@@ -43,12 +43,12 @@ public interface DataSourceSelector {
      * select data source by sql statement and parameters for batch operation.
      * Generally, the <code>DataSource</code> specified by option <code>QUERY_WITH_DATA_SOURCE</code> should be checked/returned first if it exists.
      *
-     * @param dataSourceManager the data source manager
-     * @param entityName the entity name
-     * @param sql the sql
-     * @param parameters the parameters
+     * @param dataSourceManager
+     * @param entityName
+     * @param sql
+     * @param parameters
      * @param options the target data source may be specified by <code>com.landawn.abacus.util.Options.Query.QUERY_WITH_DATA_SOURCE</code>
-     * @return the data source
+     * @return
      */
     DataSource select(DataSourceManager dataSourceManager, String entityName, String sql, List<?> parameters, Map<String, Object> options);
 }

@@ -71,7 +71,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     /**
      * Bits.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int bits() {
@@ -81,7 +81,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -93,7 +93,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -103,7 +103,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     /**
      * Equals.
      *
-     * @param object the object
+     * @param object
      * @return true, if successful
      */
     @Override
@@ -118,7 +118,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -169,10 +169,10 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         /**
          * Instantiates a new sip hasher.
          *
-         * @param c the c
-         * @param d the d
-         * @param k0 the k 0
-         * @param k1 the k 1
+         * @param c
+         * @param d
+         * @param k0
+         * @param k1
          */
         SipHasher(int c, int d, long k0, long k1) {
             super(CHUNK_SIZE);
@@ -187,7 +187,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         /**
          * Process.
          *
-         * @param buffer the buffer
+         * @param buffer
          */
         @Override
         protected void process(ByteBuffer buffer) {
@@ -198,7 +198,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         /**
          * Process remaining.
          *
-         * @param buffer the buffer
+         * @param buffer
          */
         @Override
         protected void processRemaining(ByteBuffer buffer) {
@@ -211,7 +211,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         /**
          * Make hash.
          *
-         * @return the hash code
+         * @return
          */
         @Override
         public HashCode makeHash() {
@@ -228,7 +228,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         /**
          * Process M.
          *
-         * @param m the m
+         * @param m
          */
         private void processM(long m) {
             v3 ^= m;
@@ -239,7 +239,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         /**
          * Sip round.
          *
-         * @param iterations the iterations
+         * @param iterations
          */
         private void sipRound(int iterations) {
             for (int i = 0; i < iterations; i++) {

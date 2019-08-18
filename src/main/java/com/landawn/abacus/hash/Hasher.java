@@ -56,100 +56,100 @@ public interface Hasher {
     /**
      * Put.
      *
-     * @param b the b
-     * @return the hasher
+     * @param b
+     * @return
      */
     Hasher put(byte b);
 
     /**
      * Put.
      *
-     * @param bytes the bytes
-     * @return the hasher
+     * @param bytes
+     * @return
      */
     Hasher put(byte[] bytes);
 
     /**
      * Put.
      *
-     * @param bytes the bytes
-     * @param off the off
-     * @param len the len
-     * @return the hasher
+     * @param bytes
+     * @param off
+     * @param len
+     * @return
      */
     Hasher put(byte[] bytes, int off, int len);
 
     /**
      * Put.
      *
-     * @param s the s
-     * @return the hasher
+     * @param s
+     * @return
      */
     Hasher put(short s);
 
     /**
      * Put.
      *
-     * @param i the i
-     * @return the hasher
+     * @param i
+     * @return
      */
     Hasher put(int i);
 
     /**
      * Put.
      *
-     * @param l the l
-     * @return the hasher
+     * @param l
+     * @return
      */
     Hasher put(long l);
 
     /**
      * Equivalent to {@code putInt(Float.floatToRawIntBits(f))}.
      *
-     * @param f the f
-     * @return the hasher
+     * @param f
+     * @return
      */
     Hasher put(float f);
 
     /**
      * Equivalent to {@code putLong(Double.doubleToRawLongBits(d))}.
      *
-     * @param d the d
-     * @return the hasher
+     * @param d
+     * @return
      */
     Hasher put(double d);
 
     /**
      * Equivalent to {@code putByte(b ? (byte) 1 : (byte) 0)}.
      *
-     * @param b the b
-     * @return the hasher
+     * @param b
+     * @return
      */
     Hasher put(boolean b);
 
     /**
      * Put.
      *
-     * @param c the c
-     * @return the hasher
+     * @param c
+     * @return
      */
     Hasher put(char c);
 
     /**
      * Put.
      *
-     * @param chars the chars
-     * @return the hasher
+     * @param chars
+     * @return
      */
     Hasher put(char[] chars);
 
     /**
      * Put.
      *
-     * @param chars the chars
-     * @param off the off
-     * @param len the len
-     * @return the hasher
+     * @param chars
+     * @param off
+     * @param len
+     * @return
      */
     Hasher put(char[] chars, int off, int len);
 
@@ -164,8 +164,8 @@ public interface Hasher {
      * {@link #putString}, usually with a charset of UTF-8. For other use cases, use {@code
      * putUnencodedChars}.
      *
-     * @param charSequence the char sequence
-     * @return the hasher
+     * @param charSequence
+     * @return
      * @since 15.0 (since 11.0 as putString(CharSequence)).
      */
     Hasher put(CharSequence charSequence);
@@ -178,19 +178,19 @@ public interface Hasher {
      * faster, produces the same output across Java releases, and hashes every {@code char} in the
      * input, even if some are invalid.
      *
-     * @param charSequence the char sequence
-     * @param charset the charset
-     * @return the hasher
+     * @param charSequence
+     * @param charset
+     * @return
      */
     Hasher put(CharSequence charSequence, Charset charset);
 
     /**
      * A simple convenience for {@code funnel.funnel(object, this)}.
      *
-     * @param <T> the generic type
-     * @param instance the instance
-     * @param funnel the funnel
-     * @return the hasher
+     * @param <T>
+     * @param instance
+     * @param funnel
+     * @return
      */
     <T> Hasher put(T instance, BiConsumer<? super T, ? super Hasher> funnel);
 
@@ -198,7 +198,7 @@ public interface Hasher {
      * Computes a hash code based on the data that have been provided to this hasher. The result is
      * unspecified if this method is called more than once on the same instance.
      *
-     * @return the hash code
+     * @return
      */
     HashCode hash();
 }

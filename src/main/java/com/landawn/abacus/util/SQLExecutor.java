@@ -555,7 +555,7 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSource the data source
+     * @param dataSource
      * @see JdbcUtil#createDataSource(String)
      * @see JdbcUtil#createDataSource(java.io.InputStream)
      */
@@ -566,8 +566,8 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSource the data source
-     * @param jdbcSettings the jdbc settings
+     * @param dataSource
+     * @param jdbcSettings
      * @see JdbcUtil#createDataSource(String)
      * @see JdbcUtil#createDataSource(java.io.InputStream)
      */
@@ -578,9 +578,9 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSource the data source
-     * @param jdbcSettings the jdbc settings
-     * @param sqlMapper the sql mapper
+     * @param dataSource
+     * @param jdbcSettings
+     * @param sqlMapper
      * @see JdbcUtil#createDataSource(String)
      * @see JdbcUtil#createDataSource(java.io.InputStream)
      */
@@ -591,10 +591,10 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSource the data source
-     * @param jdbcSettings the jdbc settings
-     * @param sqlMapper the sql mapper
-     * @param namingPolicy the naming policy
+     * @param dataSource
+     * @param jdbcSettings
+     * @param sqlMapper
+     * @param namingPolicy
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -605,11 +605,11 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSource the data source
-     * @param jdbcSettings the jdbc settings
-     * @param sqlMapper the sql mapper
-     * @param namingPolicy the naming policy
-     * @param asyncExecutor the async executor
+     * @param dataSource
+     * @param jdbcSettings
+     * @param sqlMapper
+     * @param namingPolicy
+     * @param asyncExecutor
      * @see JdbcUtil#createDataSource(String)
      * @see JdbcUtil#createDataSource(java.io.InputStream)
      */
@@ -621,7 +621,7 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSourceManager the data source manager
+     * @param dataSourceManager
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -632,8 +632,8 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSourceManager the data source manager
-     * @param jdbcSettings the jdbc settings
+     * @param dataSourceManager
+     * @param jdbcSettings
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -644,9 +644,9 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSourceManager the data source manager
-     * @param jdbcSettings the jdbc settings
-     * @param sqlMapper the sql mapper
+     * @param dataSourceManager
+     * @param jdbcSettings
+     * @param sqlMapper
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -657,10 +657,10 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSourceManager the data source manager
-     * @param jdbcSettings the jdbc settings
-     * @param sqlMapper the sql mapper
-     * @param namingPolicy the naming policy
+     * @param dataSourceManager
+     * @param jdbcSettings
+     * @param sqlMapper
+     * @param namingPolicy
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -671,11 +671,11 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSourceManager the data source manager
-     * @param jdbcSettings the jdbc settings
-     * @param sqlMapper the sql mapper
-     * @param namingPolicy the naming policy
-     * @param asyncExecutor the async executor
+     * @param dataSourceManager
+     * @param jdbcSettings
+     * @param sqlMapper
+     * @param namingPolicy
+     * @param asyncExecutor
      * @see JdbcUtil#createDataSourceManager(String)
      * @see JdbcUtil#createDataSourceManager(java.io.InputStream)
      */
@@ -687,13 +687,13 @@ public class SQLExecutor {
     /**
      * Instantiates a new SQL executor.
      *
-     * @param dataSourceManager the data source manager
-     * @param dataSource the data source
-     * @param jdbcSettings the jdbc settings
-     * @param sqlMapper the sql mapper
-     * @param namingPolicy the naming policy
-     * @param asyncExecutor the async executor
-     * @param isReadOnly the is read only
+     * @param dataSourceManager
+     * @param dataSource
+     * @param jdbcSettings
+     * @param sqlMapper
+     * @param namingPolicy
+     * @param asyncExecutor
+     * @param isReadOnly
      */
     protected SQLExecutor(final DataSourceManager dataSourceManager, final DataSource dataSource, final JdbcSettings jdbcSettings, final SQLMapper sqlMapper,
             final NamingPolicy namingPolicy, final AsyncExecutor asyncExecutor, final boolean isReadOnly) {
@@ -782,10 +782,10 @@ public class SQLExecutor {
     /**
      * W.
      *
-     * @param url the url
-     * @param user the user
-     * @param password the password
-     * @return the SQL executor
+     * @param url
+     * @param user
+     * @param password
+     * @return
      */
     @Beta
     public static SQLExecutor w(final String url, final String user, final String password) {
@@ -795,11 +795,11 @@ public class SQLExecutor {
     /**
      * W.
      *
-     * @param driver the driver
-     * @param url the url
-     * @param user the user
-     * @param password the password
-     * @return the SQL executor
+     * @param driver
+     * @param url
+     * @param user
+     * @param password
+     * @return
      */
     @Beta
     public static SQLExecutor w(final String driver, final String url, final String user, final String password) {
@@ -809,11 +809,11 @@ public class SQLExecutor {
     /**
      * W.
      *
-     * @param driverClass the driver class
-     * @param url the url
-     * @param user the user
-     * @param password the password
-     * @return the SQL executor
+     * @param driverClass
+     * @param url
+     * @param user
+     * @param password
+     * @return
      */
     @Beta
     public static SQLExecutor w(final Class<? extends Driver> driverClass, final String url, final String user, final String password) {
@@ -823,12 +823,12 @@ public class SQLExecutor {
     /**
      * Mapper.
      *
-     * @param <T> the generic type
-     * @param <ID> the generic type
+     * @param <T>
+     * @param <ID>
      * @param entityClass the id class
      * @param idClass the id class type of target id property. 
      * It should be {@code Void} class if there is no id property defined for the target entity, or {@code EntityId} class if there is zero or multiple id properties. 
-     * @return the mapper
+     * @return
      */
     public <T, ID> Mapper<T, ID> mapper(final Class<T> entityClass, final Class<ID> idClass) {
         synchronized (mapperPool) {
@@ -849,7 +849,7 @@ public class SQLExecutor {
     /**
      * Async.
      *
-     * @return the async SQL executor
+     * @return
      */
     public AsyncSQLExecutor async() {
         return _asyncSQLExecutor;
@@ -858,7 +858,7 @@ public class SQLExecutor {
     /**
      * Data source.
      *
-     * @return the data source
+     * @return
      */
     public DataSource dataSource() {
         return _ds;
@@ -867,7 +867,7 @@ public class SQLExecutor {
     /**
      * Jdbc settings.
      *
-     * @return the jdbc settings
+     * @return
      */
     public JdbcSettings jdbcSettings() {
         return _jdbcSettings;
@@ -876,7 +876,7 @@ public class SQLExecutor {
     /**
      * Db proudct name.
      *
-     * @return the string
+     * @return
      */
     public String dbProudctName() {
         return _dbProudctName;
@@ -885,7 +885,7 @@ public class SQLExecutor {
     /**
      * Db proudct version.
      *
-     * @return the string
+     * @return
      */
     public String dbProudctVersion() {
         return _dbProudctVersion;
@@ -894,7 +894,7 @@ public class SQLExecutor {
     /**
      * Db version.
      *
-     * @return the DB version
+     * @return
      */
     public DBVersion dbVersion() {
         return _dbVersion;
@@ -903,10 +903,10 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param sql
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -917,11 +917,11 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -932,11 +932,11 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -947,12 +947,12 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -964,13 +964,13 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param autoGeneratedKeyExtractor the auto generated key extractor
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param sql
+     * @param statementSetter
+     * @param autoGeneratedKeyExtractor
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -982,11 +982,11 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -997,12 +997,12 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1014,12 +1014,12 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public final <ID> ID insert(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final Object... parameters)
@@ -1030,13 +1030,13 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1048,14 +1048,14 @@ public class SQLExecutor {
     /**
      * Insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param autoGeneratedKeyExtractor the auto generated key extractor
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the id
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param autoGeneratedKeyExtractor
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      * @see #batchInsert(Connection, String, StatementSetter, JdbcSettings, String, Object[])
      */
@@ -1118,9 +1118,9 @@ public class SQLExecutor {
     /**
      * Gets the generated key extractor.
      *
-     * @param <ID> the generic type
-     * @param jdbcSettings the jdbc settings
-     * @return the generated key extractor
+     * @param <ID>
+     * @param jdbcSettings
+     * @return
      */
     private <ID> JdbcUtil.RowMapper<ID> getGeneratedKeyExtractor(JdbcSettings jdbcSettings) {
         if (jdbcSettings != null && ((N.notNullOrEmpty(jdbcSettings.getReturnedColumnIndexes()) && jdbcSettings.getReturnedColumnIndexes().length > 1)
@@ -1134,9 +1134,9 @@ public class SQLExecutor {
     /**
      * Gets the bi generated key extractor.
      *
-     * @param <ID> the generic type
-     * @param jdbcSettings the jdbc settings
-     * @return the bi generated key extractor
+     * @param <ID>
+     * @param jdbcSettings
+     * @return
      */
     private <ID> JdbcUtil.BiRowMapper<ID> getBiGeneratedKeyExtractor(JdbcSettings jdbcSettings) {
         if (jdbcSettings != null && ((N.notNullOrEmpty(jdbcSettings.getReturnedColumnIndexes()) && jdbcSettings.getReturnedColumnIndexes().length > 1)
@@ -1150,11 +1150,11 @@ public class SQLExecutor {
     /**
      * Check generated keys extractor.
      *
-     * @param <ID> the generic type
-     * @param autoGeneratedKeyExtractor the auto generated key extractor
-     * @param namedSQL the named SQL
-     * @param parameters the parameters
-     * @return the jdbc util. row mapper
+     * @param <ID>
+     * @param autoGeneratedKeyExtractor
+     * @param namedSQL
+     * @param parameters
+     * @return
      */
     @SuppressWarnings("rawtypes")
     static <ID> JdbcUtil.RowMapper<ID> checkGeneratedKeysExtractor(JdbcUtil.RowMapper<ID> autoGeneratedKeyExtractor, final NamedSQL namedSQL,
@@ -1203,11 +1203,11 @@ public class SQLExecutor {
     /**
      * Check bi generated keys extractor.
      *
-     * @param <ID> the generic type
-     * @param autoGeneratedKeyExtractor the auto generated key extractor
-     * @param namedSQL the named SQL
-     * @param parameters the parameters
-     * @return the jdbc util. bi row mapper
+     * @param <ID>
+     * @param autoGeneratedKeyExtractor
+     * @param namedSQL
+     * @param parameters
+     * @return
      */
     @SuppressWarnings("rawtypes")
     static <ID> JdbcUtil.BiRowMapper<ID> checkBiGeneratedKeysExtractor(JdbcUtil.BiRowMapper<ID> autoGeneratedKeyExtractor, final NamedSQL namedSQL,
@@ -1256,9 +1256,9 @@ public class SQLExecutor {
     /**
      * Sets the ids.
      *
-     * @param ids the ids
-     * @param entity the entity
-     * @param namedSQL the named SQL
+     * @param ids
+     * @param entity
+     * @param namedSQL
      */
     @SuppressWarnings("deprecation")
     static void setIds(final Object ids, final Object entity, final NamedSQL namedSQL) {
@@ -1310,12 +1310,12 @@ public class SQLExecutor {
     /**
      * Execute insert.
      *
-     * @param <ID> the generic type
-     * @param namedSQL the named SQL
-     * @param stmt the stmt
-     * @param autoGeneratedKeyExtractor the auto generated key extractor
-     * @param autoGeneratedKeys the auto generated keys
-     * @return the id
+     * @param <ID>
+     * @param namedSQL
+     * @param stmt
+     * @param autoGeneratedKeyExtractor
+     * @param autoGeneratedKeys
+     * @return
      * @throws SQLException the SQL exception
      */
     protected <ID> ID executeInsert(final NamedSQL namedSQL, final PreparedStatement stmt, final JdbcUtil.RowMapper<ID> autoGeneratedKeyExtractor,
@@ -1347,10 +1347,10 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param sql
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final String sql, final List<?> parametersList) throws UncheckedSQLException {
@@ -1360,11 +1360,11 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param sql
+     * @param statementSetter
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final String sql, final StatementSetter statementSetter, final List<?> parametersList) throws UncheckedSQLException {
@@ -1374,11 +1374,11 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param sql
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final String sql, final JdbcSettings jdbcSettings, final List<?> parametersList) throws UncheckedSQLException {
@@ -1388,12 +1388,12 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final List<?> parametersList)
@@ -1404,13 +1404,13 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param autoGeneratedKeyExtractor the auto generated key extractor
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param sql
+     * @param statementSetter
+     * @param autoGeneratedKeyExtractor
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<ID> autoGeneratedKeyExtractor,
@@ -1421,11 +1421,11 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, final List<?> parametersList) throws UncheckedSQLException {
@@ -1435,12 +1435,12 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, final StatementSetter statementSetter, final List<?> parametersList)
@@ -1451,12 +1451,12 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final List<?> parametersList)
@@ -1467,13 +1467,13 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public <ID> List<ID> batchInsert(final Connection conn, final String sql, StatementSetter statementSetter, JdbcSettings jdbcSettings,
@@ -1484,14 +1484,14 @@ public class SQLExecutor {
     /**
      * Batch insert.
      *
-     * @param <ID> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param autoGeneratedKeyExtractor the auto generated key extractor
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the list
+     * @param <ID>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param autoGeneratedKeyExtractor
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SuppressWarnings("deprecation")
@@ -1630,8 +1630,8 @@ public class SQLExecutor {
     /**
      * Sets the isolation level.
      *
-     * @param jdbcSettings the jdbc settings
-     * @param localConn the local conn
+     * @param jdbcSettings
+     * @param localConn
      * @throws SQLException the SQL exception
      */
     private void setIsolationLevel(JdbcSettings jdbcSettings, Connection localConn) throws SQLException {
@@ -1649,12 +1649,12 @@ public class SQLExecutor {
     /**
      * Execute batch insert.
      *
-     * @param <ID> the generic type
-     * @param resultIdList the result id list
-     * @param namedSQL the named SQL
-     * @param stmt the stmt
-     * @param autoGeneratedKeyExtractor the auto generated key extractor
-     * @param autoGeneratedKeys the auto generated keys
+     * @param <ID>
+     * @param resultIdList
+     * @param namedSQL
+     * @param stmt
+     * @param autoGeneratedKeyExtractor
+     * @param autoGeneratedKeys
      * @throws SQLException the SQL exception
      */
     protected <ID> void executeBatchInsert(final List<ID> resultIdList, final NamedSQL namedSQL, final PreparedStatement stmt,
@@ -1688,9 +1688,9 @@ public class SQLExecutor {
     /**
      * Update.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the int
+     * @param sql
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1701,10 +1701,10 @@ public class SQLExecutor {
     /**
      * Update.
      *
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the int
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1715,10 +1715,10 @@ public class SQLExecutor {
     /**
      * Update.
      *
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the int
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1729,11 +1729,11 @@ public class SQLExecutor {
     /**
      * Update.
      *
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the int
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1745,10 +1745,10 @@ public class SQLExecutor {
     /**
      * Update.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the int
+     * @param conn
+     * @param sql
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1759,11 +1759,11 @@ public class SQLExecutor {
     /**
      * Update.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the int
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1775,11 +1775,11 @@ public class SQLExecutor {
     /**
      * Update.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the int
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     @SafeVarargs
@@ -1790,12 +1790,12 @@ public class SQLExecutor {
     /**
      * Update.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the int
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      * @see #batchUpdate(Connection, String, StatementSetter, JdbcSettings, Object[])
      */
@@ -1838,9 +1838,9 @@ public class SQLExecutor {
     /**
      * Execute update.
      *
-     * @param namedSQL the named SQL
-     * @param stmt the stmt
-     * @return the int
+     * @param namedSQL
+     * @param stmt
+     * @return
      * @throws SQLException the SQL exception
      */
     protected int executeUpdate(final NamedSQL namedSQL, final PreparedStatement stmt) throws SQLException {
@@ -1854,9 +1854,9 @@ public class SQLExecutor {
     /**
      * Batch update.
      *
-     * @param sql the sql
-     * @param parametersList the parameters list
-     * @return the int
+     * @param sql
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public int batchUpdate(final String sql, final List<?> parametersList) throws UncheckedSQLException {
@@ -1866,10 +1866,10 @@ public class SQLExecutor {
     /**
      * Batch update.
      *
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parametersList the parameters list
-     * @return the int
+     * @param sql
+     * @param statementSetter
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public int batchUpdate(final String sql, final StatementSetter statementSetter, final List<?> parametersList) throws UncheckedSQLException {
@@ -1879,10 +1879,10 @@ public class SQLExecutor {
     /**
      * Batch update.
      *
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the int
+     * @param sql
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public int batchUpdate(final String sql, final JdbcSettings jdbcSettings, final List<?> parametersList) throws UncheckedSQLException {
@@ -1892,11 +1892,11 @@ public class SQLExecutor {
     /**
      * Batch update.
      *
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the int
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public int batchUpdate(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final List<?> parametersList)
@@ -1907,10 +1907,10 @@ public class SQLExecutor {
     /**
      * Batch update.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param parametersList the parameters list
-     * @return the int
+     * @param conn
+     * @param sql
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public int batchUpdate(final Connection conn, final String sql, final List<?> parametersList) throws UncheckedSQLException {
@@ -1920,11 +1920,11 @@ public class SQLExecutor {
     /**
      * Batch update.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parametersList the parameters list
-     * @return the int
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public int batchUpdate(final Connection conn, final String sql, final StatementSetter statementSetter, final List<?> parametersList)
@@ -1935,11 +1935,11 @@ public class SQLExecutor {
     /**
      * Batch update.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the int
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public int batchUpdate(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final List<?> parametersList)
@@ -1950,12 +1950,12 @@ public class SQLExecutor {
     /**
      * Batch update.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parametersList the parameters list
-     * @return the int
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parametersList
+     * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      * @see #batchUpdate(Connection, String, StatementSetter, JdbcSettings, Object[])
      */
@@ -2070,9 +2070,9 @@ public class SQLExecutor {
     /**
      * Execute batch update.
      *
-     * @param namedSQL the named SQL
-     * @param stmt the stmt
-     * @return the int
+     * @param namedSQL
+     * @param stmt
+     * @return
      * @throws SQLException the SQL exception
      */
     protected int executeBatchUpdate(final NamedSQL namedSQL, final PreparedStatement stmt) throws SQLException {
@@ -2187,8 +2187,8 @@ public class SQLExecutor {
     /**
      * Exists.
      *
-     * @param sql the sql
-     * @param parameters the parameters
+     * @param sql
+     * @param parameters
      * @return true, if successful
      */
     @SafeVarargs
@@ -2199,9 +2199,9 @@ public class SQLExecutor {
     /**
      * Exists.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param parameters the parameters
+     * @param conn
+     * @param sql
+     * @param parameters
      * @return true, if successful
      */
     @SafeVarargs
@@ -2212,10 +2212,10 @@ public class SQLExecutor {
     /**
      * Count.
      *
-     * @param sql the sql
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the int
+     * @return
      * @deprecated may be misused and it's inefficient.
      */
     @Deprecated
@@ -2227,11 +2227,11 @@ public class SQLExecutor {
     /**
      * Count.
      *
-     * @param conn the conn
-     * @param sql the sql
+     * @param conn
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the int
+     * @return
      * @deprecated may be misused and it's inefficient.
      */
     @Deprecated
@@ -2243,12 +2243,12 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
+     * @param <T>
+     * @param targetClass
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2259,13 +2259,13 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2277,13 +2277,13 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2295,14 +2295,14 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2314,13 +2314,13 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2332,14 +2332,14 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2351,14 +2351,14 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2370,15 +2370,15 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2390,12 +2390,12 @@ public class SQLExecutor {
     /**
      * v.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param sql
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2406,13 +2406,13 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <T> Optional<T> get(final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<T> rowMapper, final Object... parameters)
@@ -2423,13 +2423,13 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <T> Optional<T> get(final String sql, final JdbcUtil.RowMapper<T> rowMapper, final JdbcSettings jdbcSettings, final Object... parameters)
@@ -2440,14 +2440,14 @@ public class SQLExecutor {
     /**
      *  
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2459,13 +2459,13 @@ public class SQLExecutor {
     /**
      *  
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2477,14 +2477,14 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2496,14 +2496,14 @@ public class SQLExecutor {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2515,15 +2515,15 @@ public class SQLExecutor {
     /**
      *  
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2535,12 +2535,12 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
+     * @param <T>
+     * @param targetClass
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2551,13 +2551,13 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2569,13 +2569,13 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2587,14 +2587,14 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2606,13 +2606,13 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2623,14 +2623,14 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2642,14 +2642,14 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2661,15 +2661,15 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SuppressWarnings("unchecked")
@@ -2693,12 +2693,12 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param sql
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2709,13 +2709,13 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2727,13 +2727,13 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2745,14 +2745,14 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2764,13 +2764,13 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -2782,14 +2782,14 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <T> T gett(final Connection conn, final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<T> rowMapper,
@@ -2800,14 +2800,14 @@ public class SQLExecutor {
     /**
      * Gets the t.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <T> T gett(final Connection conn, final String sql, final JdbcUtil.RowMapper<T> rowMapper, JdbcSettings jdbcSettings,
@@ -2818,15 +2818,15 @@ public class SQLExecutor {
     /**
      * v.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SuppressWarnings("unchecked")
@@ -2864,11 +2864,11 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final String sql, final Object... parameters) {
@@ -2878,12 +2878,12 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final Object... parameters) {
@@ -2893,12 +2893,12 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -2908,13 +2908,13 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -2925,12 +2925,12 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final Connection conn, final String sql, final Object... parameters) {
@@ -2940,13 +2940,13 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      */
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final Connection conn, final String sql, final StatementSetter statementSetter,
             final Object... parameters) {
@@ -2956,13 +2956,13 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     public final <T> Optional<T> findFirst(final Class<T> targetClass, final Connection conn, final String sql, final JdbcSettings jdbcSettings,
             final Object... parameters) {
@@ -2976,15 +2976,15 @@ public class SQLExecutor {
      * 
      * Remember to add {@code limit} condition if big result will be returned by the query.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -3007,11 +3007,11 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final String sql, final JdbcUtil.RowMapper<T> rowMapper, final Object... parameters) {
@@ -3021,12 +3021,12 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<T> rowMapper,
@@ -3037,12 +3037,12 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final String sql, final JdbcUtil.RowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
@@ -3053,13 +3053,13 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final String sql, final StatementSetter statementSetter, final JdbcUtil.RowMapper<T> rowMapper,
@@ -3070,12 +3070,12 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param rowMapper
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> Optional<T> findFirst(final Connection conn, final String sql, final JdbcUtil.RowMapper<T> rowMapper, final Object... parameters) {
@@ -3085,13 +3085,13 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param parameters
+     * @return
      */
     public final <T> Optional<T> findFirst(final Connection conn, final String sql, final StatementSetter statementSetter,
             final JdbcUtil.RowMapper<T> rowMapper, final Object... parameters) {
@@ -3101,13 +3101,13 @@ public class SQLExecutor {
     /**
      * Find first.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the optional
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     public final <T> Optional<T> findFirst(final Connection conn, final String sql, final JdbcUtil.RowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
             final Object... parameters) {
@@ -3117,15 +3117,15 @@ public class SQLExecutor {
     /**
      * Remember to add {@code limit} condition if big result will be returned by the query.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the optional
+     * @return
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -3152,11 +3152,11 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final String sql, final Object... parameters) {
@@ -3166,12 +3166,12 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final Object... parameters) {
@@ -3181,12 +3181,12 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3196,13 +3196,13 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -3213,12 +3213,12 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final Class<T> targetClass, final Connection conn, final String sql, final Object... parameters) {
@@ -3228,13 +3228,13 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      */
     public final <T> List<T> list(final Class<T> targetClass, final Connection conn, final String sql, final StatementSetter statementSetter,
             final Object... parameters) {
@@ -3244,13 +3244,13 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     public final <T> List<T> list(final Class<T> targetClass, final Connection conn, final String sql, final JdbcSettings jdbcSettings,
             final Object... parameters) {
@@ -3260,15 +3260,15 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -3280,11 +3280,11 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final Object... parameters) {
@@ -3294,12 +3294,12 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -3310,12 +3310,12 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3325,13 +3325,13 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -3342,12 +3342,12 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param rowMapper
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> list(final Connection conn, final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final Object... parameters) {
@@ -3357,13 +3357,13 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param parameters
+     * @return
      */
     public final <T> List<T> list(final Connection conn, final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
             final Object... parameters) {
@@ -3373,13 +3373,13 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the list
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     public final <T> List<T> list(final Connection conn, final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
             final Object... parameters) {
@@ -3389,15 +3389,15 @@ public class SQLExecutor {
     /**
      * List.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -3433,13 +3433,13 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> listAll(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3450,14 +3450,14 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> listAll(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -3469,13 +3469,13 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sqls the sqls
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sqls
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> listAll(final Class<T> targetClass, final List<String> sqls, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3486,14 +3486,14 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sqls the sqls
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sqls
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> listAll(final Class<T> targetClass, final List<String> sqls, final StatementSetter statementSetter,
@@ -3505,13 +3505,13 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> listAll(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -3522,14 +3522,14 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> listAll(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -3575,7 +3575,7 @@ public class SQLExecutor {
     /**
      * Check jdbc settings for all query.
      *
-     * @param jdbcSettings the jdbc settings
+     * @param jdbcSettings
      */
     private void checkJdbcSettingsForAllQuery(JdbcSettings jdbcSettings) {
         if (jdbcSettings != null && (jdbcSettings.getOffset() != 0 || jdbcSettings.getCount() != Integer.MAX_VALUE)) {
@@ -3587,13 +3587,13 @@ public class SQLExecutor {
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param sqls the sqls
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sqls
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> listAll(final List<String> sqls, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
@@ -3605,14 +3605,14 @@ public class SQLExecutor {
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param sqls the sqls
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sqls
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the list
+     * @return
      */
     @SafeVarargs
     public final <T> List<T> listAll(final List<String> sqls, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -3644,9 +3644,9 @@ public class SQLExecutor {
     /**
      * Query for boolean.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional boolean
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3657,9 +3657,9 @@ public class SQLExecutor {
     /**
      * Query for char.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional char
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3670,9 +3670,9 @@ public class SQLExecutor {
     /**
      * Query for byte.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional byte
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3683,9 +3683,9 @@ public class SQLExecutor {
     /**
      * Query for short.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional short
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3696,9 +3696,9 @@ public class SQLExecutor {
     /**
      * Query for int.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional int
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3709,9 +3709,9 @@ public class SQLExecutor {
     /**
      * Query for long.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional long
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3722,9 +3722,9 @@ public class SQLExecutor {
     /**
      * Query for float.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional float
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3735,9 +3735,9 @@ public class SQLExecutor {
     /**
      * Query for double.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the optional double
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3748,9 +3748,9 @@ public class SQLExecutor {
     /**
      * Query for big decimal.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the nullable
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3761,9 +3761,9 @@ public class SQLExecutor {
     /**
      * Query for string.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the nullable
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, Connection, String, Object...).
      */
     @SafeVarargs
@@ -3774,9 +3774,9 @@ public class SQLExecutor {
     /**
      * Query for date.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the nullable
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, String, Object...).
      */
     @SafeVarargs
@@ -3787,9 +3787,9 @@ public class SQLExecutor {
     /**
      * Query for time.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the nullable
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, String, Object...).
      */
     @SafeVarargs
@@ -3800,9 +3800,9 @@ public class SQLExecutor {
     /**
      * Query for timestamp.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the nullable
+     * @param sql
+     * @param parameters
+     * @return
      * @see SQLExecutor#queryForSingleResult(Class, String, Object...).
      */
     @SafeVarargs
@@ -3814,10 +3814,10 @@ public class SQLExecutor {
      * Query for single result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the nullable
+     * @param targetClass
+     * @param sql
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final String sql, final Object... parameters) {
@@ -3828,11 +3828,11 @@ public class SQLExecutor {
      * Query for single result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the nullable
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final String sql, final StatementSetter statementSetter,
@@ -3844,11 +3844,11 @@ public class SQLExecutor {
      * Query for single result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the nullable
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final String sql, final JdbcSettings jdbcSettings,
@@ -3860,12 +3860,12 @@ public class SQLExecutor {
      * Query for single result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the nullable
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final String sql, final StatementSetter statementSetter,
@@ -3877,11 +3877,11 @@ public class SQLExecutor {
      * Query for single result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the nullable
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final Connection conn, final String sql, final Object... parameters) {
@@ -3892,12 +3892,12 @@ public class SQLExecutor {
      * Query for single result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the nullable
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      */
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final Connection conn, final String sql,
             final StatementSetter statementSetter, final Object... parameters) {
@@ -3908,12 +3908,12 @@ public class SQLExecutor {
      * Query for single result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the nullable
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     public final <V> Nullable<V> queryForSingleResult(final Class<V> targetClass, final Connection conn, final String sql, final JdbcSettings jdbcSettings,
             final Object... parameters) {
@@ -3931,15 +3931,15 @@ public class SQLExecutor {
      * Remember to add {@code limit} condition if big result will be returned by the query.
      *
      * @param <V> the value type
-     * @param targetClass            set result type to avoid the NullPointerException if result is null and T is primitive type
+     * @param targetClass set result type to avoid the NullPointerException if result is null and T is primitive type
      *            "int, long. short ... char, boolean..".
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -3955,8 +3955,8 @@ public class SQLExecutor {
      * Creates the single result extractor.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @return the result extractor
+     * @param targetClass
+     * @return
      */
     private <V> ResultExtractor<Nullable<V>> createSingleResultExtractor(final Class<V> targetClass) {
         @SuppressWarnings("rawtypes")
@@ -3986,11 +3986,11 @@ public class SQLExecutor {
      * Query for unique result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param sql the sql
+     * @param targetClass
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -4003,12 +4003,12 @@ public class SQLExecutor {
      * Query for unique result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -4021,12 +4021,12 @@ public class SQLExecutor {
      * Query for unique result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -4039,13 +4039,13 @@ public class SQLExecutor {
      * Query for unique result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -4058,12 +4058,12 @@ public class SQLExecutor {
      * Query for unique result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
+     * @param targetClass
+     * @param conn
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     @SafeVarargs
@@ -4076,13 +4076,13 @@ public class SQLExecutor {
      * Query for unique result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <V> Nullable<V> queryForUniqueResult(final Class<V> targetClass, final Connection conn, final String sql,
@@ -4094,13 +4094,13 @@ public class SQLExecutor {
      * Query for unique result.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if two or more records are found.
      */
     public final <V> Nullable<V> queryForUniqueResult(final Class<V> targetClass, final Connection conn, final String sql, final JdbcSettings jdbcSettings,
@@ -4120,15 +4120,15 @@ public class SQLExecutor {
      * Remember to add {@code limit} condition if big result will be returned by the query.
      *
      * @param <V> the value type
-     * @param targetClass            set result type to avoid the NullPointerException if result is null and T is primitive type
+     * @param targetClass set result type to avoid the NullPointerException if result is null and T is primitive type
      *            "int, long. short ... char, boolean..".
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the nullable
+     * @return
      * @throws DuplicatedResultException if more than one record found.
      */
     @SuppressWarnings("unchecked")
@@ -4145,8 +4145,8 @@ public class SQLExecutor {
      * Creates the unique result extractor.
      *
      * @param <V> the value type
-     * @param targetClass the target class
-     * @return the result extractor
+     * @param targetClass
+     * @return
      */
     private <V> ResultExtractor<Nullable<V>> createUniqueResultExtractor(final Class<V> targetClass) {
         @SuppressWarnings("rawtypes")
@@ -4182,9 +4182,9 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the data set
+     * @param sql
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final DataSet query(final String sql, final Object... parameters) {
@@ -4194,10 +4194,10 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the data set
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final DataSet query(final String sql, final StatementSetter statementSetter, final Object... parameters) {
@@ -4207,10 +4207,10 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the data set
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final DataSet query(final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4220,11 +4220,11 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the data set
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final DataSet query(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4234,11 +4234,11 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param resultExtractor the result extractor
-     * @param parameters the parameters
-     * @return the t
+     * @param <T>
+     * @param sql
+     * @param resultExtractor
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> T query(final String sql, final ResultExtractor<T> resultExtractor, final Object... parameters) {
@@ -4248,12 +4248,12 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param resultExtractor the result extractor
-     * @param parameters the parameters
-     * @return the t
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param resultExtractor
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> T query(final String sql, final StatementSetter statementSetter, final ResultExtractor<T> resultExtractor, final Object... parameters) {
@@ -4263,12 +4263,12 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param resultExtractor the result extractor
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the t
+     * @param <T>
+     * @param sql
+     * @param resultExtractor
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> T query(final String sql, final ResultExtractor<T> resultExtractor, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4299,14 +4299,14 @@ public class SQLExecutor {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param resultExtractor the result extractor
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param resultExtractor
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      */
     @SafeVarargs
     public final <T> T query(final String sql, final StatementSetter statementSetter, final ResultExtractor<T> resultExtractor, final JdbcSettings jdbcSettings,
@@ -4317,10 +4317,10 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param parameters the parameters
-     * @return the data set
+     * @param conn
+     * @param sql
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final DataSet query(final Connection conn, final String sql, final Object... parameters) {
@@ -4330,11 +4330,11 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param parameters the parameters
-     * @return the data set
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final DataSet query(final Connection conn, final String sql, final StatementSetter statementSetter, final Object... parameters) {
@@ -4344,11 +4344,11 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the data set
+     * @param conn
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final DataSet query(final Connection conn, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4358,12 +4358,12 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the data set
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final DataSet query(final Connection conn, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -4374,12 +4374,12 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param resultExtractor the result extractor
-     * @param parameters the parameters
-     * @return the t
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param resultExtractor
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> T query(final Connection conn, final String sql, final ResultExtractor<T> resultExtractor, final Object... parameters) {
@@ -4389,13 +4389,13 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param resultExtractor the result extractor
-     * @param parameters the parameters
-     * @return the t
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param resultExtractor
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> T query(final Connection conn, final String sql, final StatementSetter statementSetter, final ResultExtractor<T> resultExtractor,
@@ -4406,13 +4406,13 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param resultExtractor the result extractor
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the t
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param resultExtractor
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     @SafeVarargs
     public final <T> T query(final Connection conn, final String sql, final ResultExtractor<T> resultExtractor, final JdbcSettings jdbcSettings,
@@ -4444,15 +4444,15 @@ public class SQLExecutor {
      * </pre>
      *  
      *
-     * @param <T> the generic type
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param resultExtractor the result extractor
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param resultExtractor
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the t
+     * @return
      */
     @SafeVarargs
     public final <T> T query(final Connection conn, final String sql, final StatementSetter statementSetter, final ResultExtractor<T> resultExtractor,
@@ -4469,15 +4469,15 @@ public class SQLExecutor {
     /**
      * Query.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param conn the conn
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param resultExtractor the result extractor
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
-     * @return the t
+     * @param <T>
+     * @param targetClass
+     * @param conn
+     * @param sql
+     * @param statementSetter
+     * @param resultExtractor
+     * @param jdbcSettings
+     * @param parameters
+     * @return
      */
     protected <T> T query(final Class<T> targetClass, final Connection conn, final String sql, StatementSetter statementSetter,
             ResultSetExtractor<T> resultExtractor, JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4540,11 +4540,11 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the data set
+     * @return
      */
     @SafeVarargs
     public final DataSet queryAll(final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4555,12 +4555,12 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the data set
+     * @return
      */
     @SafeVarargs
     public final DataSet queryAll(final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4608,11 +4608,11 @@ public class SQLExecutor {
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param sqls the sqls
-     * @param jdbcSettings the jdbc settings
+     * @param sqls
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the data set
+     * @return
      */
     @SafeVarargs
     public final DataSet queryAll(final List<String> sqls, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4623,12 +4623,12 @@ public class SQLExecutor {
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param sqls the sqls
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param sqls
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the data set
+     * @return
      */
     @SafeVarargs
     public final DataSet queryAll(final List<String> sqls, final StatementSetter statementSetter, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4660,12 +4660,12 @@ public class SQLExecutor {
      *  
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
+     * @param <T>
+     * @param targetClass
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final Class<T> targetClass, final String sql, final Object... parameters) {
@@ -4675,13 +4675,13 @@ public class SQLExecutor {
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final Object... parameters) {
@@ -4691,13 +4691,13 @@ public class SQLExecutor {
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     public final <T> Stream<T> stream(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
         return stream(targetClass, sql, StatementSetter.DEFAULT, jdbcSettings, parameters);
@@ -4706,14 +4706,14 @@ public class SQLExecutor {
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -4724,12 +4724,12 @@ public class SQLExecutor {
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param sql
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final Object... parameters) {
@@ -4739,13 +4739,13 @@ public class SQLExecutor {
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -4756,13 +4756,13 @@ public class SQLExecutor {
     /**
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4773,14 +4773,14 @@ public class SQLExecutor {
      *  
      * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> stream(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -4933,13 +4933,13 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final Class<T> targetClass, final String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -4950,14 +4950,14 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sql
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final Class<T> targetClass, final String sql, final StatementSetter statementSetter, final JdbcSettings jdbcSettings,
@@ -4969,13 +4969,13 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final String sql, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
@@ -4987,14 +4987,14 @@ public class SQLExecutor {
      * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition.
      *
-     * @param <T> the generic type
-     * @param sql the sql
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sql
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final String sql, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -5029,13 +5029,13 @@ public class SQLExecutor {
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition. 
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sqls the sqls
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sqls
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final Class<T> targetClass, final List<String> sqls, final JdbcSettings jdbcSettings, final Object... parameters) {
@@ -5046,14 +5046,14 @@ public class SQLExecutor {
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition. 
      *
-     * @param <T> the generic type
-     * @param targetClass the target class
-     * @param sqls the sqls
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param targetClass
+     * @param sqls
+     * @param statementSetter
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final Class<T> targetClass, final List<String> sqls, final StatementSetter statementSetter,
@@ -5065,13 +5065,13 @@ public class SQLExecutor {
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition. 
      *
-     * @param <T> the generic type
-     * @param sqls the sqls
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sqls
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final List<String> sqls, final JdbcUtil.BiRowMapper<T> rowMapper, final JdbcSettings jdbcSettings,
@@ -5083,14 +5083,14 @@ public class SQLExecutor {
      * Execute one or more queries in one or more data sources specified by {@code jdbcSettings} and merge the results.
      * It's designed for partition. 
      *
-     * @param <T> the generic type
-     * @param sqls the sqls
-     * @param statementSetter the statement setter
-     * @param rowMapper the row mapper
-     * @param jdbcSettings the jdbc settings
+     * @param <T>
+     * @param sqls
+     * @param statementSetter
+     * @param rowMapper
+     * @param jdbcSettings
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
-     * @return the stream
+     * @return
      */
     @SafeVarargs
     public final <T> Stream<T> streamAll(final List<String> sqls, final StatementSetter statementSetter, final JdbcUtil.BiRowMapper<T> rowMapper,
@@ -5117,8 +5117,8 @@ public class SQLExecutor {
     /**
      * Execute.
      *
-     * @param sql the sql
-     * @param parameters the parameters
+     * @param sql
+     * @param parameters
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     public final void execute(final String sql, final Object... parameters) throws UncheckedSQLException {
@@ -5128,8 +5128,8 @@ public class SQLExecutor {
     /**
      * Execute the sql with the specified parameters.
      *
-     * @param conn the conn
-     * @param sql the sql
+     * @param conn
+     * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
      * DO NOT use primitive array {@code boolean[]/char[]/byte[]/short[]/int[]/long[]/float[]/double[]} for passing multiple parameters.
      * @throws UncheckedSQLException the unchecked SQL exception
@@ -5166,7 +5166,7 @@ public class SQLExecutor {
     /**
      * Refer to {@code beginTransaction(IsolationLevel, boolean, JdbcSettings)}.
      *
-     * @return the SQL transaction
+     * @return
      * @see #beginTransaction(IsolationLevel, boolean, JdbcSettings)
      */
     public SQLTransaction beginTransaction() {
@@ -5177,8 +5177,8 @@ public class SQLExecutor {
      *   
      * Refer to {@code beginTransaction(IsolationLevel, boolean, JdbcSettings)}.
      *
-     * @param isolationLevel the isolation level
-     * @return the SQL transaction
+     * @param isolationLevel
+     * @return
      * @see #beginTransaction(IsolationLevel, boolean, JdbcSettings)
      */
     public SQLTransaction beginTransaction(final IsolationLevel isolationLevel) {
@@ -5189,8 +5189,8 @@ public class SQLExecutor {
      *  
      * Refer to {@code beginTransaction(IsolationLevel, boolean, JdbcSettings)}.
      *
-     * @param forUpdateOnly the for update only
-     * @return the SQL transaction
+     * @param forUpdateOnly
+     * @return
      * @see #beginTransaction(IsolationLevel, boolean, JdbcSettings)
      */
     public SQLTransaction beginTransaction(final boolean forUpdateOnly) {
@@ -5201,9 +5201,9 @@ public class SQLExecutor {
      *  
      * Refer to {@code beginTransaction(IsolationLevel, boolean, JdbcSettings)}.
      *
-     * @param isolationLevel the isolation level
-     * @param forUpdateOnly the for update only
-     * @return the SQL transaction
+     * @param isolationLevel
+     * @param forUpdateOnly
+     * @return
      * @see #beginTransaction(IsolationLevel, boolean, JdbcSettings)
      */
     public SQLTransaction beginTransaction(IsolationLevel isolationLevel, boolean forUpdateOnly) {
@@ -5243,10 +5243,10 @@ public class SQLExecutor {
      * </code>
      * </pre>
      *
-     * @param isolationLevel the isolation level
-     * @param forUpdateOnly the for update only
-     * @param jdbcSettings the jdbc settings
-     * @return the SQL transaction
+     * @param isolationLevel
+     * @param forUpdateOnly
+     * @param jdbcSettings
+     * @return
      */
     public SQLTransaction beginTransaction(final IsolationLevel isolationLevel, final boolean forUpdateOnly, final JdbcSettings jdbcSettings) {
         N.checkArgNotNull(isolationLevel, "isolationLevel");
@@ -5293,9 +5293,9 @@ public class SQLExecutor {
     /**
      * Gets the DB sequence.
      *
-     * @param tableName the table name
-     * @param seqName the seq name
-     * @return the DB sequence
+     * @param tableName
+     * @param seqName
+     * @return
      */
     public DBSequence getDBSequence(final String tableName, final String seqName) {
         return new DBSequence(this, tableName, seqName, 0, 1000);
@@ -5304,11 +5304,11 @@ public class SQLExecutor {
     /**
      * Supports global sequence by db table.
      *
-     * @param tableName the table name
-     * @param seqName the seq name
-     * @param startVal the start val
+     * @param tableName
+     * @param seqName
+     * @param startVal
      * @param seqBufferSize the numbers to allocate/reserve from database table when cached numbers are used up.
-     * @return the DB sequence
+     * @return
      */
     public DBSequence getDBSequence(final String tableName, final String seqName, final long startVal, final int seqBufferSize) {
         return new DBSequence(this, tableName, seqName, startVal, seqBufferSize);
@@ -5317,8 +5317,8 @@ public class SQLExecutor {
     /**
      * Supports global lock by db table.
      *
-     * @param tableName the table name
-     * @return the DB lock
+     * @param tableName
+     * @return
      */
     public DBLock getDBLock(final String tableName) {
         return new DBLock(this, tableName);
@@ -5327,7 +5327,7 @@ public class SQLExecutor {
     /**
      * Does table exist.
      *
-     * @param tableName the table name
+     * @param tableName
      * @return true, if successful
      */
     public boolean doesTableExist(final String tableName) {
@@ -5343,8 +5343,8 @@ public class SQLExecutor {
     /**
      * Returns {@code true} if succeed to create table, otherwise {@code false} is returned.
      *
-     * @param tableName the table name
-     * @param schema the schema
+     * @param tableName
+     * @param schema
      * @return true, if successful
      */
     public boolean createTableIfNotExists(final String tableName, final String schema) {
@@ -5360,7 +5360,7 @@ public class SQLExecutor {
     /**
      * Returns {@code true} if succeed to drop table, otherwise {@code false} is returned.
      *
-     * @param tableName the table name
+     * @param tableName
      * @return true, if successful
      */
     public boolean dropTableIfExists(final String tableName) {
@@ -5376,8 +5376,8 @@ public class SQLExecutor {
     /**
      * Gets the column name list.
      *
-     * @param tableName the table name
-     * @return the column name list
+     * @param tableName
+     * @return
      */
     public List<String> getColumnNameList(final String tableName) {
         List<String> columnNameList = _tableColumnNamePool.get(tableName);
@@ -5401,7 +5401,7 @@ public class SQLExecutor {
     /**
      * Gets the connection.
      *
-     * @return the connection
+     * @return
      */
     public Connection getConnection() {
         return getConnection(_ds);
@@ -5410,7 +5410,7 @@ public class SQLExecutor {
     /**
      * Close connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     public void closeConnection(final Connection conn) {
         close(conn, _ds);
@@ -5419,10 +5419,10 @@ public class SQLExecutor {
     /**
      * Gets the data source.
      *
-     * @param sql the sql
-     * @param parameters the parameters
-     * @param jdbcSettings the jdbc settings
-     * @return the data source
+     * @param sql
+     * @param parameters
+     * @param jdbcSettings
+     * @return
      */
     protected DataSource getDataSource(final String sql, final Object[] parameters, final JdbcSettings jdbcSettings) {
         if (_dsm == null || _dss == null) {
@@ -5445,10 +5445,10 @@ public class SQLExecutor {
     /**
      * Gets the data source.
      *
-     * @param sql the sql
-     * @param parametersList the parameters list
-     * @param jdbcSettings the jdbc settings
-     * @return the data source
+     * @param sql
+     * @param parametersList
+     * @param jdbcSettings
+     * @return
      */
     protected DataSource getDataSource(final String sql, final List<?> parametersList, final JdbcSettings jdbcSettings) {
         if (_dsm == null || _dss == null) {
@@ -5471,11 +5471,11 @@ public class SQLExecutor {
     /**
      * Gets the connection.
      *
-     * @param inputConn the input conn
-     * @param ds the ds
-     * @param jdbcSettings the jdbc settings
-     * @param op the op
-     * @return the connection
+     * @param inputConn
+     * @param ds
+     * @param jdbcSettings
+     * @param op
+     * @return
      */
     protected Connection getConnection(final Connection inputConn, final DataSource ds, final JdbcSettings jdbcSettings, final SQLOperation op) {
         if (inputConn != null) {
@@ -5498,8 +5498,8 @@ public class SQLExecutor {
     /**
      * Gets the connection.
      *
-     * @param ds the ds
-     * @return the connection
+     * @param ds
+     * @return
      */
     protected Connection getConnection(final DataSource ds) {
         return JdbcUtil.getConnection(ds);
@@ -5508,15 +5508,15 @@ public class SQLExecutor {
     /**
      * Prepare statement.
      *
-     * @param ds the ds
-     * @param localConn the local conn
-     * @param namedSQL the named SQL
-     * @param statementSetter the statement setter
-     * @param jdbcSettings the jdbc settings
-     * @param autoGeneratedKeys the auto generated keys
-     * @param isBatch the is batch
-     * @param parameters the parameters
-     * @return the prepared statement
+     * @param ds
+     * @param localConn
+     * @param namedSQL
+     * @param statementSetter
+     * @param jdbcSettings
+     * @param autoGeneratedKeys
+     * @param isBatch
+     * @param parameters
+     * @return
      * @throws SQLException the SQL exception
      */
     protected PreparedStatement prepareStatement(final DataSource ds, final Connection localConn, final NamedSQL namedSQL,
@@ -5546,11 +5546,11 @@ public class SQLExecutor {
     /**
      * Prepare statement.
      *
-     * @param conn the conn
-     * @param sql the sql
-     * @param autoGeneratedKeys the auto generated keys
-     * @param jdbcSettings the jdbc settings
-     * @return the prepared statement
+     * @param conn
+     * @param sql
+     * @param autoGeneratedKeys
+     * @param jdbcSettings
+     * @return
      * @throws SQLException the SQL exception
      */
     protected PreparedStatement prepareStatement(final Connection conn, String sql, final boolean autoGeneratedKeys, final JdbcSettings jdbcSettings)
@@ -5681,11 +5681,11 @@ public class SQLExecutor {
     /**
      * Sets the parameters.
      *
-     * @param namedSQL the named SQL
-     * @param stmt the stmt
-     * @param statementSetter the statement setter
-     * @param isBatch the is batch
-     * @param parameters the parameters
+     * @param namedSQL
+     * @param stmt
+     * @param statementSetter
+     * @param isBatch
+     * @param parameters
      * @throws SQLException the SQL exception
      */
     protected void setParameters(final NamedSQL namedSQL, final PreparedStatement stmt, final StatementSetter statementSetter, final boolean isBatch,
@@ -5700,9 +5700,9 @@ public class SQLExecutor {
     /**
      * Log SQL.
      *
-     * @param sql the sql
-     * @param jdbcSettings the jdbc settings
-     * @param parameters the parameters
+     * @param sql
+     * @param jdbcSettings
+     * @param parameters
      */
     protected void logSQL(String sql, final JdbcSettings jdbcSettings, final Object... parameters) {
         if ((jdbcSettings != null) && (jdbcSettings.isLogSQL() || jdbcSettings.isLogSQLWithParameters()) && logger.isInfoEnabled()) {
@@ -5717,7 +5717,7 @@ public class SQLExecutor {
     /**
      * Close.
      *
-     * @param rs the rs
+     * @param rs
      */
     protected void close(final ResultSet rs) {
         JdbcUtil.closeQuietly(rs);
@@ -5726,7 +5726,7 @@ public class SQLExecutor {
     /**
      * Close.
      *
-     * @param stmt the stmt
+     * @param stmt
      */
     protected void close(final PreparedStatement stmt) {
         JdbcUtil.closeQuietly(stmt);
@@ -5735,8 +5735,8 @@ public class SQLExecutor {
     /**
      * Close.
      *
-     * @param rs the rs
-     * @param stmt the stmt
+     * @param rs
+     * @param stmt
      */
     protected void close(final ResultSet rs, final PreparedStatement stmt) {
         JdbcUtil.closeQuietly(rs, stmt);
@@ -5745,9 +5745,9 @@ public class SQLExecutor {
     /**
      * Close.
      *
-     * @param localConn the local conn
-     * @param inputConn the input conn
-     * @param ds the ds
+     * @param localConn
+     * @param inputConn
+     * @param ds
      */
     protected void close(final Connection localConn, final Connection inputConn, final DataSource ds) {
         if (inputConn == null) {
@@ -5768,8 +5768,8 @@ public class SQLExecutor {
     /**
      * Close.
      *
-     * @param conn the conn
-     * @param ds the ds
+     * @param conn
+     * @param ds
      */
     protected void close(final Connection conn, final DataSource ds) {
         JdbcUtil.releaseConnection(conn, ds);
@@ -5797,8 +5797,8 @@ public class SQLExecutor {
     /**
      * Gets the batch size.
      *
-     * @param jdbcSettings the jdbc settings
-     * @return the batch size
+     * @param jdbcSettings
+     * @return
      */
     protected int getBatchSize(final JdbcSettings jdbcSettings) {
         return ((jdbcSettings == null) || (jdbcSettings.getBatchSize() < 0)) ? JdbcSettings.DEFAULT_BATCH_SIZE : jdbcSettings.getBatchSize();
@@ -5807,9 +5807,9 @@ public class SQLExecutor {
     /**
      * Check statement setter.
      *
-     * @param namedSQL the named SQL
-     * @param statementSetter the statement setter
-     * @return the statement setter
+     * @param namedSQL
+     * @param statementSetter
+     * @return
      */
     protected StatementSetter checkStatementSetter(final NamedSQL namedSQL, StatementSetter statementSetter) {
         if (statementSetter == null) {
@@ -5822,10 +5822,10 @@ public class SQLExecutor {
     /**
      * Check result set extractor.
      *
-     * @param <T> the generic type
-     * @param namedSQL the named SQL
-     * @param resultExtractor the result extractor
-     * @return the result set extractor
+     * @param <T>
+     * @param namedSQL
+     * @param resultExtractor
+     * @return
      */
     @SuppressWarnings("unchecked")
     protected <T> ResultSetExtractor<T> checkResultSetExtractor(final NamedSQL namedSQL, ResultSetExtractor<T> resultExtractor) {
@@ -5839,10 +5839,10 @@ public class SQLExecutor {
     /**
      * Check jdbc settings.
      *
-     * @param jdbcSettings the jdbc settings
-     * @param namedSQL the named SQL
-     * @param attrs the attrs
-     * @return the jdbc settings
+     * @param jdbcSettings
+     * @param namedSQL
+     * @param attrs
+     * @return
      */
     protected JdbcSettings checkJdbcSettings(final JdbcSettings jdbcSettings, final NamedSQL namedSQL, final Map<String, String> attrs) {
         JdbcSettings newJdbcSettings = null;
@@ -5863,10 +5863,10 @@ public class SQLExecutor {
     /**
      * Sets the jdbc settings for named SQL.
      *
-     * @param jdbcSettings the jdbc settings
-     * @param namedSQL the named SQL
-     * @param attrs the attrs
-     * @return the jdbc settings
+     * @param jdbcSettings
+     * @param namedSQL
+     * @param attrs
+     * @return
      */
     protected JdbcSettings setJdbcSettingsForNamedSQL(JdbcSettings jdbcSettings, final NamedSQL namedSQL, final Map<String, String> attrs) {
         if ((namedSQL == null) || N.isNullOrEmpty(attrs)) {
@@ -5907,8 +5907,8 @@ public class SQLExecutor {
     /**
      * Gets the named SQL.
      *
-     * @param sql the sql
-     * @return the named SQL
+     * @param sql
+     * @return
      */
     protected NamedSQL getNamedSQL(final String sql) {
         N.checkArgNotNull(sql, "sql");
@@ -5930,8 +5930,8 @@ public class SQLExecutor {
      * Gets the column label list.
      *
      * @param sql should be prepared sql because it will be cached.
-     * @param rs the rs
-     * @return the column label list
+     * @param rs
+     * @return
      * @throws SQLException the SQL exception
      */
     protected static List<String> getColumnLabelList(final String sql, final ResultSet rs) throws SQLException {
@@ -5956,8 +5956,8 @@ public class SQLExecutor {
     /**
      * Checks if is entity or map parameter.
      *
-     * @param namedSQL the named SQL
-     * @param parameters the parameters
+     * @param namedSQL
+     * @param parameters
      * @return true, if is entity or map parameter
      */
     protected static boolean isEntityOrMapParameter(final NamedSQL namedSQL, final Object... parameters) {
@@ -5979,8 +5979,8 @@ public class SQLExecutor {
     /**
      *  
      *
-     * @param <T> the generic type
-     * @param <ID> the generic type
+     * @param <T>
+     * @param <ID>
      * @see {@link com.landawn.abacus.annotation.ReadOnly}
      * @see {@link com.landawn.abacus.annotation.ReadOnlyId}
      * @see {@link com.landawn.abacus.annotation.NonUpdatable}
@@ -6066,8 +6066,8 @@ public class SQLExecutor {
          *
          * @param entityClass the target class
          * @param idClass the target id class.
-         * @param sqlExecutor the sql executor
-         * @param namingPolicy the naming policy
+         * @param sqlExecutor
+         * @param namingPolicy
          */
         Mapper(final Class<T> entityClass, final Class<ID> idClass, final SQLExecutor sqlExecutor, final NamingPolicy namingPolicy) {
             this.sqlExecutor = sqlExecutor;
@@ -6134,7 +6134,7 @@ public class SQLExecutor {
         /**
          * Target class.
          *
-         * @return the class
+         * @return
          */
         Class<T> targetClass() {
             return targetClass;
@@ -6143,7 +6143,7 @@ public class SQLExecutor {
         /**
          * Target type.
          *
-         * @return the type
+         * @return
          */
         Type<T> targetType() {
             return targetType;
@@ -6152,7 +6152,7 @@ public class SQLExecutor {
         /**
          * Id prop name list.
          *
-         * @return the list
+         * @return
          */
         List<String> idPropNameList() {
             return idPropNameList;
@@ -6161,7 +6161,7 @@ public class SQLExecutor {
         /**
          * Id prop name set.
          *
-         * @return the sets the
+         * @return
          */
         Set<String> idPropNameSet() {
             return idPropNameSet;
@@ -6170,7 +6170,7 @@ public class SQLExecutor {
         /**
          * Prop name list.
          *
-         * @return the list
+         * @return
          */
         List<String> propNameList() {
             return propNameList;
@@ -6179,7 +6179,7 @@ public class SQLExecutor {
         /**
          * Prop name set.
          *
-         * @return the sets the
+         * @return
          */
         Set<String> propNameSet() {
             return propNameSet;
@@ -6188,7 +6188,7 @@ public class SQLExecutor {
         /**
          * Async.
          *
-         * @return the async mapper
+         * @return
          */
         public AsyncMapper<T, ID> async() {
             return asyncMapper;
@@ -6207,7 +6207,7 @@ public class SQLExecutor {
         /**
          * Exists.
          *
-         * @param whereCause the where cause
+         * @param whereCause
          * @return true, if successful
          */
         public boolean exists(final Condition whereCause) {
@@ -6217,8 +6217,8 @@ public class SQLExecutor {
         /**
          * Exists.
          *
-         * @param conn the conn
-         * @param id the id
+         * @param conn
+         * @param id
          * @return true, if successful
          */
         public boolean exists(final Connection conn, final ID id) {
@@ -6228,8 +6228,8 @@ public class SQLExecutor {
         /**
          * Exists.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
+         * @param conn
+         * @param whereCause
          * @return true, if successful
          */
         public boolean exists(final Connection conn, final Condition whereCause) {
@@ -6241,8 +6241,8 @@ public class SQLExecutor {
         /**
          * Count.
          *
-         * @param whereCause the where cause
-         * @return the int
+         * @param whereCause
+         * @return
          */
         public int count(final Condition whereCause) {
             return count(null, whereCause);
@@ -6251,9 +6251,9 @@ public class SQLExecutor {
         /**
          * Count.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the int
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public int count(final Connection conn, final Condition whereCause) {
             final SP sp = prepareQuery(COUNT_SELECT_PROP_NAMES, whereCause);
@@ -6265,7 +6265,7 @@ public class SQLExecutor {
          * Gets the.
          *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @return the optional
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public Optional<T> get(final ID id) throws DuplicatedResultException {
@@ -6289,8 +6289,8 @@ public class SQLExecutor {
          * Gets the.
          *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @param selectPropNames the select prop names
-         * @return the optional
+         * @param selectPropNames
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public Optional<T> get(final ID id, final Collection<String> selectPropNames) throws DuplicatedResultException {
@@ -6300,10 +6300,10 @@ public class SQLExecutor {
         /**
          * Gets the.
          *
-         * @param conn the conn
+         * @param conn
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @param selectPropNames the select prop names
-         * @return the optional
+         * @param selectPropNames
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public Optional<T> get(final Connection conn, final ID id, final Collection<String> selectPropNames) throws DuplicatedResultException {
@@ -6314,7 +6314,7 @@ public class SQLExecutor {
          * Gets the t.
          *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @return the t
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public T gett(final ID id) throws DuplicatedResultException {
@@ -6338,8 +6338,8 @@ public class SQLExecutor {
          * Gets the t.
          *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @param selectPropNames the select prop names
-         * @return the t
+         * @param selectPropNames
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public T gett(final ID id, final Collection<String> selectPropNames) throws DuplicatedResultException {
@@ -6349,10 +6349,10 @@ public class SQLExecutor {
         /**
          * Gets the t.
          *
-         * @param conn the conn
+         * @param conn
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
-         * @param selectPropNames the select prop names
-         * @return the t
+         * @param selectPropNames
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public T gett(final Connection conn, final ID id, final Collection<String> selectPropNames) throws DuplicatedResultException {
@@ -6367,8 +6367,8 @@ public class SQLExecutor {
         /**
          *  
          *
-         * @param ids the ids
-         * @return the list
+         * @param ids
+         * @return
          */
         public List<T> batchGet(final List<ID> ids) {
             return batchGet(ids, (Collection<String>) null);
@@ -6377,9 +6377,9 @@ public class SQLExecutor {
         /**
          *  
          *
-         * @param ids the ids
-         * @param selectPropNames the select prop names
-         * @return the list
+         * @param ids
+         * @param selectPropNames
+         * @return
          */
         public List<T> batchGet(final List<ID> ids, final Collection<String> selectPropNames) {
             return batchGet(ids, selectPropNames, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -6388,10 +6388,10 @@ public class SQLExecutor {
         /**
          * Batch get.
          *
-         * @param ids the ids
-         * @param selectPropNames the select prop names
-         * @param batchSize the batch size
-         * @return the list
+         * @param ids
+         * @param selectPropNames
+         * @param batchSize
+         * @return
          */
         public List<T> batchGet(final List<ID> ids, final Collection<String> selectPropNames, final int batchSize) {
             return batchGet(null, ids, selectPropNames, batchSize);
@@ -6400,11 +6400,11 @@ public class SQLExecutor {
         /**
          *  
          *
-         * @param conn the conn
-         * @param ids the ids
-         * @param selectPropNames the select prop names
-         * @param batchSize the batch size
-         * @return the list
+         * @param conn
+         * @param ids
+         * @param selectPropNames
+         * @param batchSize
+         * @return
          */
         public List<T> batchGet(final Connection conn, final List<ID> ids, final Collection<String> selectPropNames, final int batchSize) {
             N.checkArgPositive(batchSize, "batchSize");
@@ -6483,8 +6483,8 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param whereCause the where cause
-         * @return the optional
+         * @param whereCause
+         * @return
          */
         public Optional<T> findFirst(final Condition whereCause) {
             return findFirst((Collection<String>) null, whereCause);
@@ -6493,9 +6493,9 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the optional
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public Optional<T> findFirst(final Collection<String> selectPropNames, final Condition whereCause) {
             return findFirst(selectPropNames, whereCause, null);
@@ -6504,10 +6504,10 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public Optional<T> findFirst(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return findFirst(null, selectPropNames, whereCause, jdbcSettings);
@@ -6516,9 +6516,9 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the optional
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public Optional<T> findFirst(final Connection conn, final Condition whereCause) {
             return findFirst(conn, null, whereCause);
@@ -6527,10 +6527,10 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the optional
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public Optional<T> findFirst(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return findFirst(conn, selectPropNames, whereCause, null);
@@ -6539,11 +6539,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public Optional<T> findFirst(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6555,11 +6555,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the optional
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Optional<R> findFirst(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(selectPropName, rowMapper, whereCause, null);
@@ -6568,12 +6568,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Optional<R> findFirst(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6583,12 +6583,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the optional
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Optional<R> findFirst(final Connection conn, String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(conn, selectPropName, rowMapper, whereCause, null);
@@ -6597,13 +6597,13 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Optional<R> findFirst(final Connection conn, String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6613,11 +6613,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the optional
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Optional<R> findFirst(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(selectPropName, rowMapper, whereCause, null);
@@ -6626,12 +6626,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Optional<R> findFirst(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6641,12 +6641,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the optional
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Optional<R> findFirst(final Connection conn, String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(conn, selectPropName, rowMapper, whereCause, null);
@@ -6655,13 +6655,13 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Optional<R> findFirst(final Connection conn, String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6671,11 +6671,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the optional
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Optional<R> findFirst(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(selectPropNames, rowMapper, whereCause, null);
@@ -6684,12 +6684,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Optional<R> findFirst(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6699,12 +6699,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the optional
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Optional<R> findFirst(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -6714,13 +6714,13 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Optional<R> findFirst(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -6732,11 +6732,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the optional
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Optional<R> findFirst(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return findFirst(selectPropNames, rowMapper, whereCause, null);
@@ -6745,12 +6745,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Optional<R> findFirst(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6760,12 +6760,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the optional
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Optional<R> findFirst(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -6775,13 +6775,13 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the optional
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Optional<R> findFirst(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -6806,8 +6806,8 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param whereCause the where cause
-         * @return the list
+         * @param whereCause
+         * @return
          */
         public List<T> list(final Condition whereCause) {
             return list((Collection<String>) null, whereCause);
@@ -6816,9 +6816,9 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the list
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public List<T> list(final Collection<String> selectPropNames, final Condition whereCause) {
             return list(selectPropNames, whereCause, null);
@@ -6827,10 +6827,10 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public List<T> list(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return list(null, selectPropNames, whereCause, jdbcSettings);
@@ -6839,9 +6839,9 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the list
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public List<T> list(final Connection conn, final Condition whereCause) {
             return list(conn, null, whereCause);
@@ -6850,10 +6850,10 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the list
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public List<T> list(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return list(conn, selectPropNames, whereCause, null);
@@ -6862,11 +6862,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public List<T> list(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
@@ -6877,11 +6877,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the list
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> List<R> list(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return list(selectPropName, rowMapper, whereCause, null);
@@ -6890,12 +6890,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> list(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return list(null, selectPropName, rowMapper, whereCause, jdbcSettings);
@@ -6904,12 +6904,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the list
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> List<R> list(final Connection conn, String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return list(conn, selectPropName, rowMapper, whereCause, null);
@@ -6918,13 +6918,13 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> list(final Connection conn, String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6934,11 +6934,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the list
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> List<R> list(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return list(selectPropName, rowMapper, whereCause, null);
@@ -6947,12 +6947,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> list(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return list(null, selectPropName, rowMapper, whereCause, jdbcSettings);
@@ -6961,12 +6961,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the list
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> List<R> list(final Connection conn, String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return list(conn, selectPropName, rowMapper, whereCause, null);
@@ -6975,13 +6975,13 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> list(final Connection conn, String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -6991,11 +6991,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the list
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> List<R> list(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return list(selectPropNames, rowMapper, whereCause, null);
@@ -7004,12 +7004,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> list(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7019,12 +7019,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the list
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> List<R> list(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return list(conn, selectPropNames, rowMapper, whereCause, null);
@@ -7033,13 +7033,13 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> list(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7058,11 +7058,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the list
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> List<R> list(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return list(selectPropNames, rowMapper, whereCause, null);
@@ -7071,12 +7071,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> list(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7086,12 +7086,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the list
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> List<R> list(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -7101,13 +7101,13 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> list(final Connection conn, Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7120,9 +7120,9 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @see SQLExecutor#listAll(Class, String, StatementSetter, JdbcSettings, Object...)
          */
         public List<T> listAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -7133,10 +7133,10 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @see SQLExecutor#listAll(Class, String, StatementSetter, JdbcSettings, Object...)
          */
         public List<T> listAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -7149,12 +7149,12 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> listAll(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return listAll(Arrays.asList(selectPropName), rowMapper, whereCause, jdbcSettings);
@@ -7164,12 +7164,12 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> listAll(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7180,12 +7180,12 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> listAll(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7205,12 +7205,12 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the list
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> List<R> listAll(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7222,8 +7222,8 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param whereCause the where cause
-         * @return the stream
+         * @param whereCause
+         * @return
          */
         public Stream<T> stream(final Condition whereCause) {
             return stream((Collection<String>) null, whereCause);
@@ -7232,9 +7232,9 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the stream
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public Stream<T> stream(final Collection<String> selectPropNames, final Condition whereCause) {
             return stream(selectPropNames, whereCause, null);
@@ -7243,10 +7243,10 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public Stream<T> stream(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
@@ -7257,11 +7257,11 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the stream
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Stream<R> stream(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return stream(selectPropName, rowMapper, whereCause, null);
@@ -7270,12 +7270,12 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Stream<R> stream(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return stream(Arrays.asList(selectPropName), rowMapper, whereCause, jdbcSettings);
@@ -7284,11 +7284,11 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the stream
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Stream<R> stream(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return stream(selectPropName, rowMapper, whereCause, null);
@@ -7297,12 +7297,12 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Stream<R> stream(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7312,11 +7312,11 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the stream
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Stream<R> stream(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return stream(selectPropNames, rowMapper, whereCause, null);
@@ -7325,12 +7325,12 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Stream<R> stream(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7349,11 +7349,11 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the stream
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> Stream<R> stream(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return stream(selectPropNames, rowMapper, whereCause, null);
@@ -7362,12 +7362,12 @@ public class SQLExecutor {
         /**
          * Lazy execution, lazy fetch. The query execution and record fetching only happen when a terminal operation of the stream is called.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Stream<R> stream(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7380,9 +7380,9 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @see SQLExecutor#streamAll(Class, String, StatementSetter, JdbcSettings, Object...)
          */
         public Stream<T> streamAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -7393,10 +7393,10 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @see SQLExecutor#streamAll(Class, String, StatementSetter, JdbcSettings, Object...)
          */
         public Stream<T> streamAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -7409,12 +7409,12 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Stream<R> streamAll(String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7425,12 +7425,12 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Stream<R> streamAll(String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7441,12 +7441,12 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Stream<R> streamAll(Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7467,12 +7467,12 @@ public class SQLExecutor {
          * It's designed for partition. 
          *  
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the stream
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> Stream<R> streamAll(Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -7484,8 +7484,8 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param whereCause the where cause
-         * @return the data set
+         * @param whereCause
+         * @return
          */
         public DataSet query(final Condition whereCause) {
             return query((Collection<String>) null, whereCause);
@@ -7494,9 +7494,9 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the data set
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public DataSet query(final Collection<String> selectPropNames, final Condition whereCause) {
             return query(selectPropNames, whereCause, null);
@@ -7505,10 +7505,10 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the data set
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public DataSet query(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return query(null, selectPropNames, whereCause, jdbcSettings);
@@ -7517,9 +7517,9 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the data set
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public DataSet query(final Connection conn, final Condition whereCause) {
             return query(conn, null, whereCause);
@@ -7528,10 +7528,10 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the data set
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public DataSet query(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return query(conn, selectPropNames, whereCause, null);
@@ -7540,11 +7540,11 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the data set
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public DataSet query(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             final SP sp = prepareQuery(selectPropNames, whereCause);
@@ -7556,9 +7556,9 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the data set
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @see SQLExecutor#queryAll(String, StatementSetter, JdbcSettings, Object...)
          */
         public DataSet queryAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -7569,10 +7569,10 @@ public class SQLExecutor {
          * Execute the query in one or more data sources specified by {@code jdbcSettings} and merge the results.
          * It's designed for partition. 
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the data set
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @see SQLExecutor#queryAll(String, StatementSetter, JdbcSettings, Object...)
          */
         public DataSet queryAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -7584,9 +7584,9 @@ public class SQLExecutor {
         /**
          * Query for boolean.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the optional boolean
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalBoolean queryForBoolean(final String selectPropName, final Condition whereCause) {
@@ -7598,9 +7598,9 @@ public class SQLExecutor {
         /**
          * Query for char.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the optional char
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalChar queryForChar(final String selectPropName, final Condition whereCause) {
@@ -7612,9 +7612,9 @@ public class SQLExecutor {
         /**
          * Query for byte.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the optional byte
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalByte queryForByte(final String selectPropName, final Condition whereCause) {
@@ -7626,9 +7626,9 @@ public class SQLExecutor {
         /**
          * Query for short.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the optional short
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalShort queryForShort(final String selectPropName, final Condition whereCause) {
@@ -7640,9 +7640,9 @@ public class SQLExecutor {
         /**
          * Query for int.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the optional int
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalInt queryForInt(final String selectPropName, final Condition whereCause) {
@@ -7654,9 +7654,9 @@ public class SQLExecutor {
         /**
          * Query for long.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the optional long
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalLong queryForLong(final String selectPropName, final Condition whereCause) {
@@ -7668,9 +7668,9 @@ public class SQLExecutor {
         /**
          * Query for float.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the optional float
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalFloat queryForFloat(final String selectPropName, final Condition whereCause) {
@@ -7682,9 +7682,9 @@ public class SQLExecutor {
         /**
          * Query for double.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the optional double
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public OptionalDouble queryForDouble(final String selectPropName, final Condition whereCause) {
@@ -7696,9 +7696,9 @@ public class SQLExecutor {
         /**
          * Query for big decimal.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<BigDecimal> queryForBigDecimal(final String selectPropName, final Condition whereCause) {
@@ -7710,9 +7710,9 @@ public class SQLExecutor {
         /**
          * Query for string.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<String> queryForString(final String selectPropName, final Condition whereCause) {
@@ -7724,9 +7724,9 @@ public class SQLExecutor {
         /**
          * Query for date.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<java.sql.Date> queryForDate(final String selectPropName, final Condition whereCause) {
@@ -7738,9 +7738,9 @@ public class SQLExecutor {
         /**
          * Query for time.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<java.sql.Time> queryForTime(final String selectPropName, final Condition whereCause) {
@@ -7752,9 +7752,9 @@ public class SQLExecutor {
         /**
          * Query for timestamp.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public Nullable<java.sql.Timestamp> queryForTimestamp(final String selectPropName, final Condition whereCause) {
@@ -7767,10 +7767,10 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param id the id
-         * @return the nullable
+         * @param targetValueClass
+         * @param selectPropName
+         * @param id
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final ID id) {
@@ -7781,10 +7781,10 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param targetValueClass
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause) {
@@ -7795,11 +7795,11 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the nullable
+         * @param targetValueClass
+         * @param selectPropName
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause,
@@ -7811,11 +7811,11 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param id the id
-         * @return the nullable
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param id
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName, final ID id) {
@@ -7826,11 +7826,11 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
@@ -7842,12 +7842,12 @@ public class SQLExecutor {
          * Returns a {@code Nullable} describing the value in the first row/column if it exists, otherwise return an empty {@code Nullable}.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the nullable
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @see Mapper#queryForSingleResult(Class, Connection, String, Condition, JdbcSettings)
          */
         public <V> Nullable<V> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
@@ -7861,10 +7861,10 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param id the id
-         * @return the nullable
+         * @param targetValueClass
+         * @param selectPropName
+         * @param id
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final ID id)
@@ -7876,10 +7876,10 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param targetValueClass
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @throws DuplicatedResultException the duplicated result exception
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause)
@@ -7891,11 +7891,11 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the nullable
+         * @param targetValueClass
+         * @param selectPropName
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause,
@@ -7907,11 +7907,11 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param id the id
-         * @return the nullable
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param id
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName, final ID id)
@@ -7923,11 +7923,11 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the nullable
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param whereCause
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
@@ -7939,12 +7939,12 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the nullable
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          * @throws DuplicatedResultException if two or more records are found.
          */
         public <V> Nullable<V> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
@@ -7957,9 +7957,9 @@ public class SQLExecutor {
         /**
          * Prepare query.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the sp
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         private SP prepareQuery(final Collection<String> selectPropNames, final Condition whereCause) {
             return prepareQuery(selectPropNames, whereCause, 0);
@@ -7968,10 +7968,10 @@ public class SQLExecutor {
         /**
          * Prepare query.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param count the count
-         * @return the sp
+         * @param selectPropNames
+         * @param whereCause
+         * @param count
+         * @return
          */
         private SP prepareQuery(Collection<String> selectPropNames, final Condition whereCause, final int count) {
             if (N.isNullOrEmpty(selectPropNames)) {
@@ -8031,8 +8031,8 @@ public class SQLExecutor {
         /**
          * Insert the specified entity into data store, and set back the auto-generated id to the specified entity if there is the auto-generated id.
          *
-         * @param entity the entity
-         * @return the auto-generated id or null if there is no auto-generated id.
+         * @param entity
+         * @return
          */
         public ID insert(final T entity) {
             return insert(null, entity);
@@ -8041,9 +8041,9 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param propNamesToInsert the prop names to insert
-         * @return the id
+         * @param entity
+         * @param propNamesToInsert
+         * @return
          */
         public ID insert(final T entity, final Collection<String> propNamesToInsert) {
             return insert(null, entity, propNamesToInsert);
@@ -8052,8 +8052,8 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the auto-generated id or null if there is no auto-generated id.
+         * @param props
+         * @return
          */
         public ID insert(final Map<String, Object> props) {
             return insert(null, props);
@@ -8062,9 +8062,9 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @return the id
+         * @param conn
+         * @param entity
+         * @return
          */
         public ID insert(final Connection conn, final T entity) {
             return insert(conn, entity, null);
@@ -8073,10 +8073,10 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @param propNamesToInsert the prop names to insert
-         * @return the id
+         * @param conn
+         * @param entity
+         * @param propNamesToInsert
+         * @return
          */
         public ID insert(final Connection conn, final T entity, final Collection<String> propNamesToInsert) {
             N.checkArgNotNull(entity);
@@ -8147,9 +8147,9 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param conn the conn
-         * @param props the props
-         * @return the auto-generated id or null if there is no auto-generated id.
+         * @param conn
+         * @param props
+         * @return
          */
         public ID insert(final Connection conn, final Map<String, Object> props) {
             N.checkArgNotNull(props);
@@ -8162,8 +8162,8 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param entities the entities
-         * @return the list
+         * @param entities
+         * @return
          */
         public List<ID> batchInsert(final Collection<? extends T> entities) {
             return batchInsert(entities, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -8172,9 +8172,9 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the list
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public List<ID> batchInsert(final Collection<? extends T> entities, final int batchSize) {
             return batchInsert(entities, batchSize, IsolationLevel.DEFAULT);
@@ -8183,10 +8183,10 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the list
+         * @param entities
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public List<ID> batchInsert(final Collection<? extends T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return batchInsert(entities, null, batchSize, isolationLevel);
@@ -8195,11 +8195,11 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param entities the entities
-         * @param propNamesToInsert the prop names to insert
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the list
+         * @param entities
+         * @param propNamesToInsert
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public List<ID> batchInsert(final Collection<? extends T> entities, final Collection<String> propNamesToInsert, final int batchSize,
                 final IsolationLevel isolationLevel) {
@@ -8209,9 +8209,9 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @return the list
+         * @param conn
+         * @param entities
+         * @return
          */
         public List<ID> batchInsert(final Connection conn, final Collection<? extends T> entities) {
             return batchInsert(conn, entities, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -8220,10 +8220,10 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the list
+         * @param conn
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public List<ID> batchInsert(final Connection conn, final Collection<? extends T> entities, final int batchSize) {
             return batchInsert(conn, entities, null, batchSize);
@@ -8232,11 +8232,11 @@ public class SQLExecutor {
         /**
          * Insert All the records by batch operation. And set back auto-generated ids to the specified entities if there are the auto-generated ids.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param propNamesToInsert the prop names to insert
-         * @param batchSize the batch size
-         * @return the auto-generated id list or an empty list if there is no auto-generated id.
+         * @param conn
+         * @param entities
+         * @param propNamesToInsert
+         * @param batchSize
+         * @return
          */
         public List<ID> batchInsert(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToInsert,
                 final int batchSize) {
@@ -8246,12 +8246,12 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param propNamesToInsert the prop names to insert
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the list
+         * @param conn
+         * @param entities
+         * @param propNamesToInsert
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         @SuppressWarnings("deprecation")
         private List<ID> batchInsert(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToInsert,
@@ -8300,9 +8300,9 @@ public class SQLExecutor {
         /**
          * Prepare insert sql.
          *
-         * @param entity the entity
-         * @param propNamesToInsert the prop names to insert
-         * @return the string
+         * @param entity
+         * @param propNamesToInsert
+         * @return
          */
         @SuppressWarnings("deprecation")
         private String prepareInsertSql(final T entity, final Collection<String> propNamesToInsert) {
@@ -8334,8 +8334,8 @@ public class SQLExecutor {
         /**
          * Prepare insert sql.
          *
-         * @param props the props
-         * @return the string
+         * @param props
+         * @return
          */
         private String prepareInsertSql(final Map<String, Object> props) {
             N.checkArgument(N.notNullOrEmpty(props), "props");
@@ -8346,8 +8346,8 @@ public class SQLExecutor {
         /**
          * Prepare insert sql.
          *
-         * @param insertingPropNames the inserting prop names
-         * @return the string
+         * @param insertingPropNames
+         * @return
          */
         private String prepareInsertSql(final Collection<String> insertingPropNames) {
             N.checkArgument(N.notNullOrEmpty(insertingPropNames), "insertingPropNames");
@@ -8370,8 +8370,8 @@ public class SQLExecutor {
         /**
          * Execute {@code add} and return the added entity if the record doesn't, otherwise, {@code update} is executed and updated db record is returned. 
          *
-         * @param entity the entity
-         * @return the t
+         * @param entity
+         * @return
          */
         public T upsert(final T entity) {
             final T dbEntity = idPropNameList.size() == 1 ? gett((ID) ClassUtil.getPropValue(entity, idPropName)) : gett((ID) entity);
@@ -8389,9 +8389,9 @@ public class SQLExecutor {
         /**
          * Execute {@code add} and return the added entity if the record doesn't, otherwise, {@code update} is executed and updated db record is returned. 
          *
-         * @param entity the entity
+         * @param entity
          * @param whereCause to verify if the record exists or not.
-         * @return the t
+         * @return
          */
         public T upsert(final T entity, final Condition whereCause) {
             N.checkArgNotNull(whereCause, "whereCause");
@@ -8411,7 +8411,7 @@ public class SQLExecutor {
         /**
          * Refresh.
          *
-         * @param entity the entity
+         * @param entity
          * @return true, if successful
          */
         public boolean refresh(final T entity) {
@@ -8425,8 +8425,8 @@ public class SQLExecutor {
         /**
          * Refresh.
          *
-         * @param entity the entity
-         * @param propNamesToRefresh the prop names to refresh
+         * @param entity
+         * @param propNamesToRefresh
          * @return {@code false} if no record found by the ids in the specified {@code entity}.
          */
         public boolean refresh(final T entity, Collection<String> propNamesToRefresh) {
@@ -8453,8 +8453,8 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param entity the entity
-         * @return the int
+         * @param entity
+         * @return
          */
         public int update(final T entity) {
             return update(entity, (Collection<String>) null);
@@ -8463,9 +8463,9 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param entity the entity
-         * @param propNamesToUpdate the prop names to update
-         * @return the int
+         * @param entity
+         * @param propNamesToUpdate
+         * @return
          */
         public int update(final T entity, final Collection<String> propNamesToUpdate) {
             return update((Connection) null, entity, propNamesToUpdate);
@@ -8474,9 +8474,9 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param props the props
-         * @param id the id
-         * @return the int
+         * @param props
+         * @param id
+         * @return
          */
         public int update(final Map<String, Object> props, final ID id) {
             return update((Connection) null, props, id);
@@ -8485,9 +8485,9 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param props the props
-         * @param whereCause the where cause
-         * @return the int
+         * @param props
+         * @param whereCause
+         * @return
          */
         public int update(final Map<String, Object> props, final Condition whereCause) {
             return update((Connection) null, props, whereCause);
@@ -8496,9 +8496,9 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @return the int
+         * @param conn
+         * @param entity
+         * @return
          */
         public int update(final Connection conn, final T entity) {
             return update(conn, entity, (Collection<String>) null);
@@ -8507,10 +8507,10 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @param propNamesToUpdate the prop names to update
-         * @return the int
+         * @param conn
+         * @param entity
+         * @param propNamesToUpdate
+         * @return
          */
         public int update(final Connection conn, final T entity, final Collection<String> propNamesToUpdate) {
             N.checkArgNotNull(entity);
@@ -8531,10 +8531,10 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param conn the conn
-         * @param props the props
-         * @param id the id
-         * @return the int
+         * @param conn
+         * @param props
+         * @param id
+         * @return
          */
         public int update(final Connection conn, final Map<String, Object> props, final ID id) {
             N.checkArgNotNull(id);
@@ -8545,10 +8545,10 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param conn the conn
-         * @param props the props
-         * @param whereCause the where cause
-         * @return the int
+         * @param conn
+         * @param props
+         * @param whereCause
+         * @return
          */
         public int update(final Connection conn, final Map<String, Object> props, final Condition whereCause) {
             N.checkArgNotNull(props);
@@ -8567,7 +8567,7 @@ public class SQLExecutor {
          * Update All the records by batch operation.
          *
          * @param entities which must have the same properties set for update.
-         * @return the int
+         * @return
          */
         public int batchUpdate(final Collection<? extends T> entities) {
             return batchUpdate(entities, (Collection<String>) null);
@@ -8576,9 +8576,9 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @return the int
+         * @param entities
+         * @param propNamesToUpdate
+         * @return
          */
         public int batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate) {
             return batchUpdate(entities, propNamesToUpdate, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -8587,9 +8587,9 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the int
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public int batchUpdate(final Collection<? extends T> entities, final int batchSize) {
             return batchUpdate(entities, (Collection<String>) null, batchSize);
@@ -8599,9 +8599,9 @@ public class SQLExecutor {
          * Update All the records by batch operation.
          *
          * @param entities which must have the same properties set for update.
-         * @param propNamesToUpdate the prop names to update
+         * @param propNamesToUpdate
          * @param batchSize Default value is 200.
-         * @return the int
+         * @return
          */
         public int batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize) {
             return batchUpdate(entities, propNamesToUpdate, batchSize, IsolationLevel.DEFAULT);
@@ -8610,10 +8610,10 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the int
+         * @param entities
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public int batchUpdate(final Collection<? extends T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return batchUpdate(entities, (Collection<String>) null, batchSize, isolationLevel);
@@ -8622,11 +8622,11 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the int
+         * @param entities
+         * @param propNamesToUpdate
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public int batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize,
                 final IsolationLevel isolationLevel) {
@@ -8636,9 +8636,9 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @return the int
+         * @param conn
+         * @param entities
+         * @return
          */
         public int batchUpdate(final Connection conn, final Collection<? extends T> entities) {
             return batchUpdate(conn, entities, (Collection<String>) null);
@@ -8647,10 +8647,10 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @return the int
+         * @param conn
+         * @param entities
+         * @param propNamesToUpdate
+         * @return
          */
         public int batchUpdate(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToUpdate) {
             return batchUpdate(conn, entities, propNamesToUpdate, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -8659,10 +8659,10 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the int
+         * @param conn
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public int batchUpdate(final Connection conn, final Collection<? extends T> entities, final int batchSize) {
             return batchUpdate(conn, entities, (Collection<String>) null, batchSize);
@@ -8671,11 +8671,11 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @param batchSize the batch size
-         * @return the int
+         * @param conn
+         * @param entities
+         * @param propNamesToUpdate
+         * @param batchSize
+         * @return
          */
         public int batchUpdate(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize) {
             return batchUpdate(conn, entities, propNamesToUpdate, batchSize, IsolationLevel.DEFAULT);
@@ -8684,12 +8684,12 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the int
+         * @param conn
+         * @param entities
+         * @param propNamesToUpdate
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         @SuppressWarnings("deprecation")
         private int batchUpdate(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize,
@@ -8731,9 +8731,9 @@ public class SQLExecutor {
         /**
          * Prepare update sql.
          *
-         * @param entity the entity
-         * @param propNamesToUpdate the prop names to update
-         * @return the string
+         * @param entity
+         * @param propNamesToUpdate
+         * @return
          */
         private String prepareUpdateSql(final T entity, final Collection<String> propNamesToUpdate) {
             checkEntity(entity);
@@ -8755,9 +8755,9 @@ public class SQLExecutor {
         /**
          * Prepare update.
          *
-         * @param props the props
-         * @param whereCause the where cause
-         * @return the sp
+         * @param props
+         * @param whereCause
+         * @return
          */
         private SP prepareUpdate(final Map<String, Object> props, final Condition whereCause) {
             N.checkArgument(N.notNullOrEmpty(props), "props");
@@ -8780,8 +8780,8 @@ public class SQLExecutor {
         /**
          * Prepare update sql.
          *
-         * @param propNamesToUpdate the prop names to update
-         * @return the string
+         * @param propNamesToUpdate
+         * @return
          */
         private String prepareUpdateSql(final Collection<String> propNamesToUpdate) {
             N.checkArgument(N.notNullOrEmpty(propNamesToUpdate), "propNamesToUpdate");
@@ -8829,8 +8829,8 @@ public class SQLExecutor {
         /**
          * Delete.
          *
-         * @param whereCause the where cause
-         * @return the int
+         * @param whereCause
+         * @return
          */
         public int delete(final Condition whereCause) {
             return delete(null, whereCause);
@@ -8839,9 +8839,9 @@ public class SQLExecutor {
         /**
          * Delete.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the int
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public int delete(final Connection conn, final Condition whereCause) {
             N.checkArgNotNull(whereCause);
@@ -8859,8 +8859,8 @@ public class SQLExecutor {
         /**
          * Delete.
          *
-         * @param entity the entity
-         * @return the int
+         * @param entity
+         * @return
          */
         public int delete(final T entity) {
             return delete(null, entity);
@@ -8869,9 +8869,9 @@ public class SQLExecutor {
         /**
          * Delete.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @return the int
+         * @param conn
+         * @param entity
+         * @return
          */
         public int delete(final Connection conn, final T entity) {
             N.checkArgNotNull(entity);
@@ -8883,8 +8883,8 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param entities the entities
-         * @return the int
+         * @param entities
+         * @return
          */
         public int batchDelete(final Collection<T> entities) {
             return batchDelete(entities, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -8893,9 +8893,9 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param entities the entities
+         * @param entities
          * @param batchSize Default value is 200.
-         * @return the int
+         * @return
          */
         public int batchDelete(final Collection<T> entities, final int batchSize) {
             return batchDelete(entities, batchSize, IsolationLevel.DEFAULT);
@@ -8904,10 +8904,10 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param entities the entities
+         * @param entities
          * @param batchSize Default value is 200.
-         * @param isolationLevel the isolation level
-         * @return the int
+         * @param isolationLevel
+         * @return
          */
         public int batchDelete(final Collection<T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return batchDelete(null, entities, batchSize, isolationLevel);
@@ -8916,9 +8916,9 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @return the int
+         * @param conn
+         * @param entities
+         * @return
          */
         public int batchDelete(final Connection conn, final Collection<T> entities) {
             return batchDelete(conn, entities, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -8927,10 +8927,10 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the int
+         * @param conn
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public int batchDelete(final Connection conn, final Collection<T> entities, final int batchSize) {
             return batchDelete(conn, entities, batchSize, IsolationLevel.DEFAULT);
@@ -8939,11 +8939,11 @@ public class SQLExecutor {
         /**
          * Batch delete.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the int
+         * @param conn
+         * @param entities
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         private int batchDelete(final Connection conn, final Collection<T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             N.checkArgPositive(batchSize, "batchSize");
@@ -8961,8 +8961,8 @@ public class SQLExecutor {
         /**
          * Prepare delete.
          *
-         * @param whereCause the where cause
-         * @return the sp
+         * @param whereCause
+         * @return
          */
         private SP prepareDelete(final Condition whereCause) {
             SP sp = null;
@@ -8993,8 +8993,8 @@ public class SQLExecutor {
         /**
          * Delete by id.
          *
-         * @param id the id
-         * @return the int
+         * @param id
+         * @return
          */
         public int deleteById(final ID id) {
             return deleteById(null, id);
@@ -9003,9 +9003,9 @@ public class SQLExecutor {
         /**
          * Delete by id.
          *
-         * @param conn the conn
-         * @param id the id
-         * @return the int
+         * @param conn
+         * @param id
+         * @return
          */
         public int deleteById(final Connection conn, final ID id) {
             N.checkArgNotNull(id);
@@ -9016,8 +9016,8 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param ids the ids
-         * @return the int
+         * @param ids
+         * @return
          */
         public int batchDeleteByIds(final Collection<ID> ids) {
             return batchDeleteByIds(ids, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -9026,9 +9026,9 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param ids the ids
+         * @param ids
          * @param batchSize Default value is 200.
-         * @return the int
+         * @return
          */
         public int batchDeleteByIds(final Collection<ID> ids, final int batchSize) {
             return batchDeleteByIds(ids, batchSize, IsolationLevel.DEFAULT);
@@ -9037,10 +9037,10 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param ids the ids
+         * @param ids
          * @param batchSize Default value is 200.
-         * @param isolationLevel the isolation level
-         * @return the int
+         * @param isolationLevel
+         * @return
          */
         public int batchDeleteByIds(final Collection<ID> ids, final int batchSize, final IsolationLevel isolationLevel) {
             return batchDeleteByIds(null, ids, batchSize, isolationLevel);
@@ -9049,9 +9049,9 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param conn the conn
-         * @param ids the ids
-         * @return the int
+         * @param conn
+         * @param ids
+         * @return
          */
         public int batchDeleteByIds(final Connection conn, final Collection<ID> ids) {
             return batchDeleteByIds(conn, ids, JdbcSettings.DEFAULT_BATCH_SIZE);
@@ -9060,10 +9060,10 @@ public class SQLExecutor {
         /**
          * Delete all the records by batch operation.
          *
-         * @param conn the conn
-         * @param ids the ids
-         * @param batchSize the batch size
-         * @return the int
+         * @param conn
+         * @param ids
+         * @param batchSize
+         * @return
          */
         public int batchDeleteByIds(final Connection conn, final Collection<ID> ids, final int batchSize) {
             return batchDeleteByIds(conn, ids, batchSize, IsolationLevel.DEFAULT);
@@ -9072,11 +9072,11 @@ public class SQLExecutor {
         /**
          * Batch delete by ids.
          *
-         * @param conn the conn
-         * @param ids the ids
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the int
+         * @param conn
+         * @param ids
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         private int batchDeleteByIds(final Connection conn, final Collection<ID> ids, final int batchSize, final IsolationLevel isolationLevel) {
             N.checkArgPositive(batchSize, "batchSize");
@@ -9095,7 +9095,7 @@ public class SQLExecutor {
         /**
          * Checks if is entity.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if is entity
          */
         private boolean isEntity(Object obj) {
@@ -9105,9 +9105,9 @@ public class SQLExecutor {
         /**
          * Id 2 cond.
          *
-         * @param id the id
-         * @param isIdOrEntity the is id or entity
-         * @return the condition
+         * @param id
+         * @param isIdOrEntity
+         * @return
          */
         private Condition id2Cond(final Object id, boolean isIdOrEntity) {
             if (isVoidId) {
@@ -9124,7 +9124,7 @@ public class SQLExecutor {
         /**
          * Check entity.
          *
-         * @param entity the entity
+         * @param entity
          */
         private void checkEntity(final Object entity) {
             final Class<?> cls = entity.getClass();
@@ -9137,7 +9137,7 @@ public class SQLExecutor {
         /**
          * To stirng.
          *
-         * @return the string
+         * @return
          */
         public String toStirng() {
             return "Mapper[" + ClassUtil.getCanonicalClassName(targetClass) + "]";
@@ -9147,8 +9147,8 @@ public class SQLExecutor {
     /**
      * The Class AsyncMapper.
      *
-     * @param <T> the generic type
-     * @param <ID> the generic type
+     * @param <T>
+     * @param <ID>
      */
     public static final class AsyncMapper<T, ID> {
 
@@ -9161,8 +9161,8 @@ public class SQLExecutor {
         /**
          * Instantiates a new async mapper.
          *
-         * @param mapper the mapper
-         * @param asyncExecutor the async executor
+         * @param mapper
+         * @param asyncExecutor
          */
         AsyncMapper(Mapper<T, ID> mapper, AsyncExecutor asyncExecutor) {
             this.mapper = mapper;
@@ -9172,8 +9172,8 @@ public class SQLExecutor {
         /**
          * Exists.
          *
-         * @param id the id
-         * @return the continuable future
+         * @param id
+         * @return
          */
         public ContinuableFuture<Boolean> exists(final ID id) {
             return asyncExecutor.execute(new Callable<Boolean>() {
@@ -9187,8 +9187,8 @@ public class SQLExecutor {
         /**
          * Exists.
          *
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Boolean> exists(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Boolean>() {
@@ -9202,9 +9202,9 @@ public class SQLExecutor {
         /**
          * Exists.
          *
-         * @param conn the conn
-         * @param id the id
-         * @return the continuable future
+         * @param conn
+         * @param id
+         * @return
          */
         public ContinuableFuture<Boolean> exists(final Connection conn, final ID id) {
             return asyncExecutor.execute(new Callable<Boolean>() {
@@ -9218,9 +9218,9 @@ public class SQLExecutor {
         /**
          * Exists.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Boolean> exists(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Boolean>() {
@@ -9234,8 +9234,8 @@ public class SQLExecutor {
         /**
          * Count.
          *
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Integer> count(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -9249,9 +9249,9 @@ public class SQLExecutor {
         /**
          * Count.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Integer> count(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -9265,8 +9265,8 @@ public class SQLExecutor {
         /**
          * Gets the.
          *
-         * @param id the id
-         * @return the continuable future
+         * @param id
+         * @return
          */
         public ContinuableFuture<Optional<T>> get(final ID id) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -9298,9 +9298,9 @@ public class SQLExecutor {
         /**
          * Gets the.
          *
-         * @param id the id
-         * @param selectPropNames the select prop names
-         * @return the continuable future
+         * @param id
+         * @param selectPropNames
+         * @return
          */
         public ContinuableFuture<Optional<T>> get(final ID id, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -9314,10 +9314,10 @@ public class SQLExecutor {
         /**
          * Gets the.
          *
-         * @param conn the conn
-         * @param id the id
-         * @param selectPropNames the select prop names
-         * @return the continuable future
+         * @param conn
+         * @param id
+         * @param selectPropNames
+         * @return
          */
         public ContinuableFuture<Optional<T>> get(final Connection conn, final ID id, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -9331,8 +9331,8 @@ public class SQLExecutor {
         /**
          * Gets the t.
          *
-         * @param id the id
-         * @return the t
+         * @param id
+         * @return
          */
         public ContinuableFuture<T> gett(final ID id) {
             return asyncExecutor.execute(new Callable<T>() {
@@ -9364,9 +9364,9 @@ public class SQLExecutor {
         /**
          * Gets the t.
          *
-         * @param id the id
-         * @param selectPropNames the select prop names
-         * @return the t
+         * @param id
+         * @param selectPropNames
+         * @return
          */
         public ContinuableFuture<T> gett(final ID id, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<T>() {
@@ -9380,10 +9380,10 @@ public class SQLExecutor {
         /**
          * Gets the t.
          *
-         * @param conn the conn
-         * @param id the id
-         * @param selectPropNames the select prop names
-         * @return the t
+         * @param conn
+         * @param id
+         * @param selectPropNames
+         * @return
          */
         public ContinuableFuture<T> gett(final Connection conn, final ID id, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<T>() {
@@ -9397,8 +9397,8 @@ public class SQLExecutor {
         /**
          * Batch get.
          *
-         * @param ids the ids
-         * @return the continuable future
+         * @param ids
+         * @return
          */
         public ContinuableFuture<List<T>> batchGet(final List<ID> ids) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9429,9 +9429,9 @@ public class SQLExecutor {
         /**
          * Batch get.
          *
-         * @param ids the ids
-         * @param selectPropNames the select prop names
-         * @return the continuable future
+         * @param ids
+         * @param selectPropNames
+         * @return
          */
         public ContinuableFuture<List<T>> batchGet(final List<ID> ids, final Collection<String> selectPropNames) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9445,10 +9445,10 @@ public class SQLExecutor {
         /**
          * Batch get.
          *
-         * @param ids the ids
-         * @param selectPropNames the select prop names
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param ids
+         * @param selectPropNames
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<List<T>> batchGet(final List<ID> ids, final Collection<String> selectPropNames, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9462,11 +9462,11 @@ public class SQLExecutor {
         /**
          * Batch get.
          *
-         * @param conn the conn
-         * @param ids the ids
-         * @param selectPropNames the select prop names
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param conn
+         * @param ids
+         * @param selectPropNames
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<List<T>> batchGet(final Connection conn, final List<ID> ids, final Collection<String> selectPropNames, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9480,8 +9480,8 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Optional<T>> findFirst(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -9495,9 +9495,9 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Optional<T>> findFirst(final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -9511,10 +9511,10 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<Optional<T>> findFirst(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -9528,9 +9528,9 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Optional<T>> findFirst(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -9544,10 +9544,10 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Optional<T>> findFirst(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<T>>() {
@@ -9561,11 +9561,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<Optional<T>> findFirst(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -9580,11 +9580,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -9598,12 +9598,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -9618,12 +9618,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -9638,13 +9638,13 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -9659,11 +9659,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -9678,12 +9678,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -9698,12 +9698,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final Collection<String> selectPropNames,
                 final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
@@ -9718,13 +9718,13 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final Collection<String> selectPropNames,
                 final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -9739,11 +9739,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Optional<R>>() {
@@ -9757,12 +9757,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -9777,12 +9777,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -9797,13 +9797,13 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -9818,11 +9818,11 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -9837,12 +9837,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -9857,12 +9857,12 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final Collection<String> selectPropNames,
                 final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
@@ -9877,13 +9877,13 @@ public class SQLExecutor {
         /**
          * Find first.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Optional<R>> findFirst(final Connection conn, final Collection<String> selectPropNames,
                 final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -9898,8 +9898,8 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<List<T>> list(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9913,9 +9913,9 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<List<T>> list(final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9929,10 +9929,10 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<List<T>> list(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9946,9 +9946,9 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<List<T>> list(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9962,10 +9962,10 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<List<T>> list(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -9979,11 +9979,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<List<T>> list(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -9998,11 +9998,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -10016,12 +10016,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10036,12 +10036,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -10056,13 +10056,13 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10077,11 +10077,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -10096,12 +10096,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10116,12 +10116,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -10136,13 +10136,13 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10157,11 +10157,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<List<R>>() {
@@ -10175,12 +10175,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10195,12 +10195,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -10215,13 +10215,13 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10236,11 +10236,11 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -10255,12 +10255,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10275,12 +10275,12 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -10295,13 +10295,13 @@ public class SQLExecutor {
         /**
          * List.
          *
-         * @param <R> the generic type
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param conn
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> list(final Connection conn, final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10316,9 +10316,9 @@ public class SQLExecutor {
         /**
          * List all.
          *
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<List<T>> listAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -10332,10 +10332,10 @@ public class SQLExecutor {
         /**
          * List all.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<List<T>> listAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<List<T>>() {
@@ -10349,12 +10349,12 @@ public class SQLExecutor {
         /**
          * List all.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> listAll(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10369,12 +10369,12 @@ public class SQLExecutor {
         /**
          * List all.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> listAll(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10389,12 +10389,12 @@ public class SQLExecutor {
         /**
          * List all.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> listAll(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10409,12 +10409,12 @@ public class SQLExecutor {
         /**
          * List all.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<List<R>> listAll(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10429,8 +10429,8 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Stream<T>> stream(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
@@ -10444,9 +10444,9 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Stream<T>> stream(final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
@@ -10460,10 +10460,10 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<Stream<T>> stream(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
@@ -10477,11 +10477,11 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> stream(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -10495,12 +10495,12 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> stream(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10515,11 +10515,11 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> stream(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -10534,12 +10534,12 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> stream(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10554,11 +10554,11 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> stream(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Stream<R>>() {
@@ -10572,12 +10572,12 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> stream(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10592,11 +10592,11 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> stream(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause) {
@@ -10611,12 +10611,12 @@ public class SQLExecutor {
         /**
          * Stream.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> stream(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10631,9 +10631,9 @@ public class SQLExecutor {
         /**
          * Stream all.
          *
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<Stream<T>> streamAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
@@ -10647,10 +10647,10 @@ public class SQLExecutor {
         /**
          * Stream all.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<Stream<T>> streamAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<Stream<T>>() {
@@ -10664,12 +10664,12 @@ public class SQLExecutor {
         /**
          * Stream all.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> streamAll(final String selectPropName, final JdbcUtil.RowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10684,12 +10684,12 @@ public class SQLExecutor {
         /**
          * Stream all.
          *
-         * @param <R> the generic type
-         * @param selectPropName the select prop name
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropName
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> streamAll(final String selectPropName, final JdbcUtil.BiRowMapper<R> rowMapper, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10704,12 +10704,12 @@ public class SQLExecutor {
         /**
          * Stream all.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> streamAll(final Collection<String> selectPropNames, final JdbcUtil.RowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10724,12 +10724,12 @@ public class SQLExecutor {
         /**
          * Stream all.
          *
-         * @param <R> the generic type
-         * @param selectPropNames the select prop names
-         * @param rowMapper the row mapper
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param <R>
+         * @param selectPropNames
+         * @param rowMapper
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <R> ContinuableFuture<Stream<R>> streamAll(final Collection<String> selectPropNames, final JdbcUtil.BiRowMapper<R> rowMapper,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -10744,8 +10744,8 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<DataSet> query(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<DataSet>() {
@@ -10759,9 +10759,9 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<DataSet> query(final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<DataSet>() {
@@ -10775,10 +10775,10 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<DataSet> query(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<DataSet>() {
@@ -10792,9 +10792,9 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<DataSet> query(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<DataSet>() {
@@ -10808,10 +10808,10 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<DataSet> query(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<DataSet>() {
@@ -10825,11 +10825,11 @@ public class SQLExecutor {
         /**
          * Query.
          *
-         * @param conn the conn
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param conn
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<DataSet> query(final Connection conn, final Collection<String> selectPropNames, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -10844,9 +10844,9 @@ public class SQLExecutor {
         /**
          * Query all.
          *
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<DataSet> queryAll(final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<DataSet>() {
@@ -10860,10 +10860,10 @@ public class SQLExecutor {
         /**
          * Query all.
          *
-         * @param selectPropNames the select prop names
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param selectPropNames
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public ContinuableFuture<DataSet> queryAll(final Collection<String> selectPropNames, final Condition whereCause, final JdbcSettings jdbcSettings) {
             return asyncExecutor.execute(new Callable<DataSet>() {
@@ -10877,9 +10877,9 @@ public class SQLExecutor {
         /**
          * Query for boolean.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<OptionalBoolean> queryForBoolean(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalBoolean>() {
@@ -10893,9 +10893,9 @@ public class SQLExecutor {
         /**
          * Query for byte.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<OptionalByte> queryForByte(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalByte>() {
@@ -10909,9 +10909,9 @@ public class SQLExecutor {
         /**
          * Query for short.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<OptionalShort> queryForShort(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalShort>() {
@@ -10925,9 +10925,9 @@ public class SQLExecutor {
         /**
          * Query for int.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<OptionalInt> queryForInt(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalInt>() {
@@ -10941,9 +10941,9 @@ public class SQLExecutor {
         /**
          * Query for long.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<OptionalLong> queryForLong(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalLong>() {
@@ -10957,9 +10957,9 @@ public class SQLExecutor {
         /**
          * Query for float.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<OptionalFloat> queryForFloat(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalFloat>() {
@@ -10973,9 +10973,9 @@ public class SQLExecutor {
         /**
          * Query for double.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<OptionalDouble> queryForDouble(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<OptionalDouble>() {
@@ -10989,9 +10989,9 @@ public class SQLExecutor {
         /**
          * Query for big decimal.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Nullable<BigDecimal>> queryForBigDecimal(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<BigDecimal>>() {
@@ -11005,9 +11005,9 @@ public class SQLExecutor {
         /**
          * Query for string.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Nullable<String>> queryForString(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<String>>() {
@@ -11021,9 +11021,9 @@ public class SQLExecutor {
         /**
          * Query for date.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Nullable<java.sql.Date>> queryForDate(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<java.sql.Date>>() {
@@ -11037,9 +11037,9 @@ public class SQLExecutor {
         /**
          * Query for time.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Nullable<java.sql.Time>> queryForTime(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<java.sql.Time>>() {
@@ -11053,9 +11053,9 @@ public class SQLExecutor {
         /**
          * Query for timestamp.
          *
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Nullable<java.sql.Timestamp>> queryForTimestamp(final String selectPropName, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Nullable<java.sql.Timestamp>>() {
@@ -11070,10 +11070,10 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param id the id
-         * @return the continuable future
+         * @param targetValueClass
+         * @param selectPropName
+         * @param id
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final ID id) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -11088,10 +11088,10 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param targetValueClass
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName,
                 final Condition whereCause) {
@@ -11107,11 +11107,11 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param targetValueClass
+         * @param selectPropName
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -11127,11 +11127,11 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param id the id
-         * @return the continuable future
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param id
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final ID id) {
@@ -11147,11 +11147,11 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final Condition whereCause) {
@@ -11167,12 +11167,12 @@ public class SQLExecutor {
          * Query for single result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForSingleResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -11188,10 +11188,10 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param id the id
-         * @return the continuable future
+         * @param targetValueClass
+         * @param selectPropName
+         * @param id
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final ID id) {
             return asyncExecutor.execute(new Callable<Nullable<V>>() {
@@ -11206,10 +11206,10 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param targetValueClass
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName,
                 final Condition whereCause) {
@@ -11225,11 +11225,11 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param targetValueClass
+         * @param selectPropName
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final String selectPropName, final Condition whereCause,
                 final JdbcSettings jdbcSettings) {
@@ -11245,11 +11245,11 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param id the id
-         * @return the continuable future
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param id
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final ID id) {
@@ -11265,11 +11265,11 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param whereCause
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final Condition whereCause) {
@@ -11285,12 +11285,12 @@ public class SQLExecutor {
          * Query for unique result.
          *
          * @param <V> the value type
-         * @param targetValueClass the target value class
-         * @param conn the conn
-         * @param selectPropName the select prop name
-         * @param whereCause the where cause
-         * @param jdbcSettings the jdbc settings
-         * @return the continuable future
+         * @param targetValueClass
+         * @param conn
+         * @param selectPropName
+         * @param whereCause
+         * @param jdbcSettings
+         * @return
          */
         public <V> ContinuableFuture<Nullable<V>> queryForUniqueResult(final Class<V> targetValueClass, final Connection conn, final String selectPropName,
                 final Condition whereCause, final JdbcSettings jdbcSettings) {
@@ -11305,8 +11305,8 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @return the continuable future
+         * @param entity
+         * @return
          */
         public ContinuableFuture<ID> insert(final T entity) {
             return asyncExecutor.execute(new Callable<ID>() {
@@ -11320,9 +11320,9 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param entity the entity
-         * @param propNamesToInsert the prop names to insert
-         * @return the continuable future
+         * @param entity
+         * @param propNamesToInsert
+         * @return
          */
         public ContinuableFuture<ID> insert(final T entity, final Collection<String> propNamesToInsert) {
             return asyncExecutor.execute(new Callable<ID>() {
@@ -11336,8 +11336,8 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param props the props
-         * @return the continuable future
+         * @param props
+         * @return
          */
         public ContinuableFuture<ID> insert(final Map<String, Object> props) {
             return asyncExecutor.execute(new Callable<ID>() {
@@ -11351,9 +11351,9 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @return the continuable future
+         * @param conn
+         * @param entity
+         * @return
          */
         public ContinuableFuture<ID> insert(final Connection conn, final T entity) {
             return asyncExecutor.execute(new Callable<ID>() {
@@ -11367,10 +11367,10 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @param propNamesToInsert the prop names to insert
-         * @return the continuable future
+         * @param conn
+         * @param entity
+         * @param propNamesToInsert
+         * @return
          */
         public ContinuableFuture<ID> insert(final Connection conn, final T entity, final Collection<String> propNamesToInsert) {
             return asyncExecutor.execute(new Callable<ID>() {
@@ -11384,9 +11384,9 @@ public class SQLExecutor {
         /**
          * Insert.
          *
-         * @param conn the conn
-         * @param props the props
-         * @return the continuable future
+         * @param conn
+         * @param props
+         * @return
          */
         public ContinuableFuture<ID> insert(final Connection conn, final Map<String, Object> props) {
             return asyncExecutor.execute(new Callable<ID>() {
@@ -11430,8 +11430,8 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param entities the entities
-         * @return the continuable future
+         * @param entities
+         * @return
          */
         public ContinuableFuture<List<ID>> batchInsert(final Collection<? extends T> entities) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
@@ -11445,9 +11445,9 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<List<ID>> batchInsert(final Collection<? extends T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
@@ -11461,10 +11461,10 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the continuable future
+         * @param entities
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public ContinuableFuture<List<ID>> batchInsert(final Collection<? extends T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
@@ -11478,11 +11478,11 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param entities the entities
-         * @param propNamesToInsert the prop names to insert
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the continuable future
+         * @param entities
+         * @param propNamesToInsert
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public ContinuableFuture<List<ID>> batchInsert(final Collection<? extends T> entities, final Collection<String> propNamesToInsert, final int batchSize,
                 final IsolationLevel isolationLevel) {
@@ -11497,9 +11497,9 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @return
          */
         public ContinuableFuture<List<ID>> batchInsert(final Connection conn, final Collection<? extends T> entities) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
@@ -11513,10 +11513,10 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<List<ID>> batchInsert(final Connection conn, final Collection<? extends T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<List<ID>>() {
@@ -11530,11 +11530,11 @@ public class SQLExecutor {
         /**
          * Batch insert.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param propNamesToInsert the prop names to insert
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @param propNamesToInsert
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<List<ID>> batchInsert(final Connection conn, final Collection<? extends T> entities,
                 final Collection<String> propNamesToInsert, final int batchSize) {
@@ -11549,8 +11549,8 @@ public class SQLExecutor {
         /**
          * Upsert.
          *
-         * @param entity the entity
-         * @return the continuable future
+         * @param entity
+         * @return
          */
         public ContinuableFuture<T> upsert(final T entity) {
             return asyncExecutor.execute(new Callable<T>() {
@@ -11564,9 +11564,9 @@ public class SQLExecutor {
         /**
          * Upsert.
          *
-         * @param entity the entity
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param entity
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<T> upsert(final T entity, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<T>() {
@@ -11580,8 +11580,8 @@ public class SQLExecutor {
         /**
          * Refresh.
          *
-         * @param entity the entity
-         * @return the continuable future
+         * @param entity
+         * @return
          */
         public ContinuableFuture<Boolean> refresh(final T entity) {
             return asyncExecutor.execute(new Callable<Boolean>() {
@@ -11595,9 +11595,9 @@ public class SQLExecutor {
         /**
          * Refresh.
          *
-         * @param entity the entity
-         * @param propNamesToUpdate the prop names to update
-         * @return the continuable future
+         * @param entity
+         * @param propNamesToUpdate
+         * @return
          */
         public ContinuableFuture<Boolean> refresh(final T entity, final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Boolean>() {
@@ -11611,8 +11611,8 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param entity the entity
-         * @return the continuable future
+         * @param entity
+         * @return
          */
         public ContinuableFuture<Integer> update(final T entity) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11626,9 +11626,9 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param entity the entity
-         * @param propNamesToUpdate the prop names to update
-         * @return the continuable future
+         * @param entity
+         * @param propNamesToUpdate
+         * @return
          */
         public ContinuableFuture<Integer> update(final T entity, final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11642,9 +11642,9 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param props the props
-         * @param id the id
-         * @return the continuable future
+         * @param props
+         * @param id
+         * @return
          */
         public ContinuableFuture<Integer> update(final Map<String, Object> props, final ID id) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11658,9 +11658,9 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param props the props
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param props
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Integer> update(final Map<String, Object> props, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11674,9 +11674,9 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @return the continuable future
+         * @param conn
+         * @param entity
+         * @return
          */
         public ContinuableFuture<Integer> update(final Connection conn, final T entity) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11690,10 +11690,10 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @param propNamesToUpdate the prop names to update
-         * @return the continuable future
+         * @param conn
+         * @param entity
+         * @param propNamesToUpdate
+         * @return
          */
         public ContinuableFuture<Integer> update(final Connection conn, final T entity, final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11707,10 +11707,10 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param conn the conn
-         * @param props the props
-         * @param id the id
-         * @return the continuable future
+         * @param conn
+         * @param props
+         * @param id
+         * @return
          */
         public ContinuableFuture<Integer> update(final Connection conn, final Map<String, Object> props, final ID id) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11724,10 +11724,10 @@ public class SQLExecutor {
         /**
          * Update.
          *
-         * @param conn the conn
-         * @param props the props
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param props
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Integer> update(final Connection conn, final Map<String, Object> props, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11802,8 +11802,8 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @return the continuable future
+         * @param entities
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11817,9 +11817,9 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @return the continuable future
+         * @param entities
+         * @param propNamesToUpdate
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11833,9 +11833,9 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11849,10 +11849,10 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param entities
+         * @param propNamesToUpdate
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11866,10 +11866,10 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the continuable future
+         * @param entities
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11883,11 +11883,11 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the continuable future
+         * @param entities
+         * @param propNamesToUpdate
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Collection<? extends T> entities, final Collection<String> propNamesToUpdate, final int batchSize,
                 final IsolationLevel isolationLevel) {
@@ -11902,9 +11902,9 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Connection conn, final Collection<? extends T> entities) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11918,10 +11918,10 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @param propNamesToUpdate
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Connection conn, final Collection<? extends T> entities,
                 final Collection<String> propNamesToUpdate) {
@@ -11936,10 +11936,10 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Connection conn, final Collection<? extends T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11953,11 +11953,11 @@ public class SQLExecutor {
         /**
          * Batch update.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param propNamesToUpdate the prop names to update
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @param propNamesToUpdate
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<Integer> batchUpdate(final Connection conn, final Collection<? extends T> entities, final Collection<String> propNamesToUpdate,
                 final int batchSize) {
@@ -11972,8 +11972,8 @@ public class SQLExecutor {
         /**
          * Delete.
          *
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Integer> delete(final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -11987,9 +11987,9 @@ public class SQLExecutor {
         /**
          * Delete.
          *
-         * @param conn the conn
-         * @param whereCause the where cause
-         * @return the continuable future
+         * @param conn
+         * @param whereCause
+         * @return
          */
         public ContinuableFuture<Integer> delete(final Connection conn, final Condition whereCause) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12003,8 +12003,8 @@ public class SQLExecutor {
         /**
          * Delete.
          *
-         * @param entity the entity
-         * @return the continuable future
+         * @param entity
+         * @return
          */
         public ContinuableFuture<Integer> delete(final T entity) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12018,9 +12018,9 @@ public class SQLExecutor {
         /**
          * Delete.
          *
-         * @param conn the conn
-         * @param entity the entity
-         * @return the continuable future
+         * @param conn
+         * @param entity
+         * @return
          */
         public ContinuableFuture<Integer> delete(final Connection conn, final T entity) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12034,8 +12034,8 @@ public class SQLExecutor {
         /**
          * Batch delete.
          *
-         * @param entities the entities
-         * @return the continuable future
+         * @param entities
+         * @return
          */
         public ContinuableFuture<Integer> batchDelete(final Collection<T> entities) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12049,9 +12049,9 @@ public class SQLExecutor {
         /**
          * Batch delete.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<Integer> batchDelete(final Collection<T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12065,10 +12065,10 @@ public class SQLExecutor {
         /**
          * Batch delete.
          *
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the continuable future
+         * @param entities
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public ContinuableFuture<Integer> batchDelete(final Collection<T> entities, final int batchSize, final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12082,9 +12082,9 @@ public class SQLExecutor {
         /**
          * Batch delete.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @return
          */
         public ContinuableFuture<Integer> batchDelete(final Connection conn, final Collection<T> entities) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12098,10 +12098,10 @@ public class SQLExecutor {
         /**
          * Batch delete.
          *
-         * @param conn the conn
-         * @param entities the entities
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param conn
+         * @param entities
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<Integer> batchDelete(final Connection conn, final Collection<T> entities, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12115,8 +12115,8 @@ public class SQLExecutor {
         /**
          * Delete by id.
          *
-         * @param id the id
-         * @return the continuable future
+         * @param id
+         * @return
          */
         public ContinuableFuture<Integer> deleteById(final ID id) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12130,9 +12130,9 @@ public class SQLExecutor {
         /**
          * Delete by id.
          *
-         * @param conn the conn
-         * @param id the id
-         * @return the continuable future
+         * @param conn
+         * @param id
+         * @return
          */
         public ContinuableFuture<Integer> deleteById(final Connection conn, final ID id) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12146,8 +12146,8 @@ public class SQLExecutor {
         /**
          * Batch delete by ids.
          *
-         * @param ids the ids
-         * @return the continuable future
+         * @param ids
+         * @return
          */
         public ContinuableFuture<Integer> batchDeleteByIds(final Collection<ID> ids) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12161,9 +12161,9 @@ public class SQLExecutor {
         /**
          * Batch delete by ids.
          *
-         * @param ids the ids
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param ids
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<Integer> batchDeleteByIds(final Collection<ID> ids, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12177,10 +12177,10 @@ public class SQLExecutor {
         /**
          * Batch delete by ids.
          *
-         * @param ids the ids
-         * @param batchSize the batch size
-         * @param isolationLevel the isolation level
-         * @return the continuable future
+         * @param ids
+         * @param batchSize
+         * @param isolationLevel
+         * @return
          */
         public ContinuableFuture<Integer> batchDeleteByIds(final Collection<ID> ids, final int batchSize, final IsolationLevel isolationLevel) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12194,9 +12194,9 @@ public class SQLExecutor {
         /**
          * Batch delete by ids.
          *
-         * @param conn the conn
-         * @param ids the ids
-         * @return the continuable future
+         * @param conn
+         * @param ids
+         * @return
          */
         public ContinuableFuture<Integer> batchDeleteByIds(final Connection conn, final Collection<ID> ids) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12210,10 +12210,10 @@ public class SQLExecutor {
         /**
          * Batch delete by ids.
          *
-         * @param conn the conn
-         * @param ids the ids
-         * @param batchSize the batch size
-         * @return the continuable future
+         * @param conn
+         * @param ids
+         * @param batchSize
+         * @return
          */
         public ContinuableFuture<Integer> batchDeleteByIds(final Connection conn, final Collection<ID> ids, final int batchSize) {
             return asyncExecutor.execute(new Callable<Integer>() {
@@ -12258,9 +12258,9 @@ public class SQLExecutor {
         /**
          * Sets the parameters.
          *
-         * @param namedSQL the named SQL
-         * @param stmt the stmt
-         * @param parameters the parameters
+         * @param namedSQL
+         * @param stmt
+         * @param parameters
          * @throws SQLException the SQL exception
          */
         public void setParameters(final NamedSQL namedSQL, final PreparedStatement stmt, final Object... parameters) throws SQLException;
@@ -12270,7 +12270,7 @@ public class SQLExecutor {
      * Refer to http://landawn.com/introduction-to-jdbc.html about how to read columns/rows from <code>java.sql.ResultSet</code>
      *
      * @author Haiyang Li
-     * @param <T> the generic type
+     * @param <T>
      */
     public static interface ResultExtractor<T> {
 
@@ -12285,9 +12285,9 @@ public class SQLExecutor {
         /**
          * Extract data.
          *
-         * @param rs the rs
-         * @param jdbcSettings the jdbc settings
-         * @return the t
+         * @param rs
+         * @param jdbcSettings
+         * @return
          * @throws SQLException the SQL exception
          */
         public T extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException;
@@ -12297,9 +12297,9 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @return the result extractor
+         * @param keyExtractor
+         * @param valueExtractor
+         * @return
          */
         public static <K, V> ResultExtractor<Map<K, V>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) {
             return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
@@ -12310,11 +12310,11 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param supplier the supplier
-         * @return the result extractor
+         * @param <M>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param supplier
+         * @return
          */
         public static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
@@ -12326,10 +12326,10 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param mergeFunction the merge function
-         * @return the result extractor
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param mergeFunction
+         * @return
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -12344,12 +12344,12 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param mergeFunction the merge function
-         * @param supplier the supplier
-         * @return the result extractor
+         * @param <M>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param mergeFunction
+         * @param supplier
+         * @return
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -12385,12 +12385,12 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <A> the generic type
-         * @param <D> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param downstream the downstream
-         * @return the result extractor
+         * @param <A>
+         * @param <D>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param downstream
+         * @return
          */
         public static <K, V, A, D> ResultExtractor<Map<K, D>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream) {
@@ -12402,14 +12402,14 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <A> the generic type
-         * @param <D> the generic type
-         * @param <M> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param downstream the downstream
-         * @param supplier the supplier
-         * @return the result extractor
+         * @param <A>
+         * @param <D>
+         * @param <M>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param downstream
+         * @param supplier
+         * @return
          */
         public static <K, V, A, D, M extends Map<K, D>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream, final Supplier<? extends M> supplier) {
@@ -12461,9 +12461,9 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @return the result extractor
+         * @param keyExtractor
+         * @param valueExtractor
+         * @return
          */
         public static <K, V> ResultExtractor<Map<K, V>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor) {
             return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
@@ -12474,11 +12474,11 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param supplier the supplier
-         * @return the result extractor
+         * @param <M>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param supplier
+         * @return
          */
         public static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
@@ -12490,10 +12490,10 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param mergeFunction the merge function
-         * @return the result extractor
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param mergeFunction
+         * @return
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -12508,12 +12508,12 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param mergeFunction the merge function
-         * @param supplier the supplier
-         * @return the result extractor
+         * @param <M>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param mergeFunction
+         * @param supplier
+         * @return
          * @see {@link Fn.EE#throwingMerger()}
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
@@ -12550,12 +12550,12 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <A> the generic type
-         * @param <D> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param downstream the downstream
-         * @return the result extractor
+         * @param <A>
+         * @param <D>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param downstream
+         * @return
          */
         public static <K, V, A, D> ResultExtractor<Map<K, D>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream) {
@@ -12567,14 +12567,14 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <A> the generic type
-         * @param <D> the generic type
-         * @param <M> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param downstream the downstream
-         * @param supplier the supplier
-         * @return the result extractor
+         * @param <A>
+         * @param <D>
+         * @param <M>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param downstream
+         * @param supplier
+         * @return
          */
         public static <K, V, A, D, M extends Map<K, D>> ResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream, final Supplier<? extends M> supplier) {
@@ -12627,9 +12627,9 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @return the result extractor
+         * @param keyExtractor
+         * @param valueExtractor
+         * @return
          */
         public static <K, V> ResultExtractor<Map<K, List<V>>> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) {
             return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
@@ -12640,11 +12640,11 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param supplier the supplier
-         * @return the result extractor
+         * @param <M>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param supplier
+         * @return
          */
         public static <K, V, M extends Map<K, List<V>>> ResultExtractor<M> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
@@ -12686,9 +12686,9 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @return the result extractor
+         * @param keyExtractor
+         * @param valueExtractor
+         * @return
          */
         public static <K, V> ResultExtractor<Map<K, List<V>>> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor) {
             return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
@@ -12699,11 +12699,11 @@ public class SQLExecutor {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M> the generic type
-         * @param keyExtractor the key extractor
-         * @param valueExtractor the value extractor
-         * @param supplier the supplier
-         * @return the result extractor
+         * @param <M>
+         * @param keyExtractor
+         * @param valueExtractor
+         * @param supplier
+         * @return
          */
         public static <K, V, M extends Map<K, List<V>>> ResultExtractor<M> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
@@ -12746,18 +12746,18 @@ public class SQLExecutor {
      * Refer to http://landawn.com/introduction-to-jdbc.html about how to read columns/rows from <code>java.sql.ResultSet</code>
      *
      * @author Haiyang Li
-     * @param <T> the generic type
+     * @param <T>
      */
     static interface ResultSetExtractor<T> {
 
         /**
          * Extract data.
          *
-         * @param targetClass the target class
-         * @param namedSQL the named SQL
-         * @param rs the rs
-         * @param jdbcSettings the jdbc settings
-         * @return the t
+         * @param targetClass
+         * @param namedSQL
+         * @param rs
+         * @param jdbcSettings
+         * @return
          * @throws SQLException the SQL exception
          */
         public T extractData(final Class<?> targetClass, final NamedSQL namedSQL, final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException;
@@ -12771,9 +12771,9 @@ public class SQLExecutor {
         /**
          * Sets the parameters.
          *
-         * @param namedSQL the named SQL
-         * @param stmt the stmt
-         * @param parameters the parameters
+         * @param namedSQL
+         * @param stmt
+         * @param parameters
          * @throws SQLException the SQL exception
          */
         @SuppressWarnings("rawtypes")
@@ -12846,10 +12846,10 @@ public class SQLExecutor {
         /**
          * Sets the parameters.
          *
-         * @param stmt the stmt
-         * @param parameterCount the parameter count
-         * @param parameters the parameters
-         * @param parameterTypes the parameter types
+         * @param stmt
+         * @param parameterCount
+         * @param parameters
+         * @param parameterTypes
          * @throws SQLException the SQL exception
          */
         @SuppressWarnings("rawtypes")
@@ -12858,9 +12858,9 @@ public class SQLExecutor {
         /**
          * Gets the parameter values.
          *
-         * @param namedSQL the named SQL
-         * @param parameters the parameters
-         * @return the parameter values
+         * @param namedSQL
+         * @param parameters
+         * @return
          */
         protected Object[] getParameterValues(final NamedSQL namedSQL, final Object... parameters) {
             if ((parameters.length == 1) && (parameters[0] != null)) {
@@ -12879,16 +12879,16 @@ public class SQLExecutor {
     /**
      * The Class AbstractResultExtractor.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     public static abstract class AbstractResultExtractor<T> implements ResultExtractor<T> {
 
         /**
          * Extract data.
          *
-         * @param rs the rs
-         * @param jdbcSettings the jdbc settings
-         * @return the t
+         * @param rs
+         * @param jdbcSettings
+         * @return
          * @throws SQLException the SQL exception
          */
         @Override
@@ -12899,8 +12899,8 @@ public class SQLExecutor {
         /**
          * Convert.
          *
-         * @param dataSet the data set
-         * @return the t
+         * @param dataSet
+         * @return
          */
         protected abstract T convert(final DataSet dataSet);
     }
@@ -13006,7 +13006,7 @@ public class SQLExecutor {
         /**
          * Creates the.
          *
-         * @return the jdbc settings
+         * @return
          */
         public static JdbcSettings create() {
             return new JdbcSettings();
@@ -13015,7 +13015,7 @@ public class SQLExecutor {
         /**
          * Copy.
          *
-         * @return the jdbc settings
+         * @return
          */
         public JdbcSettings copy() {
             JdbcSettings copy = new JdbcSettings();
@@ -13055,8 +13055,8 @@ public class SQLExecutor {
         /**
          * Sets the log SQL.
          *
-         * @param logSQL the log SQL
-         * @return the jdbc settings
+         * @param logSQL
+         * @return
          */
         public JdbcSettings setLogSQL(final boolean logSQL) {
             assertNotFrozen();
@@ -13078,8 +13078,8 @@ public class SQLExecutor {
         /**
          * Sets the log SQL with parameters.
          *
-         * @param logSQLWithParameters the log SQL with parameters
-         * @return the jdbc settings
+         * @param logSQLWithParameters
+         * @return
          */
         public JdbcSettings setLogSQLWithParameters(final boolean logSQLWithParameters) {
             assertNotFrozen();
@@ -13092,7 +13092,7 @@ public class SQLExecutor {
         /**
          * Gets the batch size.
          *
-         * @return the batch size
+         * @return
          */
         public int getBatchSize() {
             return batchSize;
@@ -13101,8 +13101,8 @@ public class SQLExecutor {
         /**
          * Sets the batch size.
          *
-         * @param batchSize the batch size
-         * @return the jdbc settings
+         * @param batchSize
+         * @return
          */
         public JdbcSettings setBatchSize(final int batchSize) {
             assertNotFrozen();
@@ -13115,7 +13115,7 @@ public class SQLExecutor {
         /**
          * Gets the query timeout.
          *
-         * @return the query timeout
+         * @return
          */
         public int getQueryTimeout() {
             return queryTimeout;
@@ -13124,8 +13124,8 @@ public class SQLExecutor {
         /**
          * Sets the query timeout.
          *
-         * @param queryTimeout the query timeout
-         * @return the jdbc settings
+         * @param queryTimeout
+         * @return
          */
         public JdbcSettings setQueryTimeout(final int queryTimeout) {
             assertNotFrozen();
@@ -13147,8 +13147,8 @@ public class SQLExecutor {
         /**
          * Sets the auto generated keys.
          *
-         * @param autoGeneratedKeys the auto generated keys
-         * @return the jdbc settings
+         * @param autoGeneratedKeys
+         * @return
          */
         public JdbcSettings setAutoGeneratedKeys(final boolean autoGeneratedKeys) {
             assertNotFrozen();
@@ -13161,7 +13161,7 @@ public class SQLExecutor {
         /**
          * Gets the returned column indexes.
          *
-         * @return the returned column indexes
+         * @return
          * @see {@link Connection#prepareStatement(String, int[])}
          */
         public int[] getReturnedColumnIndexes() {
@@ -13171,8 +13171,8 @@ public class SQLExecutor {
         /**
          * Sets the returned column indexes.
          *
-         * @param columnIndexes the column indexes
-         * @return the jdbc settings
+         * @param columnIndexes
+         * @return
          * @see {@link Connection#prepareStatement(String, int[])}
          */
         public JdbcSettings setReturnedColumnIndexes(final int[] columnIndexes) {
@@ -13186,7 +13186,7 @@ public class SQLExecutor {
         /**
          * Gets the returned column names.
          *
-         * @return the returned column names
+         * @return
          * @see {@link Connection#prepareStatement(String, String[])}
          */
         public String[] getReturnedColumnNames() {
@@ -13196,8 +13196,8 @@ public class SQLExecutor {
         /**
          * Sets the returned column names.
          *
-         * @param columnNames the column names
-         * @return the jdbc settings
+         * @param columnNames
+         * @return
          * @see {@link Connection#prepareStatement(String, String[])}
          */
         public JdbcSettings setReturnedColumnNames(final String[] columnNames) {
@@ -13211,7 +13211,7 @@ public class SQLExecutor {
         /**
          * Gets the max rows.
          *
-         * @return the max rows
+         * @return
          */
         public int getMaxRows() {
             return maxRows;
@@ -13220,8 +13220,8 @@ public class SQLExecutor {
         /**
          * Sets the max rows.
          *
-         * @param maxRows the max rows
-         * @return the jdbc settings
+         * @param maxRows
+         * @return
          */
         public JdbcSettings setMaxRows(final int maxRows) {
             assertNotFrozen();
@@ -13234,7 +13234,7 @@ public class SQLExecutor {
         /**
          * Gets the max field size.
          *
-         * @return the max field size
+         * @return
          */
         public int getMaxFieldSize() {
             return maxFieldSize;
@@ -13243,8 +13243,8 @@ public class SQLExecutor {
         /**
          * Sets the max field size.
          *
-         * @param maxFieldSize the max field size
-         * @return the jdbc settings
+         * @param maxFieldSize
+         * @return
          */
         public JdbcSettings setMaxFieldSize(final int maxFieldSize) {
             assertNotFrozen();
@@ -13257,7 +13257,7 @@ public class SQLExecutor {
         /**
          * Gets the fetch size.
          *
-         * @return the fetch size
+         * @return
          */
         public int getFetchSize() {
             return fetchSize;
@@ -13266,8 +13266,8 @@ public class SQLExecutor {
         /**
          * Sets the fetch size.
          *
-         * @param fetchSize the fetch size
-         * @return the jdbc settings
+         * @param fetchSize
+         * @return
          */
         public JdbcSettings setFetchSize(final int fetchSize) {
             assertNotFrozen();
@@ -13280,7 +13280,7 @@ public class SQLExecutor {
         /**
          * Gets the fetch direction.
          *
-         * @return the fetch direction
+         * @return
          */
         public int getFetchDirection() {
             return fetchDirection;
@@ -13289,8 +13289,8 @@ public class SQLExecutor {
         /**
          * Sets the fetch direction.
          *
-         * @param fetchDirection the fetch direction
-         * @return the jdbc settings
+         * @param fetchDirection
+         * @return
          */
         public JdbcSettings setFetchDirection(final int fetchDirection) {
             assertNotFrozen();
@@ -13303,7 +13303,7 @@ public class SQLExecutor {
         /**
          * Gets the result set type.
          *
-         * @return the result set type
+         * @return
          */
         public int getResultSetType() {
             return resultSetType;
@@ -13312,8 +13312,8 @@ public class SQLExecutor {
         /**
          * Sets the result set type.
          *
-         * @param resultSetType the result set type
-         * @return the jdbc settings
+         * @param resultSetType
+         * @return
          */
         public JdbcSettings setResultSetType(final int resultSetType) {
             assertNotFrozen();
@@ -13326,7 +13326,7 @@ public class SQLExecutor {
         /**
          * Gets the result set concurrency.
          *
-         * @return the result set concurrency
+         * @return
          */
         public int getResultSetConcurrency() {
             return resultSetConcurrency;
@@ -13335,8 +13335,8 @@ public class SQLExecutor {
         /**
          * Sets the result set concurrency.
          *
-         * @param resultSetConcurrency the result set concurrency
-         * @return the jdbc settings
+         * @param resultSetConcurrency
+         * @return
          */
         public JdbcSettings setResultSetConcurrency(final int resultSetConcurrency) {
             assertNotFrozen();
@@ -13349,7 +13349,7 @@ public class SQLExecutor {
         /**
          * Gets the result set holdability.
          *
-         * @return the result set holdability
+         * @return
          */
         public int getResultSetHoldability() {
             return resultSetHoldability;
@@ -13358,8 +13358,8 @@ public class SQLExecutor {
         /**
          * Sets the result set holdability.
          *
-         * @param resultSetHoldability the result set holdability
-         * @return the jdbc settings
+         * @param resultSetHoldability
+         * @return
          */
         public JdbcSettings setResultSetHoldability(final int resultSetHoldability) {
             assertNotFrozen();
@@ -13372,7 +13372,7 @@ public class SQLExecutor {
         /**
          * Gets the offset.
          *
-         * @return the offset
+         * @return
          */
         public int getOffset() {
             return offset;
@@ -13381,8 +13381,8 @@ public class SQLExecutor {
         /**
          * Sets the offset.
          *
-         * @param offset the offset
-         * @return the jdbc settings
+         * @param offset
+         * @return
          */
         public JdbcSettings setOffset(final int offset) {
             assertNotFrozen();
@@ -13395,7 +13395,7 @@ public class SQLExecutor {
         /**
          * Gets the count.
          *
-         * @return the count
+         * @return
          */
         public int getCount() {
             return count;
@@ -13404,8 +13404,8 @@ public class SQLExecutor {
         /**
          * Sets the count.
          *
-         * @param count the count
-         * @return the jdbc settings
+         * @param count
+         * @return
          */
         public JdbcSettings setCount(final int count) {
             assertNotFrozen();
@@ -13418,7 +13418,7 @@ public class SQLExecutor {
         /**
          * Gets the query with data source.
          *
-         * @return the query with data source
+         * @return
          */
         public String getQueryWithDataSource() {
             return queryWithDataSource;
@@ -13427,8 +13427,8 @@ public class SQLExecutor {
         /**
          * Sets the query with data source.
          *
-         * @param queryWithDataSource the query with data source
-         * @return the jdbc settings
+         * @param queryWithDataSource
+         * @return
          */
         public JdbcSettings setQueryWithDataSource(final String queryWithDataSource) {
             assertNotFrozen();
@@ -13441,7 +13441,7 @@ public class SQLExecutor {
         /**
          * Gets the query with data sources.
          *
-         * @return the query with data sources
+         * @return
          */
         public Collection<String> getQueryWithDataSources() {
             return queryWithDataSources;
@@ -13450,8 +13450,8 @@ public class SQLExecutor {
         /**
          * Sets the query with data sources.
          *
-         * @param queryWithDataSources the query with data sources
-         * @return the jdbc settings
+         * @param queryWithDataSources
+         * @return
          */
         public JdbcSettings setQueryWithDataSources(final Collection<String> queryWithDataSources) {
             assertNotFrozen();
@@ -13473,8 +13473,8 @@ public class SQLExecutor {
         /**
          * Sets the query in parallel.
          *
-         * @param queryInParallel the query in parallel
-         * @return the jdbc settings
+         * @param queryInParallel
+         * @return
          */
         public JdbcSettings setQueryInParallel(final boolean queryInParallel) {
             assertNotFrozen();
@@ -13487,7 +13487,7 @@ public class SQLExecutor {
         /**
          * Gets the isolation level.
          *
-         * @return the isolation level
+         * @return
          */
         public IsolationLevel getIsolationLevel() {
             return isolationLevel;
@@ -13496,8 +13496,8 @@ public class SQLExecutor {
         /**
          * Sets the isolation level.
          *
-         * @param isolationLevel the isolation level
-         * @return the jdbc settings
+         * @param isolationLevel
+         * @return
          */
         public JdbcSettings setIsolationLevel(IsolationLevel isolationLevel) {
             assertNotFrozen();
@@ -13519,8 +13519,8 @@ public class SQLExecutor {
         /**
          * {@code streamTransactionIndependent = true} means the query executed by {@code stream/streamAll(...)} methods won't be in any transaction(using connection started by transaction), even the {@code stream/streamAll(...)} methods are invoked inside of a transaction block. 
          *
-         * @param streamTransactionIndependent the stream transaction independent
-         * @return the jdbc settings
+         * @param streamTransactionIndependent
+         * @return
          */
         JdbcSettings setStreamTransactionIndependent(final boolean streamTransactionIndependent) {
             assertNotFrozen();
@@ -13549,7 +13549,7 @@ public class SQLExecutor {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -13583,7 +13583,7 @@ public class SQLExecutor {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -13612,7 +13612,7 @@ public class SQLExecutor {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {

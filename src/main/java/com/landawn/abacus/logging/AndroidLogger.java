@@ -33,7 +33,7 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Instantiates a new android logger.
      *
-     * @param name the name
+     * @param name
      */
     public AndroidLogger(String name) {
         super(name.startsWith("com.landawn.abacus") ? "Abacus"
@@ -59,7 +59,7 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void trace(String msg) {
@@ -69,8 +69,8 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void trace(String msg, Throwable t) {
@@ -90,7 +90,7 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void debug(String msg) {
@@ -100,8 +100,8 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void debug(String msg, Throwable t) {
@@ -121,7 +121,7 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void info(String msg) {
@@ -131,8 +131,8 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void info(String msg, Throwable t) {
@@ -152,7 +152,7 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void warn(String msg) {
@@ -162,8 +162,8 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void warn(String msg, Throwable t) {
@@ -183,7 +183,7 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void error(String msg) {
@@ -193,8 +193,8 @@ class AndroidLogger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void error(String msg, Throwable t) {

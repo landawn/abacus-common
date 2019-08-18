@@ -52,7 +52,7 @@ class HikariConnectionManager extends AbstractConnectionManager {
     /**
      * Instantiates a new hikari connection manager.
      *
-     * @param props the props
+     * @param props
      */
     public HikariConnectionManager(Map<String, ?> props) {
         super(props);
@@ -81,7 +81,7 @@ class HikariConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the max active.
      *
-     * @return the max active
+     * @return
      */
     @Override
     public int getMaxActive() {
@@ -91,7 +91,7 @@ class HikariConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the num active.
      *
-     * @return the num active
+     * @return
      */
     @Override
     public int getNumActive() {
@@ -101,7 +101,7 @@ class HikariConnectionManager extends AbstractConnectionManager {
     /**
      * Gets the connection.
      *
-     * @return the connection
+     * @return
      */
     @Override
     public Connection getConnection() {
@@ -115,7 +115,7 @@ class HikariConnectionManager extends AbstractConnectionManager {
     /**
      * Close connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     @Override
     public void closeConnection(Connection conn) {
@@ -131,7 +131,7 @@ class HikariConnectionManager extends AbstractConnectionManager {
     /**
      * Detroy connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     @Override
     public void detroyConnection(Connection conn) {

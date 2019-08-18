@@ -54,9 +54,9 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Gets the inits the parameter.
      *
-     * @param config the config
-     * @param parameterName the parameter name
-     * @return the inits the parameter
+     * @param config
+     * @param parameterName
+     * @return
      */
     protected String getInitParameter(ServletConfig config, String parameterName) {
         String parameterValue = config.getInitParameter(parameterName);
@@ -67,7 +67,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Checks if is url encoded.
      *
-     * @param request the request
+     * @param request
      * @return true, if is url encoded
      * @throws IOException Signals that an I/O exception has occurred.
      */
@@ -80,8 +80,8 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Gets the content format.
      *
-     * @param request the request
-     * @return the content format
+     * @param request
+     * @return
      */
     protected ContentFormat getContentFormat(HttpServletRequest request) {
         String contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
@@ -95,9 +95,9 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Gets the input stream.
      *
-     * @param request the request
-     * @param contentFormat the content format
-     * @return the input stream
+     * @param request
+     * @param contentFormat
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     protected InputStream getInputStream(HttpServletRequest request, final ContentFormat contentFormat) throws IOException {
@@ -109,9 +109,9 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Gets the output stream.
      *
-     * @param response the response
-     * @param contentFormat the content format
-     * @return the output stream
+     * @param response
+     * @param contentFormat
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     protected OutputStream getOutputStream(HttpServletResponse response, ContentFormat contentFormat) throws IOException {
@@ -135,7 +135,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Flush.
      *
-     * @param os the os
+     * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
     protected void flush(OutputStream os) throws IOException {
@@ -145,9 +145,9 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Gets the parameter.
      *
-     * @param parameterMap the parameter map
-     * @param parameterName the parameter name
-     * @return the parameter
+     * @param parameterMap
+     * @param parameterName
+     * @return
      */
     protected String getParameter(Map<String, String[]> parameterMap, String parameterName) {
         final String[] values = parameterMap.get(parameterName);
@@ -158,10 +158,10 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Gets the parameter.
      *
-     * @param parameterMap the parameter map
-     * @param parameterName the parameter name
-     * @param defaultValue the default value
-     * @return the parameter
+     * @param parameterMap
+     * @param parameterName
+     * @param defaultValue
+     * @return
      */
     protected String getParameter(Map<String, String[]> parameterMap, String parameterName, String defaultValue) {
         final String[] values = parameterMap.get(parameterName);
@@ -172,11 +172,11 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Gets the parameter.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @param parameterMap the parameter map
-     * @param parameterName the parameter name
-     * @return the parameter
+     * @param <T>
+     * @param cls
+     * @param parameterMap
+     * @param parameterName
+     * @return
      */
     protected <T> T getParameter(Class<T> cls, Map<String, String[]> parameterMap, String parameterName) {
         final String[] values = parameterMap.get(parameterName);
@@ -187,12 +187,12 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     /**
      * Gets the parameter.
      *
-     * @param <T> the generic type
-     * @param cls the cls
-     * @param parameterMap the parameter map
-     * @param parameterName the parameter name
-     * @param defaultValue the default value
-     * @return the parameter
+     * @param <T>
+     * @param cls
+     * @param parameterMap
+     * @param parameterName
+     * @param defaultValue
+     * @return
      */
     protected <T> T getParameter(Class<T> cls, Map<String, String[]> parameterMap, String parameterName, T defaultValue) {
         final String[] values = parameterMap.get(parameterName);

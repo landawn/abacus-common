@@ -76,10 +76,10 @@ public class AsyncExecutor {
     /**
      * Instantiates a new async executor.
      *
-     * @param coreThreadPoolSize the core thread pool size
-     * @param maxThreadPoolSize the max thread pool size
-     * @param keepAliveTime the keep alive time
-     * @param unit the unit
+     * @param coreThreadPoolSize
+     * @param maxThreadPoolSize
+     * @param keepAliveTime
+     * @param unit
      */
     public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
         N.checkArgNotNegative(coreThreadPoolSize, "coreThreadPoolSize");
@@ -119,7 +119,7 @@ public class AsyncExecutor {
     /**
      * Instantiates a new async executor.
      *
-     * @param executor the executor
+     * @param executor
      */
     public AsyncExecutor(final Executor executor) {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
@@ -130,8 +130,8 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param command the command
-     * @return the continuable future
+     * @param command
+     * @return
      */
     public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> command) {
         return execute(new FutureTask<Void>(FN.toCallable(command)));
@@ -140,8 +140,8 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param commands the commands
-     * @return the list
+     * @param commands
+     * @return
      */
     @SafeVarargs
     public final List<ContinuableFuture<Void>> execute(final Try.Runnable<? extends Exception>... commands) {
@@ -161,8 +161,8 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param commands the commands
-     * @return the list
+     * @param commands
+     * @return
      */
     public List<ContinuableFuture<Void>> execute(final List<? extends Try.Runnable<? extends Exception>> commands) {
         if (N.isNullOrEmpty(commands)) {
@@ -181,9 +181,9 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param <T> the generic type
-     * @param command the command
-     * @return the continuable future
+     * @param <T>
+     * @param command
+     * @return
      */
     public <T> ContinuableFuture<T> execute(final Callable<T> command) {
         return execute(new FutureTask<>(command));
@@ -192,9 +192,9 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param <T> the generic type
-     * @param commands the commands
-     * @return the list
+     * @param <T>
+     * @param commands
+     * @return
      */
     @SafeVarargs
     public final <T> List<ContinuableFuture<T>> execute(final Callable<T>... commands) {
@@ -214,9 +214,9 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param <T> the generic type
-     * @param commands the commands
-     * @return the list
+     * @param <T>
+     * @param commands
+     * @return
      */
     public <T> List<ContinuableFuture<T>> execute(final Collection<? extends Callable<T>> commands) {
         if (N.isNullOrEmpty(commands)) {
@@ -235,11 +235,11 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param action the action
-     * @param retryTimes the retry times
-     * @param retryInterval the retry interval
-     * @param retryCondition the retry condition
-     * @return the continuable future
+     * @param action
+     * @param retryTimes
+     * @param retryInterval
+     * @param retryCondition
+     * @return
      */
     public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> action, final int retryTimes, final long retryInterval,
             final Predicate<? super Exception> retryCondition) {
@@ -255,12 +255,12 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param <T> the generic type
-     * @param action the action
-     * @param retryTimes the retry times
-     * @param retryInterval the retry interval
-     * @param retryCondition the retry condition
-     * @return the continuable future
+     * @param <T>
+     * @param action
+     * @param retryTimes
+     * @param retryInterval
+     * @param retryCondition
+     * @return
      */
     public <T> ContinuableFuture<T> execute(final Callable<T> action, final int retryTimes, final long retryInterval,
             final BiPredicate<? super T, ? super Exception> retryCondition) {
@@ -276,9 +276,9 @@ public class AsyncExecutor {
     /**
      * Execute.
      *
-     * @param <T> the generic type
-     * @param futureTask the future task
-     * @return the continuable future
+     * @param <T>
+     * @param futureTask
+     * @return
      */
     private <T> ContinuableFuture<T> execute(final FutureTask<T> futureTask) {
         final Executor executor = getExecutor();
@@ -291,7 +291,7 @@ public class AsyncExecutor {
     /**
      * Gets the executor.
      *
-     * @return the executor
+     * @return
      */
     private Executor getExecutor() {
         if (executor == null) {

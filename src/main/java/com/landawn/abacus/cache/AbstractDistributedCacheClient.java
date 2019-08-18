@@ -22,7 +22,7 @@ import java.util.Map;
  * The Class AbstractDistributedCacheClient.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public abstract class AbstractDistributedCacheClient<T> implements DistributedCacheClient<T> {
@@ -33,7 +33,7 @@ public abstract class AbstractDistributedCacheClient<T> implements DistributedCa
     /**
      * Instantiates a new abstract distributed cache client.
      *
-     * @param serverUrl the server url
+     * @param serverUrl
      */
     public AbstractDistributedCacheClient(String serverUrl) {
         this.serverUrl = serverUrl;
@@ -42,7 +42,7 @@ public abstract class AbstractDistributedCacheClient<T> implements DistributedCa
     /**
      * Server url.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String serverUrl() {
@@ -52,8 +52,8 @@ public abstract class AbstractDistributedCacheClient<T> implements DistributedCa
     /**
      * Gets the bulk.
      *
-     * @param keys the keys
-     * @return the bulk
+     * @param keys
+     * @return
      */
     @Override
     public Map<String, T> getBulk(String... keys) {
@@ -63,8 +63,8 @@ public abstract class AbstractDistributedCacheClient<T> implements DistributedCa
     /**
      * Gets the bulk.
      *
-     * @param keys the keys
-     * @return the bulk
+     * @param keys
+     * @return
      */
     @Override
     public Map<String, T> getBulk(Collection<String> keys) {
@@ -82,8 +82,8 @@ public abstract class AbstractDistributedCacheClient<T> implements DistributedCa
     /**
      * To seconds.
      *
-     * @param liveTime the live time
-     * @return the int
+     * @param liveTime
+     * @return
      */
     protected int toSeconds(long liveTime) {
         return (int) ((liveTime % 1000 == 0) ? (liveTime / 1000) : (liveTime / 1000) + 1);

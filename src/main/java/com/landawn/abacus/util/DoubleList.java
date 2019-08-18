@@ -69,7 +69,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Instantiates a new double list.
      *
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity
      */
     public DoubleList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_DOUBLE_ARRAY : new double[initialCapacity];
@@ -78,7 +78,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * The specified array is used as the element array for this list without copying action.
      *
-     * @param a the a
+     * @param a
      */
     public DoubleList(double[] a) {
         this(a, a.length);
@@ -87,8 +87,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Instantiates a new double list.
      *
-     * @param a the a
-     * @param size the size
+     * @param a
+     * @param size
      */
     public DoubleList(double[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -100,8 +100,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Of.
      *
-     * @param a the a
-     * @return the double list
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static DoubleList of(final double... a) {
@@ -111,9 +111,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Of.
      *
-     * @param a the a
-     * @param size the size
-     * @return the double list
+     * @param a
+     * @param size
+     * @return
      */
     public static DoubleList of(final double[] a, final int size) {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -124,8 +124,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Copy of.
      *
-     * @param a the a
-     * @return the double list
+     * @param a
+     * @return
      */
     public static DoubleList copyOf(final double[] a) {
         return of(N.clone(a));
@@ -134,10 +134,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Copy of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double list
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static DoubleList copyOf(final double[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -146,8 +146,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * From.
      *
-     * @param c the c
-     * @return the double list
+     * @param c
+     * @return
      */
     public static DoubleList from(Collection<Double> c) {
         if (N.isNullOrEmpty(c)) {
@@ -160,9 +160,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * From.
      *
-     * @param c the c
-     * @param defaultForNull the default for null
-     * @return the double list
+     * @param c
+     * @param defaultForNull
+     * @return
      */
     public static DoubleList from(Collection<Double> c, double defaultForNull) {
         if (N.isNullOrEmpty(c)) {
@@ -182,10 +182,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -200,11 +200,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * From.
      *
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param defaultForNull the default for null
-     * @return the double list
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param defaultForNull
+     * @return
      */
     public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex, double defaultForNull) {
         return of(N.toDoubleArray(c, fromIndex, toIndex, defaultForNull));
@@ -213,9 +213,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Repeat.
      *
-     * @param element the element
-     * @param len the len
-     * @return the double list
+     * @param element
+     * @param len
+     * @return
      */
     public static DoubleList repeat(double element, final int len) {
         return of(Array.repeat(element, len));
@@ -224,8 +224,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Random.
      *
-     * @param len the len
-     * @return the double list
+     * @param len
+     * @return
      */
     public static DoubleList random(final int len) {
         final double[] a = new double[len];
@@ -240,7 +240,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns the original element array without copying.
      *
-     * @return the double[]
+     * @return
      */
     @Override
     public double[] array() {
@@ -250,8 +250,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Gets the.
      *
-     * @param index the index
-     * @return the double
+     * @param index
+     * @return
      */
     public double get(int index) {
         rangeCheck(index);
@@ -262,7 +262,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Range check.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheck(int index) {
         if (index >= size) {
@@ -273,9 +273,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Sets the.
      *
-     * @param index the index
-     * @param e the e
-     * @return the old value in the specified position.
+     * @param index
+     * @param e
+     * @return
      */
     public double set(int index, double e) {
         rangeCheck(index);
@@ -290,7 +290,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Adds the.
      *
-     * @param e the e
+     * @param e
      */
     public void add(double e) {
         ensureCapacityInternal(size + 1);
@@ -301,8 +301,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Adds the.
      *
-     * @param index the index
-     * @param e the e
+     * @param index
+     * @param e
      */
     public void add(int index, double e) {
         rangeCheckForAdd(index);
@@ -323,7 +323,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Adds the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(DoubleList c) {
@@ -345,8 +345,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param c the c
+     * @param index
+     * @param c
      * @return true, if successful
      */
     public boolean addAll(int index, DoubleList c) {
@@ -376,7 +376,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Adds the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -387,8 +387,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Adds the all.
      *
-     * @param index the index
-     * @param a the a
+     * @param index
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -419,7 +419,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Range check for add.
      *
-     * @param index the index
+     * @param index
      */
     private void rangeCheckForAdd(int index) {
         if (index > size || index < 0) {
@@ -430,7 +430,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Removes the.
      *
-     * @param e the e
+     * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(double e) {
@@ -449,7 +449,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Removes the all occurrences.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     public boolean removeAllOccurrences(double e) {
@@ -475,7 +475,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Fast remove.
      *
-     * @param index the index
+     * @param index
      */
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
@@ -490,7 +490,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Removes the all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean removeAll(DoubleList c) {
@@ -504,7 +504,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Removes the all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -519,8 +519,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Removes the if.
      *
-     * @param <E> the element type
-     * @param p the p
+     * @param <E>
+     * @param p
      * @return true, if successful
      * @throws E the e
      */
@@ -547,7 +547,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Retain all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean retainAll(DoubleList c) {
@@ -563,7 +563,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Retain all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     public boolean retainAll(double[] a) {
@@ -579,9 +579,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Batch remove.
      *
-     * @param c the c
-     * @param complement the complement
-     * @return the int
+     * @param c
+     * @param complement
+     * @return
      */
     private int batchRemove(DoubleList c, boolean complement) {
         final double[] elementData = this.elementData;
@@ -618,8 +618,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Delete.
      *
-     * @param index the index
-     * @return the deleted element
+     * @param index
+     * @return
      */
     public double delete(int index) {
         rangeCheck(index);
@@ -634,7 +634,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Delete all.
      *
-     * @param indices the indices
+     * @param indices
      */
     @Override
     @SafeVarargs
@@ -648,8 +648,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Delete range.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void deleteRange(final int fromIndex, final int toIndex) {
@@ -673,9 +673,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Replace all.
      *
-     * @param oldVal the old val
-     * @param newVal the new val
-     * @return the int
+     * @param oldVal
+     * @param newVal
+     * @return
      */
     public int replaceAll(double oldVal, double newVal) {
         if (size() == 0) {
@@ -698,8 +698,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Replace all.
      *
-     * @param <E> the element type
-     * @param operator the operator
+     * @param <E>
+     * @param operator
      * @throws E the e
      */
     public <E extends Exception> void replaceAll(Try.DoubleUnaryOperator<E> operator) throws E {
@@ -711,9 +711,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Replace if.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @param newValue the new value
+     * @param <E>
+     * @param predicate
+     * @param newValue
      * @return true, if successful
      * @throws E the e
      */
@@ -734,7 +734,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Fill.
      *
-     * @param val the val
+     * @param val
      */
     public void fill(final double val) {
         fill(0, size(), val);
@@ -743,9 +743,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Fill.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param val the val
+     * @param fromIndex
+     * @param toIndex
+     * @param val
      */
     public void fill(final int fromIndex, final int toIndex, final double val) {
         checkFromToIndex(fromIndex, toIndex);
@@ -756,7 +756,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Contains.
      *
-     * @param e the e
+     * @param e
      * @return true, if successful
      */
     public boolean contains(double e) {
@@ -766,7 +766,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAll(DoubleList c) {
@@ -802,7 +802,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Contains all.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -819,7 +819,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Contains any.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAny(DoubleList c) {
@@ -833,7 +833,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Contains any.
      *
-     * @param a the a
+     * @param a
      * @return true, if successful
      */
     @Override
@@ -848,7 +848,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Disjoint.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean disjoint(final DoubleList c) {
@@ -882,7 +882,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Disjoint.
      *
-     * @param b the b
+     * @param b
      * @return true, if successful
      */
     @Override
@@ -897,8 +897,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Intersection.
      *
-     * @param b the b
-     * @return the double list
+     * @param b
+     * @return
      * @see IntList#intersection(IntList)
      */
     public DoubleList intersection(final DoubleList b) {
@@ -922,8 +922,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Intersection.
      *
-     * @param a the a
-     * @return the double list
+     * @param a
+     * @return
      */
     public DoubleList intersection(final double[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -936,8 +936,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Difference.
      *
-     * @param b the b
-     * @return the double list
+     * @param b
+     * @return
      * @see IntList#difference(IntList)
      */
     public DoubleList difference(DoubleList b) {
@@ -961,8 +961,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Difference.
      *
-     * @param a the a
-     * @return the double list
+     * @param a
+     * @return
      */
     public DoubleList difference(final double[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -975,7 +975,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Symmetric difference.
      *
-     * @param b the b
+     * @param b
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
@@ -1011,8 +1011,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Symmetric difference.
      *
-     * @param a the a
-     * @return the double list
+     * @param a
+     * @return
      */
     public DoubleList symmetricDifference(final double[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -1027,8 +1027,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Occurrences of.
      *
-     * @param objectToFind the object to find
-     * @return the int
+     * @param objectToFind
+     * @return
      */
     public int occurrencesOf(final double objectToFind) {
         return N.occurrencesOf(elementData, objectToFind);
@@ -1037,8 +1037,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int indexOf(double e) {
         return indexOf(0, e);
@@ -1047,9 +1047,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Index of.
      *
-     * @param fromIndex the from index
-     * @param e the e
-     * @return the int
+     * @param fromIndex
+     * @param e
+     * @return
      */
     public int indexOf(final int fromIndex, double e) {
         checkFromToIndex(fromIndex, size);
@@ -1066,8 +1066,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Last index of.
      *
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(double e) {
         return lastIndexOf(size, e);
@@ -1077,8 +1077,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Last index of.
      *
      * @param fromIndex the start index to traverse backwards from. Inclusive.
-     * @param e the e
-     * @return the int
+     * @param e
+     * @return
      */
     public int lastIndexOf(final int fromIndex, double e) {
         checkFromToIndex(0, fromIndex);
@@ -1095,7 +1095,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Min.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble min() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.min(elementData, 0, size));
@@ -1104,9 +1104,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Min.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalDouble min(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1117,7 +1117,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Median.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble median() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, 0, size));
@@ -1126,9 +1126,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Median.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalDouble median(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1139,7 +1139,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Max.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble max() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(elementData, 0, size));
@@ -1148,9 +1148,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Max.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalDouble max(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1161,8 +1161,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Kth largest.
      *
-     * @param k the k
-     * @return the optional double
+     * @param k
+     * @return
      */
     public OptionalDouble kthLargest(final int k) {
         return kthLargest(0, size(), k);
@@ -1171,10 +1171,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Kth largest.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param k the k
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @param k
+     * @return
      */
     public OptionalDouble kthLargest(final int fromIndex, final int toIndex, final int k) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1186,7 +1186,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Sum.
      *
-     * @return the double
+     * @return
      */
     public double sum() {
         return sum(0, size());
@@ -1195,9 +1195,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Sum.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public double sum(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1208,7 +1208,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Average.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1217,9 +1217,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Average.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the optional double
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public OptionalDouble average(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1230,8 +1230,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.DoubleConsumer<E> action) throws E {
@@ -1241,10 +1241,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param action the action
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.DoubleConsumer<E> action) throws E {
@@ -1266,7 +1266,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * First.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble first() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[0]);
@@ -1275,7 +1275,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Last.
      *
-     * @return the optional double
+     * @return
      */
     public OptionalDouble last() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[size() - 1]);
@@ -1284,9 +1284,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Find first.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional double
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalDouble findFirst(Try.DoublePredicate<E> predicate) throws E {
@@ -1302,9 +1302,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Find last.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional double
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalDouble findLast(Try.DoublePredicate<E> predicate) throws E {
@@ -1320,9 +1320,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Find first index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findFirstIndex(Try.DoublePredicate<E> predicate) throws E {
@@ -1338,9 +1338,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Find last index.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional int
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalInt findLastIndex(Try.DoublePredicate<E> predicate) throws E {
@@ -1356,8 +1356,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns whether all elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1368,10 +1368,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * All match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1392,8 +1392,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns whether any elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1404,10 +1404,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Any match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1428,8 +1428,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns whether no elements of this List match the provided predicate.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1440,10 +1440,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * None match.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
      * @return true, if successful
      * @throws E the e
      */
@@ -1464,9 +1464,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(Try.DoublePredicate<E> filter) throws E {
@@ -1476,11 +1476,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Count.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the int
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.DoublePredicate<E> filter) throws E {
@@ -1492,8 +1492,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
+     * @param <E>
+     * @param filter
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1504,11 +1504,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @return the double list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @return
      * @throws E the e
      */
     public <E extends Exception> DoubleList filter(final int fromIndex, final int toIndex, Try.DoublePredicate<E> filter) throws E {
@@ -1520,9 +1520,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param filter the filter
-     * @param max the max
+     * @param <E>
+     * @param filter
+     * @param max
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
@@ -1533,12 +1533,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param filter the filter
-     * @param max the max
-     * @return the double list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param filter
+     * @param max
+     * @return
      * @throws E the e
      */
     public <E extends Exception> DoubleList filter(final int fromIndex, final int toIndex, Try.DoublePredicate<E> filter, final int max) throws E {
@@ -1550,9 +1550,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the double list
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> DoubleList map(final Try.DoubleUnaryOperator<E> mapper) throws E {
@@ -1562,11 +1562,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Map.
      *
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the double list
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <E extends Exception> DoubleList map(final int fromIndex, final int toIndex, final Try.DoubleUnaryOperator<E> mapper) throws E {
@@ -1584,10 +1584,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final Try.DoubleFunction<? extends T, E> mapper) throws E {
@@ -1597,12 +1597,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Map to obj.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param mapper the mapper
-     * @return the list
+     * @param <T>
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.DoubleFunction<? extends T, E> mapper) throws E {
@@ -1635,9 +1635,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param accumulator the accumulator
-     * @return the optional double
+     * @param <E>
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> OptionalDouble reduce(final Try.DoubleBinaryOperator<E> accumulator) throws E {
@@ -1672,10 +1672,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * </code>
      * </pre>
      *
-     * @param <E> the element type
-     * @param identity the identity
-     * @param accumulator the accumulator
-     * @return the double
+     * @param <E>
+     * @param identity
+     * @param accumulator
+     * @return
      * @throws E the e
      */
     public <E extends Exception> double reduce(final double identity, final Try.DoubleBinaryOperator<E> accumulator) throws E {
@@ -1705,9 +1705,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Distinct.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public DoubleList distinct(final int fromIndex, final int toIndex) {
@@ -1723,8 +1723,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Top.
      *
-     * @param n the n
-     * @return the double list
+     * @param n
+     * @return
      */
     public DoubleList top(final int n) {
         return top(0, size(), n);
@@ -1733,10 +1733,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Top.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @return the double list
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @return
      */
     public DoubleList top(final int fromIndex, final int toIndex, final int n) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1747,9 +1747,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Top.
      *
-     * @param n the n
-     * @param cmp the cmp
-     * @return the double list
+     * @param n
+     * @param cmp
+     * @return
      */
     public DoubleList top(final int n, Comparator<? super Double> cmp) {
         return top(0, size(), n, cmp);
@@ -1758,11 +1758,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Top.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param n the n
-     * @param cmp the cmp
-     * @return the double list
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param cmp
+     * @return
      */
     public DoubleList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Double> cmp) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1802,8 +1802,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * This List should be sorted first.
      *
-     * @param key the key
-     * @return the int
+     * @param key
+     * @return
      */
     public int binarySearch(final double key) {
         return N.binarySearch(elementData, key);
@@ -1812,10 +1812,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * This List should be sorted first.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param key the key
-     * @return the int
+     * @param fromIndex
+     * @param toIndex
+     * @param key
+     * @return
      */
     public int binarySearch(final int fromIndex, final int toIndex, final double key) {
         checkFromToIndex(fromIndex, toIndex);
@@ -1836,8 +1836,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Reverse.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) {
@@ -1851,7 +1851,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Rotate.
      *
-     * @param distance the distance
+     * @param distance
      */
     @Override
     public void rotate(int distance) {
@@ -1873,7 +1873,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Shuffle.
      *
-     * @param rnd the rnd
+     * @param rnd
      */
     @Override
     public void shuffle(final Random rnd) {
@@ -1885,8 +1885,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Swap.
      *
-     * @param i the i
-     * @param j the j
+     * @param i
+     * @param j
      */
     @Override
     public void swap(int i, int j) {
@@ -1899,7 +1899,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Copy.
      *
-     * @return the double list
+     * @return
      */
     @Override
     public DoubleList copy() {
@@ -1909,9 +1909,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Copy.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     @Override
     public DoubleList copy(final int fromIndex, final int toIndex) {
@@ -1923,10 +1923,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Copy.
      *
-     * @param from the from
-     * @param to the to
-     * @param step the step
-     * @return the double list
+     * @param from
+     * @param to
+     * @param step
+     * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -1940,10 +1940,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns List of {@code DoubleList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
      *  
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param fromIndex
+     * @param toIndex
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return the list
+     * @return
      */
     @Override
     public List<DoubleList> split(final int fromIndex, final int toIndex, final int chunkSize) {
@@ -1991,10 +1991,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, char delimiter) {
@@ -2006,10 +2006,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Join.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param delimiter the delimiter
-     * @return the string
+     * @param fromIndex
+     * @param toIndex
+     * @param delimiter
+     * @return
      */
     @Override
     public String join(int fromIndex, int toIndex, String delimiter) {
@@ -2021,7 +2021,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Trim to size.
      *
-     * @return the double list
+     * @return
      */
     @Override
     public DoubleList trimToSize() {
@@ -2057,7 +2057,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -2067,7 +2067,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Boxed.
      *
-     * @return the list
+     * @return
      */
     public List<Double> boxed() {
         return boxed(0, size);
@@ -2076,9 +2076,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Boxed.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the list
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public List<Double> boxed(int fromIndex, int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2095,7 +2095,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * To array.
      *
-     * @return the double[]
+     * @return
      */
     @Override
     public double[] toArray() {
@@ -2105,11 +2105,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public <C extends Collection<Double>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier) {
@@ -2127,10 +2127,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * To multiset.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @param supplier the supplier
-     * @return the multiset
+     * @param fromIndex
+     * @param toIndex
+     * @param supplier
+     * @return
      */
     @Override
     public Multiset<Double> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Double>> supplier) {
@@ -2150,11 +2150,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2168,13 +2168,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -2190,13 +2190,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2211,15 +2211,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param <E3> the generic type
-     * @param keyMapper the key mapper
-     * @param valueMapper the value mapper
-     * @param mergeFunction the merge function
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param <E3>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      * @throws E the e
      * @throws E2 the e2
      * @throws E3 the e3
@@ -2239,12 +2239,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @return the map
+     * @param <A>
+     * @param <D>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @return
      * @throws E the e
      */
     public <K, A, D, E extends Exception> Map<K, D> toMap(Try.DoubleFunction<? extends K, E> keyMapper, Collector<Double, A, D> downstream) throws E {
@@ -2255,14 +2255,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * To map.
      *
      * @param <K> the key type
-     * @param <A> the generic type
-     * @param <D> the generic type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @param downstream the downstream
-     * @param mapFactory the map factory
-     * @return the m
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param <E>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.DoubleFunction<? extends K, E> keyMapper,
@@ -2301,7 +2301,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Iterator.
      *
-     * @return the double iterator
+     * @return
      */
     public DoubleIterator iterator() {
         if (isEmpty()) {
@@ -2314,7 +2314,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Stream.
      *
-     * @return the double stream
+     * @return
      */
     public DoubleStream stream() {
         return DoubleStream.of(elementData, 0, size());
@@ -2323,9 +2323,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Stream.
      *
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the double stream
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public DoubleStream stream(final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex);
@@ -2336,10 +2336,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Apply.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the r
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2350,10 +2350,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Apply if not empty.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the optional
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
      * @throws E the e
      */
     @Override
@@ -2364,8 +2364,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2376,8 +2376,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Accept if not empty.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     @Override
@@ -2390,7 +2390,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2400,7 +2400,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -2421,7 +2421,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -2431,7 +2431,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Ensure capacity internal.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_DOUBLE_ARRAY) {
@@ -2444,7 +2444,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Ensure explicit capacity.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
@@ -2455,7 +2455,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Grow.
      *
-     * @param minCapacity the min capacity
+     * @param minCapacity
      */
     private void grow(int minCapacity) {
         int oldCapacity = elementData.length;

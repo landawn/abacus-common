@@ -46,8 +46,8 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Instantiates a new activity print.
      *
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
+     * @param liveTime
+     * @param maxIdleTime
      * @throws IllegalArgumentException the illegal argument exception
      */
     public ActivityPrint(long liveTime, long maxIdleTime) throws IllegalArgumentException {
@@ -71,9 +71,9 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Value of.
      *
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
-     * @return the activity print
+     * @param liveTime
+     * @param maxIdleTime
+     * @return
      */
     public static ActivityPrint valueOf(long liveTime, long maxIdleTime) {
         return new ActivityPrint(liveTime, maxIdleTime);
@@ -82,7 +82,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Gets the live time.
      *
-     * @return the live time
+     * @return
      */
     public long getLiveTime() {
         return liveTime;
@@ -91,8 +91,8 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Sets the live time.
      *
-     * @param liveTime the live time
-     * @return the activity print
+     * @param liveTime
+     * @return
      * @throws IllegalArgumentException the illegal argument exception
      */
     public ActivityPrint setLiveTime(long liveTime) throws IllegalArgumentException {
@@ -108,7 +108,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Gets the max idle time.
      *
-     * @return the max idle time
+     * @return
      */
     public long getMaxIdleTime() {
         return maxIdleTime;
@@ -117,8 +117,8 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Sets the max idle time.
      *
-     * @param maxIdleTime the max idle time
-     * @return the activity print
+     * @param maxIdleTime
+     * @return
      * @throws IllegalArgumentException the illegal argument exception
      */
     public ActivityPrint setMaxIdleTime(long maxIdleTime) throws IllegalArgumentException {
@@ -134,7 +134,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Gets the creates the time.
      *
-     * @return the creates the time
+     * @return
      */
     public long getCreateTime() {
         return createTime;
@@ -143,8 +143,8 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Sets the create time.
      *
-     * @param createTime the create time
-     * @return the activity print
+     * @param createTime
+     * @return
      */
     ActivityPrint setCreateTime(long createTime) {
         this.createTime = createTime;
@@ -155,7 +155,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Gets the last access time.
      *
-     * @return the last access time
+     * @return
      */
     public long getLastAccessTime() {
         return lastAccessTime;
@@ -171,7 +171,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Gets the access count.
      *
-     * @return the access count
+     * @return
      */
     public int getAccessCount() {
         return accessCount;
@@ -187,7 +187,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Gets the expiration time.
      *
-     * @return the expiration time
+     * @return
      */
     public long getExpirationTime() {
         return ((Long.MAX_VALUE - createTime) < liveTime) ? Long.MAX_VALUE : (createTime + liveTime);
@@ -207,7 +207,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Clone.
      *
-     * @return the object
+     * @return
      */
     @Override
     public Object clone() {
@@ -225,7 +225,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -242,7 +242,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -264,7 +264,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

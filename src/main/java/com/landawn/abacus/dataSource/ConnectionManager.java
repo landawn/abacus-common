@@ -30,14 +30,14 @@ public interface ConnectionManager {
     /**
      * Gets the properties.
      *
-     * @return the properties
+     * @return
      */
     Map<String, String> getProperties();
 
     /**
      * Gets the connection properties.
      *
-     * @return the connection properties
+     * @return
      */
     Properties getConnectionProperties();
 
@@ -49,35 +49,35 @@ public interface ConnectionManager {
     /**
      * Gets the max active.
      *
-     * @return the max active
+     * @return
      */
     int getMaxActive();
 
     /**
      * Gets the num active.
      *
-     * @return the num active
+     * @return
      */
     int getNumActive();
 
     /**
      * Gets the connection.
      *
-     * @return the connection
+     * @return
      */
     Connection getConnection();
 
     /**
      * Close connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     void closeConnection(Connection conn);
 
     /**
      * Detroy connection.
      *
-     * @param conn the conn
+     * @param conn
      */
     void detroyConnection(Connection conn);
 

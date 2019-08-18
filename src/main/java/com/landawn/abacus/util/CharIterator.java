@@ -46,7 +46,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Empty.
      *
-     * @return the char iterator
+     * @return
      */
     public static CharIterator empty() {
         return EMPTY;
@@ -55,8 +55,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the char iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static CharIterator of(final char... a) {
@@ -66,10 +66,10 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the char iterator
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static CharIterator of(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -110,8 +110,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier the iterator supplier
-     * @return the char iterator
+     * @param iteratorSupplier
+     * @return
      */
     public static CharIterator of(final Supplier<? extends CharIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -150,8 +150,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Lazy evaluation.
      *
-     * @param arraySupplier the array supplier
-     * @return the char iterator
+     * @param arraySupplier
+     * @return
      */
     public static CharIterator oF(final Supplier<char[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -197,8 +197,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Returns an infinite {@code CharIterator}.
      *
-     * @param supplier the supplier
-     * @return the char iterator
+     * @param supplier
+     * @return
      */
     public static CharIterator generate(final CharSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -219,9 +219,9 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Generate.
      *
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the char iterator
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static CharIterator generate(final BooleanSupplier hasNext, final CharSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -247,7 +247,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Next.
      *
-     * @return the character
+     * @return
      * @Deprecated use <code>nextChar()</code> instead.
      */
     @Deprecated
@@ -259,14 +259,14 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Next char.
      *
-     * @return the char
+     * @return
      */
     public abstract char nextChar();
 
     /**
      * To array.
      *
-     * @return the char[]
+     * @return
      */
     public char[] toArray() {
         return toList().trimToSize().array();
@@ -275,7 +275,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * To list.
      *
-     * @return the char list
+     * @return
      */
     public CharList toList() {
         final CharList list = new CharList();
@@ -290,7 +290,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Stream.
      *
-     * @return the char stream
+     * @return
      */
     public CharStream stream() {
         return CharStream.of(this);
@@ -299,8 +299,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * Foreach remaining.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void foreachRemaining(Try.CharConsumer<E> action) throws E {
@@ -314,7 +314,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      * For each remaining.
      *
-     * @param action the action
+     * @param action
      */
     @Override
     @Deprecated

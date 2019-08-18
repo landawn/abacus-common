@@ -62,7 +62,7 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Instantiates a new distributed cache.
      *
-     * @param dcc the dcc
+     * @param dcc
      */
     protected DistributedCache(DistributedCacheClient<V> dcc) {
         this(dcc, N.EMPTY_STRING, DEFAULT_MAX_FAILED_NUMBER, DEFAULT_RETRY_DELAY);
@@ -71,8 +71,8 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Instantiates a new distributed cache.
      *
-     * @param dcc the dcc
-     * @param keyPrefix the key prefix
+     * @param dcc
+     * @param keyPrefix
      */
     protected DistributedCache(DistributedCacheClient<V> dcc, String keyPrefix) {
         this(dcc, keyPrefix, DEFAULT_MAX_FAILED_NUMBER, DEFAULT_RETRY_DELAY);
@@ -81,10 +81,10 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Instantiates a new distributed cache.
      *
-     * @param dcc the dcc
-     * @param keyPrefix the key prefix
-     * @param maxFailedNumForRetry the max failed num for retry
-     * @param retryDelay the retry delay
+     * @param dcc
+     * @param keyPrefix
+     * @param maxFailedNumForRetry
+     * @param retryDelay
      */
     protected DistributedCache(DistributedCacheClient<V> dcc, String keyPrefix, int maxFailedNumForRetry, long retryDelay) {
         this.keyPrefix = N.isNullOrEmpty(keyPrefix) ? N.EMPTY_STRING : keyPrefix;
@@ -96,8 +96,8 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Gets the t.
      *
-     * @param k the k
-     * @return the t
+     * @param k
+     * @return
      */
     @Override
     public V gett(K k) {
@@ -129,10 +129,10 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Put.
      *
-     * @param k the k
-     * @param v the v
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
+     * @param k
+     * @param v
+     * @param liveTime
+     * @param maxIdleTime
      * @return true, if successful
      */
     @Override
@@ -145,7 +145,7 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Always return {@code null}.
      *
-     * @param k the k
+     * @param k
      */
     @Override
     public void remove(K k) {
@@ -157,7 +157,7 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Contains key.
      *
-     * @param k the k
+     * @param k
      * @return true, if successful
      */
     @Override
@@ -168,7 +168,7 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -178,7 +178,7 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -222,8 +222,8 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     /**
      * Generate key.
      *
-     * @param k the k
-     * @return the string
+     * @param k
+     * @return
      */
     protected String generateKey(K k) {
         return N.isNullOrEmpty(keyPrefix) ? N.base64Encode(N.stringOf(k).getBytes()) : (keyPrefix + N.base64Encode(N.stringOf(k).getBytes()));

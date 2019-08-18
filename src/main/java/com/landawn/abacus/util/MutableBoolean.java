@@ -56,7 +56,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Constructs a new MutableBoolean with the specified value.
      * 
-     * @param value  the initial value to store
+     * @param value the initial value to store
      */
     MutableBoolean(final boolean value) {
         super();
@@ -66,8 +66,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Of.
      *
-     * @param value the value
-     * @return the mutable boolean
+     * @param value
+     * @return
      */
     public static MutableBoolean of(final boolean value) {
         return new MutableBoolean(value);
@@ -86,7 +86,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Gets the value as a Boolean instance.
      * 
-     * @return the value as a Boolean, never null
+     * @return
      * @deprecated replace by {@link #value()}.
      */
     @Deprecated
@@ -97,7 +97,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Sets the value.
      * 
-     * @param value  the value to set
+     * @param value the value to set
      */
     public void setValue(final boolean value) {
         this.value = value;
@@ -106,8 +106,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Gets the and set.
      *
-     * @param value the value
-     * @return the and set
+     * @param value
+     * @return
      */
     public boolean getAndSet(final boolean value) {
         final boolean result = this.value;
@@ -118,7 +118,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Sets the and get.
      *
-     * @param value the value
+     * @param value
      * @return true, if successful
      */
     public boolean setAndGet(final boolean value) {
@@ -129,7 +129,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Gets the and invert.
      *
-     * @return the and invert
+     * @return
      */
     public boolean getAndInvert() {
         final boolean result = value;
@@ -151,8 +151,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate - test the current value.
      * @return true, if successful
      * @throws E the e
@@ -170,8 +170,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
      * Otherwise just return <code>false</code> without setting the value to new value.
      *
-     * @param <E> the element type
-     * @param newValue the new value
+     * @param <E>
+     * @param newValue
      * @param predicate the first parameter is the current value, the second parameter is the new value.
      * @return true, if successful
      * @throws E the e
@@ -235,7 +235,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Compares this mutable to another in ascending order.
      * 
-     * @param other  the other mutable to compare to, not null
+     * @param other the other mutable to compare to, not null
      * @return negative if this is less, zero if equal, positive if greater
      *  where false is less than true
      */
@@ -250,7 +250,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * not <code>null</code> and is an <code>MutableBoolean</code> object that contains the same
      * <code>boolean</code> value as this object.
      * 
-     * @param obj  the object to compare with, null returns false
+     * @param obj the object to compare with, null returns false
      * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
      */
     @Override
@@ -264,7 +264,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Returns a suitable hash code for this mutable.
      * 
-     * @return the hash code returned by <code>Boolean.TRUE</code> or <code>Boolean.FALSE</code>
+     * @return
      */
     @Override
     public int hashCode() {
@@ -275,7 +275,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Returns the String value of this mutable.
      * 
-     * @return the mutable value as a string
+     * @return
      */
     @Override
     public String toString() {

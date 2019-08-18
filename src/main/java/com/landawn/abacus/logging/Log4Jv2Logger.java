@@ -53,7 +53,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Instantiates a new log 4 jv 2 logger.
      *
-     * @param name the name
+     * @param name
      */
     public Log4Jv2Logger(String name) {
         super(name);
@@ -77,7 +77,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void trace(String msg) {
@@ -87,8 +87,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void trace(String msg, Throwable t) {
@@ -108,7 +108,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void debug(String msg) {
@@ -118,8 +118,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void debug(String msg, Throwable t) {
@@ -139,7 +139,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void info(String msg) {
@@ -149,8 +149,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void info(String msg, Throwable t) {
@@ -170,7 +170,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void warn(String msg) {
@@ -180,8 +180,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void warn(String msg, Throwable t) {
@@ -201,7 +201,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param msg the msg
+     * @param msg
      */
     @Override
     public void error(String msg) {
@@ -211,8 +211,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param msg the msg
-     * @param t the t
+     * @param msg
+     * @param t
      */
     @Override
     public void error(String msg, Throwable t) {
@@ -222,8 +222,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     @Override
     public void trace(String template, Object arg) {
@@ -235,9 +235,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void trace(String template, Object arg1, Object arg2) {
@@ -249,10 +249,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void trace(String template, Object arg1, Object arg2, Object arg3) {
@@ -264,8 +264,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param template the template
-     * @param args the args
+     * @param template
+     * @param args
      */
     @Override
     @SafeVarargs
@@ -278,8 +278,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     @Override
     public void trace(Throwable t, String msg) {
@@ -289,9 +289,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     @Override
     public void trace(Throwable t, String template, Object arg) {
@@ -303,10 +303,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void trace(Throwable t, String template, Object arg1, Object arg2) {
@@ -318,11 +318,11 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void trace(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
@@ -334,7 +334,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     @Override
     public void trace(Supplier<String> supplier) {
@@ -346,8 +346,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      */
     @Override
     public void trace(Supplier<String> supplier, Throwable t) {
@@ -359,8 +359,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Trace.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     @Override
     public void trace(Throwable t, Supplier<String> supplier) {
@@ -372,8 +372,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     @Override
     public void debug(String template, Object arg) {
@@ -385,9 +385,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void debug(String template, Object arg1, Object arg2) {
@@ -399,10 +399,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void debug(String template, Object arg1, Object arg2, Object arg3) {
@@ -414,8 +414,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param template the template
-     * @param args the args
+     * @param template
+     * @param args
      */
     @Override
     @SafeVarargs
@@ -428,8 +428,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     @Override
     public void debug(Throwable t, String msg) {
@@ -439,9 +439,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     @Override
     public void debug(Throwable t, String template, Object arg) {
@@ -453,10 +453,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void debug(Throwable t, String template, Object arg1, Object arg2) {
@@ -468,11 +468,11 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void debug(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
@@ -484,7 +484,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     @Override
     public void debug(Supplier<String> supplier) {
@@ -496,8 +496,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      */
     @Override
     public void debug(Supplier<String> supplier, Throwable t) {
@@ -509,8 +509,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Debug.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     @Override
     public void debug(Throwable t, Supplier<String> supplier) {
@@ -522,8 +522,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     @Override
     public void info(String template, Object arg) {
@@ -535,9 +535,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void info(String template, Object arg1, Object arg2) {
@@ -549,10 +549,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void info(String template, Object arg1, Object arg2, Object arg3) {
@@ -564,8 +564,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param template the template
-     * @param args the args
+     * @param template
+     * @param args
      */
     @Override
     @SafeVarargs
@@ -578,8 +578,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     @Override
     public void info(Throwable t, String msg) {
@@ -589,9 +589,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     @Override
     public void info(Throwable t, String template, Object arg) {
@@ -603,10 +603,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void info(Throwable t, String template, Object arg1, Object arg2) {
@@ -618,11 +618,11 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void info(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
@@ -634,7 +634,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     @Override
     public void info(Supplier<String> supplier) {
@@ -646,8 +646,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      */
     @Override
     public void info(Supplier<String> supplier, Throwable t) {
@@ -659,8 +659,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Info.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     @Override
     public void info(Throwable t, Supplier<String> supplier) {
@@ -672,8 +672,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     @Override
     public void warn(String template, Object arg) {
@@ -685,9 +685,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void warn(String template, Object arg1, Object arg2) {
@@ -699,10 +699,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void warn(String template, Object arg1, Object arg2, Object arg3) {
@@ -714,8 +714,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param template the template
-     * @param args the args
+     * @param template
+     * @param args
      */
     @Override
     @SafeVarargs
@@ -728,8 +728,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     @Override
     public void warn(Throwable t, String msg) {
@@ -739,9 +739,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     @Override
     public void warn(Throwable t, String template, Object arg) {
@@ -753,10 +753,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void warn(Throwable t, String template, Object arg1, Object arg2) {
@@ -768,11 +768,11 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void warn(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
@@ -784,7 +784,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     @Override
     public void warn(Supplier<String> supplier) {
@@ -796,8 +796,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      */
     @Override
     public void warn(Supplier<String> supplier, Throwable t) {
@@ -809,8 +809,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Warn.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     @Override
     public void warn(Throwable t, Supplier<String> supplier) {
@@ -822,8 +822,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param template the template
-     * @param arg the arg
+     * @param template
+     * @param arg
      */
     @Override
     public void error(String template, Object arg) {
@@ -835,9 +835,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void error(String template, Object arg1, Object arg2) {
@@ -849,10 +849,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void error(String template, Object arg1, Object arg2, Object arg3) {
@@ -864,8 +864,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param template the template
-     * @param args the args
+     * @param template
+     * @param args
      */
     @Override
     @SafeVarargs
@@ -878,8 +878,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param t the t
-     * @param msg the msg
+     * @param t
+     * @param msg
      */
     @Override
     public void error(Throwable t, String msg) {
@@ -889,9 +889,9 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg the arg
+     * @param t
+     * @param template
+     * @param arg
      */
     @Override
     public void error(Throwable t, String template, Object arg) {
@@ -903,10 +903,10 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
      */
     @Override
     public void error(Throwable t, String template, Object arg1, Object arg2) {
@@ -918,11 +918,11 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param t the t
-     * @param template the template
-     * @param arg1 the arg 1
-     * @param arg2 the arg 2
-     * @param arg3 the arg 3
+     * @param t
+     * @param template
+     * @param arg1
+     * @param arg2
+     * @param arg3
      */
     @Override
     public void error(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
@@ -934,7 +934,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param supplier the supplier
+     * @param supplier
      */
     @Override
     public void error(Supplier<String> supplier) {
@@ -946,8 +946,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param supplier the supplier
-     * @param t the t
+     * @param supplier
+     * @param t
      */
     @Override
     public void error(Supplier<String> supplier, Throwable t) {
@@ -959,8 +959,8 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Error.
      *
-     * @param t the t
-     * @param supplier the supplier
+     * @param t
+     * @param supplier
      */
     @Override
     public void error(Throwable t, Supplier<String> supplier) {

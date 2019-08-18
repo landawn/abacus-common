@@ -37,8 +37,8 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     /**
      * Instantiates a new local cache.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
+     * @param capacity
+     * @param evictDelay
      */
     public LocalCache(int capacity, long evictDelay) {
         this(capacity, evictDelay, DEFAULT_LIVE_TIME, DEFAULT_MAX_IDLE_TIME);
@@ -47,10 +47,10 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     /**
      * Instantiates a new local cache.
      *
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @param defaultLiveTime the default live time
-     * @param defaultMaxIdleTime the default max idle time
+     * @param capacity
+     * @param evictDelay
+     * @param defaultLiveTime
+     * @param defaultMaxIdleTime
      */
     public LocalCache(int capacity, long evictDelay, long defaultLiveTime, long defaultMaxIdleTime) {
         super(defaultLiveTime, defaultMaxIdleTime);
@@ -61,8 +61,8 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     /**
      * Gets the t.
      *
-     * @param key the key
-     * @return the t
+     * @param key
+     * @return
      */
     @Override
     public V gett(K key) {
@@ -74,10 +74,10 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     /**
      * Put.
      *
-     * @param key the key
-     * @param value the value
-     * @param liveTime the live time
-     * @param maxIdleTime the max idle time
+     * @param key
+     * @param value
+     * @param liveTime
+     * @param maxIdleTime
      * @return true, if successful
      */
     @Override
@@ -88,7 +88,7 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     /**
      * Removes the.
      *
-     * @param key the key
+     * @param key
      */
     @Override
     public void remove(K key) {
@@ -98,7 +98,7 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     /**
      * Contains key.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     @Override
@@ -109,7 +109,7 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -119,7 +119,7 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {

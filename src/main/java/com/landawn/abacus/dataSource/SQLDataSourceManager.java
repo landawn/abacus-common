@@ -58,7 +58,7 @@ public class SQLDataSourceManager implements DataSourceManager {
     /**
      * Instantiates a new SQL data source manager.
      *
-     * @param dataSourceManagerConfiguration the data source manager configuration
+     * @param dataSourceManagerConfiguration
      */
     public SQLDataSourceManager(DataSourceManagerConfiguration dataSourceManagerConfiguration) {
         this.dsmConfig = dataSourceManagerConfiguration;
@@ -103,7 +103,7 @@ public class SQLDataSourceManager implements DataSourceManager {
     /**
      * Gets the primary data source.
      *
-     * @return the primary data source
+     * @return
      */
     @Override
     public DataSource getPrimaryDataSource() {
@@ -113,8 +113,8 @@ public class SQLDataSourceManager implements DataSourceManager {
     /**
      * Gets the active data source.
      *
-     * @param dataSourceName the data source name
-     * @return the active data source
+     * @param dataSourceName
+     * @return
      */
     @Override
     public DataSource getActiveDataSource(String dataSourceName) {
@@ -124,7 +124,7 @@ public class SQLDataSourceManager implements DataSourceManager {
     /**
      * Gets the active data sources.
      *
-     * @return the active data sources
+     * @return
      */
     @Override
     public Map<String, DataSource> getActiveDataSources() {
@@ -134,7 +134,7 @@ public class SQLDataSourceManager implements DataSourceManager {
     /**
      * Gets the data source selector.
      *
-     * @return the data source selector
+     * @return
      */
     @Override
     public DataSourceSelector getDataSourceSelector() {
@@ -144,7 +144,7 @@ public class SQLDataSourceManager implements DataSourceManager {
     /**
      * Gets the properties.
      *
-     * @return the properties
+     * @return
      */
     @Override
     public Properties<String, String> getProperties() {

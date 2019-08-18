@@ -28,7 +28,7 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
     /**
      * Bits.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int bits() {
@@ -38,7 +38,7 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
     /**
      * New hasher.
      *
-     * @return the hasher
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -48,7 +48,7 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -91,7 +91,7 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
         /**
          * Update.
          *
-         * @param b the b
+         * @param b
          */
         @Override
         public void update(byte b) {
@@ -103,7 +103,7 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
         /**
          * Hash.
          *
-         * @return the hash code
+         * @return
          */
         @Override
         public HashCode hash() {

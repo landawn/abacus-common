@@ -36,7 +36,7 @@ public class ParseException extends AbacusException {
     /**
      * Constructor for ParseException.
      *
-     * @param message the message
+     * @param message
      */
     public ParseException(String message) {
         super(message);
@@ -45,8 +45,8 @@ public class ParseException extends AbacusException {
     /**
      * Constructor for ParseException.
      *
-     * @param message the message
-     * @param cause the cause
+     * @param message
+     * @param cause
      */
     public ParseException(String message, Throwable cause) {
         super(message, cause);
@@ -55,7 +55,7 @@ public class ParseException extends AbacusException {
     /**
      * Constructor for ParseException.
      *
-     * @param cause the cause
+     * @param cause
      */
     public ParseException(Throwable cause) {
         super(cause);

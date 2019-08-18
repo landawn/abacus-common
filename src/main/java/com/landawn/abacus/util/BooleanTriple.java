@@ -45,9 +45,9 @@ public class BooleanTriple {
     /**
      * Instantiates a new boolean triple.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
      */
     BooleanTriple(boolean _1, boolean _2, boolean _3) {
         this._1 = _1;
@@ -58,10 +58,10 @@ public class BooleanTriple {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @return the boolean triple
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @return
      */
     public static BooleanTriple of(boolean _1, boolean _2, boolean _3) {
         return new BooleanTriple(_1, _2, _3);
@@ -70,7 +70,7 @@ public class BooleanTriple {
     /**
      * Reversed.
      *
-     * @return the boolean triple
+     * @return
      */
     public BooleanTriple reversed() {
         return new BooleanTriple(_3, _2, _1);
@@ -79,7 +79,7 @@ public class BooleanTriple {
     /**
      * To array.
      *
-     * @return the boolean[]
+     * @return
      */
     public boolean[] toArray() {
         return new boolean[] { _1, _2, _3 };
@@ -88,7 +88,7 @@ public class BooleanTriple {
     /**
      * To list.
      *
-     * @return the boolean list
+     * @return
      */
     public BooleanList toList() {
         return BooleanList.of(_1, _2, _3);
@@ -97,8 +97,8 @@ public class BooleanTriple {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.BooleanConsumer<E> comsumer) throws E {
@@ -110,8 +110,8 @@ public class BooleanTriple {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<BooleanTriple, E> action) throws E {
@@ -121,10 +121,10 @@ public class BooleanTriple {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<BooleanTriple, U, E> mapper) throws E {
@@ -134,9 +134,9 @@ public class BooleanTriple {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<BooleanTriple> filter(final Try.Predicate<BooleanTriple, E> predicate) throws E {
@@ -146,7 +146,7 @@ public class BooleanTriple {
     /**
      * Stream.
      *
-     * @return the stream
+     * @return
      */
     public Stream<Boolean> stream() {
         return Stream.of(_1, _2, _3);
@@ -155,7 +155,7 @@ public class BooleanTriple {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -165,7 +165,7 @@ public class BooleanTriple {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -183,7 +183,7 @@ public class BooleanTriple {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

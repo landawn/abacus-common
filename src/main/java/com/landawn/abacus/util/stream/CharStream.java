@@ -88,7 +88,7 @@ public abstract class CharStream
      * @param mapper a <a href="package-summary.html#NonCharerference">non-interfering</a>,
      *               <a href="package-summary.html#Statelessness">stateless</a>
      *               function to apply to each element
-     * @return the new stream
+     * @return
      */
     public abstract CharStream map(CharUnaryOperator mapper);
 
@@ -102,7 +102,7 @@ public abstract class CharStream
      * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
      *               <a href="package-summary.html#Statelessness">stateless</a>
      *               function to apply to each element
-     * @return the new stream
+     * @return
      */
     public abstract IntStream mapToInt(CharToIntFunction mapper);
 
@@ -117,7 +117,7 @@ public abstract class CharStream
      * @param mapper a <a href="package-summary.html#NonCharerference">non-interfering</a>,
      *               <a href="package-summary.html#Statelessness">stateless</a>
      *               function to apply to each element
-     * @return the new stream
+     * @return
      */
     public abstract <U> Stream<U> mapToObj(CharFunction<? extends U> mapper);
 
@@ -133,7 +133,7 @@ public abstract class CharStream
      *               <a href="package-summary.html#Statelessness">stateless</a>
      *               function to apply to each element which produces an
      *               {@code CharStream} of new values
-     * @return the new stream
+     * @return
      * @see Stream#flatMap(Function)
      */
     public abstract CharStream flatMap(CharFunction<? extends CharStream> mapper);
@@ -166,7 +166,7 @@ public abstract class CharStream
      *        not merged to the interval, then mapper will receive the same
      *        value twice, otherwise it will receive the leftmost and the
      *        rightmost values which were merged to the range.
-     * @return the new stream
+     * @return
      * @see #collapse(CharBiPredicate, CharBinaryOperator)
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
@@ -191,7 +191,7 @@ public abstract class CharStream
      *        not merged to the interval, then mapper will receive the same
      *        value twice, otherwise it will receive the leftmost and the
      *        rightmost values which were merged to the range.
-     * @return the new stream
+     * @return
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
@@ -242,8 +242,8 @@ public abstract class CharStream
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param accumulator  the accumulation function
-     * @return the new stream which has the extract same size as this stream.
+     * @param accumulator the accumulation function
+     * @return
      */
     @SequentialOnly
     public abstract CharStream scan(final CharBinaryOperator accumulator);
@@ -270,8 +270,8 @@ public abstract class CharStream
      * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * 
-     * @param accumulator  the accumulation function
-     * @return the new stream which has the extract same size as this stream.
+     * @param accumulator the accumulation function
+     * @return
      */
     @SequentialOnly
     public abstract CharStream scan(final char init, final CharBinaryOperator accumulator);
@@ -397,7 +397,7 @@ public abstract class CharStream
      *           <a href="package-summary.html#NonCharerference">non-interfering</a>,
      *           <a href="package-summary.html#Statelessness">stateless</a>
      *           function for combining two values
-     * @return the result of the reduction
+     * @return
      * @see #sum()
      * @see #min()
      * @see #max()
@@ -437,7 +437,7 @@ public abstract class CharStream
      *           <a href="package-summary.html#NonCharerference">non-interfering</a>,
      *           <a href="package-summary.html#Statelessness">stateless</a>
      *           function for combining two values
-     * @return the result of the reduction
+     * @return
      * @see #reduce(int, CharBinaryOperator)
      */
     public abstract OptionalChar reduce(CharBinaryOperator op);
@@ -475,7 +475,7 @@ public abstract class CharStream
      *                    <a href="package-summary.html#Statelessness">stateless</a>
      *                    function for combining two values, which must be
      *                    compatible with the accumulator function
-     * @return the result of the reduction
+     * @return
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      */
     public abstract <R> R collect(Supplier<R> supplier, ObjCharConsumer<? super R> accumulator, BiConsumer<R, R> combiner);

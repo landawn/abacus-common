@@ -35,7 +35,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * The Class ContinuableFuture.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ContinuableFuture.html">https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ContinuableFuture.html</a>
  * @since 0.8
  */
@@ -79,7 +79,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Instantiates a new continuable future.
      *
-     * @param future the future
+     * @param future
      */
     ContinuableFuture(final Future<T> future) {
         this(future, null, null);
@@ -88,9 +88,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Instantiates a new continuable future.
      *
-     * @param future the future
-     * @param upFutures the up futures
-     * @param asyncExecutor the async executor
+     * @param future
+     * @param upFutures
+     * @param asyncExecutor
      */
     ContinuableFuture(final Future<T> future, final List<ContinuableFuture<?>> upFutures, final Executor asyncExecutor) {
         this.future = future;
@@ -101,9 +101,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @return the continuable future
+     * @param <E>
+     * @param action
+     * @return
      */
     public static <E extends Exception> ContinuableFuture<Void> run(final Try.Runnable<E> action) {
         return run(action, DEFAULT_EXECUTOR);
@@ -112,10 +112,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @param executor the executor
-     * @return the continuable future
+     * @param <E>
+     * @param action
+     * @param executor
+     * @return
      */
     public static <E extends Exception> ContinuableFuture<Void> run(final Try.Runnable<E> action, final Executor executor) {
         final FutureTask<Void> futureTask = new FutureTask<>(new Callable<Void>() {
@@ -134,10 +134,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param action the action
-     * @return the continuable future
+     * @param <T>
+     * @param <E>
+     * @param action
+     * @return
      */
     public static <T, E extends Exception> ContinuableFuture<T> call(final Try.Callable<T, E> action) {
         return call(action, DEFAULT_EXECUTOR);
@@ -146,11 +146,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param action the action
-     * @param executor the executor
-     * @return the continuable future
+     * @param <T>
+     * @param <E>
+     * @param action
+     * @param executor
+     * @return
      */
     public static <T, E extends Exception> ContinuableFuture<T> call(final Try.Callable<T, E> action, final Executor executor) {
         final FutureTask<T> futureTask = new FutureTask<>(new Callable<T>() {
@@ -168,8 +168,8 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Completed.
      *
-     * @param <T> the generic type
-     * @param result the result
+     * @param <T>
+     * @param result
      * @return a ContinuableFuture which is already done by passing the result to it directly.
      */
     public static <T> ContinuableFuture<T> completed(final T result) {
@@ -204,9 +204,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Wrap.
      *
-     * @param <T> the generic type
-     * @param future the future
-     * @return the continuable future
+     * @param <T>
+     * @param future
+     * @return
      */
     public static <T> ContinuableFuture<T> wrap(Future<T> future) {
         return new ContinuableFuture<T>(future);
@@ -215,7 +215,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Cancel.
      *
-     * @param mayInterruptIfRunning the may interrupt if running
+     * @param mayInterruptIfRunning
      * @return true, if successful
      */
     @Override
@@ -236,7 +236,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Cancel this future and all the previous stage future recursively.
      *
-     * @param mayInterruptIfRunning the may interrupt if running
+     * @param mayInterruptIfRunning
      * @return true, if successful
      */
     public boolean cancelAll(boolean mayInterruptIfRunning) {
@@ -281,7 +281,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the.
      *
-     * @return the t
+     * @return
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      */
@@ -293,9 +293,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the.
      *
-     * @param timeout the timeout
-     * @param unit the unit
-     * @return the t
+     * @param timeout
+     * @param unit
+     * @return
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      * @throws TimeoutException the timeout exception
@@ -308,7 +308,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the t.
      *
-     * @return the t
+     * @return
      */
     public Result<T, Exception> gett() {
         try {
@@ -321,9 +321,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the t.
      *
-     * @param timeout the timeout
-     * @param unit the unit
-     * @return the t
+     * @param timeout
+     * @param unit
+     * @return
      */
     public Result<T, Exception> gett(final long timeout, final TimeUnit unit) {
         try {
@@ -336,8 +336,8 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the now.
      *
-     * @param defaultValue the default value
-     * @return the now
+     * @param defaultValue
+     * @return
      */
     public T getNow(T defaultValue) {
         if (isDone()) {
@@ -354,10 +354,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then apply.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param action the action
-     * @return the then apply
+     * @param <U>
+     * @param <E>
+     * @param action
+     * @return
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      * @throws E the e
@@ -369,12 +369,12 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then apply.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param timeout the timeout
-     * @param unit the unit
-     * @param action the action
-     * @return the then apply
+     * @param <U>
+     * @param <E>
+     * @param timeout
+     * @param unit
+     * @param action
+     * @return
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      * @throws TimeoutException the timeout exception
@@ -388,10 +388,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then apply.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param action the action
-     * @return the then apply
+     * @param <U>
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U getThenApply(final Try.BiFunction<? super T, ? super Exception, U, E> action) throws E {
@@ -402,12 +402,12 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then apply.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param timeout the timeout
-     * @param unit the unit
-     * @param action the action
-     * @return the then apply
+     * @param <U>
+     * @param <E>
+     * @param timeout
+     * @param unit
+     * @param action
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit, final Try.BiFunction<? super T, ? super Exception, U, E> action)
@@ -419,9 +419,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then accept.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @return the then accept
+     * @param <E>
+     * @param action
+     * @return
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      * @throws E the e
@@ -433,11 +433,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then accept.
      *
-     * @param <E> the element type
-     * @param timeout the timeout
-     * @param unit the unit
-     * @param action the action
-     * @return the then accept
+     * @param <E>
+     * @param timeout
+     * @param unit
+     * @param action
+     * @return
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      * @throws TimeoutException the timeout exception
@@ -451,9 +451,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then accept.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @return the then accept
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     public <E extends Exception> void getThenAccept(final Try.BiConsumer<? super T, ? super Exception, E> action) throws E {
@@ -464,11 +464,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then accept.
      *
-     * @param <E> the element type
-     * @param timeout the timeout
-     * @param unit the unit
-     * @param action the action
-     * @return the then accept
+     * @param <E>
+     * @param timeout
+     * @param unit
+     * @param action
+     * @return
      * @throws E the e
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit, final Try.BiConsumer<? super T, ? super Exception, E> action)
@@ -497,10 +497,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param func the func
-     * @return the continuable future
+     * @param <U>
+     * @param <E>
+     * @param func
+     * @return
      */
     public <U, E extends Exception> ContinuableFuture<U> map(final Try.Function<? super T, U, E> func) {
         return new ContinuableFuture<U>(new Future<U>() {
@@ -732,9 +732,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Then run.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @return the continuable future
+     * @param <E>
+     * @param action
+     * @return
      */
     public <E extends Exception> ContinuableFuture<Void> thenRun(final Try.Runnable<E> action) {
         return execute(new Callable<Void>() {
@@ -750,9 +750,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Then run.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @return the continuable future
+     * @param <E>
+     * @param action
+     * @return
      */
     public <E extends Exception> ContinuableFuture<Void> thenRun(final Try.Consumer<? super T, E> action) {
         return execute(new Callable<Void>() {
@@ -767,9 +767,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Then run.
      *
-     * @param <E> the element type
-     * @param action the action
-     * @return the continuable future
+     * @param <E>
+     * @param action
+     * @return
      */
     public <E extends Exception> ContinuableFuture<Void> thenRun(final Try.BiConsumer<? super T, ? super Exception, E> action) {
         return execute(new Callable<Void>() {
@@ -785,10 +785,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Then call.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param action the action
-     * @return the continuable future
+     * @param <R>
+     * @param <E>
+     * @param action
+     * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> thenCall(final Try.Callable<R, E> action) {
         return execute(new Callable<R>() {
@@ -803,10 +803,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Then call.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param action the action
-     * @return the continuable future
+     * @param <R>
+     * @param <E>
+     * @param action
+     * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> thenCall(final Try.Function<? super T, R, E> action) {
         return execute(new Callable<R>() {
@@ -820,10 +820,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Then call.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param action the action
-     * @return the continuable future
+     * @param <R>
+     * @param <E>
+     * @param action
+     * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> thenCall(final Try.BiFunction<? super T, ? super Exception, R, E> action) {
         return execute(new Callable<R>() {
@@ -838,10 +838,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run after both.
      *
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <E extends Exception> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<?> other, final Try.Runnable<E> action) {
         return execute(new Callable<Void>() {
@@ -858,11 +858,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run after both.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <U>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <U, E extends Exception> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
             final Try.BiConsumer<? super T, ? super U, E> action) {
@@ -878,11 +878,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run after both.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <U>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <U, E extends Exception> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
             final Try.Consumer<? super Tuple4<T, ? super Exception, U, ? super Exception>, E> action) {
@@ -901,11 +901,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run after both.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <U>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <U, E extends Exception> ContinuableFuture<Void> runAfterBoth(final ContinuableFuture<U> other,
             final Try.QuadConsumer<T, ? super Exception, U, ? super Exception, E> action) {
@@ -924,11 +924,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after both.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<?> other, final Try.Callable<R, E> action) {
         return execute(new Callable<R>() {
@@ -944,12 +944,12 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after both.
      *
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <U, R, E extends Exception> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
             final Try.BiFunction<? super T, ? super U, R, E> action) {
@@ -964,12 +964,12 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after both.
      *
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <U, R, E extends Exception> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
             final Try.Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, R, E> action) {
@@ -987,12 +987,12 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after both.
      *
-     * @param <U> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <U, R, E extends Exception> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
             final Try.QuadFunction<T, ? super Exception, U, ? super Exception, R, E> action) {
@@ -1010,10 +1010,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run after either.
      *
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <E extends Exception> ContinuableFuture<Void> runAfterEither(final ContinuableFuture<?> other, final Try.Runnable<E> action) {
         return execute(new Callable<Void>() {
@@ -1030,10 +1030,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run after either.
      *
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <E extends Exception> ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other, final Try.Consumer<? super T, E> action) {
         return execute(new Callable<Void>() {
@@ -1050,10 +1050,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Run after either.
      *
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <E extends Exception> ContinuableFuture<Void> runAfterEither(final ContinuableFuture<? extends T> other,
             final Try.BiConsumer<? super T, ? super Exception, E> action) {
@@ -1071,11 +1071,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after either.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> callAfterEither(final ContinuableFuture<?> other, final Try.Callable<R, RuntimeException> action) {
         return execute(new Callable<R>() {
@@ -1091,11 +1091,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after either.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
             final Try.Function<? super T, R, E> action) {
@@ -1112,11 +1112,11 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after either.
      *
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param other the other
-     * @param action the action
-     * @return the continuable future
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
             final Try.BiFunction<? super T, ? super Exception, R, E> action) {
@@ -1316,9 +1316,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Execute.
      *
-     * @param <R> the generic type
-     * @param command the command
-     * @return the continuable future
+     * @param <R>
+     * @param command
+     * @return
      */
     private <R> ContinuableFuture<R> execute(final Callable<R> command) {
         return execute(command, null);
@@ -1327,10 +1327,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Execute.
      *
-     * @param <R> the generic type
-     * @param command the command
-     * @param other the other
-     * @return the continuable future
+     * @param <R>
+     * @param command
+     * @param other
+     * @return
      */
     private <R> ContinuableFuture<R> execute(final Callable<R> command, final ContinuableFuture<?> other) {
         return execute(new FutureTask<>(command), other);
@@ -1339,10 +1339,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Execute.
      *
-     * @param <U> the generic type
-     * @param futureTask the future task
-     * @param other the other
-     * @return the continuable future
+     * @param <U>
+     * @param futureTask
+     * @param other
+     * @return
      */
     private <U> ContinuableFuture<U> execute(final FutureTask<U> futureTask, final ContinuableFuture<?> other) {
         asyncExecutor.execute(futureTask);
@@ -1355,9 +1355,9 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Then delay.
      *
-     * @param delay the delay
-     * @param unit the unit
-     * @return the continuable future
+     * @param delay
+     * @param unit
+     * @return
      */
     public ContinuableFuture<T> thenDelay(long delay, TimeUnit unit) {
         if (delay <= 0) {
@@ -1370,8 +1370,8 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Then use.
      *
-     * @param executor the executor
-     * @return the continuable future
+     * @param executor
+     * @return
      */
     public ContinuableFuture<T> thenUse(Executor executor) {
         return with(executor, 0, TimeUnit.MILLISECONDS);
@@ -1380,10 +1380,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * With.
      *
-     * @param executor the executor
-     * @param delay the delay
-     * @param unit the unit
-     * @return the continuable future
+     * @param executor
+     * @param delay
+     * @param unit
+     * @return
      */
     @Deprecated
     ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) {

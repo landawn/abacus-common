@@ -24,7 +24,7 @@ import com.landawn.abacus.util.ContinuableFuture;
  * The Class AbstractHttpRequest.
  *
  * @author Haiyang Li
- * @param <S> the generic type
+ * @param <S>
  * @since 1.3
  */
 abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
@@ -44,7 +44,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Instantiates a new abstract http request.
      *
-     * @param httpClient the http client
+     * @param httpClient
      */
     AbstractHttpRequest(AbstractHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -53,9 +53,9 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Header.
      *
-     * @param name the name
-     * @param value the value
-     * @return the s
+     * @param name
+     * @param value
+     * @return
      */
     public S header(String name, Object value) {
         checkSettings();
@@ -68,11 +68,11 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Headers.
      *
-     * @param name1 the name 1
-     * @param value1 the value 1
-     * @param name2 the name 2
-     * @param value2 the value 2
-     * @return the s
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @return
      */
     public S headers(String name1, Object value1, String name2, Object value2) {
         checkSettings();
@@ -85,13 +85,13 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Headers.
      *
-     * @param name1 the name 1
-     * @param value1 the value 1
-     * @param name2 the name 2
-     * @param value2 the value 2
-     * @param name3 the name 3
-     * @param value3 the value 3
-     * @return the s
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @param name3
+     * @param value3
+     * @return
      */
     public S headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
         checkSettings();
@@ -104,8 +104,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Headers.
      *
-     * @param headers the headers
-     * @return the s
+     * @param headers
+     * @return
      */
     public S headers(Map<String, Object> headers) {
         checkSettings();
@@ -118,8 +118,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Headers.
      *
-     * @param headers the headers
-     * @return the s
+     * @param headers
+     * @return
      */
     public S headers(HttpHeaders headers) {
         checkSettings();
@@ -132,7 +132,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Gets the.
      *
-     * @return the string
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String get() throws UncheckedIOException {
@@ -142,9 +142,9 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(Class<T> resultClass) throws UncheckedIOException {
@@ -154,8 +154,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Gets the.
      *
-     * @param query the query
-     * @return the string
+     * @param query
+     * @return
      */
     public String get(Object query) {
         return get(String.class, query);
@@ -164,10 +164,10 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Gets the.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param query the query
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param query
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T get(Class<T> resultClass, Object query) throws UncheckedIOException {
@@ -180,8 +180,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Post.
      *
-     * @param body the body
-     * @return the string
+     * @param body
+     * @return
      */
     public String post(Object body) {
         return post(String.class, body);
@@ -190,10 +190,10 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Post.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param body the body
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param body
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T post(Class<T> resultClass, Object body) throws UncheckedIOException {
@@ -206,8 +206,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Put.
      *
-     * @param body the body
-     * @return the string
+     * @param body
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String put(Object body) throws UncheckedIOException {
@@ -217,10 +217,10 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Put.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param body the body
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param body
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T put(Class<T> resultClass, Object body) throws UncheckedIOException {
@@ -233,7 +233,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Delete.
      *
-     * @return the string
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String delete() throws UncheckedIOException {
@@ -243,9 +243,9 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(Class<T> resultClass) throws UncheckedIOException {
@@ -255,8 +255,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Delete.
      *
-     * @param query the query
-     * @return the string
+     * @param query
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public String delete(Object query) throws UncheckedIOException {
@@ -266,10 +266,10 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param query the query
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @param query
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T delete(Class<T> resultClass, Object query) throws UncheckedIOException {
@@ -282,7 +282,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async get.
      *
-     * @return the continuable future
+     * @return
      */
     public ContinuableFuture<String> asyncGet() {
         return asyncGet(String.class);
@@ -291,9 +291,9 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async get.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @return
      */
     public <T> ContinuableFuture<T> asyncGet(Class<T> resultClass) {
         return asyncGet(resultClass, null);
@@ -302,8 +302,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async get.
      *
-     * @param query the query
-     * @return the continuable future
+     * @param query
+     * @return
      */
     public ContinuableFuture<String> asyncGet(Object query) {
         return asyncGet(String.class, query);
@@ -312,10 +312,10 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async get.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param query the query
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param query
+     * @return
      */
     public <T> ContinuableFuture<T> asyncGet(Class<T> resultClass, Object query) {
         this.httpMethod = HttpMethod.GET;
@@ -327,8 +327,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async post.
      *
-     * @param body the body
-     * @return the continuable future
+     * @param body
+     * @return
      */
     public ContinuableFuture<String> asyncPost(Object body) {
         return asyncPost(String.class, body);
@@ -337,10 +337,10 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async post.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param body the body
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param body
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPost(Class<T> resultClass, Object body) {
         this.httpMethod = HttpMethod.POST;
@@ -352,8 +352,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async put.
      *
-     * @param body the body
-     * @return the continuable future
+     * @param body
+     * @return
      */
     public ContinuableFuture<String> asyncPut(Object body) {
         return asyncPut(String.class, body);
@@ -362,10 +362,10 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async put.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param body the body
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param body
+     * @return
      */
     public <T> ContinuableFuture<T> asyncPut(Class<T> resultClass, Object body) {
         this.httpMethod = HttpMethod.PUT;
@@ -377,7 +377,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async delete.
      *
-     * @return the continuable future
+     * @return
      */
     public ContinuableFuture<String> asyncDelete() {
         return asyncDelete(String.class);
@@ -386,9 +386,9 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(Class<T> resultClass) {
         return asyncDelete(resultClass, null);
@@ -397,8 +397,8 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async delete.
      *
-     * @param query the query
-     * @return the continuable future
+     * @param query
+     * @return
      */
     public ContinuableFuture<String> asyncDelete(Object query) {
         return asyncDelete(String.class, query);
@@ -407,10 +407,10 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async delete.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @param query the query
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @param query
+     * @return
      */
     public <T> ContinuableFuture<T> asyncDelete(Class<T> resultClass, Object query) {
         this.httpMethod = HttpMethod.DELETE;
@@ -422,9 +422,9 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Execute.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the t
+     * @param <T>
+     * @param resultClass
+     * @return
      */
     protected <T> T execute(final Class<T> resultClass) {
         if (httpMethod == null) {
@@ -452,9 +452,9 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     /**
      * Async execute.
      *
-     * @param <T> the generic type
-     * @param resultClass the result class
-     * @return the continuable future
+     * @param <T>
+     * @param resultClass
+     * @return
      */
     protected <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass) {
         if (httpMethod == null) {

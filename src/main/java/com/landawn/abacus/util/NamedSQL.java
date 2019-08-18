@@ -90,7 +90,7 @@ public final class NamedSQL {
     /**
      * Instantiates a new named SQL.
      *
-     * @param sql the sql
+     * @param sql
      */
     @SuppressWarnings({ "unchecked" })
     private NamedSQL(String sql) {
@@ -145,8 +145,8 @@ public final class NamedSQL {
     /**
      * Parses the.
      *
-     * @param sql the sql
-     * @return the named SQL
+     * @param sql
+     * @return
      */
     public static NamedSQL parse(String sql) {
         NamedSQL result = null;
@@ -167,7 +167,7 @@ public final class NamedSQL {
     /**
      * Gets the named SQL.
      *
-     * @return the named SQL
+     * @return
      */
     public String getNamedSQL() {
         return namedSQL;
@@ -176,7 +176,7 @@ public final class NamedSQL {
     /**
      * Gets the parameterized SQL.
      *
-     * @return the parameterized SQL
+     * @return
      */
     public String getParameterizedSQL() {
         return pureSQL;
@@ -185,8 +185,8 @@ public final class NamedSQL {
     /**
      * Gets the parameterized SQL.
      *
-     * @param isForCouchbase the is for couchbase
-     * @return the parameterized SQL
+     * @param isForCouchbase
+     * @return
      */
     public String getParameterizedSQL(boolean isForCouchbase) {
         if (isForCouchbase) {
@@ -203,7 +203,7 @@ public final class NamedSQL {
     /**
      * Gets the named parameters.
      *
-     * @return the named parameters
+     * @return
      */
     public List<String> getNamedParameters() {
         return namedParameters;
@@ -212,8 +212,8 @@ public final class NamedSQL {
     /**
      * Gets the named parameters.
      *
-     * @param isForCouchbase the is for couchbase
-     * @return the named parameters
+     * @param isForCouchbase
+     * @return
      */
     public List<String> getNamedParameters(boolean isForCouchbase) {
         if (isForCouchbase) {
@@ -230,7 +230,7 @@ public final class NamedSQL {
     /**
      * Gets the parameter count.
      *
-     * @return the parameter count
+     * @return
      */
     public int getParameterCount() {
         return parameterCount;
@@ -239,8 +239,8 @@ public final class NamedSQL {
     /**
      * Gets the parameter count.
      *
-     * @param isForCouchbase the is for couchbase
-     * @return the parameter count
+     * @param isForCouchbase
+     * @return
      */
     public int getParameterCount(boolean isForCouchbase) {
         if (isForCouchbase) {
@@ -337,7 +337,7 @@ public final class NamedSQL {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -351,7 +351,7 @@ public final class NamedSQL {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -372,7 +372,7 @@ public final class NamedSQL {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

@@ -28,7 +28,7 @@ import com.landawn.abacus.util.function.Supplier;
  * The Class ImmutableIterator.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.9
  */
 abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
@@ -47,7 +47,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
     /**
      * To set.
      *
-     * @return the sets the
+     * @return
      */
     public Set<T> toSet() {
         final Set<T> set = new HashSet<>();
@@ -62,9 +62,9 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
     /**
      * To collection.
      *
-     * @param <C> the generic type
-     * @param supplier the supplier
-     * @return the c
+     * @param <C>
+     * @param supplier
+     * @return
      */
     public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) {
         final C c = supplier.get();
@@ -80,9 +80,9 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      * To map.
      *
      * @param <K> the key type
-     * @param <E> the element type
-     * @param keyMapper the key mapper
-     * @return the map
+     * @param <E>
+     * @param keyMapper
+     * @return
      * @throws E the e
      */
     public <K, E extends Exception> Map<K, T> toMap(final Try.Function<? super T, K, E> keyMapper) throws E {
@@ -94,11 +94,11 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @return the map
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -112,13 +112,13 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param keyMapper the key mapper
-     * @param valueExtractor the value extractor
-     * @param mapSupplier the map supplier
-     * @return the m
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */

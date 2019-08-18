@@ -21,7 +21,7 @@ import java.util.Iterator;
  * The Class Indexed.
  *
  * @author Haiyang Li
- * @param <T> the generic type
+ * @param <T>
  * @since 0.8
  */
 public final class Indexed<T> extends AbstractIndexed {
@@ -32,8 +32,8 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Instantiates a new indexed.
      *
-     * @param index the index
-     * @param value the value
+     * @param index
+     * @param value
      */
     Indexed(long index, T value) {
         super(index);
@@ -43,10 +43,10 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param index the index
-     * @return the indexed
+     * @param <T>
+     * @param value
+     * @param index
+     * @return
      */
     public static <T> Indexed<T> of(T value, int index) {
         N.checkArgNotNegative(index, "index");
@@ -57,10 +57,10 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Of.
      *
-     * @param <T> the generic type
-     * @param value the value
-     * @param index the index
-     * @return the indexed
+     * @param <T>
+     * @param value
+     * @param index
+     * @return
      */
     public static <T> Indexed<T> of(T value, long index) {
         N.checkArgNotNegative(index, "index");
@@ -71,9 +71,9 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Iterate.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @return the obj iterator
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter) {
         return iterate(iter, 0);
@@ -82,10 +82,10 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Iterate.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @param startIndex the start index
-     * @return the obj iterator
+     * @param <T>
+     * @param iter
+     * @param startIndex
+     * @return
      */
     public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter, final int startIndex) {
         N.checkArgNotNegative(startIndex, "startIndex");
@@ -96,10 +96,10 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Iterate.
      *
-     * @param <T> the generic type
-     * @param iter the iter
-     * @param startIndex the start index
-     * @return the obj iterator
+     * @param <T>
+     * @param iter
+     * @param startIndex
+     * @return
      */
     public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter, final long startIndex) {
         N.checkArgNotNegative(startIndex, "startIndex");
@@ -122,7 +122,7 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Value.
      *
-     * @return the t
+     * @return
      */
     public T value() {
         return value;
@@ -131,7 +131,7 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -141,7 +141,7 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -162,7 +162,7 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

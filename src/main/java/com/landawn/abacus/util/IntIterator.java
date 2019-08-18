@@ -46,7 +46,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Empty.
      *
-     * @return the int iterator
+     * @return
      */
     public static IntIterator empty() {
         return EMPTY;
@@ -55,8 +55,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Of.
      *
-     * @param a the a
-     * @return the int iterator
+     * @param a
+     * @return
      */
     @SafeVarargs
     public static IntIterator of(final int... a) {
@@ -66,10 +66,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Of.
      *
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the int iterator
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -110,8 +110,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Lazy evaluation.
      *
-     * @param iteratorSupplier the iterator supplier
-     * @return the int iterator
+     * @param iteratorSupplier
+     * @return
      */
     public static IntIterator of(final Supplier<? extends IntIterator> iteratorSupplier) {
         N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
@@ -150,8 +150,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Lazy evaluation.
      *
-     * @param arraySupplier the array supplier
-     * @return the int iterator
+     * @param arraySupplier
+     * @return
      */
     public static IntIterator oF(final Supplier<int[]> arraySupplier) {
         N.checkArgNotNull(arraySupplier, "arraySupplier");
@@ -197,8 +197,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Returns an infinite {@code IntIterator}.
      *
-     * @param supplier the supplier
-     * @return the int iterator
+     * @param supplier
+     * @return
      */
     public static IntIterator generate(final IntSupplier supplier) {
         N.checkArgNotNull(supplier);
@@ -219,9 +219,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Generate.
      *
-     * @param hasNext the has next
-     * @param supplier the supplier
-     * @return the int iterator
+     * @param hasNext
+     * @param supplier
+     * @return
      */
     public static IntIterator generate(final BooleanSupplier hasNext, final IntSupplier supplier) {
         N.checkArgNotNull(hasNext);
@@ -247,7 +247,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Next.
      *
-     * @return the integer
+     * @return
      * @Deprecated use <code>nextInt()</code> instead.
      */
     @Deprecated
@@ -259,14 +259,14 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Next int.
      *
-     * @return the int
+     * @return
      */
     public abstract int nextInt();
 
     /**
      * To array.
      *
-     * @return the int[]
+     * @return
      */
     public int[] toArray() {
         return toList().trimToSize().array();
@@ -275,7 +275,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * To list.
      *
-     * @return the int list
+     * @return
      */
     public IntList toList() {
         final IntList list = new IntList();
@@ -290,7 +290,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Stream.
      *
-     * @return the int stream
+     * @return
      */
     public IntStream stream() {
         return IntStream.of(this);
@@ -299,8 +299,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Foreach remaining.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void foreachRemaining(Try.IntConsumer<E> action) throws E {
@@ -314,7 +314,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * For each remaining.
      *
-     * @param action the action
+     * @param action
      */
     @Override
     @Deprecated

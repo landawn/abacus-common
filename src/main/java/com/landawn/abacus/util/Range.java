@@ -37,7 +37,7 @@ import com.landawn.abacus.util.u.Optional;
  * </p>
  *
  * @version $Id: Range.java 1565243 2014-02-06 13:37:12Z sebb $
- * @param <T> the generic type
+ * @param <T>
  * @since 3.0
  */
 @SuppressWarnings("rawtypes")
@@ -61,9 +61,9 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * Instantiates a new range.
      *
-     * @param lowerEndpoint the lower endpoint
-     * @param upperEndpoint the upper endpoint
-     * @param boundType the bound type
+     * @param lowerEndpoint
+     * @param upperEndpoint
+     * @param boundType
      */
     @SuppressWarnings("unchecked")
     private Range(final LowerEndpoint<T> lowerEndpoint, final UpperEndpoint<T> upperEndpoint, final BoundType boundType) {
@@ -85,7 +85,7 @@ public final class Range<T extends Comparable> implements Serializable {
      *            the type of the elements in this range
      * @param element
      *            the value to use for this range, not null
-     * @return the range object, not null
+     * @return
      * @throws IllegalArgumentException if the element is null
      */
     public static <T extends Comparable<T>> Range<T> just(final T element) {
@@ -95,10 +95,10 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * Open.
      *
-     * @param <T> the generic type
-     * @param min the min
-     * @param max the max
-     * @return the range
+     * @param <T>
+     * @param min
+     * @param max
+     * @return
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
     public static <T extends Comparable<T>> Range<T> open(final T min, final T max) {
@@ -112,10 +112,10 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * Open closed.
      *
-     * @param <T> the generic type
-     * @param min the min
-     * @param max the max
-     * @return the range
+     * @param <T>
+     * @param min
+     * @param max
+     * @return
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
     public static <T extends Comparable<T>> Range<T> openClosed(final T min, final T max) {
@@ -129,10 +129,10 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * Closed open.
      *
-     * @param <T> the generic type
-     * @param min the min
-     * @param max the max
-     * @return the range
+     * @param <T>
+     * @param min
+     * @param max
+     * @return
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
     public static <T extends Comparable<T>> Range<T> closedOpen(final T min, final T max) {
@@ -146,10 +146,10 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * Closed.
      *
-     * @param <T> the generic type
-     * @param min the min
-     * @param max the max
-     * @return the range
+     * @param <T>
+     * @param min
+     * @param max
+     * @return
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
     public static <T extends Comparable<T>> Range<T> closed(final T min, final T max) {
@@ -163,7 +163,7 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * Bound type.
      *
-     * @return the bound type
+     * @return
      */
     public BoundType boundType() {
         return boundType;
@@ -174,7 +174,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * Gets the minimum value in this range.
      * </p>
      * 
-     * @return the minimum value in this range, not null
+     * @return
      */
     public T lowerEndpoint() {
         return lowerEndpoint.value;
@@ -185,7 +185,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * Gets the maximum value in this range.
      * </p>
      * 
-     * @return the maximum value in this range, not null
+     * @return
      */
     public T upperEndpoint() {
         return upperEndpoint.value;
@@ -214,7 +214,7 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * Contains all.
      *
-     * @param c the c
+     * @param c
      * @return true, if successful
      */
     public boolean containsAll(Collection<? extends T> c) {
@@ -458,8 +458,8 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>Like {@link #intersection(Range) intersection}, this operation is commutative, associative
      * and idempotent. Unlike it, it is always well-defined for any two input ranges.
      *
-     * @param other the other
-     * @return the range
+     * @param other
+     * @return
      */
     public Range<T> span(Range<T> other) {
         final LowerEndpoint<T> newLowerEndpoint = lowerEndpoint.includes(other.lowerEndpoint.value) ? lowerEndpoint : other.lowerEndpoint;
@@ -541,7 +541,7 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {
@@ -566,7 +566,7 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * The Class Endpoint.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     static abstract class Endpoint<T extends Comparable> implements Serializable {
 
@@ -582,8 +582,8 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Instantiates a new endpoint.
          *
-         * @param value the value
-         * @param isClosed the is closed
+         * @param value
+         * @param isClosed
          */
         protected Endpoint(final T value, boolean isClosed) {
             this.value = value;
@@ -593,8 +593,8 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Compare to.
          *
-         * @param value the value
-         * @return the int
+         * @param value
+         * @return
          */
         public int compareTo(T value) {
             return N.compare(this.value, value);
@@ -603,7 +603,7 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Includes.
          *
-         * @param value the value
+         * @param value
          * @return true, if successful
          */
         public abstract boolean includes(T value);
@@ -613,7 +613,7 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * The Class LowerEndpoint.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     static class LowerEndpoint<T extends Comparable> extends Endpoint<T> implements Serializable {
 
@@ -623,8 +623,8 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Instantiates a new lower endpoint.
          *
-         * @param value the value
-         * @param isClosed the is closed
+         * @param value
+         * @param isClosed
          */
         LowerEndpoint(final T value, boolean isClosed) {
             super(value, isClosed);
@@ -633,7 +633,7 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Includes.
          *
-         * @param value the value
+         * @param value
          * @return true, if successful
          */
         @Override
@@ -687,7 +687,7 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {
@@ -698,7 +698,7 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * The Class UpperEndpoint.
      *
-     * @param <T> the generic type
+     * @param <T>
      */
     static class UpperEndpoint<T extends Comparable> extends Endpoint<T> implements Serializable {
 
@@ -708,8 +708,8 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Instantiates a new upper endpoint.
          *
-         * @param value the value
-         * @param isClosed the is closed
+         * @param value
+         * @param isClosed
          */
         UpperEndpoint(final T value, boolean isClosed) {
             super(value, isClosed);
@@ -718,7 +718,7 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Includes.
          *
-         * @param value the value
+         * @param value
          * @return true, if successful
          */
         @Override
@@ -729,7 +729,7 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Hash code.
          *
-         * @return the int
+         * @return
          */
         @Override
         public int hashCode() {
@@ -741,7 +741,7 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * Equals.
          *
-         * @param obj the obj
+         * @param obj
          * @return true, if successful
          */
         @Override
@@ -762,7 +762,7 @@ public final class Range<T extends Comparable> implements Serializable {
         /**
          * To string.
          *
-         * @return the string
+         * @return
          */
         @Override
         public String toString() {

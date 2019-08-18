@@ -42,9 +42,9 @@ public final class CacheFactory {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
-     * @return the local cache< k, v>
+     * @param capacity
+     * @param evictDelay
+     * @return
      */
     public static <K, V> LocalCache<K, V> createLocalCache(final int capacity, final long evictDelay) {
         return new LocalCache<K, V>(capacity, evictDelay);
@@ -55,11 +55,11 @@ public final class CacheFactory {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param capacity the capacity
-     * @param evictDelay the evict delay
+     * @param capacity
+     * @param evictDelay
      * @param defaultLiveTime default value is 3 hours
      * @param defaultMaxIdleTime default value is 30 minutes
-     * @return the local cache< k, v>
+     * @return
      */
     public static <K, V> LocalCache<K, V> createLocalCache(final int capacity, final long evictDelay, final long defaultLiveTime,
             final long defaultMaxIdleTime) {
@@ -71,8 +71,8 @@ public final class CacheFactory {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param dcc the dcc
-     * @return the distributed cache< k, v>
+     * @param dcc
+     * @return
      */
     public static <K, V> DistributedCache<K, V> createDistributedCache(final DistributedCacheClient<V> dcc) {
         return new DistributedCache<K, V>(dcc);
@@ -83,9 +83,9 @@ public final class CacheFactory {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param dcc the dcc
-     * @param keyPrefix the key prefix
-     * @return the distributed cache< k, v>
+     * @param dcc
+     * @param keyPrefix
+     * @return
      */
     public static <K, V> DistributedCache<K, V> createDistributedCache(final DistributedCacheClient<V> dcc, final String keyPrefix) {
         return new DistributedCache<K, V>(dcc, keyPrefix);
@@ -96,11 +96,11 @@ public final class CacheFactory {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param dcc the dcc
-     * @param keyPrefix the key prefix
-     * @param maxFailedNumForRetry the max failed num for retry
-     * @param retryDelay the retry delay
-     * @return the distributed cache< k, v>
+     * @param dcc
+     * @param keyPrefix
+     * @param maxFailedNumForRetry
+     * @param retryDelay
+     * @return
      */
     public static <K, V> DistributedCache<K, V> createDistributedCache(final DistributedCacheClient<V> dcc, final String keyPrefix,
             final int maxFailedNumForRetry, final long retryDelay) {
@@ -112,8 +112,8 @@ public final class CacheFactory {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param provider the provider
-     * @return the cache< k, v>
+     * @param provider
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <K, V> Cache<K, V> createCache(final String provider) {

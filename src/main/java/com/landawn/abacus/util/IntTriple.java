@@ -45,9 +45,9 @@ public final class IntTriple {
     /**
      * Instantiates a new int triple.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
      */
     IntTriple(int _1, int _2, int _3) {
         this._1 = _1;
@@ -58,10 +58,10 @@ public final class IntTriple {
     /**
      * Of.
      *
-     * @param _1 the  1
-     * @param _2 the  2
-     * @param _3 the  3
-     * @return the int triple
+     * @param _1 the 1
+     * @param _2 the 2
+     * @param _3 the 3
+     * @return
      */
     public static IntTriple of(int _1, int _2, int _3) {
         return new IntTriple(_1, _2, _3);
@@ -70,7 +70,7 @@ public final class IntTriple {
     /**
      * Min.
      *
-     * @return the int
+     * @return
      */
     public int min() {
         return N.min(_1, _2, _3);
@@ -79,7 +79,7 @@ public final class IntTriple {
     /**
      * Max.
      *
-     * @return the int
+     * @return
      */
     public int max() {
         return N.max(_1, _2, _3);
@@ -88,7 +88,7 @@ public final class IntTriple {
     /**
      * Median.
      *
-     * @return the int
+     * @return
      */
     public int median() {
         return N.median(_1, _2, _3);
@@ -97,7 +97,7 @@ public final class IntTriple {
     /**
      * Sum.
      *
-     * @return the int
+     * @return
      */
     public int sum() {
         return N.toIntExact(0L + _1 + _2 + _3);
@@ -106,7 +106,7 @@ public final class IntTriple {
     /**
      * Average.
      *
-     * @return the double
+     * @return
      */
     public double average() {
         return (0d + _1 + _2 + _3) / 3;
@@ -115,7 +115,7 @@ public final class IntTriple {
     /**
      * Reversed.
      *
-     * @return the int triple
+     * @return
      */
     public IntTriple reversed() {
         return new IntTriple(_3, _2, _1);
@@ -124,7 +124,7 @@ public final class IntTriple {
     /**
      * To array.
      *
-     * @return the int[]
+     * @return
      */
     public int[] toArray() {
         return new int[] { _1, _2, _3 };
@@ -133,7 +133,7 @@ public final class IntTriple {
     /**
      * To list.
      *
-     * @return the int list
+     * @return
      */
     public IntList toList() {
         return IntList.of(_1, _2, _3);
@@ -142,8 +142,8 @@ public final class IntTriple {
     /**
      * For each.
      *
-     * @param <E> the element type
-     * @param comsumer the comsumer
+     * @param <E>
+     * @param comsumer
      * @throws E the e
      */
     public <E extends Exception> void forEach(Try.IntConsumer<E> comsumer) throws E {
@@ -155,8 +155,8 @@ public final class IntTriple {
     /**
      * Accept.
      *
-     * @param <E> the element type
-     * @param action the action
+     * @param <E>
+     * @param action
      * @throws E the e
      */
     public <E extends Exception> void accept(Try.Consumer<IntTriple, E> action) throws E {
@@ -166,10 +166,10 @@ public final class IntTriple {
     /**
      * Map.
      *
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param mapper the mapper
-     * @return the u
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
      * @throws E the e
      */
     public <U, E extends Exception> U map(Try.Function<IntTriple, U, E> mapper) throws E {
@@ -179,9 +179,9 @@ public final class IntTriple {
     /**
      * Filter.
      *
-     * @param <E> the element type
-     * @param predicate the predicate
-     * @return the optional
+     * @param <E>
+     * @param predicate
+     * @return
      * @throws E the e
      */
     public <E extends Exception> Optional<IntTriple> filter(final Try.Predicate<IntTriple, E> predicate) throws E {
@@ -191,7 +191,7 @@ public final class IntTriple {
     /**
      * Stream.
      *
-     * @return the int stream
+     * @return
      */
     public IntStream stream() {
         return IntStream.of(_1, _2, _3);
@@ -200,7 +200,7 @@ public final class IntTriple {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -210,7 +210,7 @@ public final class IntTriple {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -228,7 +228,7 @@ public final class IntTriple {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

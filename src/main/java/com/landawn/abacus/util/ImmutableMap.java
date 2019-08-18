@@ -46,7 +46,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Instantiates a new immutable map.
      *
-     * @param map the map
+     * @param map
      */
     ImmutableMap(final Map<? extends K, ? extends V> map) {
         this.map = Collections.unmodifiableMap(map);
@@ -57,7 +57,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return the immutable map
+     * @return
      */
     public static <K, V> ImmutableMap<K, V> empty() {
         return EMPTY;
@@ -68,11 +68,11 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @return the immutable map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1) {
         return new ImmutableMap<K, V>(Collections.singletonMap(k1, v1));
@@ -83,13 +83,13 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @return the immutable map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2) {
         final Map<k, v> map = N.asLinkedHashMap(k1, v1, k2, v2);
@@ -101,15 +101,15 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @return the immutable map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
         final Map<k, v> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3);
@@ -121,17 +121,17 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @return the immutable map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4) {
@@ -144,19 +144,19 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @return the immutable map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5) {
@@ -169,21 +169,21 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @return the immutable map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6) {
@@ -196,23 +196,23 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k> the generic type
-     * @param <v> the generic type
-     * @param k1 the k 1
-     * @param v1 the v 1
-     * @param k2 the k 2
-     * @param v2 the v 2
-     * @param k3 the k 3
-     * @param v3 the v 3
-     * @param k4 the k 4
-     * @param v4 the v 4
-     * @param k5 the k 5
-     * @param v5 the v 5
-     * @param k6 the k 6
-     * @param v6 the v 6
-     * @param k7 the k 7
-     * @param v7 the v 7
-     * @return the immutable map
+     * @param <k>
+     * @param <v>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
@@ -226,7 +226,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param <K> the key type
      * @param <V> the value type
      * @param map the elements in this <code>map</code> are shared by the returned ImmutableMap.
-     * @return the immutable map
+     * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) {
         if (map == null) {
@@ -243,8 +243,8 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the map
-     * @return the immutable map
+     * @param map
+     * @return
      */
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (N.isNullOrEmpty(map)) {
@@ -260,9 +260,9 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Gets the or default.
      *
-     * @param key the key
-     * @param defaultValue the default value
-     * @return the or default
+     * @param key
+     * @param defaultValue
+     * @return
      */
     @Override
     public V getOrDefault(Object key, V defaultValue) {
@@ -274,9 +274,9 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Put.
      *
-     * @param k the k
-     * @param v the v
-     * @return the v
+     * @param k
+     * @param v
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -288,8 +288,8 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Removes the.
      *
-     * @param o the o
-     * @return the v
+     * @param o
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -301,7 +301,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Put all.
      *
-     * @param map the map
+     * @param map
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -313,9 +313,9 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Put if absent.
      *
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param key
+     * @param value
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -327,8 +327,8 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Removes the.
      *
-     * @param key the key
-     * @param value the value
+     * @param key
+     * @param value
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -341,9 +341,9 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Replace.
      *
-     * @param key the key
-     * @param oldValue the old value
-     * @param newValue the new value
+     * @param key
+     * @param oldValue
+     * @param newValue
      * @return true, if successful
      * @deprecated Unsupported operation.
      */
@@ -356,9 +356,9 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Replace.
      *
-     * @param key the key
-     * @param value the value
-     * @return the v
+     * @param key
+     * @param value
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -370,9 +370,9 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Compute if absent.
      *
-     * @param key the key
-     * @param mappingFunction the mapping function
-     * @return the v
+     * @param key
+     * @param mappingFunction
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -384,9 +384,9 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Compute if present.
      *
-     * @param key the key
-     * @param remappingFunction the remapping function
-     * @return the v
+     * @param key
+     * @param remappingFunction
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -398,9 +398,9 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Compute.
      *
-     * @param key the key
-     * @param remappingFunction the remapping function
-     * @return the v
+     * @param key
+     * @param remappingFunction
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -412,10 +412,10 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Merge.
      *
-     * @param key the key
-     * @param value the value
-     * @param remappingFunction the remapping function
-     * @return the v
+     * @param key
+     * @param value
+     * @param remappingFunction
+     * @return
      * @deprecated Unsupported operation.
      */
     @Deprecated
@@ -448,7 +448,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Contains key.
      *
-     * @param key the key
+     * @param key
      * @return true, if successful
      */
     @Override
@@ -459,7 +459,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Contains value.
      *
-     * @param value the value
+     * @param value
      * @return true, if successful
      */
     @Override
@@ -470,8 +470,8 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Gets the.
      *
-     * @param key the key
-     * @return the v
+     * @param key
+     * @return
      */
     @Override
     public V get(Object key) {
@@ -481,7 +481,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Key set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<K> keySet() {
@@ -491,7 +491,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Values.
      *
-     * @return the collection
+     * @return
      */
     @Override
     public Collection<V> values() {
@@ -501,7 +501,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Entry set.
      *
-     * @return the sets the
+     * @return
      */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
@@ -511,7 +511,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Size.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int size() {
@@ -521,7 +521,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Equals.
      *
-     * @param obj the obj
+     * @param obj
      * @return true, if successful
      */
     @Override
@@ -532,7 +532,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * Hash code.
      *
-     * @return the int
+     * @return
      */
     @Override
     public int hashCode() {
@@ -542,7 +542,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     /**
      * To string.
      *
-     * @return the string
+     * @return
      */
     @Override
     public String toString() {

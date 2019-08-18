@@ -35,7 +35,7 @@ public class RefReentrantReadWriteLock extends ReentrantReadWriteLock {
     /**
      * Method getRefCount.
      *
-     * @return the ref count
+     * @return
      */
     public int getRefCount() {
         return refCount.get();
@@ -44,7 +44,7 @@ public class RefReentrantReadWriteLock extends ReentrantReadWriteLock {
     /**
      * Method incrementRefCount.
      *
-     * @return the int
+     * @return
      */
     public int incrementRefCount() {
         return refCount.incrementAndGet();
@@ -53,7 +53,7 @@ public class RefReentrantReadWriteLock extends ReentrantReadWriteLock {
     /**
      * Method decrementRefCount.
      *
-     * @return the int
+     * @return
      */
     public int decrementRefCount() {
         return refCount.decrementAndGet();
