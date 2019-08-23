@@ -13,12 +13,12 @@
  */
 
 package com.landawn.abacus.pool;
-
+ 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -393,7 +393,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            return new HashSet<K>(pool.keySet());
+            return N.newHashSet(pool.keySet());
         } finally {
             lock.unlock();
         }

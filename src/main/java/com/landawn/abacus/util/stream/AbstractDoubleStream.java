@@ -13,9 +13,8 @@
  */
 
 package com.landawn.abacus.util.stream;
-
+ 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -68,7 +67,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream distinct() {
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new DoublePredicate() {
             @Override

@@ -18,7 +18,6 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -41,7 +40,7 @@ public class ArrayHashSet<E> implements Set<E> {
      * Instantiates a new array hash set.
      */
     public ArrayHashSet() {
-        this.set = new HashSet<>();
+        this.set = N.newHashSet();
     }
 
     /**
@@ -50,7 +49,7 @@ public class ArrayHashSet<E> implements Set<E> {
      * @param initialCapacity
      */
     public ArrayHashSet(final int initialCapacity) {
-        this.set = new HashSet<>(initialCapacity);
+        this.set = N.newHashSet(initialCapacity);
     }
 
     /**
@@ -70,9 +69,9 @@ public class ArrayHashSet<E> implements Set<E> {
      */
     public ArrayHashSet(final Collection<? extends E> coll) {
         if (N.isNullOrEmpty(coll)) {
-            set = new HashSet<>();
+            set = N.newHashSet();
         } else {
-            set = new HashSet<>(N.initHashCapacity(coll.size()));
+            set = N.newHashSet(N.initHashCapacity(coll.size()));
         }
 
         addAll(coll);

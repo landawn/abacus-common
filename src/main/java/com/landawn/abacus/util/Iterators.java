@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -200,10 +199,10 @@ public final class Iterators {
      */
     public static <T> Set<T> toSet(final Iterator<? extends T> iter) {
         if (iter == null) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<T> result = new HashSet<>();
+        final Set<T> result = N.newHashSet();
 
         while (iter.hasNext()) {
             result.add(iter.next());

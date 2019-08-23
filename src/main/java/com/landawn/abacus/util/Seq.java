@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -3312,7 +3311,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
      * @return
      */
     public Set<T> toSet() {
-        return coll == null ? new HashSet<T>() : new HashSet<T>(coll);
+        return coll == null ? N.newHashSet() : N.newHashSet(coll);
     }
 
     /**

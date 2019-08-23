@@ -13,11 +13,10 @@
  */
 
 package com.landawn.abacus.util.stream;
-
+ 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -941,7 +940,7 @@ class ArrayByteStream extends AbstractByteStream {
         assertNotClosed();
 
         try {
-            final Set<Byte> result = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Byte> result = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);

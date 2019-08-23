@@ -13,7 +13,7 @@
  */
 
 package com.landawn.abacus.util.stream;
-
+ 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -3128,7 +3127,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> distinct() {
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new Predicate<T>() {
             @Override
@@ -3140,7 +3139,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> distinctBy(final Function<? super T, ?> keyMapper) {
-        //    final Set<Object> set = new HashSet<>();
+        //    final Set<Object> set = N.newHashSet();
         //
         //    final Predicate<T> predicate = isParallel() ? new Predicate<T>() {
         //        @Override
@@ -3166,7 +3165,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 return map.put(hashKey(keyMapper.apply(value)), StreamBase.NONE) == null;
             }
         } : new Predicate<T>() {
-            private final Set<Object> set = new HashSet<>();
+            private final Set<Object> set = N.newHashSet();
 
             @Override
             public boolean test(T value) {
@@ -3221,7 +3220,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     //        final Set<T> set = toSet(new Supplier<Set<T>>() {
     //            @Override
     //            public Set<T> get() {
-    //                return new LinkedHashSet<>();
+    //                return N.newLinkedHashSet();
     //            }
     //        });
     //
@@ -3532,7 +3531,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         assertNotClosed();
 
         try {
-            final Set<T> set = new HashSet<>();
+            final Set<T> set = N.newHashSet();
             final Iterator<T> iter = iteratorEx();
 
             while (iter.hasNext()) {

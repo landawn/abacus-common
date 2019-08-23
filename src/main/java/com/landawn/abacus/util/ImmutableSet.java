@@ -16,7 +16,6 @@ package com.landawn.abacus.util;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -121,6 +120,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
             return empty();
         }
 
-        return new ImmutableSet<>((set instanceof LinkedHashSet || set instanceof SortedSet) ? new LinkedHashSet<>(set) : new HashSet<>(set));
+        return new ImmutableSet<>((set instanceof LinkedHashSet || set instanceof SortedSet) ? N.newLinkedHashSet(set) : N.newHashSet(set));
     }
 }

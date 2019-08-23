@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1312,7 +1311,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     public ExceptionalStream<T, E> distinct() {
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = N.newHashSet();
 
         return filter(new Try.Predicate<T, E>() {
             @Override
@@ -1331,7 +1330,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     public ExceptionalStream<T, E> distinctBy(final Try.Function<? super T, ?, ? extends E> keyMapper) {
         checkArgNotNull(keyMapper, "keyMapper");
 
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = N.newHashSet();
 
         return filter(new Try.Predicate<T, E>() {
             @Override
@@ -3576,7 +3575,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         assertNotClosed();
 
         try {
-            final Set<T> result = new HashSet<>();
+            final Set<T> result = N.newHashSet();
 
             while (elements.hasNext()) {
                 result.add(elements.next());

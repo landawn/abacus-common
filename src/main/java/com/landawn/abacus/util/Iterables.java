@@ -77,12 +77,12 @@ public final class Iterables {
      */
     public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
         if (N.isNullOrEmpty(a)) {
-            return new HashSet<>();
+            return N.newHashSet();
         } else if (N.isNullOrEmpty(b)) {
-            return new HashSet<>(a);
+            return N.newHashSet(a);
         }
 
-        final Set<T> result = new HashSet<>(a);
+        final Set<T> result = N.newHashSet(a);
 
         Iterables.removeAll(a, b);
 
@@ -99,13 +99,13 @@ public final class Iterables {
      */
     public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
         if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? new HashSet<T>() : new HashSet<>(b);
+            return N.isNullOrEmpty(b) ? N.newHashSet() : N.newHashSet(b);
         } else if (N.isNullOrEmpty(b)) {
-            return N.isNullOrEmpty(a) ? new HashSet<T>() : new HashSet<>(a);
+            return N.isNullOrEmpty(a) ? N.newHashSet() : N.newHashSet(a);
         }
 
         final Set<T> commonSet = Iterables.commonSet(a, b);
-        final Set<T> result = new HashSet<>(a);
+        final Set<T> result = N.newHashSet(a);
 
         for (T e : a) {
             if (!commonSet.contains(e)) {
@@ -132,7 +132,7 @@ public final class Iterables {
      */
     public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
         return commonSet(N.asList(a, (Collection<? extends T>) b));
@@ -147,7 +147,7 @@ public final class Iterables {
      */
     public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
         if (N.isNullOrEmpty(c)) {
-            return new HashSet<>();
+            return N.newHashSet();
         } else if (c.size() == 1) {
             return N.newHashSet(c.iterator().next());
         }
@@ -156,7 +156,7 @@ public final class Iterables {
 
         for (Collection<? extends T> e : c) {
             if (N.isNullOrEmpty(e)) {
-                return new HashSet<>();
+                return N.newHashSet();
             }
 
             if (smallest == null || e.size() < smallest.size()) {
@@ -193,7 +193,7 @@ public final class Iterables {
             cnt++;
         }
 
-        final Set<T> result = new HashSet<>(map.size());
+        final Set<T> result = N.newHashSet(map.size());
 
         for (Map.Entry<T, MutableInt> entry : map.entrySet()) {
             if (entry.getValue().intValue() == cnt) {
@@ -249,7 +249,7 @@ public final class Iterables {
         }
 
         if (c instanceof HashSet && !(objsToKeep instanceof Set) && (c.size() > 9 || objsToKeep.size() > 9)) {
-            return c.retainAll(new HashSet<>(objsToKeep));
+            return c.retainAll(N.newHashSet(objsToKeep));
         } else {
             return c.retainAll(objsToKeep);
         }

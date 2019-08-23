@@ -1088,7 +1088,7 @@ public final class N {
             } else if (cls.equals(List.class)) {
                 return (T) new ArrayList<>();
             } else if (cls.equals(Set.class)) {
-                return (T) new HashSet<>();
+                return (T) N.newHashSet();
             } else if (cls.equals(Queue.class)) {
                 return (T) new LinkedList<>();
             } else if (cls.equals(Deque.class)) {
@@ -1220,7 +1220,7 @@ public final class N {
      */
     public static <T> T newEntity(final Class<T> cls, final String entityName) {
         if (MapEntity.class.isAssignableFrom(cls)) {
-            return (T) asMapEntity(entityName);
+            return (T) new MapEntity(entityName);
         }
 
         final Class<?> enclosingClass = ClassUtil.getEnclosingClass(cls);
@@ -1333,7 +1333,7 @@ public final class N {
      * @param <T>
      * @return
      */
-    public static <T> HashSet<T> newHashSet() {
+    public static <T> Set<T> newHashSet() {
         return new HashSet<>();
     }
 
@@ -1344,7 +1344,7 @@ public final class N {
      * @param initialCapacity
      * @return
      */
-    public static <T> HashSet<T> newHashSet(int initialCapacity) {
+    public static <T> Set<T> newHashSet(int initialCapacity) {
         return new HashSet<>(initialCapacity);
     }
 
@@ -1355,7 +1355,7 @@ public final class N {
      * @param c
      * @return
      */
-    public static <T> HashSet<T> newHashSet(Collection<? extends T> c) {
+    public static <T> Set<T> newHashSet(Collection<? extends T> c) {
         return N.isNullOrEmpty(c) ? new HashSet<T>() : new HashSet<>(c);
     }
 
@@ -1365,7 +1365,7 @@ public final class N {
      * @param <T>
      * @return
      */
-    public static <T> LinkedHashSet<T> newLinkedHashSet() {
+    public static <T> Set<T> newLinkedHashSet() {
         return new LinkedHashSet<>();
     }
 
@@ -1376,7 +1376,7 @@ public final class N {
      * @param initialCapacity
      * @return
      */
-    public static <T> LinkedHashSet<T> newLinkedHashSet(int initialCapacity) {
+    public static <T> Set<T> newLinkedHashSet(int initialCapacity) {
         return new LinkedHashSet<>(initialCapacity);
     }
 
@@ -1387,7 +1387,7 @@ public final class N {
      * @param c
      * @return
      */
-    public static <T> LinkedHashSet<T> newLinkedHashSet(Collection<? extends T> c) {
+    public static <T> Set<T> newLinkedHashSet(Collection<? extends T> c) {
         return N.isNullOrEmpty(c) ? new LinkedHashSet<T>() : new LinkedHashSet<>(c);
     }
 
@@ -1556,7 +1556,7 @@ public final class N {
      * @param <V> the value type
      * @return
      */
-    public static <K, V> HashMap<K, V> newHashMap() {
+    public static <K, V> Map<K, V> newHashMap() {
         return new HashMap<>();
     }
 
@@ -1568,7 +1568,7 @@ public final class N {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> HashMap<K, V> newHashMap(int initialCapacity) {
+    public static <K, V> Map<K, V> newHashMap(int initialCapacity) {
         return new HashMap<>(initialCapacity);
     }
 
@@ -1580,7 +1580,7 @@ public final class N {
      * @param m
      * @return
      */
-    public static <K, V> HashMap<K, V> newHashMap(Map<? extends K, ? extends V> m) {
+    public static <K, V> Map<K, V> newHashMap(Map<? extends K, ? extends V> m) {
         return N.isNullOrEmpty(m) ? new HashMap<K, V>() : new HashMap<K, V>(m);
     }
 
@@ -1595,7 +1595,7 @@ public final class N {
      * @return
      * @throws E the e
      */
-    public static <K, V, E extends Exception> HashMap<K, V> newHashMap(final Collection<? extends V> c, final Try.Function<? super V, ? extends K, E> keyMapper)
+    public static <K, V, E extends Exception> Map<K, V> newHashMap(final Collection<? extends V> c, final Try.Function<? super V, ? extends K, E> keyMapper)
             throws E {
         N.checkArgNotNull(keyMapper);
 
@@ -1619,7 +1619,7 @@ public final class N {
      * @param <V> the value type
      * @return
      */
-    public static <K, V> LinkedHashMap<K, V> newLinkedHashMap() {
+    public static <K, V> Map<K, V> newLinkedHashMap() {
         return new LinkedHashMap<>();
     }
 
@@ -1631,7 +1631,7 @@ public final class N {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int initialCapacity) {
+    public static <K, V> Map<K, V> newLinkedHashMap(int initialCapacity) {
         return new LinkedHashMap<>(initialCapacity);
     }
 
@@ -1643,7 +1643,7 @@ public final class N {
      * @param m
      * @return
      */
-    public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Map<? extends K, ? extends V> m) {
+    public static <K, V> Map<K, V> newLinkedHashMap(Map<? extends K, ? extends V> m) {
         return N.isNullOrEmpty(m) ? new LinkedHashMap<K, V>() : new LinkedHashMap<K, V>(m);
     }
 
@@ -1658,7 +1658,7 @@ public final class N {
      * @return
      * @throws E the e
      */
-    public static <K, V, E extends Exception> LinkedHashMap<K, V> newLinkedHashMap(final Collection<? extends V> c,
+    public static <K, V, E extends Exception> Map<K, V> newLinkedHashMap(final Collection<? extends V> c,
             final Try.Function<? super V, ? extends K, E> keyMapper) throws E {
         N.checkArgNotNull(keyMapper);
 
@@ -1666,7 +1666,7 @@ public final class N {
             return new LinkedHashMap<>();
         }
 
-        final LinkedHashMap<K, V> result = new LinkedHashMap<>(N.initHashCapacity(c.size()));
+        final Map<K, V> result = new LinkedHashMap<>(N.initHashCapacity(c.size()));
 
         for (V v : c) {
             result.put(keyMapper.apply(v), v);
@@ -2253,7 +2253,7 @@ public final class N {
         final int rowSize = rowList.size();
 
         if (N.isNullOrEmpty(columnNames)) {
-            final Set<String> columnNameSet = new LinkedHashSet<>();
+            final Set<String> columnNameSet = N.newLinkedHashSet();
             Set<Class<?>> clsSet = null;
             Map<Class<?>, Set<String>> clsSignedPropNameSetMap = new HashMap<>();
 
@@ -2275,7 +2275,7 @@ public final class N {
                         Set<String> clsSignedPropNameSet = clsSignedPropNameSetMap.get(cls);
 
                         if (clsSignedPropNameSet == null) {
-                            clsSignedPropNameSet = new HashSet<>();
+                            clsSignedPropNameSet = N.newHashSet();
                             clsSignedPropNameSetMap.put(cls, clsSignedPropNameSet);
                         }
 
@@ -2294,7 +2294,7 @@ public final class N {
                         }
                     } else {
                         if (clsSet == null) {
-                            clsSet = new HashSet<>();
+                            clsSet = N.newHashSet();
                         }
 
                         if (clsSet.contains(cls)) {
@@ -2386,61 +2386,6 @@ public final class N {
         }
 
         return new RowDataSet(columnNameList, columnList);
-    }
-
-    /**
-     * As map entity.
-     *
-     * @param entityName
-     * @param props
-     * @return
-     */
-    static MapEntity asMapEntity(final String entityName, final Object... props) {
-        final MapEntity mapEntity = new MapEntity(entityName);
-
-        if (N.isNullOrEmpty(props)) {
-            return mapEntity;
-        }
-
-        if (props.length == 1) {
-            if (props[0] instanceof Map) {
-                Map<String, Object> map = (Map<String, Object>) props[0];
-                for (String key : map.keySet()) {
-                    mapEntity.set(key, map.get(key));
-                }
-            } else if (ClassUtil.isEntity(props[0].getClass())) {
-                Object anEntity = props[0];
-                if (anEntity instanceof DirtyMarker) {
-                    Class<?> entityClass = anEntity.getClass();
-                    Method propGetMethod = null;
-                    for (String propName : DirtyMarkerUtil.signedPropNames((DirtyMarker) anEntity)) {
-                        propGetMethod = ClassUtil.getPropGetMethod(entityClass, propName);
-                        propName = ClassUtil.getPropNameByMethod(propGetMethod);
-                        mapEntity.set(propName, ClassUtil.getPropValue(anEntity, propGetMethod));
-                    }
-                } else {
-                    final Map<String, Method> getterMethodList = ClassUtil.checkPropGetMethodList(anEntity.getClass());
-
-                    for (Map.Entry<String, Method> entry : getterMethodList.entrySet()) {
-                        mapEntity.set(entry.getKey(), ClassUtil.getPropValue(anEntity, entry.getValue()));
-                    }
-                }
-            } else {
-                throw new IllegalArgumentException(
-                        "The parameters must be the pairs of property name and value, or Map, or an entity class with getter/setter methods.");
-            }
-        } else {
-            if ((props.length % 2) != 0) {
-                throw new IllegalArgumentException(
-                        "The parameters must be the pairs of property name and value, or Map, or an entity class with getter/setter methods.");
-            }
-
-            for (int i = 0; i < props.length; i++) {
-                mapEntity.set((String) props[i], props[++i]);
-            }
-        }
-
-        return mapEntity;
     }
 
     /**
@@ -3752,10 +3697,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<Boolean> result = new HashSet<>(toIndex - fromIndex);
+        final Set<Boolean> result = N.newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -3786,10 +3731,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<Character> result = new HashSet<>(toIndex - fromIndex);
+        final Set<Character> result = N.newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -3820,10 +3765,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<Byte> result = new HashSet<>(toIndex - fromIndex);
+        final Set<Byte> result = N.newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -3854,10 +3799,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<Short> result = new HashSet<>(toIndex - fromIndex);
+        final Set<Short> result = N.newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -3888,10 +3833,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<Integer> result = new HashSet<>(toIndex - fromIndex);
+        final Set<Integer> result = N.newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -3922,10 +3867,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<Long> result = new HashSet<>(toIndex - fromIndex);
+        final Set<Long> result = N.newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -3956,10 +3901,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<Float> result = new HashSet<>(toIndex - fromIndex);
+        final Set<Float> result = N.newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -3990,10 +3935,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<Double> result = new HashSet<>(toIndex - fromIndex);
+        final Set<Double> result = N.newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -4011,7 +3956,7 @@ public final class N {
      */
     public static <T> Set<T> toSet(final T[] a) {
         if (N.isNullOrEmpty(a)) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
         return N.asSet(a);
@@ -4030,10 +3975,10 @@ public final class N {
         N.checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<T> result = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+        final Set<T> result = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
         for (int i = fromIndex; i < toIndex; i++) {
             result.add(a[i]);
@@ -4682,8 +4627,8 @@ public final class N {
      * @param v1
      * @return
      */
-    public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1) {
-        final LinkedHashMap<K, V> map = new LinkedHashMap<>();
+    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1) {
+        final Map<K, V> map = new LinkedHashMap<>();
         map.put(k1, v1);
         return map;
     }
@@ -4701,8 +4646,8 @@ public final class N {
      * @param v2
      * @return
      */
-    public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2) {
-        final LinkedHashMap<K, V> map = new LinkedHashMap<>();
+    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2) {
+        final Map<K, V> map = new LinkedHashMap<>();
         map.put(k1, v1);
         map.put(k2, v2);
         return map;
@@ -4723,8 +4668,8 @@ public final class N {
      * @param v3
      * @return
      */
-    public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
-        final LinkedHashMap<K, V> map = new LinkedHashMap<>();
+    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
+        final Map<K, V> map = new LinkedHashMap<>();
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4748,9 +4693,9 @@ public final class N {
      * @param v4
      * @return
      */
-    public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3,
-            final k k4, final v v4) {
-        final LinkedHashMap<K, V> map = new LinkedHashMap<>();
+    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
+            final v v4) {
+        final Map<K, V> map = new LinkedHashMap<>();
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4777,9 +4722,9 @@ public final class N {
      * @param v5
      * @return
      */
-    public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3,
-            final k k4, final v v4, final k k5, final v v5) {
-        final LinkedHashMap<K, V> map = new LinkedHashMap<>();
+    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
+            final v v4, final k k5, final v v5) {
+        final Map<K, V> map = new LinkedHashMap<>();
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4809,9 +4754,9 @@ public final class N {
      * @param v6
      * @return
      */
-    public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3,
-            final k k4, final v v4, final k k5, final v v5, final k k6, final v v6) {
-        final LinkedHashMap<K, V> map = new LinkedHashMap<>();
+    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
+            final v v4, final k k5, final v v5, final k k6, final v v6) {
+        final Map<K, V> map = new LinkedHashMap<>();
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4844,9 +4789,9 @@ public final class N {
      * @param v7
      * @return
      */
-    public static <K, V, k extends K, v extends V> LinkedHashMap<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3,
-            final k k4, final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
-        final LinkedHashMap<K, V> map = new LinkedHashMap<>();
+    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
+            final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
+        final Map<K, V> map = new LinkedHashMap<>();
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4866,7 +4811,7 @@ public final class N {
      * @return
      */
     @SafeVarargs
-    public static <K, V> LinkedHashMap<K, V> asLinkedHashMap(final Object... a) {
+    public static <K, V> Map<K, V> asLinkedHashMap(final Object... a) {
         if (N.isNullOrEmpty(a)) {
             return new LinkedHashMap<>();
         }
@@ -5254,7 +5199,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e) {
-        final Set<T> set = new HashSet<>(1);
+        final Set<T> set = N.newHashSet(1);
         set.add(e);
         return set;
     }
@@ -5268,7 +5213,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2) {
-        final Set<T> set = new HashSet<>(2);
+        final Set<T> set = N.newHashSet(2);
         set.add(e1);
         set.add(e2);
         return set;
@@ -5284,7 +5229,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3) {
-        final Set<T> set = new HashSet<>(3);
+        final Set<T> set = N.newHashSet(3);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5302,7 +5247,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4) {
-        final Set<T> set = new HashSet<>(4);
+        final Set<T> set = N.newHashSet(4);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5322,7 +5267,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
-        final Set<T> set = new HashSet<>(5);
+        final Set<T> set = N.newHashSet(5);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5344,7 +5289,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
-        final Set<T> set = new HashSet<>(6);
+        final Set<T> set = N.newHashSet(6);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5368,7 +5313,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
-        final Set<T> set = new HashSet<>(7);
+        final Set<T> set = N.newHashSet(7);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5394,7 +5339,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
-        final Set<T> set = new HashSet<>(8);
+        final Set<T> set = N.newHashSet(8);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5422,7 +5367,7 @@ public final class N {
      * @return
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
-        final Set<T> set = new HashSet<>(9);
+        final Set<T> set = N.newHashSet(9);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5446,10 +5391,10 @@ public final class N {
     @NullSafe
     public static <T> Set<T> asSet(final T... a) {
         if (N.isNullOrEmpty(a)) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        final Set<T> set = new HashSet<>(N.initHashCapacity(a.length));
+        final Set<T> set = N.newHashSet(N.initHashCapacity(a.length));
 
         for (T e : a) {
             set.add(e);
@@ -5465,8 +5410,8 @@ public final class N {
      * @param e
      * @return
      */
-    public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e) {
-        final LinkedHashSet<T> set = new LinkedHashSet<>(1);
+    public static <T> Set<T> asLinkedHashSet(final T e) {
+        final Set<T> set = N.newLinkedHashSet(1);
         set.add(e);
         return set;
     }
@@ -5479,8 +5424,8 @@ public final class N {
      * @param e2
      * @return
      */
-    public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2) {
-        final LinkedHashSet<T> set = new LinkedHashSet<>(2);
+    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2) {
+        final Set<T> set = N.newLinkedHashSet(2);
         set.add(e1);
         set.add(e2);
         return set;
@@ -5495,8 +5440,8 @@ public final class N {
      * @param e3
      * @return
      */
-    public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3) {
-        final LinkedHashSet<T> set = new LinkedHashSet<>(3);
+    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3) {
+        final Set<T> set = N.newLinkedHashSet(3);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5513,8 +5458,8 @@ public final class N {
      * @param e4
      * @return
      */
-    public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3, final T e4) {
-        final LinkedHashSet<T> set = new LinkedHashSet<>(4);
+    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4) {
+        final Set<T> set = N.newLinkedHashSet(4);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5533,8 +5478,8 @@ public final class N {
      * @param e5
      * @return
      */
-    public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
-        final LinkedHashSet<T> set = new LinkedHashSet<>(5);
+    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
+        final Set<T> set = N.newLinkedHashSet(5);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5555,8 +5500,8 @@ public final class N {
      * @param e6
      * @return
      */
-    public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
-        final LinkedHashSet<T> set = new LinkedHashSet<>(6);
+    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+        final Set<T> set = N.newLinkedHashSet(6);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5579,8 +5524,8 @@ public final class N {
      * @param e7
      * @return
      */
-    public static <T> LinkedHashSet<T> asLinkedLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
-        final LinkedHashSet<T> set = new LinkedHashSet<>(7);
+    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
+        final Set<T> set = N.newLinkedHashSet(7);
         set.add(e1);
         set.add(e2);
         set.add(e3);
@@ -5600,12 +5545,12 @@ public final class N {
      */
     @SafeVarargs
     @NullSafe
-    public static <T> LinkedHashSet<T> asLinkedHashSet(final T... a) {
+    public static <T> Set<T> asLinkedHashSet(final T... a) {
         if (N.isNullOrEmpty(a)) {
-            return new LinkedHashSet<>();
+            return N.newLinkedHashSet();
         }
 
-        final LinkedHashSet<T> set = new LinkedHashSet<>(N.initHashCapacity(a.length));
+        final Set<T> set = N.newLinkedHashSet(N.initHashCapacity(a.length));
 
         for (T e : a) {
             set.add(e);
@@ -6407,7 +6352,7 @@ public final class N {
     }
 
     /** The Constant notKryoCompatible. */
-    private static final Set<Class<?>> notKryoCompatible = new HashSet<>();
+    private static final Set<Class<?>> notKryoCompatible = N.newHashSet();
 
     /**
      * Clone.
@@ -25254,7 +25199,7 @@ public final class N {
         }
 
         final List<T> result = new ArrayList<>();
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = N.newHashSet();
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (set.add(hashKey(a[i]))) {
@@ -25299,7 +25244,7 @@ public final class N {
         }
 
         final List<T> result = new ArrayList<>();
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = N.newHashSet();
         T e = null;
 
         if (c instanceof List && c instanceof RandomAccess) {
@@ -25376,7 +25321,7 @@ public final class N {
         }
 
         final List<T> result = new ArrayList<>();
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = N.newHashSet();
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (set.add(hashKey(keyMapper.apply(a[i])))) {
@@ -25432,7 +25377,7 @@ public final class N {
         }
 
         final List<T> result = new ArrayList<>();
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = N.newHashSet();
         T e = null;
 
         if (c instanceof List && c instanceof RandomAccess) {
@@ -31140,7 +31085,7 @@ public final class N {
 
             return idx == b.length ? b : N.copyOfRange(b, 0, idx);
         } else {
-            final Set<Character> set = new LinkedHashSet<>(N.initHashCapacity(a.length));
+            final Set<Character> set = N.newLinkedHashSet(N.initHashCapacity(a.length));
 
             for (int i = from; i < to; i++) {
                 set.add(a[i]);
@@ -31222,7 +31167,7 @@ public final class N {
 
             return idx == b.length ? b : N.copyOfRange(b, 0, idx);
         } else {
-            final Set<Byte> set = new LinkedHashSet<>(N.initHashCapacity(a.length));
+            final Set<Byte> set = N.newLinkedHashSet(N.initHashCapacity(a.length));
 
             for (int i = from; i < to; i++) {
                 set.add(a[i]);
@@ -31304,7 +31249,7 @@ public final class N {
 
             return idx == b.length ? b : N.copyOfRange(b, 0, idx);
         } else {
-            final Set<Short> set = new LinkedHashSet<>(N.initHashCapacity(a.length));
+            final Set<Short> set = N.newLinkedHashSet(N.initHashCapacity(a.length));
 
             for (int i = from; i < to; i++) {
                 set.add(a[i]);
@@ -31387,7 +31332,7 @@ public final class N {
             return idx == b.length ? b : N.copyOfRange(b, 0, idx);
         } else {
 
-            final Set<Integer> set = new LinkedHashSet<>(N.initHashCapacity(a.length));
+            final Set<Integer> set = N.newLinkedHashSet(N.initHashCapacity(a.length));
 
             for (int i = from; i < to; i++) {
                 set.add(a[i]);
@@ -31469,7 +31414,7 @@ public final class N {
 
             return idx == b.length ? b : N.copyOfRange(b, 0, idx);
         } else {
-            final Set<Long> set = new LinkedHashSet<>(N.initHashCapacity(a.length));
+            final Set<Long> set = N.newLinkedHashSet(N.initHashCapacity(a.length));
 
             for (int i = from; i < to; i++) {
                 set.add(a[i]);
@@ -31552,7 +31497,7 @@ public final class N {
             return idx == b.length ? b : N.copyOfRange(b, 0, idx);
         } else {
 
-            final Set<Float> set = new LinkedHashSet<>(N.initHashCapacity(a.length));
+            final Set<Float> set = N.newLinkedHashSet(N.initHashCapacity(a.length));
 
             for (int i = from; i < to; i++) {
                 set.add(a[i]);
@@ -31634,7 +31579,7 @@ public final class N {
 
             return idx == b.length ? b : N.copyOfRange(b, 0, idx);
         } else {
-            final Set<Double> set = new LinkedHashSet<>(N.initHashCapacity(a.length));
+            final Set<Double> set = N.newLinkedHashSet(N.initHashCapacity(a.length));
 
             for (int i = from; i < to; i++) {
                 set.add(a[i]);
@@ -31845,7 +31790,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Character> set = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Character> set = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (set.add(a[i]) == false) {
@@ -31911,7 +31856,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Byte> set = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Byte> set = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (set.add(a[i]) == false) {
@@ -31977,7 +31922,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Short> set = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Short> set = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (set.add(a[i]) == false) {
@@ -32043,7 +31988,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Integer> set = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Integer> set = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (set.add(a[i]) == false) {
@@ -32109,7 +32054,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Long> set = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Long> set = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (set.add(a[i]) == false) {
@@ -32175,7 +32120,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Float> set = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Float> set = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (set.add(a[i]) == false) {
@@ -32241,7 +32186,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Double> set = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Double> set = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (set.add(a[i]) == false) {
@@ -32310,7 +32255,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Object> set = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Object> set = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (set.add(hashKey(a[i])) == false) {
@@ -32360,7 +32305,7 @@ public final class N {
 
             return false;
         } else {
-            final Set<Object> set = new HashSet<>(N.initHashCapacity(c.size()));
+            final Set<Object> set = N.newHashSet(N.initHashCapacity(c.size()));
 
             for (Object e : c) {
                 if (set.add(hashKey(e)) == false) {

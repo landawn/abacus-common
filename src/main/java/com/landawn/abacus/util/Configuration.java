@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -289,7 +288,7 @@ public abstract class Configuration {
         }
 
         if (foundDir == null) {
-            foundDir = new HashSet<>();
+            foundDir = N.newHashSet();
         }
 
         for (String configPath : Configuration.getCommonConfigPath()) {
@@ -412,7 +411,7 @@ public abstract class Configuration {
         dir = Configuration.formatPath(dir);
 
         if (foundDir == null) {
-            foundDir = new HashSet<>();
+            foundDir = N.newHashSet();
         } else if (foundDir.contains(dir.getAbsolutePath())) {
             return null;
         }
@@ -746,7 +745,7 @@ public abstract class Configuration {
      * @return
      */
     protected Set<String> string2Set(String st) {
-        return Splitter.with(WD.COMMA).trim(true).split(new HashSet<String>(), st);
+        return Splitter.with(WD.COMMA).trim(true).split(N.newHashSet(), st);
     }
 
     /**

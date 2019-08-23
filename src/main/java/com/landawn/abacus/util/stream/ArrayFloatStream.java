@@ -13,12 +13,11 @@
  */
 
 package com.landawn.abacus.util.stream;
-
+ 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1253,7 +1252,7 @@ class ArrayFloatStream extends AbstractFloatStream {
         assertNotClosed();
 
         try {
-            final Set<Float> result = new HashSet<>(N.initHashCapacity(toIndex - fromIndex));
+            final Set<Float> result = N.newHashSet(N.initHashCapacity(toIndex - fromIndex));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);

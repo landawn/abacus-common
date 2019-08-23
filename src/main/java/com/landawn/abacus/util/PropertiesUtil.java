@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -467,7 +465,7 @@ public final class PropertiesUtil {
             properties = targetProperties;
         }
 
-        Set<String> newKeySet = new HashSet<>();
+        Set<String> newKeySet = N.newHashSet();
         Enumeration<?> it = newProperties.propertyNames();
         String propName = null;
 
@@ -478,7 +476,7 @@ public final class PropertiesUtil {
         }
 
         if (targetProperties != null) {
-            Set<String> oldKeySet = new HashSet<>(properties.keySet());
+            Set<String> oldKeySet = N.newHashSet(properties.keySet());
 
             for (String key : oldKeySet) {
                 if (!newKeySet.contains(key)) {
@@ -693,7 +691,7 @@ public final class PropertiesUtil {
 
         NodeList propNodes = node.getChildNodes();
         int propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
-        Set<String> newKeySet = new HashSet<>();
+        Set<String> newKeySet = N.newHashSet();
         Node propNode = null;
         String typeAttr = null;
         String propName = null;
@@ -771,7 +769,7 @@ public final class PropertiesUtil {
 
         if (targetProperties != null) {
 
-            Set<String> oldKeySet = new HashSet<>(properties.keySet());
+            Set<String> oldKeySet = N.newHashSet(properties.keySet());
             Method removeMethod = null;
             for (String key : oldKeySet) {
                 if (!newKeySet.contains(key)) {
@@ -1151,7 +1149,7 @@ public final class PropertiesUtil {
 
         if ((childNodes != null) && (childNodes.getLength() > 0)) {
             Set<String> duplicatedPropNameSet = getDuplicatedPropNameSet(node);
-            Set<String> propNameSet = new HashSet<>();
+            Set<String> propNameSet = N.newHashSet();
 
             Node childNode = null;
             String propName = null;
@@ -1284,7 +1282,7 @@ public final class PropertiesUtil {
      * @return
      */
     private static Set<String> getImportType(Node node) {
-        Set<String> result = new LinkedHashSet<>();
+        Set<String> result = N.newLinkedHashSet();
         NodeList childNodes = node.getChildNodes();
 
         if ((childNodes == null) || (childNodes.getLength() == 0)) {
@@ -1429,7 +1427,7 @@ public final class PropertiesUtil {
         String propName = null;
         Node childNode = null;
 
-        Set<String> propNameSet = new HashSet<>();
+        Set<String> propNameSet = N.newHashSet();
 
         for (int i = 0; i < childNodes.getLength(); i++) {
             childNode = childNodes.item(i);
@@ -1461,11 +1459,11 @@ public final class PropertiesUtil {
     private static Set<String> getDuplicatedPropNameSet(Node node) {
         NodeList childNodes = node.getChildNodes();
         if (childNodes == null || childNodes.getLength() == 0) {
-            return new HashSet<>();
+            return N.newHashSet();
         }
 
-        Set<String> propNameSet = new HashSet<>();
-        Set<String> duplicatedPropNameSet = new HashSet<>();
+        Set<String> propNameSet = N.newHashSet();
+        Set<String> duplicatedPropNameSet = N.newHashSet();
 
         Node childNode = null;
         String propName = null;

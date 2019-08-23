@@ -16,7 +16,6 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -623,7 +622,7 @@ public abstract class Observer<T> {
      */
     public Observer<T> distinct() {
         dispatcher.append(new Dispatcher<Object>() {
-            private Set<T> set = new HashSet<>();
+            private Set<T> set = N.newHashSet();
 
             @Override
             public void onNext(final Object param) {
@@ -644,7 +643,7 @@ public abstract class Observer<T> {
      */
     public Observer<T> distinctBy(final Function<? super T, ?> keyMapper) {
         dispatcher.append(new Dispatcher<Object>() {
-            private Set<Object> set = new HashSet<>();
+            private Set<Object> set = N.newHashSet();
 
             @Override
             public void onNext(final Object param) {

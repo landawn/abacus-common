@@ -26,9 +26,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -399,7 +397,7 @@ public abstract class SQLBuilder {
     static void registerEntityPropColumnNameMap(final Class<?> entityClass) {
         N.checkArgNotNull(entityClass);
 
-        final Set<Field> allFields = new HashSet<>();
+        final Set<Field> allFields = N.newHashSet();
 
         for (Class<?> superClass : ClassUtil.getAllSuperclasses(entityClass)) {
             allFields.addAll(Array.asList(superClass.getDeclaredFields()));
@@ -640,7 +638,7 @@ public abstract class SQLBuilder {
 
         if (val == null) {
             synchronized (entityClass) {
-                final Set<String> entityPropNames = new LinkedHashSet<>(ClassUtil.getPropGetMethodList(entityClass).keySet());
+                final Set<String> entityPropNames = N.newLinkedHashSet(ClassUtil.getPropGetMethodList(entityClass).keySet());
                 final Set<String> subEntityPropNames = getSubEntityPropNames(entityClass);
 
                 if (N.notNullOrEmpty(subEntityPropNames)) {
@@ -648,11 +646,11 @@ public abstract class SQLBuilder {
                 }
 
                 val = new Set[5];
-                val[0] = new LinkedHashSet<>(entityPropNames);
-                val[1] = new LinkedHashSet<>(entityPropNames);
-                val[2] = new LinkedHashSet<>(entityPropNames);
-                val[3] = new LinkedHashSet<>(entityPropNames);
-                val[4] = new LinkedHashSet<>(entityPropNames);
+                val[0] = N.newLinkedHashSet(entityPropNames);
+                val[1] = N.newLinkedHashSet(entityPropNames);
+                val[2] = N.newLinkedHashSet(entityPropNames);
+                val[3] = N.newLinkedHashSet(entityPropNames);
+                val[4] = N.newLinkedHashSet(entityPropNames);
 
                 Method method = null;
                 Class<?> subEntityClass = null;
@@ -664,7 +662,7 @@ public abstract class SQLBuilder {
                     subEntityClass = ClassUtil.isEntity(method.getReturnType()) ? method.getReturnType() : ClassUtil.getTypeArgumentsByMethod(method)[0];
                     subEntityClassName = ClassUtil.getSimpleClassName(subEntityClass);
 
-                    subEntityPropNameList = new LinkedHashSet<>(ClassUtil.getPropGetMethodList(subEntityClass).keySet());
+                    subEntityPropNameList = N.newLinkedHashSet(ClassUtil.getPropGetMethodList(subEntityClass).keySet());
                     subEntityPropNameList.removeAll(getSubEntityPropNames(subEntityClass));
 
                     for (String pn : subEntityPropNameList) {
@@ -672,11 +670,11 @@ public abstract class SQLBuilder {
                     }
                 }
 
-                final Set<String> readOnlyPropNames = new HashSet<>();
-                final Set<String> nonUpdatablePropNames = new HashSet<>();
-                final Set<String> transientPropNames = new HashSet<>();
+                final Set<String> readOnlyPropNames = N.newHashSet();
+                final Set<String> nonUpdatablePropNames = N.newHashSet();
+                final Set<String> transientPropNames = N.newHashSet();
 
-                final Set<Field> allFields = new HashSet<>();
+                final Set<Field> allFields = N.newHashSet();
 
                 for (Class<?> superClass : ClassUtil.getAllSuperclasses(entityClass)) {
                     allFields.addAll(Array.asList(superClass.getDeclaredFields()));
@@ -743,7 +741,7 @@ public abstract class SQLBuilder {
             Set<String> subEntityPropNames = subEntityPropNamesPool.get(entityClass);
 
             if (subEntityPropNames == null) {
-                subEntityPropNames = new LinkedHashSet<>();
+                subEntityPropNames = N.newLinkedHashSet();
                 final Map<String, Method> propMethods = ClassUtil.getPropGetMethodList(entityClass);
                 final Set<String> nonSubEntityPropNames = nonSubEntityPropNamesPool.get(entityClass);
                 Class<?>[] typeParameterClasses = null;
@@ -854,7 +852,7 @@ public abstract class SQLBuilder {
     //                propNameSet = classPropNameSetPool.get(entityClass);
     //
     //                if (propNameSet == null) {
-    //                    propNameSet = N.asImmutableSet(new LinkedHashSet<>(N.getPropGetMethodList(entityClass).keySet()));
+    //                    propNameSet = N.asImmutableSet(N.newLinkedHashSet(N.getPropGetMethodList(entityClass).keySet()));
     //                    classPropNameSetPool.put(entityClass, propNameSet);
     //                }
     //            }

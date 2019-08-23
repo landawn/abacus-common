@@ -15,7 +15,7 @@
  */
 
 package com.landawn.abacus.core;
-
+ 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -2152,7 +2151,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         } else if (rowType.isList() || rowType.isSet()) {
             if (isAbstractRowClass) {
-                result = (rowType.isList() ? new ArrayList<>(columnCount) : new HashSet<>(N.initHashCapacity(columnCount)));
+                result = (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(N.initHashCapacity(columnCount)));
             } else {
                 if (intConstructor == null) {
                     result = ClassUtil.invokeConstructor(constructor);
@@ -2807,7 +2806,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 row = (Collection<Object>) (isAbstractRowClass
-                        ? (rowType.isList() ? new ArrayList<>(columnCount) : new HashSet<>(N.initHashCapacity(columnCount)))
+                        ? (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(N.initHashCapacity(columnCount)))
                         : ((intConstructor == null) ? ClassUtil.invokeConstructor(constructor) : ClassUtil.invokeConstructor(intConstructor, columnCount)));
 
                 for (int i = 0; i < columnCount; i++) {
@@ -3191,7 +3190,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 value = (Collection<Object>) (isAbstractRowClass
-                        ? (valueType.isList() ? new ArrayList<>(valueColumnCount) : new HashSet<>(N.initHashCapacity(valueColumnCount)))
+                        ? (valueType.isList() ? new ArrayList<>(valueColumnCount) : N.newHashSet(N.initHashCapacity(valueColumnCount)))
                         : ((intConstructor == null) ? ClassUtil.invokeConstructor(constructor)
                                 : ClassUtil.invokeConstructor(intConstructor, valueColumnCount)));
 
@@ -3529,7 +3528,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 value = (Collection<Object>) (isAbstractRowClass
-                        ? (elementType.isList() ? new ArrayList<>(valueColumnCount) : new HashSet<>(N.initHashCapacity(valueColumnCount)))
+                        ? (elementType.isList() ? new ArrayList<>(valueColumnCount) : N.newHashSet(N.initHashCapacity(valueColumnCount)))
                         : ((intConstructor == null) ? ClassUtil.invokeConstructor(constructor)
                                 : ClassUtil.invokeConstructor(intConstructor, valueColumnCount)));
 
@@ -4795,7 +4794,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final Try.Function<Object, ?, E> keyMapper2 = (Try.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
         final List<Object> keyColumn = newColumnList.get(0);
 
-        final Set<Object> keySet = new HashSet<>();
+        final Set<Object> keySet = N.newHashSet();
         final List<Object> groupByColumn = _columnList.get(columnIndex);
         Object value = null;
 
@@ -5147,7 +5146,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final Set<Object> keyRowSet = new HashSet<>();
+        final Set<Object> keyRowSet = N.newHashSet();
         Object[] keyRow = Objectory.createObjectArray(columnCount);
         final DisposableObjArray disposableArray = DisposableObjArray.wrap(keyRow);
 
@@ -6227,7 +6226,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final int size = size();
         final int columnCount = _columnNameList.size();
-        final Set<Integer> ordered = new HashSet<>(size);
+        final Set<Integer> ordered = N.newHashSet(size);
         final Object[] tempRow = new Object[columnCount];
 
         for (int i = 0, index = 0; i < size; i++) {
@@ -6546,7 +6545,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         final Try.Function<Object, ?, E> keyMapper2 = (Try.Function<Object, ?, E>) keyMapper;
-        final Set<Object> rowSet = new HashSet<>();
+        final Set<Object> rowSet = N.newHashSet();
         Object key = null;
         Object value = null;
 
@@ -6610,7 +6609,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList, newProperties);
         }
 
-        final Set<Object> rowSet = new HashSet<>();
+        final Set<Object> rowSet = N.newHashSet();
         Object[] row = Objectory.createObjectArray(columnCount);
         DisposableObjArray disposableArray = DisposableObjArray.wrap(row);
 
@@ -9064,7 +9063,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
-            final Set<Object> joinColumnLeftRowIndexSet = new HashSet<>();
+            final Set<Object> joinColumnLeftRowIndexSet = N.newHashSet();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
@@ -9243,7 +9242,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            final Set<Object> joinColumnLeftRowIndexSet = new HashSet<>();
+            final Set<Object> joinColumnLeftRowIndexSet = N.newHashSet();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 hashKey = getHashKey(leftJoinColumn.get(leftRowIndex));
@@ -9422,7 +9421,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            final Set<Object> joinColumnLeftRowIndexSet = new HashSet<>();
+            final Set<Object> joinColumnLeftRowIndexSet = N.newHashSet();
             List<Integer> rightRowIndexList = null;
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
@@ -9793,7 +9792,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final int otherColumnIndex = other.getColumnIndex(commonColumnNameList.get(0));
 
             final List<Object> column = _columnList.get(columnIndex);
-            final Set<Object> rowSet = new HashSet<>();
+            final Set<Object> rowSet = N.newHashSet();
 
             for (Object e : other.getColumn(otherColumnIndex)) {
                 rowSet.add(getHashKey(e));
@@ -10467,7 +10466,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     row = N.newArray(rowClass.getComponentType(), columnCount);
                 } else if (rowType.isList() || rowType.isSet()) {
                     if (isAbstractRowClass) {
-                        row = (rowType.isList() ? new ArrayList<>(columnCount) : new HashSet<>(N.initHashCapacity(columnCount)));
+                        row = (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(N.initHashCapacity(columnCount)));
                     } else {
                         if (intConstructor == null) {
                             row = ClassUtil.invokeConstructor(constructor);

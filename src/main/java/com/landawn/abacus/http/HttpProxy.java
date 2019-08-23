@@ -13,7 +13,7 @@
  */
 
 package com.landawn.abacus.http;
-
+ 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,7 +25,6 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -756,7 +755,7 @@ public final class HttpProxy {
      */
     static Set<String> parsePathParameters(final String path) {
         Matcher m = PARAM_URL_REGEX.matcher(path);
-        Set<String> patterns = new LinkedHashSet<>();
+        Set<String> patterns = N.newLinkedHashSet();
         while (m.find()) {
             patterns.add(m.group(1));
         }

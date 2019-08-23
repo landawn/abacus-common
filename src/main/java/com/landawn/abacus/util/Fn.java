@@ -25,11 +25,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -3686,345 +3684,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ep.
-     *
-     * @param <T>
-     * @param <E>
-     * @param predicate
-     * @return
-     */
-    @Beta
-    public static <T, E extends Exception> Try.Predicate<T, E> ep(final Try.Predicate<T, E> predicate) {
-        return predicate;
-    }
-
-    /**
-     * Ep.
-     *
-     * @param <A>
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param biPredicate
-     * @return
-     */
-    @Beta
-    public static <A, T, E extends Exception> Try.Predicate<T, E> ep(final A a, final Try.BiPredicate<A, T, E> biPredicate) {
-        N.checkArgNotNull(biPredicate);
-
-        return new Try.Predicate<T, E>() {
-            @Override
-            public boolean test(T t) throws E {
-                return biPredicate.test(a, t);
-            }
-        };
-    }
-
-    /**
-     * Ep.
-     *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param triPredicate
-     * @return
-     */
-    @Beta
-    public static <A, B, T, E extends Exception> Try.Predicate<T, E> ep(final A a, final B b, final Try.TriPredicate<A, B, T, E> triPredicate) {
-        N.checkArgNotNull(triPredicate);
-
-        return new Try.Predicate<T, E>() {
-            @Override
-            public boolean test(T t) throws E {
-                return triPredicate.test(a, b, t);
-            }
-        };
-    }
-
-    /**
-     * Ep.
-     *
-     * @param <T>
-     * @param <U>
-     * @param <E>
-     * @param biPredicate
-     * @return
-     */
-    @Beta
-    public static <T, U, E extends Exception> Try.BiPredicate<T, U, E> ep(final Try.BiPredicate<T, U, E> biPredicate) {
-        return biPredicate;
-    }
-
-    /**
-     * Ep.
-     *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param <E>
-     * @param a
-     * @param triPredicate
-     * @return
-     */
-    @Beta
-    public static <A, T, U, E extends Exception> Try.BiPredicate<T, U, E> ep(final A a, final Try.TriPredicate<A, T, U, E> triPredicate) {
-        N.checkArgNotNull(triPredicate);
-
-        return new Try.BiPredicate<T, U, E>() {
-            @Override
-            public boolean test(T t, U u) throws E {
-                return triPredicate.test(a, t, u);
-            }
-        };
-    }
-
-    /**
-     * Ep.
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
-     * @param triPredicate
-     * @return
-     */
-    @Beta
-    public static <A, B, C, E extends Exception> Try.TriPredicate<A, B, C, E> ep(final Try.TriPredicate<A, B, C, E> triPredicate) {
-        return triPredicate;
-    }
-
-    /**
-     * Ec.
-     *
-     * @param <T>
-     * @param <E>
-     * @param predicate
-     * @return
-     */
-    @Beta
-    public static <T, E extends Exception> Try.Consumer<T, E> ec(final Try.Consumer<T, E> predicate) {
-        return predicate;
-    }
-
-    /**
-     * Ec.
-     *
-     * @param <A>
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param biConsumer
-     * @return
-     */
-    @Beta
-    public static <A, T, E extends Exception> Try.Consumer<T, E> ec(final A a, final Try.BiConsumer<A, T, E> biConsumer) {
-        N.checkArgNotNull(biConsumer);
-
-        return new Try.Consumer<T, E>() {
-            @Override
-            public void accept(T t) throws E {
-                biConsumer.accept(a, t);
-            }
-        };
-    }
-
-    /**
-     * Ec.
-     *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param triConsumer
-     * @return
-     */
-    @Beta
-    public static <A, B, T, E extends Exception> Try.Consumer<T, E> ec(final A a, final B b, final Try.TriConsumer<A, B, T, E> triConsumer) {
-        N.checkArgNotNull(triConsumer);
-
-        return new Try.Consumer<T, E>() {
-            @Override
-            public void accept(T t) throws E {
-                triConsumer.accept(a, b, t);
-            }
-        };
-    }
-
-    /**
-     * Ec.
-     *
-     * @param <T>
-     * @param <U>
-     * @param <E>
-     * @param biConsumer
-     * @return
-     */
-    @Beta
-    public static <T, U, E extends Exception> Try.BiConsumer<T, U, E> ec(final Try.BiConsumer<T, U, E> biConsumer) {
-        return biConsumer;
-    }
-
-    /**
-     * Ec.
-     *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param <E>
-     * @param a
-     * @param triConsumer
-     * @return
-     */
-    @Beta
-    public static <A, T, U, E extends Exception> Try.BiConsumer<T, U, E> ec(final A a, final Try.TriConsumer<A, T, U, E> triConsumer) {
-        N.checkArgNotNull(triConsumer);
-
-        return new Try.BiConsumer<T, U, E>() {
-            @Override
-            public void accept(T t, U u) throws E {
-                triConsumer.accept(a, t, u);
-            }
-        };
-    }
-
-    /**
-     * Ec.
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <E>
-     * @param triConsumer
-     * @return
-     */
-    @Beta
-    public static <A, B, C, E extends Exception> Try.TriConsumer<A, B, C, E> ec(final Try.TriConsumer<A, B, C, E> triConsumer) {
-        return triConsumer;
-    }
-
-    /**
-     * Ef.
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param predicate
-     * @return
-     */
-    @Beta
-    public static <T, R, E extends Exception> Try.Function<T, R, E> ef(final Try.Function<T, R, E> predicate) {
-        return predicate;
-    }
-
-    /**
-     * Ef.
-     *
-     * @param <A>
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param biFunction
-     * @return
-     */
-    @Beta
-    public static <A, T, R, E extends Exception> Try.Function<T, R, E> ef(final A a, final Try.BiFunction<A, T, R, E> biFunction) {
-        N.checkArgNotNull(biFunction);
-
-        return new Try.Function<T, R, E>() {
-            @Override
-            public R apply(T t) throws E {
-                return biFunction.apply(a, t);
-            }
-        };
-    }
-
-    /**
-     * Ef.
-     *
-     * @param <A>
-     * @param <B>
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param triFunction
-     * @return
-     */
-    @Beta
-    public static <A, B, T, R, E extends Exception> Try.Function<T, R, E> ef(final A a, final B b, final Try.TriFunction<A, B, T, R, E> triFunction) {
-        N.checkArgNotNull(triFunction);
-
-        return new Try.Function<T, R, E>() {
-            @Override
-            public R apply(T t) throws E {
-                return triFunction.apply(a, b, t);
-            }
-        };
-    }
-
-    /**
-     * Ef.
-     *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
-     * @param biFunction
-     * @return
-     */
-    @Beta
-    public static <T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> ef(final Try.BiFunction<T, U, R, E> biFunction) {
-        return biFunction;
-    }
-
-    /**
-     * Ef.
-     *
-     * @param <A>
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param triFunction
-     * @return
-     */
-    @Beta
-    public static <A, T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> ef(final A a, final Try.TriFunction<A, T, U, R, E> triFunction) {
-        N.checkArgNotNull(triFunction);
-
-        return new Try.BiFunction<T, U, R, E>() {
-            @Override
-            public R apply(T t, U u) throws E {
-                return triFunction.apply(a, t, u);
-            }
-        };
-    }
-
-    /**
-     * Ef.
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param <R>
-     * @param <E>
-     * @param triFunction
-     * @return
-     */
-    @Beta
-    public static <A, B, C, R, E extends Exception> Try.TriFunction<A, B, C, R, E> ef(final Try.TriFunction<A, B, C, R, E> triFunction) {
-        return triFunction;
-    }
-
-    /**
      * Pp.
      *
      * @param <T>
@@ -5772,16 +5431,16 @@ public abstract class Fn extends Comparators {
         private static final IntFunction<? super Set> SET_FACTORY = new IntFunction<Set>() {
             @Override
             public Set apply(int len) {
-                return new HashSet<>(N.initHashCapacity(len));
+                return N.newHashSet(N.initHashCapacity(len));
             }
         };
 
         /** The Constant LINKED_HASH_SET_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super LinkedHashSet> LINKED_HASH_SET_FACTORY = new IntFunction<LinkedHashSet>() {
+        private static final IntFunction<? super Set> LINKED_HASH_SET_FACTORY = new IntFunction<Set>() {
             @Override
-            public LinkedHashSet apply(int len) {
-                return new LinkedHashSet<>(N.initHashCapacity(len));
+            public Set apply(int len) {
+                return N.newLinkedHashSet(N.initHashCapacity(len));
             }
         };
 
@@ -5853,16 +5512,16 @@ public abstract class Fn extends Comparators {
         private static final IntFunction<? super Map> MAP_FACTORY = new IntFunction<Map>() {
             @Override
             public Map apply(int len) {
-                return new HashMap<>(N.initHashCapacity(len));
+                return N.newHashMap(N.initHashCapacity(len));
             }
         };
 
         /** The Constant LINKED_HASH_MAP_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super LinkedHashMap> LINKED_HASH_MAP_FACTORY = new IntFunction<LinkedHashMap>() {
+        private static final IntFunction<? super Map> LINKED_HASH_MAP_FACTORY = new IntFunction<Map>() {
             @Override
-            public LinkedHashMap apply(int len) {
-                return new LinkedHashMap<>(N.initHashCapacity(len));
+            public Map apply(int len) {
+                return N.newLinkedHashMap(N.initHashCapacity(len));
             }
         };
 
@@ -6147,7 +5806,7 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<LinkedHashSet<T>> ofLinkedHashSet() {
+        public static <T> IntFunction<Set<T>> ofLinkedHashSet() {
             return (IntFunction) LINKED_HASH_SET_FACTORY;
         }
 
@@ -6270,7 +5929,7 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<LinkedHashMap<K, V>> ofLinkedHashMap() {
+        public static <K, V> IntFunction<Map<K, V>> ofLinkedHashMap() {
             return (IntFunction) LINKED_HASH_MAP_FACTORY;
         }
 
@@ -6665,16 +6324,16 @@ public abstract class Fn extends Comparators {
         private static final Supplier<? super Set> SET = new Supplier<Set>() {
             @Override
             public Set get() {
-                return new HashSet();
+                return N.newHashSet();
             }
         };
 
         /** The Constant LINKED_HASH_SET. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super LinkedHashSet> LINKED_HASH_SET = new Supplier<LinkedHashSet>() {
+        private static final Supplier<? super Set> LINKED_HASH_SET = new Supplier<Set>() {
             @Override
-            public LinkedHashSet get() {
-                return new LinkedHashSet();
+            public Set get() {
+                return N.newLinkedHashSet();
             }
         };
 
@@ -6746,16 +6405,16 @@ public abstract class Fn extends Comparators {
         private static final Supplier<? super Map> MAP = new Supplier<Map>() {
             @Override
             public Map get() {
-                return new HashMap();
+                return N.newHashMap();
             }
         };
 
         /** The Constant LINKED_HASH_MAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super LinkedHashMap> LINKED_HASH_MAP = new Supplier<LinkedHashMap>() {
+        private static final Supplier<? super Map> LINKED_HASH_MAP = new Supplier<Map>() {
             @Override
-            public LinkedHashMap get() {
-                return new LinkedHashMap();
+            public Map get() {
+                return N.newLinkedHashMap();
             }
         };
 
@@ -7082,7 +6741,7 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <T> Supplier<LinkedHashSet<T>> ofLinkedHashSet() {
+        public static <T> Supplier<Set<T>> ofLinkedHashSet() {
             return (Supplier) LINKED_HASH_SET;
         }
 
@@ -7205,7 +6864,7 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public static <K, V> Supplier<LinkedHashMap<K, V>> ofLinkedHashMap() {
+        public static <K, V> Supplier<Map<K, V>> ofLinkedHashMap() {
             return (Supplier) LINKED_HASH_MAP;
         }
 
@@ -7448,7 +7107,7 @@ public abstract class Fn extends Comparators {
          */
         public static <T> Predicate<T> distinct() {
             return new Predicate<T>() {
-                private final Set<Object> set = new HashSet<Object>();
+                private final Set<Object> set = N.newHashSet();
 
                 @Override
                 public boolean test(T value) {
@@ -7466,7 +7125,7 @@ public abstract class Fn extends Comparators {
          */
         public static <T> Predicate<T> distinctBy(final Function<? super T, ?> mapper) {
             return new Predicate<T>() {
-                private final Set<Object> set = new HashSet<Object>();
+                private final Set<Object> set = N.newHashSet();
 
                 @Override
                 public boolean test(T value) {
@@ -9249,7 +8908,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ef.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -9270,7 +8928,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ep.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -9291,7 +8948,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ec.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -11197,6 +10853,333 @@ public abstract class Fn extends Comparators {
         }
 
         /**
+         *
+         * @param <T>
+         * @param <E>
+         * @param predicate
+         * @return
+         */
+        @Beta
+        public static <T, E extends Exception> Try.Predicate<T, E> p(final Try.Predicate<T, E> predicate) {
+            return predicate;
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param biPredicate
+         * @return
+         */
+        @Beta
+        public static <A, T, E extends Exception> Try.Predicate<T, E> p(final A a, final Try.BiPredicate<A, T, E> biPredicate) {
+            N.checkArgNotNull(biPredicate);
+
+            return new Try.Predicate<T, E>() {
+                @Override
+                public boolean test(T t) throws E {
+                    return biPredicate.test(a, t);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triPredicate
+         * @return
+         */
+        @Beta
+        public static <A, B, T, E extends Exception> Try.Predicate<T, E> p(final A a, final B b, final Try.TriPredicate<A, B, T, E> triPredicate) {
+            N.checkArgNotNull(triPredicate);
+
+            return new Try.Predicate<T, E>() {
+                @Override
+                public boolean test(T t) throws E {
+                    return triPredicate.test(a, b, t);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param biPredicate
+         * @return
+         */
+        @Beta
+        public static <T, U, E extends Exception> Try.BiPredicate<T, U, E> p(final Try.BiPredicate<T, U, E> biPredicate) {
+            return biPredicate;
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param a
+         * @param triPredicate
+         * @return
+         */
+        @Beta
+        public static <A, T, U, E extends Exception> Try.BiPredicate<T, U, E> p(final A a, final Try.TriPredicate<A, T, U, E> triPredicate) {
+            N.checkArgNotNull(triPredicate);
+
+            return new Try.BiPredicate<T, U, E>() {
+                @Override
+                public boolean test(T t, U u) throws E {
+                    return triPredicate.test(a, t, u);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <E>
+         * @param triPredicate
+         * @return
+         */
+        @Beta
+        public static <A, B, C, E extends Exception> Try.TriPredicate<A, B, C, E> p(final Try.TriPredicate<A, B, C, E> triPredicate) {
+            return triPredicate;
+        }
+
+        /**
+         * Ec.
+         *
+         * @param <T>
+         * @param <E>
+         * @param predicate
+         * @return
+         */
+        @Beta
+        public static <T, E extends Exception> Try.Consumer<T, E> c(final Try.Consumer<T, E> predicate) {
+            return predicate;
+        }
+
+        /**
+         * Ec.
+         *
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param biConsumer
+         * @return
+         */
+        @Beta
+        public static <A, T, E extends Exception> Try.Consumer<T, E> c(final A a, final Try.BiConsumer<A, T, E> biConsumer) {
+            N.checkArgNotNull(biConsumer);
+
+            return new Try.Consumer<T, E>() {
+                @Override
+                public void accept(T t) throws E {
+                    biConsumer.accept(a, t);
+                }
+            };
+        }
+
+        /**
+         * Ec.
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triConsumer
+         * @return
+         */
+        @Beta
+        public static <A, B, T, E extends Exception> Try.Consumer<T, E> c(final A a, final B b, final Try.TriConsumer<A, B, T, E> triConsumer) {
+            N.checkArgNotNull(triConsumer);
+
+            return new Try.Consumer<T, E>() {
+                @Override
+                public void accept(T t) throws E {
+                    triConsumer.accept(a, b, t);
+                }
+            };
+        }
+
+        /**
+         * Ec.
+         *
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param biConsumer
+         * @return
+         */
+        @Beta
+        public static <T, U, E extends Exception> Try.BiConsumer<T, U, E> c(final Try.BiConsumer<T, U, E> biConsumer) {
+            return biConsumer;
+        }
+
+        /**
+         * Ec.
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param a
+         * @param triConsumer
+         * @return
+         */
+        @Beta
+        public static <A, T, U, E extends Exception> Try.BiConsumer<T, U, E> c(final A a, final Try.TriConsumer<A, T, U, E> triConsumer) {
+            N.checkArgNotNull(triConsumer);
+
+            return new Try.BiConsumer<T, U, E>() {
+                @Override
+                public void accept(T t, U u) throws E {
+                    triConsumer.accept(a, t, u);
+                }
+            };
+        }
+
+        /**
+         * Ec.
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <E>
+         * @param triConsumer
+         * @return
+         */
+        @Beta
+        public static <A, B, C, E extends Exception> Try.TriConsumer<A, B, C, E> c(final Try.TriConsumer<A, B, C, E> triConsumer) {
+            return triConsumer;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param predicate
+         * @return
+         */
+        @Beta
+        public static <T, R, E extends Exception> Try.Function<T, R, E> f(final Try.Function<T, R, E> predicate) {
+            return predicate;
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param biFunction
+         * @return
+         */
+        @Beta
+        public static <A, T, R, E extends Exception> Try.Function<T, R, E> f(final A a, final Try.BiFunction<A, T, R, E> biFunction) {
+            N.checkArgNotNull(biFunction);
+
+            return new Try.Function<T, R, E>() {
+                @Override
+                public R apply(T t) throws E {
+                    return biFunction.apply(a, t);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param b
+         * @param triFunction
+         * @return
+         */
+        @Beta
+        public static <A, B, T, R, E extends Exception> Try.Function<T, R, E> f(final A a, final B b, final Try.TriFunction<A, B, T, R, E> triFunction) {
+            N.checkArgNotNull(triFunction);
+
+            return new Try.Function<T, R, E>() {
+                @Override
+                public R apply(T t) throws E {
+                    return triFunction.apply(a, b, t);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param biFunction
+         * @return
+         */
+        @Beta
+        public static <T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> f(final Try.BiFunction<T, U, R, E> biFunction) {
+            return biFunction;
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param a
+         * @param triFunction
+         * @return
+         */
+        @Beta
+        public static <A, T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> f(final A a, final Try.TriFunction<A, T, U, R, E> triFunction) {
+            N.checkArgNotNull(triFunction);
+
+            return new Try.BiFunction<T, U, R, E>() {
+                @Override
+                public R apply(T t, U u) throws E {
+                    return triFunction.apply(a, t, u);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param <R>
+         * @param <E>
+         * @param triFunction
+         * @return
+         */
+        @Beta
+        public static <A, B, C, R, E extends Exception> Try.TriFunction<A, B, C, R, E> f(final Try.TriFunction<A, B, C, R, E> triFunction) {
+            return triFunction;
+        }
+
+        /**
          * Pp.
          *
          * @param <T>
@@ -11489,11 +11472,7 @@ public abstract class Fn extends Comparators {
             return new Try.Function<T, R, E>() {
                 @Override
                 public R apply(T t) {
-                    try {
-                        return triFunction.apply(a, b, t);
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
+                    return triFunction.apply(a, b, t);
                 }
             };
         }

@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,7 +49,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      * @return
      */
     public Set<T> toSet() {
-        final Set<T> set = new HashSet<>();
+        final Set<T> set = N.newHashSet();
 
         while (hasNext()) {
             set.add(next());

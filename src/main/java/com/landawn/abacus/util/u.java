@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -515,7 +514,7 @@ public class u {
             if (isPresent()) {
                 return N.asSet(value);
             } else {
-                return new HashSet<>();
+                return N.newHashSet();
             }
         }
 
@@ -4753,7 +4752,7 @@ public class u {
             if (isPresent()) {
                 return N.asSet(value);
             } else {
-                return new HashSet<>();
+                return N.newHashSet();
             }
         }
 
@@ -4766,7 +4765,7 @@ public class u {
             if (isNotNull()) {
                 return N.asSet(value);
             } else {
-                return new HashSet<>();
+                return N.newHashSet();
             }
         }
 

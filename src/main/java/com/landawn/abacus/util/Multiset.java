@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -890,7 +889,7 @@ public final class Multiset<T> implements Iterable<T> {
         for (T key : this.valueMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(key);
@@ -920,7 +919,7 @@ public final class Multiset<T> implements Iterable<T> {
         for (Map.Entry<T, MutableInt> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue().value())) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(entry.getKey());
@@ -953,7 +952,7 @@ public final class Multiset<T> implements Iterable<T> {
         for (T key : this.valueMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(key);
@@ -986,7 +985,7 @@ public final class Multiset<T> implements Iterable<T> {
         for (Map.Entry<T, MutableInt> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue().value())) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(entry.getKey());
@@ -1248,7 +1247,7 @@ public final class Multiset<T> implements Iterable<T> {
         for (T e : valueMap.keySet()) {
             if (!c.contains(e)) {
                 if (others == null) {
-                    others = new HashSet<>(valueMap.size());
+                    others = N.newHashSet(valueMap.size());
                 }
 
                 others.add(e);

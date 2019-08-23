@@ -459,7 +459,7 @@ public final class ClassUtil {
     }
 
     /** The Constant nonGetMethodName. */
-    private static final Set<String> nonGetMethodName = new HashSet<>(16);
+    private static final Set<String> nonGetMethodName = N.newHashSet(16);
 
     static {
         nonGetMethodName.add("getClass");
@@ -575,7 +575,7 @@ public final class ClassUtil {
                 set = registeredNonPropGetSetMethodPool.get(cls);
 
                 if (set == null) {
-                    set = new HashSet<>();
+                    set = N.newHashSet();
                     registeredNonPropGetSetMethodPool.put(cls, set);
                 }
             }
@@ -823,7 +823,7 @@ public final class ClassUtil {
      * @return
      */
     public static Set<Class<?>> getAllInterfaces(final Class<?> cls) {
-        final Set<Class<?>> interfacesFound = new LinkedHashSet<>();
+        final Set<Class<?>> interfacesFound = N.newLinkedHashSet();
 
         getAllInterfaces(cls, interfacesFound);
 
@@ -858,7 +858,7 @@ public final class ClassUtil {
      * @return
      */
     public static Set<Class<?>> getAllSuperTypes(final Class<?> cls) {
-        final Set<Class<?>> superTypesFound = new LinkedHashSet<>();
+        final Set<Class<?>> superTypesFound = N.newLinkedHashSet();
 
         getAllSuperTypes(cls, superTypesFound);
 
@@ -1621,7 +1621,7 @@ public final class ClassUtil {
         } else if (propNameToExcluded instanceof Set) {
             return getPropNameListExclusively(cls, (Set) propNameToExcluded);
         } else {
-            return getPropNameListExclusively(cls, new HashSet<>(propNameToExcluded));
+            return getPropNameListExclusively(cls, N.newHashSet(propNameToExcluded));
         }
     }
 
@@ -2603,8 +2603,8 @@ public final class ClassUtil {
         List<String> idPropNames = idPropNamesMap.get(targetClass);
 
         if (idPropNames == null) {
-            final Set<String> idPropNameSet = new LinkedHashSet<>();
-            final Set<Field> allFields = new LinkedHashSet<>();
+            final Set<String> idPropNameSet = N.newLinkedHashSet();
+            final Set<Field> allFields = N.newLinkedHashSet();
 
             for (Class<?> superClass : ClassUtil.getAllSuperclasses(targetClass)) {
                 allFields.addAll(Array.asList(superClass.getDeclaredFields()));

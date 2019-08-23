@@ -33,7 +33,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -253,7 +252,7 @@ public final class CSVUtil {
             final Type<?>[] columnTypes = new Type<?>[columnCount];
             final List<String> columnNameList = new ArrayList<>(selectColumnNames == null ? columnCount : selectColumnNames.size());
             final List<List<Object>> columnList = new ArrayList<>(selectColumnNames == null ? columnCount : selectColumnNames.size());
-            final Set<String> selectPropNameSet = selectColumnNames == null ? null : new HashSet<>(selectColumnNames);
+            final Set<String> selectPropNameSet = selectColumnNames == null ? null : N.newHashSet(selectColumnNames);
 
             for (int i = 0; i < columnCount; i++) {
                 if (selectPropNameSet == null || selectPropNameSet.remove(titles[i])) {
@@ -503,7 +502,7 @@ public final class CSVUtil {
             final Type<?>[] columnTypes = new Type<?>[columnCount];
             final List<String> columnNameList = new ArrayList<>(selectColumnNames == null ? columnCount : selectColumnNames.size());
             final List<List<Object>> columnList = new ArrayList<>(selectColumnNames == null ? columnCount : selectColumnNames.size());
-            final Set<String> selectPropNameSet = selectColumnNames == null ? null : new HashSet<>(selectColumnNames);
+            final Set<String> selectPropNameSet = selectColumnNames == null ? null : N.newHashSet(selectColumnNames);
 
             for (int i = 0; i < columnCount; i++) {
                 if (selectPropNameSet == null || selectPropNameSet.remove(titles[i])) {
@@ -1305,7 +1304,7 @@ public final class CSVUtil {
             final ResultSetMetaData rsmd = rs.getMetaData();
             final int columnCount = rsmd.getColumnCount();
             final String[] columnNames = new String[columnCount];
-            final Set<String> columnNameSet = selectColumnNames == null ? null : new HashSet<>(selectColumnNames);
+            final Set<String> columnNameSet = selectColumnNames == null ? null : N.newHashSet(selectColumnNames);
             String label = null;
 
             for (int i = 0; i < columnCount; i++) {

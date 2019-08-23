@@ -1,3 +1,9 @@
+### 1.8.14
+
+* Move `Fn.ep/ef/ec` to `Fn.p/f/c`.
+* Improvements and bug fix.
+
+
 ### 1.8.13
 
 * Improve Java Docs.

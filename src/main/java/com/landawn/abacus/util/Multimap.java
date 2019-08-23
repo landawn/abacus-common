@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -754,7 +753,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         for (K key : this.valueMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(key);
@@ -791,7 +790,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(entry.getKey());
@@ -828,7 +827,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         for (K key : this.valueMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(key);
@@ -865,7 +864,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(entry.getKey());
@@ -901,7 +900,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         for (K key : this.valueMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(key);
@@ -933,7 +932,7 @@ public class Multimap<K, E, V extends Collection<E>> {
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 if (removingKeys == null) {
-                    removingKeys = new HashSet<>();
+                    removingKeys = N.newHashSet();
                 }
 
                 removingKeys.add(entry.getKey());

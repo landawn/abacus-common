@@ -20,10 +20,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -453,7 +451,7 @@ public final class Maps {
         Set<E> v = map.get(key);
 
         if (v == null) {
-            v = new HashSet<>();
+            v = N.newHashSet();
             v = map.put(key, v);
         }
 
@@ -473,7 +471,7 @@ public final class Maps {
         Set<E> v = map.get(key);
 
         if (v == null) {
-            v = new LinkedHashSet<>();
+            v = N.newLinkedHashSet();
             v = map.put(key, v);
         }
 
@@ -1499,7 +1497,7 @@ public final class Maps {
 
                 return resultMap;
             } else {
-                final Set<String> tmp = new HashSet<>(N.initHashCapacity(signedPropNames.size()));
+                final Set<String> tmp = N.newHashSet(N.initHashCapacity(signedPropNames.size()));
 
                 for (String propName : signedPropNames) {
                     tmp.add(ClassUtil.getPropNameByMethod(ClassUtil.getPropGetMethod(entityClass, propName)));
@@ -1819,7 +1817,7 @@ public final class Maps {
 
                 return resultMap;
             } else {
-                final Set<String> tmp = new HashSet<>(N.initHashCapacity(signedPropNames.size()));
+                final Set<String> tmp = N.newHashSet(N.initHashCapacity(signedPropNames.size()));
 
                 for (String propName : signedPropNames) {
                     tmp.add(ClassUtil.getPropNameByMethod(ClassUtil.getPropGetMethod(entityClass, propName)));

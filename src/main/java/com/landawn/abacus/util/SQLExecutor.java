@@ -27,7 +27,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -8266,7 +8265,7 @@ public class SQLExecutor {
             Collection<String> insertingPropNames = null;
 
             if (N.isNullOrEmpty(propNamesToInsert) && N.isDirtyMarker(entity.getClass())) {
-                insertingPropNames = new HashSet<>();
+                insertingPropNames = N.newHashSet();
 
                 for (T e : entities) {
                     insertingPropNames.addAll(DirtyMarkerUtil.signedPropNames((DirtyMarker) e));
@@ -8704,7 +8703,7 @@ public class SQLExecutor {
             Collection<String> updatingPropNames = null;
 
             if (N.isNullOrEmpty(propNamesToUpdate) && N.isDirtyMarker(entity.getClass())) {
-                updatingPropNames = new HashSet<>();
+                updatingPropNames = N.newHashSet();
 
                 for (T e : entities) {
                     updatingPropNames.addAll(DirtyMarkerUtil.dirtyPropNames((DirtyMarker) e));

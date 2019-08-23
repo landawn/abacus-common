@@ -64,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -192,7 +191,7 @@ public final class JdbcUtil {
     };
 
     /** The Constant sqlStateForTableNotExists. */
-    private static final Set<String> sqlStateForTableNotExists = new HashSet<>();
+    private static final Set<String> sqlStateForTableNotExists = N.newHashSet();
 
     static {
         sqlStateForTableNotExists.add("42S02"); // for MySQCF.
@@ -3476,7 +3475,7 @@ public final class JdbcUtil {
             final List<String> columnNameList = dataset.columnNameList();
             final int[] columnIndexes = new int[columnCount];
             final Type<Object>[] columnTypes = new Type[columnCount];
-            final Set<String> columnNameSet = new HashSet<>(columnCount);
+            final Set<String> columnNameSet = N.newHashSet(columnCount);
 
             int idx = 0;
             for (String columnName : columnNameList) {
@@ -4824,7 +4823,7 @@ public final class JdbcUtil {
         if (result == null) {
             result = N.newBiMap(LinkedHashMap.class, LinkedHashMap.class);
 
-            final Set<Field> allFields = new HashSet<>();
+            final Set<Field> allFields = N.newHashSet();
 
             for (Class<?> superClass : ClassUtil.getAllSuperclasses(entityClass)) {
                 allFields.addAll(Array.asList(superClass.getDeclaredFields()));
@@ -16256,7 +16255,7 @@ public final class JdbcUtil {
     }
 
     /** The Constant noLogMethods. */
-    private static final Set<String> noLogMethods = new HashSet<>();
+    private static final Set<String> noLogMethods = N.newHashSet();
 
     static {
         noLogMethods.add("dataSource");

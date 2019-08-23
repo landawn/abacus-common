@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +35,7 @@ public final class SQLParser {
     private static final char ENTER = '\n';
 
     /** The Constant seperators. */
-    private static final Set<Object> seperators = new HashSet<>();
+    private static final Set<Object> seperators = N.newHashSet();
 
     static {
         seperators.add(TAB);

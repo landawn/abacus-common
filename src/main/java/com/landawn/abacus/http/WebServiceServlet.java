@@ -13,7 +13,7 @@
  */
 
 package com.landawn.abacus.http;
-
+ 
 import static com.landawn.abacus.http.HTTP.jsonParser;
 import static com.landawn.abacus.http.HTTP.kryoParser;
 import static com.landawn.abacus.http.HTTP.xmlParser;
@@ -26,8 +26,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -218,7 +216,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
             }
         }
 
-        final Set<Class<?>> superClasses = new LinkedHashSet<>();
+        final Set<Class<?>> superClasses = N.newLinkedHashSet();
 
         if (!(serviceImplClass.getSuperclass() == null || Object.class.equals(serviceImplClass))) {
             superClasses.add(serviceImplClass.getSuperclass());
@@ -396,7 +394,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                     if ("ALL".equalsIgnoreCase(httpMethods[0].trim())) {
                         methodHttpMethodMap.put(methodName, N.asSet(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE));
                     } else {
-                        final Set<HttpMethod> set = new HashSet<>();
+                        final Set<HttpMethod> set = N.newHashSet();
 
                         for (String e : httpMethods) {
                             set.add(HttpMethod.valueOf(e.trim().toUpperCase()));
