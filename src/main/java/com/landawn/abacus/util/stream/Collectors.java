@@ -104,7 +104,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
- 
+
 /**
  * 
  * @see {@code java.util.stream.Collectors}
@@ -1822,7 +1822,7 @@ public abstract class Collectors {
      * @since 0.3.8
      */
     public static <T> Collector<T, ?, List<T>> distinctBy(final Function<? super T, ?> mapper) {
-       final Supplier<Map<Object, T>> supplier = Suppliers.<Object, T> ofLinkedHashMap();
+        final Supplier<Map<Object, T>> supplier = Suppliers.<Object, T> ofLinkedHashMap();
 
         final BiConsumer<Map<Object, T>, T> accumulator = new BiConsumer<Map<Object, T>, T>() {
             @Override
@@ -3763,8 +3763,8 @@ public abstract class Collectors {
      * @return
      * @see #toMap(Function, Function, BinaryOperator)
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(Function<? super T, ? extends K> keyMapper,
-            Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
+            BinaryOperator<V> mergeFunction) {
         final Supplier<Map<K, V>> mapFactory = Suppliers.ofLinkedHashMap();
 
         return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);

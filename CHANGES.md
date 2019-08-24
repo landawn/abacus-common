@@ -1,3 +1,8 @@
+### 1.8.15
+
+* Improvements and bug fix.
+
+
 ### 1.8.14
 
 * Move `Fn.ep/ef/ec` to `Fn.p/f/c`.
