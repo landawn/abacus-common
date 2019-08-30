@@ -64,7 +64,7 @@ import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
 
 /**
- * 
+ *
  */
 final class ParallelIteratorStream<T> extends IteratorStream<T> {
     private final int maxThreadNum;
@@ -1013,8 +1013,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
 
@@ -1102,8 +1101,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
 
@@ -1191,8 +1189,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
 
@@ -1280,8 +1277,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
 
@@ -1369,8 +1365,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
 
@@ -1458,8 +1453,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
 
@@ -1547,8 +1541,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
 
@@ -1636,8 +1629,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
 
@@ -3041,9 +3033,9 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             }
         }
 
-        comparator = comparator == null ? NATURAL_COMPARATOR : comparator;
+        comparator = comparator == null ? NULL_MAX_COMPARATOR : comparator;
 
-        return collect(Collectors.minBy(comparator));
+        return collect(Collectors.min(comparator));
     }
 
     @Override
@@ -3070,9 +3062,9 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             }
         }
 
-        comparator = comparator == null ? NATURAL_COMPARATOR : comparator;
+        comparator = comparator == null ? NULL_MIN_COMPARATOR : comparator;
 
-        return collect(Collectors.maxBy(comparator));
+        return collect(Collectors.max(comparator));
     }
 
     @Override

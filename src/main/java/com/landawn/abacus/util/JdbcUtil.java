@@ -118,7 +118,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.ExceptionalStream.ExceptionalIterator;
-import com.landawn.abacus.util.Fn.FN;
+import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.SQLBuilder.NAC;
 import com.landawn.abacus.util.SQLBuilder.NLC;
@@ -12894,7 +12894,7 @@ public final class JdbcUtil {
          */
         public static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
-            return toMap(keyExtractor, valueExtractor, FN.throwingMerger(), supplier);
+            return toMap(keyExtractor, valueExtractor, Fnn.throwingMerger(), supplier);
         }
 
         /**
@@ -13124,7 +13124,7 @@ public final class JdbcUtil {
          */
         public static <K, V, M extends Map<K, V>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
-            return toMap(keyExtractor, valueExtractor, FN.throwingMerger(), supplier);
+            return toMap(keyExtractor, valueExtractor, Fnn.throwingMerger(), supplier);
         }
 
         /**

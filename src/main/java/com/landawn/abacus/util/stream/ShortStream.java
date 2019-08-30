@@ -27,7 +27,7 @@ import java.util.Random;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
-import com.landawn.abacus.util.Fn.Fnn;
+import com.landawn.abacus.util.Fn.FnS;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedShort;
 import com.landawn.abacus.util.MutableInt;
@@ -62,9 +62,9 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToShortFunction;
 
-/** 
+/**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
- * 
+ *
  * @see Stream
  */
 public abstract class ShortStream
@@ -96,14 +96,14 @@ public abstract class ShortStream
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     *  
+     *
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
      *        which belong to the same range.
@@ -121,14 +121,14 @@ public abstract class ShortStream
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     *  
+     *
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
      *        which belong to the same range.
@@ -146,10 +146,10 @@ public abstract class ShortStream
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @return
      */
@@ -172,7 +172,7 @@ public abstract class ShortStream
      * stream: [1, 2, 3, 4, 5]
      * result: [1, 3, 6, 10, 15]
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
@@ -197,13 +197,13 @@ public abstract class ShortStream
      * stream: [1, 2, 3, 4, 5]
      * result: [11, 13, 16, 20, 25]
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
+     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream.
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
-     * 
+     *
      * @param accumulator the accumulation function
      * @return
      */
@@ -211,7 +211,7 @@ public abstract class ShortStream
     public abstract ShortStream scan(final short init, final ShortBinaryOperator accumulator);
 
     /**
-     * 
+     *
      * @param init
      * @param accumulator
      * @param initIncluded
@@ -223,7 +223,7 @@ public abstract class ShortStream
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param n
      * @return
      */
@@ -233,7 +233,7 @@ public abstract class ShortStream
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param n
      * @return
      */
@@ -243,7 +243,7 @@ public abstract class ShortStream
     public abstract ShortList toShortList();
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -252,7 +252,7 @@ public abstract class ShortStream
     public abstract <K, V> Map<K, V> toMap(ShortFunction<? extends K> keyMapper, ShortFunction<? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -263,7 +263,7 @@ public abstract class ShortStream
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -273,7 +273,7 @@ public abstract class ShortStream
     public abstract <K, V> Map<K, V> toMap(ShortFunction<? extends K> keyMapper, ShortFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -285,7 +285,7 @@ public abstract class ShortStream
             BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @return
@@ -294,7 +294,7 @@ public abstract class ShortStream
     public abstract <K, A, D> Map<K, D> toMap(final ShortFunction<? extends K> keyMapper, final Collector<Short, A, D> downstream);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @param mapFactory
@@ -311,7 +311,7 @@ public abstract class ShortStream
     public abstract <R> R collect(Supplier<R> supplier, ObjShortConsumer<? super R> accumulator, BiConsumer<R, R> combiner);
 
     /**
-     * 
+     *
      * @param supplier
      * @param accumulator
      * @return
@@ -340,7 +340,7 @@ public abstract class ShortStream
     public abstract OptionalShort max();
 
     /**
-     * 
+     *
      * @param k
      * @return OptionalByte.empty() if there is no element or count less than k, otherwise the kth largest element.
      */
@@ -355,7 +355,7 @@ public abstract class ShortStream
     public abstract Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> summarizeAndPercentiles();
 
     /**
-     * 
+     *
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -377,7 +377,7 @@ public abstract class ShortStream
 
     /**
      * Remember to close this Stream after the iteration is done, if required.
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -413,15 +413,15 @@ public abstract class ShortStream
     }
 
     public static ShortStream of(final Short[] a) {
-        return Stream.of(a).mapToShort(Fnn.unboxS());
+        return Stream.of(a).mapToShort(FnS.unbox());
     }
 
     public static ShortStream of(final Short[] a, final int startIndex, final int endIndex) {
-        return Stream.of(a, startIndex, endIndex).mapToShort(Fnn.unboxS());
+        return Stream.of(a, startIndex, endIndex).mapToShort(FnS.unbox());
     }
 
     public static ShortStream of(final Collection<Short> c) {
-        return Stream.of(c).mapToShort(Fnn.unboxS());
+        return Stream.of(c).mapToShort(FnS.unbox());
     }
 
     public static ShortStream of(final ShortIterator iterator) {
@@ -989,7 +989,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param init
      * @param hasNext test if has next by hasNext.test(init) for first time and hasNext.test(f.apply(previous)) for remaining.
      * @param f
@@ -1170,7 +1170,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1203,7 +1203,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1237,7 +1237,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1259,7 +1259,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1281,7 +1281,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1293,7 +1293,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1305,7 +1305,7 @@ public abstract class ShortStream
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -1317,7 +1317,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1357,7 +1357,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1400,7 +1400,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1430,7 +1430,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1464,7 +1464,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1480,7 +1480,7 @@ public abstract class ShortStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1499,7 +1499,7 @@ public abstract class ShortStream
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -1510,7 +1510,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1556,7 +1556,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1568,7 +1568,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1636,7 +1636,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1648,7 +1648,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1659,7 +1659,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1671,7 +1671,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -1697,7 +1697,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -1707,7 +1707,7 @@ public abstract class ShortStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @param maxThreadNum

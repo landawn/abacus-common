@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -47,6 +48,7 @@ import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
+import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.DoubleSummaryStatistics;
@@ -106,9 +108,9 @@ import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
 
 /**
- * 
+ *
  * @see {@code java.util.stream.Collectors}
- * 
+ *
  */
 public abstract class Collectors {
     static final Object NONE = new Object();
@@ -1091,7 +1093,7 @@ public abstract class Collectors {
         final Supplier<List<T>> supplier = new Supplier<List<T>>() {
             @Override
             public List<T> get() {
-                return new ArrayList<T>(N.min(256, atMostSize));
+                return new ArrayList<>(N.min(256, atMostSize));
             }
         };
 
@@ -1351,7 +1353,7 @@ public abstract class Collectors {
 
     /**
      * {@code DuplicatedResultException} is threw if there are more than one values are collected.
-     * 
+     *
      * @return
      */
     @SuppressWarnings("rawtypes")
@@ -1366,7 +1368,7 @@ public abstract class Collectors {
 
     /**
      * {@code DuplicatedResultException} is threw if there are more than one values are collected.
-     * 
+     *
      * @param predicate
      * @return
      */
@@ -1417,9 +1419,9 @@ public abstract class Collectors {
         }
     };
 
-    /** 
+    /**
      * Only works for sequential Stream.
-     * 
+     *
      * @return
      * @throws UnsupportedOperationException operated by multiple threads
      */
@@ -1435,8 +1437,8 @@ public abstract class Collectors {
 
     /**
      * Only works for sequential Stream.
-     * 
-     * @return 
+     *
+     * @return
      * @throws UnsupportedOperationException operated by multiple threads
      */
     @SuppressWarnings("rawtypes")
@@ -1451,7 +1453,7 @@ public abstract class Collectors {
 
     /**
      * Only works for sequential Stream.
-     * 
+     *
      * @param n
      * @return
      * @throws UnsupportedOperationException operated by multiple threads
@@ -1462,7 +1464,7 @@ public abstract class Collectors {
         final Supplier<List<T>> supplier = new Supplier<List<T>>() {
             @Override
             public List<T> get() {
-                return new ArrayList<T>(N.min(256, n));
+                return new ArrayList<>(N.min(256, n));
             }
         };
 
@@ -1491,7 +1493,7 @@ public abstract class Collectors {
 
     /**
      * Only works for sequential Stream.
-     * 
+     *
      * @param n
      * @return
      * @throws UnsupportedOperationException operated by multiple threads
@@ -1502,7 +1504,7 @@ public abstract class Collectors {
         final Supplier<Deque<T>> supplier = new Supplier<Deque<T>>() {
             @Override
             public Deque<T> get() {
-                return n <= 1024 ? new ArrayDeque<T>(n) : new LinkedList<T>();
+                return n <= 1024 ? new ArrayDeque<>(n) : new LinkedList<>();
             }
         };
 
@@ -1570,18 +1572,18 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which filters input elements by the supplied
      * predicate, collecting them to the list.
      *
      * <p>
      * This method behaves like
      * {@code filtering(predicate, Collectors.toList())}.
-     * 
+     *
      * <p>
      * There are no guarantees on the type, mutability, serializability, or
      * thread-safety of the {@code List} returned.
-     * 
+     *
      * @param <T> the type of the input elements
      * @param predicate a filter function to be applied to the input elements
      * @return a collector which applies the predicate to the input elements and
@@ -1599,7 +1601,7 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which passes only those elements to the
      * specified downstream collector which match given predicate.
      *
@@ -1607,7 +1609,7 @@ public abstract class Collectors {
      * This method returns a
      * <a href="package-summary.html#ShortCircuitReduction">short-circuiting
      * collector</a> if downstream collector is short-circuiting.
-     * 
+     *
      * <p>
      * The operation performed by the returned collector is equivalent to
      * {@code stream.filter(predicate).collect(downstream)}. This collector is
@@ -1619,7 +1621,7 @@ public abstract class Collectors {
      * appears in JDK 9. However when downstream collector is
      * <a href="package-summary.html#ShortCircuitReduction">short-circuiting</a>
      * , this method will also return a short-circuiting collector.
-     * 
+     *
      * @param <T> the type of the input elements
      * @param <A> intermediate accumulation type of the downstream collector
      * @param <R> result type of collector
@@ -1776,9 +1778,9 @@ public abstract class Collectors {
         Set<Characteristics> characteristics = downstream.characteristics();
 
         if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
-            if (characteristics.size() == 1)
+            if (characteristics.size() == 1) {
                 characteristics = Collectors.CH_NOID;
-            else {
+            } else {
                 characteristics = EnumSet.copyOf(characteristics);
                 characteristics.remove(Characteristics.IDENTITY_FINISH);
                 characteristics = Collections.unmodifiableSet(characteristics);
@@ -1799,7 +1801,7 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which collects into the {@link List} the
      * input elements for which given mapper function returns distinct results.
      *
@@ -1807,15 +1809,15 @@ public abstract class Collectors {
      * For ordered source the order of collected elements is preserved. If the
      * same result is returned by mapper function for several elements, only the
      * first element is included into the resulting list.
-     * 
+     *
      * <p>
      * There are no guarantees on the type, mutability, serializability, or
      * thread-safety of the {@code List} returned.
-     * 
+     *
      * <p>
      * The operation performed by the returned collector is equivalent to
      * {@code stream.distinct(mapper).toList()}, but may work faster.
-     * 
+     *
      * @param <T> the type of the input elements
      * @param mapper a function which classifies input elements.
      * @return a collector which collects distinct elements to the {@code List}.
@@ -1861,15 +1863,15 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which counts a number of distinct values the
      * mapper function returns for the stream elements.
-     * 
+     *
      * <p>
      * The operation performed by the returned collector is equivalent to
      * {@code stream.map(mapper).distinct().count()}. This collector is mostly
      * useful as a downstream collector.
-     * 
+     *
      * @param <T> the type of the input elements
      * @param mapper a function which classifies input elements.
      * @return a collector which counts a number of distinct classes the mapper
@@ -1904,10 +1906,10 @@ public abstract class Collectors {
 
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, Optional<T>> min() {
-        return minBy(Fn.naturalOrder());
+        return min(Fn.nullsLast());
     }
 
-    public static <T> Collector<T, ?, Optional<T>> minBy(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, Optional<T>> min(final Comparator<? super T> comparator) {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = new BinaryOperator<T>() {
@@ -1920,7 +1922,7 @@ public abstract class Collectors {
         return reducing(op);
     }
 
-    public static <T> Collector<T, ?, T> minByOrGet(final Comparator<? super T> comparator, final Supplier<? extends T> other) {
+    public static <T> Collector<T, ?, T> minOrGet(final Comparator<? super T> comparator, final Supplier<? extends T> other) {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = new BinaryOperator<T>() {
@@ -1933,7 +1935,7 @@ public abstract class Collectors {
         return reducingOrGet(op, other);
     }
 
-    public static <T, X extends RuntimeException> Collector<T, ?, T> minByOrThrow(final Comparator<? super T> comparator,
+    public static <T, X extends RuntimeException> Collector<T, ?, T> minOrThrow(final Comparator<? super T> comparator,
             final Supplier<? extends X> exceptionSupplier) {
         N.checkArgNotNull(comparator);
 
@@ -1945,14 +1947,26 @@ public abstract class Collectors {
         };
 
         return reducingOrThrow(op, exceptionSupplier);
+    }
+
+    private static final Supplier<NoSuchElementException> noSuchElementExceptionSupplier = new Supplier<NoSuchElementException>() {
+        @Override
+        public NoSuchElementException get() {
+            return new NoSuchElementException();
+        }
+
+    };
+
+    public static <T> Collector<T, ?, T> minOrThrow(final Comparator<? super T> comparator) {
+        return minOrThrow(comparator, noSuchElementExceptionSupplier);
     }
 
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, Optional<T>> max() {
-        return maxBy(Fn.naturalOrder());
+        return max(Fn.nullsFirst());
     }
 
-    public static <T> Collector<T, ?, Optional<T>> maxBy(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, Optional<T>> max(final Comparator<? super T> comparator) {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = new BinaryOperator<T>() {
@@ -1965,7 +1979,7 @@ public abstract class Collectors {
         return reducing(op);
     }
 
-    public static <T> Collector<T, ?, T> maxByOrGet(final Comparator<? super T> comparator, final Supplier<? extends T> other) {
+    public static <T> Collector<T, ?, T> maxOrGet(final Comparator<? super T> comparator, final Supplier<? extends T> other) {
         N.checkArgNotNull(comparator);
 
         final BinaryOperator<T> op = new BinaryOperator<T>() {
@@ -1978,7 +1992,7 @@ public abstract class Collectors {
         return reducingOrGet(op, other);
     }
 
-    public static <T, X extends RuntimeException> Collector<T, ?, T> maxByOrThrow(final Comparator<? super T> comparator,
+    public static <T, X extends RuntimeException> Collector<T, ?, T> maxOrThrow(final Comparator<? super T> comparator,
             final Supplier<? extends X> exceptionSupplier) {
         N.checkArgNotNull(comparator);
 
@@ -1992,8 +2006,59 @@ public abstract class Collectors {
         return reducingOrThrow(op, exceptionSupplier);
     }
 
+    public static <T> Collector<T, ?, T> maxOrThrow(final Comparator<? super T> comparator) {
+        return maxOrThrow(comparator, noSuchElementExceptionSupplier);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        return min(Comparators.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, T> minByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
+        return minOrGet(Comparators.comparingBy(keyMapper), other);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T, X extends RuntimeException> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper,
+            final Supplier<? extends X> exceptionSupplier) {
+        return minOrThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+        return minOrThrow(Comparators.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        return max(Comparators.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, T> maxByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
+        return maxOrGet(Comparators.comparingBy(keyMapper), other);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T, X extends RuntimeException> Collector<T, ?, T> maxByOrThrow(final Function<? super T, ? extends Comparable> keyMapper,
+            final Supplier<? extends X> exceptionSupplier) {
+        return maxOrThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, T> maxByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+        return maxOrThrow(Comparators.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable, R> Collector<T, ?, Optional<Pair<T, T>>> minMax() {
+        return minMax(Fn.naturalOrder());
+    }
+
     /**
-     * 
+     *
      * @param comparator
      * @return
      * @see Collectors#minMax(Comparator, BiFunction)
@@ -2005,16 +2070,16 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds the minimal and maximal element
      * according to the supplied comparator, then applies finisher function to
      * them producing the final result.
-     * 
+     *
      * <p>
      * This collector produces stable result for ordered stream: if several
      * minimal or maximal elements appear, the collector always selects the
      * first encountered.
-     * 
+     *
      * <p>
      * If there are no input elements, the finisher method is not called and
      * empty {@code Optional} is returned. Otherwise the finisher result is
@@ -2038,13 +2103,24 @@ public abstract class Collectors {
             }
         };
 
-        return combine(Collectors.minBy(comparator), Collectors.maxBy(comparator), finisher2);
+        return combine(Collectors.min(comparator), Collectors.max(comparator), finisher2);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T, R> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        return minMax(Comparators.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T, R> Collector<T, ?, Optional<R>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper,
+            final BiFunction<? super T, ? super T, ? extends R> finisher) {
+        return minMax(Comparators.comparingBy(keyMapper), finisher);
     }
 
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and bigger than any other element according to the natural
      * order. The found elements are collected to {@link List}.
@@ -2057,13 +2133,13 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, List<T>> maxAll() {
-        return maxAll(Fn.naturalOrder());
+        return maxAll(Fn.nullsFirst());
     }
 
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and bigger than any other element according to the
      * specified {@link Comparator}. The found elements are collected to
@@ -2081,7 +2157,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param comparator
      * @param atMostSize
      * @return
@@ -2090,7 +2166,7 @@ public abstract class Collectors {
         final Supplier<Pair<T, List<T>>> supplier = new Supplier<Pair<T, List<T>>>() {
             @Override
             public Pair<T, List<T>> get() {
-                final List<T> list = new ArrayList<T>(Math.min(16, atMostSize));
+                final List<T> list = new ArrayList<>(Math.min(16, atMostSize));
                 return Pair.of((T) NONE, list);
             }
         };
@@ -2162,7 +2238,7 @@ public abstract class Collectors {
 
     /**
      * Use occurrences to save the count of largest objects if {@code areAllLargestSame = true}(e.g. {@code Number/String/...}) and return a list by repeat the largest object {@code n} times.
-     *  
+     *
      * @param areAllLargestSame
      * @return
      * @see Collectors#maxAll(Comparator, int, boolean)
@@ -2174,7 +2250,7 @@ public abstract class Collectors {
 
     /**
      * Use occurrences to save the count of largest objects if {@code areAllLargestSame = true}(e.g. {@code Number/String/...}) and return a list by repeat the largest object {@code n} times.
-     * 
+     *
      * @param atMostSize
      * @param areAllLargestSame
      * @return
@@ -2182,14 +2258,14 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, List<T>> maxAll(final int atMostSize, final boolean areAllLargestSame) {
-        return maxAll(Fn.naturalOrder(), atMostSize, areAllLargestSame);
+        return maxAll(Fn.nullsFirst(), atMostSize, areAllLargestSame);
     }
 
     /**
      * Use occurrences to save the count of largest objects if {@code areAllLargestSame = true}(e.g. {@code Number/String/...}) and return a list by repeat the largest object {@code n} times.
-     * 
+     *
      * The default implementation is equivalent to, for this {@code map}:
-     * <pre> 
+     * <pre>
      * <code>
      * if (areAllLargestSame) {
      *     final Function<Pair<Optional<T>, Integer>, List<T>> finisher = new Function<Pair<Optional<T>, Integer>, List<T>>() {
@@ -2218,7 +2294,7 @@ public abstract class Collectors {
                 @Override
                 public List<T> apply(Pair<Optional<T>, Integer> t) {
                     int n = N.min(atMostSize, t.right.intValue());
-                    return n == 0 ? new ArrayList<T>() : N.repeat(t.left.get(), n);
+                    return n == 0 ? new ArrayList<>() : N.repeat(t.left.get(), n);
                 }
             };
 
@@ -2231,7 +2307,7 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and bigger than any other element according to the natural
      * order. The found elements are reduced using the specified downstream
@@ -2249,13 +2325,13 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, A, D> Collector<T, ?, D> maxAll(Collector<T, A, D> downstream) {
-        return maxAll(Fn.naturalOrder(), downstream);
+        return maxAll(Fn.nullsFirst(), downstream);
     }
 
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and bigger than any other element according to the
      * specified {@link Comparator}. The found elements are reduced using the
@@ -2376,7 +2452,7 @@ public abstract class Collectors {
 
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, A, D> Collector<T, ?, Pair<Optional<T>, D>> maxAlll(Collector<T, A, D> downstream) {
-        return maxAlll(Fn.naturalOrder(), downstream);
+        return maxAlll(Fn.nullsFirst(), downstream);
     }
 
     public static <T, A, D> Collector<T, ?, Pair<Optional<T>, D>> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream) {
@@ -2488,7 +2564,7 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and smaller than any other element according to the natural
      * order. The found elements are collected to {@link List}.
@@ -2501,13 +2577,13 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, List<T>> minAll() {
-        return minAll(Fn.naturalOrder());
+        return minAll(Fn.nullsLast());
     }
 
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and smaller than any other element according to the
      * specified {@link Comparator}. The found elements are collected to
@@ -2525,7 +2601,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param comparator
      * @param atMostSize
      * @return
@@ -2536,7 +2612,7 @@ public abstract class Collectors {
 
     /**
      * Use occurrences to save the count of largest objects if {@code areAllSmallestSame = true}(e.g. {@code Number/String/...}) and return a list by repeat the smallest object {@code n} times.
-     *  
+     *
      * @param areAllSmallestSame
      * @return
      * @see Collectors#maxAll(Comparator, int, boolean)
@@ -2548,7 +2624,7 @@ public abstract class Collectors {
 
     /**
      * Use occurrences to save the count of largest objects if {@code areAllSmallestSame = true}(e.g. {@code Number/String/...}) and return a list by repeat the smallest object {@code n} times.
-     *  
+     *
      * @param atMostSize
      * @param areAllSmallestSame
      * @return
@@ -2556,12 +2632,12 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, List<T>> minAll(final int atMostSize, final boolean areAllSmallestSame) {
-        return minAll(Fn.naturalOrder(), atMostSize, areAllSmallestSame);
+        return minAll(Fn.nullsLast(), atMostSize, areAllSmallestSame);
     }
 
     /**
      * Use occurrences to save the count of largest objects if {@code areAllSmallestSame = true}(e.g. {@code Number/String/...}) and return a list by repeat the smallest object {@code n} times.
-     *  
+     *
      * @param comparator
      * @param atMostSize
      * @param areAllSmallestSame
@@ -2575,7 +2651,7 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and smaller than any other element according to the natural
      * order. The found elements are reduced using the specified downstream
@@ -2593,13 +2669,13 @@ public abstract class Collectors {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, A, D> Collector<T, ?, D> minAll(Collector<T, A, D> downstream) {
-        return minAll(Fn.naturalOrder(), downstream);
+        return minAll(Fn.nullsLast(), downstream);
     }
 
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which finds all the elements which are equal
      * to each other and smaller than any other element according to the
      * specified {@link Comparator}. The found elements are reduced using the
@@ -2622,7 +2698,7 @@ public abstract class Collectors {
 
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, A, D> Collector<T, ?, Pair<Optional<T>, D>> minAlll(Collector<T, A, D> downstream) {
-        return minAlll(Fn.naturalOrder(), downstream);
+        return minAlll(Fn.nullsLast(), downstream);
     }
 
     public static <T, A, D> Collector<T, ?, Pair<Optional<T>, D>> minAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream) {
@@ -2908,7 +2984,7 @@ public abstract class Collectors {
 
         final BinaryOperator<CharSummaryStatistics> combiner = SummarizingChar_Combiner;
 
-        return new CollectorImpl<T, CharSummaryStatistics, CharSummaryStatistics>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     public static <T> Collector<T, ?, ByteSummaryStatistics> summarizingByte(final ToByteFunction<? super T> mapper) {
@@ -2923,7 +2999,7 @@ public abstract class Collectors {
 
         final BinaryOperator<ByteSummaryStatistics> combiner = SummarizingByte_Combiner;
 
-        return new CollectorImpl<T, ByteSummaryStatistics, ByteSummaryStatistics>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     public static <T> Collector<T, ?, ShortSummaryStatistics> summarizingShort(final ToShortFunction<? super T> mapper) {
@@ -2938,7 +3014,7 @@ public abstract class Collectors {
 
         final BinaryOperator<ShortSummaryStatistics> combiner = SummarizingShort_Combiner;
 
-        return new CollectorImpl<T, ShortSummaryStatistics, ShortSummaryStatistics>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     public static <T> Collector<T, ?, IntSummaryStatistics> summarizingInt(final ToIntFunction<? super T> mapper) {
@@ -2953,7 +3029,7 @@ public abstract class Collectors {
 
         final BinaryOperator<IntSummaryStatistics> combiner = SummarizingInt_Combiner;
 
-        return new CollectorImpl<T, IntSummaryStatistics, IntSummaryStatistics>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     public static <T> Collector<T, ?, LongSummaryStatistics> summarizingLong(final ToLongFunction<? super T> mapper) {
@@ -2968,7 +3044,7 @@ public abstract class Collectors {
 
         final BinaryOperator<LongSummaryStatistics> combiner = SummarizingLong_Combiner;
 
-        return new CollectorImpl<T, LongSummaryStatistics, LongSummaryStatistics>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     public static <T> Collector<T, ?, FloatSummaryStatistics> summarizingFloat(final ToFloatFunction<? super T> mapper) {
@@ -2983,7 +3059,7 @@ public abstract class Collectors {
 
         final BinaryOperator<FloatSummaryStatistics> combiner = SummarizingFloat_Combiner;
 
-        return new CollectorImpl<T, FloatSummaryStatistics, FloatSummaryStatistics>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     public static <T> Collector<T, ?, DoubleSummaryStatistics> summarizingDouble(final ToDoubleFunction<? super T> mapper) {
@@ -2998,7 +3074,7 @@ public abstract class Collectors {
 
         final BinaryOperator<DoubleSummaryStatistics> combiner = SummarizingDouble_Combiner;
 
-        return new CollectorImpl<T, DoubleSummaryStatistics, DoubleSummaryStatistics>(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return new CollectorImpl<>(supplier, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     public static <T> Collector<T, ?, T> reducing(final T identity, final BinaryOperator<T> op) {
@@ -3028,7 +3104,7 @@ public abstract class Collectors {
         final Supplier<OptHolder<T>> supplier = new Supplier<OptHolder<T>>() {
             @Override
             public OptHolder<T> get() {
-                return new OptHolder<T>(op);
+                return new OptHolder<>(op);
             }
         };
 
@@ -3044,7 +3120,7 @@ public abstract class Collectors {
         final Supplier<OptHolder<T>> supplier = new Supplier<OptHolder<T>>() {
             @Override
             public OptHolder<T> get() {
-                return new OptHolder<T>(op);
+                return new OptHolder<>(op);
             }
         };
 
@@ -3067,7 +3143,7 @@ public abstract class Collectors {
         final Supplier<OptHolder<T>> supplier = new Supplier<OptHolder<T>>() {
             @Override
             public OptHolder<T> get() {
-                return new OptHolder<T>(op);
+                return new OptHolder<>(op);
             }
         };
 
@@ -3086,6 +3162,10 @@ public abstract class Collectors {
         };
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+    }
+
+    public static <T> Collector<T, ?, T> reducingOrThrow(final BinaryOperator<T> op) {
+        return reducingOrThrow(op, noSuchElementExceptionSupplier);
     }
 
     public static <T, U> Collector<T, ?, U> reducing(final U identity, final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op) {
@@ -3116,7 +3196,7 @@ public abstract class Collectors {
         final Supplier<MappingOptHolder<T, U>> supplier = new Supplier<MappingOptHolder<T, U>>() {
             @Override
             public MappingOptHolder<T, U> get() {
-                return new MappingOptHolder<T, U>(mapper, op);
+                return new MappingOptHolder<>(mapper, op);
             }
         };
 
@@ -3185,7 +3265,7 @@ public abstract class Collectors {
         final Supplier<MappingOptHolder<T, U>> supplier = new Supplier<MappingOptHolder<T, U>>() {
             @Override
             public MappingOptHolder<T, U> get() {
-                return new MappingOptHolder<T, U>(mapper, op);
+                return new MappingOptHolder<>(mapper, op);
             }
         };
 
@@ -3207,7 +3287,7 @@ public abstract class Collectors {
         final Supplier<MappingOptHolder<T, U>> supplier = new Supplier<MappingOptHolder<T, U>>() {
             @Override
             public MappingOptHolder<T, U> get() {
-                return new MappingOptHolder<T, U>(mapper, op);
+                return new MappingOptHolder<>(mapper, op);
             }
         };
 
@@ -3227,10 +3307,14 @@ public abstract class Collectors {
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
+    public static <T, U> Collector<T, ?, U> reducingOrThrow(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op) {
+        return reducingOrThrow(mapper, op, noSuchElementExceptionSupplier);
+    }
+
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which computes a common prefix of input
      * {@code CharSequence} objects returning the result as {@code String}. For
      * empty input the empty {@code String} is returned.
@@ -3243,13 +3327,13 @@ public abstract class Collectors {
      * <a href="http://www.unicode.org/glossary/#low_surrogate_code_unit">
      * Unicode low-surrogate code unit</a> in any of the input sequences.
      * Normally the ending high-surrogate code unit is removed from the prefix.
-     * 
+     *
      * <p>
      * This method returns a
      * <a href="package-summary.html#ShortCircuitReduction">short-circuiting
      * collector</a>: it may not process all the elements if the common prefix
      * is empty.
-     * 
+     *
      * @return a {@code Collector} which computes a common prefix.
      * @since 0.5.0
      */
@@ -3316,7 +3400,7 @@ public abstract class Collectors {
     /**
      * It's copied from StreamEx: https://github.com/amaembo/streamex under Apache License v2 and may be modified.
      * <br />
-     * 
+     *
      * Returns a {@code Collector} which computes a common suffix of input
      * {@code CharSequence} objects returning the result as {@code String}. For
      * empty input the empty {@code String} is returned.
@@ -3329,13 +3413,13 @@ public abstract class Collectors {
      * <a href="http://www.unicode.org/glossary/#high_surrogate_code_unit">
      * Unicode high-surrogate code unit</a> in any of the input sequences.
      * Normally the starting low-surrogate code unit is removed from the suffix.
-     * 
+     *
      * <p>
      * This method returns a
      * <a href="package-summary.html#ShortCircuitReduction">short-circuiting
      * collector</a>: it may not process all the elements if the common suffix
      * is empty.
-     * 
+     *
      * @return a {@code Collector} which computes a common suffix.
      * @since 0.5.0
      */
@@ -3657,7 +3741,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @return
@@ -3668,7 +3752,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @param mapFactory
@@ -3681,7 +3765,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param downstream
@@ -3694,7 +3778,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param downstream
@@ -3742,7 +3826,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -3756,7 +3840,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -3803,7 +3887,7 @@ public abstract class Collectors {
 
         final BinaryOperator<M> combiner = (BinaryOperator<M>) concurrentMapMerger(mergeFunction);
 
-        return new CollectorImpl<T, M, M>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
@@ -3897,7 +3981,7 @@ public abstract class Collectors {
             }
         };
 
-        return new CollectorImpl<T, List<T>, DataSet>(collector.supplier(), collector.accumulator(), collector.combiner(), finisher, CH_NOID);
+        return new CollectorImpl<>(collector.supplier(), collector.accumulator(), collector.combiner(), finisher, CH_NOID);
     }
 
     public static <T, A1, A2, R1, R2> Collector<T, Tuple2<A1, A2>, Tuple2<R1, R2>> combine(final Collector<? super T, A1, R1> collector1,
@@ -4149,7 +4233,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param collectors
      * @return
      * @see Tuple#from(Collection)
@@ -4471,7 +4555,7 @@ public abstract class Collectors {
     }
 
     /**
-     * 
+     *
      * @param collectors
      * @return
      * @see Tuple#from(Collection)
@@ -4659,7 +4743,7 @@ public abstract class Collectors {
 
     /**
      * Note: Generally it's much slower than other {@code Collectors}.
-     * 
+     *
      * @param streamingCollector
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
@@ -4672,7 +4756,7 @@ public abstract class Collectors {
 
     /**
      * Note: Generally it's much slower than other {@code Collectors}.
-     * 
+     *
      * @param maxWaitIntervalInMillis
      * @param streamingCollector
      * @return
@@ -4686,7 +4770,7 @@ public abstract class Collectors {
 
     /**
      * Note: Generally it's much slower than other {@code Collectors}.
-     * 
+     *
      * @param supplier
      * @param streamingCollector
      * @return
@@ -4700,7 +4784,7 @@ public abstract class Collectors {
 
     /**
      * Note: Generally it's much slower than other {@code Collectors}.
-     * 
+     *
      * @param maxWaitIntervalInMillis
      * @param supplier
      * @param streamingCollector
@@ -4722,7 +4806,7 @@ public abstract class Collectors {
 
     /**
      * Note: Generally it's much slower than other {@code Collectors}.
-     * 
+     *
      * @param supplier
      * @param streamingCollector
      * @param maxWaitIntervalInMillis

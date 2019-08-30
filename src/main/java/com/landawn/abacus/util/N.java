@@ -92,7 +92,7 @@ import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import com.landawn.abacus.util.Fn.FN;
+import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -36507,7 +36507,7 @@ public final class N {
      * @return
      */
     public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command, final long delayInMillis) {
-        return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(FN.toCallable(command), delayInMillis, TimeUnit.MILLISECONDS));
+        return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(Fnn.toCallable(command), delayInMillis, TimeUnit.MILLISECONDS));
     }
 
     /**

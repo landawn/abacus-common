@@ -77,8 +77,8 @@ import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BinaryOperator;
 
-/** 
- * 
+/**
+ *
  */
 abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, A, P, C, PL, OT, IT, ITER, S>>
         implements BaseStream<T, A, P, C, PL, OT, IT, ITER, S> {
@@ -139,6 +139,14 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
             }
         };
     }
+
+    /** The Constant NULL_MIN_COMPARATOR. */
+    @SuppressWarnings("rawtypes")
+    static final Comparator NULL_MIN_COMPARATOR = Comparators.nullsFirst();
+
+    /** The Constant NULL_MAX_COMPARATOR. */
+    @SuppressWarnings("rawtypes")
+    static final Comparator NULL_MAX_COMPARATOR = Comparators.nullsLast();
 
     @SuppressWarnings("rawtypes")
     static final Comparator NATURAL_COMPARATOR = Comparators.naturalOrder();
@@ -587,7 +595,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
 
     final Deque<Runnable> closeHandlers;
     final boolean sorted;
-    final Comparator<? super T> cmp;;
+    final Comparator<? super T> cmp;
     boolean isClosed = false;
 
     StreamBase(final boolean sorted, final Comparator<? super T> cmp, final Collection<Runnable> closeHandlers) {
@@ -709,7 +717,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
 
     //    @Override
     //    public S maxThreadNum(int maxThreadNum) {
-    //        // throw new UnsupportedOperationException();  
+    //        // throw new UnsupportedOperationException();
     //
     //        // ignore, do nothing if it's sequential stream.
     //        return (S) this;

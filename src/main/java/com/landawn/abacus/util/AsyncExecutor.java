@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.Fn.FN;
+import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
@@ -134,7 +134,7 @@ public class AsyncExecutor {
      * @return
      */
     public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> command) {
-        return execute(new FutureTask<Void>(FN.toCallable(command)));
+        return execute(new FutureTask<Void>(Fnn.toCallable(command)));
     }
 
     /**

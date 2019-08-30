@@ -1,3 +1,10 @@
+### 1.8.16
+
+* Rename `Collectors.max/minBy(Comparator)` to `Collectors.max/min(Comparator)`.
+* Refactoring `Fn`.
+* Improvements and bug fix.
+
+
 ### 1.8.15
 
 * Improvements and bug fix.

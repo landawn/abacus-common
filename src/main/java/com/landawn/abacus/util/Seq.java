@@ -31,7 +31,7 @@ import java.util.Set;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.Fn.BiFunctions;
-import com.landawn.abacus.util.Fn.FN;
+import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
@@ -3483,7 +3483,7 @@ public final class Seq<T> extends ImmutableCollection<T> {
      */
     public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.Function<? super T, ? extends K, E> keyMapper,
             final Collector<? super T, A, D> downstream, final IntFunction<? extends M> mapFactory) throws E {
-        return toMap(keyMapper, FN.<T, RuntimeException> identity(), downstream, mapFactory);
+        return toMap(keyMapper, Fnn.<T, RuntimeException> identity(), downstream, mapFactory);
     }
 
     /**

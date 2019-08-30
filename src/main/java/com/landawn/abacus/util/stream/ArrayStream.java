@@ -61,7 +61,7 @@ import com.landawn.abacus.util.function.TriFunction;
 
 /**
  *
- * @param <T> 
+ * @param <T>
  */
 class ArrayStream<T> extends AbstractStream<T> {
     final T[] elements;
@@ -329,7 +329,7 @@ class ArrayStream<T> extends AbstractStream<T> {
     //            //            @Override
     //            //            public void skip(long n) {
     //            //                checkArgNotNegative(n, "n");
-    //            //                
+    //            //
     //            //                cursor = n < count() ? cursor + (int) n * 2 : toIndex;
     //            //            }
     //
@@ -379,7 +379,7 @@ class ArrayStream<T> extends AbstractStream<T> {
     //            //            @Override
     //            //            public void skip(long n) {
     //            //                checkArgNotNegative(n, "n");
-    //            //                
+    //            //
     //            //                cursor = n < count() ? cursor + (int) n * 3 : toIndex;
     //            //            }
     //
@@ -1128,8 +1128,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1196,8 +1195,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1264,8 +1262,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1332,8 +1329,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1400,8 +1396,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1468,8 +1463,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1536,8 +1530,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1604,8 +1597,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -3057,6 +3049,8 @@ class ArrayStream<T> extends AbstractStream<T> {
                 return Optional.of(elements[fromIndex]);
             }
 
+            comparator = comparator == null ? NULL_MAX_COMPARATOR : comparator;
+
             return Optional.of(N.min(elements, fromIndex, toIndex, comparator));
         } finally {
             close();
@@ -3073,6 +3067,8 @@ class ArrayStream<T> extends AbstractStream<T> {
             } else if (sorted && isSameComparator(cmp, comparator)) {
                 return Optional.of(elements[toIndex - 1]);
             }
+
+            comparator = comparator == null ? NULL_MIN_COMPARATOR : comparator;
 
             return Optional.of(N.max(elements, fromIndex, toIndex, comparator));
         } finally {
@@ -3369,7 +3365,7 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     /**
      * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterator asynchronously.
-     * 
+     *
      * @param stream
      * @param queueSize Default value is 8
      * @return

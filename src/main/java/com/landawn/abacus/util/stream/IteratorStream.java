@@ -66,7 +66,7 @@ import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.ObjIteratorEx.QueuedIterator;
 
 /**
- * 
+ *
  */
 class IteratorStream<T> extends AbstractStream<T> {
     final ObjIteratorEx<T> elements;
@@ -901,8 +901,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -968,8 +967,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1035,8 +1033,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1102,8 +1099,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1169,8 +1165,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1236,8 +1231,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1303,8 +1297,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1370,8 +1363,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1597,9 +1589,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                         list.add(elements.next());
                     }
 
-                    result = new ArrayStream<T>(Stream.toArray(list), 0, list.size(), sorted, cmp, null);
+                    result = new ArrayStream<>(Stream.toArray(list), 0, list.size(), sorted, cmp, null);
                 } else {
-                    result = new IteratorStream<T>(elements, sorted, cmp, null);
+                    result = new IteratorStream<>(elements, sorted, cmp, null);
                 }
 
                 cursor++;
@@ -2984,7 +2976,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 if (initialized == false) {
                     initialized = true;
 
-                    final Deque<T> dqueue = n <= 1024 ? new ArrayDeque<T>(n) : new LinkedList<T>();
+                    final Deque<T> dqueue = n <= 1024 ? new ArrayDeque<>(n) : new LinkedList<>();
 
                     try {
                         while (elements.hasNext()) {
@@ -3016,7 +3008,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             @Override
             public boolean hasNext() {
                 if (dqueue == null) {
-                    dqueue = n <= 1024 ? new ArrayDeque<T>(n) : new LinkedList<T>();
+                    dqueue = n <= 1024 ? new ArrayDeque<>(n) : new LinkedList<>();
 
                     while (dqueue.size() < n && elements.hasNext()) {
                         dqueue.offerLast(elements.next());
@@ -3051,7 +3043,8 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return Optional.of(elements.next());
             }
 
-            comparator = comparator == null ? NATURAL_COMPARATOR : comparator;
+            comparator = comparator == null ? NULL_MAX_COMPARATOR : comparator;
+
             T candidate = elements.next();
             T next = null;
 
@@ -3085,7 +3078,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return Optional.of(next);
             }
 
-            comparator = comparator == null ? NATURAL_COMPARATOR : comparator;
+            comparator = comparator == null ? NULL_MIN_COMPARATOR : comparator;
             T candidate = elements.next();
             T next = null;
 
@@ -3325,7 +3318,7 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     /**
      * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterator asynchronously.
-     * 
+     *
      * @param stream
      * @param queueSize Default value is 8
      * @return

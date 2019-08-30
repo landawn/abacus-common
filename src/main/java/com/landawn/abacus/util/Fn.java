@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,26 +128,26 @@ import com.landawn.abacus.util.stream.Stream;
 // TODO: Auto-generated Javadoc
 /**
  * Factory utility class for functional interfaces.
- * 
+ *
  * <br>
  * Note: Don't save and reuse any Function/Predicat/Consumer/... created by calling the methods in this class.
  * The method should be called every time.
  * </br>
- * 
+ *
  * <pre>
  * <code>
- * 
+ *
  * Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);
  * // Instead of
  * Stream.of(map).filter(e -> e.getKey().equals("a") || e.getKey().equals("b")).toMap(e -> e.getKey(), e -> e.getValue());
  * // Using Fn
  * Stream.of(map).filter(Fn.testByKey(k -> k.equals("a") || k.equals("b"))).collect(Collectors.toMap());
- * 
+ *
  * </code>
  * </pre>
- * 
- * 
- * 
+ *
+ *
+ *
  * @author haiyang li
  *
  */
@@ -714,7 +714,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Only for temporary use in sequential stream/single thread, not for parallel stream/multiple threads.
-     * The returned Collection will clean up before it's returned every time when {@code get} is called. 
+     * The returned Collection will clean up before it's returned every time when {@code get} is called.
      * Don't save the returned Collection object or use it to save objects.
      *
      * @param <T>
@@ -722,7 +722,9 @@ public abstract class Fn extends Comparators {
      * @param supplier
      * @return
      * @see {@code Stream.split/sliding};
+     * @deprecated
      */
+    @Deprecated
     @Beta
     @SequentialOnly
     public static <T, C extends Collection<T>> Supplier<? extends C> reuse(final Supplier<? extends C> supplier) {
@@ -744,7 +746,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Only for temporary use in sequential stream/single thread, not for parallel stream/multiple threads.
-     * The returned Collection will clean up before it's returned every time when {@code get} is called. 
+     * The returned Collection will clean up before it's returned every time when {@code get} is called.
      * Don't save the returned Collection object or use it to save objects.
      *
      * @param <T>
@@ -752,7 +754,9 @@ public abstract class Fn extends Comparators {
      * @param supplier
      * @return
      * @see {@code Stream.split/sliding};
+     * @deprecated
      */
+    @Deprecated
     @Beta
     @SequentialOnly
     public static <T, C extends Collection<T>> IntFunction<? extends C> reuse(final IntFunction<? extends C> supplier) {
@@ -2463,7 +2467,7 @@ public abstract class Fn extends Comparators {
      * @param <C>
      * @param predicate
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     static <A, B, C> TriPredicate<A, B, C> test(final TriPredicate<A, B, C> predicate) {
@@ -2819,7 +2823,7 @@ public abstract class Fn extends Comparators {
         return new Function<Map.Entry<K, V>, Map.Entry<KK, V>>() {
             @Override
             public Map.Entry<KK, V> apply(Entry<K, V> entry) {
-                return new SimpleImmutableEntry<KK, V>(func.apply(entry.getKey()), entry.getValue());
+                return new SimpleImmutableEntry<>(func.apply(entry.getKey()), entry.getValue());
             }
         };
     }
@@ -2839,7 +2843,7 @@ public abstract class Fn extends Comparators {
         return new Function<Map.Entry<K, V>, Map.Entry<K, VV>>() {
             @Override
             public Map.Entry<K, VV> apply(Entry<K, V> entry) {
-                return new SimpleImmutableEntry<K, VV>(entry.getKey(), func.apply(entry.getValue()));
+                return new SimpleImmutableEntry<>(entry.getKey(), func.apply(entry.getValue()));
             }
         };
     }
@@ -3061,13 +3065,14 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Limit then filter.
+     * Returns a stateful <code>Predicate</code>. Don't save it.
      *
      * @param <T>
      * @param limit
      * @param predicate
      * @return
      */
+    @Beta
     public static <T> Predicate<T> limitThenFilter(final int limit, final Predicate<T> predicate) {
         N.checkArgNotNull(predicate);
 
@@ -3082,7 +3087,7 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Limit then filter.
+     * Returns a stateful <code>Predicate</code>. Don't save it.
      *
      * @param <T>
      * @param <U>
@@ -3090,6 +3095,7 @@ public abstract class Fn extends Comparators {
      * @param predicate
      * @return
      */
+    @Beta
     public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final BiPredicate<T, U> predicate) {
         N.checkArgNotNull(predicate);
 
@@ -3104,13 +3110,14 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Filter then limit.
+     * Returns a stateful <code>Predicate</code>. Don't save it.
      *
      * @param <T>
      * @param predicate
      * @param limit
      * @return
      */
+    @Beta
     public static <T> Predicate<T> filterThenLimit(final Predicate<T> predicate, final int limit) {
         N.checkArgNotNull(predicate);
 
@@ -3125,7 +3132,7 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Filter then limit.
+     * Returns a stateful <code>Predicate</code>. Don't save it.
      *
      * @param <T>
      * @param <U>
@@ -3133,6 +3140,7 @@ public abstract class Fn extends Comparators {
      * @param limit
      * @return
      */
+    @Beta
     public static <T, U> BiPredicate<T, U> filterThenLimit(final BiPredicate<T, U> predicate, final int limit) {
         N.checkArgNotNull(predicate);
 
@@ -3147,14 +3155,19 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Time limit.
+     * Returns a stateful <code>Predicate</code>. Don't save it.
      *
      * @param <T>
      * @param timeInMillis
      * @return
      */
+    @Beta
     public static <T> Predicate<T> timeLimit(final long timeInMillis) {
         N.checkArgNotNegative(timeInMillis, "timeInMillis");
+
+        if (timeInMillis == 0) {
+            return Fn.alwaysFalse();
+        }
 
         final MutableBoolean ongoing = MutableBoolean.of(true);
 
@@ -3176,12 +3189,13 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Time limit.
+     * Returns a stateful <code>Predicate</code>. Don't save it.
      *
      * @param <T>
      * @param duration
      * @return
      */
+    @Beta
     public static <T> Predicate<T> timeLimit(final Duration duration) {
         N.checkArgNotNull(duration, "duration");
 
@@ -3189,11 +3203,12 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Function</code> which should not be used in parallel stream.
+     * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
      *
      * @param <T>
      * @return
      */
+    @Beta
     @SequentialOnly
     public static <T> Function<T, Indexed<T>> indexed() {
         return new Function<T, Indexed<T>>() {
@@ -3207,85 +3222,16 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code> which should not be used in parallel stream.
+     * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
      *
      * @param <T>
      * @param predicate
      * @return
      */
+    @Beta
     @SequentialOnly
     public static <T> Predicate<T> indexed(final IndexedPredicate<T> predicate) {
         return Predicates.indexed(predicate);
-    }
-
-    /**
-     * Returns a stateful <code>BiPredicate</code> which should not be used in parallel stream.
-     *
-     * @param <U>
-     * @param <T>
-     * @param predicate
-     * @return
-     * @deprecated replaced by {@code BiPredicates#indexed(IndexedBiPredicate)}.
-     */
-    @Deprecated
-    static <U, T> BiPredicate<U, T> indexed(final IndexedBiPredicate<U, T> predicate) {
-        return BiPredicates.indexed(predicate);
-    }
-
-    /**
-     * Returns a stateful <code>Function</code> which should not be used in parallel stream.
-     *
-     * @param <T>
-     * @param <R>
-     * @param func
-     * @return
-     * @deprecated replaced by {@code Functions#indexed(IndexedFunction)}.
-     */
-    @Deprecated
-    static <T, R> Function<T, R> indexedd(final IndexedFunction<T, R> func) {
-        return Functions.indexed(func);
-    }
-
-    /**
-     * Returns a stateful <code>BiFunction</code> which should not be used in parallel stream.
-     *
-     * @param <U>
-     * @param <T>
-     * @param <R>
-     * @param func
-     * @return
-     * @deprecated replaced by {@code BiFunctions#indexed(IndexedBiFunction)}.
-     */
-    @Deprecated
-    static <U, T, R> BiFunction<U, T, R> indexedd(final IndexedBiFunction<U, T, R> func) {
-        return BiFunctions.indexed(func);
-    }
-
-    /**
-     * Returns a stateful <code>Consumer</code> which should not be used in parallel stream.
-     *
-     * @param <T>
-     * @param action
-     * @return
-     * @deprecated replaced by {@code Consumers#indexed(IndexedConsumer)}.
-     */
-    @Deprecated
-    static <T> Consumer<T> indexeed(final IndexedConsumer<T> action) {
-        return Consumers.indexed(action);
-    }
-
-    /**
-     * Returns a stateful <code>BiConsumer</code> which should not be used in parallel stream.
-     *
-     * @param <U>
-     * @param <T>
-     * @param action
-     * @return
-     * @deprecated replaced by {@code BiConsumers#indexed(IndexedBiConsumer)}.
-     */
-    @Deprecated
-    static <U, T> BiConsumer<U, T> indexeed(final IndexedBiConsumer<U, T> action) {
-        return BiConsumers.indexed(action);
     }
 
     /**
@@ -4405,7 +4351,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Split this stream by the specified duration.
-     * 
+     *
      * <pre>
      * <code>
      * Stream<Timed<MyObject>> s = ...;
@@ -4887,7 +4833,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Split this stream by the specified duration.
-     * 
+     *
      * <pre>
      * <code>
      * Stream<Timed<MyObject>> s = ...;
@@ -7080,12 +7026,14 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Indexed.
+         * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
          *
          * @param <T>
          * @param predicate
          * @return
          */
+        @Beta
+        @SequentialOnly
         public static <T> Predicate<T> indexed(final IndexedPredicate<T> predicate) {
             N.checkArgNotNull(predicate);
 
@@ -7100,11 +7048,13 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Distinct.
+         * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
          *
          * @param <T>
          * @return
          */
+        @Beta
+        @SequentialOnly
         public static <T> Predicate<T> distinct() {
             return new Predicate<T>() {
                 private final Set<Object> set = N.newHashSet();
@@ -7117,12 +7067,14 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Distinct by.
+         * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
          *
          * @param <T>
          * @param mapper
          * @return
          */
+        @Beta
+        @SequentialOnly
         public static <T> Predicate<T> distinctBy(final Function<? super T, ?> mapper) {
             return new Predicate<T>() {
                 private final Set<Object> set = N.newHashSet();
@@ -7135,11 +7087,12 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Concurrent distinct.
+         * Returns a stateful <code>Predicate</code>. Don't save it.
          *
          * @param <T>
          * @return
          */
+        @Beta
         public static <T> Predicate<T> concurrentDistinct() {
             return new Predicate<T>() {
                 private final Map<Object, Object> map = new ConcurrentHashMap<>();
@@ -7152,12 +7105,13 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Concurrent distinct by.
+         * Returns a stateful <code>Predicate</code>. Don't save it.
          *
          * @param <T>
          * @param mapper
          * @return
          */
+        @Beta
         public static <T> Predicate<T> concurrentDistinctBy(final Function<? super T, ?> mapper) {
             return new Predicate<T>() {
                 private final Map<Object, Object> map = new ConcurrentHashMap<>();
@@ -7170,12 +7124,14 @@ public abstract class Fn extends Comparators {
         }
 
         /**
+         * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
          * Remove the continuous repeat elements.
-         * Returns a stateful predicate which should not be used in parallel stream.
          *
          * @param <T>
          * @return
          */
+        @Beta
+        @SequentialOnly
         public static <T> Predicate<T> skipRepeats() {
             return new Predicate<T>() {
                 private T pre = (T) NONE;
@@ -7196,7 +7152,10 @@ public abstract class Fn extends Comparators {
          * @param periodInMillis
          * @param cancellationFlag the underline scheduled {@code Task} will be cancelled if {@code cancellationFlag} is set to true.
          * @return
+         * @deprecated
          */
+        @Deprecated
+        @Beta
         public static <T> Predicate<T> invertedByDuration(final long periodInMillis, final MutableBoolean cancellationFlag) {
             final MutableBoolean switcher = MutableBoolean.of(true);
 
@@ -7229,7 +7188,10 @@ public abstract class Fn extends Comparators {
          * @param cancellationFlag the underline scheduled {@code Task} will be cancelled if {@code cancellationFlag} is set to true.
          * @param update called at the beginning of each duration.
          * @return
+         * @deprecated
          */
+        @Deprecated
+        @Beta
         public static <T> Predicate<T> invertedByDuration(final long periodInMillis, final MutableBoolean cancellationFlag, final Runnable update) {
             final MutableBoolean switcher = MutableBoolean.of(true);
 
@@ -7263,7 +7225,10 @@ public abstract class Fn extends Comparators {
          * @param periodInMillis
          * @param cancellationFlag the underline scheduled {@code Task} will be cancelled if {@code cancellationFlag} is set to true.
          * @return
+         * @deprecated
          */
+        @Deprecated
+        @Beta
         public static <T> Predicate<T> invertedByDuration(final long delayInMillis, final long periodInMillis, final MutableBoolean cancellationFlag) {
             final MutableBoolean switcher = MutableBoolean.of(true);
 
@@ -7297,7 +7262,10 @@ public abstract class Fn extends Comparators {
          * @param cancellationFlag the underline scheduled {@code Task} will be cancelled if {@code cancellationFlag} is set to true.
          * @param update called at the beginning of each duration.
          * @return
+         * @deprecated
          */
+        @Deprecated
+        @Beta
         public static <T> Predicate<T> invertedByDuration(final long delayInMillis, final long periodInMillis, final MutableBoolean cancellationFlag,
                 final Runnable update) {
             final MutableBoolean switcher = MutableBoolean.of(true);
@@ -7432,22 +7400,25 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Indexed.
+         * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
          *
-         * @param <U>
+         *
          * @param <T>
+         * @param <U>
          * @param predicate
          * @return
          */
-        public static <U, T> BiPredicate<U, T> indexed(final IndexedBiPredicate<U, T> predicate) {
+        @Beta
+        @SequentialOnly
+        public static <T, U> BiPredicate<T, U> indexed(final IndexedBiPredicate<T, U> predicate) {
             N.checkArgNotNull(predicate);
 
-            return new BiPredicate<U, T>() {
+            return new BiPredicate<T, U>() {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public boolean test(U u, T t) {
-                    return predicate.test(u, idx.getAndIncrement(), t);
+                public boolean test(T t, U u) {
+                    return predicate.test(t, idx.getAndIncrement(), u);
                 }
             };
         }
@@ -7540,12 +7511,14 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Indexed.
+         * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
          *
          * @param <T>
          * @param action
          * @return
          */
+        @Beta
+        @SequentialOnly
         public static <T> Consumer<T> indexed(final IndexedConsumer<T> action) {
             N.checkArgNotNull(action);
 
@@ -7824,13 +7797,16 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Indexed.
+         * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
+         *
          *
          * @param <U>
          * @param <T>
          * @param action
          * @return
          */
+        @Beta
+        @SequentialOnly
         public static <U, T> BiConsumer<U, T> indexed(final IndexedBiConsumer<U, T> action) {
             N.checkArgNotNull(action);
 
@@ -7910,13 +7886,16 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Indexed.
+         * Returns a stateful <code>Function</code>. Don't save it or use it in parallel stream.
+         *
          *
          * @param <T>
          * @param <R>
          * @param func
          * @return
          */
+        @Beta
+        @SequentialOnly
         public static <T, R> Function<T, R> indexed(final IndexedFunction<T, R> func) {
             N.checkArgNotNull(func);
 
@@ -7928,54 +7907,6 @@ public abstract class Fn extends Comparators {
                     return func.apply(idx.getAndIncrement(), t);
                 }
             };
-        }
-
-        /**
-         * Pair to list.
-         *
-         * @param <T>
-         * @return
-         * @deprecated replaced by PairFn#toList();
-         */
-        @Deprecated
-        public static <T> Function<Pair<T, T>, List<T>> pairToList() {
-            return Pairs.toList();
-        }
-
-        /**
-         * Pair to set.
-         *
-         * @param <T>
-         * @return
-         * @deprecated replaced by PairFn#toSet();
-         */
-        @Deprecated
-        public static <T> Function<Pair<T, T>, Set<T>> pairToSet() {
-            return Pairs.toSet();
-        }
-
-        /**
-         * Triple to list.
-         *
-         * @param <T>
-         * @return
-         * @deprecated replaced by TripleFn#toList();
-         */
-        @Deprecated
-        public static <T> Function<Triple<T, T, T>, List<T>> tripleToList() {
-            return Triples.toList();
-        }
-
-        /**
-         * Triple to set.
-         *
-         * @param <T>
-         * @return
-         * @deprecated replaced by TripleFn#toSet();
-         */
-        @Deprecated
-        public static <T> Function<Triple<T, T, T>, Set<T>> tripleToSet() {
-            return Triples.toSet();
         }
     }
 
@@ -8272,7 +8203,7 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Indexed.
+         * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
          *
          * @param <U>
          * @param <T>
@@ -8280,6 +8211,8 @@ public abstract class Fn extends Comparators {
          * @param func
          * @return
          */
+        @Beta
+        @SequentialOnly
         public static <U, T, R> BiFunction<U, T, R> indexed(final IndexedBiFunction<U, T, R> func) {
             N.checkArgNotNull(func);
 
@@ -8916,6 +8849,7 @@ public abstract class Fn extends Comparators {
          * @param f
          * @return
          */
+        @Beta
         public static <K, V, T, E extends Exception> Try.Function<Map.Entry<K, V>, T, E> ef(final Try.BiFunction<? super K, ? super V, ? extends T, E> f) {
             N.checkArgNotNull(f, "BiFunction");
 
@@ -8935,6 +8869,7 @@ public abstract class Fn extends Comparators {
          * @param p
          * @return
          */
+        @Beta
         public static <K, V, E extends Exception> Try.Predicate<Map.Entry<K, V>, E> ep(final Try.BiPredicate<? super K, ? super V, E> p) {
             N.checkArgNotNull(p, "BiPredicate");
 
@@ -8955,6 +8890,7 @@ public abstract class Fn extends Comparators {
          * @param c
          * @return
          */
+        @Beta
         public static <K, V, E extends Exception> Try.Consumer<Map.Entry<K, V>, E> ec(final Try.BiConsumer<? super K, ? super V, E> c) {
             N.checkArgNotNull(c, "BiConsumer");
 
@@ -9220,7 +9156,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Utility class for {@code CharPredicate/Function/Consumer}.
-     * 
+     *
      * @author haiyangl
      *
      */
@@ -9370,10 +9306,56 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Alternate.
          *
          * @return
          */
+        public static ToCharFunction<Character> unbox() {
+            return ToCharFunction.UNBOX;
+        }
+
+        /**
+         *
+         * @param p
+         * @return
+         */
+        public static CharPredicate p(final CharPredicate p) {
+            N.checkArgNotNull(p);
+
+            return p;
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param f
+         * @return
+         */
+        public static <R> CharFunction<R> f(final CharFunction<R> f) {
+            N.checkArgNotNull(f);
+
+            return f;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public static CharConsumer c(final CharConsumer c) {
+            N.checkArgNotNull(c);
+
+            return c;
+        }
+
+        /**
+         * Returns a stateful <code>CharBiFunction</code>. Don't save it or use it in parallel stream.
+         *
+         * @return
+         * @deprecated
+         */
+        @Deprecated
+        @Beta
+        @SequentialOnly
         public static CharBiFunction<Nth> alternate() {
             return new CharBiFunction<Nth>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
@@ -9388,7 +9370,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Utility class for {@code BytePredicate/Function/Consumer}.
-     * 
+     *
      * @author haiyangl
      *
      */
@@ -9538,10 +9520,56 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Alternate.
          *
          * @return
          */
+        public static ToByteFunction<Byte> unbox() {
+            return ToByteFunction.UNBOX;
+        }
+
+        /**
+         *
+         * @param p
+         * @return
+         */
+        public static BytePredicate p(final BytePredicate p) {
+            N.checkArgNotNull(p);
+
+            return p;
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param f
+         * @return
+         */
+        public static <R> ByteFunction<R> f(final ByteFunction<R> f) {
+            N.checkArgNotNull(f);
+
+            return f;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public static ByteConsumer c(final ByteConsumer c) {
+            N.checkArgNotNull(c);
+
+            return c;
+        }
+
+        /**
+         * Returns a stateful <code>ByteBiFunction</code>. Don't save it or use it in parallel stream.
+         *
+         * @return
+         * @deprecated
+         */
+        @Deprecated
+        @Beta
+        @SequentialOnly
         public static ByteBiFunction<Nth> alternate() {
             return new ByteBiFunction<Nth>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
@@ -9556,7 +9584,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Utility class for {@code ShortPredicate/Function/Consumer}.
-     * 
+     *
      * @author haiyangl
      *
      */
@@ -9706,10 +9734,56 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Alternate.
          *
          * @return
          */
+        public static ToShortFunction<Short> unbox() {
+            return ToShortFunction.UNBOX;
+        }
+
+        /**
+         *
+         * @param p
+         * @return
+         */
+        public static ShortPredicate p(final ShortPredicate p) {
+            N.checkArgNotNull(p);
+
+            return p;
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param f
+         * @return
+         */
+        public static <R> ShortFunction<R> f(final ShortFunction<R> f) {
+            N.checkArgNotNull(f);
+
+            return f;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public static ShortConsumer c(final ShortConsumer c) {
+            N.checkArgNotNull(c);
+
+            return c;
+        }
+
+        /**
+         * Returns a stateful <code>ShortBiFunction</code>. Don't save it or use it in parallel stream.
+         *
+         * @return
+         * @deprecated
+         */
+        @Deprecated
+        @Beta
+        @SequentialOnly
         public static ShortBiFunction<Nth> alternate() {
             return new ShortBiFunction<Nth>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
@@ -9724,7 +9798,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Utility class for {@code IntPredicate/Function/Consumer}.
-     * 
+     *
      * @author haiyangl
      *
      */
@@ -9874,10 +9948,56 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Alternate.
          *
          * @return
          */
+        public static ToIntFunction<Integer> unbox() {
+            return ToIntFunction.UNBOX;
+        }
+
+        /**
+         *
+         * @param p
+         * @return
+         */
+        public static IntPredicate p(final IntPredicate p) {
+            N.checkArgNotNull(p);
+
+            return p;
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param f
+         * @return
+         */
+        public static <R> IntFunction<R> f(final IntFunction<R> f) {
+            N.checkArgNotNull(f);
+
+            return f;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public static IntConsumer c(final IntConsumer c) {
+            N.checkArgNotNull(c);
+
+            return c;
+        }
+
+        /**
+         * Returns a stateful <code>IntBiFunction</code>. Don't save it or use it in parallel stream.
+         *
+         * @return
+         * @deprecated
+         */
+        @Deprecated
+        @Beta
+        @SequentialOnly
         public static IntBiFunction<Nth> alternate() {
             return new IntBiFunction<Nth>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
@@ -9892,7 +10012,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Utility class for {@code LongPredicate/Function/Consumer}.
-     * 
+     *
      * @author haiyangl
      *
      */
@@ -10042,10 +10162,56 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Alternate.
          *
          * @return
          */
+        public static ToLongFunction<Long> unbox() {
+            return ToLongFunction.UNBOX;
+        }
+
+        /**
+         *
+         * @param p
+         * @return
+         */
+        public static LongPredicate p(final LongPredicate p) {
+            N.checkArgNotNull(p);
+
+            return p;
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param f
+         * @return
+         */
+        public static <R> LongFunction<R> f(final LongFunction<R> f) {
+            N.checkArgNotNull(f);
+
+            return f;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public static LongConsumer c(final LongConsumer c) {
+            N.checkArgNotNull(c);
+
+            return c;
+        }
+
+        /**
+         * Returns a stateful <code>LongBiFunction</code>. Don't save it or use it in parallel stream.
+         *
+         * @return
+         * @deprecated
+         */
+        @Deprecated
+        @Beta
+        @SequentialOnly
         public static LongBiFunction<Nth> alternate() {
             return new LongBiFunction<Nth>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
@@ -10060,7 +10226,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Utility class for {@code FloatPredicate/Function/Consumer}.
-     * 
+     *
      * @author haiyangl
      *
      */
@@ -10210,10 +10376,56 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Alternate.
          *
          * @return
          */
+        public static ToFloatFunction<Float> unbox() {
+            return ToFloatFunction.UNBOX;
+        }
+
+        /**
+         *
+         * @param p
+         * @return
+         */
+        public static FloatPredicate p(final FloatPredicate p) {
+            N.checkArgNotNull(p);
+
+            return p;
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param f
+         * @return
+         */
+        public static <R> FloatFunction<R> f(final FloatFunction<R> f) {
+            N.checkArgNotNull(f);
+
+            return f;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public static FloatConsumer c(final FloatConsumer c) {
+            N.checkArgNotNull(c);
+
+            return c;
+        }
+
+        /**
+         * Returns a stateful <code>FloatBiFunction</code>. Don't save it or use it in parallel stream.
+         *
+         * @return
+         * @deprecated
+         */
+        @Deprecated
+        @Beta
+        @SequentialOnly
         public static FloatBiFunction<Nth> alternate() {
             return new FloatBiFunction<Nth>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
@@ -10228,7 +10440,7 @@ public abstract class Fn extends Comparators {
 
     /**
      * Utility class for {@code DoublePredicate/Function/Consumer}.
-     * 
+     *
      * @author haiyangl
      *
      */
@@ -10378,10 +10590,56 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Alternate.
          *
          * @return
          */
+        public static ToDoubleFunction<Double> unbox() {
+            return ToDoubleFunction.UNBOX;
+        }
+
+        /**
+         *
+         * @param p
+         * @return
+         */
+        public static DoublePredicate p(final DoublePredicate p) {
+            N.checkArgNotNull(p);
+
+            return p;
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param f
+         * @return
+         */
+        public static <R> DoubleFunction<R> f(final DoubleFunction<R> f) {
+            N.checkArgNotNull(f);
+
+            return f;
+        }
+
+        /**
+         *
+         * @param c
+         * @return
+         */
+        public static DoubleConsumer c(final DoubleConsumer c) {
+            N.checkArgNotNull(c);
+
+            return c;
+        }
+
+        /**
+         * Returns a stateful <code>DoubleBiFunction</code>. Don't save it or use it in parallel stream.
+         *
+         * @return
+         * @deprecated
+         */
+        @Deprecated
+        @Beta
+        @SequentialOnly
         public static DoubleBiFunction<Nth> alternate() {
             return new DoubleBiFunction<Nth>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
@@ -10395,355 +10653,17 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Utility class for primitive {@code Predicate/Function/Consumer}.
-     * 
+     * Utility class for exceptional {@code Predicate/Function/Consumer}.
+     *
      * @author haiyangl
      *
      */
     public static abstract class Fnn {
 
         /**
-         * Instantiates a new fnn.
-         */
-        protected Fnn() {
-            // for extention
-        }
-
-        /**
-         * Unbox B.
-         *
-         * @return
-         */
-        public static ToByteFunction<Byte> unboxB() {
-            return ToByteFunction.UNBOX;
-        }
-
-        /**
-         * Unbox C.
-         *
-         * @return
-         */
-        public static ToCharFunction<Character> unboxC() {
-            return ToCharFunction.UNBOX;
-        }
-
-        /**
-         * Unbox S.
-         *
-         * @return
-         */
-        public static ToShortFunction<Short> unboxS() {
-            return ToShortFunction.UNBOX;
-        }
-
-        /**
-         * Unbox I.
-         *
-         * @return
-         */
-        public static ToIntFunction<Integer> unboxI() {
-            return ToIntFunction.UNBOX;
-        }
-
-        /**
-         * Unbox L.
-         *
-         * @return
-         */
-        public static ToLongFunction<Long> unboxL() {
-            return ToLongFunction.UNBOX;
-        }
-
-        /**
-         * Unbox F.
-         *
-         * @return
-         */
-        public static ToFloatFunction<Float> unboxF() {
-            return ToFloatFunction.UNBOX;
-        }
-
-        /**
-         * Unbox D.
-         *
-         * @return
-         */
-        public static ToDoubleFunction<Double> unboxD() {
-            return ToDoubleFunction.UNBOX;
-        }
-
-        /**
-         * Cp.
-         *
-         * @param p
-         * @return
-         */
-        public static CharPredicate cp(final CharPredicate p) {
-            N.checkArgNotNull(p);
-
-            return p;
-        }
-
-        /**
-         * Bp.
-         *
-         * @param p
-         * @return
-         */
-        public static BytePredicate bp(final BytePredicate p) {
-            N.checkArgNotNull(p);
-
-            return p;
-        }
-
-        /**
-         * Sp.
-         *
-         * @param p
-         * @return
-         */
-        public static ShortPredicate sp(final ShortPredicate p) {
-            N.checkArgNotNull(p);
-
-            return p;
-        }
-
-        /**
-         * Ip.
-         *
-         * @param p
-         * @return
-         */
-        public static IntPredicate ip(final IntPredicate p) {
-            N.checkArgNotNull(p);
-
-            return p;
-        }
-
-        /**
-         * Lp.
-         *
-         * @param p
-         * @return
-         */
-        public static LongPredicate lp(final LongPredicate p) {
-            N.checkArgNotNull(p);
-
-            return p;
-        }
-
-        /**
-         * Fp.
-         *
-         * @param p
-         * @return
-         */
-        public static FloatPredicate fp(final FloatPredicate p) {
-            N.checkArgNotNull(p);
-
-            return p;
-        }
-
-        /**
-         * Dp.
-         *
-         * @param p
-         * @return
-         */
-        public static DoublePredicate dp(final DoublePredicate p) {
-            N.checkArgNotNull(p);
-
-            return p;
-        }
-
-        /**
-         * Cf.
-         *
-         * @param <R>
-         * @param f
-         * @return
-         */
-        public static <R> CharFunction<R> cf(final CharFunction<R> f) {
-            N.checkArgNotNull(f);
-
-            return f;
-        }
-
-        /**
-         * Bf.
-         *
-         * @param <R>
-         * @param f
-         * @return
-         */
-        public static <R> ByteFunction<R> bf(final ByteFunction<R> f) {
-            N.checkArgNotNull(f);
-
-            return f;
-        }
-
-        /**
-         * Sf.
-         *
-         * @param <R>
-         * @param f
-         * @return
-         */
-        public static <R> ShortFunction<R> sf(final ShortFunction<R> f) {
-            N.checkArgNotNull(f);
-
-            return f;
-        }
-
-        /**
-         * I F.
-         *
-         * @param <R>
-         * @param f
-         * @return
-         */
-        public static <R> IntFunction<R> iF(final IntFunction<R> f) {
-            N.checkArgNotNull(f);
-
-            return f;
-        }
-
-        /**
-         * Lf.
-         *
-         * @param <R>
-         * @param f
-         * @return
-         */
-        public static <R> LongFunction<R> lf(final LongFunction<R> f) {
-            N.checkArgNotNull(f);
-
-            return f;
-        }
-
-        /**
-         * Ff.
-         *
-         * @param <R>
-         * @param f
-         * @return
-         */
-        public static <R> FloatFunction<R> ff(final FloatFunction<R> f) {
-            N.checkArgNotNull(f);
-
-            return f;
-        }
-
-        /**
-         * Df.
-         *
-         * @param <R>
-         * @param f
-         * @return
-         */
-        public static <R> DoubleFunction<R> df(final DoubleFunction<R> f) {
-            N.checkArgNotNull(f);
-
-            return f;
-        }
-
-        /**
-         * Cc.
-         *
-         * @param c
-         * @return
-         */
-        public static CharConsumer cc(final CharConsumer c) {
-            N.checkArgNotNull(c);
-
-            return c;
-        }
-
-        /**
-         * Bc.
-         *
-         * @param c
-         * @return
-         */
-        public static ByteConsumer bc(final ByteConsumer c) {
-            N.checkArgNotNull(c);
-
-            return c;
-        }
-
-        /**
-         * Sc.
-         *
-         * @param c
-         * @return
-         */
-        public static ShortConsumer sc(final ShortConsumer c) {
-            N.checkArgNotNull(c);
-
-            return c;
-        }
-
-        /**
-         * Ic.
-         *
-         * @param c
-         * @return
-         */
-        public static IntConsumer ic(final IntConsumer c) {
-            N.checkArgNotNull(c);
-
-            return c;
-        }
-
-        /**
-         * Lc.
-         *
-         * @param c
-         * @return
-         */
-        public static LongConsumer lc(final LongConsumer c) {
-            N.checkArgNotNull(c);
-
-            return c;
-        }
-
-        /**
-         * Fc.
-         *
-         * @param c
-         * @return
-         */
-        public static FloatConsumer fc(final FloatConsumer c) {
-            N.checkArgNotNull(c);
-
-            return c;
-        }
-
-        /**
-         * Dc.
-         *
-         * @param c
-         * @return
-         */
-        public static DoubleConsumer dc(final DoubleConsumer c) {
-            N.checkArgNotNull(c);
-
-            return c;
-        }
-    }
-
-    /**
-     * Utility class for exceptional {@code Predicate/Function/Consumer}.
-     * 
-     * @author haiyangl
-     *
-     */
-    public static abstract class FN {
-
-        /**
          * Instantiates a new fn.
          */
-        protected FN() {
+        protected Fnn() {
             // for extention
         }
 
@@ -11534,6 +11454,262 @@ public abstract class Fn extends Comparators {
             N.checkArgNotNull(triFunction);
 
             return (Try.TriFunction<A, B, C, R, E>) triFunction;
+        }
+
+        /**
+         * Synchronized {@code Predicate}.
+         *
+         * @param <T>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param predicate
+         * @return
+         */
+        @Beta
+        public static <T, E extends Exception> Try.Predicate<T, E> sp(final Object mutex, final Try.Predicate<T, E> predicate) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(predicate, "predicate");
+
+            return new Try.Predicate<T, E>() {
+                @Override
+                public boolean test(T t) throws E {
+                    synchronized (mutex) {
+                        return predicate.test(t);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code Predicate}.
+         *
+         * @param <A>
+         * @param <T>
+         * @param mutex to synchronized on
+         * @param a
+         * @param biPredicate
+         * @return
+         */
+        @Beta
+        public static <A, T, E extends Exception> Try.Predicate<T, E> sp(final Object mutex, final A a, final Try.BiPredicate<A, T, E> biPredicate) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(biPredicate, "biPredicate");
+
+            return new Try.Predicate<T, E>() {
+                @Override
+                public boolean test(T t) throws E {
+                    synchronized (mutex) {
+                        return biPredicate.test(a, t);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code Predicate}.
+         *
+         * @param <A>
+         * @param <B>
+         * @param <T>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param a
+         * @param b
+         * @param triPredicate
+         * @return
+         */
+        @Beta
+        public static <A, B, T, E extends Exception> Try.Predicate<T, E> sp(final Object mutex, final A a, final B b,
+                final Try.TriPredicate<A, B, T, E> triPredicate) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(triPredicate, "triPredicate");
+
+            return new Try.Predicate<T, E>() {
+                @Override
+                public boolean test(T t) throws E {
+                    synchronized (mutex) {
+                        return triPredicate.test(a, b, t);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code BiPredicate}.
+         *
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param biPredicate
+         * @return
+         */
+        @Beta
+        public static <T, U, E extends Exception> Try.BiPredicate<T, U, E> sp(final Object mutex, final Try.BiPredicate<T, U, E> biPredicate) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(biPredicate, "biPredicate");
+
+            return new Try.BiPredicate<T, U, E>() {
+                @Override
+                public boolean test(T t, U u) throws E {
+                    synchronized (mutex) {
+                        return biPredicate.test(t, u);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code Consumer}.
+         *
+         * @param <T>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param consumer
+         * @return
+         */
+        @Beta
+        public static <T, E extends Exception> Try.Consumer<T, E> sc(final Object mutex, final Try.Consumer<T, E> consumer) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(consumer, "consumer");
+
+            return new Try.Consumer<T, E>() {
+                @Override
+                public void accept(T t) throws E {
+                    synchronized (mutex) {
+                        consumer.accept(t);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code Consumer}.
+         *
+         * @param <A>
+         * @param <T>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param a
+         * @param biConsumer
+         * @return
+         */
+        @Beta
+        public static <A, T, E extends Exception> Try.Consumer<T, E> sc(final Object mutex, final A a, final Try.BiConsumer<A, T, E> biConsumer) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(biConsumer, "biConsumer");
+
+            return new Try.Consumer<T, E>() {
+                @Override
+                public void accept(T t) throws E {
+                    synchronized (mutex) {
+                        biConsumer.accept(a, t);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code BiConsumer}.
+         *
+         * @param <T>
+         * @param <U>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param biConsumer
+         * @return
+         */
+        @Beta
+        public static <T, U, E extends Exception> Try.BiConsumer<T, U, E> sc(final Object mutex, final Try.BiConsumer<T, U, E> biConsumer) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(biConsumer, "biConsumer");
+
+            return new Try.BiConsumer<T, U, E>() {
+                @Override
+                public void accept(T t, U u) throws E {
+                    synchronized (mutex) {
+                        biConsumer.accept(t, u);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code Function}.
+         *
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param function
+         * @return
+         */
+        @Beta
+        public static <T, R, E extends Exception> Try.Function<T, R, E> sf(final Object mutex, final Try.Function<T, R, E> function) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(function, "function");
+
+            return new Try.Function<T, R, E>() {
+                @Override
+                public R apply(T t) throws E {
+                    synchronized (mutex) {
+                        return function.apply(t);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code Function}.
+         *
+         * @param <A>
+         * @param <T>
+         * @param <R>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param a
+         * @param biFunction
+         * @return
+         */
+        @Beta
+        public static <A, T, R, E extends Exception> Try.Function<T, R, E> sf(final Object mutex, final A a, final Try.BiFunction<A, T, R, E> biFunction) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(biFunction, "biFunction");
+
+            return new Try.Function<T, R, E>() {
+                @Override
+                public R apply(T t) throws E {
+                    synchronized (mutex) {
+                        return biFunction.apply(a, t);
+                    }
+                }
+            };
+        }
+
+        /**
+         * Synchronized {@code BiFunction}.
+         *
+         * @param <T>
+         * @param <U>
+         * @param <R>
+         * @param <E>
+         * @param mutex to synchronized on
+         * @param biFunction
+         * @return
+         */
+        @Beta
+        public static <T, U, R, E extends Exception> Try.BiFunction<T, U, R, E> sf(final Object mutex, final Try.BiFunction<T, U, R, E> biFunction) {
+            N.checkArgNotNull(mutex, "mutex");
+            N.checkArgNotNull(biFunction, "biFunction");
+
+            return new Try.BiFunction<T, U, R, E>() {
+                @Override
+                public R apply(T t, U u) throws E {
+                    synchronized (mutex) {
+                        return biFunction.apply(t, u);
+                    }
+                }
+            };
         }
 
         /**

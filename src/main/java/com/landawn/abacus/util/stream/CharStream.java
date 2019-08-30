@@ -30,7 +30,7 @@ import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
-import com.landawn.abacus.util.Fn.Fnn;
+import com.landawn.abacus.util.Fn.FnC;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedChar;
 import com.landawn.abacus.util.MutableInt;
@@ -150,14 +150,14 @@ public abstract class CharStream
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     *  
+     *
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
      *        which belong to the same range.
@@ -175,14 +175,14 @@ public abstract class CharStream
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     *  
+     *
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
      *        which belong to the same range.
@@ -200,10 +200,10 @@ public abstract class CharStream
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @return
      */
@@ -213,10 +213,10 @@ public abstract class CharStream
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @param mergeFunction
      * @return
@@ -238,7 +238,7 @@ public abstract class CharStream
      * stream: [1, 2, 3, 4, 5]
      * result: [1, 3, 6, 10, 15]
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
@@ -263,13 +263,13 @@ public abstract class CharStream
      * stream: [1, 2, 3, 4, 5]
      * result: [11, 13, 16, 20, 25]
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
+     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream.
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
-     * 
+     *
      * @param accumulator the accumulation function
      * @return
      */
@@ -277,7 +277,7 @@ public abstract class CharStream
     public abstract CharStream scan(final char init, final CharBinaryOperator accumulator);
 
     /**
-     * 
+     *
      * @param init
      * @param accumulator
      * @param initIncluded
@@ -289,7 +289,7 @@ public abstract class CharStream
     public abstract CharList toCharList();
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -298,7 +298,7 @@ public abstract class CharStream
     public abstract <K, V> Map<K, V> toMap(CharFunction<? extends K> keyMapper, CharFunction<? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -309,7 +309,7 @@ public abstract class CharStream
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -319,7 +319,7 @@ public abstract class CharStream
     public abstract <K, V> Map<K, V> toMap(CharFunction<? extends K> keyMapper, CharFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -331,7 +331,7 @@ public abstract class CharStream
             BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @return
@@ -340,7 +340,7 @@ public abstract class CharStream
     public abstract <K, A, D> Map<K, D> toMap(final CharFunction<? extends K> keyMapper, final Collector<Character, A, D> downstream);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @param mapFactory
@@ -481,7 +481,7 @@ public abstract class CharStream
     public abstract <R> R collect(Supplier<R> supplier, ObjCharConsumer<? super R> accumulator, BiConsumer<R, R> combiner);
 
     /**
-     * 
+     *
      * @param supplier
      * @param accumulator
      * @return
@@ -539,7 +539,7 @@ public abstract class CharStream
     public abstract OptionalChar max();
 
     /**
-     * 
+     *
      * @param k
      * @return OptionalByte.empty() if there is no element or count less than k, otherwise the kth largest element.
      */
@@ -554,7 +554,7 @@ public abstract class CharStream
     public abstract Pair<CharSummaryStatistics, Optional<Map<Percentage, Character>>> summarizeAndPercentiles();
 
     /**
-     * 
+     *
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -595,7 +595,7 @@ public abstract class CharStream
 
     /**
      * Remember to close this Stream after the iteration is done, if required.
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -632,7 +632,7 @@ public abstract class CharStream
 
     /**
      * Takes the chars in the specified String as the elements of the Stream
-     * 
+     *
      * @param str
      * @return
      */
@@ -642,7 +642,7 @@ public abstract class CharStream
 
     /**
      * Takes the chars in the specified String as the elements of the Stream
-     * 
+     *
      * @param str
      * @param startIndex
      * @param endIndex
@@ -683,15 +683,15 @@ public abstract class CharStream
     }
 
     public static CharStream of(final Character[] a) {
-        return Stream.of(a).mapToChar(Fnn.unboxC());
+        return Stream.of(a).mapToChar(FnC.unbox());
     }
 
     public static CharStream of(final Character[] a, final int startIndex, final int endIndex) {
-        return Stream.of(a, startIndex, endIndex).mapToChar(Fnn.unboxC());
+        return Stream.of(a, startIndex, endIndex).mapToChar(FnC.unbox());
     }
 
     public static CharStream of(final Collection<Character> c) {
-        return Stream.of(c).mapToChar(Fnn.unboxC());
+        return Stream.of(c).mapToChar(FnC.unbox());
     }
 
     public static CharStream of(final CharIterator iterator) {
@@ -1291,7 +1291,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param init
      * @param hasNext test if has next by hasNext.test(init) for first time and hasNext.test(f.apply(previous)) for remaining.
      * @param f
@@ -1472,7 +1472,7 @@ public abstract class CharStream
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1505,7 +1505,7 @@ public abstract class CharStream
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1539,7 +1539,7 @@ public abstract class CharStream
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1561,7 +1561,7 @@ public abstract class CharStream
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1583,7 +1583,7 @@ public abstract class CharStream
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1595,7 +1595,7 @@ public abstract class CharStream
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1607,7 +1607,7 @@ public abstract class CharStream
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -1619,7 +1619,7 @@ public abstract class CharStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1658,7 +1658,7 @@ public abstract class CharStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1701,7 +1701,7 @@ public abstract class CharStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1731,7 +1731,7 @@ public abstract class CharStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1765,7 +1765,7 @@ public abstract class CharStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1781,7 +1781,7 @@ public abstract class CharStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1800,7 +1800,7 @@ public abstract class CharStream
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -1811,7 +1811,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1857,7 +1857,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1869,7 +1869,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1937,7 +1937,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1949,7 +1949,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1960,7 +1960,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1972,7 +1972,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -1998,7 +1998,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -2008,7 +2008,7 @@ public abstract class CharStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @param maxThreadNum

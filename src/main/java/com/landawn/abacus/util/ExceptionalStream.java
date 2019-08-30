@@ -42,6 +42,7 @@ import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.u.Optional;
@@ -749,7 +750,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param resultSet
      * @param closeResultSet
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     static ExceptionalStream<Object[], SQLException> rows(final ResultSet resultSet, final boolean closeResultSet) {
@@ -779,7 +780,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param resultSet
      * @param closeResultSet
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     static <T> ExceptionalStream<T, SQLException> rows(final Class<T> targetClass, final ResultSet resultSet, final boolean closeResultSet) {
@@ -973,7 +974,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param columnIndex starts from 0, not 1.
      * @param closeResultSet
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final int columnIndex, final boolean closeResultSet) {
@@ -1055,7 +1056,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param closeResultSet
      * @return
      * @throws UncheckedSQLException the unchecked SQL exception
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final String columnName, final boolean closeResultSet)
@@ -1661,7 +1662,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public <K> ExceptionalStream<Map.Entry<K, List<T>>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory) {
-        return groupBy(keyMapper, Fn.FN.<T, E> identity(), mapFactory);
+        return groupBy(keyMapper, Fnn.<T, E> identity(), mapFactory);
     }
 
     /**
@@ -1745,9 +1746,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param mergeFunction
      * @param mapFactory
      * @return
-     * @see {@link Fn.FN#throwingMerger()}
-     * @see {@link Fn.FN#replacingMerger()}
-     * @see {@link Fn.FN#ignoringMerger()}
+     * @see {@link Fn.Fnn#throwingMerger()}
+     * @see {@link Fn.Fnn#replacingMerger()}
+     * @see {@link Fn.Fnn#ignoringMerger()}
      */
     public <K, V> ExceptionalStream<Map.Entry<K, V>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Try.BinaryOperator<V, ? extends E> mergeFunction,
@@ -1811,7 +1812,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public <K, A, D, M extends Map<K, D>> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E {
-        return groupBy(keyMapper, Fn.FN.<T, E> identity(), downstream, mapFactory);
+        return groupBy(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
     }
 
     /**
@@ -1970,7 +1971,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <p>Example:
      * <pre>
      * <code>
@@ -1981,7 +1982,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * Stream.of(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b, (a, b) -> a + b) => [6, 3, 2, 1]
      * </code>
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
@@ -2324,7 +2325,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * Returns ExceptionalStream of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     *  
+     *
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
@@ -2335,7 +2336,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * Returns ExceptionalStream of {@code Set<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     *  
+     *
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
@@ -2346,7 +2347,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * Returns ExceptionalStream of {@code C} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     *  
+     *
      *
      * @param <C>
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
@@ -3622,9 +3623,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      * @throws E the e
      * @throws IllegalStateException if there are duplicated keys.
-     * @see {@link Fn.FN#throwingMerger()}
-     * @see {@link Fn.FN#replacingMerger()}
-     * @see {@link Fn.FN#ignoringMerger()}
+     * @see {@link Fn.Fnn#throwingMerger()}
+     * @see {@link Fn.Fnn#replacingMerger()}
+     * @see {@link Fn.Fnn#ignoringMerger()}
      */
     public <K, V> Map<K, V> toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper) throws E, IllegalStateException {
@@ -3643,13 +3644,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      * @throws E the e
      * @throws IllegalStateException if there are duplicated keys.
-     * @see {@link Fn.FN#throwingMerger()}
-     * @see {@link Fn.FN#replacingMerger()}
-     * @see {@link Fn.FN#ignoringMerger()}
+     * @see {@link Fn.Fnn#throwingMerger()}
+     * @see {@link Fn.Fnn#replacingMerger()}
+     * @see {@link Fn.Fnn#ignoringMerger()}
      */
     public <K, V, M extends Map<K, V>> M toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Supplier<? extends M> mapFactory) throws E, IllegalStateException {
-        return toMap(keyMapper, valueMapper, Fn.FN.<V, E> throwingMerger(), mapFactory);
+        return toMap(keyMapper, valueMapper, Fnn.<V, E> throwingMerger(), mapFactory);
     }
 
     /**
@@ -3662,9 +3663,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param mergeFunction
      * @return
      * @throws E the e
-     * @see {@link Fn.FN#throwingMerger()}
-     * @see {@link Fn.FN#replacingMerger()}
-     * @see {@link Fn.FN#ignoringMerger()}
+     * @see {@link Fn.Fnn#throwingMerger()}
+     * @see {@link Fn.Fnn#replacingMerger()}
+     * @see {@link Fn.Fnn#ignoringMerger()}
      */
     public <K, V> Map<K, V> toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Try.BinaryOperator<V, ? extends E> mergeFunction) throws E {
@@ -3683,9 +3684,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param mapFactory
      * @return
      * @throws E the e
-     * @see {@link Fn.FN#throwingMerger()}
-     * @see {@link Fn.FN#replacingMerger()}
-     * @see {@link Fn.FN#ignoringMerger()}
+     * @see {@link Fn.Fnn#throwingMerger()}
+     * @see {@link Fn.Fnn#replacingMerger()}
+     * @see {@link Fn.Fnn#ignoringMerger()}
      */
     public <K, V, M extends Map<K, V>> M toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Try.BinaryOperator<V, ? extends E> mergeFunction,
@@ -3741,7 +3742,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public <K, A, D, M extends Map<K, D>> M toMap(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E {
-        return toMap(keyMapper, Fn.FN.<T, E> identity(), downstream, mapFactory);
+        return toMap(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
     }
 
     /**
@@ -3846,7 +3847,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public <K, M extends Map<K, List<T>>> M groupTo(final Try.Function<? super T, ? extends K, ? extends E> keyMapper, final Supplier<? extends M> mapFactory)
             throws E {
-        final Try.Function<T, T, E> valueMapper = Fn.FN.identity();
+        final Try.Function<T, T, E> valueMapper = Fnn.identity();
 
         return groupTo(keyMapper, valueMapper, mapFactory);
     }
@@ -4488,13 +4489,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     //            }
     //
     //                @Override
-    //                public void skip(long n) throws E2 { 
-    //                    checkArgNotNegative(n, "n"); 
-    //                    
+    //                public void skip(long n) throws E2 {
+    //                    checkArgNotNegative(n, "n");
+    //
     //                    if (initialized == false) {
     //                        init();
     //                    }
-    //    
+    //
     //                    try {
     //                        iter.skip(n);
     //                    } catch (Exception e) {
@@ -4541,7 +4542,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     *  
+     *
      *
      * @param action a terminal operation should be called.
      * @return

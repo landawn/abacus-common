@@ -30,7 +30,7 @@ import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
-import com.landawn.abacus.util.Fn.Fnn;
+import com.landawn.abacus.util.Fn.FnB;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedByte;
 import com.landawn.abacus.util.MutableInt;
@@ -64,10 +64,10 @@ import com.landawn.abacus.util.function.ObjByteConsumer;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToByteFunction;
 
-/** 
+/**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
- * 
- * @see Stream 
+ *
+ * @see Stream
  */
 public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate, ByteConsumer, ByteList, OptionalByte, IndexedByte, ByteIterator, ByteStream> {
 
@@ -97,14 +97,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     *  
+     *
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
      *        which belong to the same range.
@@ -122,14 +122,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     *  
+     *
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
      *        which belong to the same range.
@@ -147,10 +147,10 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @return
      */
@@ -160,10 +160,10 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @param mergeFunction
      * @return
@@ -185,7 +185,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * stream: [1, 2, 3, 4, 5]
      * result: [1, 3, 6, 10, 15]
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
@@ -210,13 +210,13 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * stream: [1, 2, 3, 4, 5]
      * result: [11, 13, 16, 20, 25]
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
+     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream.
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
-     * 
+     *
      * @param accumulator the accumulation function
      * @return
      */
@@ -224,7 +224,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract ByteStream scan(final byte init, final ByteBinaryOperator accumulator);
 
     /**
-     * 
+     *
      * @param init
      * @param accumulator
      * @param initIncluded
@@ -234,13 +234,13 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract ByteStream scan(final byte init, final ByteBinaryOperator accumulator, final boolean initIncluded);
 
     /**
-     * 
+     *
      * @return
      */
     public abstract ByteList toByteList();
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -249,7 +249,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract <K, V> Map<K, V> toMap(ByteFunction<? extends K> keyMapper, ByteFunction<? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -260,7 +260,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -270,7 +270,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract <K, V> Map<K, V> toMap(ByteFunction<? extends K> keyMapper, ByteFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -282,7 +282,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @return
@@ -291,7 +291,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract <K, A, D> Map<K, D> toMap(final ByteFunction<? extends K> keyMapper, final Collector<Byte, A, D> downstream);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @param mapFactory
@@ -302,7 +302,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             final Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param identity
      * @param op
      * @return
@@ -310,14 +310,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract byte reduce(byte identity, ByteBinaryOperator op);
 
     /**
-     * 
+     *
      * @param op
      * @return
      */
     public abstract OptionalByte reduce(ByteBinaryOperator op);
 
     /**
-     * 
+     *
      * @param supplier
      * @param accumulator
      * @param combiner
@@ -326,7 +326,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract <R> R collect(Supplier<R> supplier, ObjByteConsumer<? super R> accumulator, BiConsumer<R, R> combiner);
 
     /**
-     * 
+     *
      * @param supplier
      * @param accumulator
      * @return
@@ -351,26 +351,26 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract <E extends Exception> OptionalByte findAny(final Try.BytePredicate<E> predicate) throws E;
 
     /**
-     * 
+     *
      * @return
      */
     public abstract OptionalByte min();
 
     /**
-     * 
+     *
      * @return
      */
     public abstract OptionalByte max();
 
     /**
-     * 
+     *
      * @param k
      * @return OptionalByte.empty() if there is no element or count less than k, otherwise the kth largest element.
      */
     public abstract OptionalByte kthLargest(int k);
 
     /**
-     * 
+     *
      * @return int
      */
     public abstract int sum();
@@ -382,7 +382,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract Pair<ByteSummaryStatistics, Optional<Map<Percentage, Byte>>> summarizeAndPercentiles();
 
     /**
-     * 
+     *
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -403,7 +403,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     /**
      * Remember to close this Stream after the iteration is done, if required.
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -439,15 +439,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     public static ByteStream of(final Byte[] a) {
-        return Stream.of(a).mapToByte(Fnn.unboxB());
+        return Stream.of(a).mapToByte(FnB.unbox());
     }
 
     public static ByteStream of(final Byte[] a, final int startIndex, final int endIndex) {
-        return Stream.of(a, startIndex, endIndex).mapToByte(Fnn.unboxB());
+        return Stream.of(a, startIndex, endIndex).mapToByte(FnB.unbox());
     }
 
     public static ByteStream of(final Collection<Byte> c) {
-        return Stream.of(c).mapToByte(Fnn.unboxB());
+        return Stream.of(c).mapToByte(FnB.unbox());
     }
 
     public static ByteStream of(final ByteIterator iterator) {
@@ -1015,7 +1015,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param init
      * @param hasNext test if has next by hasNext.test(init) for first time and hasNext.test(f.apply(previous)) for remaining.
      * @param f
@@ -1196,7 +1196,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1229,7 +1229,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1263,7 +1263,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1285,7 +1285,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1307,7 +1307,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1319,7 +1319,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1331,7 +1331,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -1343,7 +1343,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1382,7 +1382,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1425,7 +1425,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1455,7 +1455,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1489,7 +1489,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1505,7 +1505,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1524,7 +1524,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -1535,7 +1535,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1581,7 +1581,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1593,7 +1593,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1661,7 +1661,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1673,7 +1673,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1684,7 +1684,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1696,7 +1696,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -1722,7 +1722,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -1732,7 +1732,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @param maxThreadNum

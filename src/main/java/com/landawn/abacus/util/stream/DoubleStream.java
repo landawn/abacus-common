@@ -32,7 +32,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.DoubleSummaryStatistics;
-import com.landawn.abacus.util.Fn.Fnn;
+import com.landawn.abacus.util.Fn.FnD;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedDouble;
 import com.landawn.abacus.util.MutableInt;
@@ -65,10 +65,10 @@ import com.landawn.abacus.util.function.ObjDoubleConsumer;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToDoubleFunction;
 
-/** 
+/**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
- * 
- * @see Stream 
+ *
+ * @see Stream
  */
 public abstract class DoubleStream
         extends StreamBase<Double, double[], DoublePredicate, DoubleConsumer, DoubleList, OptionalDouble, IndexedDouble, DoubleIterator, DoubleStream> {
@@ -107,14 +107,14 @@ public abstract class DoubleStream
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     *  
+     *
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
      *        which belong to the same range.
@@ -132,14 +132,14 @@ public abstract class DoubleStream
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     *  
+     *
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
      *        which belong to the same range.
@@ -157,10 +157,10 @@ public abstract class DoubleStream
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @return
      */
@@ -170,10 +170,10 @@ public abstract class DoubleStream
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @param mergeFunction
      * @return
@@ -195,7 +195,7 @@ public abstract class DoubleStream
      * stream: [1, 2, 3, 4, 5]
      * result: [1, 3, 6, 10, 15]
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
@@ -220,13 +220,13 @@ public abstract class DoubleStream
      * stream: [1, 2, 3, 4, 5]
      * result: [11, 13, 16, 20, 25]
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
+     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream.
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
-     * 
+     *
      * @param accumulator the accumulation function
      * @return
      */
@@ -234,7 +234,7 @@ public abstract class DoubleStream
     public abstract DoubleStream scan(final double init, final DoubleBinaryOperator accumulator);
 
     /**
-     * 
+     *
      * @param init
      * @param accumulator
      * @param initIncluded
@@ -246,7 +246,7 @@ public abstract class DoubleStream
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param n
      * @return
      */
@@ -256,7 +256,7 @@ public abstract class DoubleStream
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param n
      * @param comparator
      * @return
@@ -267,7 +267,7 @@ public abstract class DoubleStream
     public abstract DoubleList toDoubleList();
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -276,7 +276,7 @@ public abstract class DoubleStream
     public abstract <K, V> Map<K, V> toMap(DoubleFunction<? extends K> keyMapper, DoubleFunction<? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -287,7 +287,7 @@ public abstract class DoubleStream
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -297,7 +297,7 @@ public abstract class DoubleStream
     public abstract <K, V> Map<K, V> toMap(DoubleFunction<? extends K> keyMapper, DoubleFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -309,7 +309,7 @@ public abstract class DoubleStream
             BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @return
@@ -318,7 +318,7 @@ public abstract class DoubleStream
     public abstract <K, A, D> Map<K, D> toMap(final DoubleFunction<? extends K> keyMapper, final Collector<Double, A, D> downstream);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @param mapFactory
@@ -358,7 +358,7 @@ public abstract class DoubleStream
     public abstract OptionalDouble max();
 
     /**
-     * 
+     *
      * @param k
      * @return OptionalByte.empty() if there is no element or count less than k, otherwise the kth largest element.
      */
@@ -373,7 +373,7 @@ public abstract class DoubleStream
     public abstract Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> summarizeAndPercentiles();
 
     /**
-     * 
+     *
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -395,7 +395,7 @@ public abstract class DoubleStream
 
     /**
      * Remember to close this Stream after the iteration is done, if required.
-     * 
+     *
      * @return
      */
     @Override
@@ -430,15 +430,15 @@ public abstract class DoubleStream
     }
 
     public static DoubleStream of(final Double[] a) {
-        return Stream.of(a).mapToDouble(Fnn.unboxD());
+        return Stream.of(a).mapToDouble(FnD.unbox());
     }
 
     public static DoubleStream of(final Double[] a, final int startIndex, final int endIndex) {
-        return Stream.of(a, startIndex, endIndex).mapToDouble(Fnn.unboxD());
+        return Stream.of(a, startIndex, endIndex).mapToDouble(FnD.unbox());
     }
 
     public static DoubleStream of(final Collection<Double> c) {
-        return Stream.of(c).mapToDouble(Fnn.unboxD());
+        return Stream.of(c).mapToDouble(FnD.unbox());
     }
 
     public static DoubleStream of(final DoubleIterator iterator) {
@@ -886,7 +886,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param init
      * @param hasNext test if has next by hasNext.test(init) for first time and hasNext.test(f.apply(previous)) for remaining.
      * @param f
@@ -1067,7 +1067,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1100,7 +1100,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1134,7 +1134,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1156,7 +1156,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1178,7 +1178,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1190,7 +1190,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -1202,7 +1202,7 @@ public abstract class DoubleStream
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -1214,7 +1214,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1254,7 +1254,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1297,7 +1297,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1327,7 +1327,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1362,7 +1362,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -1378,7 +1378,7 @@ public abstract class DoubleStream
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1397,7 +1397,7 @@ public abstract class DoubleStream
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -1408,7 +1408,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1454,7 +1454,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1466,7 +1466,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1534,7 +1534,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1546,7 +1546,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -1557,7 +1557,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -1569,7 +1569,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -1595,7 +1595,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -1605,7 +1605,7 @@ public abstract class DoubleStream
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @param maxThreadNum
