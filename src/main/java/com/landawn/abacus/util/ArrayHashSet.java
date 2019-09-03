@@ -87,7 +87,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Adds the.
      *
      * @param e
      * @return true, if successful
@@ -119,7 +118,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Removes the.
      *
      * @param o
      * @return true, if successful
@@ -151,7 +149,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Retain all.
      *
      * @param c
      * @return true, if successful
@@ -178,7 +175,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Contains.
      *
      * @param o
      * @return true, if successful
@@ -189,7 +185,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Contains all.
      *
      * @param c
      * @return true, if successful
@@ -210,7 +205,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Iterator.
      *
      * @return
      */
@@ -220,7 +214,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -243,7 +236,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * To array.
      *
      * @param <T>
      * @param a
@@ -268,7 +260,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -296,7 +287,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -306,7 +296,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -317,7 +306,6 @@ public class ArrayHashSet<E> implements Set<E> {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -356,7 +344,6 @@ public class ArrayHashSet<E> implements Set<E> {
         }
 
         /**
-         * Next.
          *
          * @return
          */

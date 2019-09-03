@@ -33,7 +33,6 @@ import com.landawn.abacus.util.function.BiConsumer;
 abstract class AbstractHasher implements Hasher {
 
     /**
-     * Put.
      *
      * @param b
      * @return
@@ -44,7 +43,6 @@ abstract class AbstractHasher implements Hasher {
     }
 
     /**
-     * Put.
      *
      * @param d
      * @return
@@ -55,7 +53,6 @@ abstract class AbstractHasher implements Hasher {
     }
 
     /**
-     * Put.
      *
      * @param f
      * @return
@@ -66,7 +63,6 @@ abstract class AbstractHasher implements Hasher {
     }
 
     /**
-     * Put.
      *
      * @param chars
      * @return
@@ -77,7 +73,6 @@ abstract class AbstractHasher implements Hasher {
     }
 
     /**
-     * Put.
      *
      * @param chars
      * @param off
@@ -96,7 +91,6 @@ abstract class AbstractHasher implements Hasher {
     }
 
     /**
-     * Put.
      *
      * @param charSequence
      * @return
@@ -111,7 +105,6 @@ abstract class AbstractHasher implements Hasher {
     }
 
     /**
-     * Put.
      *
      * @param charSequence
      * @param charset
@@ -123,7 +116,6 @@ abstract class AbstractHasher implements Hasher {
     }
 
     /**
-     * Put.
      *
      * @param <T>
      * @param instance

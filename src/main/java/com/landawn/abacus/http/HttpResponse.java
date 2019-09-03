@@ -105,7 +105,6 @@ public class HttpResponse {
     }
 
     /**
-     * Code.
      *
      * @return
      */
@@ -114,7 +113,6 @@ public class HttpResponse {
     }
 
     /**
-     * Message.
      *
      * @return
      */
@@ -123,7 +121,6 @@ public class HttpResponse {
     }
 
     /**
-     * Headers.
      *
      * @return
      */
@@ -132,7 +129,6 @@ public class HttpResponse {
     }
 
     /**
-     * Body.
      *
      * @return
      */
@@ -141,7 +137,6 @@ public class HttpResponse {
     }
 
     /**
-     * Body.
      *
      * @param <T>
      * @param resultClass
@@ -176,7 +171,6 @@ public class HttpResponse {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -193,7 +187,6 @@ public class HttpResponse {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -215,7 +208,6 @@ public class HttpResponse {
     }
 
     /**
-     * To string.
      *
      * @return
      */

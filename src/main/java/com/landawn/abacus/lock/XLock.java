@@ -37,7 +37,6 @@ public interface XLock<T> {
     public static final long DEFAULT_TIMEOUT = 3 * 1000L;
 
     /**
-     * Lock.
      *
      * @param target
      * @param lockMode
@@ -47,7 +46,6 @@ public interface XLock<T> {
     public String lock(T target, LockMode lockMode, String refLockCode);
 
     /**
-     * Method lock.
      *
      * @param target
      * @param lockMode
@@ -58,7 +56,6 @@ public interface XLock<T> {
     public String lock(T target, LockMode lockMode, String refLockCode, long timeout);
 
     /**
-     * Method isLocked.
      *
      * @param target
      * @param requiredLockMode
@@ -68,7 +65,6 @@ public interface XLock<T> {
     public boolean isLocked(T target, LockMode requiredLockMode, String refLockCode);
 
     /**
-     * Method unlock.
      *
      * @param target
      * @param refLockCode

@@ -43,7 +43,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     };
 
     /**
-     * Empty.
      *
      * @return
      */
@@ -52,7 +51,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -63,7 +61,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param fromIndex
@@ -216,7 +213,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Generate.
      *
      * @param hasNext
      * @param supplier
@@ -244,7 +240,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Next.
      *
      * @return
      * @Deprecated use <code>nextBoolean()</code> instead.
@@ -256,14 +251,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Next boolean.
      *
      * @return true, if successful
      */
     public abstract boolean nextBoolean();
 
     /**
-     * To array.
      *
      * @return
      */
@@ -272,7 +265,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -287,7 +279,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -296,7 +287,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Foreach remaining.
      *
      * @param <E>
      * @param action

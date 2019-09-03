@@ -541,7 +541,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param sqlDataSource
      * @return
@@ -721,7 +720,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close.
      *
      * @param rs
      * @throws UncheckedSQLException the unchecked SQL exception
@@ -737,7 +735,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close.
      *
      * @param rs
      * @param closeStatement
@@ -748,7 +745,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close.
      *
      * @param rs
      * @param closeStatement
@@ -785,7 +781,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close.
      *
      * @param stmt
      * @throws UncheckedSQLException the unchecked SQL exception
@@ -809,7 +804,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close.
      *
      * @param conn
      * @throws UncheckedSQLException the unchecked SQL exception
@@ -825,7 +819,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close.
      *
      * @param rs
      * @param stmt
@@ -857,7 +850,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close.
      *
      * @param stmt
      * @param conn
@@ -889,7 +881,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close.
      *
      * @param rs
      * @param stmt
@@ -942,7 +933,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close quietly.
      *
      * @param rs
      * @param closeStatement
@@ -953,7 +943,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Close quietly.
      *
      * @param rs
      * @param closeStatement
@@ -1082,7 +1071,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Skip.
      *
      * @param rs
      * @param n the count of row to move ahead.
@@ -1094,7 +1082,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Skip.
      *
      * @param rs
      * @param n the count of row to move ahead.
@@ -1579,7 +1566,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Prepare query.
      *
      * @param ds
      * @param sql
@@ -1610,7 +1596,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Prepare query.
      *
      * @param ds
      * @param sql
@@ -2538,7 +2523,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Prepare statement.
      *
      * @param conn
      * @param sql
@@ -2562,7 +2546,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Prepare call.
      *
      * @param conn
      * @param sql
@@ -2634,7 +2617,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Execute query.
      *
      * @param conn
      * @param sql
@@ -2664,7 +2646,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Execute query.
      *
      * @param stmt
      * @return
@@ -2683,7 +2664,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Execute update.
      *
      * @param conn
      * @param sql
@@ -2773,7 +2753,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Execute.
      *
      * @param conn
      * @param sql
@@ -2798,7 +2777,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Extract data.
      *
      * @param rs
      * @return
@@ -2809,7 +2787,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Extract data.
      *
      * @param rs
      * @param closeResultSet
@@ -2821,7 +2798,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Extract data.
      *
      * @param rs
      * @param offset
@@ -2834,7 +2810,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Extract data.
      *
      * @param rs
      * @param offset
@@ -2848,7 +2823,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Extract data.
      *
      * @param rs
      * @param offset
@@ -3539,7 +3513,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param dataset
      * @param stmt
@@ -3651,7 +3624,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param file
@@ -3668,7 +3640,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param file
@@ -3699,7 +3670,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param file
@@ -3745,7 +3715,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param is
@@ -3762,7 +3731,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param is
@@ -3794,7 +3762,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param is
@@ -3831,7 +3798,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param reader
@@ -3848,7 +3814,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param reader
@@ -3879,7 +3844,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <E>
      * @param reader
@@ -3963,7 +3927,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <T>
      * @param <E>
@@ -3981,7 +3944,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <T>
      * @param <E>
@@ -4014,7 +3976,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <T>
      * @param <E>
@@ -4095,7 +4056,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <T>
      * @param iter
@@ -4110,7 +4070,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <T>
      * @param iter
@@ -4129,7 +4088,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <T>
      * @param <E>
@@ -4163,7 +4121,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <T>
      * @param iter
@@ -4177,7 +4134,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Import data.
      *
      * @param <T>
      * @param iter
@@ -4257,7 +4213,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param conn
@@ -4272,7 +4227,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param <E2>
@@ -4290,7 +4244,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param conn
@@ -4307,7 +4260,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param <E2>
@@ -4327,7 +4279,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param conn
@@ -4382,7 +4333,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param stmt
@@ -4395,7 +4345,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param <E2>
@@ -4412,7 +4361,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param stmt
@@ -4427,7 +4375,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param <E2>
@@ -4446,7 +4393,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param stmt
@@ -4496,7 +4442,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param rs
@@ -4509,7 +4454,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param <E2>
@@ -4526,7 +4470,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param rs
@@ -4542,7 +4485,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param <E2>
@@ -4561,7 +4503,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param <E>
      * @param rs
@@ -4639,7 +4580,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Copy.
      *
      * @param sourceConn
      * @param selectSql
@@ -4654,7 +4594,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Copy.
      *
      * @param sourceConn
      * @param selectSql
@@ -4696,7 +4635,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Copy.
      *
      * @param selectStmt
      * @param insertStmt
@@ -4710,7 +4648,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Copy.
      *
      * @param selectStmt
      * @param offset
@@ -4974,7 +4911,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * On close.
          *
          * @param closeHandler A task to execute after this {@code Query} is closed
          * @return
@@ -6094,7 +6030,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Sett parameters.
          *
          * @param paramSetter
          * @return
@@ -6119,7 +6054,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Sett parameters.
          *
          * @param <T>
          * @param parameter
@@ -6550,7 +6484,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Gets the.
          *
          * @param <T>
          * @param targetClass
@@ -6565,7 +6498,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Query.
          *
          * @return
          * @throws SQLException the SQL exception
@@ -6575,7 +6507,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Query.
          *
          * @param <R>
          * @param resultExtrator
@@ -6594,7 +6525,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Query.
          *
          * @param <R>
          * @param resultExtrator
@@ -6613,7 +6543,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Gets the.
          *
          * @param <T>
          * @param targetClass
@@ -6626,7 +6555,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Gets the.
          *
          * @param <T>
          * @param rowMapper
@@ -6639,7 +6567,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Gets the.
          *
          * @param <T>
          * @param rowMapper
@@ -6744,7 +6671,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Find first.
          *
          * @param <T>
          * @param targetClass
@@ -6767,7 +6693,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Find first.
          *
          * @param <T>
          * @param rowMapper
@@ -6786,7 +6711,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Find first.
          *
          * @param <T>
          * @param recordFilter
@@ -6813,7 +6737,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Find first.
          *
          * @param <T>
          * @param rowMapper
@@ -6832,7 +6755,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Find first.
          *
          * @param <T>
          * @param recordFilter
@@ -6861,7 +6783,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param targetClass
@@ -6873,7 +6794,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param targetClass
@@ -6886,7 +6806,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param rowMapper
@@ -6898,7 +6817,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param rowMapper
@@ -6911,7 +6829,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param recordFilter
@@ -6924,7 +6841,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param recordFilter
@@ -6956,7 +6872,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param rowMapper
@@ -6968,7 +6883,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param rowMapper
@@ -6981,7 +6895,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param recordFilter
@@ -6994,7 +6907,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * List.
          *
          * @param <T>
          * @param recordFilter
@@ -7027,7 +6939,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Stream.
          *
          * @param <T>
          * @param targetClass
@@ -7039,7 +6950,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Stream.
          *
          * @param <T>
          * @param rowMapper
@@ -7141,7 +7051,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Stream.
          *
          * @param <T>
          * @param rowMapper
@@ -7264,7 +7173,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * If exists.
          *
          * @param rowConsumer
          * @throws SQLException the SQL exception
@@ -7283,7 +7191,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * If exists.
          *
          * @param rowConsumer
          * @throws SQLException the SQL exception
@@ -7372,7 +7279,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Count.
          *
          * @param recordFilter
          * @return
@@ -7398,7 +7304,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Count.
          *
          * @param recordFilter
          * @return
@@ -7425,7 +7330,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Any match.
          *
          * @param recordFilter
          * @return true, if successful
@@ -7449,7 +7353,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Any match.
          *
          * @param recordFilter
          * @return true, if successful
@@ -7475,7 +7378,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * All match.
          *
          * @param recordFilter
          * @return true, if successful
@@ -7499,7 +7401,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * All match.
          *
          * @param recordFilter
          * @return true, if successful
@@ -7525,7 +7426,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * None match.
          *
          * @param recordFilter
          * @return true, if successful
@@ -7536,7 +7436,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * None match.
          *
          * @param recordFilter
          * @return true, if successful
@@ -7547,7 +7446,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * For each.
          *
          * @param rowConsumer
          * @throws SQLException the SQL exception
@@ -7568,7 +7466,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * For each.
          *
          * @param recordFilter
          * @param rowConsumer
@@ -7592,7 +7489,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * For each.
          *
          * @param rowConsumer
          * @throws SQLException the SQL exception
@@ -7614,7 +7510,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * For each.
          *
          * @param recordFilter
          * @param rowConsumer
@@ -7640,7 +7535,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Execute query.
          *
          * @return
          * @throws SQLException the SQL exception
@@ -7675,7 +7569,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Insert.
          *
          * @param <ID>
          * @param autoGeneratedKeyExtractor
@@ -7697,7 +7590,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Insert.
          *
          * @param <ID>
          * @param autoGeneratedKeyExtractor
@@ -7742,7 +7634,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Batch insert.
          *
          * @param <ID>
          * @param autoGeneratedKeyExtractor
@@ -7772,7 +7663,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Batch insert.
          *
          * @param <ID>
          * @param autoGeneratedKeyExtractor
@@ -7870,7 +7760,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Update.
          *
          * @return
          * @throws SQLException the SQL exception
@@ -7886,7 +7775,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Batch update.
          *
          * @return
          * @throws SQLException the SQL exception
@@ -7902,7 +7790,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Large upate.
          *
          * @return
          * @throws SQLException the SQL exception
@@ -7990,7 +7877,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Execute.
          *
          * @return true, if successful
          * @throws SQLException the SQL exception
@@ -8086,7 +7972,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Async apply.
          *
          * @param <R>
          * @param func
@@ -8120,7 +8005,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Async apply.
          *
          * @param <R>
          * @param func
@@ -8145,7 +8029,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Async accept.
          *
          * @param action
          * @return
@@ -8179,7 +8062,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Async accept.
          *
          * @param action
          * @param executor
@@ -8221,7 +8103,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Check arg.
          *
          * @param b
          * @param errorMsg
@@ -9359,7 +9240,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Call.
          *
          * @param <R1>
          * @param resultExtrator1
@@ -9386,7 +9266,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Call.
          *
          * @param <R1>
          * @param <R2>
@@ -9427,7 +9306,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Call.
          *
          * @param <R1>
          * @param <R2>
@@ -9479,7 +9357,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Call.
          *
          * @param <R1>
          * @param <R2>
@@ -9543,7 +9420,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Call.
          *
          * @param <R1>
          * @param <R2>
@@ -12366,7 +12242,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Id.
          *
          * @return
          */
@@ -12375,7 +12250,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Connection.
          *
          * @return
          */
@@ -12384,7 +12258,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Isolation level.
          *
          * @return
          */
@@ -12393,7 +12266,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Status.
          *
          * @return
          */
@@ -12446,7 +12318,6 @@ public final class JdbcUtil {
         //    }
 
         /**
-         * Commit.
          *
          * @throws SQLException the SQL exception
          */
@@ -12528,7 +12399,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Execute rollback.
          *
          * @throws UncheckedSQLException the unchecked SQL exception
          */
@@ -12677,7 +12547,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Put transaction.
          *
          * @param ds
          * @param tran
@@ -12688,7 +12557,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Put transaction.
          *
          * @param conn
          * @param tran
@@ -12699,7 +12567,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -12709,7 +12576,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -12720,7 +12586,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -12755,7 +12620,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Value of.
          *
          * @param intValue
          * @return
@@ -12778,7 +12642,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Int value.
          *
          * @return
          */
@@ -12795,7 +12658,6 @@ public final class JdbcUtil {
     public static interface ParametersSetter<QS> extends Try.Consumer<QS, SQLException> {
 
         /**
-         * Accept.
          *
          * @param preparedQuery
          * @throws SQLException the SQL exception
@@ -12813,7 +12675,6 @@ public final class JdbcUtil {
     public static interface BiParametersSetter<QS, T> extends Try.BiConsumer<QS, T, SQLException> {
 
         /**
-         * Accept.
          *
          * @param preparedQuery
          * @param t
@@ -12832,7 +12693,6 @@ public final class JdbcUtil {
     public static interface TriParametersSetter<QS, T> extends Try.TriConsumer<NamedSQL, QS, T, SQLException> {
 
         /**
-         * Accept.
          *
          * @param namedSQL
          * @param preparedQuery
@@ -12859,7 +12719,6 @@ public final class JdbcUtil {
         };
 
         /**
-         * Apply.
          *
          * @param rs
          * @return
@@ -12869,7 +12728,6 @@ public final class JdbcUtil {
         T apply(ResultSet rs) throws SQLException;
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12882,7 +12740,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12898,7 +12755,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12916,7 +12772,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12952,7 +12807,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12969,7 +12823,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13024,7 +12877,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Group to.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13038,7 +12890,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Group to.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13088,7 +12939,6 @@ public final class JdbcUtil {
     public static interface BiResultExtractor<T> extends Try.BiFunction<ResultSet, List<String>, T, SQLException> {
 
         /**
-         * Apply.
          *
          * @param rs
          * @param columnLabels
@@ -13099,7 +12949,6 @@ public final class JdbcUtil {
         T apply(ResultSet rs, List<String> columnLabels) throws SQLException;
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13112,7 +12961,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13128,7 +12976,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13146,7 +12993,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13182,7 +13028,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13199,7 +13044,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13254,7 +13098,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Group to.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13269,7 +13112,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Group to.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -13415,7 +13257,6 @@ public final class JdbcUtil {
         };
 
         /**
-         * Apply.
          *
          * @param rs
          * @return
@@ -13835,7 +13676,6 @@ public final class JdbcUtil {
         };
 
         /**
-         * Apply.
          *
          * @param rs
          * @param columnLabels
@@ -14014,7 +13854,6 @@ public final class JdbcUtil {
     public static interface RowConsumer extends Try.Consumer<ResultSet, SQLException> {
 
         /**
-         * Accept.
          *
          * @param rs
          * @throws SQLException the SQL exception
@@ -14029,7 +13868,6 @@ public final class JdbcUtil {
     public static interface BiRowConsumer extends Try.BiConsumer<ResultSet, List<String>, SQLException> {
 
         /**
-         * Accept.
          *
          * @param rs
          * @param columnLabels
@@ -14063,7 +13901,6 @@ public final class JdbcUtil {
         };
 
         /**
-         * Test.
          *
          * @param rs
          * @return true, if successful
@@ -14095,7 +13932,6 @@ public final class JdbcUtil {
         };
 
         /**
-         * Test.
          *
          * @param rs
          * @param columnLabels
@@ -14260,7 +14096,6 @@ public final class JdbcUtil {
         public static @interface Select {
 
             /**
-             * Value.
              *
              * @return
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
@@ -14271,7 +14106,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Sql.
              *
              * @return
              */
@@ -14280,7 +14114,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Fetch size.
              *
              * @return
              */
@@ -14302,7 +14135,6 @@ public final class JdbcUtil {
         public static @interface Insert {
 
             /**
-             * Value.
              *
              * @return
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
@@ -14313,7 +14145,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Sql.
              *
              * @return
              */
@@ -14335,7 +14166,6 @@ public final class JdbcUtil {
         public static @interface Update {
 
             /**
-             * Value.
              *
              * @return
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
@@ -14346,7 +14176,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Sql.
              *
              * @return
              */
@@ -14368,7 +14197,6 @@ public final class JdbcUtil {
         public static @interface Delete {
 
             /**
-             * Value.
              *
              * @return
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
@@ -14379,7 +14207,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Sql.
              *
              * @return
              */
@@ -14401,7 +14228,6 @@ public final class JdbcUtil {
         public static @interface NamedSelect {
 
             /**
-             * Value.
              *
              * @return
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
@@ -14412,7 +14238,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Sql.
              *
              * @return
              */
@@ -14421,7 +14246,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Fetch size.
              *
              * @return
              */
@@ -14443,7 +14267,6 @@ public final class JdbcUtil {
         public static @interface NamedInsert {
 
             /**
-             * Value.
              *
              * @return
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
@@ -14454,7 +14277,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Sql.
              *
              * @return
              */
@@ -14476,7 +14298,6 @@ public final class JdbcUtil {
         public static @interface NamedUpdate {
 
             /**
-             * Value.
              *
              * @return
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
@@ -14487,7 +14308,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Sql.
              *
              * @return
              */
@@ -14509,7 +14329,6 @@ public final class JdbcUtil {
         public static @interface NamedDelete {
 
             /**
-             * Value.
              *
              * @return
              * @deprecated using sql="SELECT ... FROM ..." for explicit call.
@@ -14520,7 +14339,6 @@ public final class JdbcUtil {
             default "";
 
             /**
-             * Sql.
              *
              * @return
              */
@@ -14542,7 +14360,6 @@ public final class JdbcUtil {
         public static @interface Bind {
 
             /**
-             * Value.
              *
              * @return
              */
@@ -14550,7 +14367,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Data source.
          *
          * @return
          */
@@ -14636,7 +14452,6 @@ public final class JdbcUtil {
         //    }
 
         /**
-         * Prepare query.
          *
          * @param query
          * @return
@@ -14645,7 +14460,6 @@ public final class JdbcUtil {
         PreparedQuery prepareQuery(final String query) throws SQLException;
 
         /**
-         * Prepare query.
          *
          * @param query
          * @param generateKeys
@@ -14654,7 +14468,6 @@ public final class JdbcUtil {
         PreparedQuery prepareQuery(final String query, final boolean generateKeys);
 
         /**
-         * Prepare query.
          *
          * @param sql
          * @param stmtCreator
@@ -14722,7 +14535,6 @@ public final class JdbcUtil {
                 throws SQLException;
 
         /**
-         * New instance.
          *
          * @param <T>
          * @param daoInterface
@@ -14760,7 +14572,6 @@ public final class JdbcUtil {
     public static interface BasicDao<T, SB extends SQLBuilder> extends Dao {
 
         /**
-         * Insert.
          *
          * @param entityToSave
          * @return
@@ -14769,7 +14580,6 @@ public final class JdbcUtil {
         void save(T entityToSave) throws SQLException;
 
         /**
-         * Exists.
          *
          * @param cond
          * @return true, if successful
@@ -14778,7 +14588,6 @@ public final class JdbcUtil {
         boolean exists(Condition cond) throws SQLException;
 
         /**
-         * Count.
          *
          * @param cond
          * @return
@@ -14787,7 +14596,6 @@ public final class JdbcUtil {
         int count(Condition cond) throws SQLException;
 
         /**
-         * Find first.
          *
          * @param cond
          * @return
@@ -14796,7 +14604,6 @@ public final class JdbcUtil {
         Optional<T> findFirst(Condition cond) throws SQLException;
 
         /**
-         * Find first.
          *
          * @param selectPropNames
          * @param cond
@@ -14806,7 +14613,6 @@ public final class JdbcUtil {
         Optional<T> findFirst(Collection<String> selectPropNames, Condition cond) throws SQLException;
 
         /**
-         * List.
          *
          * @param cond
          * @return
@@ -14815,7 +14621,6 @@ public final class JdbcUtil {
         List<T> list(Condition cond) throws SQLException;
 
         /**
-         * List.
          *
          * @param selectPropNames
          * @param cond
@@ -14825,7 +14630,6 @@ public final class JdbcUtil {
         List<T> list(Collection<String> selectPropNames, Condition cond) throws SQLException;
 
         /**
-         * Query.
          *
          * @param cond
          * @return
@@ -14834,7 +14638,6 @@ public final class JdbcUtil {
         DataSet query(Condition cond) throws SQLException;
 
         /**
-         * Query.
          *
          * @param selectPropNames
          * @param cond
@@ -15012,7 +14815,6 @@ public final class JdbcUtil {
         <V> Optional<V> queryForUniqueNonNull(final Class<V> targetValueClass, final String selectPropName, final Condition cond) throws SQLException;
 
         /**
-         * Stream.
          *
          * @param cond
          * @return
@@ -15021,7 +14823,6 @@ public final class JdbcUtil {
         ExceptionalStream<T, SQLException> stream(Condition cond) throws SQLException;
 
         /**
-         * Stream.
          *
          * @param selectPropNames
          * @param cond
@@ -15031,7 +14832,6 @@ public final class JdbcUtil {
         ExceptionalStream<T, SQLException> stream(Collection<String> selectPropNames, Condition cond) throws SQLException;
 
         /**
-         * Update.
          *
          * @param updateProps
          * @param cond
@@ -15041,7 +14841,6 @@ public final class JdbcUtil {
         int update(Map<String, Object> updateProps, Condition cond) throws SQLException;
 
         /**
-         * Delete.
          *
          * @param cond
          * @return
@@ -15066,7 +14865,6 @@ public final class JdbcUtil {
     public static interface CrudDao<T, ID, SB extends SQLBuilder> extends BasicDao<T, SB> {
 
         /**
-         * Insert.
          *
          * @param entityToSave
          * @return
@@ -15075,7 +14873,6 @@ public final class JdbcUtil {
         ID insert(T entityToSave) throws SQLException;
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @return
@@ -15084,7 +14881,6 @@ public final class JdbcUtil {
         List<ID> batchInsert(Collection<T> entities) throws SQLException;
 
         /**
-         * Gets the.
          *
          * @param id
          * @return
@@ -15094,7 +14890,6 @@ public final class JdbcUtil {
         Optional<T> get(ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Gets the.
          *
          * @param selectPropNames
          * @param id
@@ -15126,7 +14921,6 @@ public final class JdbcUtil {
         T gett(Collection<String> selectPropNames, ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Exists.
          *
          * @param id
          * @return true, if successful
@@ -15136,7 +14930,6 @@ public final class JdbcUtil {
         boolean exists(ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Update.
          *
          * @param entityToUpdate
          * @return
@@ -15146,7 +14939,6 @@ public final class JdbcUtil {
         int update(T entityToUpdate) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Update.
          *
          * @param entityToUpdate
          * @param propNamesToUpdate
@@ -15157,7 +14949,6 @@ public final class JdbcUtil {
         int update(T entityToUpdate, Collection<String> propNamesToUpdate) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Update.
          *
          * @param updateProps
          * @param id
@@ -15168,7 +14959,6 @@ public final class JdbcUtil {
         int update(Map<String, Object> updateProps, ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Batch update.
          *
          * @param entities
          * @return
@@ -15178,7 +14968,6 @@ public final class JdbcUtil {
         int batchUpdate(Collection<T> entities) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param propNamesToUpdate
@@ -15199,7 +14988,6 @@ public final class JdbcUtil {
         int deleteById(ID id) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Delete.
          *
          * @param entity
          * @return
@@ -15209,7 +14997,6 @@ public final class JdbcUtil {
         int delete(T entity) throws UnsupportedOperationException, SQLException;
 
         /**
-         * Batch delete.
          *
          * @param entities
          * @return
@@ -15220,7 +15007,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * New instance.
      *
      * @param <T>
      * @param daoInterface
@@ -16429,7 +16215,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Prepare query.
      *
      * @param proxy
      * @param query
@@ -16609,7 +16394,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * Unwrap.
          *
          * @param <T>
          * @param iface

@@ -124,7 +124,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Empty.
      *
      * @param <T>
      * @param <E>
@@ -135,7 +134,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Just.
      *
      * @param <T>
      * @param <E>
@@ -147,7 +145,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of nullable.
      *
      * @param <T>
      * @param <E>
@@ -163,7 +160,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -213,7 +209,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -229,7 +224,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -255,7 +249,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -271,7 +264,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -288,7 +280,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -365,7 +356,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -378,7 +368,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -391,7 +380,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -404,7 +392,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -418,7 +405,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -431,7 +417,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param <E>
@@ -469,7 +454,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param <E>
@@ -510,7 +494,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param <E>
@@ -559,7 +542,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param <E>
@@ -587,7 +569,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Lines.
      *
      * @param file
      * @return
@@ -597,7 +578,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Lines.
      *
      * @param file
      * @param charset
@@ -617,7 +597,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Lines.
      *
      * @param path
      * @return
@@ -627,7 +606,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Lines.
      *
      * @param path
      * @param charset
@@ -647,7 +625,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Lines.
      *
      * @param reader
      * @return
@@ -745,7 +722,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Rows.
      *
      * @param resultSet
      * @param closeResultSet
@@ -773,7 +749,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Rows.
      *
      * @param <T>
      * @param targetClass Array/List/Map or Entity with getter/setter methods.
@@ -967,7 +942,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Rows.
      *
      * @param <T>
      * @param resultSet
@@ -1048,7 +1022,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Rows.
      *
      * @param <T>
      * @param resultSet
@@ -1107,7 +1080,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Concat.
      *
      * @param <T>
      * @param <E>
@@ -1124,7 +1096,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Concat.
      *
      * @param <T>
      * @param <E>
@@ -1175,7 +1146,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Filter.
      *
      * @param predicate
      * @return
@@ -1214,7 +1184,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Take while.
      *
      * @param predicate
      * @return
@@ -1256,7 +1225,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Drop while.
      *
      * @param predicate
      * @return
@@ -1342,7 +1310,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param mapper
@@ -1365,7 +1332,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Flat map.
      *
      * @param <R>
      * @param mapper
@@ -1441,7 +1407,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Flatt map.
      *
      * @param <R>
      * @param mapper
@@ -1459,7 +1424,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding map.
      *
      * @param <R>
      * @param mapper
@@ -1470,7 +1434,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding map.
      *
      * @param <R>
      * @param mapper
@@ -1482,7 +1445,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding map.
      *
      * @param <R>
      * @param mapper
@@ -1542,7 +1504,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding map.
      *
      * @param <R>
      * @param mapper
@@ -1553,7 +1514,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding map.
      *
      * @param <R>
      * @param mapper
@@ -1565,7 +1525,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding map.
      *
      * @param <R>
      * @param mapper
@@ -1642,7 +1601,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param keyMapper
@@ -1653,7 +1611,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param keyMapper
@@ -1666,7 +1623,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1681,7 +1637,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1722,7 +1677,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1737,7 +1691,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1782,7 +1735,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <A>
@@ -1798,7 +1750,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <A>
@@ -1816,7 +1767,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1835,7 +1785,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1881,7 +1830,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collapse.
      *
      * @param collapsible
      * @return
@@ -1923,7 +1871,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collapse.
      *
      * @param <C>
      * @param collapsible
@@ -2024,7 +1971,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collapse.
      *
      * @param <U>
      * @param collapsible
@@ -2066,7 +2012,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collapse.
      *
      * @param <R>
      * @param collapsible
@@ -2110,7 +2055,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collapse.
      *
      * @param <R>
      * @param <A>
@@ -2157,7 +2101,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Scan.
      *
      * @param accumulator
      * @return
@@ -2187,7 +2130,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Scan.
      *
      * @param <U>
      * @param init
@@ -2213,7 +2155,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Scan.
      *
      * @param <U>
      * @param init
@@ -2250,7 +2191,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Prepend.
      *
      * @param s
      * @return
@@ -2260,7 +2200,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Append.
      *
      * @param s
      * @return
@@ -2285,7 +2224,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Peek.
      *
      * @param action
      * @return
@@ -2309,7 +2247,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Split.
      *
      * @param chunkSize
      * @return
@@ -2396,7 +2333,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Split.
      *
      * @param <R>
      * @param <A>
@@ -2450,7 +2386,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding.
      *
      * @param windowSize
      * @param increment
@@ -2488,7 +2423,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding.
      *
      * @param <C>
      * @param windowSize
@@ -2626,7 +2560,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sliding.
      *
      * @param <A>
      * @param <R>
@@ -2768,7 +2701,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Skip.
      *
      * @param n
      * @return
@@ -2802,7 +2734,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Limit.
      *
      * @param maxSize
      * @return
@@ -2832,7 +2763,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Slice.
      *
      * @param from
      * @param to
@@ -2847,7 +2777,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sorted.
      *
      * @return
      */
@@ -2856,7 +2785,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Reverse sorted.
      *
      * @return
      */
@@ -2865,7 +2793,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sorted.
      *
      * @param comparator
      * @return
@@ -2888,7 +2815,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sorted by.
      *
      * @param keyMapper
      * @return
@@ -2906,7 +2832,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Lazy load.
      *
      * @param op
      * @param sorted
@@ -2973,7 +2898,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * For each.
      *
      * @param action
      * @throws E the e
@@ -2992,7 +2916,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * For each.
      *
      * @param <E2>
      * @param action
@@ -3017,7 +2940,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * For each.
      *
      * @param <U>
      * @param <E2>
@@ -3052,7 +2974,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * For each.
      *
      * @param <T2>
      * @param <T3>
@@ -3210,7 +3131,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Min.
      *
      * @param comparator
      * @return
@@ -3244,7 +3164,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Min by.
      *
      * @param keyMapper
      * @return
@@ -3266,7 +3185,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Max.
      *
      * @param comparator
      * @return
@@ -3307,7 +3225,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Max by.
      *
      * @param keyMapper
      * @return
@@ -3329,7 +3246,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Any match.
      *
      * @param predicate
      * @return true, if successful
@@ -3353,7 +3269,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * All match.
      *
      * @param predicate
      * @return true, if successful
@@ -3377,7 +3292,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * None match.
      *
      * @param predicate
      * @return true, if successful
@@ -3401,7 +3315,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Find first.
      *
      * @param predicate
      * @return
@@ -3427,7 +3340,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Find last.
      *
      * @param predicate
      * @return
@@ -3462,7 +3374,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * First.
      *
      * @return
      * @throws E the e
@@ -3482,7 +3393,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Last.
      *
      * @return
      * @throws E the e
@@ -3508,7 +3418,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To array.
      *
      * @return
      * @throws E the e
@@ -3524,7 +3433,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To array.
      *
      * @param <A>
      * @param generator
@@ -3545,7 +3453,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To list.
      *
      * @return
      * @throws E the e
@@ -3567,7 +3474,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To set.
      *
      * @return
      * @throws E the e
@@ -3589,7 +3495,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To collection.
      *
      * @param <C>
      * @param supplier
@@ -3614,7 +3519,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3633,7 +3537,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3654,7 +3557,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3673,7 +3575,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3713,7 +3614,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -3728,7 +3628,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -3746,7 +3645,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3764,7 +3662,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3822,7 +3719,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group to.
      *
      * @param <K> the key type
      * @param keyMapper
@@ -3835,7 +3731,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group to.
      *
      * @param <K> the key type
      * @param <M>
@@ -3853,7 +3748,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group to.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3868,7 +3762,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Group to.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3910,7 +3803,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Count.
      *
      * @return
      * @throws E the e
@@ -3926,7 +3818,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Only one.
      *
      * @return
      * @throws DuplicatedResultException if there are more than one elements.
@@ -3953,7 +3844,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sum int.
      *
      * @param func
      * @return
@@ -3980,7 +3870,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sum long.
      *
      * @param func
      * @return
@@ -4007,7 +3896,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Sum double.
      *
      * @param func
      * @return
@@ -4034,7 +3922,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Average int.
      *
      * @param func
      * @return
@@ -4063,7 +3950,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Average long.
      *
      * @param func
      * @return
@@ -4092,7 +3978,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Average double.
      *
      * @param func
      * @return
@@ -4119,7 +4004,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Reduce.
      *
      * @param accumulator
      * @return
@@ -4147,7 +4031,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Reduce.
      *
      * @param <U>
      * @param identity
@@ -4173,7 +4056,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collect.
      *
      * @param <R>
      * @param supplier
@@ -4200,7 +4082,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collect.
      *
      * @param <R>
      * @param <RR>
@@ -4231,7 +4112,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collect.
      *
      * @param <R>
      * @param <A>
@@ -4258,7 +4138,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Collect.
      *
      * @param <R>
      * @param <A>
@@ -4324,7 +4203,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Unchecked.
      *
      * @return
      */
@@ -4528,7 +4406,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     //    }
 
     /**
-     * .
      *
      * @param <R>
      * @param transfer
@@ -4560,7 +4437,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Async run.
      *
      * @param action a terminal operation should be called.
      * @param executor
@@ -4580,7 +4456,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Async call.
      *
      * @param <R>
      * @param action a terminal operation should be called.
@@ -4599,7 +4474,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Async call.
      *
      * @param <R>
      * @param action a terminal operation should be called.
@@ -4620,7 +4494,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * On close.
      *
      * @param closeHandler
      * @return
@@ -4652,7 +4525,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Close.
      *
      * @throws E the e
      */
@@ -4784,7 +4656,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Check argument.
      *
      * @param b
      * @param errorMessage
@@ -4804,7 +4675,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Check argument.
      *
      * @param b
      * @param errorMessageTemplate
@@ -4826,7 +4696,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * New stream.
      *
      * @param <T>
      * @param <E>
@@ -4838,7 +4707,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * New stream.
      *
      * @param <T>
      * @param <E>
@@ -4852,7 +4720,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * New stream.
      *
      * @param <T>
      * @param <E>
@@ -4868,7 +4735,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
-     * Hash key.
      *
      * @param obj
      * @return
@@ -5086,7 +4952,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         public abstract boolean hasNext() throws E;
 
         /**
-         * Next.
          *
          * @return
          * @throws E the e
@@ -5094,7 +4959,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         public abstract T next() throws E;
 
         /**
-         * Skip.
          *
          * @param n
          * @throws E the e
@@ -5108,7 +4972,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
 
         /**
-         * Count.
          *
          * @return
          * @throws E the e
@@ -5125,7 +4988,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
 
         /**
-         * Close.
          *
          * @throws E the e
          */

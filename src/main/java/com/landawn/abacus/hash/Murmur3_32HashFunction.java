@@ -65,7 +65,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * Bits.
      *
      * @return
      */
@@ -75,7 +74,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * New hasher.
      *
      * @return
      */
@@ -85,7 +83,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -95,7 +92,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * Equals.
      *
      * @param object
      * @return true, if successful
@@ -110,7 +106,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -120,7 +115,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * Hash.
      *
      * @param input
      * @return
@@ -134,7 +128,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * Hash.
      *
      * @param input
      * @return
@@ -154,7 +147,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * Hash.
      *
      * @param input
      * @return
@@ -209,7 +201,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     }
 
     /**
-     * Fmix.
      *
      * @param h1
      * @param length
@@ -252,7 +243,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         }
 
         /**
-         * Process.
          *
          * @param bb
          */
@@ -264,7 +254,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         }
 
         /**
-         * Process remaining.
          *
          * @param bb
          */
@@ -279,7 +268,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         }
 
         /**
-         * Make hash.
          *
          * @return
          */

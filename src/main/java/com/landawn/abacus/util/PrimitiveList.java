@@ -54,7 +54,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     static final int MAX_ARRAY_SIZE = N.MAX_ARRAY_SIZE;
 
     /**
-     * Huge capacity.
      *
      * @param minCapacity
      * @return
@@ -100,14 +99,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract boolean removeAll(A a);
 
     /**
-     * Delete all.
      *
      * @param indices
      */
     public abstract void deleteAll(int... indices);
 
     /**
-     * Delete range.
      *
      * @param fromIndex
      * @param toIndex
@@ -117,7 +114,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     // public abstract boolean containsAll(L l);
 
     /**
-     * Contains all.
      *
      * @param a
      * @return true, if successful
@@ -127,7 +123,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     // public abstract boolean containsAny(L l);
 
     /**
-     * Contains any.
      *
      * @param a
      * @return true, if successful
@@ -137,7 +132,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     // public abstract boolean disjoint(L l);
 
     /**
-     * Disjoint.
      *
      * @param a
      * @return true, if successful
@@ -152,7 +146,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract boolean hasDuplicates();
 
     /**
-     * Distinct.
      *
      * @return a new List with distinct elements
      */
@@ -161,7 +154,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * Distinct.
      *
      * @param fromIndex
      * @param toIndex
@@ -180,7 +172,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract void reverse();
 
     /**
-     * Reverse.
      *
      * @param fromIndex
      * @param toIndex
@@ -188,7 +179,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract void reverse(final int fromIndex, final int toIndex);
 
     /**
-     * Rotate.
      *
      * @param distance
      */
@@ -200,14 +190,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract void shuffle();
 
     /**
-     * Shuffle.
      *
      * @param rnd
      */
     public abstract void shuffle(final Random rnd);
 
     /**
-     * Swap.
      *
      * @param i
      * @param j
@@ -215,14 +203,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract void swap(int i, int j);
 
     /**
-     * Copy.
      *
      * @return a copy of this List
      */
     public abstract L copy();
 
     /**
-     * Copy.
      *
      * @param fromIndex
      * @param toIndex
@@ -231,7 +217,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract L copy(final int fromIndex, final int toIndex);
 
     /**
-     * Copy.
      *
      * @param from
      * @param to
@@ -292,7 +277,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     //    public abstract List<L> split(final int fromIndex, final int toIndex, P predicate);
 
     /**
-     * Join.
      *
      * @return
      */
@@ -301,7 +285,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * Join.
      *
      * @param delimiter
      * @return
@@ -311,7 +294,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * Join.
      *
      * @param delimiter
      * @return
@@ -321,7 +303,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -332,7 +313,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -342,7 +322,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract String join(final int fromIndex, final int toIndex, final char delimiter);
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -371,21 +350,18 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract boolean isEmpty();
 
     /**
-     * Size.
      *
      * @return
      */
     public abstract int size();
 
     /**
-     * To array.
      *
      * @return
      */
     public abstract A toArray();
 
     /**
-     * To list.
      *
      * @return
      */
@@ -394,7 +370,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * To list.
      *
      * @param fromIndex
      * @param toIndex
@@ -405,7 +380,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * To set.
      *
      * @return
      */
@@ -414,7 +388,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * To set.
      *
      * @param fromIndex
      * @param toIndex
@@ -425,7 +398,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * To collection.
      *
      * @param <C>
      * @param supplier
@@ -436,7 +408,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * To collection.
      *
      * @param <C>
      * @param fromIndex
@@ -447,7 +418,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier);
 
     /**
-     * To multiset.
      *
      * @return
      */
@@ -456,7 +426,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * To multiset.
      *
      * @param fromIndex
      * @param toIndex
@@ -471,7 +440,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * To multiset.
      *
      * @param supplier
      * @return
@@ -481,7 +449,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     }
 
     /**
-     * To multiset.
      *
      * @param fromIndex
      * @param toIndex
@@ -491,7 +458,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract Multiset<B> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<B>> supplier);
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>
@@ -513,7 +479,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super L, R, E> func) throws E;
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action

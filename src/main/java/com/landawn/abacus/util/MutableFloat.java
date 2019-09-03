@@ -61,7 +61,6 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Of.
      *
      * @param value
      * @return
@@ -71,7 +70,6 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Value.
      *
      * @return
      */

@@ -35,7 +35,6 @@ public interface RWLock<T> {
     public static final long DEFAULT_TIMEOUT = 3600 * 1000L;
 
     /**
-     * Method lockWriteOn.
      *
      * @param target
      */
@@ -50,14 +49,12 @@ public interface RWLock<T> {
     public void lockWriteOn(T target, long timeout);
 
     /**
-     * Method unlockWriteOn.
      *
      * @param target
      */
     public void unlockWriteOn(T target);
 
     /**
-     * Method lockReadOn.
      *
      * @param target
      */
@@ -72,7 +69,6 @@ public interface RWLock<T> {
     public void lockReadOn(T target, long timeout);
 
     /**
-     * Method unlockReadOn.
      *
      * @param target
      */

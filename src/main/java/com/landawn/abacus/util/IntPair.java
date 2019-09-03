@@ -51,7 +51,6 @@ public final class IntPair {
     }
 
     /**
-     * Of.
      *
      * @param _1 the 1
      * @param _2 the 2
@@ -62,7 +61,6 @@ public final class IntPair {
     }
 
     /**
-     * Min.
      *
      * @return
      */
@@ -71,7 +69,6 @@ public final class IntPair {
     }
 
     /**
-     * Max.
      *
      * @return
      */
@@ -80,7 +77,6 @@ public final class IntPair {
     }
 
     /**
-     * Sum.
      *
      * @return
      */
@@ -89,7 +85,6 @@ public final class IntPair {
     }
 
     /**
-     * Average.
      *
      * @return
      */
@@ -98,7 +93,6 @@ public final class IntPair {
     }
 
     /**
-     * Reversed.
      *
      * @return
      */
@@ -107,7 +101,6 @@ public final class IntPair {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -116,7 +109,6 @@ public final class IntPair {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -125,7 +117,6 @@ public final class IntPair {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param comsumer
@@ -137,7 +128,6 @@ public final class IntPair {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -148,7 +138,6 @@ public final class IntPair {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param <E>
@@ -161,7 +150,6 @@ public final class IntPair {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -173,7 +161,6 @@ public final class IntPair {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -182,7 +169,6 @@ public final class IntPair {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -192,7 +178,6 @@ public final class IntPair {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -210,7 +195,6 @@ public final class IntPair {
     }
 
     /**
-     * To string.
      *
      * @return
      */

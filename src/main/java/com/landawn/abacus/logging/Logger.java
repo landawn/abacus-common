@@ -93,7 +93,6 @@ public interface Logger {
     public void trace(String msg);
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg
@@ -101,7 +100,6 @@ public interface Logger {
     public void trace(String template, Object arg);
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg1
@@ -110,7 +108,6 @@ public interface Logger {
     public void trace(String template, Object arg1, Object arg2);
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg1
@@ -150,7 +147,6 @@ public interface Logger {
     public void trace(String msg, Throwable t);
 
     /**
-     * Trace.
      *
      * @param t
      * @param msg
@@ -158,7 +154,6 @@ public interface Logger {
     public void trace(Throwable t, String msg);
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -167,7 +162,6 @@ public interface Logger {
     public void trace(Throwable t, String template, Object arg);
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -177,7 +171,6 @@ public interface Logger {
     public void trace(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -188,14 +181,12 @@ public interface Logger {
     public void trace(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Trace.
      *
      * @param supplier
      */
     public void trace(Supplier<String> supplier);
 
     /**
-     * Trace.
      *
      * @param supplier
      * @param t
@@ -205,7 +196,6 @@ public interface Logger {
     public void trace(Supplier<String> supplier, Throwable t);
 
     /**
-     * Trace.
      *
      * @param t
      * @param supplier
@@ -229,7 +219,6 @@ public interface Logger {
     public void debug(String msg);
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg
@@ -237,7 +226,6 @@ public interface Logger {
     public void debug(String template, Object arg);
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg1
@@ -246,7 +234,6 @@ public interface Logger {
     public void debug(String template, Object arg1, Object arg2);
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg1
@@ -286,7 +273,6 @@ public interface Logger {
     public void debug(String msg, Throwable t);
 
     /**
-     * Debug.
      *
      * @param t
      * @param msg
@@ -294,7 +280,6 @@ public interface Logger {
     public void debug(Throwable t, String msg);
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -303,7 +288,6 @@ public interface Logger {
     public void debug(Throwable t, String template, Object arg);
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -313,7 +297,6 @@ public interface Logger {
     public void debug(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -324,14 +307,12 @@ public interface Logger {
     public void debug(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Debug.
      *
      * @param supplier
      */
     public void debug(Supplier<String> supplier);
 
     /**
-     * Debug.
      *
      * @param supplier
      * @param t
@@ -341,7 +322,6 @@ public interface Logger {
     public void debug(Supplier<String> supplier, Throwable t);
 
     /**
-     * Debug.
      *
      * @param t
      * @param supplier
@@ -365,7 +345,6 @@ public interface Logger {
     public void info(String msg);
 
     /**
-     * Info.
      *
      * @param template
      * @param arg
@@ -373,7 +352,6 @@ public interface Logger {
     public void info(String template, Object arg);
 
     /**
-     * Info.
      *
      * @param template
      * @param arg1
@@ -382,7 +360,6 @@ public interface Logger {
     public void info(String template, Object arg1, Object arg2);
 
     /**
-     * Info.
      *
      * @param template
      * @param arg1
@@ -422,7 +399,6 @@ public interface Logger {
     public void info(String msg, Throwable t);
 
     /**
-     * Info.
      *
      * @param t
      * @param msg
@@ -430,7 +406,6 @@ public interface Logger {
     public void info(Throwable t, String msg);
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -439,7 +414,6 @@ public interface Logger {
     public void info(Throwable t, String template, Object arg);
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -449,7 +423,6 @@ public interface Logger {
     public void info(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -460,14 +433,12 @@ public interface Logger {
     public void info(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Info.
      *
      * @param supplier
      */
     public void info(Supplier<String> supplier);
 
     /**
-     * Info.
      *
      * @param supplier
      * @param t
@@ -477,7 +448,6 @@ public interface Logger {
     public void info(Supplier<String> supplier, Throwable t);
 
     /**
-     * Info.
      *
      * @param t
      * @param supplier
@@ -501,7 +471,6 @@ public interface Logger {
     public void warn(String msg);
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg
@@ -509,7 +478,6 @@ public interface Logger {
     public void warn(String template, Object arg);
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg1
@@ -518,7 +486,6 @@ public interface Logger {
     public void warn(String template, Object arg1, Object arg2);
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg1
@@ -558,7 +525,6 @@ public interface Logger {
     public void warn(String msg, Throwable t);
 
     /**
-     * Warn.
      *
      * @param t
      * @param msg
@@ -566,7 +532,6 @@ public interface Logger {
     public void warn(Throwable t, String msg);
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -575,7 +540,6 @@ public interface Logger {
     public void warn(Throwable t, String template, Object arg);
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -585,7 +549,6 @@ public interface Logger {
     public void warn(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -596,14 +559,12 @@ public interface Logger {
     public void warn(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Warn.
      *
      * @param supplier
      */
     public void warn(Supplier<String> supplier);
 
     /**
-     * Warn.
      *
      * @param supplier
      * @param t
@@ -613,7 +574,6 @@ public interface Logger {
     public void warn(Supplier<String> supplier, Throwable t);
 
     /**
-     * Warn.
      *
      * @param t
      * @param supplier
@@ -637,7 +597,6 @@ public interface Logger {
     public void error(String msg);
 
     /**
-     * Error.
      *
      * @param template
      * @param arg
@@ -645,7 +604,6 @@ public interface Logger {
     public void error(String template, Object arg);
 
     /**
-     * Error.
      *
      * @param template
      * @param arg1
@@ -654,7 +612,6 @@ public interface Logger {
     public void error(String template, Object arg1, Object arg2);
 
     /**
-     * Error.
      *
      * @param template
      * @param arg1
@@ -694,7 +651,6 @@ public interface Logger {
     public void error(String msg, Throwable t);
 
     /**
-     * Error.
      *
      * @param t
      * @param msg
@@ -702,7 +658,6 @@ public interface Logger {
     public void error(Throwable t, String msg);
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -711,7 +666,6 @@ public interface Logger {
     public void error(Throwable t, String template, Object arg);
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -721,7 +675,6 @@ public interface Logger {
     public void error(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -732,14 +685,12 @@ public interface Logger {
     public void error(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Error.
      *
      * @param supplier
      */
     public void error(Supplier<String> supplier);
 
     /**
-     * Error.
      *
      * @param supplier
      * @param t
@@ -749,7 +700,6 @@ public interface Logger {
     public void error(Supplier<String> supplier, Throwable t);
 
     /**
-     * Error.
      *
      * @param t
      * @param supplier

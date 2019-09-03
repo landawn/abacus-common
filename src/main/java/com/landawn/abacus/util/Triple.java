@@ -62,7 +62,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Of.
      *
      * @param <L>
      * @param <M>
@@ -131,7 +130,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Sets the.
      *
      * @param left
      * @param middle
@@ -324,7 +322,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -333,7 +330,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -342,7 +338,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * To array.
      *
      * @param <A>
      * @param a
@@ -361,7 +356,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param comsumer
@@ -376,7 +370,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -387,7 +380,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -398,7 +390,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param <E>
@@ -411,7 +402,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param <E>
@@ -424,7 +414,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -436,7 +425,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -448,7 +436,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -457,7 +444,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * To tuple.
      *
      * @return
      */
@@ -466,7 +452,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -481,7 +466,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -502,7 +486,6 @@ public final class Triple<L, M, R> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

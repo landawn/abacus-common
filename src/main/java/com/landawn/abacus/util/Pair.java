@@ -58,7 +58,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Of.
      *
      * @param <L>
      * @param <R>
@@ -71,7 +70,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * From.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -119,7 +117,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Sets the.
      *
      * @param left
      * @param right
@@ -304,7 +301,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -313,7 +309,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -322,7 +317,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * To array.
      *
      * @param <A>
      * @param a
@@ -340,7 +334,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param comsumer
@@ -354,7 +347,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -365,7 +357,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -376,7 +367,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param <E>
@@ -389,7 +379,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param <E>
@@ -402,7 +391,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -414,7 +402,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -426,7 +413,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -435,7 +421,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * To tuple.
      *
      * @return
      */
@@ -444,7 +429,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -458,7 +442,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -479,7 +462,6 @@ public final class Pair<L, R> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

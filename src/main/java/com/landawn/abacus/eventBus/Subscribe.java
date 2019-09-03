@@ -33,7 +33,6 @@ import com.landawn.abacus.util.ThreadMode;
 public @interface Subscribe {
 
     /**
-     * Thread mode.
      *
      * @return
      */

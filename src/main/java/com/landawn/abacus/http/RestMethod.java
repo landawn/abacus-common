@@ -32,7 +32,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface RestMethod {
 
     /**
-     * Value.
      *
      * @return
      */

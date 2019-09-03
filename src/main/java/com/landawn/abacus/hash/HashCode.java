@@ -158,7 +158,6 @@ public abstract class HashCode {
         }
 
         /**
-         * Bits.
          *
          * @return
          */
@@ -168,7 +167,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As bytes.
          *
          * @return
          */
@@ -178,7 +176,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As int.
          *
          * @return
          */
@@ -188,7 +185,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As long.
          *
          * @return
          */
@@ -266,7 +262,6 @@ public abstract class HashCode {
         }
 
         /**
-         * Bits.
          *
          * @return
          */
@@ -276,7 +271,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As bytes.
          *
          * @return
          */
@@ -287,7 +281,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As int.
          *
          * @return
          */
@@ -297,7 +290,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As long.
          *
          * @return
          */
@@ -387,7 +379,6 @@ public abstract class HashCode {
         }
 
         /**
-         * Bits.
          *
          * @return
          */
@@ -397,7 +388,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As bytes.
          *
          * @return
          */
@@ -407,7 +397,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As int.
          *
          * @return
          */
@@ -418,7 +407,6 @@ public abstract class HashCode {
         }
 
         /**
-         * As long.
          *
          * @return
          */
@@ -515,7 +503,6 @@ public abstract class HashCode {
     }
 
     /**
-     * Decode.
      *
      * @param ch
      * @return

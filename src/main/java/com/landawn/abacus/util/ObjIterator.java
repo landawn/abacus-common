@@ -51,7 +51,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     };
 
     /**
-     * Empty.
      *
      * @param <T>
      * @return
@@ -61,7 +60,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Just.
      *
      * @param <T>
      * @param val
@@ -90,7 +88,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param a
@@ -102,7 +99,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param a
@@ -153,7 +149,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param iter
@@ -180,7 +175,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param iterable
@@ -191,7 +185,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param iterable
@@ -314,7 +307,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Generate.
      *
      * @param <T>
      * @param hasNext
@@ -343,7 +335,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -352,7 +343,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * To array.
      *
      * @param <A>
      * @param a
@@ -363,7 +353,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -378,7 +367,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -387,7 +375,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Foreach remaining.
      *
      * @param <E>
      * @param action

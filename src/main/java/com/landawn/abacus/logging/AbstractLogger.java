@@ -50,7 +50,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg
@@ -63,7 +62,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg1
@@ -77,7 +75,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg1
@@ -92,7 +89,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param template
      * @param args
@@ -105,7 +101,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param msg
@@ -116,7 +111,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -130,7 +124,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -145,7 +138,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -161,7 +153,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param supplier
      */
@@ -173,7 +164,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param supplier
      * @param t
@@ -186,7 +176,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param supplier
@@ -199,7 +188,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg
@@ -212,7 +200,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg1
@@ -226,7 +213,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg1
@@ -241,7 +227,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param template
      * @param args
@@ -254,7 +239,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param msg
@@ -265,7 +249,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -279,7 +262,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -294,7 +276,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -310,7 +291,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param supplier
      */
@@ -322,7 +302,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param supplier
      * @param t
@@ -335,7 +314,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param supplier
@@ -348,7 +326,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param template
      * @param arg
@@ -361,7 +338,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param template
      * @param arg1
@@ -375,7 +351,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param template
      * @param arg1
@@ -390,7 +365,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param template
      * @param args
@@ -403,7 +377,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param msg
@@ -414,7 +387,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -428,7 +400,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -443,7 +414,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -459,7 +429,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param supplier
      */
@@ -471,7 +440,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param supplier
      * @param t
@@ -484,7 +452,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param supplier
@@ -497,7 +464,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg
@@ -510,7 +476,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg1
@@ -524,7 +489,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg1
@@ -539,7 +503,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param template
      * @param args
@@ -552,7 +515,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param msg
@@ -563,7 +525,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -577,7 +538,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -592,7 +552,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -608,7 +567,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param supplier
      */
@@ -620,7 +578,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param supplier
      * @param t
@@ -633,7 +590,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param supplier
@@ -646,7 +602,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param template
      * @param arg
@@ -659,7 +614,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param template
      * @param arg1
@@ -673,7 +627,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param template
      * @param arg1
@@ -688,7 +641,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param template
      * @param args
@@ -701,7 +653,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param msg
@@ -712,7 +663,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -726,7 +676,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -741,7 +690,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -757,7 +705,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param supplier
      */
@@ -769,7 +716,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param supplier
      * @param t
@@ -782,7 +728,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param supplier
@@ -795,7 +740,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Format.
      *
      * @param template
      * @param arg
@@ -833,7 +777,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Format.
      *
      * @param template
      * @param arg1
@@ -894,7 +837,6 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Format.
      *
      * @param template
      * @param arg1

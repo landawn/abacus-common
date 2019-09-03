@@ -65,7 +65,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Gets the.
      *
      * @param k
      * @return
@@ -76,7 +75,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param key
      * @param value
@@ -88,7 +86,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Async get.
      *
      * @param k
      * @return
@@ -104,7 +101,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Async gett.
      *
      * @param k
      * @return
@@ -120,7 +116,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Async put.
      *
      * @param k
      * @param v
@@ -137,7 +132,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Async put.
      *
      * @param k
      * @param v
@@ -156,7 +150,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Async remove.
      *
      * @param k
      * @return

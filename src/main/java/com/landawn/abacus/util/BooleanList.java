@@ -97,7 +97,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -108,7 +107,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param size
@@ -121,7 +119,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Copy of.
      *
      * @param a
      * @return
@@ -131,7 +128,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Copy of.
      *
      * @param a
      * @param fromIndex
@@ -143,7 +139,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * From.
      *
      * @param c
      * @return
@@ -157,7 +152,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * From.
      *
      * @param c
      * @param defaultForNull
@@ -179,7 +173,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * From.
      *
      * @param c
      * @param fromIndex
@@ -197,7 +190,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * From.
      *
      * @param c
      * @param fromIndex
@@ -210,7 +202,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Repeat.
      *
      * @param element
      * @param len
@@ -221,7 +212,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Random.
      *
      * @param len
      * @return
@@ -247,7 +237,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Gets the.
      *
      * @param index
      * @return true, if successful
@@ -259,7 +248,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Range check.
      *
      * @param index
      */
@@ -270,7 +258,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Sets the.
      *
      * @param index
      * @param e
@@ -287,7 +274,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Adds the.
      *
      * @param e
      */
@@ -298,7 +284,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Adds the.
      *
      * @param index
      * @param e
@@ -427,7 +412,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Removes the.
      *
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
@@ -472,7 +456,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Fast remove.
      *
      * @param index
      */
@@ -544,7 +527,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Retain all.
      *
      * @param c
      * @return true, if successful
@@ -560,7 +542,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Retain all.
      *
      * @param a
      * @return true, if successful
@@ -576,7 +557,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Batch remove.
      *
      * @param c
      * @param complement
@@ -615,7 +595,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Delete.
      *
      * @param index
      * @return
@@ -631,7 +610,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Delete range.
      *
      * @param fromIndex
      * @param toIndex
@@ -656,7 +634,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Delete all.
      *
      * @param indices
      */
@@ -670,7 +647,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Replace all.
      *
      * @param oldVal
      * @param newVal
@@ -695,7 +671,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Replace all.
      *
      * @param <E>
      * @param operator
@@ -708,7 +683,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Replace if.
      *
      * @param <E>
      * @param predicate
@@ -731,7 +705,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Fill.
      *
      * @param val
      */
@@ -740,7 +713,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Fill.
      *
      * @param fromIndex
      * @param toIndex
@@ -753,7 +725,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Contains.
      *
      * @param e
      * @return true, if successful
@@ -763,7 +734,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Contains all.
      *
      * @param c
      * @return true, if successful
@@ -799,7 +769,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Contains all.
      *
      * @param a
      * @return true, if successful
@@ -816,7 +785,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Contains any.
      *
      * @param c
      * @return true, if successful
@@ -830,7 +798,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Contains any.
      *
      * @param a
      * @return true, if successful
@@ -845,7 +812,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Disjoint.
      *
      * @param c
      * @return true, if successful
@@ -879,7 +845,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Disjoint.
      *
      * @param b
      * @return true, if successful
@@ -894,7 +859,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Intersection.
      *
      * @param b
      * @return
@@ -919,7 +883,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Intersection.
      *
      * @param a
      * @return
@@ -933,7 +896,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Difference.
      *
      * @param b
      * @return
@@ -958,7 +920,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Difference.
      *
      * @param a
      * @return
@@ -972,7 +933,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Symmetric difference.
      *
      * @param b
      * @return this.difference(b).addAll(b.difference(this))
@@ -1008,7 +968,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Symmetric difference.
      *
      * @param a
      * @return
@@ -1024,7 +983,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Occurrences of.
      *
      * @param objectToFind
      * @return
@@ -1034,7 +992,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Index of.
      *
      * @param e
      * @return
@@ -1044,7 +1001,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Index of.
      *
      * @param fromIndex
      * @param e
@@ -1092,7 +1048,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param action
@@ -1103,7 +1058,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param fromIndex
@@ -1128,7 +1082,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * First.
      *
      * @return
      */
@@ -1137,7 +1090,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Last.
      *
      * @return
      */
@@ -1146,7 +1098,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Find first.
      *
      * @param <E>
      * @param predicate
@@ -1164,7 +1115,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Find last.
      *
      * @param <E>
      * @param predicate
@@ -1230,7 +1180,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * All match.
      *
      * @param <E>
      * @param fromIndex
@@ -1266,7 +1215,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Any match.
      *
      * @param <E>
      * @param fromIndex
@@ -1302,7 +1250,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * None match.
      *
      * @param <E>
      * @param fromIndex
@@ -1326,7 +1273,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Count.
      *
      * @param <E>
      * @param filter
@@ -1338,7 +1284,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Count.
      *
      * @param <E>
      * @param fromIndex
@@ -1354,7 +1299,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1366,7 +1310,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromIndex
@@ -1382,7 +1325,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1395,7 +1337,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromIndex
@@ -1412,7 +1353,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param mapper
@@ -1424,7 +1364,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromIndex
@@ -1573,7 +1512,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Distinct.
      *
      * @param fromIndex
      * @param toIndex
@@ -1635,7 +1573,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Reverse.
      *
      * @param fromIndex
      * @param toIndex
@@ -1650,7 +1587,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Rotate.
      *
      * @param distance
      */
@@ -1672,7 +1608,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Shuffle.
      *
      * @param rnd
      */
@@ -1684,7 +1619,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Swap.
      *
      * @param i
      * @param j
@@ -1698,7 +1632,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -1708,7 +1641,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Copy.
      *
      * @param fromIndex
      * @param toIndex
@@ -1722,7 +1654,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Copy.
      *
      * @param from
      * @param to
@@ -1790,7 +1721,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     //    }
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -1805,7 +1735,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -1856,7 +1785,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -1866,7 +1794,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Boxed.
      *
      * @return
      */
@@ -1875,7 +1802,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Boxed.
      *
      * @param fromIndex
      * @param toIndex
@@ -1894,7 +1820,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -1904,7 +1829,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To collection.
      *
      * @param <C>
      * @param fromIndex
@@ -1926,7 +1850,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To multiset.
      *
      * @param fromIndex
      * @param toIndex
@@ -1947,7 +1870,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1965,7 +1887,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1987,7 +1908,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2008,7 +1928,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2037,7 +1956,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -2053,7 +1971,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -2100,7 +2017,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Iterator.
      *
      * @return
      */
@@ -2113,7 +2029,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -2122,7 +2037,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Stream.
      *
      * @param fromIndex
      * @param toIndex
@@ -2135,7 +2049,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>
@@ -2163,7 +2076,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -2189,7 +2101,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -2199,7 +2110,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -2220,7 +2130,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -2254,7 +2163,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Grow.
      *
      * @param minCapacity
      */

@@ -50,7 +50,6 @@ public class UncheckedSQLException extends UncheckedException {
     }
 
     /**
-     * Method getSQLState.
      * 
      * @return String
      */
@@ -59,7 +58,6 @@ public class UncheckedSQLException extends UncheckedException {
     }
 
     /**
-     * Method getErrorCode.
      *
      * @return int
      */

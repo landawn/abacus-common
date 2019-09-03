@@ -54,7 +54,6 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
     }
 
     /**
-     * Bits.
      *
      * @return
      */
@@ -64,7 +63,6 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
     }
 
     /**
-     * New hasher.
      *
      * @return
      */
@@ -74,7 +72,6 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -101,7 +98,6 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         }
 
         /**
-         * Update.
          *
          * @param b
          */
@@ -111,7 +107,6 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         }
 
         /**
-         * Update.
          *
          * @param bytes
          * @param off
@@ -123,7 +118,6 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         }
 
         /**
-         * Hash.
          *
          * @return
          */

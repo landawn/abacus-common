@@ -81,7 +81,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param threadNum
      * @param loopNum
@@ -94,7 +93,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param threadNum
      * @param loopNum
@@ -109,7 +107,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param threadNum
      * @param threadDelay
@@ -126,7 +123,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param instance
      * @param method
@@ -140,7 +136,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param instance
      * @param method
@@ -154,7 +149,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param instance
      * @param method
@@ -169,7 +163,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param instance
      * @param method
@@ -187,7 +180,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param instance
      * @param method
@@ -285,7 +277,6 @@ public final class Profiler {
     }
 
     /**
-     * Run.
      *
      * @param instance
      * @param methodName
@@ -341,7 +332,6 @@ public final class Profiler {
     }
 
     /**
-     * Run loops.
      *
      * @param instance
      * @param methodName
@@ -391,7 +381,6 @@ public final class Profiler {
     }
 
     /**
-     * Run loop.
      *
      * @param instance
      * @param methodName
@@ -477,7 +466,6 @@ public final class Profiler {
     private static boolean suspended = false;
 
     /**
-     * Suspend.
      *
      * @param yesOrNo
      */
@@ -932,7 +920,6 @@ public final class Profiler {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -1572,7 +1559,6 @@ public final class Profiler {
         }
 
         /**
-         * Write result.
          *
          * @param os
          */
@@ -1581,7 +1567,6 @@ public final class Profiler {
         }
 
         /**
-         * Write result.
          *
          * @param writer
          */
@@ -1590,7 +1575,6 @@ public final class Profiler {
         }
 
         /**
-         * Write result.
          *
          * @param writer
          */
@@ -1665,7 +1649,6 @@ public final class Profiler {
         }
 
         /**
-         * Write error.
          *
          * @param writer
          */

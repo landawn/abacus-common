@@ -62,7 +62,6 @@ public final class Chain {
     }
 
     /**
-     * Compare.
      *
      * @param <T>
      * @param <E>
@@ -207,7 +206,6 @@ public final class Chain {
     }
 
     /**
-     * Equals.
      *
      * @param <T>
      * @param <E>
@@ -336,7 +334,6 @@ public final class Chain {
     }
 
     /**
-     * Hash.
      *
      * @param <T>
      * @param <E>
@@ -481,7 +478,6 @@ public final class Chain {
         }
 
         /**
-         * Compare.
          *
          * @param <T>
          * @param <E>
@@ -655,7 +651,6 @@ public final class Chain {
         }
 
         /**
-         * Result.
          *
          * @return
          */
@@ -697,7 +692,6 @@ public final class Chain {
         }
 
         /**
-         * Equals.
          *
          * @param <T>
          * @param <E>
@@ -854,7 +848,6 @@ public final class Chain {
         }
 
         /**
-         * Result.
          *
          * @return true, if successful
          */
@@ -891,7 +884,6 @@ public final class Chain {
         }
 
         /**
-         * Hash.
          *
          * @param <T>
          * @param <E>
@@ -1005,7 +997,6 @@ public final class Chain {
         }
 
         /**
-         * Result.
          *
          * @return
          */

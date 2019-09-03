@@ -138,7 +138,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
     }
 
     /**
-     * Of.
      *
      * @param numerator
      * @param denominator
@@ -207,7 +206,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
     }
 
     /**
-     * Of.
      *
      * @param whole
      * @param numerator
@@ -409,7 +407,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
     }
 
     /**
-     * Numerator.
      *
      * @return
      */
@@ -431,7 +428,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
     }
 
     /**
-     * Denominator.
      *
      * @return
      */
@@ -463,7 +459,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
     }
 
     /**
-     * Proper numerator.
      *
      * @return
      */
@@ -495,7 +490,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
     }
 
     /**
-     * Proper whole.
      *
      * @return
      */

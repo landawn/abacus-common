@@ -101,7 +101,6 @@ public abstract class AbstractDataSource implements DataSource {
     }
 
     /**
-     * Unwrap.
      *
      * @param <T>
      * @param iface

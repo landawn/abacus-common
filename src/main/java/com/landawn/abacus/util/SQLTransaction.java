@@ -118,7 +118,6 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Id.
      *
      * @return
      */
@@ -128,7 +127,6 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Connection.
      *
      * @return
      */
@@ -137,7 +135,6 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Isolation level.
      *
      * @return
      */
@@ -147,7 +144,6 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Status.
      *
      * @return
      */
@@ -168,7 +164,7 @@ public final class SQLTransaction implements Transaction {
 
     //    /**
     //     * Attaches this transaction to current thread.
-    //     * 
+    //     *
     //     */
     //    public void attach() {
     //        final String currentThreadName = Thread.currentThread().getName();
@@ -202,7 +198,6 @@ public final class SQLTransaction implements Transaction {
     //    }
 
     /**
-     * Commit.
      *
      * @throws UncheckedSQLException the unchecked SQL exception
      */
@@ -254,7 +249,7 @@ public final class SQLTransaction implements Transaction {
 
     /**
      * Transaction can be started:
-     * 
+     *
      * <pre>
      * <code>
      *   final SQLTransaction tran = sqlExecutor.beginTransaction(IsolationLevel.READ_COMMITTED);
@@ -262,10 +257,10 @@ public final class SQLTransaction implements Transaction {
      *       // sqlExecutor.insert(...);
      *       // sqlExecutor.update(...);
      *       // sqlExecutor.query(...);
-     * 
+     *
      *       tran.commit();
      *   } finally {
-     *       // The connection will be automatically closed after the transaction is committed or rolled back.            
+     *       // The connection will be automatically closed after the transaction is committed or rolled back.
      *       tran.rollbackIfNotCommitted();
      *   }
      * </code>
@@ -331,7 +326,6 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Execute rollback.
      *
      * @throws UncheckedSQLException the unchecked SQL exception
      */
@@ -480,7 +474,6 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Put transaction.
      *
      * @param tran
      * @return
@@ -490,7 +483,6 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -500,7 +492,46 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Equals.
+     * Execute the specified {@code Runnable} not this transaction.
+     *
+     * @param <E>
+     * @param cmd
+     * @throws E
+     */
+    public <E extends Exception> void runNotInMe(Try.Runnable<E> cmd) throws E {
+        threadTransacionMap.remove(id);
+
+        try {
+            cmd.run();
+        } finally {
+            if (threadTransacionMap.put(id, this) != null) {
+                throw new IllegalStateException("Another transaction is opened but not closed in 'Transaction.runNotInMe'.");
+            }
+        }
+    }
+
+    /**
+     * Execute the specified {@code Callable} not this transaction.
+     *
+     * @param <R>
+     * @param <E>
+     * @param cmd
+     * @return
+     * @throws E
+     */
+    public <R, E extends Exception> R callNotInMe(Try.Callable<R, E> cmd) throws E {
+        threadTransacionMap.remove(id);
+
+        try {
+            return cmd.call();
+        } finally {
+            if (threadTransacionMap.put(id, this) != null) {
+                throw new IllegalStateException("Another transaction is opened but not closed in 'Transaction.callNotInMe'.");
+            }
+        }
+    }
+
+    /**
      *
      * @param obj
      * @return true, if successful
@@ -511,7 +542,6 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -523,7 +553,7 @@ public final class SQLTransaction implements Transaction {
     /**
      * The Enum CreatedBy.
      */
-    static enum CreatedBy {
+    enum CreatedBy {
         /**
          * Global for all.
          */

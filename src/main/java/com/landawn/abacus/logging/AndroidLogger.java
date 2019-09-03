@@ -57,7 +57,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param msg
      */
@@ -67,7 +66,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param msg
      * @param t
@@ -88,7 +86,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param msg
      */
@@ -98,7 +95,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param msg
      * @param t
@@ -119,7 +115,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param msg
      */
@@ -129,7 +124,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param msg
      * @param t
@@ -150,7 +144,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param msg
      */
@@ -160,7 +153,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param msg
      * @param t
@@ -181,7 +173,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param msg
      */
@@ -191,7 +182,6 @@ class AndroidLogger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param msg
      * @param t

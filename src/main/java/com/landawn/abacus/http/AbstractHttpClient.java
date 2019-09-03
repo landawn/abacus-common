@@ -130,7 +130,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Url.
      *
      * @return
      */
@@ -139,7 +138,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Gets the.
      *
      * @return
      * @throws UncheckedIOException the unchecked IO exception
@@ -149,7 +147,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Gets the.
      *
      * @param settings
      * @return
@@ -160,7 +157,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Gets the.
      *
      * @param queryParameters
      * @return
@@ -171,7 +167,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Gets the.
      *
      * @param queryParameters
      * @param settings
@@ -183,7 +178,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param resultClass
@@ -195,7 +189,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param resultClass
@@ -208,7 +201,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param resultClass
@@ -221,7 +213,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param resultClass
@@ -235,7 +226,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async get.
      *
      * @return
      */
@@ -244,7 +234,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async get.
      *
      * @param settings
      * @return
@@ -254,7 +243,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async get.
      *
      * @param queryParameters
      * @return
@@ -264,7 +252,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async get.
      *
      * @param queryParameters
      * @param settings
@@ -275,7 +262,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async get.
      *
      * @param <T>
      * @param resultClass
@@ -286,7 +272,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async get.
      *
      * @param <T>
      * @param resultClass
@@ -298,7 +283,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async get.
      *
      * @param <T>
      * @param resultClass
@@ -310,7 +294,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async get.
      *
      * @param <T>
      * @param resultClass
@@ -323,7 +306,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Delete.
      *
      * @return
      * @throws UncheckedIOException the unchecked IO exception
@@ -333,7 +315,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Delete.
      *
      * @param settings
      * @return
@@ -344,7 +325,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Delete.
      *
      * @param queryParameters
      * @return
@@ -355,7 +335,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Delete.
      *
      * @param queryParameters
      * @param settings
@@ -367,7 +346,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Delete.
      *
      * @param <T>
      * @param resultClass
@@ -379,7 +357,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Delete.
      *
      * @param <T>
      * @param resultClass
@@ -392,7 +369,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Delete.
      *
      * @param <T>
      * @param resultClass
@@ -405,7 +381,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Delete.
      *
      * @param <T>
      * @param resultClass
@@ -419,7 +394,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async delete.
      *
      * @return
      */
@@ -428,7 +402,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async delete.
      *
      * @param settings
      * @return
@@ -438,7 +411,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async delete.
      *
      * @param queryParameters
      * @return
@@ -448,7 +420,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async delete.
      *
      * @param queryParameters
      * @param settings
@@ -459,7 +430,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async delete.
      *
      * @param <T>
      * @param resultClass
@@ -470,7 +440,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async delete.
      *
      * @param <T>
      * @param resultClass
@@ -482,7 +451,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async delete.
      *
      * @param <T>
      * @param resultClass
@@ -494,7 +462,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async delete.
      *
      * @param <T>
      * @param resultClass
@@ -507,7 +474,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Post.
      *
      * @param request
      * @return
@@ -518,7 +484,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Post.
      *
      * @param request
      * @param settings
@@ -530,7 +495,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Post.
      *
      * @param <T>
      * @param resultClass
@@ -543,7 +507,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Post.
      *
      * @param <T>
      * @param resultClass
@@ -557,7 +520,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async post.
      *
      * @param request
      * @return
@@ -567,7 +529,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async post.
      *
      * @param request
      * @param settings
@@ -578,7 +539,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async post.
      *
      * @param <T>
      * @param resultClass
@@ -590,7 +550,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async post.
      *
      * @param <T>
      * @param resultClass
@@ -603,7 +562,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Put.
      *
      * @param request
      * @return
@@ -614,7 +572,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Put.
      *
      * @param request
      * @param settings
@@ -626,7 +583,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Put.
      *
      * @param <T>
      * @param resultClass
@@ -639,7 +595,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Put.
      *
      * @param <T>
      * @param resultClass
@@ -653,7 +608,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async put.
      *
      * @param request
      * @return
@@ -663,7 +617,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async put.
      *
      * @param request
      * @param settings
@@ -674,7 +627,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async put.
      *
      * @param <T>
      * @param resultClass
@@ -686,7 +638,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async put.
      *
      * @param <T>
      * @param resultClass
@@ -699,7 +650,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Execute.
      *
      * @param httpMethod
      * @param request
@@ -711,7 +661,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Execute.
      *
      * @param httpMethod
      * @param request
@@ -724,7 +673,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param resultClass
@@ -752,7 +700,6 @@ public abstract class AbstractHttpClient implements Closeable {
             throws UncheckedIOException;
 
     /**
-     * Execute.
      *
      * @param output write the InputStream in the response to this specified File.
      * @param httpMethod
@@ -763,7 +710,6 @@ public abstract class AbstractHttpClient implements Closeable {
     public abstract void execute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException;
 
     /**
-     * Execute.
      *
      * @param output write the InputStream in the response to this specified OutputStream.
      * @param httpMethod
@@ -775,7 +721,6 @@ public abstract class AbstractHttpClient implements Closeable {
             throws UncheckedIOException;
 
     /**
-     * Execute.
      *
      * @param output write the InputStream in the response to this specified Writer.
      * @param httpMethod
@@ -787,7 +732,6 @@ public abstract class AbstractHttpClient implements Closeable {
             throws UncheckedIOException;
 
     /**
-     * Async execute.
      *
      * @param httpMethod
      * @param request
@@ -798,7 +742,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async execute.
      *
      * @param httpMethod
      * @param request
@@ -810,7 +753,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async execute.
      *
      * @param <T>
      * @param resultClass
@@ -823,7 +765,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async execute.
      *
      * @param <T>
      * @param resultClass
@@ -844,7 +785,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async execute.
      *
      * @param output
      * @param httpMethod
@@ -866,7 +806,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async execute.
      *
      * @param output
      * @param httpMethod
@@ -888,7 +827,6 @@ public abstract class AbstractHttpClient implements Closeable {
     }
 
     /**
-     * Async execute.
      *
      * @param output
      * @param httpMethod

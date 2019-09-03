@@ -51,7 +51,6 @@ public interface EntityId {
     }
 
     /**
-     * Of.
      *
      * @param propName1 property name with entity name, for example {@code Account.id}
      * @param propValue1
@@ -78,7 +77,6 @@ public interface EntityId {
     }
 
     /**
-     * Of.
      *
      * @param propName1 property name with entity name, for example {@code Account.id}
      * @param propValue1
@@ -132,14 +130,12 @@ public interface EntityId {
     }
 
     /**
-     * Method entityName.
      * 
      * @return String
      */
     String entityName();
 
     /**
-     * Method get.
      *
      * @param <T>
      * @param propName
@@ -162,7 +158,6 @@ public interface EntityId {
     long getLong(String propName);
 
     /**
-     * Method get.
      *
      * @param <T>
      * @param clazz
@@ -179,21 +174,18 @@ public interface EntityId {
     boolean containsKey(String propName);
 
     /**
-     * Method keySet.
      * 
      * @return Set<String>
      */
     Set<String> keySet();
 
     /**
-     * Entry set.
      *
      * @return
      */
     Set<Map.Entry<String, Object>> entrySet();
 
     /**
-     * Size.
      *
      * @return
      */

@@ -26,14 +26,12 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public interface PaginatedDataSet extends Iterable<DataSet> {
     /**
-     * Method currentPage.
      * 
      * @return DataSet
      */
     DataSet currentPage();
 
     /**
-     * Method previousPage.
      * 
      * @return DataSet
      */
@@ -47,7 +45,6 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     boolean hasNext();
 
     /**
-     * Method nextPage.
      * 
      * @return DataSet
      */
@@ -68,7 +65,6 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     Optional<DataSet> lastPage();
 
     /**
-     * Method getPage.
      *
      * @param pageNum
      * @return
@@ -77,7 +73,6 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     DataSet getPage(int pageNum);
 
     /**
-     * Method absolute.
      *
      * @param pageNum
      * @return
@@ -85,28 +80,24 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     PaginatedDataSet absolute(int pageNum);
 
     /**
-     * Method currentPageNum.
      * 
      * @return int
      */
     int currentPageNum();
 
     /**
-     * Method pageLength.
      * 
      * @return int
      */
     int pageSize();
 
     /**
-     * Method pageCount.
      * 
      * @return int
      */
     int pageCount();
 
     /**
-     * Stream.
      *
      * @return
      */

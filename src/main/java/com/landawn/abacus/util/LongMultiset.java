@@ -133,7 +133,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param a
@@ -155,7 +154,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * From.
      *
      * @param <T>
      * @param coll
@@ -166,7 +164,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * From.
      *
      * @param <T>
      * @param m
@@ -185,7 +182,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Fromm.
      *
      * @param <T>
      * @param m
@@ -210,7 +206,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * From.
      *
      * @param <T>
      * @param multiset
@@ -231,7 +226,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Gets the.
      *
      * @param e
      * @return
@@ -394,7 +388,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Occurrences of.
      *
      * @param e
      * @return
@@ -404,7 +397,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Min occurrences.
      *
      * @return
      */
@@ -431,7 +423,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Max occurrences.
      *
      * @return
      */
@@ -547,7 +538,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Adds the.
      *
      * @param e
      * @return always true
@@ -558,7 +548,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Adds the.
      *
      * @param e
      * @param occurrences
@@ -784,7 +773,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Contains.
      *
      * @param o
      * @return true, if successful
@@ -794,7 +782,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Contains all.
      *
      * @param c
      * @return true, if successful
@@ -1152,7 +1139,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Replace if.
      *
      * @param <E>
      * @param predicate
@@ -1196,7 +1182,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Replace if.
      *
      * @param <E>
      * @param predicate
@@ -1304,7 +1289,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -1317,7 +1301,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Elements.
      *
      * @return
      */
@@ -1326,7 +1309,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -1351,7 +1333,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Iterator.
      *
      * @return
      */
@@ -1365,7 +1346,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     //    }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -1374,7 +1354,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * To array.
      *
      * @param <A>
      * @param a
@@ -1385,7 +1364,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * To map.
      *
      * @return
      */
@@ -1400,7 +1378,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * To map.
      *
      * @param <M>
      * @param supplier
@@ -1504,7 +1481,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     //    }
 
     /**
-     * Flatten.
      *
      * @return a list with all elements, each of them is repeated with the occurrences in this <code>LongMultiset</code>
      */
@@ -1531,7 +1507,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1551,7 +1526,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1571,7 +1545,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param action
@@ -1586,7 +1559,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param action
@@ -1775,7 +1747,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -1784,7 +1755,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Flat stream.
      *
      * @return
      */
@@ -1835,7 +1805,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     };
 
     /**
-     * Entry stream.
      *
      * @return
      */
@@ -1844,7 +1813,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>
@@ -1870,7 +1838,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -1894,7 +1861,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -1904,7 +1870,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -1915,7 +1880,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -1925,7 +1889,6 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Check occurrences.
      *
      * @param occurrences
      */

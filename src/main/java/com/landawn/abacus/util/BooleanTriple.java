@@ -56,7 +56,6 @@ public class BooleanTriple {
     }
 
     /**
-     * Of.
      *
      * @param _1 the 1
      * @param _2 the 2
@@ -68,7 +67,6 @@ public class BooleanTriple {
     }
 
     /**
-     * Reversed.
      *
      * @return
      */
@@ -77,7 +75,6 @@ public class BooleanTriple {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -86,7 +83,6 @@ public class BooleanTriple {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -95,7 +91,6 @@ public class BooleanTriple {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param comsumer
@@ -108,7 +103,6 @@ public class BooleanTriple {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -119,7 +113,6 @@ public class BooleanTriple {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param <E>
@@ -132,7 +125,6 @@ public class BooleanTriple {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -144,7 +136,6 @@ public class BooleanTriple {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -153,7 +144,6 @@ public class BooleanTriple {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -163,7 +153,6 @@ public class BooleanTriple {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -181,7 +170,6 @@ public class BooleanTriple {
     }
 
     /**
-     * To string.
      *
      * @return
      */

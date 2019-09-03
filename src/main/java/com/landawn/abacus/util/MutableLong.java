@@ -61,7 +61,6 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Of.
      *
      * @param value
      * @return
@@ -71,7 +70,6 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Value.
      *
      * @return
      */

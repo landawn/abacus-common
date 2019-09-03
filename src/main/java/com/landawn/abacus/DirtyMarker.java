@@ -125,7 +125,6 @@ public interface DirtyMarker {
     void freeze();
 
     /**
-     * Method frozen.
      *
      * @return true, if successful
      */

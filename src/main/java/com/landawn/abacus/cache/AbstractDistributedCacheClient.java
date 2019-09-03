@@ -40,7 +40,6 @@ public abstract class AbstractDistributedCacheClient<T> implements DistributedCa
     }
 
     /**
-     * Server url.
      *
      * @return
      */
@@ -80,7 +79,6 @@ public abstract class AbstractDistributedCacheClient<T> implements DistributedCa
     }
 
     /**
-     * To seconds.
      *
      * @param liveTime
      * @return

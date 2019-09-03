@@ -147,7 +147,6 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Close connection.
      *
      * @param conn
      */
@@ -163,7 +162,6 @@ class DBCP2ConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Detroy connection.
      *
      * @param conn
      */

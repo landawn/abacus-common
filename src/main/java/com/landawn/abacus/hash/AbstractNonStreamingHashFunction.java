@@ -34,7 +34,6 @@ import com.landawn.abacus.util.function.BiConsumer;
 abstract class AbstractNonStreamingHashFunction implements HashFunction {
 
     /**
-     * New hasher.
      *
      * @return
      */
@@ -44,7 +43,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     }
 
     /**
-     * New hasher.
      *
      * @param expectedInputSize
      * @return
@@ -56,7 +54,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     }
 
     /**
-     * Hash.
      *
      * @param <T>
      * @param instance
@@ -69,7 +66,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     }
 
     /**
-     * Hash.
      *
      * @param input
      * @return
@@ -85,7 +81,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     }
 
     /**
-     * Hash.
      *
      * @param input
      * @param charset
@@ -102,7 +97,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     //    }
 
     /**
-     * Hash.
      *
      * @param input
      * @return
@@ -113,7 +107,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     }
 
     /**
-     * Hash.
      *
      * @param input
      * @return
@@ -134,7 +127,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     //    }
 
     /**
-     * Hash.
      *
      * @param input
      * @return
@@ -165,7 +157,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Put.
          *
          * @param b
          * @return
@@ -177,7 +168,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Put.
          *
          * @param bytes
          * @return
@@ -193,7 +183,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Put.
          *
          * @param bytes
          * @param off
@@ -207,7 +196,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Put.
          *
          * @param s
          * @return
@@ -220,7 +208,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Put.
          *
          * @param i
          * @return
@@ -235,7 +222,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Put.
          *
          * @param l
          * @return
@@ -249,7 +235,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Put.
          *
          * @param c
          * @return
@@ -262,7 +247,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Put.
          *
          * @param <T>
          * @param instance
@@ -276,7 +260,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Hash.
          *
          * @return
          */
@@ -302,7 +285,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Byte array.
          *
          * @return
          */
@@ -311,7 +293,6 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
         }
 
         /**
-         * Length.
          *
          * @return
          */

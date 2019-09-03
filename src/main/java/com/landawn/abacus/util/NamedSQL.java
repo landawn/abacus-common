@@ -143,7 +143,6 @@ public final class NamedSQL {
     }
 
     /**
-     * Parses the.
      *
      * @param sql
      * @return
@@ -335,7 +334,6 @@ public final class NamedSQL {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -349,7 +347,6 @@ public final class NamedSQL {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -370,7 +367,6 @@ public final class NamedSQL {
     }
 
     /**
-     * To string.
      *
      * @return
      */

@@ -90,7 +90,6 @@ public final class Wrapper<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param array
@@ -102,7 +101,6 @@ public final class Wrapper<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param value
@@ -118,7 +116,6 @@ public final class Wrapper<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param value
@@ -137,7 +134,6 @@ public final class Wrapper<T> {
     }
 
     /**
-     * Value.
      *
      * @return
      */
@@ -154,7 +150,6 @@ public final class Wrapper<T> {
     //    }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -168,7 +163,6 @@ public final class Wrapper<T> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -179,7 +173,6 @@ public final class Wrapper<T> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

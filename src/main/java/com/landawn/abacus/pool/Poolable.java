@@ -24,7 +24,6 @@ package com.landawn.abacus.pool;
 public interface Poolable {
 
     /**
-     * Activity print.
      *
      * @return ActivityPrint
      */

@@ -330,7 +330,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Contains column.
      *
      * @param columnName
      * @return true, if successful
@@ -358,7 +357,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rename column.
      *
      * @param columnName
      * @param newColumnName
@@ -387,7 +385,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rename columns.
      *
      * @param oldNewNames
      */
@@ -413,7 +410,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rename column.
      *
      * @param <E>
      * @param columnName
@@ -426,7 +422,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rename columns.
      *
      * @param <E>
      * @param columnNames
@@ -447,7 +442,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rename columns.
      *
      * @param <E>
      * @param func
@@ -459,7 +453,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Move column.
      *
      * @param columnName
      * @param newPosition
@@ -488,7 +481,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Move columns.
      *
      * @param columnNameNewPositionMap
      */
@@ -532,7 +524,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Swap columns.
      *
      * @param columnNameA
      * @param columnNameB
@@ -565,7 +556,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Move row.
      *
      * @param rowIndex
      * @param newRowIndex
@@ -589,7 +579,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Swap rows.
      *
      * @param rowIndexA
      * @param rowIndexB
@@ -617,7 +606,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param rowIndex
@@ -630,7 +618,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetType
@@ -646,7 +633,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sets the.
      *
      * @param rowIndex
      * @param columnIndex
@@ -674,7 +660,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param columnIndex
@@ -687,7 +672,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetType
@@ -702,7 +686,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param columnName
@@ -715,7 +698,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetType
@@ -968,7 +950,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sets the.
      *
      * @param columnIndex
      * @param value
@@ -983,7 +964,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sets the.
      *
      * @param columnName
      * @param value
@@ -1393,7 +1373,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Convert column.
      *
      * @param columnName
      * @param targetType
@@ -1406,7 +1385,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Convert columns.
      *
      * @param columnTargetTypes
      */
@@ -1422,7 +1400,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Update column.
      *
      * @param <T>
      * @param <E>
@@ -1445,7 +1422,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Update columns.
      *
      * @param <T>
      * @param <E>
@@ -1490,7 +1466,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Combine columns.
      *
      * @param columnNames
      * @param newColumnName
@@ -1508,7 +1483,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param columnNames
@@ -1525,7 +1499,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param columnNameFilter
@@ -1539,7 +1512,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param <E2>
@@ -1556,7 +1528,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param columnNames
@@ -1573,7 +1544,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param columnNames
@@ -1590,7 +1560,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Divide column.
      *
      * @param <T>
      * @param <E>
@@ -1646,7 +1615,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Divide column.
      *
      * @param <T>
      * @param <E>
@@ -1703,7 +1671,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Divide column.
      *
      * @param <T>
      * @param <E>
@@ -1749,7 +1716,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Divide column.
      *
      * @param <T>
      * @param <E>
@@ -1975,7 +1941,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Update row.
      *
      * @param <E>
      * @param rowIndex
@@ -1998,7 +1963,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Update rows.
      *
      * @param <E>
      * @param indices
@@ -2025,7 +1989,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Update all.
      *
      * @param <E>
      * @param func
@@ -2048,7 +2011,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Replace if.
      *
      * @param <E>
      * @param predicate
@@ -2086,7 +2048,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Absolute.
      *
      * @param rowNum
      * @return
@@ -2216,7 +2177,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * First row.
      *
      * @return
      */
@@ -2226,7 +2186,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * First row.
      *
      * @param <T>
      * @param rowClass
@@ -2238,7 +2197,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * First row.
      *
      * @param <T>
      * @param rowClass
@@ -2251,7 +2209,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * First row.
      *
      * @param <T>
      * @param rowSupplier
@@ -2263,7 +2220,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * First row.
      *
      * @param <T>
      * @param rowSupplier
@@ -2284,7 +2240,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Last row.
      *
      * @return
      */
@@ -2294,7 +2249,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Last row.
      *
      * @param <T>
      * @param rowClass
@@ -2306,7 +2260,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Last row.
      *
      * @param <T>
      * @param rowClass
@@ -2380,7 +2333,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Last row.
      *
      * @param <T>
      * @param rowSupplier
@@ -2392,7 +2344,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Last row.
      *
      * @param <T>
      * @param rowSupplier
@@ -2413,7 +2364,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Iterator.
      *
      * @param <A>
      * @param <B>
@@ -2427,7 +2377,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Iterator.
      *
      * @param <A>
      * @param <B>
@@ -2460,7 +2409,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Iterator.
      *
      * @param <A>
      * @param <B>
@@ -2476,7 +2424,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Iterator.
      *
      * @param <A>
      * @param <B>
@@ -2513,7 +2460,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param action
@@ -2525,7 +2471,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -2538,7 +2483,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param fromRowIndex
@@ -2552,7 +2496,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -2596,7 +2539,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -2609,7 +2551,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -2645,7 +2586,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -2658,7 +2598,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -2696,7 +2635,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -2707,7 +2645,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -2720,7 +2657,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowClass
@@ -2732,7 +2668,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowClass
@@ -2746,7 +2681,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowClass
@@ -2760,7 +2694,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowClass
@@ -2888,7 +2821,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowSupplier
@@ -2900,7 +2832,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowSupplier
@@ -2914,7 +2845,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowSupplier
@@ -2927,7 +2857,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowSupplier
@@ -3042,7 +2971,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3056,7 +2984,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3077,7 +3004,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3107,7 +3033,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3122,7 +3047,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3145,7 +3069,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3247,7 +3170,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3262,7 +3184,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3285,7 +3206,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3377,7 +3297,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3391,7 +3310,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3412,7 +3330,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3443,7 +3360,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3458,7 +3374,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3481,7 +3396,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3585,7 +3499,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3600,7 +3513,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3623,7 +3535,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3717,7 +3628,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @return
      */
@@ -3727,7 +3637,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -3739,7 +3648,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -3760,7 +3668,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      */
@@ -3770,7 +3677,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      * @param fromRowIndex
@@ -3782,7 +3688,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      * @param columnNames
@@ -3812,7 +3717,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      */
@@ -3822,7 +3726,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      * @param fromRowIndex
@@ -3834,7 +3737,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      * @param columnNames
@@ -3858,7 +3760,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      */
@@ -3868,7 +3769,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      * @param fromRowIndex
@@ -3880,7 +3780,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To JSON.
      *
      * @param out
      * @param columnNames
@@ -3963,7 +3862,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @return
      */
@@ -3973,7 +3871,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param rowElementName
      * @return
@@ -3984,7 +3881,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -3996,7 +3892,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param rowElementName
      * @param fromRowIndex
@@ -4009,7 +3904,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -4022,7 +3916,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param rowElementName
      * @param columnNames
@@ -4044,7 +3937,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      */
@@ -4054,7 +3946,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4065,7 +3956,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param fromRowIndex
@@ -4077,7 +3967,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4090,7 +3979,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param columnNames
@@ -4103,7 +3991,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4135,7 +4022,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      */
@@ -4145,7 +4031,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4156,7 +4041,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param fromRowIndex
@@ -4168,7 +4052,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4181,7 +4064,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param columnNames
@@ -4194,7 +4076,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4220,7 +4101,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      */
@@ -4230,7 +4110,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4241,7 +4120,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param fromRowIndex
@@ -4253,7 +4131,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4266,7 +4143,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param columnNames
@@ -4279,7 +4155,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -4365,7 +4240,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @return
      */
@@ -4375,7 +4249,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -4388,7 +4261,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param writeTitle
      * @param quoted
@@ -4400,7 +4272,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -4423,7 +4294,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      */
@@ -4433,7 +4303,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -4446,7 +4315,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param writeTitle
@@ -4458,7 +4326,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -4490,7 +4357,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      */
@@ -4500,7 +4366,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -4513,7 +4378,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param writeTitle
@@ -4525,7 +4389,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -4552,7 +4415,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      */
@@ -4562,7 +4424,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -4575,7 +4436,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param writeTitle
@@ -4587,7 +4447,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -4685,7 +4544,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param columnName
      * @return
@@ -4696,7 +4554,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param columnName
@@ -4711,7 +4568,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param columnName
      * @param aggregateResultColumnName
@@ -4726,7 +4582,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <U>
      * @param <E>
@@ -4745,7 +4600,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param <E>
@@ -4763,7 +4617,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <E>
@@ -4810,7 +4663,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <T>
@@ -4887,7 +4739,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <T>
@@ -4924,7 +4775,6 @@ public class RowDataSet implements DataSet, Cloneable {
     };
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <E>
@@ -4943,7 +4793,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <U>
@@ -5033,7 +4882,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param columnNames
      * @return
@@ -5044,7 +4892,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param columnNames
@@ -5060,7 +4907,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param <E>
@@ -5078,7 +4924,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param columnNames
      * @param aggregateResultColumnName
@@ -5093,7 +4938,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <U>
      * @param <E>
@@ -5112,7 +4956,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <E>
      * @param columnNames
@@ -5190,7 +5033,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param <E>
@@ -5291,7 +5133,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param <E>
@@ -5320,7 +5161,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <E>
      * @param columnNames
@@ -5338,7 +5178,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Group by.
      *
      * @param <U>
      * @param <E>
@@ -5453,7 +5292,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param columnNames
      * @return
@@ -5469,7 +5307,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param <T>
      * @param columnNames
@@ -5490,7 +5327,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param <T>
      * @param <E>
@@ -5517,7 +5353,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param columnNames
      * @param aggregateResultColumnName
@@ -5532,7 +5367,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param <U>
      * @param <E>
@@ -5561,7 +5395,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param <E>
      * @param columnNames
@@ -5584,7 +5417,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param <T>
      * @param <E>
@@ -5612,7 +5444,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param <T>
      * @param <E>
@@ -5642,7 +5473,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param <E>
      * @param columnNames
@@ -5659,7 +5489,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Rollup.
      *
      * @param <U>
      * @param <E>
@@ -5691,7 +5520,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param columnNames
      * @return
@@ -5707,7 +5535,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param <T>
      * @param columnNames
@@ -5728,7 +5555,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param <T>
      * @param <E>
@@ -5755,7 +5581,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param columnNames
      * @param aggregateResultColumnName
@@ -5770,7 +5595,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param <U>
      * @param <E>
@@ -5799,7 +5623,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param <E>
      * @param columnNames
@@ -5822,7 +5645,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param <T>
      * @param <E>
@@ -5850,7 +5672,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param <T>
      * @param <E>
@@ -5880,7 +5701,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param <E>
      * @param columnNames
@@ -5897,7 +5717,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cube.
      *
      * @param <U>
      * @param <E>
@@ -5945,7 +5764,6 @@ public class RowDataSet implements DataSet, Cloneable {
     };
 
     /**
-     * Cube set.
      *
      * @param columnNames
      * @return
@@ -5960,7 +5778,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort by.
      *
      * @param columnName
      */
@@ -5970,7 +5787,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort by.
      *
      * @param <T>
      * @param columnName
@@ -5982,7 +5798,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort by.
      *
      * @param columnNames
      */
@@ -5992,7 +5807,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort by.
      *
      * @param columnNames
      * @param cmp
@@ -6003,7 +5817,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort by.
      *
      * @param columnNames
      * @param keyMapper
@@ -6070,7 +5883,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort.
      *
      * @param <T>
      * @param columnName
@@ -6114,7 +5926,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort.
      *
      * @param columnNames
      * @param cmp
@@ -6167,7 +5978,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort.
      *
      * @param columnNames
      * @param keyMapper
@@ -6210,7 +6020,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Sort.
      *
      * @param <T>
      * @param arrayOfPair
@@ -6263,7 +6072,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Top by.
      *
      * @param columnName
      * @param n
@@ -6275,7 +6083,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Top by.
      *
      * @param <T>
      * @param columnName
@@ -6321,7 +6128,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Top by.
      *
      * @param columnNames
      * @param n
@@ -6333,7 +6139,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Top by.
      *
      * @param columnNames
      * @param n
@@ -6391,7 +6196,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Top by.
      *
      * @param columnNames
      * @param n
@@ -6437,7 +6241,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Top.
      *
      * @param <T>
      * @param n
@@ -6495,7 +6298,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Distinct.
      *
      * @return
      */
@@ -6505,7 +6307,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Distinct by.
      *
      * @param columnName
      * @return
@@ -6516,7 +6317,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Distinct by.
      *
      * @param <K> the key type
      * @param <E>
@@ -6564,7 +6364,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Distinct by.
      *
      * @param columnNames
      * @return
@@ -6575,7 +6374,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Distinct by.
      *
      * @param <E>
      * @param columnNames
@@ -6653,7 +6451,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -6666,7 +6463,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -6680,7 +6476,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromRowIndex
@@ -6696,7 +6491,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromRowIndex
@@ -6712,7 +6506,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -6726,7 +6519,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -6741,7 +6533,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -6758,7 +6549,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -6812,7 +6602,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -6826,7 +6615,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -6841,7 +6629,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -6858,7 +6645,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -6914,7 +6700,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param <E>
@@ -6929,7 +6714,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param <E>
@@ -6945,7 +6729,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param <E>
@@ -6963,7 +6746,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param <E>
@@ -7013,7 +6795,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -7027,7 +6808,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -7042,7 +6822,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -7059,7 +6838,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -7117,7 +6895,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnName
@@ -7134,7 +6911,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnName
@@ -7179,7 +6955,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -7225,7 +7000,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -7273,7 +7047,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -7325,7 +7098,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnName
@@ -7342,7 +7114,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnName
@@ -7415,7 +7186,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -7489,7 +7259,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -7564,7 +7333,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -7649,7 +7417,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -7659,7 +7426,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Copy.
      *
      * @param columnNames
      * @return
@@ -7670,7 +7436,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Copy.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -7682,7 +7447,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Copy.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -7696,7 +7460,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Copy.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -7726,7 +7489,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Clone.
      *
      * @return
      */
@@ -7736,7 +7498,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Clone.
      *
      * @param freeze
      * @return
@@ -7756,7 +7517,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Inner join.
      *
      * @param right
      * @param columnName
@@ -7771,7 +7531,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Inner join.
      *
      * @param right
      * @param onColumnNames
@@ -7783,7 +7542,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Inner join.
      *
      * @param right
      * @param onColumnNames
@@ -7797,7 +7555,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Inner join.
      *
      * @param right
      * @param onColumnNames
@@ -7814,7 +7571,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Left join.
      *
      * @param right
      * @param columnName
@@ -7829,7 +7585,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Left join.
      *
      * @param right
      * @param onColumnNames
@@ -7841,7 +7596,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Join.
      *
      * @param right
      * @param onColumnNames
@@ -7940,7 +7694,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Join.
      *
      * @param newColumnList
      * @param right
@@ -7973,7 +7726,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Join.
      *
      * @param right
      * @param onColumnNames
@@ -8073,7 +7825,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Join.
      *
      * @param newColumnList
      * @param right
@@ -8291,7 +8042,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Left join.
      *
      * @param right
      * @param onColumnNames
@@ -8305,7 +8055,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Left join.
      *
      * @param right
      * @param onColumnNames
@@ -8322,7 +8071,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Join.
      *
      * @param right
      * @param onColumnNames
@@ -8426,7 +8174,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Join.
      *
      * @param newColumnList
      * @param right
@@ -8462,7 +8209,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Right join.
      *
      * @param right
      * @param columnName
@@ -8477,7 +8223,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Right join.
      *
      * @param right
      * @param onColumnNames
@@ -8581,7 +8326,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Right join.
      *
      * @param newColumnList
      * @param right
@@ -8686,7 +8430,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Right join.
      *
      * @param right
      * @param onColumnNames
@@ -8791,7 +8534,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Right join.
      *
      * @param newColumnList
      * @param right
@@ -8840,7 +8582,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Right join.
      *
      * @param right
      * @param onColumnNames
@@ -8970,7 +8711,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Right join.
      *
      * @param newColumnList
      * @param right
@@ -9015,7 +8755,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param right
      * @param columnName
@@ -9030,7 +8769,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param right
      * @param onColumnNames
@@ -9155,7 +8893,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param newColumnList
      * @param right
@@ -9175,7 +8912,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param newColumnList
      * @param right
@@ -9207,7 +8943,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param right
      * @param onColumnNames
@@ -9334,7 +9069,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param newColumnList
      * @param right
@@ -9354,7 +9088,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param newColumnList
      * @param right
@@ -9383,7 +9116,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param right
      * @param onColumnNames
@@ -9513,7 +9245,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param newColumnList
      * @param right
@@ -9539,7 +9270,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Full join.
      *
      * @param newColumnList
      * @param right
@@ -9574,7 +9304,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Union.
      *
      * @param dataSet
      * @return
@@ -9589,7 +9318,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Union all.
      *
      * @param dataSet
      * @return
@@ -9604,7 +9332,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Intersection.
      *
      * @param other
      * @return
@@ -9615,7 +9342,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Difference.
      *
      * @param other
      * @return
@@ -9626,7 +9352,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Removes the.
      *
      * @param other
      * @param retain
@@ -9724,7 +9449,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Symmetric difference.
      *
      * @param dataSet
      * @return
@@ -9735,7 +9459,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Intersect all.
      *
      * @param other
      * @return
@@ -9746,7 +9469,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Except.
      *
      * @param other
      * @return
@@ -9855,7 +9577,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Merge.
      *
      * @param from
      * @return
@@ -9866,7 +9587,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Merge.
      *
      * @param from
      * @param columnNames
@@ -9878,7 +9598,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Merge.
      *
      * @param from
      * @param fromRowIndex
@@ -9891,7 +9610,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Merge.
      *
      * @param from
      * @param columnNames
@@ -9942,7 +9660,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Cartesian product.
      *
      * @param b
      * @return
@@ -9993,7 +9710,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Split.
      *
      * @param chunkSize
      * @return
@@ -10004,7 +9720,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Split.
      *
      * @param columnNames
      * @param chunkSize
@@ -10031,7 +9746,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Splitt.
      *
      * @param chunkSize
      * @return
@@ -10042,7 +9756,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Splitt.
      *
      * @param columnNames
      * @param chunkSize
@@ -10111,7 +9824,6 @@ public class RowDataSet implements DataSet, Cloneable {
     //    }
 
     /**
-     * Slice.
      *
      * @param columnNames
      * @return
@@ -10122,7 +9834,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Slice.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -10134,7 +9845,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Slice.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -10165,7 +9875,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Paginate.
      *
      * @param pageSize
      * @return
@@ -10203,7 +9912,6 @@ public class RowDataSet implements DataSet, Cloneable {
     //    }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param columnName
@@ -10215,7 +9923,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param columnName
@@ -10258,7 +9965,6 @@ public class RowDataSet implements DataSet, Cloneable {
     //    }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowMapper
@@ -10270,7 +9976,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param fromRowIndex
@@ -10284,7 +9989,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param columnNames
@@ -10297,7 +10001,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param columnNames
@@ -10381,7 +10084,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowClass
@@ -10393,7 +10095,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowClass
@@ -10407,7 +10108,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowClass
@@ -10420,7 +10120,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowClass
@@ -10536,7 +10235,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowSupplier
@@ -10548,7 +10246,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowSupplier
@@ -10562,7 +10259,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowSupplier
@@ -10575,7 +10271,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowSupplier
@@ -10685,7 +10380,6 @@ public class RowDataSet implements DataSet, Cloneable {
     //    }
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>
@@ -10699,7 +10393,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -10719,7 +10412,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Frozen.
      *
      * @return true, if successful
      */
@@ -10755,7 +10447,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -10782,7 +10473,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Properties.
      *
      * @return
      */
@@ -10819,7 +10509,6 @@ public class RowDataSet implements DataSet, Cloneable {
     //    } 
 
     /**
-     * Column names.
      *
      * @return
      */
@@ -10829,7 +10518,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Columns.
      *
      * @return
      */
@@ -10844,7 +10532,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Column map.
      *
      * @return
      */
@@ -10865,7 +10552,6 @@ public class RowDataSet implements DataSet, Cloneable {
     //    }
 
     /**
-     * Println.
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
@@ -10875,7 +10561,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Println.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -10888,7 +10573,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Println.
      *
      * @param <W>
      * @param outputWriter
@@ -10901,7 +10585,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Println.
      *
      * @param <W>
      * @param outputWriter
@@ -11041,7 +10724,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -11055,7 +10737,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -11076,7 +10757,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -11259,7 +10939,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Iterator.
          *
          * @return
          */
@@ -11279,7 +10958,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Current page.
          *
          * @return
          */
@@ -11289,7 +10967,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Next page.
          *
          * @return
          */
@@ -11299,7 +10976,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Previous page.
          *
          * @return
          */
@@ -11309,7 +10985,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * First page.
          *
          * @return
          */
@@ -11319,7 +10994,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Last page.
          *
          * @return
          */
@@ -11358,7 +11032,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Absolute.
          *
          * @param pageNumber
          * @return
@@ -11383,7 +11056,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Page size.
          *
          * @return
          */
@@ -11393,7 +11065,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Page count.
          *
          * @return
          */
@@ -11403,7 +11074,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -11451,7 +11121,6 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             /**
-             * Next.
              *
              * @return
              */

@@ -42,7 +42,6 @@ public class Timed<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param value
@@ -53,7 +52,6 @@ public class Timed<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param value
@@ -65,7 +63,6 @@ public class Timed<T> {
     }
 
     /**
-     * Timestamp.
      *
      * @return time in milliseconds.
      */
@@ -74,7 +71,6 @@ public class Timed<T> {
     }
 
     /**
-     * Value.
      *
      * @return
      */
@@ -83,7 +79,6 @@ public class Timed<T> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -93,7 +88,6 @@ public class Timed<T> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -114,7 +108,6 @@ public class Timed<T> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

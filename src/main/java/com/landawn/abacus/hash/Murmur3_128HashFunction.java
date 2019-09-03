@@ -57,7 +57,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     }
 
     /**
-     * Bits.
      *
      * @return
      */
@@ -67,7 +66,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     }
 
     /**
-     * New hasher.
      *
      * @return
      */
@@ -77,7 +75,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -87,7 +84,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     }
 
     /**
-     * Equals.
      *
      * @param object
      * @return true, if successful
@@ -102,7 +98,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -147,7 +142,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         }
 
         /**
-         * Process.
          *
          * @param bb
          */
@@ -160,7 +154,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         }
 
         /**
-         * Bmix 64.
          *
          * @param k1
          * @param k2
@@ -180,7 +173,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         }
 
         /**
-         * Process remaining.
          *
          * @param bb
          */
@@ -230,7 +222,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         }
 
         /**
-         * Make hash.
          *
          * @return
          */
@@ -252,7 +243,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         }
 
         /**
-         * Fmix 64.
          *
          * @param k
          * @return

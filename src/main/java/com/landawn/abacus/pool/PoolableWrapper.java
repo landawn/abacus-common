@@ -75,7 +75,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     }
 
     /**
-     * Value.
      *
      * @return T
      */
@@ -94,7 +93,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -104,7 +102,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -116,7 +113,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
     }
 
     /**
-     * To string.
      *
      * @return
      */

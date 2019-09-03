@@ -118,7 +118,6 @@ final class Util {
         }
 
         /**
-         * From bytes.
          *
          * @param b1
          * @param b2
@@ -149,7 +148,6 @@ final class Util {
         }
 
         /**
-         * Checked cast.
          *
          * @param value
          * @return
@@ -180,7 +178,6 @@ final class Util {
         }
 
         /**
-         * Checked cast.
          *
          * @param value
          * @return
@@ -245,7 +242,6 @@ final class Util {
         }
 
         /**
-         * Divide.
          *
          * @param p
          * @param q

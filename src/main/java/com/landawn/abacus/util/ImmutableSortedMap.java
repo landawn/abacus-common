@@ -47,7 +47,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Empty.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -58,7 +57,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -77,7 +75,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -99,7 +96,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -125,7 +121,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -154,7 +149,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -186,7 +180,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -221,7 +214,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -259,7 +251,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -277,7 +268,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Copy of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -293,7 +283,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -306,7 +295,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Copy of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -319,7 +307,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Comparator.
      *
      * @return
      */
@@ -329,7 +316,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Sub map.
      *
      * @param fromKey
      * @param toKey
@@ -341,7 +327,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Head map.
      *
      * @param toKey
      * @return
@@ -352,7 +337,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Tail map.
      *
      * @param fromKey
      * @return
@@ -363,7 +347,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * First key.
      *
      * @return
      */
@@ -373,7 +356,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     * Last key.
      *
      * @return
      */

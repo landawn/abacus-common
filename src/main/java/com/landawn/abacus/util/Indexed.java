@@ -41,7 +41,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param value
@@ -55,7 +54,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param value
@@ -69,7 +67,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param iter
@@ -80,7 +77,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param iter
@@ -94,7 +90,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param iter
@@ -120,7 +115,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * Value.
      *
      * @return
      */
@@ -129,7 +123,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -139,7 +132,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -160,7 +152,6 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     * To string.
      *
      * @return
      */

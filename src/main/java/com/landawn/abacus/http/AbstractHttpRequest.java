@@ -51,7 +51,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Header.
      *
      * @param name
      * @param value
@@ -66,7 +65,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Headers.
      *
      * @param name1
      * @param value1
@@ -83,7 +81,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Headers.
      *
      * @param name1
      * @param value1
@@ -102,7 +99,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Headers.
      *
      * @param headers
      * @return
@@ -116,7 +112,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Headers.
      *
      * @param headers
      * @return
@@ -130,7 +125,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Gets the.
      *
      * @return
      * @throws UncheckedIOException the unchecked IO exception
@@ -140,7 +134,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param resultClass
@@ -152,7 +145,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Gets the.
      *
      * @param query
      * @return
@@ -162,7 +154,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param resultClass
@@ -178,7 +169,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Post.
      *
      * @param body
      * @return
@@ -188,7 +178,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Post.
      *
      * @param <T>
      * @param resultClass
@@ -204,7 +193,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Put.
      *
      * @param body
      * @return
@@ -215,7 +203,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Put.
      *
      * @param <T>
      * @param resultClass
@@ -231,7 +218,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Delete.
      *
      * @return
      * @throws UncheckedIOException the unchecked IO exception
@@ -241,7 +227,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Delete.
      *
      * @param <T>
      * @param resultClass
@@ -253,7 +238,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Delete.
      *
      * @param query
      * @return
@@ -264,7 +248,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Delete.
      *
      * @param <T>
      * @param resultClass
@@ -280,7 +263,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async get.
      *
      * @return
      */
@@ -289,7 +271,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async get.
      *
      * @param <T>
      * @param resultClass
@@ -300,7 +281,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async get.
      *
      * @param query
      * @return
@@ -310,7 +290,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async get.
      *
      * @param <T>
      * @param resultClass
@@ -325,7 +304,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async post.
      *
      * @param body
      * @return
@@ -335,7 +313,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async post.
      *
      * @param <T>
      * @param resultClass
@@ -350,7 +327,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async put.
      *
      * @param body
      * @return
@@ -360,7 +336,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async put.
      *
      * @param <T>
      * @param resultClass
@@ -375,7 +350,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async delete.
      *
      * @return
      */
@@ -384,7 +358,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async delete.
      *
      * @param <T>
      * @param resultClass
@@ -395,7 +368,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async delete.
      *
      * @param query
      * @return
@@ -405,7 +377,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async delete.
      *
      * @param <T>
      * @param resultClass
@@ -420,7 +391,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param resultClass
@@ -450,7 +420,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
-     * Async execute.
      *
      * @param <T>
      * @param resultClass

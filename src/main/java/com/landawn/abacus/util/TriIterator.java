@@ -65,7 +65,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     };
 
     /**
-     * Empty.
      *
      * @param <A>
      * @param <B>
@@ -90,7 +89,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Generate.
      *
      * @param <A>
      * @param <B>
@@ -159,7 +157,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Generate.
      *
      * @param <A>
      * @param <B>
@@ -230,7 +227,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -245,7 +241,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -264,7 +259,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -279,7 +273,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -299,7 +292,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -362,7 +354,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -432,7 +423,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Unzip.
      *
      * @param <T>
      * @param <L>
@@ -486,7 +476,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * Map.
      *
      * @param <R>
      * @param mapper
@@ -495,7 +484,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, R> mapper);
 
     /**
-     * Stream.
      *
      * @param <R>
      * @param mapper

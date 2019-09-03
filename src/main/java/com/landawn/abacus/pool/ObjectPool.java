@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 public interface ObjectPool<E extends Poolable> extends Pool {
 
     /**
-     * Adds the.
      *
      * @param e
      * @return true, if successful
@@ -35,7 +34,6 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     boolean add(E e);
 
     /**
-     * Adds the.
      *
      * @param e
      * @param autoDestroyOnFailedToAdd
@@ -44,7 +42,6 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     boolean add(E e, boolean autoDestroyOnFailedToAdd);
 
     /**
-     * Adds the.
      *
      * @param e
      * @param timeout
@@ -55,7 +52,6 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     boolean add(E e, long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
-     * Adds the.
      *
      * @param e
      * @param timeout
@@ -74,7 +70,6 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     E take();
 
     /**
-     * Take.
      *
      * @param timeout
      * @param unit
@@ -84,7 +79,6 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     E take(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
-     * Method contains.
      *
      * @param e
      * @return boolean
@@ -99,7 +93,6 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     public static interface MemoryMeasure<E> {
 
         /**
-         * Size of.
          *
          * @param e
          * @return

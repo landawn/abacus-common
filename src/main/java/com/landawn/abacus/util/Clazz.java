@@ -113,7 +113,6 @@ public final class Clazz {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param cls
@@ -125,7 +124,6 @@ public final class Clazz {
     }
 
     /**
-     * Of list.
      *
      * @param <T>
      * @return
@@ -136,7 +134,6 @@ public final class Clazz {
     }
 
     /**
-     * Of list.
      *
      * @param <T>
      * @param eleCls
@@ -199,7 +196,6 @@ public final class Clazz {
     }
 
     /**
-     * Of set.
      *
      * @param <T>
      * @return
@@ -210,7 +206,6 @@ public final class Clazz {
     }
 
     /**
-     * Of set.
      *
      * @param <T>
      * @param eleCls
@@ -314,7 +309,6 @@ public final class Clazz {
     }
 
     /**
-     * Of queue.
      *
      * @param <T>
      * @return
@@ -325,7 +319,6 @@ public final class Clazz {
     }
 
     /**
-     * Of queue.
      *
      * @param <T>
      * @param eleCls
@@ -337,7 +330,6 @@ public final class Clazz {
     }
 
     /**
-     * Of deque.
      *
      * @param <T>
      * @return
@@ -348,7 +340,6 @@ public final class Clazz {
     }
 
     /**
-     * Of deque.
      *
      * @param <T>
      * @param eleCls
@@ -452,7 +443,6 @@ public final class Clazz {
     }
 
     /**
-     * Of collection.
      *
      * @param <T>
      * @return
@@ -463,7 +453,6 @@ public final class Clazz {
     }
 
     /**
-     * Of collection.
      *
      * @param <T>
      * @param eleCls
@@ -475,7 +464,6 @@ public final class Clazz {
     }
 
     /**
-     * Of map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -487,7 +475,6 @@ public final class Clazz {
     }
 
     /**
-     * Of map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -683,7 +670,6 @@ public final class Clazz {
     }
 
     /**
-     * Of multiset.
      *
      * @param <T>
      * @return
@@ -694,7 +680,6 @@ public final class Clazz {
     }
 
     /**
-     * Of multiset.
      *
      * @param <T>
      * @param eleCls

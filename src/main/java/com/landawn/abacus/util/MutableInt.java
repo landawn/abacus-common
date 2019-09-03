@@ -61,7 +61,6 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * Of.
      *
      * @param value
      * @return
@@ -71,7 +70,6 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * Value.
      *
      * @return
      */

@@ -51,7 +51,6 @@ public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V>
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -64,7 +63,6 @@ public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V>
     }
 
     /**
-     * From.
      *
      * @param <K> the key type
      * @param <V> the value type

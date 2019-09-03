@@ -44,7 +44,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Adds the.
      *
      * @param e
      * @return true, if successful
@@ -70,7 +69,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Removes the.
      *
      * @param object
      * @return true, if successful
@@ -109,7 +107,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Retain all.
      *
      * @param elementsToKeep
      * @return true, if successful
@@ -122,7 +119,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Clear.
      *
      * @deprecated Unsupported operation.
      */
@@ -133,7 +129,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Contains.
      *
      * @param o
      * @return true, if successful
@@ -144,7 +139,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Iterator.
      *
      * @return
      */
@@ -154,7 +148,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -164,7 +157,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -174,7 +166,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * To array.
      *
      * @param <T>
      * @param a
@@ -186,7 +177,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Streamm.
      *
      * @return
      */
@@ -195,7 +185,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -206,7 +195,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -216,7 +204,6 @@ abstract class ImmutableCollection<E> extends AbstractCollection<E> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

@@ -44,7 +44,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     };
 
     /**
-     * Empty.
      *
      * @return
      */
@@ -53,7 +52,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -64,7 +62,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param fromIndex
@@ -217,7 +214,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Generate.
      *
      * @param hasNext
      * @param supplier
@@ -245,7 +241,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Next.
      *
      * @return
      * @Deprecated use <code>nextInt()</code> instead.
@@ -257,14 +252,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Next int.
      *
      * @return
      */
     public abstract int nextInt();
 
     /**
-     * To array.
      *
      * @return
      */
@@ -273,7 +266,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -288,7 +280,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -297,7 +288,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Foreach remaining.
      *
      * @param <E>
      * @param action

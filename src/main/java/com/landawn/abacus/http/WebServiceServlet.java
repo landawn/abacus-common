@@ -159,7 +159,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     private Logger serviceImplLogger;
 
     /**
-     * Inits the.
      *
      * @throws ServletException the servlet exception
      */
@@ -169,7 +168,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Inits the.
      *
      * @param config
      * @throws ServletException the servlet exception
@@ -461,7 +459,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Do get.
      *
      * @param request
      * @param response
@@ -473,7 +470,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Do post.
      *
      * @param request
      * @param response
@@ -485,7 +481,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Do put.
      *
      * @param request
      * @param response
@@ -497,7 +492,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Do delete.
      *
      * @param request
      * @param response
@@ -509,7 +503,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Execute.
      *
      * @param request
      * @param response
@@ -773,7 +766,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Invoke.
      *
      * @param method
      * @param parameter
@@ -891,7 +883,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Pre execute.
      *
      * @param request
      * @param response
@@ -901,7 +892,6 @@ public class WebServiceServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Post execute.
      *
      * @param response
      * @param result

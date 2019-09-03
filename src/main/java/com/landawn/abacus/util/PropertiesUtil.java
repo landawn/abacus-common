@@ -284,7 +284,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Find file.
      *
      * @param configFileName
      * @return
@@ -294,7 +293,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Find dir.
      *
      * @param configDir
      * @return
@@ -304,7 +302,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Load.
      *
      * @param file
      * @return
@@ -314,7 +311,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Load.
      *
      * @param file
      * @param autoRefresh
@@ -352,7 +348,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Load.
      *
      * @param is
      * @return
@@ -362,7 +357,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Load.
      *
      * @param targetProperties
      * @param is
@@ -381,7 +375,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Load.
      *
      * @param reader
      * @return
@@ -399,7 +392,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Load.
      *
      * @param sqlExecutor
      * @param sql
@@ -411,7 +403,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Load.
      *
      * @param targetProperties
      * @param sqlExecutor
@@ -451,7 +442,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Creates the.
      *
      * @param targetProperties
      * @param newProperties
@@ -789,7 +779,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Store.
      *
      * @param properties
      * @param file
@@ -816,7 +805,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Store.
      *
      * @param properties
      * @param os
@@ -833,7 +821,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Store.
      *
      * @param properties
      * @param writer
@@ -1325,7 +1312,6 @@ public final class PropertiesUtil {
     }
 
     /**
-     * Write method.
      *
      * @param writer
      * @param spaces
@@ -1682,7 +1668,6 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -1703,7 +1688,6 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -1728,7 +1712,6 @@ public final class PropertiesUtil {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -1880,7 +1863,6 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -1895,7 +1877,6 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -1917,7 +1898,6 @@ public final class PropertiesUtil {
         }
 
         /**
-         * To string.
          *
          * @return
          */

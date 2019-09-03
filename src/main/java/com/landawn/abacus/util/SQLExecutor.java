@@ -779,7 +779,6 @@ public class SQLExecutor {
     //    }
 
     /**
-     * W.
      *
      * @param url
      * @param user
@@ -792,7 +791,6 @@ public class SQLExecutor {
     }
 
     /**
-     * W.
      *
      * @param driver
      * @param url
@@ -806,7 +804,6 @@ public class SQLExecutor {
     }
 
     /**
-     * W.
      *
      * @param driverClass
      * @param url
@@ -820,7 +817,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Mapper.
      *
      * @param <T>
      * @param <ID>
@@ -846,7 +842,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Async.
      *
      * @return
      */
@@ -855,7 +850,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Data source.
      *
      * @return
      */
@@ -864,7 +858,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Jdbc settings.
      *
      * @return
      */
@@ -891,7 +884,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Db version.
      *
      * @return
      */
@@ -900,7 +892,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -914,7 +905,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -929,7 +919,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -944,7 +933,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -961,7 +949,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -979,7 +966,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -994,7 +980,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -1011,7 +996,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -1027,7 +1011,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -1045,7 +1028,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -1307,7 +1289,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Execute insert.
      *
      * @param <ID>
      * @param namedSQL
@@ -1344,7 +1325,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -1357,7 +1337,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -1371,7 +1350,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -1385,7 +1363,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -1401,7 +1378,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -1418,7 +1394,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -1432,7 +1407,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -1448,7 +1422,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -1464,7 +1437,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -1481,7 +1453,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -1685,7 +1656,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param sql
      * @param parameters
@@ -1698,7 +1668,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param sql
      * @param statementSetter
@@ -1712,7 +1681,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param sql
      * @param jdbcSettings
@@ -1726,7 +1694,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param sql
      * @param statementSetter
@@ -1742,7 +1709,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param conn
      * @param sql
@@ -1756,7 +1722,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param conn
      * @param sql
@@ -1772,7 +1737,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param conn
      * @param sql
@@ -1787,7 +1751,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param conn
      * @param sql
@@ -1835,7 +1798,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Execute update.
      *
      * @param namedSQL
      * @param stmt
@@ -1851,7 +1813,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param sql
      * @param parametersList
@@ -1863,7 +1824,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param sql
      * @param statementSetter
@@ -1876,7 +1836,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param sql
      * @param jdbcSettings
@@ -1889,7 +1848,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param sql
      * @param statementSetter
@@ -1904,7 +1862,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param conn
      * @param sql
@@ -1917,7 +1874,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param conn
      * @param sql
@@ -1932,7 +1888,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param conn
      * @param sql
@@ -1947,7 +1902,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param conn
      * @param sql
@@ -2184,7 +2138,6 @@ public class SQLExecutor {
     //    }
 
     /**
-     * Exists.
      *
      * @param sql
      * @param parameters
@@ -2196,7 +2149,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Exists.
      *
      * @param conn
      * @param sql
@@ -2209,7 +2161,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Count.
      *
      * @param sql
      * @param parameters it can be {@code Object[]/List} for (named) parameterized query, or {@code Map<String, Object>/Entity} for named parameterized query.
@@ -2224,7 +2175,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Count.
      *
      * @param conn
      * @param sql
@@ -2240,7 +2190,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -2256,7 +2205,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -2274,7 +2222,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -2292,7 +2239,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -2311,7 +2257,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -2329,7 +2274,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -2348,7 +2292,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -2367,7 +2310,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -2387,7 +2329,6 @@ public class SQLExecutor {
     }
 
     /**
-     * v.
      *
      * @param <T>
      * @param sql
@@ -2403,7 +2344,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param sql
@@ -2420,7 +2360,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param sql
@@ -2474,7 +2413,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param conn
@@ -2493,7 +2431,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param conn
@@ -2815,7 +2752,6 @@ public class SQLExecutor {
     }
 
     /**
-     * v.
      *
      * @param <T>
      * @param conn
@@ -2861,7 +2797,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -2875,7 +2810,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -2890,7 +2824,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -2905,7 +2838,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -2922,7 +2854,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -2937,7 +2868,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -2953,7 +2883,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -3004,7 +2933,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param sql
@@ -3018,7 +2946,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param sql
@@ -3034,7 +2961,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param sql
@@ -3050,7 +2976,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param sql
@@ -3067,7 +2992,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param conn
@@ -3082,7 +3006,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param conn
@@ -3098,7 +3021,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param conn
@@ -3149,7 +3071,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -3163,7 +3084,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -3178,7 +3098,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -3193,7 +3112,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -3210,7 +3128,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -3225,7 +3142,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -3241,7 +3157,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -3257,7 +3172,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -3277,7 +3191,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param sql
@@ -3291,7 +3204,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param sql
@@ -3307,7 +3219,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param sql
@@ -3322,7 +3233,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param sql
@@ -3339,7 +3249,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param conn
@@ -3354,7 +3263,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param conn
@@ -3370,7 +3278,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param conn
@@ -3386,7 +3293,6 @@ public class SQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param conn
@@ -4179,7 +4085,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param sql
      * @param parameters
@@ -4191,7 +4096,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param sql
      * @param statementSetter
@@ -4204,7 +4108,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param sql
      * @param jdbcSettings
@@ -4217,7 +4120,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param sql
      * @param statementSetter
@@ -4231,7 +4133,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param sql
@@ -4245,7 +4146,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param sql
@@ -4260,7 +4160,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param sql
@@ -4314,7 +4213,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param conn
      * @param sql
@@ -4327,7 +4225,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param conn
      * @param sql
@@ -4341,7 +4238,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param conn
      * @param sql
@@ -4355,7 +4251,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param conn
      * @param sql
@@ -4371,7 +4266,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param conn
@@ -4386,7 +4280,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param conn
@@ -4403,7 +4296,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param conn
@@ -4466,7 +4358,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param targetClass
@@ -5114,7 +5005,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param sql
      * @param parameters
@@ -5407,7 +5297,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Close connection.
      *
      * @param conn
      */
@@ -5505,7 +5394,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Prepare statement.
      *
      * @param ds
      * @param localConn
@@ -5543,7 +5431,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Prepare statement.
      *
      * @param conn
      * @param sql
@@ -5697,7 +5584,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Log SQL.
      *
      * @param sql
      * @param jdbcSettings
@@ -5714,7 +5600,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Close.
      *
      * @param rs
      */
@@ -5723,7 +5608,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Close.
      *
      * @param stmt
      */
@@ -5732,7 +5616,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Close.
      *
      * @param rs
      * @param stmt
@@ -5742,7 +5625,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Close.
      *
      * @param localConn
      * @param inputConn
@@ -5765,7 +5647,6 @@ public class SQLExecutor {
     }
 
     /**
-     * Close.
      *
      * @param conn
      * @param ds
@@ -6131,7 +6012,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Target class.
          *
          * @return
          */
@@ -6140,7 +6020,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Target type.
          *
          * @return
          */
@@ -6185,7 +6064,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Async.
          *
          * @return
          */
@@ -6194,7 +6072,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Exists.
          *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
          * @return true, if successful
@@ -6204,7 +6081,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Exists.
          *
          * @param whereCause
          * @return true, if successful
@@ -6214,7 +6090,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Exists.
          *
          * @param conn
          * @param id
@@ -6225,7 +6100,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Exists.
          *
          * @param conn
          * @param whereCause
@@ -6238,7 +6112,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Count.
          *
          * @param whereCause
          * @return
@@ -6248,7 +6121,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Count.
          *
          * @param conn
          * @param whereCause
@@ -6261,7 +6133,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Gets the.
          *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
          * @return
@@ -6285,7 +6156,6 @@ public class SQLExecutor {
         //    }
 
         /**
-         * Gets the.
          *
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
          * @param selectPropNames
@@ -6297,7 +6167,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Gets the.
          *
          * @param conn
          * @param id which could be {@code Number}/{@code String}... or {@code Entity}/{@code Map} for composed id.
@@ -6385,7 +6254,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch get.
          *
          * @param ids
          * @param selectPropNames
@@ -6480,7 +6348,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param whereCause
          * @return
@@ -6490,7 +6357,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param selectPropNames
          * @param whereCause
@@ -6501,7 +6367,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param selectPropNames
          * @param whereCause
@@ -6513,7 +6378,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param conn
          * @param whereCause
@@ -6524,7 +6388,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param conn
          * @param selectPropNames
@@ -6536,7 +6399,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param conn
          * @param selectPropNames
@@ -6552,7 +6414,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropName
@@ -6565,7 +6426,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropName
@@ -6580,7 +6440,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -6594,7 +6453,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -6610,7 +6468,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropName
@@ -6623,7 +6480,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropName
@@ -6638,7 +6494,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -6652,7 +6507,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -6668,7 +6522,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropNames
@@ -6681,7 +6534,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropNames
@@ -6696,7 +6548,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -6711,7 +6562,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -6729,7 +6579,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropNames
@@ -6742,7 +6591,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropNames
@@ -6757,7 +6605,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -6772,7 +6619,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -6803,7 +6649,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param whereCause
          * @return
@@ -6813,7 +6658,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param selectPropNames
          * @param whereCause
@@ -6824,7 +6668,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param selectPropNames
          * @param whereCause
@@ -6836,7 +6679,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param conn
          * @param whereCause
@@ -6847,7 +6689,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param conn
          * @param selectPropNames
@@ -6859,7 +6700,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param conn
          * @param selectPropNames
@@ -6874,7 +6714,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropName
@@ -6887,7 +6726,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropName
@@ -6901,7 +6739,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -6915,7 +6752,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -6931,7 +6767,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropName
@@ -6944,7 +6779,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropName
@@ -6958,7 +6792,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -6972,7 +6805,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -6988,7 +6820,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropNames
@@ -7001,7 +6832,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropNames
@@ -7016,7 +6846,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -7030,7 +6859,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -7055,7 +6883,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropNames
@@ -7068,7 +6895,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropNames
@@ -7083,7 +6909,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -7098,7 +6923,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -7481,7 +7305,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param whereCause
          * @return
@@ -7491,7 +7314,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param selectPropNames
          * @param whereCause
@@ -7502,7 +7324,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param selectPropNames
          * @param whereCause
@@ -7514,7 +7335,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param conn
          * @param whereCause
@@ -7525,7 +7345,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param conn
          * @param selectPropNames
@@ -7537,7 +7356,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param conn
          * @param selectPropNames
@@ -7954,7 +7772,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Prepare query.
          *
          * @param selectPropNames
          * @param whereCause
@@ -7965,7 +7782,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Prepare query.
          *
          * @param selectPropNames
          * @param whereCause
@@ -8038,7 +7854,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param propNamesToInsert
@@ -8049,7 +7864,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -8059,7 +7873,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param conn
          * @param entity
@@ -8070,7 +7883,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param conn
          * @param entity
@@ -8144,7 +7956,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param conn
          * @param props
@@ -8159,7 +7970,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @return
@@ -8169,7 +7979,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @param batchSize
@@ -8180,7 +7989,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @param batchSize
@@ -8192,7 +8000,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @param propNamesToInsert
@@ -8206,7 +8013,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param conn
          * @param entities
@@ -8217,7 +8023,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param conn
          * @param entities
@@ -8243,7 +8048,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param conn
          * @param entities
@@ -8408,7 +8212,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Refresh.
          *
          * @param entity
          * @return true, if successful
@@ -8422,7 +8225,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Refresh.
          *
          * @param entity
          * @param propNamesToRefresh
@@ -8450,7 +8252,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param entity
          * @return
@@ -8460,7 +8261,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param entity
          * @param propNamesToUpdate
@@ -8471,7 +8271,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param props
          * @param id
@@ -8482,7 +8281,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param props
          * @param whereCause
@@ -8493,7 +8291,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param conn
          * @param entity
@@ -8504,7 +8301,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param conn
          * @param entity
@@ -8528,7 +8324,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param conn
          * @param props
@@ -8542,7 +8337,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param conn
          * @param props
@@ -8573,7 +8367,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param propNamesToUpdate
@@ -8584,7 +8377,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param batchSize
@@ -8607,7 +8399,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param batchSize
@@ -8619,7 +8410,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param propNamesToUpdate
@@ -8633,7 +8423,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -8644,7 +8433,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -8656,7 +8444,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -8668,7 +8455,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -8681,7 +8467,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -8752,7 +8537,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Prepare update.
          *
          * @param props
          * @param whereCause
@@ -8826,7 +8610,6 @@ public class SQLExecutor {
         //    }
 
         /**
-         * Delete.
          *
          * @param whereCause
          * @return
@@ -8836,7 +8619,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Delete.
          *
          * @param conn
          * @param whereCause
@@ -8856,7 +8638,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Delete.
          *
          * @param entity
          * @return
@@ -8866,7 +8647,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Delete.
          *
          * @param conn
          * @param entity
@@ -8936,7 +8716,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch delete.
          *
          * @param conn
          * @param entities
@@ -8958,7 +8737,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Prepare delete.
          *
          * @param whereCause
          * @return
@@ -9121,7 +8899,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Check entity.
          *
          * @param entity
          */
@@ -9134,7 +8911,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To stirng.
          *
          * @return
          */
@@ -9169,7 +8945,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Exists.
          *
          * @param id
          * @return
@@ -9184,7 +8959,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Exists.
          *
          * @param whereCause
          * @return
@@ -9199,7 +8973,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Exists.
          *
          * @param conn
          * @param id
@@ -9215,7 +8988,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Exists.
          *
          * @param conn
          * @param whereCause
@@ -9231,7 +9003,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Count.
          *
          * @param whereCause
          * @return
@@ -9246,7 +9017,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Count.
          *
          * @param conn
          * @param whereCause
@@ -9262,7 +9032,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Gets the.
          *
          * @param id
          * @return
@@ -9295,7 +9064,6 @@ public class SQLExecutor {
         //    }
 
         /**
-         * Gets the.
          *
          * @param id
          * @param selectPropNames
@@ -9311,7 +9079,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Gets the.
          *
          * @param conn
          * @param id
@@ -9394,7 +9161,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch get.
          *
          * @param ids
          * @return
@@ -9426,7 +9192,6 @@ public class SQLExecutor {
         //    }
 
         /**
-         * Batch get.
          *
          * @param ids
          * @param selectPropNames
@@ -9442,7 +9207,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch get.
          *
          * @param ids
          * @param selectPropNames
@@ -9459,7 +9223,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch get.
          *
          * @param conn
          * @param ids
@@ -9477,7 +9240,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param whereCause
          * @return
@@ -9492,7 +9254,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param selectPropNames
          * @param whereCause
@@ -9508,7 +9269,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param selectPropNames
          * @param whereCause
@@ -9525,7 +9285,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param conn
          * @param whereCause
@@ -9541,7 +9300,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param conn
          * @param selectPropNames
@@ -9558,7 +9316,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param conn
          * @param selectPropNames
@@ -9577,7 +9334,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropName
@@ -9595,7 +9351,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropName
@@ -9615,7 +9370,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -9635,7 +9389,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -9656,7 +9409,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropNames
@@ -9675,7 +9427,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropNames
@@ -9695,7 +9446,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -9715,7 +9465,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -9736,7 +9485,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropName
@@ -9754,7 +9502,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropName
@@ -9774,7 +9521,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -9794,7 +9540,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -9815,7 +9560,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropNames
@@ -9834,7 +9578,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param selectPropNames
@@ -9854,7 +9597,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -9874,7 +9616,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Find first.
          *
          * @param <R>
          * @param conn
@@ -9895,7 +9636,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param whereCause
          * @return
@@ -9910,7 +9650,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param selectPropNames
          * @param whereCause
@@ -9926,7 +9665,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param selectPropNames
          * @param whereCause
@@ -9943,7 +9681,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param conn
          * @param whereCause
@@ -9959,7 +9696,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param conn
          * @param selectPropNames
@@ -9976,7 +9712,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param conn
          * @param selectPropNames
@@ -9995,7 +9730,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropName
@@ -10013,7 +9747,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropName
@@ -10033,7 +9766,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -10053,7 +9785,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -10074,7 +9805,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropNames
@@ -10093,7 +9823,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropNames
@@ -10113,7 +9842,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -10133,7 +9861,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -10154,7 +9881,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropName
@@ -10172,7 +9898,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropName
@@ -10192,7 +9917,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -10212,7 +9936,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -10233,7 +9956,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropNames
@@ -10252,7 +9974,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param selectPropNames
@@ -10272,7 +9993,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -10292,7 +10012,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List.
          *
          * @param <R>
          * @param conn
@@ -10313,7 +10032,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List all.
          *
          * @param whereCause
          * @param jdbcSettings
@@ -10329,7 +10047,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List all.
          *
          * @param selectPropNames
          * @param whereCause
@@ -10346,7 +10063,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List all.
          *
          * @param <R>
          * @param selectPropName
@@ -10366,7 +10082,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List all.
          *
          * @param <R>
          * @param selectPropName
@@ -10386,7 +10101,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List all.
          *
          * @param <R>
          * @param selectPropNames
@@ -10406,7 +10120,6 @@ public class SQLExecutor {
         }
 
         /**
-         * List all.
          *
          * @param <R>
          * @param selectPropNames
@@ -10426,7 +10139,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param whereCause
          * @return
@@ -10441,7 +10153,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param selectPropNames
          * @param whereCause
@@ -10457,7 +10168,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param selectPropNames
          * @param whereCause
@@ -10474,7 +10184,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param <R>
          * @param selectPropName
@@ -10492,7 +10201,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param <R>
          * @param selectPropName
@@ -10512,7 +10220,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param <R>
          * @param selectPropNames
@@ -10531,7 +10238,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param <R>
          * @param selectPropNames
@@ -10551,7 +10257,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param <R>
          * @param selectPropName
@@ -10569,7 +10274,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param <R>
          * @param selectPropName
@@ -10589,7 +10293,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param <R>
          * @param selectPropNames
@@ -10608,7 +10311,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream.
          *
          * @param <R>
          * @param selectPropNames
@@ -10628,7 +10330,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream all.
          *
          * @param whereCause
          * @param jdbcSettings
@@ -10644,7 +10345,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream all.
          *
          * @param selectPropNames
          * @param whereCause
@@ -10661,7 +10361,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream all.
          *
          * @param <R>
          * @param selectPropName
@@ -10681,7 +10380,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream all.
          *
          * @param <R>
          * @param selectPropName
@@ -10701,7 +10399,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream all.
          *
          * @param <R>
          * @param selectPropNames
@@ -10721,7 +10418,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Stream all.
          *
          * @param <R>
          * @param selectPropNames
@@ -10741,7 +10437,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param whereCause
          * @return
@@ -10756,7 +10451,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param selectPropNames
          * @param whereCause
@@ -10772,7 +10466,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param selectPropNames
          * @param whereCause
@@ -10789,7 +10482,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param conn
          * @param whereCause
@@ -10805,7 +10497,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param conn
          * @param selectPropNames
@@ -10822,7 +10513,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query.
          *
          * @param conn
          * @param selectPropNames
@@ -10841,7 +10531,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query all.
          *
          * @param whereCause
          * @param jdbcSettings
@@ -10857,7 +10546,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Query all.
          *
          * @param selectPropNames
          * @param whereCause
@@ -11302,7 +10990,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -11317,7 +11004,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param propNamesToInsert
@@ -11333,7 +11019,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -11348,7 +11033,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param conn
          * @param entity
@@ -11364,7 +11048,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param conn
          * @param entity
@@ -11381,7 +11064,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Insert.
          *
          * @param conn
          * @param props
@@ -11427,7 +11109,6 @@ public class SQLExecutor {
         //        }
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @return
@@ -11442,7 +11123,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @param batchSize
@@ -11458,7 +11138,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @param batchSize
@@ -11475,7 +11154,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param entities
          * @param propNamesToInsert
@@ -11494,7 +11172,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param conn
          * @param entities
@@ -11510,7 +11187,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param conn
          * @param entities
@@ -11527,7 +11203,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch insert.
          *
          * @param conn
          * @param entities
@@ -11546,7 +11221,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Upsert.
          *
          * @param entity
          * @return
@@ -11561,7 +11235,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Upsert.
          *
          * @param entity
          * @param whereCause
@@ -11577,7 +11250,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Refresh.
          *
          * @param entity
          * @return
@@ -11592,7 +11264,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Refresh.
          *
          * @param entity
          * @param propNamesToUpdate
@@ -11608,7 +11279,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param entity
          * @return
@@ -11623,7 +11293,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param entity
          * @param propNamesToUpdate
@@ -11639,7 +11308,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param props
          * @param id
@@ -11655,7 +11323,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param props
          * @param whereCause
@@ -11671,7 +11338,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param conn
          * @param entity
@@ -11687,7 +11353,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param conn
          * @param entity
@@ -11704,7 +11369,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param conn
          * @param props
@@ -11721,7 +11385,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Update.
          *
          * @param conn
          * @param props
@@ -11799,7 +11462,6 @@ public class SQLExecutor {
         //        }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @return
@@ -11814,7 +11476,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param propNamesToUpdate
@@ -11830,7 +11491,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param batchSize
@@ -11846,7 +11506,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param propNamesToUpdate
@@ -11863,7 +11522,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param batchSize
@@ -11880,7 +11538,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param entities
          * @param propNamesToUpdate
@@ -11899,7 +11556,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -11915,7 +11571,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -11933,7 +11588,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -11950,7 +11604,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch update.
          *
          * @param conn
          * @param entities
@@ -11969,7 +11622,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Delete.
          *
          * @param whereCause
          * @return
@@ -11984,7 +11636,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Delete.
          *
          * @param conn
          * @param whereCause
@@ -12000,7 +11651,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Delete.
          *
          * @param entity
          * @return
@@ -12015,7 +11665,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Delete.
          *
          * @param conn
          * @param entity
@@ -12031,7 +11680,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch delete.
          *
          * @param entities
          * @return
@@ -12046,7 +11694,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch delete.
          *
          * @param entities
          * @param batchSize
@@ -12062,7 +11709,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch delete.
          *
          * @param entities
          * @param batchSize
@@ -12079,7 +11725,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch delete.
          *
          * @param conn
          * @param entities
@@ -12095,7 +11740,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Batch delete.
          *
          * @param conn
          * @param entities
@@ -12282,7 +11926,6 @@ public class SQLExecutor {
         };
 
         /**
-         * Extract data.
          *
          * @param rs
          * @param jdbcSettings
@@ -12292,7 +11935,6 @@ public class SQLExecutor {
         public T extractData(final ResultSet rs, final JdbcSettings jdbcSettings) throws SQLException;
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12305,7 +11947,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12321,7 +11962,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12339,7 +11979,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12380,7 +12019,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12397,7 +12035,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12456,7 +12093,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12469,7 +12105,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12485,7 +12120,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12503,7 +12137,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12545,7 +12178,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12562,7 +12194,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12622,7 +12253,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Group to.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12635,7 +12265,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Group to.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12681,7 +12310,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Group to.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12694,7 +12322,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Group to.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -12750,7 +12377,6 @@ public class SQLExecutor {
     static interface ResultSetExtractor<T> {
 
         /**
-         * Extract data.
          *
          * @param targetClass
          * @param namedSQL
@@ -12883,7 +12509,6 @@ public class SQLExecutor {
     public static abstract class AbstractResultExtractor<T> implements ResultExtractor<T> {
 
         /**
-         * Extract data.
          *
          * @param rs
          * @param jdbcSettings
@@ -12896,7 +12521,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Convert.
          *
          * @param dataSet
          * @return
@@ -13003,7 +12627,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Creates the.
          *
          * @return
          */
@@ -13012,7 +12635,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Copy.
          *
          * @return
          */
@@ -13546,7 +13168,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -13580,7 +13201,6 @@ public class SQLExecutor {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -13609,7 +13229,6 @@ public class SQLExecutor {
         }
 
         /**
-         * To string.
          *
          * @return
          */

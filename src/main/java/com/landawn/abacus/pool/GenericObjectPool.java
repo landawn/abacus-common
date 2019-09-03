@@ -177,7 +177,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Adds the.
      *
      * @param e
      * @return true, if successful
@@ -228,7 +227,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Adds the.
      *
      * @param e
      * @param autoDestroyOnFailedToAdd
@@ -250,7 +248,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Adds the.
      *
      * @param e
      * @param timeout
@@ -311,7 +308,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Adds the.
      *
      * @param e
      * @param timeout
@@ -336,7 +332,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Take.
      *
      * @return
      */
@@ -374,7 +369,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Take.
      *
      * @param timeout
      * @param unit
@@ -424,7 +418,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Contains.
      *
      * @param e
      * @return true, if successful
@@ -491,7 +484,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -503,7 +495,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -513,7 +504,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -525,7 +515,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -535,7 +524,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Vacate.
      *
      * @param vacationNumber
      */
@@ -601,7 +589,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Destroy.
      *
      * @param value
      */
@@ -629,7 +616,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Destroy all.
      *
      * @param c
      */
@@ -659,7 +645,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Write object.
      *
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
@@ -675,7 +660,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Read object.
      *
      * @param is
      * @throws IOException Signals that an I/O exception has occurred.

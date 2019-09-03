@@ -61,7 +61,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Of.
      *
      * @param value
      * @return
@@ -71,7 +70,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Value.
      *
      * @return
      */

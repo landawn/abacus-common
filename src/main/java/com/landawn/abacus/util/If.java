@@ -59,7 +59,6 @@ public final class If {
     }
 
     /**
-     * Not.
      *
      * @param b
      * @return
@@ -452,7 +451,6 @@ public final class If {
     }
 
     /**
-     * Then.
      *
      * @param <E>
      * @param cmd
@@ -470,7 +468,6 @@ public final class If {
     }
 
     /**
-     * Then.
      *
      * @param <U>
      * @param <E>
@@ -490,7 +487,6 @@ public final class If {
     }
 
     /**
-     * Then throw.
      *
      * @param <E>
      * @param exceptionSupplier
@@ -539,7 +535,6 @@ public final class If {
         }
 
         /**
-         * Of.
          *
          * @param b
          * @return
@@ -556,7 +551,6 @@ public final class If {
         }
 
         /**
-         * Or else.
          *
          * @param <E>
          * @param cmd
@@ -571,7 +565,6 @@ public final class If {
         }
 
         /**
-         * Or else.
          *
          * @param <U>
          * @param <E>

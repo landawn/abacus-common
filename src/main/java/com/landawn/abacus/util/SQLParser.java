@@ -175,7 +175,6 @@ public final class SQLParser {
     }
 
     /**
-     * Parses the.
      *
      * @param sql
      * @return
@@ -244,7 +243,6 @@ public final class SQLParser {
     }
 
     /**
-     * Index word.
      *
      * @param sql
      * @param word
@@ -370,7 +368,6 @@ public final class SQLParser {
     }
 
     /**
-     * Next word.
      *
      * @param sql
      * @param fromIndex
@@ -426,7 +423,6 @@ public final class SQLParser {
     }
 
     /**
-     * Register seperator.
      *
      * @param seperator
      */
@@ -437,7 +433,6 @@ public final class SQLParser {
     }
 
     /**
-     * Register seperator.
      *
      * @param seperator
      */

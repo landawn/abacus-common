@@ -84,7 +84,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * On.
      *
      * @param <T>
      * @param clsName
@@ -95,7 +94,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * On.
      *
      * @param <T>
      * @param cls
@@ -106,7 +104,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * On.
      *
      * @param <T>
      * @param target
@@ -117,7 +114,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * New.
      *
      * @return
      */
@@ -126,7 +122,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * New.
      *
      * @param args
      * @return
@@ -147,7 +142,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * Instance.
      *
      * @return
      */
@@ -156,7 +150,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * Gets the.
      *
      * @param <V> the value type
      * @param fieldName
@@ -181,7 +174,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * Sets the.
      *
      * @param fieldName
      * @param value
@@ -208,7 +200,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * Invoke.
      *
      * @param <V> the value type
      * @param methodName
@@ -235,7 +226,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * Invokke.
      *
      * @param methodName
      * @param args
@@ -410,7 +400,6 @@ public final class Reflection<T> {
     }
 
     /**
-     * Wrap.
      *
      * @param cls
      * @return

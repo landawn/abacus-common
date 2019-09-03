@@ -157,7 +157,6 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Put count.
      *
      * @return
      */
@@ -167,7 +166,6 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Hit count.
      *
      * @return
      */
@@ -177,7 +175,6 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Miss count.
      *
      * @return
      */
@@ -187,7 +184,6 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Eviction count.
      *
      * @return
      */
@@ -226,7 +222,6 @@ public abstract class AbstractPool implements Pool {
     }
 
     /**
-     * Finalize.
      *
      * @throws Throwable the throwable
      */

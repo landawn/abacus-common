@@ -38,7 +38,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Of.
      *
      * @param value
      * @param index
@@ -51,7 +50,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Of.
      *
      * @param value
      * @param index
@@ -64,7 +62,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Of.
      *
      * @param iter
      * @return
@@ -74,7 +71,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Of.
      *
      * @param iter
      * @param startIndex
@@ -85,7 +81,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Of.
      *
      * @param iter
      * @param startIndex
@@ -112,7 +107,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Value.
      *
      * @return true, if successful
      */
@@ -121,7 +115,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -131,7 +124,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -142,7 +134,6 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * To string.
      *
      * @return
      */

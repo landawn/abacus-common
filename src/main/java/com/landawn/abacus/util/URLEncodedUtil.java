@@ -193,7 +193,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decode.
      *
      * @param urlQuery
      * @return
@@ -203,7 +202,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decode.
      *
      * @param urlQuery
      * @param charset
@@ -243,7 +241,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decode.
      *
      * @param <T>
      * @param targetClass
@@ -255,7 +252,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decode.
      *
      * @param <T>
      * @param targetClass
@@ -353,7 +349,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encode.
      *
      * @param parameters
      * @return
@@ -363,7 +358,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encode.
      *
      * @param parameters
      * @param charset
@@ -382,7 +376,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encode.
      *
      * @param url
      * @param parameters
@@ -393,7 +386,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encode.
      *
      * @param url
      * @param parameters
@@ -420,7 +412,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encode.
      *
      * @param output
      * @param parameters
@@ -430,7 +421,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encode.
      *
      * @param output
      * @param parameters
@@ -563,7 +553,6 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Url encode.
      *
      * @param sb
      * @param content

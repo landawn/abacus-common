@@ -29,7 +29,6 @@ import com.landawn.abacus.SliceSelector;
 public class NonSliceSelector implements SliceSelector {
 
     /**
-     * Select.
      *
      * @param entityName
      * @param sql
@@ -43,7 +42,6 @@ public class NonSliceSelector implements SliceSelector {
     }
 
     /**
-     * Select.
      *
      * @param entityName
      * @param sql

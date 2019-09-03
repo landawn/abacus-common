@@ -392,7 +392,6 @@ public abstract class Matth {
     //    }
 
     /**
-     * Log.
      *
      * @param a
      * @return
@@ -402,7 +401,6 @@ public abstract class Matth {
     }
 
     /**
-     * Log 2.
      *
      * @param x
      * @param mode
@@ -603,7 +601,6 @@ public abstract class Matth {
     }
 
     /**
-     * Log 10.
      *
      * @param x
      * @param mode
@@ -692,7 +689,6 @@ public abstract class Matth {
     }
 
     /**
-     * Log 10.
      *
      * @param x
      * @return
@@ -806,7 +802,6 @@ public abstract class Matth {
     private static final double LN_2 = Math.log(2);
 
     /**
-     * Pow.
      *
      * @param b
      * @param k
@@ -991,7 +986,6 @@ public abstract class Matth {
     }
 
     /**
-     * Sqrt floor.
      *
      * @param x
      * @return
@@ -1077,7 +1071,6 @@ public abstract class Matth {
     }
 
     /**
-     * Sqrt.
      *
      * @param x
      * @param mode
@@ -1117,7 +1110,6 @@ public abstract class Matth {
     }
 
     /**
-     * Sqrt floor.
      *
      * @param x
      * @return
@@ -1309,7 +1301,6 @@ public abstract class Matth {
     }
 
     /**
-     * Divide.
      *
      * @param p
      * @param q
@@ -2154,7 +2145,6 @@ public abstract class Matth {
     }
 
     /**
-     * List product.
      *
      * @param nums
      * @return
@@ -2164,7 +2154,6 @@ public abstract class Matth {
     }
 
     /**
-     * List product.
      *
      * @param nums
      * @param start
@@ -2378,7 +2367,6 @@ public abstract class Matth {
     }
 
     /**
-     * Mean.
      *
      * @param x
      * @param y
@@ -2438,7 +2426,6 @@ public abstract class Matth {
     }
 
     /**
-     * Mean.
      *
      * @param values
      * @return
@@ -2458,7 +2445,6 @@ public abstract class Matth {
     }
 
     /**
-     * Check finite.
      *
      * @param argument
      * @return
@@ -2469,7 +2455,6 @@ public abstract class Matth {
     }
 
     /**
-     * Round intermediate.
      *
      * @param x
      * @param mode
@@ -2749,7 +2734,6 @@ public abstract class Matth {
     }
 
     /**
-     * Next down.
      *
      * @param d
      * @return
@@ -2796,7 +2780,6 @@ public abstract class Matth {
     }
 
     /**
-     * Scale normalize.
      *
      * @param x
      * @return
@@ -2901,7 +2884,6 @@ public abstract class Matth {
     }
 
     /**
-     * Check positive.
      *
      * @param role
      * @param x
@@ -2915,7 +2897,6 @@ public abstract class Matth {
     }
 
     /**
-     * Check positive.
      *
      * @param role
      * @param x
@@ -2929,7 +2910,6 @@ public abstract class Matth {
     }
 
     /**
-     * Check positive.
      *
      * @param role
      * @param x
@@ -3280,7 +3260,6 @@ public abstract class Matth {
         };
 
         /**
-         * Test.
          *
          * @param base
          * @param n

@@ -211,7 +211,6 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     }
 
     /**
-     * Close.
      *
      * @param conn
      */
@@ -466,7 +465,6 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -480,7 +478,6 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -501,7 +498,6 @@ public class SQLDataSource extends AbstractDataSource implements com.landawn.aba
     }
 
     /**
-     * To string.
      *
      * @return
      */

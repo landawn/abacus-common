@@ -405,7 +405,6 @@ public final class HTTP {
     }
 
     /**
-     * Flush.
      *
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.

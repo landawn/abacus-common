@@ -39,7 +39,6 @@ public interface Cache<K, V> extends Closeable {
     public static final long DEFAULT_MAX_IDLE_TIME = 30 * 60 * 1000L;
 
     /**
-     * Gets the.
      *
      * @param k
      * @return V
@@ -55,7 +54,6 @@ public interface Cache<K, V> extends Closeable {
     V gett(final K k);
 
     /**
-     * Async get.
      *
      * @param k
      * @return
@@ -63,7 +61,6 @@ public interface Cache<K, V> extends Closeable {
     ContinuableFuture<Optional<V>> asyncGet(final K k);
 
     /**
-     * Async gett.
      *
      * @param k
      * @return
@@ -71,7 +68,6 @@ public interface Cache<K, V> extends Closeable {
     ContinuableFuture<V> asyncGett(final K k);
 
     /**
-     * Put.
      *
      * @param k
      * @param v
@@ -80,7 +76,6 @@ public interface Cache<K, V> extends Closeable {
     boolean put(final K k, final V v);
 
     /**
-     * Async put.
      *
      * @param k
      * @param v
@@ -89,7 +84,6 @@ public interface Cache<K, V> extends Closeable {
     ContinuableFuture<Boolean> asyncPut(final K k, final V v);
 
     /**
-     * Put.
      *
      * @param k
      * @param v
@@ -100,7 +94,6 @@ public interface Cache<K, V> extends Closeable {
     boolean put(final K k, final V v, long liveTime, long maxIdleTime);
 
     /**
-     * Async put.
      *
      * @param k
      * @param v
@@ -111,14 +104,12 @@ public interface Cache<K, V> extends Closeable {
     ContinuableFuture<Boolean> asyncPut(final K k, final V v, long liveTime, long maxIdleTime);
 
     /**
-     * Removes the.
      *
      * @param k
      */
     void remove(final K k);
 
     /**
-     * Async remove.
      *
      * @param k
      * @return
@@ -126,7 +117,6 @@ public interface Cache<K, V> extends Closeable {
     ContinuableFuture<Void> asyncRemove(final K k);
 
     /**
-     * Contains key.
      *
      * @param k
      * @return boolean
@@ -142,14 +132,12 @@ public interface Cache<K, V> extends Closeable {
     ContinuableFuture<Boolean> asyncContainsKey(final K k);
 
     /**
-     * Key set.
      *
      * @return Set<K>
      */
     Set<K> keySet();
 
     /**
-     * Method size.
      *
      * @return
      */
@@ -167,7 +155,6 @@ public interface Cache<K, V> extends Closeable {
     void close();
 
     /**
-     * method isClosed.
      *
      * @return true, if is closed
      */

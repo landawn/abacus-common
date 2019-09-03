@@ -44,7 +44,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * Empty.
      *
      * @param <E>
      * @return
@@ -54,7 +53,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * Just.
      *
      * @param <E>
      * @param e
@@ -65,7 +63,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param e
@@ -76,7 +73,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param a
@@ -92,7 +88,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param set the elements in this <code>Set</code> are shared by the returned ImmutableSet.
@@ -109,7 +104,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * Copy of.
      *
      * @param <E>
      * @param set

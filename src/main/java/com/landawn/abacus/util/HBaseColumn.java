@@ -25,7 +25,6 @@ import java.util.TreeSet;
 
 // TODO: Auto-generated Javadoc
 /**
- * It's immutable.
  *
  * @author haiyang li
  * @param <T>
@@ -121,7 +120,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Empty of.
      *
      * @param <T>
      * @param targetClass
@@ -134,7 +132,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Value of.
      *
      * @param <T>
      * @param value
@@ -145,7 +142,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Value of.
      *
      * @param <T>
      * @param value
@@ -157,7 +153,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * As list.
      *
      * @param <T>
      * @param value
@@ -168,7 +163,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * As list.
      *
      * @param <T>
      * @param value
@@ -180,7 +174,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * As set.
      *
      * @param <T>
      * @param value
@@ -191,7 +184,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * As set.
      *
      * @param <T>
      * @param value
@@ -259,7 +251,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * As map.
      *
      * @param <T>
      * @param value
@@ -272,7 +263,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * As map.
      *
      * @param <T>
      * @param value
@@ -344,7 +334,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Value.
      *
      * @return
      */
@@ -353,7 +342,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Version.
      *
      * @return
      */
@@ -362,7 +350,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -380,7 +367,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Compare to.
      *
      * @param o
      * @return
@@ -391,7 +377,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -405,7 +390,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -429,7 +413,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

@@ -530,7 +530,6 @@ public final class Hashing {
         }
 
         /**
-         * Gets the.
          *
          * @return
          */
@@ -656,7 +655,6 @@ public final class Hashing {
     }
 
     /**
-     * Combine ordered.
      *
      * @param first
      * @param second
@@ -667,7 +665,6 @@ public final class Hashing {
     }
 
     /**
-     * Combine ordered.
      *
      * @param first
      * @param second
@@ -705,7 +702,6 @@ public final class Hashing {
     }
 
     /**
-     * Combine unordered.
      *
      * @param first
      * @param second
@@ -716,7 +712,6 @@ public final class Hashing {
     }
 
     /**
-     * Combine unordered.
      *
      * @param first
      * @param second
@@ -764,7 +759,6 @@ public final class Hashing {
     }
 
     /**
-     * Concatenating.
      *
      * @param first
      * @param second
@@ -775,7 +769,6 @@ public final class Hashing {
     }
 
     /**
-     * Concatenating.
      *
      * @param first
      * @param second
@@ -846,7 +839,6 @@ public final class Hashing {
         }
 
         /**
-         * Make hash.
          *
          * @param hashers
          * @return
@@ -863,7 +855,6 @@ public final class Hashing {
         }
 
         /**
-         * Bits.
          *
          * @return
          */
@@ -873,7 +864,6 @@ public final class Hashing {
         }
 
         /**
-         * Equals.
          *
          * @param object
          * @return true, if successful
@@ -888,7 +878,6 @@ public final class Hashing {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -917,7 +906,6 @@ public final class Hashing {
         }
 
         /**
-         * Next double.
          *
          * @return
          */

@@ -109,7 +109,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Natural order.
      *
      * @param <T>
      * @return
@@ -120,7 +119,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Reversed order.
      *
      * @param <T>
      * @return
@@ -130,7 +128,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Reversed order.
      *
      * @param <T>
      * @param cmp
@@ -147,7 +144,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Nulls first.
      *
      * @param <T>
      * @return
@@ -157,7 +153,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Nulls first.
      *
      * @param <T>
      * @param cmp
@@ -177,7 +172,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Nulls last.
      *
      * @param <T>
      * @return
@@ -187,7 +181,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Nulls last.
      *
      * @param <T>
      * @param cmp
@@ -207,7 +200,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing by.
      *
      * @param <T>
      * @param <U>
@@ -247,7 +239,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing by.
      *
      * @param <T>
      * @param <U>
@@ -268,7 +259,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing boolean.
      *
      * @param <T>
      * @param keyMapper
@@ -286,7 +276,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing char.
      *
      * @param <T>
      * @param keyMapper
@@ -304,7 +293,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing byte.
      *
      * @param <T>
      * @param keyMapper
@@ -322,7 +310,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing short.
      *
      * @param <T>
      * @param keyMapper
@@ -340,7 +327,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing int.
      *
      * @param <T>
      * @param keyMapper
@@ -358,7 +344,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing long.
      *
      * @param <T>
      * @param keyMapper
@@ -376,7 +361,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing float.
      *
      * @param <T>
      * @param keyMapper
@@ -394,7 +378,6 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing double.
      *
      * @param <T>
      * @param keyMapper

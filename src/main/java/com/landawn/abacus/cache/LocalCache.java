@@ -72,7 +72,6 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param key
      * @param value
@@ -86,7 +85,6 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Removes the.
      *
      * @param key
      */
@@ -96,7 +94,6 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Contains key.
      *
      * @param key
      * @return true, if successful
@@ -107,7 +104,6 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -117,7 +113,6 @@ public class LocalCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Size.
      *
      * @return
      */

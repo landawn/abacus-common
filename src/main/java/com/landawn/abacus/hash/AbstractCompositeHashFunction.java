@@ -58,7 +58,6 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
     /* protected */ abstract HashCode makeHash(Hasher[] hashers);
 
     /**
-     * New hasher.
      *
      * @return
      */

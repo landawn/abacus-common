@@ -72,7 +72,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Value of.
      *
      * @param entityName
      * @return
@@ -82,7 +81,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Value of.
      *
      * @param entityName
      * @param props
@@ -93,7 +91,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param propName
@@ -109,7 +106,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param clazz
@@ -128,7 +124,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Sets the.
      *
      * @param propName
      * @param propValue
@@ -149,7 +144,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Sets the.
      *
      * @param nameValues
      */
@@ -162,7 +156,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Removes the.
      *
      * @param propName
      * @return
@@ -197,7 +190,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Contains key.
      *
      * @param propName
      * @return true, if successful
@@ -226,7 +218,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Entry set.
      *
      * @return
      */
@@ -235,7 +226,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -264,7 +254,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -279,7 +268,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -293,7 +281,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -314,7 +301,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
-     * To string.
      *
      * @return
      */

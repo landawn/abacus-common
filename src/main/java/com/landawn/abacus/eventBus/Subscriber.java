@@ -25,7 +25,6 @@ package com.landawn.abacus.eventBus;
 public interface Subscriber<E> {
 
     /**
-     * On.
      *
      * @param event
      */

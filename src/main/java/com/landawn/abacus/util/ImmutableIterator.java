@@ -33,7 +33,6 @@ import com.landawn.abacus.util.function.Supplier;
 abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
 
     /**
-     * Removes the.
      *
      * @deprecated - UnsupportedOperationException
      */
@@ -44,7 +43,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
     }
 
     /**
-     * To set.
      *
      * @return
      */
@@ -59,7 +57,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
     }
 
     /**
-     * To collection.
      *
      * @param <C>
      * @param supplier
@@ -76,7 +73,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <E>
@@ -89,7 +85,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -107,7 +102,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type

@@ -150,7 +150,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @return
@@ -160,7 +159,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param maxConnection
@@ -171,7 +169,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param connTimeout
@@ -183,7 +180,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param maxConnection
@@ -196,7 +192,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param maxConnection
@@ -211,7 +206,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param maxConnection
@@ -227,7 +221,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param resultClass
@@ -244,7 +237,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param output
      * @param httpMethod
@@ -267,7 +259,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param output
      * @param httpMethod
@@ -281,7 +272,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param output
      * @param httpMethod
@@ -295,7 +285,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param resultClass
@@ -423,7 +412,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Open connection.
      *
      * @param httpMethod
      * @return
@@ -434,7 +422,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Open connection.
      *
      * @param httpMethod
      * @param doOutput
@@ -446,7 +433,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Open connection.
      *
      * @param httpMethod
      * @param settings
@@ -458,7 +444,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Open connection.
      *
      * @param httpMethod
      * @param doOutput
@@ -471,7 +456,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Open connection.
      *
      * @param httpMethod
      * @param queryParameters
@@ -581,7 +565,6 @@ public final class HttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Close.
      *
      * @param os
      * @param is

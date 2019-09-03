@@ -33,7 +33,6 @@ public class RefReentrantLock extends ReentrantLock {
     private final AtomicInteger refCount = new AtomicInteger();
 
     /**
-     * Method getRefCount.
      *
      * @return
      */
@@ -42,7 +41,6 @@ public class RefReentrantLock extends ReentrantLock {
     }
 
     /**
-     * Method incrementRefCount.
      *
      * @return
      */
@@ -51,7 +49,6 @@ public class RefReentrantLock extends ReentrantLock {
     }
 
     /**
-     * Method decrementRefCount.
      *
      * @return
      */

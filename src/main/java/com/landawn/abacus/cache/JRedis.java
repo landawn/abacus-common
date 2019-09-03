@@ -74,7 +74,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Gets the.
      *
      * @param key
      * @return
@@ -85,7 +84,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Sets the.
      *
      * @param key
      * @param obj
@@ -100,7 +98,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Delete.
      *
      * @param key
      * @return true, if successful
@@ -113,7 +110,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Incr.
      *
      * @param key
      * @return
@@ -124,7 +120,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Incr.
      *
      * @param key
      * @param deta
@@ -136,7 +131,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Decr.
      *
      * @param key
      * @return
@@ -147,7 +141,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Decr.
      *
      * @param key
      * @param deta
@@ -189,7 +182,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Encode.
      *
      * @param obj
      * @return
@@ -199,7 +191,6 @@ public class JRedis<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Decode.
      *
      * @param bytes
      * @return

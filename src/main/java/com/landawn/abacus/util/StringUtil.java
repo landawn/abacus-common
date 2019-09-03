@@ -193,7 +193,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Reverse.
      *
      * @param str
      * @return
@@ -254,7 +253,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Reverse delimited.
      *
      * @param str
      * @param delimiter
@@ -275,7 +273,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Pad start.
      *
      * @param str
      * @param minLength
@@ -286,7 +283,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Pad start.
      *
      * @param str
      * @param minLength
@@ -311,7 +307,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Pad start.
      *
      * @param str
      * @param minLength
@@ -356,7 +351,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Pad end.
      *
      * @param str
      * @param minLength
@@ -367,7 +361,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Pad end.
      *
      * @param str
      * @param minLength
@@ -390,7 +383,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Pad end.
      *
      * @param str
      * @param minLength
@@ -436,7 +428,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Repeat.
      *
      * @param ch
      * @param n
@@ -475,7 +466,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Repeat.
      *
      * @param ch
      * @param n
@@ -487,7 +477,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Repeat.
      *
      * @param str
      * @param repeat
@@ -498,7 +487,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Repeat.
      *
      * @param str
      * @param n
@@ -833,7 +821,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Swap case.
      *
      * @param ch
      * @return
@@ -898,7 +885,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Capitalize.
      *
      * @param str
      * @return
@@ -922,7 +908,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Uncapitalize.
      *
      * @param str
      * @return
@@ -1101,7 +1086,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Replace all.
      *
      * @param str
      * @param fromIndex
@@ -1190,7 +1174,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Replace.
      *
      * @param str
      * @param fromIndex
@@ -1576,7 +1559,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Split.
      *
      * @param str
      * @param delimiter
@@ -1589,7 +1571,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Split.
      *
      * @param str
      * @param delimiter
@@ -1606,7 +1587,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Split.
      *
      * @param str
      * @param delimiter
@@ -1619,7 +1599,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Split.
      *
      * @param str
      * @param delimiter
@@ -1636,7 +1615,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Split.
      *
      * @param str
      * @param delimiter
@@ -1650,7 +1628,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Split.
      *
      * @param str
      * @param delimiter
@@ -1787,7 +1764,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Trim.
      *
      * @param strs
      * @return
@@ -1943,7 +1919,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Strip.
      *
      * @param strs
      * @return
@@ -2110,7 +2085,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Strip.
      *
      * @param strs
      * @param stripChars
@@ -2183,7 +2157,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Strip start.
      *
      * @param strs
      * @param stripChars
@@ -2257,7 +2230,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Strip end.
      *
      * @param strs
      * @param stripChars
@@ -2317,7 +2289,6 @@ public abstract class StringUtil {
     private static final Pattern pattern_accent = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");//$NON-NLS-1$
 
     /**
-     * Strip accents.
      *
      * @param strs
      * @return
@@ -2396,7 +2367,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Chomp.
      *
      * @param strs
      * @return
@@ -2465,7 +2435,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Chop.
      *
      * @param strs
      * @return
@@ -2521,7 +2490,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Delete whitespace.
      *
      * @param strs
      * @return
@@ -2625,7 +2593,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param str
      * @param prefixSuffix
@@ -2666,7 +2633,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Unwrap.
      *
      * @param str
      * @param prefixSuffix
@@ -3788,7 +3754,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Index of.
      *
      * @param str
      * @param targetChar
@@ -3803,7 +3768,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Index of.
      *
      * @param str
      * @param fromIndex
@@ -3819,7 +3783,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Index of.
      *
      * @param str
      * @param substr
@@ -3834,7 +3797,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Index of.
      *
      * @param str
      * @param fromIndex
@@ -3959,7 +3921,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Index of.
      *
      * @param str
      * @param substr
@@ -3971,7 +3932,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Index of.
      *
      * @param str
      * @param fromIndex the index from which to start the search.
@@ -4363,7 +4323,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Contains.
      *
      * @param str
      * @param targetChar
@@ -4378,7 +4337,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Contains.
      *
      * @param str
      * @param substr
@@ -4393,7 +4351,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Contains any.
      *
      * @param str
      * @param chs
@@ -4409,7 +4366,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Contains only.
      *
      * @param str
      * @param chs
@@ -4425,7 +4381,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Contains none.
      *
      * @param str
      * @param chs
@@ -4466,7 +4421,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Contains.
      *
      * @param str
      * @param substr
@@ -4497,7 +4451,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Contains whitespace.
      *
      * @param str
      * @return true, if successful
@@ -4519,7 +4472,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Starts with.
      *
      * @param str
      * @param prefix
@@ -4541,7 +4493,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Starts with.
      *
      * @param str
      * @param prefix
@@ -4580,7 +4531,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Ends with.
      *
      * @param str
      * @param suffix
@@ -4602,7 +4552,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Ends with.
      *
      * @param str
      * @param suffix
@@ -4642,7 +4591,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Equals.
      *
      * @param a
      * @param b
@@ -4847,7 +4795,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Common prefix.
      *
      * @param strs
      * @return
@@ -4919,7 +4866,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Common suffix.
      *
      * @param strs
      * @return
@@ -4968,7 +4914,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Count matches.
      *
      * @param str
      * @param ch
@@ -4992,7 +4937,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Count matches.
      *
      * @param str
      * @param substr
@@ -5083,7 +5027,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring.
      *
      * @param str
      * @param inclusiveBeginIndex
@@ -5100,7 +5043,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring.
      *
      * @param str
      * @param inclusiveBeginIndex
@@ -5117,7 +5059,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring.
      *
      * @param str
      * @param inclusiveBeginIndex
@@ -5134,7 +5075,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
@@ -5151,7 +5091,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
@@ -5168,7 +5107,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring.
      *
      * @param str
      * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
@@ -5202,7 +5140,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring between.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -5219,7 +5156,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring between.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -5236,7 +5172,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring between.
      *
      * @param str
      * @param exclusiveBeginIndex
@@ -5253,7 +5188,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring between.
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex {@code exclusiveBeginIndex <- str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
@@ -5270,7 +5204,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring between.
      *
      * @param str
      * @param delimiterOfExclusiveBeginIndex {@code exclusiveBeginIndex <- str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - 1) + delimiterOfExclusiveBeginIndex.length() - 1 if exclusiveEndIndex > 0}
@@ -5290,7 +5223,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Substring between.
      *
      * @param str
      * @param funcOfExclusiveBeginIndex {@code exclusiveBeginIndex <- funcOfExclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
@@ -5519,7 +5451,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * First char.
      *
      * @param str
      * @return
@@ -5533,7 +5464,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Last char.
      *
      * @param str
      * @return
@@ -5587,7 +5517,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -5597,7 +5526,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -5612,7 +5540,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -5627,7 +5554,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -5660,7 +5586,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -5701,7 +5626,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -5711,7 +5635,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -5726,7 +5649,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -5741,7 +5663,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -5774,7 +5695,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -5815,7 +5735,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -5825,7 +5744,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -5840,7 +5758,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -5855,7 +5772,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -5888,7 +5804,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -5929,7 +5844,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -5939,7 +5853,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -5954,7 +5867,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -5969,7 +5881,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6002,7 +5913,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6043,7 +5953,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -6053,7 +5962,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6068,7 +5976,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6083,7 +5990,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6116,7 +6022,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6157,7 +6062,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -6167,7 +6071,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6182,7 +6085,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6197,7 +6099,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6230,7 +6131,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6271,7 +6171,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -6281,7 +6180,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6296,7 +6194,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6311,7 +6208,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6344,7 +6240,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6385,7 +6280,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -6395,7 +6289,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6410,7 +6303,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6425,7 +6317,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6458,7 +6349,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6499,7 +6389,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @return
@@ -6509,7 +6398,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6524,7 +6412,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param delimiter
@@ -6539,7 +6426,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6552,7 +6438,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6588,7 +6473,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6601,7 +6485,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param a
      * @param fromIndex
@@ -6643,7 +6526,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param c
      * @return
@@ -6653,7 +6535,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param c
      * @param delimiter
@@ -6668,7 +6549,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param c
      * @param delimiter
@@ -6683,7 +6563,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param c
      * @param fromIndex
@@ -6696,7 +6575,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param c
      * @param fromIndex
@@ -6737,7 +6615,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param c
      * @param fromIndex
@@ -6750,7 +6627,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join.
      *
      * @param c
      * @param fromIndex
@@ -6821,7 +6697,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @return
@@ -6831,7 +6706,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param entryDelimiter
@@ -6846,7 +6720,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param entryDelimiter
@@ -6861,7 +6734,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param fromIndex
@@ -6874,7 +6746,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param fromIndex
@@ -6888,7 +6759,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param fromIndex
@@ -6901,7 +6771,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param fromIndex
@@ -6915,7 +6784,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param entryDelimiter
@@ -6931,7 +6799,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param entryDelimiter
@@ -6947,7 +6814,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param fromIndex
@@ -6961,7 +6827,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param fromIndex
@@ -7006,7 +6871,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param fromIndex
@@ -7020,7 +6884,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Join entries.
      *
      * @param m
      * @param fromIndex
@@ -7082,7 +6945,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7100,7 +6962,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7119,7 +6980,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7139,7 +6999,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7160,7 +7019,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7182,7 +7040,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7206,7 +7063,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7231,7 +7087,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -7268,7 +7123,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7281,7 +7135,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7295,7 +7148,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -7310,7 +7162,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @param b
@@ -8068,7 +7919,6 @@ public abstract class StringUtil {
     }
 
     /**
-     * New string.
      *
      * @param a the specified array should not be modified after it's used to
      *            create the new String.

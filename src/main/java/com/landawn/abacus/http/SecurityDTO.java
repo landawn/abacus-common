@@ -196,7 +196,6 @@ public abstract class SecurityDTO implements Serializable {
     }
 
     /**
-     * Decrypt.
      *
      * @param userName
      * @param password
@@ -207,7 +206,6 @@ public abstract class SecurityDTO implements Serializable {
     }
 
     /**
-     * Decrypt.
      *
      * @param userName
      * @param password
@@ -282,7 +280,6 @@ public abstract class SecurityDTO implements Serializable {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -299,7 +296,6 @@ public abstract class SecurityDTO implements Serializable {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -320,7 +316,6 @@ public abstract class SecurityDTO implements Serializable {
     }
 
     /**
-     * To string.
      *
      * @return
      */

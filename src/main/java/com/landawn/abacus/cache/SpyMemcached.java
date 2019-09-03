@@ -98,7 +98,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Gets the.
      *
      * @param key
      * @return
@@ -110,7 +109,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Async get.
      *
      * @param key
      * @return
@@ -169,7 +167,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Sets the.
      *
      * @param key
      * @param obj
@@ -182,7 +179,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Async set.
      *
      * @param key
      * @param obj
@@ -194,7 +190,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Adds the.
      *
      * @param key
      * @param obj
@@ -206,7 +201,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Async add.
      *
      * @param key
      * @param obj
@@ -218,7 +212,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Replace.
      *
      * @param key
      * @param obj
@@ -230,7 +223,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Async replace.
      *
      * @param key
      * @param obj
@@ -242,7 +234,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Delete.
      *
      * @param key
      * @return true, if successful
@@ -253,7 +244,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Async delete.
      *
      * @param key
      * @return
@@ -263,7 +253,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Incr.
      *
      * @param key
      * @return
@@ -274,7 +263,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Incr.
      *
      * @param key
      * @param deta
@@ -286,7 +274,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Incr.
      *
      * @param key
      * @param deta
@@ -298,7 +285,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Incr.
      *
      * @param key
      * @param deta
@@ -311,7 +297,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Decr.
      *
      * @param key
      * @return
@@ -322,7 +307,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Decr.
      *
      * @param key
      * @param deta
@@ -334,7 +318,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Decr.
      *
      * @param key
      * @param deta
@@ -346,7 +329,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Decr.
      *
      * @param key
      * @param deta
@@ -376,7 +358,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Flush all.
      *
      * @param delay
      * @return true, if successful
@@ -404,7 +385,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Disconnect.
      *
      * @param timeout
      */
@@ -413,7 +393,6 @@ public class SpyMemcached<T> extends AbstractDistributedCacheClient<T> {
     }
 
     /**
-     * Result of.
      *
      * @param <R>
      * @param future

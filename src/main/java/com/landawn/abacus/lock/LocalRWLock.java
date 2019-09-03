@@ -207,7 +207,6 @@ public final class LocalRWLock<T> extends AbstractRWLock<T> {
     }
 
     /**
-     * Close lock.
      *
      * @param target
      * @param refRWLock

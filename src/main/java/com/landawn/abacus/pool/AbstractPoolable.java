@@ -37,7 +37,6 @@ public abstract class AbstractPoolable implements Poolable {
     }
 
     /**
-     * Activity print.
      *
      * @return
      */

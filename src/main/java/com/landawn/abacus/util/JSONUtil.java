@@ -47,7 +47,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param map
      * @return
@@ -69,7 +68,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -80,7 +78,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -91,7 +88,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -102,7 +98,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -113,7 +108,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -124,7 +118,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -135,7 +128,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -146,7 +138,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -157,7 +148,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param array
      * @return
@@ -168,7 +158,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Wrap.
      *
      * @param coll
      * @return
@@ -178,7 +167,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Unwrap.
      *
      * @param jsonObject
      * @return
@@ -189,7 +177,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Unwrap.
      *
      * @param <T>
      * @param cls
@@ -202,7 +189,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Unwrap.
      *
      * @param <T>
      * @param type
@@ -275,7 +261,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Unwrap.
      *
      * @param <T>
      * @param jsonArray
@@ -287,7 +272,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Unwrap.
      *
      * @param <T>
      * @param cls array or collection class
@@ -300,7 +284,6 @@ public final class JSONUtil {
     }
 
     /**
-     * Unwrap.
      *
      * @param <T>
      * @param type

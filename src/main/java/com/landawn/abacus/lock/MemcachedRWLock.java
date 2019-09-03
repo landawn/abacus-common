@@ -322,7 +322,6 @@ public class MemcachedRWLock<T> extends AbstractRWLock<T> {
     }
 
     /**
-     * Generate key.
      *
      * @param keyPrefix
      * @param obj

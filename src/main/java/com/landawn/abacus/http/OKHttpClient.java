@@ -191,7 +191,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @return
@@ -201,7 +200,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param maxConnection
@@ -212,7 +210,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param connTimeout
@@ -224,7 +221,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param maxConnection
@@ -237,7 +233,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param maxConnection
@@ -252,7 +247,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param url
      * @param maxConnection
@@ -268,7 +262,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param client
      * @param url
@@ -280,7 +273,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param client
      * @param url
@@ -294,7 +286,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Creates the.
      *
      * @param client
      * @param url
@@ -309,7 +300,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param resultClass
@@ -326,7 +316,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param output
      * @param httpMethod
@@ -349,7 +338,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param output
      * @param httpMethod
@@ -363,7 +351,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param output
      * @param httpMethod
@@ -377,7 +364,6 @@ public final class OKHttpClient extends AbstractHttpClient {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param resultClass

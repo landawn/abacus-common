@@ -56,7 +56,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param msg
      */
@@ -66,7 +65,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param msg
      * @param t
@@ -87,7 +85,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param msg
      */
@@ -97,7 +94,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param msg
      * @param t
@@ -118,7 +114,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param msg
      */
@@ -128,7 +123,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param msg
      * @param t
@@ -149,7 +143,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param msg
      */
@@ -159,7 +152,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param msg
      * @param t
@@ -180,7 +172,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param msg
      */
@@ -190,7 +181,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param msg
      * @param t
@@ -201,7 +191,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Log.
      *
      * @param level
      * @param msg
@@ -211,7 +200,6 @@ class JDKLogger extends AbstractLogger {
     }
 
     /**
-     * Log.
      *
      * @param level
      * @param msg

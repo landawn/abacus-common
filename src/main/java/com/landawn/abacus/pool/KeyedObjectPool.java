@@ -29,7 +29,6 @@ import java.util.Set;
 public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
-     * Method put.
      *
      * @param key
      * @param e
@@ -38,7 +37,6 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     boolean put(K key, E e);
 
     /**
-     * Method put.
      *
      * @param key
      * @param e
@@ -48,7 +46,6 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     boolean put(K key, E e, boolean autoDestroyOnFailedToPut);
 
     /**
-     * Method get.
      *
      * @param key
      * @return E
@@ -56,7 +53,6 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     E get(K key);
 
     /**
-     * Method remove.
      *
      * @param key
      * @return E
@@ -72,21 +68,18 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     E peek(K key);
 
     /**
-     * Method keySet.
      * 
      * @return Set<K>
      */
     Set<K> keySet();
 
     /**
-     * Method values.
      * 
      * @return Collection<E>
      */
     Collection<E> values();
 
     /**
-     * Method containsKey.
      *
      * @param key
      * @return boolean
@@ -94,7 +87,6 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     boolean containsKey(K key);
 
     /**
-     * Method containsValue.
      *
      * @param e
      * @return boolean
@@ -110,7 +102,6 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     public static interface MemoryMeasure<K, E> {
 
         /**
-         * Size of.
          *
          * @param key
          * @param e

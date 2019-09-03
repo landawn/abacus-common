@@ -88,7 +88,6 @@ public interface DataSet {
     ImmutableList<String> columnNameList();
 
     /**
-     * Method getColumnName.
      *
      * @param columnIndex
      * @return
@@ -96,7 +95,6 @@ public interface DataSet {
     String getColumnName(int columnIndex);
 
     /**
-     * Method getColumnIndex.
      *
      * @param columnName
      * @return -1 if the specified <code>columnName</code> is not found
@@ -112,7 +110,6 @@ public interface DataSet {
     int[] getColumnIndexes(Collection<String> columnNames);
 
     /**
-     * Contains column.
      *
      * @param columnName
      * @return true, if successful
@@ -128,7 +125,6 @@ public interface DataSet {
     boolean containsAllColumns(Collection<String> columnNames);
 
     /**
-     * Rename column.
      *
      * @param columnName
      * @param newColumnName
@@ -136,14 +132,12 @@ public interface DataSet {
     void renameColumn(String columnName, String newColumnName);
 
     /**
-     * Rename columns.
      *
      * @param oldNewNames
      */
     void renameColumns(Map<String, String> oldNewNames);
 
     /**
-     * Rename column.
      *
      * @param <E>
      * @param columnName
@@ -153,7 +147,6 @@ public interface DataSet {
     <E extends Exception> void renameColumn(String columnName, Try.Function<String, String, E> func) throws E;
 
     /**
-     * Rename columns.
      *
      * @param <E>
      * @param columnNames
@@ -163,7 +156,6 @@ public interface DataSet {
     <E extends Exception> void renameColumns(Collection<String> columnNames, Try.Function<String, String, E> func) throws E;
 
     /**
-     * Rename columns.
      *
      * @param <E>
      * @param func
@@ -172,7 +164,6 @@ public interface DataSet {
     <E extends Exception> void renameColumns(Try.Function<String, String, E> func) throws E;
 
     /**
-     * Move column.
      *
      * @param columnName
      * @param newPosition
@@ -180,7 +171,6 @@ public interface DataSet {
     void moveColumn(String columnName, int newPosition);
 
     /**
-     * Move columns.
      *
      * @param columnNameNewPositionMap
      */
@@ -236,7 +226,6 @@ public interface DataSet {
     <T> T get(Class<T> targetType, int rowIndex, int columnIndex);
 
     /**
-     * Sets the.
      *
      * @param rowIndex
      * @param columnIndex
@@ -527,7 +516,6 @@ public interface DataSet {
     boolean isNull(String columnName);
 
     /**
-     * Method set.
      *
      * @param columnIndex
      * @param value
@@ -535,7 +523,6 @@ public interface DataSet {
     void set(int columnIndex, Object value);
 
     /**
-     * Method set.
      *
      * @param columnName
      * @param value
@@ -570,7 +557,6 @@ public interface DataSet {
     <T> List<T> copyOfColumn(String columnName);
 
     /**
-     * Method addColumn.
      *
      * @param columnName
      * @param column
@@ -578,7 +564,6 @@ public interface DataSet {
     void addColumn(String columnName, List<?> column);
 
     /**
-     * Method addColumn.
      *
      * @param columnIndex position to add.
      * @param columnName
@@ -766,7 +751,6 @@ public interface DataSet {
     //    void convertColumn(Class<?>[] targetColumnTypes);
     //
     /**
-     * Combine columns.
      *
      * @param columnNames
      * @param newColumnName
@@ -775,7 +759,6 @@ public interface DataSet {
     void combineColumns(Collection<String> columnNames, String newColumnName, Class<?> newColumnClass);
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param columnNames
@@ -787,7 +770,6 @@ public interface DataSet {
             throws E;
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param columnNames
@@ -798,7 +780,6 @@ public interface DataSet {
     <E extends Exception> void combineColumns(Tuple2<String, String> columnNames, String newColumnName, Try.BiFunction<?, ?, ?, E> combineFunc) throws E;
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param columnNames
@@ -810,7 +791,6 @@ public interface DataSet {
             throws E;
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param columnNameFilter
@@ -821,7 +801,6 @@ public interface DataSet {
     <E extends Exception> void combineColumns(Try.Predicate<String, E> columnNameFilter, String newColumnName, Class<?> newColumnClass) throws E;
 
     /**
-     * Combine columns.
      *
      * @param <E>
      * @param <E2>
@@ -835,7 +814,6 @@ public interface DataSet {
             Try.Function<? super DisposableObjArray, ?, E2> combineFunc) throws E, E2;
 
     /**
-     * Divide column.
      *
      * @param <T>
      * @param <E>
@@ -847,7 +825,6 @@ public interface DataSet {
     <T, E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Try.Function<T, ? extends List<?>, E> divideFunc) throws E;
 
     /**
-     * Divide column.
      *
      * @param <T>
      * @param <E>
@@ -859,7 +836,6 @@ public interface DataSet {
     <T, E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Try.BiConsumer<T, Object[], E> output) throws E;
 
     /**
-     * Divide column.
      *
      * @param <T>
      * @param <E>
@@ -872,7 +848,6 @@ public interface DataSet {
             throws E;
 
     /**
-     * Divide column.
      *
      * @param <T>
      * @param <E>
@@ -1026,14 +1001,12 @@ public interface DataSet {
     <T> T getRow(IntFunction<? extends T> rowSupplier, Collection<String> columnNames, int rowNum);
 
     /**
-     * First row.
      *
      * @return {@code Optional<Object[]>}
      */
     Optional<Object[]> firstRow();
 
     /**
-     * First row.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -1042,7 +1015,6 @@ public interface DataSet {
     <T> Optional<T> firstRow(Class<? extends T> rowClass);
 
     /**
-     * First row.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -1052,7 +1024,6 @@ public interface DataSet {
     <T> Optional<T> firstRow(Class<? extends T> rowClass, Collection<String> columnNames);
 
     /**
-     * First row.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -1061,7 +1032,6 @@ public interface DataSet {
     <T> Optional<T> firstRow(IntFunction<? extends T> rowSupplier);
 
     /**
-     * First row.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -1071,14 +1041,12 @@ public interface DataSet {
     <T> Optional<T> firstRow(IntFunction<? extends T> rowSupplier, Collection<String> columnNames);
 
     /**
-     * Last row.
      *
      * @return {@code Optional<Object[]>}
      */
     Optional<Object[]> lastRow();
 
     /**
-     * Last row.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -1087,7 +1055,6 @@ public interface DataSet {
     <T> Optional<T> lastRow(Class<? extends T> rowClass);
 
     /**
-     * Last row.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -1098,7 +1065,6 @@ public interface DataSet {
     <T> Optional<T> lastRow(Class<? extends T> rowClass, Collection<String> columnNames);
 
     /**
-     * Last row.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -1107,7 +1073,6 @@ public interface DataSet {
     <T> Optional<T> lastRow(IntFunction<? extends T> rowSupplier);
 
     /**
-     * Last row.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -1168,7 +1133,6 @@ public interface DataSet {
             throws E;
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -1178,7 +1142,6 @@ public interface DataSet {
     <E extends Exception> void forEach(Tuple2<String, String> columnNames, Try.BiConsumer<?, ?, E> action) throws E;
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -1190,7 +1153,6 @@ public interface DataSet {
     <E extends Exception> void forEach(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Try.BiConsumer<?, ?, E> action) throws E;
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -1200,7 +1162,6 @@ public interface DataSet {
     <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, Try.TriConsumer<?, ?, ?, E> action) throws E;
 
     /**
-     * For each.
      *
      * @param <E>
      * @param columnNames
@@ -1213,14 +1174,12 @@ public interface DataSet {
             throws E;
 
     /**
-     * To list.
      *
      * @return
      */
     List<Object[]> toList();
 
     /**
-     * To list.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -1229,7 +1188,6 @@ public interface DataSet {
     List<Object[]> toList(int fromRowIndex, int toRowIndex);
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -1238,7 +1196,6 @@ public interface DataSet {
     <T> List<T> toList(Class<? extends T> rowClass);
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -1249,7 +1206,6 @@ public interface DataSet {
     <T> List<T> toList(Class<? extends T> rowClass, int fromRowIndex, int toRowIndex);
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -1259,7 +1215,6 @@ public interface DataSet {
     <T> List<T> toList(Class<? extends T> rowClass, Collection<String> columnNames);
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -1271,7 +1226,6 @@ public interface DataSet {
     <T> List<T> toList(Class<? extends T> rowClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -1280,7 +1234,6 @@ public interface DataSet {
     <T> List<T> toList(IntFunction<? extends T> rowSupplier);
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -1291,7 +1244,6 @@ public interface DataSet {
     <T> List<T> toList(IntFunction<? extends T> rowSupplier, int fromRowIndex, int toRowIndex);
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -1301,7 +1253,6 @@ public interface DataSet {
     <T> List<T> toList(IntFunction<? extends T> rowSupplier, Collection<String> columnNames);
 
     /**
-     * To list.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -1313,7 +1264,6 @@ public interface DataSet {
     <T> List<T> toList(IntFunction<? extends T> rowSupplier, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1324,7 +1274,6 @@ public interface DataSet {
     <K, V> Map<K, V> toMap(String keyColumnName, String valueColumnName);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1337,7 +1286,6 @@ public interface DataSet {
     <K, V> Map<K, V> toMap(String keyColumnName, String valueColumnName, int fromRowIndex, int toRowIndex);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1352,7 +1300,6 @@ public interface DataSet {
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, String valueColumnName, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1364,7 +1311,6 @@ public interface DataSet {
     <K, V> Map<K, V> toMap(Class<? extends V> rowClass, String keyColumnName, Collection<String> valueColumnNames);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1378,7 +1324,6 @@ public interface DataSet {
     <K, V> Map<K, V> toMap(Class<? extends V> rowClass, String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1395,7 +1340,6 @@ public interface DataSet {
             int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1407,7 +1351,6 @@ public interface DataSet {
     <K, V> Map<K, V> toMap(IntFunction<? extends V> rowSupplier, String keyColumnName, Collection<String> valueColumnNames);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1421,7 +1364,6 @@ public interface DataSet {
     <K, V> Map<K, V> toMap(IntFunction<? extends V> rowSupplier, String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1438,7 +1380,6 @@ public interface DataSet {
             int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1449,7 +1390,6 @@ public interface DataSet {
     <K, E> ListMultimap<K, E> toMultimap(String keyColumnName, String valueColumnName);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1462,7 +1402,6 @@ public interface DataSet {
     <K, E> ListMultimap<K, E> toMultimap(String keyColumnName, String valueColumnName, int fromRowIndex, int toRowIndex);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1479,7 +1418,6 @@ public interface DataSet {
             IntFunction<? extends M> supplier);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1491,7 +1429,6 @@ public interface DataSet {
     <K, E> ListMultimap<K, E> toMultimap(Class<? extends E> rowClass, String keyColumnName, Collection<String> valueColumnNames);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1506,7 +1443,6 @@ public interface DataSet {
             int toRowIndex);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1524,7 +1460,6 @@ public interface DataSet {
             Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1536,7 +1471,6 @@ public interface DataSet {
     <K, E> ListMultimap<K, E> toMultimap(IntFunction<? extends E> rowSupplier, String keyColumnName, Collection<String> valueColumnNames);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1551,7 +1485,6 @@ public interface DataSet {
             int toRowIndex);
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -1569,14 +1502,12 @@ public interface DataSet {
             Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
-     * To JSON.
      *
      * @return
      */
     String toJSON();
 
     /**
-     * To JSON.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -1585,7 +1516,6 @@ public interface DataSet {
     String toJSON(int fromRowIndex, int toRowIndex);
 
     /**
-     * To JSON.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -1595,7 +1525,6 @@ public interface DataSet {
     String toJSON(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * To JSON.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -1603,7 +1532,6 @@ public interface DataSet {
     void toJSON(File out) throws UncheckedIOException;
 
     /**
-     * To JSON.
      *
      * @param out
      * @param fromRowIndex
@@ -1613,7 +1541,6 @@ public interface DataSet {
     void toJSON(File out, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To JSON.
      *
      * @param out
      * @param columnNames
@@ -1624,7 +1551,6 @@ public interface DataSet {
     void toJSON(File out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To JSON.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -1632,7 +1558,6 @@ public interface DataSet {
     void toJSON(OutputStream out) throws UncheckedIOException;
 
     /**
-     * To JSON.
      *
      * @param out
      * @param fromRowIndex
@@ -1642,7 +1567,6 @@ public interface DataSet {
     void toJSON(OutputStream out, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To JSON.
      *
      * @param out
      * @param columnNames
@@ -1653,7 +1577,6 @@ public interface DataSet {
     void toJSON(OutputStream out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To JSON.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -1661,7 +1584,6 @@ public interface DataSet {
     void toJSON(Writer out) throws UncheckedIOException;
 
     /**
-     * To JSON.
      *
      * @param out
      * @param fromRowIndex
@@ -1671,7 +1593,6 @@ public interface DataSet {
     void toJSON(Writer out, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To JSON.
      *
      * @param out
      * @param columnNames
@@ -1682,14 +1603,12 @@ public interface DataSet {
     void toJSON(Writer out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @return
      */
     String toXML();
 
     /**
-     * To XML.
      *
      * @param rowElementName
      * @return
@@ -1697,7 +1616,6 @@ public interface DataSet {
     String toXML(String rowElementName);
 
     /**
-     * To XML.
      *
      * @param fromRowIndex
      * @param toRowIndex
@@ -1706,7 +1624,6 @@ public interface DataSet {
     String toXML(int fromRowIndex, int toRowIndex);
 
     /**
-     * To XML.
      *
      * @param rowElementName
      * @param fromRowIndex
@@ -1716,7 +1633,6 @@ public interface DataSet {
     String toXML(String rowElementName, int fromRowIndex, int toRowIndex);
 
     /**
-     * To XML.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -1726,7 +1642,6 @@ public interface DataSet {
     String toXML(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * To XML.
      *
      * @param rowElementName
      * @param columnNames
@@ -1737,7 +1652,6 @@ public interface DataSet {
     String toXML(String rowElementName, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * To XML.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -1745,7 +1659,6 @@ public interface DataSet {
     void toXML(File out) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1754,7 +1667,6 @@ public interface DataSet {
     void toXML(File out, String rowElementName) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param fromRowIndex
@@ -1764,7 +1676,6 @@ public interface DataSet {
     void toXML(File out, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1775,7 +1686,6 @@ public interface DataSet {
     void toXML(File out, String rowElementName, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param columnNames
@@ -1786,7 +1696,6 @@ public interface DataSet {
     void toXML(File out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1798,7 +1707,6 @@ public interface DataSet {
     void toXML(File out, String rowElementName, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -1806,7 +1714,6 @@ public interface DataSet {
     void toXML(OutputStream out) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1815,7 +1722,6 @@ public interface DataSet {
     void toXML(OutputStream out, String rowElementName) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param fromRowIndex
@@ -1825,7 +1731,6 @@ public interface DataSet {
     void toXML(OutputStream out, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1836,7 +1741,6 @@ public interface DataSet {
     void toXML(OutputStream out, String rowElementName, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param columnNames
@@ -1847,7 +1751,6 @@ public interface DataSet {
     void toXML(OutputStream out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1859,7 +1762,6 @@ public interface DataSet {
     void toXML(OutputStream out, String rowElementName, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -1867,7 +1769,6 @@ public interface DataSet {
     void toXML(Writer out) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1876,7 +1777,6 @@ public interface DataSet {
     void toXML(Writer out, String rowElementName) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param fromRowIndex
@@ -1886,7 +1786,6 @@ public interface DataSet {
     void toXML(Writer out, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1897,7 +1796,6 @@ public interface DataSet {
     void toXML(Writer out, String rowElementName, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param columnNames
@@ -1908,7 +1806,6 @@ public interface DataSet {
     void toXML(Writer out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To XML.
      *
      * @param out
      * @param rowElementName
@@ -1920,14 +1817,12 @@ public interface DataSet {
     void toXML(Writer out, String rowElementName, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @return
      */
     String toCSV();
 
     /**
-     * To CSV.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -1937,7 +1832,6 @@ public interface DataSet {
     String toCSV(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * To CSV.
      *
      * @param writeTitle
      * @param quoteValue
@@ -1946,7 +1840,6 @@ public interface DataSet {
     String toCSV(boolean writeTitle, boolean quoteValue);
 
     /**
-     * To CSV.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -1958,7 +1851,6 @@ public interface DataSet {
     String toCSV(Collection<String> columnNames, int fromRowIndex, int toRowIndex, boolean writeTitle, boolean quoteValue);
 
     /**
-     * To CSV.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -1966,7 +1858,6 @@ public interface DataSet {
     void toCSV(File out) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -1977,7 +1868,6 @@ public interface DataSet {
     void toCSV(File out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @param writeTitle
@@ -1987,7 +1877,6 @@ public interface DataSet {
     void toCSV(File out, boolean writeTitle, boolean quoteValue) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -2000,7 +1889,6 @@ public interface DataSet {
     void toCSV(File out, Collection<String> columnNames, int fromRowIndex, int toRowIndex, boolean writeTitle, boolean quoteValue) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -2008,7 +1896,6 @@ public interface DataSet {
     void toCSV(OutputStream out);
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -2019,7 +1906,6 @@ public interface DataSet {
     void toCSV(OutputStream out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @param writeTitle
@@ -2029,7 +1915,6 @@ public interface DataSet {
     void toCSV(OutputStream out, boolean writeTitle, boolean quoteValue) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -2043,7 +1928,6 @@ public interface DataSet {
             throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @throws UncheckedIOException the unchecked IO exception
@@ -2051,7 +1935,6 @@ public interface DataSet {
     void toCSV(Writer out);
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -2062,7 +1945,6 @@ public interface DataSet {
     void toCSV(Writer out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @param writeTitle
@@ -2072,7 +1954,6 @@ public interface DataSet {
     void toCSV(Writer out, boolean writeTitle, boolean quoteValue) throws UncheckedIOException;
 
     /**
-     * To CSV.
      *
      * @param out
      * @param columnNames
@@ -2086,7 +1967,6 @@ public interface DataSet {
             throws UncheckedIOException;
 
     /**
-     * Group by.
      *
      * @param columnName specifying the column to group by.
      * @return
@@ -2094,7 +1974,6 @@ public interface DataSet {
     DataSet groupBy(String columnName);
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param columnName
@@ -2106,7 +1985,6 @@ public interface DataSet {
     <T> DataSet groupBy(String columnName, String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param <E>
@@ -2121,7 +1999,6 @@ public interface DataSet {
             Try.Function<Stream<T>, ?, E> func) throws E;
 
     /**
-     * Group by.
      *
      * @param columnName
      * @param aggregateResultColumnName
@@ -2133,7 +2010,6 @@ public interface DataSet {
             Collector<? super Object[], ?, ?> collector);
 
     /**
-     * Group by.
      *
      * @param <U>
      * @param <E>
@@ -2149,7 +2025,6 @@ public interface DataSet {
             Try.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector) throws E;
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <E>
@@ -2161,7 +2036,6 @@ public interface DataSet {
     <K, E extends Exception> DataSet groupBy(String columnName, Try.Function<K, ?, E> keyMapper) throws E;
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <T>
@@ -2178,7 +2052,6 @@ public interface DataSet {
             String aggregateOnColumnName, Collector<T, ?, ?> collector) throws E;
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <T>
@@ -2197,7 +2070,6 @@ public interface DataSet {
             String aggregateOnColumnName, Try.Function<Stream<T>, ?, E2> func) throws E, E2;
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <E>
@@ -2213,7 +2085,6 @@ public interface DataSet {
             Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector) throws E;
 
     /**
-     * Group by.
      *
      * @param <K> the key type
      * @param <U>
@@ -2234,7 +2105,6 @@ public interface DataSet {
             throws E, E2;
 
     /**
-     * Group by.
      *
      * @param columnNames
      * @return
@@ -2242,7 +2112,6 @@ public interface DataSet {
     DataSet groupBy(Collection<String> columnNames);
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param columnNames
@@ -2254,7 +2123,6 @@ public interface DataSet {
     <T> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param <E>
@@ -2269,7 +2137,6 @@ public interface DataSet {
             Try.Function<Stream<T>, ?, E> func) throws E;
 
     /**
-     * Group by.
      *
      * @param columnNames
      * @param aggregateResultColumnName
@@ -2281,7 +2148,6 @@ public interface DataSet {
             Collector<? super Object[], ?, ?> collector);
 
     /**
-     * Group by.
      *
      * @param <U>
      * @param <E>
@@ -2297,7 +2163,6 @@ public interface DataSet {
             Try.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector) throws E;
 
     /**
-     * Group by.
      *
      * @param <E>
      * @param columnNames
@@ -2308,7 +2173,6 @@ public interface DataSet {
     <E extends Exception> DataSet groupBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper) throws E;
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param <E>
@@ -2324,7 +2188,6 @@ public interface DataSet {
             String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector) throws E;
 
     /**
-     * Group by.
      *
      * @param <T>
      * @param <E>
@@ -2342,7 +2205,6 @@ public interface DataSet {
             String aggregateResultColumnName, String aggregateOnColumnName, Try.Function<Stream<T>, ?, E2> func) throws E, E2;
 
     /**
-     * Group by.
      *
      * @param <E>
      * @param columnNames
@@ -2357,7 +2219,6 @@ public interface DataSet {
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector) throws E;
 
     /**
-     * Group by.
      *
      * @param <U>
      * @param <E>
@@ -2377,7 +2238,6 @@ public interface DataSet {
             Collector<? super U, ?, ?> collector) throws E, E2;
 
     /**
-     * Rollup.
      *
      * @param columnNames
      * @return
@@ -2385,7 +2245,6 @@ public interface DataSet {
     Stream<DataSet> rollup(Collection<String> columnNames);
 
     /**
-     * Rollup.
      *
      * @param <T>
      * @param columnNames
@@ -2397,7 +2256,6 @@ public interface DataSet {
     <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
-     * Rollup.
      *
      * @param <T>
      * @param <E>
@@ -2411,7 +2269,6 @@ public interface DataSet {
             Try.Function<Stream<T>, ?, E> func);
 
     /**
-     * Rollup.
      *
      * @param columnNames
      * @param aggregateResultColumnName
@@ -2423,7 +2280,6 @@ public interface DataSet {
             Collector<? super Object[], ?, ?> collector);
 
     /**
-     * Rollup.
      *
      * @param <U>
      * @param <E>
@@ -2438,7 +2294,6 @@ public interface DataSet {
             Try.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector);
 
     /**
-     * Rollup.
      *
      * @param <E>
      * @param columnNames
@@ -2448,7 +2303,6 @@ public interface DataSet {
     <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper);
 
     /**
-     * Rollup.
      *
      * @param <T>
      * @param <E>
@@ -2463,7 +2317,6 @@ public interface DataSet {
             String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
-     * Rollup.
      *
      * @param <T>
      * @param <E>
@@ -2480,7 +2333,6 @@ public interface DataSet {
             Try.Function<Stream<T>, ?, E2> func);
 
     /**
-     * Rollup.
      *
      * @param <E>
      * @param columnNames
@@ -2494,7 +2346,6 @@ public interface DataSet {
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
 
     /**
-     * Rollup.
      *
      * @param <U>
      * @param <E>
@@ -2512,7 +2363,6 @@ public interface DataSet {
             Try.Function<? super DisposableObjArray, U, E2> rowMapper, Collector<? super U, ?, ?> collector);
 
     /**
-     * Cube.
      *
      * @param columnNames
      * @return
@@ -2520,7 +2370,6 @@ public interface DataSet {
     Stream<DataSet> cube(Collection<String> columnNames);
 
     /**
-     * Cube.
      *
      * @param <T>
      * @param columnNames
@@ -2532,7 +2381,6 @@ public interface DataSet {
     <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
-     * Cube.
      *
      * @param <T>
      * @param <E>
@@ -2546,7 +2394,6 @@ public interface DataSet {
             Try.Function<Stream<T>, ?, E> func);
 
     /**
-     * Cube.
      *
      * @param columnNames
      * @param aggregateResultColumnName
@@ -2558,7 +2405,6 @@ public interface DataSet {
             Collector<? super Object[], ?, ?> collector);
 
     /**
-     * Cube.
      *
      * @param <U>
      * @param <E>
@@ -2573,7 +2419,6 @@ public interface DataSet {
             Try.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector);
 
     /**
-     * Cube.
      *
      * @param <E>
      * @param columnNames
@@ -2583,7 +2428,6 @@ public interface DataSet {
     <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper);
 
     /**
-     * Cube.
      *
      * @param <T>
      * @param <E>
@@ -2598,7 +2442,6 @@ public interface DataSet {
             String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
-     * Cube.
      *
      * @param <T>
      * @param <E>
@@ -2615,7 +2458,6 @@ public interface DataSet {
             Try.Function<Stream<T>, ?, E2> func);
 
     /**
-     * Cube.
      *
      * @param <E>
      * @param columnNames
@@ -2629,7 +2471,6 @@ public interface DataSet {
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
 
     /**
-     * Cube.
      *
      * @param <U>
      * @param <E>
@@ -2647,14 +2488,12 @@ public interface DataSet {
             Try.Function<? super DisposableObjArray, U, E2> rowMapper, Collector<? super U, ?, ?> collector);
 
     /**
-     * Sort by.
      *
      * @param columnName
      */
     void sortBy(String columnName);
 
     /**
-     * Sort by.
      *
      * @param <T>
      * @param columnName
@@ -2663,14 +2502,12 @@ public interface DataSet {
     <T> void sortBy(String columnName, Comparator<T> cmp);
 
     /**
-     * Sort by.
      *
      * @param columnNames
      */
     void sortBy(Collection<String> columnNames);
 
     /**
-     * Sort by.
      *
      * @param columnNames
      * @param cmp
@@ -2678,7 +2515,6 @@ public interface DataSet {
     void sortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp);
 
     /**
-     * Sort by.
      *
      * @param columnNames
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
@@ -2727,7 +2563,6 @@ public interface DataSet {
     void parallelSortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper);
 
     /**
-     * Top by.
      *
      * @param columnName
      * @param n
@@ -2736,7 +2571,6 @@ public interface DataSet {
     DataSet topBy(String columnName, int n);
 
     /**
-     * Top by.
      *
      * @param <T>
      * @param columnName
@@ -2747,7 +2581,6 @@ public interface DataSet {
     <T> DataSet topBy(String columnName, int n, Comparator<T> cmp);
 
     /**
-     * Top by.
      *
      * @param columnNames
      * @param n
@@ -2756,7 +2589,6 @@ public interface DataSet {
     DataSet topBy(Collection<String> columnNames, int n);
 
     /**
-     * Top by.
      *
      * @param columnNames
      * @param n
@@ -2766,7 +2598,6 @@ public interface DataSet {
     DataSet topBy(Collection<String> columnNames, int n, Comparator<? super Object[]> cmp);
 
     /**
-     * Top by.
      *
      * @param columnNames
      * @param n
@@ -2823,7 +2654,6 @@ public interface DataSet {
     <E extends Exception> DataSet distinctBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
@@ -2833,7 +2663,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Try.Predicate<? super DisposableObjArray, E> filter) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
@@ -2844,7 +2673,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromRowIndex
@@ -2856,7 +2684,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Try.Predicate<? super DisposableObjArray, E> filter) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromRowIndex
@@ -2869,7 +2696,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -2880,7 +2706,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Try.BiPredicate<?, ?, E> filter) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -2892,7 +2717,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Try.BiPredicate<?, ?, E> filter, int max) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -2905,7 +2729,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Try.BiPredicate<?, ?, E> filter) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -2920,7 +2743,6 @@ public interface DataSet {
             throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -2931,7 +2753,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Try.TriPredicate<?, ?, ?, E> filter) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -2943,7 +2764,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Try.TriPredicate<?, ?, ?, E> filter, int max) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -2957,7 +2777,6 @@ public interface DataSet {
             throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -2972,7 +2791,6 @@ public interface DataSet {
             int max) throws E;
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param <E>
@@ -2984,7 +2802,6 @@ public interface DataSet {
     <T, E extends Exception> DataSet filter(String columnName, Try.Predicate<T, E> filter) throws E;
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param <E>
@@ -2997,7 +2814,6 @@ public interface DataSet {
     <T, E extends Exception> DataSet filter(String columnName, Try.Predicate<T, E> filter, int max) throws E;
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param <E>
@@ -3011,7 +2827,6 @@ public interface DataSet {
     <T, E extends Exception> DataSet filter(String columnName, int fromRowIndex, int toRowIndex, Try.Predicate<T, E> filter) throws E;
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param <E>
@@ -3026,7 +2841,6 @@ public interface DataSet {
     <T, E extends Exception> DataSet filter(String columnName, int fromRowIndex, int toRowIndex, Try.Predicate<T, E> filter, int max) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -3037,7 +2851,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Collection<String> columnNames, Try.Predicate<? super DisposableObjArray, E> filter) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -3049,7 +2862,6 @@ public interface DataSet {
     <E extends Exception> DataSet filter(Collection<String> columnNames, Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -3063,7 +2875,6 @@ public interface DataSet {
             throws E;
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param columnNames
@@ -3078,7 +2889,6 @@ public interface DataSet {
             int max) throws E;
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnName
@@ -3091,7 +2901,6 @@ public interface DataSet {
     <E extends Exception> DataSet map(String fromColumnName, Try.Function<?, ?, E> func, String newColumnName, String copyingColumnName) throws E;
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnName
@@ -3104,7 +2913,6 @@ public interface DataSet {
     <E extends Exception> DataSet map(String fromColumnName, Try.Function<?, ?, E> func, String newColumnName, Collection<String> copyingColumnNames) throws E;
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -3118,7 +2926,6 @@ public interface DataSet {
             Collection<String> copyingColumnNames) throws E;
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -3132,7 +2939,6 @@ public interface DataSet {
             Collection<String> copyingColumnNames) throws E;
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -3146,7 +2952,6 @@ public interface DataSet {
             Collection<String> copyingColumnNames) throws E;
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnName
@@ -3160,7 +2965,6 @@ public interface DataSet {
             String copyingColumnName) throws E;
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnName
@@ -3174,7 +2978,6 @@ public interface DataSet {
             Collection<String> copyingColumnNames) throws E;
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -3188,7 +2991,6 @@ public interface DataSet {
             Collection<String> copyingColumnNames) throws E;
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -3202,7 +3004,6 @@ public interface DataSet {
             String newColumnName, Collection<String> copyingColumnNames) throws E;
 
     /**
-     * Flat map.
      *
      * @param <E>
      * @param fromColumnNames
@@ -3436,7 +3237,6 @@ public interface DataSet {
     DataSet difference(DataSet dataSet);
 
     /**
-     * Symmetric difference.
      *
      * @param dataSet
      * @return
@@ -3492,7 +3292,6 @@ public interface DataSet {
     DataSet merge(DataSet from, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * Cartesian product.
      *
      * @param b
      * @return
@@ -3617,7 +3416,6 @@ public interface DataSet {
     DataSet clone(boolean freeze);
 
     /**
-     * Iterator.
      *
      * @param <A>
      * @param <B>
@@ -3628,7 +3426,6 @@ public interface DataSet {
     <A, B> BiIterator<A, B> iterator(String columnNameA, String columnNameB);
 
     /**
-     * Iterator.
      *
      * @param <A>
      * @param <B>
@@ -3641,7 +3438,6 @@ public interface DataSet {
     <A, B> BiIterator<A, B> iterator(String columnNameA, String columnNameB, int fromRowIndex, int toRowIndex);
 
     /**
-     * Iterator.
      *
      * @param <A>
      * @param <B>
@@ -3654,7 +3450,6 @@ public interface DataSet {
     <A, B, C> TriIterator<A, B, C> iterator(String columnNameA, String columnNameB, String columnNameC);
 
     /**
-     * Iterator.
      *
      * @param <A>
      * @param <B>
@@ -3669,7 +3464,6 @@ public interface DataSet {
     <A, B, C> TriIterator<A, B, C> iterator(String columnNameA, String columnNameB, String columnNameC, int fromRowIndex, int toRowIndex);
 
     /**
-     * Method paginate.
      *
      * @param pageSize
      * @return
@@ -3677,7 +3471,6 @@ public interface DataSet {
     PaginatedDataSet paginate(int pageSize);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param columnName
@@ -3686,7 +3479,6 @@ public interface DataSet {
     <T> Stream<T> stream(String columnName);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param columnName
@@ -3697,7 +3489,6 @@ public interface DataSet {
     <T> Stream<T> stream(String columnName, int fromRowIndex, int toRowIndex);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
@@ -3706,7 +3497,6 @@ public interface DataSet {
     <T> Stream<T> stream(Function<? super DisposableObjArray, T> rowMapper);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param fromRowIndex
@@ -3717,7 +3507,6 @@ public interface DataSet {
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Function<? super DisposableObjArray, T> rowMapper);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param columnNames
@@ -3727,7 +3516,6 @@ public interface DataSet {
     <T> Stream<T> stream(Collection<String> columnNames, Function<? super DisposableObjArray, T> rowMapper);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param columnNames
@@ -3739,7 +3527,6 @@ public interface DataSet {
     <T> Stream<T> stream(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Function<? super DisposableObjArray, T> rowMapper);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -3748,7 +3535,6 @@ public interface DataSet {
     <T> Stream<T> stream(Class<? extends T> rowClass);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -3759,7 +3545,6 @@ public interface DataSet {
     <T> Stream<T> stream(Class<? extends T> rowClass, int fromRowIndex, int toRowIndex);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -3769,7 +3554,6 @@ public interface DataSet {
     <T> Stream<T> stream(Class<? extends T> rowClass, Collection<String> columnNames);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
@@ -3781,7 +3565,6 @@ public interface DataSet {
     <T> Stream<T> stream(Class<? extends T> rowClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -3790,7 +3573,6 @@ public interface DataSet {
     <T> Stream<T> stream(IntFunction<? extends T> rowSupplier);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -3801,7 +3583,6 @@ public interface DataSet {
     <T> Stream<T> stream(IntFunction<? extends T> rowSupplier, int fromRowIndex, int toRowIndex);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -3811,7 +3592,6 @@ public interface DataSet {
     <T> Stream<T> stream(IntFunction<? extends T> rowSupplier, Collection<String> columnNames);
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
@@ -3823,7 +3603,6 @@ public interface DataSet {
     <T> Stream<T> stream(IntFunction<? extends T> rowSupplier, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>
@@ -3834,7 +3613,6 @@ public interface DataSet {
     <R, E extends Exception> R apply(Try.Function<? super DataSet, R, E> func) throws E;
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -3848,7 +3626,6 @@ public interface DataSet {
     void freeze();
 
     /**
-     * Method frozen.
      *
      * @return true, if successful
      */
@@ -3879,28 +3656,24 @@ public interface DataSet {
     int size();
 
     /**
-     * Properties.
      *
      * @return
      */
     Properties<String, Object> properties();
 
     /**
-     * Column names.
      *
      * @return
      */
     Stream<String> columnNames();
 
     /**
-     * Columns.
      *
      * @return
      */
     Stream<ImmutableList<Object>> columns();
 
     /**
-     * Column map.
      *
      * @return key are column name, value is column - an immutable list, backed by the column in this {@code DataSet}.
      */
@@ -3909,14 +3682,12 @@ public interface DataSet {
     // DataSetBuilder builder();
 
     /**
-     * Println.
      *
      * @throws UncheckedIOException the unchecked IO exception
      */
     void println() throws UncheckedIOException;
 
     /**
-     * Println.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -3926,7 +3697,6 @@ public interface DataSet {
     void println(Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
-     * Println.
      *
      * @param <W>
      * @param outputWriter
@@ -3936,7 +3706,6 @@ public interface DataSet {
     <W extends Writer> W println(W outputWriter) throws UncheckedIOException;
 
     /**
-     * Println.
      *
      * @param <W>
      * @param outputWriter

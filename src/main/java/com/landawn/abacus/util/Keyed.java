@@ -42,7 +42,6 @@ public class Keyed<K, T> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <T>
@@ -55,7 +54,6 @@ public class Keyed<K, T> {
     }
 
     /**
-     * Key.
      *
      * @return
      */
@@ -64,7 +62,6 @@ public class Keyed<K, T> {
     }
 
     /**
-     * Val.
      *
      * @return
      */
@@ -73,7 +70,6 @@ public class Keyed<K, T> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -83,7 +79,6 @@ public class Keyed<K, T> {
     }
 
     /**
-     * Equals.
      *
      * @param val
      * @return true, if successful
@@ -103,7 +98,6 @@ public class Keyed<K, T> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

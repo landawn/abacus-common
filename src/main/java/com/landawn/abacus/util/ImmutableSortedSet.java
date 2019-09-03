@@ -49,7 +49,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Empty.
      *
      * @param <E>
      * @return
@@ -59,7 +58,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param a
@@ -75,7 +73,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param sortedSet the elements in this <code>Set</code> are shared by the returned ImmutableSortedSet.
@@ -92,7 +89,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Copy of.
      *
      * @param <E>
      * @param sortedSet
@@ -107,7 +103,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param set
@@ -119,7 +114,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Copy of.
      *
      * @param <E>
      * @param set
@@ -131,7 +125,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Comparator.
      *
      * @return
      */
@@ -141,7 +134,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Sub set.
      *
      * @param fromElement
      * @param toElement
@@ -153,7 +145,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Head set.
      *
      * @param toElement
      * @return
@@ -164,7 +155,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Tail set.
      *
      * @param fromElement
      * @return
@@ -175,7 +165,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * First.
      *
      * @return
      */
@@ -185,7 +174,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Last.
      *
      * @return
      */

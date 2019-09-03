@@ -33,14 +33,12 @@ public interface Transaction {
     String id();
 
     /**
-     * Isolation level.
      *
      * @return
      */
     IsolationLevel isolationLevel();
 
     /**
-     * Method status.
      * 
      * @return Status
      */
@@ -54,14 +52,12 @@ public interface Transaction {
     boolean isActive();
 
     /**
-     * Method commit.
      *
      * @throws UncheckedSQLException the unchecked SQL exception
      */
     void commit() throws UncheckedSQLException;
 
     /**
-     * Method rollback.
      *
      * @throws UncheckedSQLException the unchecked SQL exception
      */

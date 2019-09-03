@@ -1516,7 +1516,6 @@ public final class ClassUtil {
     }
 
     /**
-     * Invoke constructor.
      *
      * @param <T>
      * @param constructor
@@ -1533,7 +1532,6 @@ public final class ClassUtil {
     }
 
     /**
-     * Invoke method.
      *
      * @param <T>
      * @param method
@@ -1547,7 +1545,6 @@ public final class ClassUtil {
     }
 
     /**
-     * Invoke method.
      *
      * @param <T>
      * @param instance

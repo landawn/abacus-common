@@ -48,7 +48,6 @@ public final class Result<T, E extends Throwable> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <E>
@@ -79,7 +78,6 @@ public final class Result<T, E extends Throwable> {
     }
 
     /**
-     * If failure.
      *
      * @param <E2>
      * @param actionOnFailure
@@ -112,7 +110,6 @@ public final class Result<T, E extends Throwable> {
     }
 
     /**
-     * If success.
      *
      * @param <E2>
      * @param actionOnSuccess
@@ -145,7 +142,6 @@ public final class Result<T, E extends Throwable> {
     }
 
     /**
-     * Or else.
      *
      * @param defaultValueIfErrorOccurred
      * @return
@@ -226,7 +222,6 @@ public final class Result<T, E extends Throwable> {
     //    }
 
     /**
-     * To tuple.
      *
      * @return
      */
@@ -235,7 +230,6 @@ public final class Result<T, E extends Throwable> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -245,7 +239,6 @@ public final class Result<T, E extends Throwable> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -257,7 +250,6 @@ public final class Result<T, E extends Throwable> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

@@ -113,7 +113,6 @@ class HikariConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Close connection.
      *
      * @param conn
      */
@@ -129,7 +128,6 @@ class HikariConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Detroy connection.
      *
      * @param conn
      */

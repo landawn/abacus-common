@@ -98,7 +98,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -109,7 +108,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param size
@@ -122,7 +120,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Copy of.
      *
      * @param a
      * @return
@@ -132,7 +129,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Copy of.
      *
      * @param a
      * @param fromIndex
@@ -164,7 +160,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     //    }
 
     /**
-     * From.
      *
      * @param c
      * @return
@@ -178,7 +173,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * From.
      *
      * @param c
      * @param defaultForNull
@@ -200,7 +194,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * From.
      *
      * @param c
      * @param fromIndex
@@ -218,7 +211,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * From.
      *
      * @param c
      * @param fromIndex
@@ -231,7 +223,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Range.
      *
      * @param startInclusive
      * @param endExclusive
@@ -242,7 +233,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Range.
      *
      * @param startInclusive
      * @param endExclusive
@@ -254,7 +244,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Range closed.
      *
      * @param startInclusive
      * @param endInclusive
@@ -265,7 +254,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Range closed.
      *
      * @param startInclusive
      * @param endInclusive
@@ -277,7 +265,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Repeat.
      *
      * @param element
      * @param len
@@ -288,7 +275,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Random.
      *
      * @param len
      * @return
@@ -304,7 +290,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Random.
      *
      * @param startInclusive
      * @param endExclusive
@@ -345,7 +330,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Gets the.
      *
      * @param index
      * @return
@@ -357,7 +341,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Range check.
      *
      * @param index
      */
@@ -368,7 +351,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Sets the.
      *
      * @param index
      * @param e
@@ -385,7 +367,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Adds the.
      *
      * @param e
      */
@@ -396,7 +377,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Adds the.
      *
      * @param index
      * @param e
@@ -525,7 +505,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Removes the.
      *
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
@@ -570,7 +549,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Fast remove.
      *
      * @param index
      */
@@ -642,7 +620,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Retain all.
      *
      * @param c
      * @return true, if successful
@@ -658,7 +635,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Retain all.
      *
      * @param a
      * @return true, if successful
@@ -674,7 +650,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Batch remove.
      *
      * @param c
      * @param complement
@@ -713,7 +688,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Delete.
      *
      * @param index
      * @return
@@ -729,7 +703,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Delete all.
      *
      * @param indices
      */
@@ -743,7 +716,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Delete range.
      *
      * @param fromIndex
      * @param toIndex
@@ -768,7 +740,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Replace all.
      *
      * @param oldVal
      * @param newVal
@@ -793,7 +764,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Replace all.
      *
      * @param <E>
      * @param operator
@@ -806,7 +776,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Replace if.
      *
      * @param <E>
      * @param predicate
@@ -829,7 +798,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Fill.
      *
      * @param val
      */
@@ -838,7 +806,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Fill.
      *
      * @param fromIndex
      * @param toIndex
@@ -851,7 +818,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Contains.
      *
      * @param e
      * @return true, if successful
@@ -861,7 +827,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Contains all.
      *
      * @param c
      * @return true, if successful
@@ -897,7 +862,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Contains all.
      *
      * @param a
      * @return true, if successful
@@ -914,7 +878,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Contains any.
      *
      * @param c
      * @return true, if successful
@@ -928,7 +891,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Contains any.
      *
      * @param a
      * @return true, if successful
@@ -943,7 +905,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Disjoint.
      *
      * @param c
      * @return true, if successful
@@ -977,7 +938,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Disjoint.
      *
      * @param b
      * @return true, if successful
@@ -1026,7 +986,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Intersection.
      *
      * @param a
      * @return
@@ -1074,7 +1033,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Difference.
      *
      * @param a
      * @return
@@ -1128,7 +1086,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Symmetric difference.
      *
      * @param a
      * @return
@@ -1144,7 +1101,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Occurrences of.
      *
      * @param objectToFind
      * @return
@@ -1154,7 +1110,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Index of.
      *
      * @param e
      * @return
@@ -1164,7 +1119,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Index of.
      *
      * @param fromIndex
      * @param e
@@ -1212,7 +1166,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Min.
      *
      * @return
      */
@@ -1221,7 +1174,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Min.
      *
      * @param fromIndex
      * @param toIndex
@@ -1234,7 +1186,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Median.
      *
      * @return
      */
@@ -1243,7 +1194,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Median.
      *
      * @param fromIndex
      * @param toIndex
@@ -1256,7 +1206,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Max.
      *
      * @return
      */
@@ -1265,7 +1214,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Max.
      *
      * @param fromIndex
      * @param toIndex
@@ -1278,7 +1226,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Kth largest.
      *
      * @param k
      * @return
@@ -1288,7 +1235,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Kth largest.
      *
      * @param fromIndex
      * @param toIndex
@@ -1303,7 +1249,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Sum.
      *
      * @return
      */
@@ -1312,7 +1257,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Sum.
      *
      * @param fromIndex
      * @param toIndex
@@ -1325,7 +1269,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Average.
      *
      * @return
      */
@@ -1334,7 +1277,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Average.
      *
      * @param fromIndex
      * @param toIndex
@@ -1347,7 +1289,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param action
@@ -1358,7 +1299,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param fromIndex
@@ -1383,7 +1323,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * First.
      *
      * @return
      */
@@ -1392,7 +1331,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Last.
      *
      * @return
      */
@@ -1401,7 +1339,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Find first.
      *
      * @param <E>
      * @param predicate
@@ -1419,7 +1356,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Find last.
      *
      * @param <E>
      * @param predicate
@@ -1485,7 +1421,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * All match.
      *
      * @param <E>
      * @param fromIndex
@@ -1521,7 +1456,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Any match.
      *
      * @param <E>
      * @param fromIndex
@@ -1557,7 +1491,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * None match.
      *
      * @param <E>
      * @param fromIndex
@@ -1581,7 +1514,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Count.
      *
      * @param <E>
      * @param filter
@@ -1593,7 +1525,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Count.
      *
      * @param <E>
      * @param fromIndex
@@ -1609,7 +1540,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1621,7 +1551,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromIndex
@@ -1637,7 +1566,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1650,7 +1578,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromIndex
@@ -1667,7 +1594,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param mapper
@@ -1679,7 +1605,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromIndex
@@ -1822,7 +1747,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Distinct.
      *
      * @param fromIndex
      * @param toIndex
@@ -1840,7 +1764,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Top.
      *
      * @param n
      * @return
@@ -1850,7 +1773,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Top.
      *
      * @param fromIndex
      * @param toIndex
@@ -1864,7 +1786,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Top.
      *
      * @param n
      * @param cmp
@@ -1875,7 +1796,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Top.
      *
      * @param fromIndex
      * @param toIndex
@@ -1953,7 +1873,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Reverse.
      *
      * @param fromIndex
      * @param toIndex
@@ -1968,7 +1887,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Rotate.
      *
      * @param distance
      */
@@ -1990,7 +1908,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Shuffle.
      *
      * @param rnd
      */
@@ -2002,7 +1919,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Swap.
      *
      * @param i
      * @param j
@@ -2016,7 +1932,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -2026,7 +1941,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Copy.
      *
      * @param fromIndex
      * @param toIndex
@@ -2040,7 +1954,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Copy.
      *
      * @param from
      * @param to
@@ -2108,7 +2021,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     //    }
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -2123,7 +2035,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -2174,7 +2085,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -2184,7 +2094,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Boxed.
      *
      * @return
      */
@@ -2193,7 +2102,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Boxed.
      *
      * @param fromIndex
      * @param toIndex
@@ -2212,7 +2120,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -2267,7 +2174,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To collection.
      *
      * @param <C>
      * @param fromIndex
@@ -2289,7 +2195,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To multiset.
      *
      * @param fromIndex
      * @param toIndex
@@ -2310,7 +2215,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2328,7 +2232,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2350,7 +2253,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2371,7 +2273,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2400,7 +2301,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -2416,7 +2316,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -2463,7 +2362,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Iterator.
      *
      * @return
      */
@@ -2476,7 +2374,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -2485,7 +2382,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Stream.
      *
      * @param fromIndex
      * @param toIndex
@@ -2498,7 +2394,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>
@@ -2526,7 +2421,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -2552,7 +2446,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -2562,7 +2455,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -2583,7 +2475,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -2617,7 +2508,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Grow.
      *
      * @param minCapacity
      */

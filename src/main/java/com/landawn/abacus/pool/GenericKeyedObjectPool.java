@@ -178,7 +178,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Put.
      *
      * @param key
      * @param e
@@ -234,7 +233,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Put.
      *
      * @param key
      * @param e
@@ -257,7 +255,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Gets the.
      *
      * @param key
      * @return
@@ -290,7 +287,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Removes the.
      *
      * @param key
      * @return
@@ -325,7 +321,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Peek.
      *
      * @param key
      * @return
@@ -344,7 +339,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Contains key.
      *
      * @param key
      * @return true, if successful
@@ -363,7 +357,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Contains value.
      *
      * @param e
      * @return true, if successful
@@ -382,7 +375,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -400,7 +392,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Values.
      *
      * @return
      */
@@ -466,7 +457,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -478,7 +468,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -488,7 +477,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -500,7 +488,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -510,7 +497,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Vacate.
      *
      * @param vacationNumber
      */
@@ -581,7 +567,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Destroy.
      *
      * @param key
      * @param value
@@ -610,7 +595,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Destroy all.
      *
      * @param map
      */
@@ -640,7 +624,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Write object.
      *
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
@@ -656,7 +639,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Read object.
      *
      * @param is
      * @throws IOException Signals that an I/O exception has occurred.

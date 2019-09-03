@@ -69,7 +69,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * Value of.
      *
      * @param liveTime
      * @param maxIdleTime
@@ -205,7 +204,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * Clone.
      *
      * @return
      */
@@ -223,7 +221,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -240,7 +237,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -262,7 +258,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * To string.
      *
      * @return
      */

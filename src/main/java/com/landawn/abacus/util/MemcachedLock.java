@@ -48,7 +48,6 @@ public final class MemcachedLock<K, V> {
     }
 
     /**
-     * Lock.
      *
      * @param target
      * @param liveTime
@@ -59,7 +58,6 @@ public final class MemcachedLock<K, V> {
     }
 
     /**
-     * Lock.
      *
      * @param target
      * @param value
@@ -87,7 +85,6 @@ public final class MemcachedLock<K, V> {
     }
 
     /**
-     * Gets the.
      *
      * @param target
      * @return
@@ -99,7 +96,6 @@ public final class MemcachedLock<K, V> {
     }
 
     /**
-     * Unlock.
      *
      * @param target
      * @return true, if successful
@@ -113,7 +109,6 @@ public final class MemcachedLock<K, V> {
     }
 
     /**
-     * To key.
      *
      * @param target
      * @return
@@ -123,7 +118,6 @@ public final class MemcachedLock<K, V> {
     }
 
     /**
-     * Client.
      *
      * @return
      */

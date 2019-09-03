@@ -44,7 +44,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     };
 
     /**
-     * Empty.
      *
      * @return
      */
@@ -53,7 +52,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -64,7 +62,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param fromIndex
@@ -217,7 +214,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Generate.
      *
      * @param hasNext
      * @param supplier
@@ -245,7 +241,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Next.
      *
      * @return
      * @Deprecated use <code>nextFloat()</code> instead.
@@ -257,14 +252,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Next float.
      *
      * @return
      */
     public abstract float nextFloat();
 
     /**
-     * To array.
      *
      * @return
      */
@@ -273,7 +266,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -288,7 +280,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -297,7 +288,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Foreach remaining.
      *
      * @param <E>
      * @param action

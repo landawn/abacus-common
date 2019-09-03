@@ -39,7 +39,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * On.
      *
      * @param <T>
      * @param mutex
@@ -52,7 +51,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Run.
      *
      * @param <T>
      * @param <E>
@@ -70,7 +68,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Call.
      *
      * @param <T>
      * @param <R>
@@ -90,7 +87,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Test.
      *
      * @param <T>
      * @param <E>
@@ -109,7 +105,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Test.
      *
      * @param <T>
      * @param <U>
@@ -130,7 +125,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Accept.
      *
      * @param <T>
      * @param <E>
@@ -148,7 +142,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Accept.
      *
      * @param <T>
      * @param <U>
@@ -168,7 +161,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Apply.
      *
      * @param <T>
      * @param <R>
@@ -188,7 +180,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Apply.
      *
      * @param <T>
      * @param <U>
@@ -210,7 +201,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Run.
      *
      * @param <E>
      * @param cmd
@@ -225,7 +215,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Call.
      *
      * @param <R>
      * @param <E>
@@ -242,7 +231,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Test.
      *
      * @param <E>
      * @param predicate
@@ -258,7 +246,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param consumer
@@ -273,7 +260,6 @@ public final class Synchronized<T> {
     }
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>

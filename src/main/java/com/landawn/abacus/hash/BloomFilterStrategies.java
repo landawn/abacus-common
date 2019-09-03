@@ -188,7 +188,6 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         }
 
         /**
-         * Gets the.
          *
          * @param index
          * @return true, if successful
@@ -216,7 +215,6 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         }
 
         /**
-         * Copy.
          *
          * @return
          */
@@ -239,7 +237,6 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         }
 
         /**
-         * Equals.
          *
          * @param o
          * @return true, if successful
@@ -254,7 +251,6 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */

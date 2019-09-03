@@ -51,7 +51,6 @@ public class BooleanPair {
     }
 
     /**
-     * Of.
      *
      * @param _1 the 1
      * @param _2 the 2
@@ -62,7 +61,6 @@ public class BooleanPair {
     }
 
     /**
-     * Reversed.
      *
      * @return
      */
@@ -71,7 +69,6 @@ public class BooleanPair {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -80,7 +77,6 @@ public class BooleanPair {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -89,7 +85,6 @@ public class BooleanPair {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param comsumer
@@ -101,7 +96,6 @@ public class BooleanPair {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -112,7 +106,6 @@ public class BooleanPair {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param <E>
@@ -125,7 +118,6 @@ public class BooleanPair {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -137,7 +129,6 @@ public class BooleanPair {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -146,7 +137,6 @@ public class BooleanPair {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -156,7 +146,6 @@ public class BooleanPair {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -174,7 +163,6 @@ public class BooleanPair {
     }
 
     /**
-     * To string.
      *
      * @return
      */

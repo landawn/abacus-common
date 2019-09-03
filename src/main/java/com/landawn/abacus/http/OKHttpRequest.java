@@ -33,7 +33,6 @@ public class OKHttpRequest extends AbstractHttpRequest<OKHttpRequest> {
     }
 
     /**
-     * Creates the.
      *
      * @param okHttpClient
      * @return
@@ -43,7 +42,6 @@ public class OKHttpRequest extends AbstractHttpRequest<OKHttpRequest> {
     }
 
     /**
-     * Url.
      *
      * @param url
      * @return
@@ -53,7 +51,6 @@ public class OKHttpRequest extends AbstractHttpRequest<OKHttpRequest> {
     }
 
     /**
-     * Url.
      *
      * @param url
      * @param connTimeout

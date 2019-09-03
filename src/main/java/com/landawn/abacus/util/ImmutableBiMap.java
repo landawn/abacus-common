@@ -46,7 +46,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Empty.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -58,7 +57,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -74,7 +72,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -92,7 +89,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -112,7 +108,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -135,7 +130,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -160,7 +154,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -187,7 +180,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -216,7 +208,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -232,7 +223,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Copy of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -248,7 +238,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -261,7 +250,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * Copy of.
      *
      * @param <K> the key type
      * @param <V> the value type

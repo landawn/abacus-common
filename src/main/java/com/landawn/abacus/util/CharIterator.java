@@ -44,7 +44,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     };
 
     /**
-     * Empty.
      *
      * @return
      */
@@ -53,7 +52,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -64,7 +62,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param fromIndex
@@ -217,7 +214,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Generate.
      *
      * @param hasNext
      * @param supplier
@@ -245,7 +241,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Next.
      *
      * @return
      * @Deprecated use <code>nextChar()</code> instead.
@@ -257,14 +252,12 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Next char.
      *
      * @return
      */
     public abstract char nextChar();
 
     /**
-     * To array.
      *
      * @return
      */
@@ -273,7 +266,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -288,7 +280,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -297,7 +288,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Foreach remaining.
      *
      * @param <E>
      * @param action

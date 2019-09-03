@@ -47,7 +47,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Creates the.
      *
      * @param milliseconds
      * @return
@@ -61,7 +60,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Of days.
      *
      * @param days
      * @return
@@ -71,7 +69,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Of hours.
      *
      * @param hours
      * @return
@@ -81,7 +78,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Of minutes.
      *
      * @param minutes
      * @return
@@ -91,7 +87,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Of seconds.
      *
      * @param seconds
      * @return
@@ -101,7 +96,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Of millis.
      *
      * @param millis
      * @return
@@ -129,7 +123,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Plus.
      *
      * @param duration
      * @return
@@ -139,7 +132,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Plus days.
      *
      * @param daysToAdd
      * @return
@@ -149,7 +141,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Plus hours.
      *
      * @param hoursToAdd
      * @return
@@ -159,7 +150,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Plus minutes.
      *
      * @param minutesToAdd
      * @return
@@ -169,7 +159,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Plus seconds.
      *
      * @param secondsToAdd
      * @return
@@ -179,7 +168,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Plus millis.
      *
      * @param millisToAdd
      * @return
@@ -193,7 +181,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Minus.
      *
      * @param duration
      * @return
@@ -203,7 +190,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Minus days.
      *
      * @param daysToSubtract
      * @return
@@ -213,7 +199,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Minus hours.
      *
      * @param hoursToSubtract
      * @return
@@ -223,7 +208,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Minus minutes.
      *
      * @param minutesToSubtract
      * @return
@@ -233,7 +217,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Minus seconds.
      *
      * @param secondsToSubtract
      * @return
@@ -243,7 +226,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Minus millis.
      *
      * @param millisToSubtract
      * @return
@@ -257,7 +239,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Multiplied by.
      *
      * @param multiplicand
      * @return
@@ -273,7 +254,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Divided by.
      *
      * @param divisor
      * @return
@@ -289,7 +269,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Negated.
      *
      * @return
      */
@@ -298,7 +277,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Abs.
      *
      * @return
      */
@@ -307,7 +285,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * To days.
      *
      * @return
      */
@@ -316,7 +293,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * To hours.
      *
      * @return
      */
@@ -325,7 +301,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * To minutes.
      *
      * @return
      */
@@ -334,7 +309,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * To seconds.
      *
      * @return
      */
@@ -343,7 +317,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * To millis.
      *
      * @return
      */
@@ -352,7 +325,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Compare to.
      *
      * @param other
      * @return
@@ -363,7 +335,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -378,7 +349,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -388,7 +358,6 @@ public final class Duration implements Comparable<Duration> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

@@ -132,7 +132,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -151,7 +150,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -173,7 +171,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -198,7 +195,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -227,7 +223,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -259,7 +254,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -294,7 +288,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -332,7 +325,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Copy of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -348,7 +340,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * From.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -362,7 +353,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Gets the.
      *
      * @param key
      * @return
@@ -383,7 +373,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param key
      * @param value
@@ -419,7 +408,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param key
      * @param value
@@ -468,7 +456,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Removes the.
      *
      * @param key
      * @return
@@ -501,7 +488,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Contains key.
      *
      * @param key
      * @return true, if successful
@@ -512,7 +498,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Contains value.
      *
      * @param value
      * @return true, if successful
@@ -614,7 +599,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -646,7 +630,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -660,7 +643,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     //    }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -670,7 +652,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -682,7 +663,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

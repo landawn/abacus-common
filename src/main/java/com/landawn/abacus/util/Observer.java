@@ -114,7 +114,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Complete.
      *
      * @param queue
      */
@@ -124,7 +123,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param queue
@@ -137,7 +135,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param c
@@ -148,7 +145,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param iter
@@ -198,7 +194,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Interval.
      *
      * @param initialDelayInMillis
      * @param periodInMillis
@@ -239,7 +234,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Debounce.
      *
      * @param intervalDurationInMillis
      * @return this instance.
@@ -250,7 +244,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Debounce.
      *
      * @param intervalDuration
      * @param unit
@@ -327,7 +320,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Throttle first.
      *
      * @param intervalDurationInMillis
      * @return this instance.
@@ -338,7 +330,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Throttle first.
      *
      * @param intervalDuration
      * @param unit
@@ -400,7 +391,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Throttle last.
      *
      * @param intervalDurationInMillis
      * @return this instance.
@@ -411,7 +401,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Throttle last.
      *
      * @param intervalDuration
      * @param unit
@@ -475,7 +464,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Delay.
      *
      * @param delayInMillis
      * @return this instance.
@@ -486,7 +474,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Delay.
      *
      * @param delay
      * @param unit
@@ -522,7 +509,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Time interval.
      *
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timeInterval()">RxJava#timeInterval</a>
@@ -547,7 +533,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Timestamp.
      *
      * @return this instance.
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timestamp()">RxJava#timestamp</a>
@@ -566,7 +551,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Skip.
      *
      * @param n
      * @return
@@ -591,7 +575,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Limit.
      *
      * @param maxSize
      * @return
@@ -616,7 +599,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Distinct.
      *
      * @return
      */
@@ -636,7 +618,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Distinct by.
      *
      * @param keyMapper
      * @return
@@ -657,7 +638,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Filter.
      *
      * @param filter
      * @return
@@ -676,7 +656,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param map
@@ -696,7 +675,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Flat map.
      *
      * @param <U>
      * @param map
@@ -722,7 +700,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Buffer.
      *
      * @param timespan
      * @param unit
@@ -734,7 +711,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Buffer.
      *
      * @param timespan
      * @param unit
@@ -791,7 +767,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Buffer.
      *
      * @param timespan
      * @param timeskip
@@ -804,7 +779,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Buffer.
      *
      * @param timespan
      * @param timeskip
@@ -867,7 +841,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Observe.
      *
      * @param action
      */
@@ -876,7 +849,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Observe.
      *
      * @param action
      * @param onError
@@ -886,7 +858,6 @@ public abstract class Observer<T> {
     }
 
     /**
-     * Observe.
      *
      * @param action
      * @param onError
@@ -960,7 +931,6 @@ public abstract class Observer<T> {
         protected Dispatcher<T> downDispatcher;
 
         /**
-         * On next.
          *
          * @param value
          */
@@ -990,7 +960,6 @@ public abstract class Observer<T> {
         }
 
         /**
-         * Append.
          *
          * @param downDispatcher
          */
@@ -1030,7 +999,6 @@ public abstract class Observer<T> {
         }
 
         /**
-         * On error.
          *
          * @param error
          */

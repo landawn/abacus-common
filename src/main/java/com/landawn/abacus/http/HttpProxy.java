@@ -1107,7 +1107,6 @@ public final class HttpProxy {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -1388,7 +1387,6 @@ public final class HttpProxy {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -1409,7 +1407,6 @@ public final class HttpProxy {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -1433,7 +1430,6 @@ public final class HttpProxy {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -1450,7 +1446,6 @@ public final class HttpProxy {
     public static interface Handler {
 
         /**
-         * Pre invoke.
          *
          * @param method
          * @param args
@@ -1458,7 +1453,6 @@ public final class HttpProxy {
         void preInvoke(final Method method, final Object... args);
 
         /**
-         * Post invoke.
          *
          * @param e
          * @param result

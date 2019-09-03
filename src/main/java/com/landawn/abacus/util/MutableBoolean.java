@@ -64,7 +64,6 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Of.
      *
      * @param value
      * @return
@@ -74,7 +73,6 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Value.
      *
      * @return true, if successful
      */

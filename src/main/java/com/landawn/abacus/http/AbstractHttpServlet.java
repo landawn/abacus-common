@@ -42,7 +42,6 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     private static final long serialVersionUID = -6025259563199941531L;
 
     /**
-     * Inits the.
      *
      * @throws ServletException the servlet exception
      */
@@ -133,7 +132,6 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     }
 
     /**
-     * Flush.
      *
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.

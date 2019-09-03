@@ -263,7 +263,6 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Close connection.
      *
      * @param conn
      */
@@ -303,7 +302,6 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Detroy connection.
      *
      * @param conn
      */
@@ -348,7 +346,6 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Clear.
      *
      * @param isClose
      */
@@ -433,7 +430,6 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Method newConnection.
      *
      * @return PoolableConnection
      */
@@ -470,7 +466,6 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Method finalize.
      *
      * @throws Throwable the throwable
      */
@@ -514,7 +509,6 @@ public final class SQLConnectionManager extends AbstractConnectionManager {
     }
 
     /**
-     * Validate.
      *
      * @param conn
      * @return true, if successful

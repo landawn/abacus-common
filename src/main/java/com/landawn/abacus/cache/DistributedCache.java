@@ -127,7 +127,6 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param k
      * @param v
@@ -155,7 +154,6 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Contains key.
      *
      * @param k
      * @return true, if successful
@@ -166,7 +164,6 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -176,7 +173,6 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -220,7 +216,6 @@ public class DistributedCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Generate key.
      *
      * @param k
      * @return

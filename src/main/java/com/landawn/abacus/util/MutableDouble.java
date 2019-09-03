@@ -61,7 +61,6 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Of.
      *
      * @param value
      * @return
@@ -71,7 +70,6 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Value.
      *
      * @return
      */

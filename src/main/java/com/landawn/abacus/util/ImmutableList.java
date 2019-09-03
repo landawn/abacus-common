@@ -51,7 +51,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Empty.
      *
      * @param <E>
      * @return
@@ -61,7 +60,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Just.
      *
      * @param <E>
      * @param e
@@ -72,7 +70,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param e
@@ -83,7 +80,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param a the elements in this <code>array</code> are shared by the returned ImmutableList.
@@ -99,7 +95,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param list the elements in this <code>list</code> are shared by the returned ImmutableList.
@@ -116,7 +111,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Copy of.
      *
      * @param <E>
      * @param a
@@ -132,7 +126,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Copy of.
      *
      * @param <E>
      * @param list
@@ -147,7 +140,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Gets the.
      *
      * @param index
      * @return
@@ -158,7 +150,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Index of.
      *
      * @param o
      * @return
@@ -180,7 +171,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * List iterator.
      *
      * @return
      */
@@ -190,7 +180,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * List iterator.
      *
      * @param index
      * @return
@@ -201,7 +190,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Sub list.
      *
      * @param fromIndex
      * @param toIndex
@@ -227,7 +215,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Sets the.
      *
      * @param index
      * @param element
@@ -241,7 +228,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Adds the.
      *
      * @param index
      * @param element
@@ -254,7 +240,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Removes the.
      *
      * @param index
      * @return
@@ -267,7 +252,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Replace all.
      *
      * @param operator
      * @deprecated Unsupported operation.
@@ -279,7 +263,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Sort.
      *
      * @param c
      * @deprecated Unsupported operation.

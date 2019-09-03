@@ -53,7 +53,6 @@ public final class Maps {
     }
 
     /**
-     * New map.
      *
      * @param <T>
      * @param <K> the key type
@@ -108,7 +107,6 @@ public final class Maps {
     }
 
     /**
-     * New map.
      *
      * @param <T>
      * @param <K> the key type
@@ -141,7 +139,6 @@ public final class Maps {
     }
 
     /**
-     * New map.
      *
      * @param <T>
      * @param <K> the key type
@@ -259,7 +256,6 @@ public final class Maps {
     }
 
     /**
-     * Gets the.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -511,7 +507,6 @@ public final class Maps {
     }
 
     /**
-     * Contains.
      *
      * @param map
      * @param key
@@ -529,7 +524,6 @@ public final class Maps {
     }
 
     /**
-     * Intersection.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -557,7 +551,6 @@ public final class Maps {
     }
 
     /**
-     * Difference.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -595,7 +588,6 @@ public final class Maps {
     }
 
     /**
-     * Symmetric difference.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -703,7 +695,6 @@ public final class Maps {
     }
 
     /**
-     * Removes the.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -877,7 +868,6 @@ public final class Maps {
     }
 
     /**
-     * Replace.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -903,7 +893,6 @@ public final class Maps {
     }
 
     /**
-     * Replace.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -927,7 +916,6 @@ public final class Maps {
     }
 
     /**
-     * Replace all.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -969,7 +957,6 @@ public final class Maps {
     }
 
     /**
-     * For each.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -991,7 +978,6 @@ public final class Maps {
     }
 
     /**
-     * Filter.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1072,7 +1058,6 @@ public final class Maps {
     }
 
     /**
-     * Invert.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1097,7 +1082,6 @@ public final class Maps {
     }
 
     /**
-     * Invert.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1131,7 +1115,6 @@ public final class Maps {
     }
 
     /**
-     * Flat invert.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2461,7 +2444,6 @@ public final class Maps {
     }
 
     /**
-     * Flatten.
      *
      * @param map
      * @return
@@ -2471,7 +2453,6 @@ public final class Maps {
     }
 
     /**
-     * Flatten.
      *
      * @param <M>
      * @param map
@@ -2483,7 +2464,6 @@ public final class Maps {
     }
 
     /**
-     * Flatten.
      *
      * @param <M>
      * @param map
@@ -2500,7 +2480,6 @@ public final class Maps {
     }
 
     /**
-     * Flatten.
      *
      * @param map
      * @param prefix
@@ -2532,7 +2511,6 @@ public final class Maps {
     }
 
     /**
-     * Unflatten.
      *
      * @param map
      * @return
@@ -2542,7 +2520,6 @@ public final class Maps {
     }
 
     /**
-     * Unflatten.
      *
      * @param <M>
      * @param map
@@ -2554,7 +2531,6 @@ public final class Maps {
     }
 
     /**
-     * Unflatten.
      *
      * @param <M>
      * @param map
@@ -2626,7 +2602,6 @@ public final class Maps {
     }
 
     /**
-     * Replace all.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2646,7 +2621,6 @@ public final class Maps {
     }
 
     /**
-     * Merge.
      *
      * @param <K> the key type
      * @param <V> the value type

@@ -625,7 +625,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param supplier
@@ -664,7 +663,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Memoize.
      *
      * @param <T>
      * @param <R>
@@ -777,7 +775,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Close.
      *
      * @param closeable
      * @return
@@ -799,7 +796,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Close all.
      *
      * @param a
      * @return
@@ -822,7 +818,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Close all.
      *
      * @param c
      * @return
@@ -844,7 +839,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Close quietly.
      *
      * @param closeable
      * @return
@@ -911,7 +905,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Empty action.
      *
      * @return
      */
@@ -920,7 +913,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Do nothing.
      *
      * @param <T>
      * @return
@@ -930,7 +922,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Close.
      *
      * @param <T>
      * @return
@@ -940,7 +931,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Close quietly.
      *
      * @param <T>
      * @return
@@ -950,7 +940,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Sleep.
      *
      * @param <T>
      * @param millis
@@ -966,7 +955,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Sleep uninterruptibly.
      *
      * @param <T>
      * @param millis
@@ -982,7 +970,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Println.
      *
      * @param <T>
      * @return
@@ -992,7 +979,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Println.
      *
      * @param <T>
      * @param <U>
@@ -1038,7 +1024,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * To str.
      *
      * @param <T>
      * @return
@@ -1093,7 +1078,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Identity.
      *
      * @param <T>
      * @return
@@ -1103,7 +1087,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Keyed.
      *
      * @param <K> the key type
      * @param <T>
@@ -1138,7 +1121,6 @@ public abstract class Fn extends Comparators {
     };
 
     /**
-     * Val.
      *
      * @param <K> the key type
      * @param <T>
@@ -1150,7 +1132,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Kk.
      *
      * @param <T>
      * @param <K> the key type
@@ -1171,7 +1152,6 @@ public abstract class Fn extends Comparators {
     };
 
     /**
-     * Wrap.
      *
      * @param <T>
      * @return
@@ -1182,7 +1162,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Wrap.
      *
      * @param <T>
      * @param hashFunction
@@ -1210,7 +1189,6 @@ public abstract class Fn extends Comparators {
     };
 
     /**
-     * Unwrap.
      *
      * @param <K> the key type
      * @param <T>
@@ -1222,7 +1200,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Key.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1234,7 +1211,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Value.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1246,7 +1222,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Inverse.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1258,7 +1233,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Entry.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1270,7 +1244,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Entry.
      *
      * @param <K> the key type
      * @param <T>
@@ -1287,7 +1260,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Entry.
      *
      * @param <K> the key type
      * @param <T>
@@ -1306,7 +1278,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Pair.
      *
      * @param <L>
      * @param <R>
@@ -1318,7 +1289,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Triple.
      *
      * @param <L>
      * @param <M>
@@ -1331,7 +1301,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Tuple 1.
      *
      * @param <T>
      * @return
@@ -1342,7 +1311,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Tuple 2.
      *
      * @param <T>
      * @param <U>
@@ -1354,7 +1322,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Tuple 3.
      *
      * @param <A>
      * @param <B>
@@ -1367,7 +1334,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Tuple 4.
      *
      * @param <A>
      * @param <B>
@@ -1381,7 +1347,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Trim.
      *
      * @return
      */
@@ -1451,7 +1416,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Length.
      *
      * @param <T>
      * @return
@@ -1461,7 +1425,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Len.
      *
      * @param <T>
      * @return
@@ -1472,7 +1435,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Size.
      *
      * @param <T>
      * @return
@@ -1483,7 +1445,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Size M.
      *
      * @param <T>
      * @return
@@ -1494,7 +1455,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Cast.
      *
      * @param <T>
      * @param <U>
@@ -1513,7 +1473,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Always true.
      *
      * @param <T>
      * @return
@@ -1523,7 +1482,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Always false.
      *
      * @param <T>
      * @return
@@ -1563,7 +1521,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Not null.
      *
      * @param <T>
      * @return
@@ -1611,7 +1568,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Equal.
      *
      * @param <T>
      * @param target
@@ -1627,7 +1583,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Not equal.
      *
      * @param <T>
      * @param target
@@ -1643,7 +1598,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Greater than.
      *
      * @param <T>
      * @param target
@@ -1660,7 +1614,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Greater equal.
      *
      * @param <T>
      * @param target
@@ -1677,7 +1630,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Less than.
      *
      * @param <T>
      * @param target
@@ -1694,7 +1646,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Less equal.
      *
      * @param <T>
      * @param target
@@ -1729,7 +1680,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * In.
      *
      * @param <T>
      * @param c
@@ -1747,7 +1697,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Not in.
      *
      * @param <T>
      * @param c
@@ -1765,7 +1714,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Instance of.
      *
      * @param <T>
      * @param clazz
@@ -1783,7 +1731,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Subtype of.
      *
      * @param clazz
      * @return
@@ -1801,7 +1748,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Starts with.
      *
      * @param prefix
      * @return
@@ -1818,7 +1764,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ends with.
      *
      * @param suffix
      * @return
@@ -1835,7 +1780,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Contains.
      *
      * @param str
      * @return
@@ -1886,7 +1830,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Not contains.
      *
      * @param str
      * @return
@@ -1903,7 +1846,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Matches.
      *
      * @param pattern
      * @return
@@ -1920,7 +1862,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Equal.
      *
      * @param <T>
      * @param <U>
@@ -1931,7 +1872,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Not equal.
      *
      * @param <T>
      * @param <U>
@@ -1942,7 +1882,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Greater than.
      *
      * @param <T>
      * @return
@@ -1953,7 +1892,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Greater equal.
      *
      * @param <T>
      * @return
@@ -1964,7 +1902,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Less than.
      *
      * @param <T>
      * @return
@@ -1975,7 +1912,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Less equal.
      *
      * @param <T>
      * @return
@@ -1986,7 +1922,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Not.
      *
      * @param <T>
      * @param predicate
@@ -2004,7 +1939,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Not.
      *
      * @param <T>
      * @param <U>
@@ -2023,7 +1957,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Not.
      *
      * @param <A>
      * @param <B>
@@ -2043,7 +1976,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * And.
      *
      * @param first
      * @param second
@@ -2062,7 +1994,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * And.
      *
      * @param first
      * @param second
@@ -2083,7 +2014,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * And.
      *
      * @param <T>
      * @param first
@@ -2103,7 +2033,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * And.
      *
      * @param <T>
      * @param first
@@ -2125,7 +2054,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * And.
      *
      * @param <T>
      * @param c
@@ -2149,7 +2077,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * And.
      *
      * @param <T>
      * @param <U>
@@ -2170,7 +2097,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * And.
      *
      * @param <T>
      * @param <U>
@@ -2194,7 +2120,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * And.
      *
      * @param <T>
      * @param <U>
@@ -2219,7 +2144,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Or.
      *
      * @param first
      * @param second
@@ -2238,7 +2162,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Or.
      *
      * @param first
      * @param second
@@ -2259,7 +2182,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Or.
      *
      * @param <T>
      * @param first
@@ -2279,7 +2201,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Or.
      *
      * @param <T>
      * @param first
@@ -2301,7 +2222,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Or.
      *
      * @param <T>
      * @param c
@@ -2325,7 +2245,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Or.
      *
      * @param <T>
      * @param <U>
@@ -2346,7 +2265,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Or.
      *
      * @param <T>
      * @param <U>
@@ -2370,7 +2288,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Or.
      *
      * @param <T>
      * @param <U>
@@ -2809,7 +2726,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Map key.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2829,7 +2745,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Map value.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3235,7 +3150,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Compare to.
      *
      * @param <T>
      * @param target
@@ -3252,7 +3166,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Compare to.
      *
      * @param <T>
      * @param target
@@ -3276,7 +3189,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Compare.
      *
      * @param <T>
      * @return
@@ -3287,7 +3199,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Compare.
      *
      * @param <T>
      * @param cmp
@@ -3309,7 +3220,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * P.
      *
      * @param <T>
      * @param predicate
@@ -3321,7 +3231,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * P.
      *
      * @param <A>
      * @param <T>
@@ -3342,7 +3251,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * P.
      *
      * @param <A>
      * @param <B>
@@ -3365,7 +3273,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * P.
      *
      * @param <T>
      * @param <U>
@@ -3378,7 +3285,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * P.
      *
      * @param <A>
      * @param <T>
@@ -3400,7 +3306,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * P.
      *
      * @param <A>
      * @param <B>
@@ -3414,7 +3319,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * C.
      *
      * @param <T>
      * @param predicate
@@ -3426,7 +3330,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * C.
      *
      * @param <A>
      * @param <T>
@@ -3447,7 +3350,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * C.
      *
      * @param <A>
      * @param <B>
@@ -3470,7 +3372,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * C.
      *
      * @param <T>
      * @param <U>
@@ -3483,7 +3384,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * C.
      *
      * @param <A>
      * @param <T>
@@ -3505,7 +3405,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * C.
      *
      * @param <A>
      * @param <B>
@@ -3519,7 +3418,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * F.
      *
      * @param <T>
      * @param <R>
@@ -3532,7 +3430,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * F.
      *
      * @param <A>
      * @param <T>
@@ -3554,7 +3451,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * F.
      *
      * @param <A>
      * @param <B>
@@ -3578,7 +3474,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * F.
      *
      * @param <T>
      * @param <U>
@@ -3592,7 +3487,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * F.
      *
      * @param <A>
      * @param <T>
@@ -3615,7 +3509,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * F.
      *
      * @param <A>
      * @param <B>
@@ -3630,7 +3523,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Pp.
      *
      * @param <T>
      * @param <E>
@@ -3654,7 +3546,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Pp.
      *
      * @param <A>
      * @param <T>
@@ -3680,7 +3571,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Pp.
      *
      * @param <A>
      * @param <B>
@@ -3708,7 +3598,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Pp.
      *
      * @param <T>
      * @param <U>
@@ -3733,7 +3622,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Pp.
      *
      * @param <A>
      * @param <T>
@@ -3760,7 +3648,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Pp.
      *
      * @param <A>
      * @param <B>
@@ -3786,7 +3673,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Cc.
      *
      * @param <T>
      * @param <E>
@@ -3810,7 +3696,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Cc.
      *
      * @param <A>
      * @param <T>
@@ -3836,7 +3721,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Cc.
      *
      * @param <A>
      * @param <B>
@@ -3864,7 +3748,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Cc.
      *
      * @param <T>
      * @param <U>
@@ -3889,7 +3772,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Cc.
      *
      * @param <A>
      * @param <T>
@@ -3916,7 +3798,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Cc.
      *
      * @param <A>
      * @param <B>
@@ -3942,7 +3823,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ff.
      *
      * @param <T>
      * @param <R>
@@ -3967,7 +3847,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ff.
      *
      * @param <A>
      * @param <T>
@@ -3994,7 +3873,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ff.
      *
      * @param <A>
      * @param <B>
@@ -4023,7 +3901,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ff.
      *
      * @param <T>
      * @param <U>
@@ -4049,7 +3926,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ff.
      *
      * @param <A>
      * @param <T>
@@ -4077,7 +3953,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ff.
      *
      * @param <A>
      * @param <B>
@@ -4394,7 +4269,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Window.
      *
      * @param <T>
      * @param <C>
@@ -4409,7 +4283,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Window.
      *
      * @param <T>
      * @param <A>
@@ -4426,7 +4299,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Window.
      *
      * @param <T>
      * @param duration
@@ -4483,7 +4355,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Window.
      *
      * @param <T>
      * @param <C>
@@ -4653,7 +4524,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Window.
      *
      * @param <T>
      * @param <A>
@@ -5088,7 +4958,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Callable.
      *
      * @param <R>
      * @param callable
@@ -5101,7 +4970,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Runnable.
      *
      * @param runnable
      * @return
@@ -5113,7 +4981,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * To callable.
      *
      * @param runnable
      * @return
@@ -5131,7 +4998,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * To runnable.
      *
      * @param <R>
      * @param callable
@@ -5149,7 +5015,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Throwing merger.
      *
      * @param <T>
      * @return
@@ -5159,7 +5024,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Ignoring merger.
      *
      * @param <T>
      * @return
@@ -5169,7 +5033,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Replacing merger.
      *
      * @param <T>
      * @return
@@ -5192,7 +5055,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Put all.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -5713,7 +5575,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of list.
          *
          * @param <T>
          * @return
@@ -5735,7 +5596,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of set.
          *
          * @param <T>
          * @return
@@ -5790,7 +5650,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of queue.
          *
          * @param <T>
          * @return
@@ -5801,7 +5660,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of deque.
          *
          * @param <T>
          * @return
@@ -5856,7 +5714,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -5964,7 +5821,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of multiset.
          *
          * @param <T>
          * @return
@@ -6010,7 +5866,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Won't work.
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
@@ -6021,7 +5876,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Won't work.
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
@@ -6032,7 +5886,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Won't work.
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
@@ -6043,7 +5896,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Single.
          *
          * @param <T>
          * @param <C>
@@ -6468,7 +6320,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of UUID.
          *
          * @return
          */
@@ -6477,7 +6328,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of GUID.
          *
          * @return
          */
@@ -6648,7 +6498,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of list.
          *
          * @param <T>
          * @return
@@ -6670,7 +6519,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of set.
          *
          * @param <T>
          * @return
@@ -6725,7 +6573,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of queue.
          *
          * @param <T>
          * @return
@@ -6736,7 +6583,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of deque.
          *
          * @param <T>
          * @return
@@ -6791,7 +6637,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of map.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -6899,7 +6744,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of multiset.
          *
          * @param <T>
          * @return
@@ -6954,7 +6798,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Won't work.
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
@@ -6965,7 +6808,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Won't work.
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
@@ -6976,7 +6818,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Won't work.
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
@@ -6987,7 +6828,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Single.
          *
          * @param <T>
          * @param <C>
@@ -7378,7 +7218,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Always true.
          *
          * @param <T>
          * @param <U>
@@ -7389,7 +7228,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Always false.
          *
          * @param <T>
          * @param <U>
@@ -7455,7 +7293,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Always true.
          *
          * @param <A>
          * @param <B>
@@ -7467,7 +7304,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Always false.
          *
          * @param <A>
          * @param <B>
@@ -7645,7 +7481,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Do nothing.
          *
          * @param <T>
          * @param <U>
@@ -7656,7 +7491,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of add.
          *
          * @param <T>
          * @param <C>
@@ -7689,7 +7523,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of remove.
          *
          * @param <T>
          * @param <C>
@@ -7722,7 +7555,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of put.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -7759,7 +7591,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of merge.
          *
          * @return
          */
@@ -7768,7 +7599,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of append.
          *
          * @param <T>
          * @return
@@ -7867,7 +7697,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Convert.
          *
          * @param <T>
          * @param action
@@ -8038,7 +7867,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Return first.
          *
          * @param <T>
          * @param <U>
@@ -8049,7 +7877,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Return second.
          *
          * @param <T>
          * @param <U>
@@ -8060,7 +7887,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of add.
          *
          * @param <T>
          * @param <C>
@@ -8093,7 +7919,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of remove.
          *
          * @param <T>
          * @param <C>
@@ -8126,7 +7951,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of put.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8164,7 +7988,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of merge.
          *
          * @return
          */
@@ -8173,7 +7996,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of append.
          *
          * @param <T>
          * @return
@@ -8183,7 +8005,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Convert.
          *
          * @param <T>
          * @param <U>
@@ -8240,7 +8061,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Convert.
          *
          * @param <A>
          * @param <B>
@@ -8567,7 +8387,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of merge.
          *
          * @return
          * @deprecated replaced by {@code #ofMergeToFirst}.
@@ -8596,7 +8415,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of append.
          *
          * @return
          * @deprecated replaced by {@code #ofAppendToFirst()}
@@ -8625,7 +8443,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Of concat.
          *
          * @return
          */
@@ -8679,7 +8496,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Min.
          *
          * @param <T>
          * @return
@@ -8690,24 +8506,12 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Max.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public static <T extends Comparable<? super T>> BinaryOperator<T> max() {
-            return (BinaryOperator) MAX;
-        }
-
-        /**
-         * Min by.
          *
          * @param <T>
          * @param comparator
          * @return
          */
-        public static <T> BinaryOperator<T> minBy(final Comparator<? super T> comparator) {
+        public static <T> BinaryOperator<T> min(final Comparator<? super T> comparator) {
             N.checkArgNotNull(comparator);
 
             return new BinaryOperator<T>() {
@@ -8719,19 +8523,64 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Max by.
          *
          * @param <T>
          * @param comparator
          * @return
          */
-        public static <T> BinaryOperator<T> maxBy(final Comparator<? super T> comparator) {
+        @SuppressWarnings("rawtypes")
+        public static <T> BinaryOperator<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
+            N.checkArgNotNull(keyMapper);
+
+            return new BinaryOperator<T>() {
+                @Override
+                public T apply(T t, T u) {
+                    return N.compare(keyMapper.apply(t), keyMapper.apply(u)) <= 0 ? t : u;
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <T extends Comparable<? super T>> BinaryOperator<T> max() {
+            return (BinaryOperator) MAX;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param comparator
+         * @return
+         */
+        public static <T> BinaryOperator<T> max(final Comparator<? super T> comparator) {
             N.checkArgNotNull(comparator);
 
             return new BinaryOperator<T>() {
                 @Override
                 public T apply(T t, T u) {
                     return comparator.compare(t, u) >= 0 ? t : u;
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param comparator
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> BinaryOperator<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+            N.checkArgNotNull(keyMapper);
+
+            return new BinaryOperator<T>() {
+                @Override
+                public T apply(T t, T u) {
+                    return N.compare(keyMapper.apply(t), keyMapper.apply(u)) >= 0 ? t : u;
                 }
             };
         }
@@ -8759,7 +8608,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Identity.
          *
          * @param <T>
          * @return
@@ -8782,7 +8630,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * F.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8802,7 +8649,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * P.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8822,7 +8668,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * C.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8903,7 +8748,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ff.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8928,7 +8772,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Pp.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8952,7 +8795,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Cc.
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -9007,7 +8849,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * To list.
          *
          * @param <T>
          * @return
@@ -9018,7 +8859,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * To set.
          *
          * @param <T>
          * @return
@@ -9061,7 +8901,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * To list.
          *
          * @param <T>
          * @return
@@ -9072,7 +8911,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * To set.
          *
          * @param <T>
          * @return
@@ -9114,7 +8952,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Clone array.
          *
          * @param <T>
          * @param <A>
@@ -9126,7 +8963,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * To str.
          *
          * @param <A>
          * @return
@@ -9137,7 +8973,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Join.
          *
          * @param <A>
          * @param delimiter
@@ -9234,7 +9069,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Positve.
          *
          * @return
          */
@@ -9243,7 +9077,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not negative.
          *
          * @return
          */
@@ -9252,7 +9085,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Equal.
          *
          * @return
          */
@@ -9261,7 +9093,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not equal.
          *
          * @return
          */
@@ -9270,7 +9101,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater than.
          *
          * @return
          */
@@ -9279,7 +9109,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater equal.
          *
          * @return
          */
@@ -9288,7 +9117,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less than.
          *
          * @return
          */
@@ -9297,7 +9125,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less equal.
          *
          * @return
          */
@@ -9448,7 +9275,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Positve.
          *
          * @return
          */
@@ -9457,7 +9283,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not negative.
          *
          * @return
          */
@@ -9466,7 +9291,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Equal.
          *
          * @return
          */
@@ -9475,7 +9299,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not equal.
          *
          * @return
          */
@@ -9484,7 +9307,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater than.
          *
          * @return
          */
@@ -9493,7 +9315,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater equal.
          *
          * @return
          */
@@ -9502,7 +9323,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less than.
          *
          * @return
          */
@@ -9511,7 +9331,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less equal.
          *
          * @return
          */
@@ -9662,7 +9481,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Positve.
          *
          * @return
          */
@@ -9671,7 +9489,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not negative.
          *
          * @return
          */
@@ -9680,7 +9497,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Equal.
          *
          * @return
          */
@@ -9689,7 +9505,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not equal.
          *
          * @return
          */
@@ -9698,7 +9513,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater than.
          *
          * @return
          */
@@ -9707,7 +9521,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater equal.
          *
          * @return
          */
@@ -9716,7 +9529,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less than.
          *
          * @return
          */
@@ -9725,7 +9537,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less equal.
          *
          * @return
          */
@@ -9876,7 +9687,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Positve.
          *
          * @return
          */
@@ -9885,7 +9695,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not negative.
          *
          * @return
          */
@@ -9894,7 +9703,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Equal.
          *
          * @return
          */
@@ -9903,7 +9711,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not equal.
          *
          * @return
          */
@@ -9912,7 +9719,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater than.
          *
          * @return
          */
@@ -9921,7 +9727,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater equal.
          *
          * @return
          */
@@ -9930,7 +9735,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less than.
          *
          * @return
          */
@@ -9939,7 +9743,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less equal.
          *
          * @return
          */
@@ -10090,7 +9893,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Positve.
          *
          * @return
          */
@@ -10099,7 +9901,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not negative.
          *
          * @return
          */
@@ -10108,7 +9909,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Equal.
          *
          * @return
          */
@@ -10117,7 +9917,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not equal.
          *
          * @return
          */
@@ -10126,7 +9925,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater than.
          *
          * @return
          */
@@ -10135,7 +9933,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater equal.
          *
          * @return
          */
@@ -10144,7 +9941,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less than.
          *
          * @return
          */
@@ -10153,7 +9949,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less equal.
          *
          * @return
          */
@@ -10304,7 +10099,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Positve.
          *
          * @return
          */
@@ -10313,7 +10107,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not negative.
          *
          * @return
          */
@@ -10322,7 +10115,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Equal.
          *
          * @return
          */
@@ -10331,7 +10123,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not equal.
          *
          * @return
          */
@@ -10340,7 +10131,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater than.
          *
          * @return
          */
@@ -10349,7 +10139,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater equal.
          *
          * @return
          */
@@ -10358,7 +10147,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less than.
          *
          * @return
          */
@@ -10367,7 +10155,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less equal.
          *
          * @return
          */
@@ -10518,7 +10305,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Positve.
          *
          * @return
          */
@@ -10527,7 +10313,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not negative.
          *
          * @return
          */
@@ -10536,7 +10321,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Equal.
          *
          * @return
          */
@@ -10545,7 +10329,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Not equal.
          *
          * @return
          */
@@ -10554,7 +10337,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater than.
          *
          * @return
          */
@@ -10563,7 +10345,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Greater equal.
          *
          * @return
          */
@@ -10572,7 +10353,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less than.
          *
          * @return
          */
@@ -10581,7 +10361,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Less equal.
          *
          * @return
          */
@@ -10668,7 +10447,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Identity.
          *
          * @param <T>
          * @param <E>
@@ -10679,7 +10457,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Empty action.
          *
          * @param <E>
          * @return
@@ -10689,7 +10466,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Do nothing.
          *
          * @param <T>
          * @param <E>
@@ -10700,7 +10476,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Sleep.
          *
          * @param <T>
          * @param <E>
@@ -10717,7 +10492,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Sleep uninterruptibly.
          *
          * @param <T>
          * @param <E>
@@ -10738,7 +10512,6 @@ public abstract class Fn extends Comparators {
         //    }
 
         /**
-         * Close quietly.
          *
          * @param <T>
          * @param <E>
@@ -10749,7 +10522,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Println.
          *
          * @param <T>
          * @param <E>
@@ -10760,7 +10532,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Println.
          *
          * @param <T>
          * @param <U>
@@ -10878,7 +10649,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ec.
          *
          * @param <T>
          * @param <E>
@@ -10891,7 +10661,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ec.
          *
          * @param <A>
          * @param <T>
@@ -10913,7 +10682,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ec.
          *
          * @param <A>
          * @param <B>
@@ -10937,7 +10705,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ec.
          *
          * @param <T>
          * @param <U>
@@ -10951,7 +10718,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ec.
          *
          * @param <A>
          * @param <T>
@@ -10974,7 +10740,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ec.
          *
          * @param <A>
          * @param <B>
@@ -11100,7 +10865,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Pp.
          *
          * @param <T>
          * @param <E>
@@ -11115,7 +10879,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Pp.
          *
          * @param <A>
          * @param <T>
@@ -11137,7 +10900,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Pp.
          *
          * @param <A>
          * @param <B>
@@ -11161,7 +10923,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Pp.
          *
          * @param <T>
          * @param <U>
@@ -11177,7 +10938,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Pp.
          *
          * @param <A>
          * @param <T>
@@ -11200,7 +10960,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Pp.
          *
          * @param <A>
          * @param <B>
@@ -11217,7 +10976,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Cc.
          *
          * @param <T>
          * @param <E>
@@ -11232,7 +10990,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Cc.
          *
          * @param <A>
          * @param <T>
@@ -11254,7 +11011,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Cc.
          *
          * @param <A>
          * @param <B>
@@ -11278,7 +11034,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Cc.
          *
          * @param <T>
          * @param <U>
@@ -11294,7 +11049,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Cc.
          *
          * @param <A>
          * @param <T>
@@ -11317,7 +11071,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Cc.
          *
          * @param <A>
          * @param <B>
@@ -11334,7 +11087,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ff.
          *
          * @param <T>
          * @param <R>
@@ -11350,7 +11102,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ff.
          *
          * @param <A>
          * @param <T>
@@ -11373,7 +11124,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ff.
          *
          * @param <A>
          * @param <B>
@@ -11398,7 +11148,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ff.
          *
          * @param <T>
          * @param <U>
@@ -11415,7 +11164,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ff.
          *
          * @param <A>
          * @param <T>
@@ -11439,7 +11187,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ff.
          *
          * @param <A>
          * @param <B>
@@ -11713,7 +11460,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Throwing merger.
          *
          * @param <T>
          * @param <E>
@@ -11724,7 +11470,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Ignoring merger.
          *
          * @param <T>
          * @param <E>
@@ -11735,7 +11480,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Replacing merger.
          *
          * @param <T>
          * @param <E>
@@ -11746,7 +11490,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Callable.
          *
          * @param <R>
          * @param <E>
@@ -11760,7 +11503,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * Runnable.
          *
          * @param <E>
          * @param runnable
@@ -11773,7 +11515,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * To callable.
          *
          * @param <E>
          * @param runnable
@@ -11792,7 +11533,6 @@ public abstract class Fn extends Comparators {
         }
 
         /**
-         * To runnable.
          *
          * @param <R>
          * @param <E>

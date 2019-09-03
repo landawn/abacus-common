@@ -53,7 +53,6 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     }
 
     /**
-     * Of.
      *
      * @param value
      * @return
@@ -63,7 +62,6 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
     }
 
     /**
-     * Value.
      *
      * @return
      */

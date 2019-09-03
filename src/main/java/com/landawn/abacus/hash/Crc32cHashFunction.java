@@ -26,7 +26,6 @@ package com.landawn.abacus.hash;
 final class Crc32cHashFunction extends AbstractStreamingHashFunction {
 
     /**
-     * Bits.
      *
      * @return
      */
@@ -36,7 +35,6 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * New hasher.
      *
      * @return
      */
@@ -46,7 +44,6 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -89,7 +86,6 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
         private int crc = 0;
 
         /**
-         * Update.
          *
          * @param b
          */
@@ -101,7 +97,6 @@ final class Crc32cHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Hash.
          *
          * @return
          */

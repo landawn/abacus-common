@@ -44,7 +44,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     };
 
     /**
-     * Empty.
      *
      * @return
      */
@@ -53,7 +52,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -64,7 +62,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param fromIndex
@@ -217,7 +214,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Generate.
      *
      * @param hasNext
      * @param supplier
@@ -245,7 +241,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Next.
      *
      * @return
      * @Deprecated use <code>nextShort()</code> instead.
@@ -257,14 +252,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Next short.
      *
      * @return
      */
     public abstract short nextShort();
 
     /**
-     * To array.
      *
      * @return
      */
@@ -273,7 +266,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -288,7 +280,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -297,7 +288,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Foreach remaining.
      *
      * @param <E>
      * @param action

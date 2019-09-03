@@ -63,7 +63,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * Bits.
      *
      * @return
      */
@@ -73,7 +72,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * Supports clone.
      *
      * @param mac
      * @return true, if successful
@@ -107,7 +105,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * New hasher.
      *
      * @return
      */
@@ -124,7 +121,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -154,7 +150,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Update.
          *
          * @param b
          */
@@ -165,7 +160,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Update.
          *
          * @param b
          */
@@ -176,7 +170,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Update.
          *
          * @param b
          * @param off
@@ -196,7 +189,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Hash.
          *
          * @return
          */

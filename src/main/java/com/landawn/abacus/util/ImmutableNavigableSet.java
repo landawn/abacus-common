@@ -48,7 +48,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Empty.
      *
      * @param <E>
      * @return
@@ -58,7 +57,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param a
@@ -74,7 +72,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param navigableSet the elements in this <code>Set</code> are shared by the returned ImmutableNavigableSet.
@@ -91,7 +88,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Copy of.
      *
      * @param <E>
      * @param sortedSet
@@ -106,7 +102,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Of.
      *
      * @param <E>
      * @param sortedSet
@@ -118,7 +113,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Lower.
      *
      * @param e
      * @return
@@ -129,7 +123,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Floor.
      *
      * @param e
      * @return
@@ -140,7 +133,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Ceiling.
      *
      * @param e
      * @return
@@ -151,7 +143,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Higher.
      *
      * @param e
      * @return
@@ -162,7 +153,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Poll first.
      *
      * @return
      */
@@ -172,7 +162,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Poll last.
      *
      * @return
      */
@@ -182,7 +171,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Descending set.
      *
      * @return
      */
@@ -192,7 +180,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Descending iterator.
      *
      * @return
      */
@@ -202,7 +189,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Sub set.
      *
      * @param fromElement
      * @param fromInclusive
@@ -216,7 +202,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Head set.
      *
      * @param toElement
      * @param inclusive
@@ -228,7 +213,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Tail set.
      *
      * @param fromElement
      * @param inclusive

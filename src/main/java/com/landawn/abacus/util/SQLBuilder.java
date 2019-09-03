@@ -862,7 +862,6 @@ public abstract class SQLBuilder {
     //    }
 
     /**
-     * Named.
      *
      * @param propNames
      * @return
@@ -879,7 +878,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Named.
      *
      * @param propNames
      * @return
@@ -931,7 +929,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Into.
      *
      * @param tableName
      * @return
@@ -1110,7 +1107,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Into.
      *
      * @param entityClass
      * @return
@@ -1124,7 +1120,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * From.
      *
      * @param expr
      * @return
@@ -1141,7 +1136,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * From.
      *
      * @param tableNames
      * @return
@@ -1157,7 +1151,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * From.
      *
      * @param tableNames
      * @return
@@ -1172,7 +1165,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * From.
      *
      * @param tableAliases
      * @return
@@ -1184,7 +1176,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * From.
      *
      * @param tableName
      * @param fromCause
@@ -1316,7 +1307,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * From.
      *
      * @param entityClass
      * @return
@@ -1330,7 +1320,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Join.
      *
      * @param expr
      * @return
@@ -1344,7 +1333,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Join.
      *
      * @param entityClass
      * @return
@@ -1358,7 +1346,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Inner join.
      *
      * @param expr
      * @return
@@ -1372,7 +1359,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Inner join.
      *
      * @param entityClass
      * @return
@@ -1386,7 +1372,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Left join.
      *
      * @param expr
      * @return
@@ -1400,7 +1385,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Left join.
      *
      * @param entityClass
      * @return
@@ -1414,7 +1398,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Right join.
      *
      * @param expr
      * @return
@@ -1428,7 +1411,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Right join.
      *
      * @param entityClass
      * @return
@@ -1442,7 +1424,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Full join.
      *
      * @param expr
      * @return
@@ -1456,7 +1437,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Full join.
      *
      * @param entityClass
      * @return
@@ -1470,7 +1450,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Cross join.
      *
      * @param expr
      * @return
@@ -1484,7 +1463,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Cross join.
      *
      * @param entityClass
      * @return
@@ -1498,7 +1476,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Natural join.
      *
      * @param expr
      * @return
@@ -1512,7 +1489,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Natural join.
      *
      * @param entityClass
      * @return
@@ -1526,7 +1502,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * On.
      *
      * @param expr
      * @return
@@ -1540,7 +1515,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * On.
      *
      * @param cond any literal written in <code>Expression</code> condition won't be formalized
      * @return
@@ -1554,7 +1528,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Using.
      *
      * @param expr
      * @return
@@ -1568,7 +1541,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Where.
      *
      * @param expr
      * @return
@@ -1607,7 +1579,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Where.
      *
      * @param cond any literal written in <code>Expression</code> condition won't be formalized
      * @return
@@ -1623,7 +1594,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Group by.
      *
      * @param expr
      * @return
@@ -1642,7 +1612,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Group by.
      *
      * @param columnNames
      * @return
@@ -1674,7 +1643,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Group by.
      *
      * @param columnName
      * @param direction
@@ -1690,7 +1658,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Group by.
      *
      * @param columnNames
      * @return
@@ -1712,7 +1679,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Group by.
      *
      * @param columnNames
      * @param direction
@@ -1728,7 +1694,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Group by.
      *
      * @param orders
      * @return
@@ -1753,7 +1718,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Having.
      *
      * @param expr
      * @return
@@ -1767,7 +1731,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Having.
      *
      * @param cond any literal written in <code>Expression</code> condition won't be formalized
      * @return
@@ -1781,7 +1744,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Order by.
      *
      * @param expr
      * @return
@@ -1800,7 +1762,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Order by.
      *
      * @param columnNames
      * @return
@@ -1832,7 +1793,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Order by.
      *
      * @param columnName
      * @param direction
@@ -1848,7 +1808,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Order by.
      *
      * @param columnNames
      * @return
@@ -1870,7 +1829,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Order by.
      *
      * @param columnNames
      * @param direction
@@ -1886,7 +1844,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Order by.
      *
      * @param orders
      * @return
@@ -1912,7 +1869,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Limit.
      *
      * @param count
      * @return
@@ -1926,7 +1882,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Limit.
      *
      * @param offset
      * @param count
@@ -1945,7 +1900,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Offset.
      *
      * @param offset
      * @return
@@ -1973,7 +1927,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Union.
      *
      * @param sqlBuilder
      * @return
@@ -1989,7 +1942,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Union.
      *
      * @param query
      * @return
@@ -1999,7 +1951,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Union.
      *
      * @param columnNames
      * @return
@@ -2027,7 +1978,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Union.
      *
      * @param columnNames
      * @return
@@ -2045,7 +1995,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Union all.
      *
      * @param sqlBuilder
      * @return
@@ -2061,7 +2010,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Union all.
      *
      * @param query
      * @return
@@ -2071,7 +2019,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Union all.
      *
      * @param columnNames
      * @return
@@ -2099,7 +2046,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Union all.
      *
      * @param columnNames
      * @return
@@ -2117,7 +2063,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Intersect.
      *
      * @param sqlBuilder
      * @return
@@ -2133,7 +2078,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Intersect.
      *
      * @param query
      * @return
@@ -2143,7 +2087,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Intersect.
      *
      * @param columnNames
      * @return
@@ -2171,7 +2114,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Intersect.
      *
      * @param columnNames
      * @return
@@ -2189,7 +2131,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Except.
      *
      * @param sqlBuilder
      * @return
@@ -2205,7 +2146,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Except.
      *
      * @param query
      * @return
@@ -2215,7 +2155,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Except.
      *
      * @param columnNames
      * @return
@@ -2243,7 +2182,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Except.
      *
      * @param columnNames
      * @return
@@ -2261,7 +2199,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Minus.
      *
      * @param sqlBuilder
      * @return
@@ -2277,7 +2214,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Minus.
      *
      * @param query
      * @return
@@ -2287,7 +2223,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Minus.
      *
      * @param columnNames
      * @return
@@ -2315,7 +2250,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Minus.
      *
      * @param columnNames
      * @return
@@ -2333,7 +2267,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * For update.
      *
      * @return
      */
@@ -2344,7 +2277,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Sets the.
      *
      * @param expr
      * @return
@@ -2354,7 +2286,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Sets the.
      *
      * @param columnNames
      * @return
@@ -2432,7 +2363,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Sets the.
      *
      * @param columnNames
      * @return
@@ -2508,7 +2438,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Sets the.
      *
      * @param props
      * @return
@@ -2642,7 +2571,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Sets the.
      *
      * @param entityClass
      * @return
@@ -2654,7 +2582,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Sets the.
      *
      * @param entityClass
      * @param excludedPropNames
@@ -2697,7 +2624,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Parameters.
      *
      * @return
      */
@@ -2715,7 +2641,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Apply.
      *
      * @param <T>
      * @param <EX>
@@ -2728,7 +2653,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Accept.
      *
      * @param <EX>
      * @param consumer
@@ -2739,7 +2663,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Inits the.
      *
      * @param setForUpdate
      */
@@ -2961,7 +2884,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Append condition.
      *
      * @param cond
      */
@@ -3210,7 +3132,6 @@ public abstract class SQLBuilder {
     //    }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -3326,7 +3247,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -3336,7 +3256,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -3352,7 +3271,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -3367,7 +3285,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -3382,7 +3299,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -3392,7 +3308,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -3410,7 +3325,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -3420,7 +3334,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -3437,7 +3350,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -3447,7 +3359,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -3480,7 +3391,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -3496,7 +3406,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -3513,7 +3422,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -3528,7 +3436,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -3545,7 +3452,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -3560,7 +3466,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -3577,7 +3482,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -3587,7 +3491,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -3598,7 +3501,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -3609,7 +3511,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -3627,7 +3528,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -3637,7 +3537,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -3648,7 +3547,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -3659,7 +3557,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -3681,7 +3578,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -3696,7 +3592,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -3706,7 +3601,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -3724,7 +3618,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -3739,7 +3632,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -3788,7 +3680,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -3798,7 +3689,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -3814,7 +3704,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -3829,7 +3718,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -3844,7 +3732,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -3854,7 +3741,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -3872,7 +3758,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -3882,7 +3767,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -3899,7 +3783,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -3909,7 +3792,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -3942,7 +3824,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -3958,7 +3839,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -3975,7 +3855,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -3990,7 +3869,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -4007,7 +3885,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -4022,7 +3899,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -4039,7 +3915,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -4049,7 +3924,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4060,7 +3934,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4071,7 +3944,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4089,7 +3961,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -4099,7 +3970,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4110,7 +3980,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4121,7 +3990,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4143,7 +4011,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -4158,7 +4025,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -4168,7 +4034,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4186,7 +4051,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -4201,7 +4065,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -4250,7 +4113,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -4260,7 +4122,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -4276,7 +4137,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -4291,7 +4151,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -4306,7 +4165,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -4316,7 +4174,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -4334,7 +4191,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -4344,7 +4200,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4361,7 +4216,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -4371,7 +4225,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4404,7 +4257,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -4420,7 +4272,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -4437,7 +4288,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -4452,7 +4302,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -4469,7 +4318,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -4484,7 +4332,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -4501,7 +4348,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -4511,7 +4357,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4522,7 +4367,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4533,7 +4377,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4551,7 +4394,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -4561,7 +4403,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4572,7 +4413,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4583,7 +4423,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4605,7 +4444,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -4620,7 +4458,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -4630,7 +4467,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4648,7 +4484,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -4663,7 +4498,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -4709,7 +4543,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -4719,7 +4552,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -4735,7 +4567,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -4750,7 +4581,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -4765,7 +4595,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -4775,7 +4604,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -4793,7 +4621,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -4803,7 +4630,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4820,7 +4646,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -4830,7 +4655,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4863,7 +4687,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -4879,7 +4702,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -4896,7 +4718,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -4911,7 +4732,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -4928,7 +4748,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -4943,7 +4762,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -4960,7 +4778,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -4970,7 +4787,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -4981,7 +4797,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -4992,7 +4807,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5010,7 +4824,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -5020,7 +4833,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5031,7 +4843,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5042,7 +4853,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5064,7 +4874,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -5079,7 +4888,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -5089,7 +4897,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5107,7 +4914,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -5122,7 +4928,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -5168,7 +4973,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -5178,7 +4982,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -5194,7 +4997,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -5209,7 +5011,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -5224,7 +5025,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -5234,7 +5034,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -5252,7 +5051,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -5262,7 +5060,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5279,7 +5076,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -5289,7 +5085,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5322,7 +5117,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -5338,7 +5132,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -5355,7 +5148,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -5370,7 +5162,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -5387,7 +5178,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -5402,7 +5192,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -5419,7 +5208,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -5429,7 +5217,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5440,7 +5227,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5451,7 +5237,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5469,7 +5254,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -5479,7 +5263,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5490,7 +5273,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5501,7 +5283,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5523,7 +5304,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -5538,7 +5318,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -5548,7 +5327,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5566,7 +5344,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -5581,7 +5358,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -5627,7 +5403,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -5637,7 +5412,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -5653,7 +5427,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -5668,7 +5441,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -5683,7 +5455,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -5693,7 +5464,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -5711,7 +5481,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -5721,7 +5490,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5738,7 +5506,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -5748,7 +5515,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5781,7 +5547,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -5797,7 +5562,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -5814,7 +5578,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -5829,7 +5592,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -5846,7 +5608,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -5861,7 +5622,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -5878,7 +5638,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -5888,7 +5647,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5899,7 +5657,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5910,7 +5667,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5928,7 +5684,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -5938,7 +5693,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5949,7 +5703,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -5960,7 +5713,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -5982,7 +5734,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -5997,7 +5748,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -6007,7 +5757,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6025,7 +5774,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -6040,7 +5788,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -6086,7 +5833,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -6096,7 +5842,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -6112,7 +5857,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -6127,7 +5871,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -6142,7 +5885,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -6152,7 +5894,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -6170,7 +5911,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -6180,7 +5920,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6197,7 +5936,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -6207,7 +5945,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6240,7 +5977,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -6256,7 +5992,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -6273,7 +6008,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -6288,7 +6022,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -6305,7 +6038,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -6320,7 +6052,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -6337,7 +6068,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -6347,7 +6077,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -6358,7 +6087,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6369,7 +6097,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -6387,7 +6114,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -6397,7 +6123,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -6408,7 +6133,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6419,7 +6143,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -6441,7 +6164,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -6456,7 +6178,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -6466,7 +6187,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6484,7 +6204,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -6499,7 +6218,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -6545,7 +6263,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -6555,7 +6272,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -6571,7 +6287,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -6586,7 +6301,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -6601,7 +6315,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -6611,7 +6324,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -6629,7 +6341,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -6639,7 +6350,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6656,7 +6366,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -6666,7 +6375,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6699,7 +6407,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -6715,7 +6422,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -6732,7 +6438,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -6747,7 +6452,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -6764,7 +6468,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -6779,7 +6482,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -6796,7 +6498,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -6806,7 +6507,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -6817,7 +6517,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6828,7 +6527,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -6846,7 +6544,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -6856,7 +6553,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -6867,7 +6563,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6878,7 +6573,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -6900,7 +6594,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -6915,7 +6608,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -6925,7 +6617,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -6943,7 +6634,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -6958,7 +6648,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -7004,7 +6693,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -7014,7 +6702,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -7030,7 +6717,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -7045,7 +6731,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -7060,7 +6745,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -7070,7 +6754,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -7088,7 +6771,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -7098,7 +6780,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7115,7 +6796,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -7125,7 +6805,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7158,7 +6837,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -7174,7 +6852,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -7191,7 +6868,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -7206,7 +6882,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -7223,7 +6898,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -7238,7 +6912,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -7255,7 +6928,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -7265,7 +6937,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -7276,7 +6947,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7287,7 +6957,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -7305,7 +6974,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -7315,7 +6983,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -7326,7 +6993,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7337,7 +7003,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -7359,7 +7024,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -7374,7 +7038,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -7384,7 +7047,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7402,7 +7064,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -7417,7 +7078,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -7464,7 +7124,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -7474,7 +7133,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -7490,7 +7148,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -7505,7 +7162,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -7520,7 +7176,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -7530,7 +7185,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -7548,7 +7202,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -7558,7 +7211,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7575,7 +7227,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -7585,7 +7236,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7618,7 +7268,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -7634,7 +7283,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -7651,7 +7299,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -7666,7 +7313,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -7683,7 +7329,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -7698,7 +7343,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -7715,7 +7359,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -7725,7 +7368,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -7736,7 +7378,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7747,7 +7388,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -7765,7 +7405,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -7775,7 +7414,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -7786,7 +7424,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7797,7 +7434,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -7819,7 +7455,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -7834,7 +7469,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -7844,7 +7478,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -7862,7 +7495,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -7877,7 +7509,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -7924,7 +7555,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -7934,7 +7564,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -7950,7 +7579,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -7965,7 +7593,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -7980,7 +7607,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -7990,7 +7616,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -8008,7 +7633,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -8018,7 +7642,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8035,7 +7658,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -8045,7 +7667,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8078,7 +7699,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -8094,7 +7714,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -8111,7 +7730,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -8126,7 +7744,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -8143,7 +7760,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -8158,7 +7774,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -8175,7 +7790,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -8185,7 +7799,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -8196,7 +7809,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8207,7 +7819,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -8225,7 +7836,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -8235,7 +7845,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -8246,7 +7855,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8257,7 +7865,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -8279,7 +7886,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -8294,7 +7900,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -8304,7 +7909,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8322,7 +7926,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -8337,7 +7940,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -8384,7 +7986,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param expr
          * @return
@@ -8394,7 +7995,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -8410,7 +8010,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param columnNames
          * @return
@@ -8425,7 +8024,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param props
          * @return
@@ -8440,7 +8038,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @return
@@ -8450,7 +8047,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entity
          * @param excludedPropNames
@@ -8468,7 +8064,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @return
@@ -8478,7 +8073,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8495,7 +8089,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @return
@@ -8505,7 +8098,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Insert into.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8538,7 +8130,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -8554,7 +8145,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -8571,7 +8161,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnNames
          * @return
@@ -8586,7 +8175,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnNames
@@ -8603,7 +8191,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param columnAliases
          * @return
@@ -8618,7 +8205,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
          * @param columnAliases
@@ -8635,7 +8221,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @return
@@ -8645,7 +8230,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -8656,7 +8240,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8667,7 +8250,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -8685,7 +8267,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @return
@@ -8695,7 +8276,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -8706,7 +8286,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8717,7 +8296,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Select from.
          *
          * @param entityClass
          * @param includeSubEntityProperties
@@ -8739,7 +8317,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param tableName
          * @return
@@ -8754,7 +8331,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @return
@@ -8764,7 +8340,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Update.
          *
          * @param entityClass
          * @param excludedPropNames
@@ -8782,7 +8357,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param tableName
          * @return
@@ -8797,7 +8371,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Delete from.
          *
          * @param entityClass
          * @return
@@ -8836,7 +8409,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * .
          *
          * @return
          */
@@ -8845,7 +8417,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -8855,7 +8426,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -8876,7 +8446,6 @@ public abstract class SQLBuilder {
         }
 
         /**
-         * To string.
          *
          * @return
          */

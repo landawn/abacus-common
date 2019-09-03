@@ -51,7 +51,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * From.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -63,7 +62,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Gets the.
      *
      * @param propName
      * @return
@@ -125,7 +123,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Sets the.
      *
      * @param propName
      * @param propValue
@@ -138,7 +135,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param key
      * @param value
@@ -150,7 +146,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Put all.
      *
      * @param m
      */
@@ -177,7 +172,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Removes the.
      *
      * @param key
      * @return
@@ -242,7 +236,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Contains key.
      *
      * @param key
      * @return true, if successful
@@ -253,7 +246,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Contains value.
      *
      * @param value
      * @return true, if successful
@@ -264,7 +256,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -274,7 +265,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Values.
      *
      * @return
      */
@@ -284,7 +274,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Entry set.
      *
      * @return
      */
@@ -304,7 +293,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -322,7 +310,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -335,7 +322,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -345,7 +331,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -356,7 +341,6 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

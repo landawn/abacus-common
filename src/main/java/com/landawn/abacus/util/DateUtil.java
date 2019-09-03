@@ -822,7 +822,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Parses the.
      *
      * @param date
      * @param format
@@ -868,7 +867,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param date
      * @return
@@ -878,7 +876,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param date
      * @param format
@@ -889,7 +886,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param date
      * @param format
@@ -901,7 +897,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param date
@@ -911,7 +906,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param date
@@ -922,7 +916,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param date
@@ -934,7 +927,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param c
      * @return
@@ -944,7 +936,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param c
      * @param format
@@ -955,7 +946,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param c
      * @param format
@@ -978,7 +968,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param c
@@ -988,7 +977,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param c
@@ -999,7 +987,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param c
@@ -1015,7 +1002,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param c
      * @return
@@ -1025,7 +1011,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param c
      * @param format
@@ -1036,7 +1021,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param c
      * @param format
@@ -1060,7 +1044,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param c
@@ -1070,7 +1053,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param c
@@ -1081,7 +1063,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format.
      *
      * @param writer
      * @param c
@@ -2105,7 +2086,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Recycle SDF.
      *
      * @param format
      * @param timeZone
@@ -2368,7 +2348,6 @@ public abstract class DateUtil {
     }
 
     /**
-     * Format date.
      *
      * @param writer
      * @param date

@@ -63,7 +63,6 @@ public enum IsolationLevel {
     private final int intValue;
 
     /**
-     * Constructor.
      *
      * @param intValue
      */
@@ -72,7 +71,6 @@ public enum IsolationLevel {
     }
 
     /**
-     * Method intValue.
      *
      * @return int
      */
@@ -81,7 +79,6 @@ public enum IsolationLevel {
     }
 
     /**
-     * Method valueOf.
      *
      * @param intValue
      * @return IsolationLevel

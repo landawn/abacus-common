@@ -33,7 +33,6 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     }
 
     /**
-     * Creates the.
      *
      * @param httpClient
      * @return
@@ -43,7 +42,6 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     }
 
     /**
-     * Url.
      *
      * @param url
      * @return
@@ -53,7 +51,6 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     }
 
     /**
-     * Url.
      *
      * @param url
      * @param connTimeout

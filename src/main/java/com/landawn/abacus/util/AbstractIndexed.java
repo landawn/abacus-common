@@ -36,7 +36,6 @@ abstract class AbstractIndexed {
     }
 
     /**
-     * Index.
      *
      * @return
      */
@@ -45,7 +44,6 @@ abstract class AbstractIndexed {
     }
 
     /**
-     * Long index.
      *
      * @return
      */

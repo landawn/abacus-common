@@ -161,7 +161,6 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     }
 
     /**
-     * Test.
      *
      * @param input
      * @return true, if successful
@@ -262,7 +261,6 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     }
 
     /**
-     * Equals.
      *
      * @param object
      * @return true, if successful
@@ -281,7 +279,6 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -342,7 +339,6 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     }
 
     /**
-     * Creates the.
      *
      * @param <T>
      * @param funnel
@@ -469,7 +465,6 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     }
 
     /**
-     * Write replace.
      *
      * @return
      */
@@ -509,7 +504,6 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
         }
 
         /**
-         * Read resolve.
          *
          * @return
          */

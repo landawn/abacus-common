@@ -39,7 +39,6 @@ import java.lang.annotation.Target;
 public @interface Type {
 
     /**
-     * Value.
      *
      * @return
      * @deprecated use {@code name} to specify attribute explicitly.
@@ -48,21 +47,18 @@ public @interface Type {
     String value() default "";
 
     /**
-     * Name.
      *
      * @return
      */
     String name() default "";
 
     /**
-     * Enumerated.
      *
      * @return
      */
     EnumType enumerated() default EnumType.STRING;
 
     /**
-     * Scope.
      *
      * @return
      */

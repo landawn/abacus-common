@@ -83,35 +83,30 @@ public abstract class Tuple {
     }
 
     /**
-     * Arity.
      *
      * @return
      */
     public abstract int arity();
 
     /**
-     * Any null.
      *
      * @return true, if successful
      */
     public abstract boolean anyNull();
 
     /**
-     * All null.
      *
      * @return true, if successful
      */
     public abstract boolean allNull();
 
     /**
-     * To array.
      *
      * @return
      */
     public abstract Object[] toArray();
 
     /**
-     * To array.
      *
      * @param <A>
      * @param a
@@ -120,7 +115,6 @@ public abstract class Tuple {
     public abstract <A> A[] toArray(A[] a);
 
     /**
-     * For each.
      *
      * @param <E>
      * @param consumer
@@ -129,14 +123,12 @@ public abstract class Tuple {
     public abstract <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E;
 
     /**
-     * Stream.
      *
      * @return
      */
     protected abstract Stream<? extends Tuple> stream();
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param _1 the 1
@@ -147,7 +139,6 @@ public abstract class Tuple {
     }
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param <T2>
@@ -160,7 +151,6 @@ public abstract class Tuple {
     }
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param <T2>
@@ -175,7 +165,6 @@ public abstract class Tuple {
     }
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param <T2>
@@ -192,7 +181,6 @@ public abstract class Tuple {
     }
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param <T2>
@@ -211,7 +199,6 @@ public abstract class Tuple {
     }
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param <T2>
@@ -232,7 +219,6 @@ public abstract class Tuple {
     }
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param <T2>
@@ -255,7 +241,6 @@ public abstract class Tuple {
     }
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param <T2>
@@ -280,7 +265,6 @@ public abstract class Tuple {
     }
 
     /**
-     * Of.
      *
      * @param <T1>
      * @param <T2>
@@ -308,7 +292,6 @@ public abstract class Tuple {
     }
 
     /**
-     * From.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -320,7 +303,6 @@ public abstract class Tuple {
     }
 
     /**
-     * From.
      *
      * @param <T>
      * @param a
@@ -380,7 +362,6 @@ public abstract class Tuple {
     }
 
     /**
-     * From.
      *
      * @param <T>
      * @param c
@@ -468,7 +449,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -478,7 +458,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -488,7 +467,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -498,7 +476,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -508,7 +485,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -526,7 +502,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -540,7 +515,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -551,7 +525,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -564,7 +537,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -576,7 +548,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -600,7 +571,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -613,7 +583,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -634,7 +603,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -678,7 +646,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -688,7 +655,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -698,7 +664,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -708,7 +673,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Reversed.
          *
          * @return
          */
@@ -717,7 +681,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -727,7 +690,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -746,7 +708,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -761,7 +722,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -772,7 +732,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -783,7 +742,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -796,7 +754,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -809,7 +766,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -821,7 +777,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -833,7 +788,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -843,7 +797,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To pair.
          *
          * @return
          */
@@ -852,7 +805,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -866,7 +818,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -887,7 +838,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -937,7 +887,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -947,7 +896,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -957,7 +905,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -967,7 +914,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Reversed.
          *
          * @return
          */
@@ -976,7 +922,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -986,7 +931,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -1006,7 +950,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -1022,7 +965,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -1033,7 +975,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -1044,7 +985,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -1057,7 +997,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -1070,7 +1009,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -1082,7 +1020,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -1094,7 +1031,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -1104,7 +1040,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To triple.
          *
          * @return
          */
@@ -1113,7 +1048,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -1128,7 +1062,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -1149,7 +1082,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -1205,7 +1137,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -1215,7 +1146,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -1225,7 +1155,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -1235,7 +1164,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Reversed.
          *
          * @return
          */
@@ -1244,7 +1172,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -1254,7 +1181,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -1275,7 +1201,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -1292,7 +1217,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -1303,7 +1227,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -1316,7 +1239,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -1328,7 +1250,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -1338,7 +1259,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -1354,7 +1274,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -1375,7 +1294,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -1437,7 +1355,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -1447,7 +1364,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -1457,7 +1373,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -1467,7 +1382,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Reversed.
          *
          * @return
          */
@@ -1476,7 +1390,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -1486,7 +1399,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -1508,7 +1420,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -1526,7 +1437,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -1537,7 +1447,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -1550,7 +1459,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -1563,7 +1471,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -1573,7 +1480,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -1590,7 +1496,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -1612,7 +1517,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -1680,7 +1584,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -1690,7 +1593,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -1700,7 +1602,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -1710,7 +1611,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Reversed.
          *
          * @return
          */
@@ -1719,7 +1619,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -1729,7 +1628,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -1752,7 +1650,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -1771,7 +1668,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -1782,7 +1678,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -1795,7 +1690,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -1808,7 +1702,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -1818,7 +1711,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -1836,7 +1728,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -1858,7 +1749,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -1933,7 +1823,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -1943,7 +1832,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -1953,7 +1841,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -1963,7 +1850,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Reversed.
          *
          * @return
          */
@@ -1972,7 +1858,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -1982,7 +1867,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -2006,7 +1890,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -2026,7 +1909,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -2037,7 +1919,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -2050,7 +1931,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -2063,7 +1943,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -2073,7 +1952,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -2092,7 +1970,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -2114,7 +1991,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -2195,7 +2071,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -2205,7 +2080,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -2215,7 +2089,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -2225,7 +2098,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Reversed.
          *
          * @return
          */
@@ -2234,7 +2106,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -2244,7 +2115,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -2269,7 +2139,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -2290,7 +2159,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -2301,7 +2169,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -2314,7 +2181,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -2327,7 +2193,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -2337,7 +2202,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -2357,7 +2221,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -2379,7 +2242,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -2466,7 +2328,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Arity.
          *
          * @return
          */
@@ -2476,7 +2337,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Any null.
          *
          * @return true, if successful
          */
@@ -2486,7 +2346,6 @@ public abstract class Tuple {
         }
 
         /**
-         * All null.
          *
          * @return true, if successful
          */
@@ -2496,7 +2355,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Reversed.
          *
          * @return
          */
@@ -2505,7 +2363,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -2515,7 +2372,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a
@@ -2541,7 +2397,6 @@ public abstract class Tuple {
         }
 
         /**
-         * For each.
          *
          * @param <E>
          * @param consumer
@@ -2563,7 +2418,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Accept.
          *
          * @param <E>
          * @param action
@@ -2574,7 +2428,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Map.
          *
          * @param <U>
          * @param <E>
@@ -2587,7 +2440,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Filter.
          *
          * @param <E>
          * @param predicate
@@ -2600,7 +2452,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Stream.
          *
          * @return
          */
@@ -2610,7 +2461,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -2631,7 +2481,6 @@ public abstract class Tuple {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -2654,7 +2503,6 @@ public abstract class Tuple {
         }
 
         /**
-         * To string.
          *
          * @return
          */

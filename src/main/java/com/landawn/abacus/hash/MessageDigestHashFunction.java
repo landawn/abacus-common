@@ -74,7 +74,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * Supports clone.
      *
      * @param digest
      * @return true, if successful
@@ -89,7 +88,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * Bits.
      *
      * @return
      */
@@ -99,7 +97,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -123,7 +120,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * New hasher.
      *
      * @return
      */
@@ -167,7 +163,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Read resolve.
          *
          * @return
          */
@@ -180,7 +175,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
     }
 
     /**
-     * Write replace.
      *
      * @return
      */
@@ -214,7 +208,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Update.
          *
          * @param b
          */
@@ -225,7 +218,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Update.
          *
          * @param b
          */
@@ -236,7 +228,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Update.
          *
          * @param b
          * @param off
@@ -256,7 +247,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         }
 
         /**
-         * Hash.
          *
          * @return
          */

@@ -75,7 +75,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param msg
      */
@@ -85,7 +84,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param msg
      * @param t
@@ -106,7 +104,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param msg
      */
@@ -116,7 +113,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param msg
      * @param t
@@ -137,7 +133,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param msg
      */
@@ -147,7 +142,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param msg
      * @param t
@@ -168,7 +162,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param msg
      */
@@ -178,7 +171,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param msg
      * @param t
@@ -199,7 +191,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param msg
      */
@@ -209,7 +200,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param msg
      * @param t
@@ -220,7 +210,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg
@@ -233,7 +222,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg1
@@ -247,7 +235,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param template
      * @param arg1
@@ -262,7 +249,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param template
      * @param args
@@ -276,7 +262,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param msg
@@ -287,7 +272,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -301,7 +285,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -316,7 +299,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param template
@@ -332,7 +314,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param supplier
      */
@@ -344,7 +325,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param supplier
      * @param t
@@ -357,7 +337,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Trace.
      *
      * @param t
      * @param supplier
@@ -370,7 +349,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg
@@ -383,7 +361,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg1
@@ -397,7 +374,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param template
      * @param arg1
@@ -412,7 +388,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param template
      * @param args
@@ -426,7 +401,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param msg
@@ -437,7 +411,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -451,7 +424,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -466,7 +438,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param template
@@ -482,7 +453,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param supplier
      */
@@ -494,7 +464,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param supplier
      * @param t
@@ -507,7 +476,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Debug.
      *
      * @param t
      * @param supplier
@@ -520,7 +488,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param template
      * @param arg
@@ -533,7 +500,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param template
      * @param arg1
@@ -547,7 +513,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param template
      * @param arg1
@@ -562,7 +527,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param template
      * @param args
@@ -576,7 +540,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param msg
@@ -587,7 +550,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -601,7 +563,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -616,7 +577,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param template
@@ -632,7 +592,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param supplier
      */
@@ -644,7 +603,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param supplier
      * @param t
@@ -657,7 +615,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Info.
      *
      * @param t
      * @param supplier
@@ -670,7 +627,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg
@@ -683,7 +639,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg1
@@ -697,7 +652,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param template
      * @param arg1
@@ -712,7 +666,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param template
      * @param args
@@ -726,7 +679,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param msg
@@ -737,7 +689,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -751,7 +702,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -766,7 +716,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param template
@@ -782,7 +731,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param supplier
      */
@@ -794,7 +742,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param supplier
      * @param t
@@ -807,7 +754,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Warn.
      *
      * @param t
      * @param supplier
@@ -820,7 +766,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param template
      * @param arg
@@ -833,7 +778,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param template
      * @param arg1
@@ -847,7 +791,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param template
      * @param arg1
@@ -862,7 +805,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param template
      * @param args
@@ -876,7 +818,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param msg
@@ -887,7 +828,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -901,7 +841,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -916,7 +855,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param template
@@ -932,7 +870,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param supplier
      */
@@ -944,7 +881,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param supplier
      * @param t
@@ -957,7 +893,6 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Error.
      *
      * @param t
      * @param supplier

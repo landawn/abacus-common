@@ -51,7 +51,6 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     private static final long K2 = 0x9ae16a3b2f90404fL;
 
     /**
-     * Hash.
      *
      * @param input
      * @param off
@@ -65,7 +64,6 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     }
 
     /**
-     * Bits.
      *
      * @return
      */
@@ -75,7 +73,6 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -87,7 +84,6 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     // End of public functions.
 
     /**
-     * Fingerprint.
      *
      * @param bytes
      * @param offset
@@ -109,7 +105,6 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
     }
 
     /**
-     * Shift mix.
      *
      * @param val
      * @return

@@ -65,7 +65,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     };
 
     /**
-     * Empty.
      *
      * @param <A>
      * @param <B>
@@ -76,7 +75,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -92,7 +90,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -164,7 +161,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Generate.
      *
      * @param <A>
      * @param <B>
@@ -232,7 +228,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Generate.
      *
      * @param <A>
      * @param <B>
@@ -302,7 +297,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -315,7 +309,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -330,7 +323,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -343,7 +335,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -358,7 +349,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -419,7 +409,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -481,7 +470,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Unzip.
      *
      * @param <T>
      * @param <L>
@@ -534,7 +522,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
-     * Map.
      *
      * @param <R>
      * @param mapper
@@ -543,7 +530,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, R> mapper);
 
     /**
-     * Stream.
      *
      * @param <R>
      * @param mapper

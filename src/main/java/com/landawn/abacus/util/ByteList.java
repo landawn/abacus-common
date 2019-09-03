@@ -98,7 +98,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -109,7 +108,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param size
@@ -122,7 +120,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Copy of.
      *
      * @param a
      * @return
@@ -132,7 +129,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Copy of.
      *
      * @param a
      * @param fromIndex
@@ -144,7 +140,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * From.
      *
      * @param c
      * @return
@@ -158,7 +153,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * From.
      *
      * @param c
      * @param defaultForNull
@@ -180,7 +174,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * From.
      *
      * @param c
      * @param fromIndex
@@ -198,7 +191,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * From.
      *
      * @param c
      * @param fromIndex
@@ -211,7 +203,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Range.
      *
      * @param startInclusive
      * @param endExclusive
@@ -222,7 +213,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Range.
      *
      * @param startInclusive
      * @param endExclusive
@@ -234,7 +224,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Range closed.
      *
      * @param startInclusive
      * @param endInclusive
@@ -245,7 +234,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Range closed.
      *
      * @param startInclusive
      * @param endInclusive
@@ -257,7 +245,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Repeat.
      *
      * @param element
      * @param len
@@ -268,7 +255,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Random.
      *
      * @param len
      * @return
@@ -297,7 +283,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Gets the.
      *
      * @param index
      * @return
@@ -309,7 +294,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Range check.
      *
      * @param index
      */
@@ -320,7 +304,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Sets the.
      *
      * @param index
      * @param e
@@ -337,7 +320,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Adds the.
      *
      * @param e
      */
@@ -348,7 +330,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Adds the.
      *
      * @param index
      * @param e
@@ -477,7 +458,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Removes the.
      *
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
@@ -522,7 +502,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Fast remove.
      *
      * @param index
      */
@@ -594,7 +573,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Retain all.
      *
      * @param c
      * @return true, if successful
@@ -610,7 +588,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Retain all.
      *
      * @param a
      * @return true, if successful
@@ -626,7 +603,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Batch remove.
      *
      * @param c
      * @param complement
@@ -665,7 +641,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Delete.
      *
      * @param index
      * @return
@@ -681,7 +656,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Delete all.
      *
      * @param indices
      */
@@ -695,7 +669,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Delete range.
      *
      * @param fromIndex
      * @param toIndex
@@ -720,7 +693,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Replace all.
      *
      * @param oldVal
      * @param newVal
@@ -745,7 +717,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Replace all.
      *
      * @param <E>
      * @param operator
@@ -758,7 +729,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Replace if.
      *
      * @param <E>
      * @param predicate
@@ -781,7 +751,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Fill.
      *
      * @param val
      */
@@ -790,7 +759,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Fill.
      *
      * @param fromIndex
      * @param toIndex
@@ -803,7 +771,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Contains.
      *
      * @param e
      * @return true, if successful
@@ -813,7 +780,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Contains all.
      *
      * @param c
      * @return true, if successful
@@ -849,7 +815,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Contains all.
      *
      * @param a
      * @return true, if successful
@@ -866,7 +831,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Contains any.
      *
      * @param c
      * @return true, if successful
@@ -880,7 +844,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Contains any.
      *
      * @param a
      * @return true, if successful
@@ -895,7 +858,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Disjoint.
      *
      * @param c
      * @return true, if successful
@@ -929,7 +891,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Disjoint.
      *
      * @param b
      * @return true, if successful
@@ -944,7 +905,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Intersection.
      *
      * @param b
      * @return
@@ -969,7 +929,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Intersection.
      *
      * @param a
      * @return
@@ -983,7 +942,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Difference.
      *
      * @param b
      * @return
@@ -1008,7 +966,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Difference.
      *
      * @param a
      * @return
@@ -1022,7 +979,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Symmetric difference.
      *
      * @param b
      * @return this.difference(b).addAll(b.difference(this))
@@ -1058,7 +1014,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Symmetric difference.
      *
      * @param a
      * @return
@@ -1074,7 +1029,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Occurrences of.
      *
      * @param objectToFind
      * @return
@@ -1084,7 +1038,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Index of.
      *
      * @param e
      * @return
@@ -1094,7 +1047,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Index of.
      *
      * @param fromIndex
      * @param e
@@ -1142,7 +1094,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Min.
      *
      * @return
      */
@@ -1151,7 +1102,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Min.
      *
      * @param fromIndex
      * @param toIndex
@@ -1164,7 +1114,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Median.
      *
      * @return
      */
@@ -1173,7 +1122,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Median.
      *
      * @param fromIndex
      * @param toIndex
@@ -1186,7 +1134,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Max.
      *
      * @return
      */
@@ -1195,7 +1142,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Max.
      *
      * @param fromIndex
      * @param toIndex
@@ -1208,7 +1154,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Kth largest.
      *
      * @param k
      * @return
@@ -1218,7 +1163,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Kth largest.
      *
      * @param fromIndex
      * @param toIndex
@@ -1233,7 +1177,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Sum.
      *
      * @return
      */
@@ -1242,7 +1185,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Sum.
      *
      * @param fromIndex
      * @param toIndex
@@ -1255,7 +1197,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Average.
      *
      * @return
      */
@@ -1264,7 +1205,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Average.
      *
      * @param fromIndex
      * @param toIndex
@@ -1277,7 +1217,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param action
@@ -1288,7 +1227,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param fromIndex
@@ -1313,7 +1251,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * First.
      *
      * @return
      */
@@ -1322,7 +1259,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Last.
      *
      * @return
      */
@@ -1331,7 +1267,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Find first.
      *
      * @param <E>
      * @param predicate
@@ -1349,7 +1284,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Find last.
      *
      * @param <E>
      * @param predicate
@@ -1415,7 +1349,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * All match.
      *
      * @param <E>
      * @param fromIndex
@@ -1451,7 +1384,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Any match.
      *
      * @param <E>
      * @param fromIndex
@@ -1487,7 +1419,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * None match.
      *
      * @param <E>
      * @param fromIndex
@@ -1511,7 +1442,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Count.
      *
      * @param <E>
      * @param filter
@@ -1523,7 +1453,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Count.
      *
      * @param <E>
      * @param fromIndex
@@ -1539,7 +1468,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1551,7 +1479,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromIndex
@@ -1567,7 +1494,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1580,7 +1506,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param fromIndex
@@ -1597,7 +1522,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param mapper
@@ -1609,7 +1533,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Map.
      *
      * @param <E>
      * @param fromIndex
@@ -1752,7 +1675,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Distinct.
      *
      * @param fromIndex
      * @param toIndex
@@ -1833,7 +1755,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Reverse.
      *
      * @param fromIndex
      * @param toIndex
@@ -1848,7 +1769,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Rotate.
      *
      * @param distance
      */
@@ -1870,7 +1790,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Shuffle.
      *
      * @param rnd
      */
@@ -1882,7 +1801,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Swap.
      *
      * @param i
      * @param j
@@ -1896,7 +1814,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -1906,7 +1823,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Copy.
      *
      * @param fromIndex
      * @param toIndex
@@ -1920,7 +1836,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Copy.
      *
      * @param from
      * @param to
@@ -1988,7 +1903,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     //    }
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -2003,7 +1917,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Join.
      *
      * @param fromIndex
      * @param toIndex
@@ -2054,7 +1967,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -2064,7 +1976,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Boxed.
      *
      * @return
      */
@@ -2073,7 +1984,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Boxed.
      *
      * @param fromIndex
      * @param toIndex
@@ -2092,7 +2002,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -2117,7 +2026,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To collection.
      *
      * @param <C>
      * @param fromIndex
@@ -2139,7 +2047,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To multiset.
      *
      * @param fromIndex
      * @param toIndex
@@ -2160,7 +2067,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2178,7 +2084,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2200,7 +2105,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2221,7 +2125,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2250,7 +2153,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -2266,7 +2168,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -2313,7 +2214,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Iterator.
      *
      * @return
      */
@@ -2326,7 +2226,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -2335,7 +2234,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Stream.
      *
      * @param fromIndex
      * @param toIndex
@@ -2348,7 +2246,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>
@@ -2376,7 +2273,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -2402,7 +2298,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -2412,7 +2307,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -2433,7 +2327,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -2467,7 +2360,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Grow.
      *
      * @param minCapacity
      */

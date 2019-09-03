@@ -53,7 +53,6 @@ public final class HashingOutputStream extends FilterOutputStream {
     }
 
     /**
-     * Write.
      *
      * @param b
      * @throws IOException Signals that an I/O exception has occurred.
@@ -65,7 +64,6 @@ public final class HashingOutputStream extends FilterOutputStream {
     }
 
     /**
-     * Write.
      *
      * @param bytes
      * @param off
@@ -91,7 +89,6 @@ public final class HashingOutputStream extends FilterOutputStream {
     // Overriding close() because FilterOutputStream's close() method pre-JDK8 has bad behavior:
     // it silently ignores any exception thrown by flush(). Instead, just close the delegate stream.
     /**
-     * Close.
      *
      * @throws IOException Signals that an I/O exception has occurred.
      */

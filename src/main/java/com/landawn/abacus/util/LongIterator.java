@@ -44,7 +44,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     };
 
     /**
-     * Empty.
      *
      * @return
      */
@@ -53,7 +52,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -64,7 +62,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param fromIndex
@@ -217,7 +214,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Generate.
      *
      * @param hasNext
      * @param supplier
@@ -245,7 +241,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Next.
      *
      * @return
      * @Deprecated use <code>nextLong()</code> instead.
@@ -257,14 +252,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Next long.
      *
      * @return
      */
     public abstract long nextLong();
 
     /**
-     * To array.
      *
      * @return
      */
@@ -273,7 +266,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -288,7 +280,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -297,7 +288,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Foreach remaining.
      *
      * @param <E>
      * @param action

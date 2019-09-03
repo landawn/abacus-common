@@ -158,7 +158,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method element2Attr.
      *
      * @param element
      */
@@ -235,7 +234,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Find file.
      *
      * @param configFileName
      * @param isDir
@@ -486,7 +484,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method newDocument.
      *
      * @param file
      * @return Document
@@ -502,7 +499,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method createDocument.
      *
      * @param is
      * @return Document
@@ -518,7 +514,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Format path.
      *
      * @param file
      * @return
@@ -532,7 +527,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method isTextElement.
      *
      * @param node
      * @return boolean
@@ -550,7 +544,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method getTextElementContent.
      *
      * @param node
      * @return String
@@ -560,7 +553,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Read element.
      *
      * @param element
      * @return
@@ -647,7 +639,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method getAttrNames.
      * 
      * @return Collection<String>
      */
@@ -656,7 +647,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method getAttribute.
      *
      * @param attrName
      * @return String
@@ -666,7 +656,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method hasAttribute.
      *
      * @param attrName
      * @return boolean
@@ -685,7 +674,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method addAttribute.
      *
      * @param attrName
      * @param attrValue
@@ -709,7 +697,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Method removeAttribute.
      *
      * @param attrName
      * @return String
@@ -749,7 +736,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -759,7 +745,6 @@ public abstract class Configuration {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -770,7 +755,6 @@ public abstract class Configuration {
     }
 
     /**
-     * To string.
      *
      * @return
      */

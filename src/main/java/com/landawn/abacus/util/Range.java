@@ -93,7 +93,6 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * Open.
      *
      * @param <T>
      * @param min
@@ -110,7 +109,6 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * Open closed.
      *
      * @param <T>
      * @param min
@@ -127,7 +125,6 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * Closed open.
      *
      * @param <T>
      * @param min
@@ -144,7 +141,6 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * Closed.
      *
      * @param <T>
      * @param min
@@ -161,7 +157,6 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * Bound type.
      *
      * @return
      */
@@ -212,7 +207,6 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * Contains all.
      *
      * @param c
      * @return true, if successful
@@ -539,7 +533,6 @@ public final class Range<T extends Comparable> implements Serializable {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -591,7 +584,6 @@ public final class Range<T extends Comparable> implements Serializable {
         }
 
         /**
-         * Compare to.
          *
          * @param value
          * @return
@@ -601,7 +593,6 @@ public final class Range<T extends Comparable> implements Serializable {
         }
 
         /**
-         * Includes.
          *
          * @param value
          * @return true, if successful
@@ -631,7 +622,6 @@ public final class Range<T extends Comparable> implements Serializable {
         }
 
         /**
-         * Includes.
          *
          * @param value
          * @return true, if successful
@@ -685,7 +675,6 @@ public final class Range<T extends Comparable> implements Serializable {
         }
 
         /**
-         * To string.
          *
          * @return
          */
@@ -716,7 +705,6 @@ public final class Range<T extends Comparable> implements Serializable {
         }
 
         /**
-         * Includes.
          *
          * @param value
          * @return true, if successful
@@ -727,7 +715,6 @@ public final class Range<T extends Comparable> implements Serializable {
         }
 
         /**
-         * Hash code.
          *
          * @return
          */
@@ -739,7 +726,6 @@ public final class Range<T extends Comparable> implements Serializable {
         }
 
         /**
-         * Equals.
          *
          * @param obj
          * @return true, if successful
@@ -760,7 +746,6 @@ public final class Range<T extends Comparable> implements Serializable {
         }
 
         /**
-         * To string.
          *
          * @return
          */

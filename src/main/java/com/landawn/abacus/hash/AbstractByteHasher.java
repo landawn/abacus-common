@@ -67,7 +67,6 @@ abstract class AbstractByteHasher extends AbstractHasher {
     }
 
     /**
-     * Put.
      *
      * @param b
      * @return
@@ -79,7 +78,6 @@ abstract class AbstractByteHasher extends AbstractHasher {
     }
 
     /**
-     * Put.
      *
      * @param bytes
      * @return
@@ -92,7 +90,6 @@ abstract class AbstractByteHasher extends AbstractHasher {
     }
 
     /**
-     * Put.
      *
      * @param bytes
      * @param off
@@ -123,7 +120,6 @@ abstract class AbstractByteHasher extends AbstractHasher {
     }
 
     /**
-     * Put.
      *
      * @param s
      * @return
@@ -135,7 +131,6 @@ abstract class AbstractByteHasher extends AbstractHasher {
     }
 
     /**
-     * Put.
      *
      * @param i
      * @return
@@ -147,7 +142,6 @@ abstract class AbstractByteHasher extends AbstractHasher {
     }
 
     /**
-     * Put.
      *
      * @param l
      * @return
@@ -159,7 +153,6 @@ abstract class AbstractByteHasher extends AbstractHasher {
     }
 
     /**
-     * Put.
      *
      * @param c
      * @return

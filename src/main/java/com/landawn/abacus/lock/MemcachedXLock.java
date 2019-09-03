@@ -95,7 +95,6 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     }
 
     /**
-     * Lock.
      *
      * @param target
      * @param lockMode
@@ -108,7 +107,6 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     }
 
     /**
-     * Lock.
      *
      * @param target
      * @param lockMode
@@ -204,7 +202,6 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     }
 
     /**
-     * Unlock.
      *
      * @param target
      * @param refLockCode
@@ -242,7 +239,6 @@ public class MemcachedXLock<T> extends AbstractXLock<T> {
     }
 
     /**
-     * Generate key.
      *
      * @param keyPrefix
      * @param obj

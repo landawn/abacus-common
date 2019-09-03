@@ -313,7 +313,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param k
      * @param v
@@ -609,7 +608,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Removes the.
      *
      * @param k
      */
@@ -623,7 +621,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Contains key.
      *
      * @param k
      * @return true, if successful
@@ -634,7 +631,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -644,7 +640,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -747,7 +742,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         }
 
         /**
-         * Read.
          *
          * @return
          */
@@ -785,7 +779,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         }
 
         /**
-         * Read.
          *
          * @return
          */
@@ -851,7 +844,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         }
 
         /**
-         * Read.
          *
          * @return
          */
@@ -937,7 +929,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         }
 
         /**
-         * Allocate.
          *
          * @return
          */
@@ -956,7 +947,6 @@ public class OffHeapCache<K, V> extends AbstractCache<K, V> {
         }
 
         /**
-         * Release.
          *
          * @param blockIndex
          */

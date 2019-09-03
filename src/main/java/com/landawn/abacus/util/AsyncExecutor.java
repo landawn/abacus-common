@@ -128,7 +128,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param command
      * @return
@@ -138,7 +137,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param commands
      * @return
@@ -159,7 +157,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param commands
      * @return
@@ -179,7 +176,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param command
@@ -190,7 +186,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param commands
@@ -212,7 +207,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param commands
@@ -233,7 +227,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param action
      * @param retryTimes
@@ -253,7 +246,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param action
@@ -274,7 +266,6 @@ public class AsyncExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param <T>
      * @param futureTask

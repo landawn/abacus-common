@@ -37,14 +37,12 @@ public interface DistributedCacheClient<T> {
     public static final String REDIS = "Redis";
 
     /**
-     * Server url.
      *
      * @return
      */
     String serverUrl();
 
     /**
-     * Gets the.
      *
      * @param key
      * @return
@@ -68,7 +66,6 @@ public interface DistributedCacheClient<T> {
     Map<String, T> getBulk(Collection<String> keys);
 
     /**
-     * Sets the.
      *
      * @param key
      * @param obj
@@ -78,7 +75,6 @@ public interface DistributedCacheClient<T> {
     boolean set(String key, T obj, long liveTime);
 
     /**
-     * Delete.
      *
      * @param key
      * @return true, if successful
@@ -86,7 +82,6 @@ public interface DistributedCacheClient<T> {
     boolean delete(String key);
 
     /**
-     * Incr.
      *
      * @param key
      * @return
@@ -94,7 +89,6 @@ public interface DistributedCacheClient<T> {
     long incr(String key);
 
     /**
-     * Incr.
      *
      * @param key
      * @param deta
@@ -103,7 +97,6 @@ public interface DistributedCacheClient<T> {
     long incr(String key, int deta);
 
     /**
-     * Decr.
      *
      * @param key
      * @return
@@ -111,7 +104,6 @@ public interface DistributedCacheClient<T> {
     long decr(String key);
 
     /**
-     * Decr.
      *
      * @param key
      * @param deta

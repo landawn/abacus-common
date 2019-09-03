@@ -31,42 +31,36 @@ import com.landawn.abacus.annotation.Type.EnumType;
 public @interface JsonXmlField {
 
     /**
-     * Name.
      *
      * @return
      */
     String name() default "";
 
     /**
-     * Type.
      *
      * @return
      */
     String type() default "";
 
     /**
-     * Enumerated.
      *
      * @return
      */
     EnumType enumerated() default EnumType.STRING;
 
     /**
-     * Date format.
      *
      * @return
      */
     String dateFormat() default "";
 
     /**
-     * Time zone.
      *
      * @return
      */
     String timeZone() default "";
 
     /**
-     * Number format.
      *
      * @return
      * @see DecimalFormat
@@ -74,7 +68,6 @@ public @interface JsonXmlField {
     String numberFormat() default "";
 
     /**
-     * Ignore.
      *
      * @return true, if successful
      */

@@ -65,7 +65,6 @@ public final class Retry<T> {
     }
 
     /**
-     * Of.
      *
      * @param retryTimes
      * @param retryInterval
@@ -83,7 +82,6 @@ public final class Retry<T> {
     }
 
     /**
-     * Of.
      *
      * @param <R>
      * @param retryTimes
@@ -102,7 +100,6 @@ public final class Retry<T> {
     }
 
     /**
-     * Run.
      *
      * @param cmd
      * @throws Exception the exception
@@ -137,7 +134,6 @@ public final class Retry<T> {
     }
 
     /**
-     * Call.
      *
      * @param callable
      * @return
@@ -196,7 +192,6 @@ public final class Retry<T> {
     }
 
     /**
-     * Iterate.
      *
      * @param <E>
      * @param iter
@@ -209,7 +204,6 @@ public final class Retry<T> {
     }
 
     /**
-     * Iterate.
      *
      * @param <E>
      * @param iter

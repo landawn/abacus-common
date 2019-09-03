@@ -67,7 +67,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Sync.
      *
      * @return
      */
@@ -76,7 +75,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Async executor.
      *
      * @return
      */
@@ -85,7 +83,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -103,7 +100,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -122,7 +118,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -141,7 +136,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -162,7 +156,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param sql
@@ -184,7 +177,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -203,7 +195,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -223,7 +214,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -243,7 +233,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -265,7 +254,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Insert.
      *
      * @param <ID>
      * @param conn
@@ -288,7 +276,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -305,7 +292,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -323,7 +309,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -341,7 +326,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -361,7 +345,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param sql
@@ -382,7 +365,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -400,7 +382,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -420,7 +401,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -440,7 +420,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -461,7 +440,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch insert.
      *
      * @param <ID>
      * @param conn
@@ -483,7 +461,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param sql
      * @param parameters
@@ -500,7 +477,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param sql
      * @param statementSetter
@@ -518,7 +494,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param sql
      * @param jdbcSettings
@@ -536,7 +511,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param sql
      * @param statementSetter
@@ -556,7 +530,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param conn
      * @param sql
@@ -574,7 +547,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param conn
      * @param sql
@@ -593,7 +565,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param conn
      * @param sql
@@ -612,7 +583,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Update.
      *
      * @param conn
      * @param sql
@@ -633,7 +603,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param sql
      * @param parametersList
@@ -649,7 +618,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param sql
      * @param statementSetter
@@ -666,7 +634,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param sql
      * @param jdbcSettings
@@ -683,7 +650,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param sql
      * @param statementSetter
@@ -702,7 +668,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param conn
      * @param sql
@@ -719,7 +684,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param conn
      * @param sql
@@ -738,7 +702,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param conn
      * @param sql
@@ -756,7 +719,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Batch update.
      *
      * @param conn
      * @param sql
@@ -776,7 +738,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Exists.
      *
      * @param sql
      * @param parameters
@@ -793,7 +754,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Exists.
      *
      * @param conn
      * @param sql
@@ -811,7 +771,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Count.
      *
      * @param sql
      * @param parameters
@@ -830,7 +789,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Count.
      *
      * @param conn
      * @param sql
@@ -850,7 +808,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -869,7 +826,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -890,7 +846,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -911,7 +866,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -933,7 +887,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -953,7 +906,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -975,7 +927,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -997,7 +948,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param targetClass
@@ -1020,7 +970,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param sql
@@ -1039,7 +988,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param sql
@@ -1060,7 +1008,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param sql
@@ -1081,7 +1028,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param sql
@@ -1103,7 +1049,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param conn
@@ -1124,7 +1069,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param conn
@@ -1146,7 +1090,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param conn
@@ -1168,7 +1111,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param conn
@@ -1530,7 +1472,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -1549,7 +1490,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -1570,7 +1510,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -1591,7 +1530,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -1613,7 +1551,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -1633,7 +1570,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -1655,7 +1591,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -1677,7 +1612,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param targetClass
@@ -1700,7 +1634,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param sql
@@ -1719,7 +1652,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param sql
@@ -1740,7 +1672,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param sql
@@ -1761,7 +1692,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param sql
@@ -1783,7 +1713,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param conn
@@ -1804,7 +1733,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param conn
@@ -1826,7 +1754,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param conn
@@ -1848,7 +1775,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Find first.
      *
      * @param <T>
      * @param conn
@@ -1871,7 +1797,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -1890,7 +1815,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -1911,7 +1835,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -1932,7 +1855,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -1954,7 +1876,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -1974,7 +1895,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -1996,7 +1916,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -2018,7 +1937,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param targetClass
@@ -2041,7 +1959,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param sql
@@ -2060,7 +1977,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param sql
@@ -2081,7 +1997,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param sql
@@ -2102,7 +2017,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param sql
@@ -2124,7 +2038,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param conn
@@ -2145,7 +2058,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param conn
@@ -2167,7 +2079,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param conn
@@ -2189,7 +2100,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List.
      *
      * @param <T>
      * @param conn
@@ -2212,7 +2122,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List all.
      *
      * @param <T>
      * @param targetClass
@@ -2233,7 +2142,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List all.
      *
      * @param <T>
      * @param targetClass
@@ -2255,7 +2163,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List all.
      *
      * @param <T>
      * @param targetClass
@@ -2276,7 +2183,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List all.
      *
      * @param <T>
      * @param targetClass
@@ -2298,7 +2204,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List all.
      *
      * @param <T>
      * @param sql
@@ -2319,7 +2224,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List all.
      *
      * @param <T>
      * @param sql
@@ -2341,7 +2245,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List all.
      *
      * @param <T>
      * @param sqls
@@ -2362,7 +2265,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * List all.
      *
      * @param <T>
      * @param sqls
@@ -2947,7 +2849,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param sql
      * @param parameters
@@ -2964,7 +2865,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param sql
      * @param statementSetter
@@ -2982,7 +2882,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param sql
      * @param jdbcSettings
@@ -3000,7 +2899,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param sql
      * @param statementSetter
@@ -3020,7 +2918,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param sql
@@ -3039,7 +2936,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param sql
@@ -3060,7 +2956,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param sql
@@ -3081,7 +2976,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param sql
@@ -3103,7 +2997,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param conn
      * @param sql
@@ -3121,7 +3014,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param conn
      * @param sql
@@ -3140,7 +3032,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param conn
      * @param sql
@@ -3159,7 +3050,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param conn
      * @param sql
@@ -3180,7 +3070,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param conn
@@ -3200,7 +3089,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param conn
@@ -3222,7 +3110,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param conn
@@ -3244,7 +3131,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query.
      *
      * @param <T>
      * @param conn
@@ -3267,7 +3153,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query all.
      *
      * @param sql
      * @param jdbcSettings
@@ -3285,7 +3170,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query all.
      *
      * @param sql
      * @param statementSetter
@@ -3305,7 +3189,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query all.
      *
      * @param sqls
      * @param jdbcSettings
@@ -3323,7 +3206,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Query all.
      *
      * @param sqls
      * @param statementSetter
@@ -3343,7 +3225,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param targetClass
@@ -3362,7 +3243,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param targetClass
@@ -3383,7 +3263,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param targetClass
@@ -3404,7 +3283,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param targetClass
@@ -3426,7 +3304,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param sql
@@ -3445,7 +3322,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param sql
@@ -3466,7 +3342,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param sql
@@ -3487,7 +3362,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream.
      *
      * @param <T>
      * @param sql
@@ -3509,7 +3383,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream all.
      *
      * @param <T>
      * @param targetClass
@@ -3552,7 +3425,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Stream all.
      *
      * @param <T>
      * @param targetClass
@@ -3595,7 +3467,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param sql
      * @param parameters
@@ -3613,7 +3484,6 @@ public final class AsyncSQLExecutor {
     }
 
     /**
-     * Execute.
      *
      * @param conn
      * @param sql

@@ -75,7 +75,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Empty.
      *
      * @param <T>
      * @return
@@ -85,7 +84,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Just.
      *
      * @param <T>
      * @param t
@@ -96,7 +94,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param a
@@ -128,7 +125,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -175,7 +171,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     //    }
 
     /**
-     * Contains.
      *
      * @param e
      * @return true, if successful
@@ -190,7 +185,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Contains all.
      *
      * @param c
      * @return true, if successful
@@ -207,7 +201,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Contains all.
      *
      * @param a
      * @return true, if successful
@@ -223,7 +216,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Contains any.
      *
      * @param c
      * @return true, if successful
@@ -237,7 +229,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Contains any.
      *
      * @param a
      * @return true, if successful
@@ -251,7 +242,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Disjoint.
      *
      * @param c
      * @return true, if successful
@@ -261,7 +251,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Disjoint.
      *
      * @param a
      * @return true, if successful
@@ -275,7 +264,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Intersection.
      *
      * @param b
      * @return
@@ -286,7 +274,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Intersection.
      *
      * @param a
      * @return
@@ -296,7 +283,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Difference.
      *
      * @param b
      * @return
@@ -307,7 +293,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Difference.
      *
      * @param a
      * @return
@@ -317,7 +302,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Symmetric difference.
      *
      * @param b
      * @return this.difference(b).addAll(b.difference(this))
@@ -328,7 +312,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Symmetric difference.
      *
      * @param a
      * @return
@@ -338,7 +321,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Occurrences of.
      *
      * @param objectToFind
      * @return
@@ -348,7 +330,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Min.
      *
      * @return
      */
@@ -358,7 +339,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Min.
      *
      * @param cmp
      * @return
@@ -368,7 +348,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Min by.
      *
      * @param keyMapper
      * @return
@@ -379,7 +358,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Max.
      *
      * @return
      */
@@ -389,7 +367,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Max.
      *
      * @param cmp
      * @return
@@ -399,7 +376,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Max by.
      *
      * @param keyMapper
      * @return
@@ -410,7 +386,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Median.
      *
      * @return
      */
@@ -420,7 +395,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Median.
      *
      * @param cmp
      * @return
@@ -430,7 +404,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Kth largest.
      *
      * @param k
      * @return
@@ -443,7 +416,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Kth largest.
      *
      * @param k
      * @param cmp
@@ -456,7 +428,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Sum int.
      *
      * @param <E>
      * @param mapper
@@ -472,7 +443,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Sum long.
      *
      * @param <E>
      * @param mapper
@@ -488,7 +458,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Sum double.
      *
      * @param <E>
      * @param mapper
@@ -504,7 +473,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Average int.
      *
      * @param <E>
      * @param mapper
@@ -516,7 +484,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Average long.
      *
      * @param <E>
      * @param mapper
@@ -528,7 +495,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Average double.
      *
      * @param <E>
      * @param mapper
@@ -540,7 +506,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Foreach.
      *
      * @param <E>
      * @param action
@@ -551,7 +516,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param <E2>
@@ -571,7 +535,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     //    }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param action
@@ -582,7 +545,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * For each.
      *
      * @param <U>
      * @param <E>
@@ -598,7 +560,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * For each.
      *
      * @param <T2>
      * @param <T3>
@@ -731,7 +692,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * First.
      *
      * @return
      */
@@ -780,7 +740,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Last.
      *
      * @return
      */
@@ -830,7 +789,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Find first.
      *
      * @param <E>
      * @param predicate
@@ -842,7 +800,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Find last.
      *
      * @param <E>
      * @param predicate
@@ -986,7 +943,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * All match.
      *
      * @param <E>
      * @param filter
@@ -1008,7 +964,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Any match.
      *
      * @param <E>
      * @param filter
@@ -1030,7 +985,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * None match.
      *
      * @param <E>
      * @param filter
@@ -1052,7 +1006,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * N match.
      *
      * @param <E>
      * @param atLeast
@@ -1089,7 +1042,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Count.
      *
      * @param <E>
      * @param filter
@@ -1101,7 +1053,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1113,7 +1064,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param filter
@@ -1126,7 +1076,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Filter.
      *
      * @param <C>
      * @param <E>
@@ -1140,7 +1089,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Filter.
      *
      * @param <C>
      * @param <E>
@@ -1156,7 +1104,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Take while.
      *
      * @param <E>
      * @param filter
@@ -1212,7 +1159,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Drop while.
      *
      * @param <E>
      * @param filter
@@ -1248,7 +1194,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Skip until.
      *
      * @param <E>
      * @param filter
@@ -1284,7 +1229,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Map.
      *
      * @param <R>
      * @param <E>
@@ -1393,7 +1337,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Flat map.
      *
      * @param <R>
      * @param <E>
@@ -1418,7 +1361,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Flatt map.
      *
      * @param <R>
      * @param <E>
@@ -1854,7 +1796,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Flat map.
      *
      * @param <U>
      * @param <R>
@@ -1886,7 +1827,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Flat map.
      *
      * @param <T2>
      * @param <T3>
@@ -2190,7 +2130,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Collapse.
      *
      * @param <U>
      * @param <E>
@@ -2230,7 +2169,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Collapse.
      *
      * @param <E>
      * @param collapsible
@@ -2242,7 +2180,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Collapse.
      *
      * @param <C>
      * @param <E>
@@ -2402,7 +2339,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Scan.
      *
      * @param <U>
      * @param <E>
@@ -2516,7 +2452,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Collect.
      *
      * @param <R>
      * @param <E>
@@ -2539,7 +2474,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Collect.
      *
      * @param <A>
      * @param <R>
@@ -2568,7 +2502,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Collect.
      *
      * @param <A>
      * @param <R>
@@ -2589,7 +2522,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Collect.
      *
      * @param <A>
      * @param <R>
@@ -2673,7 +2605,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Append.
      *
      * @param a
      * @return
@@ -2688,7 +2619,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Append.
      *
      * @param c
      * @return
@@ -2698,7 +2628,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Prepend.
      *
      * @param a
      * @return
@@ -2713,7 +2642,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Prepend.
      *
      * @param c
      * @return
@@ -2723,7 +2651,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Merge.
      *
      * @param <E>
      * @param b
@@ -2736,7 +2663,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Zip with.
      *
      * @param <B>
      * @param <R>
@@ -2751,7 +2677,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Zip with.
      *
      * @param <B>
      * @param <R>
@@ -2769,7 +2694,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Zip with.
      *
      * @param <B>
      * @param <C>
@@ -2787,7 +2711,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Zip with.
      *
      * @param <B>
      * @param <C>
@@ -2808,7 +2731,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Intersperse.
      *
      * @param value
      * @return
@@ -2834,7 +2756,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Indexed.
      *
      * @return
      */
@@ -2850,7 +2771,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Distinct.
      *
      * @return a new List with distinct elements
      */
@@ -2859,7 +2779,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Distinct by.
      *
      * @param <E>
      * @param keyMapper don't change value of the input parameter.
@@ -2871,7 +2790,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Top.
      *
      * @param n
      * @return
@@ -2882,7 +2800,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Top.
      *
      * @param n
      * @param cmp
@@ -2904,7 +2821,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Split.
      *
      * @param <U>
      * @param <E>
@@ -2917,7 +2833,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Split.
      *
      * @param <U>
      * @param <C>
@@ -2989,7 +2904,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Split.
      *
      * @param <U>
      * @param <C>
@@ -3047,7 +2961,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Split at.
      *
      * @param where
      * @return
@@ -3091,7 +3004,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Split by.
      *
      * @param <E>
      * @param predicate
@@ -3125,7 +3037,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Sliding.
      *
      * @param windowSize
      * @return
@@ -3135,7 +3046,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Sliding.
      *
      * @param windowSize
      * @param increment
@@ -3187,7 +3097,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Join.
      *
      * @return
      */
@@ -3196,7 +3105,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Join.
      *
      * @param delimiter
      * @return
@@ -3206,7 +3114,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Join.
      *
      * @param delimiter
      * @return
@@ -3216,7 +3123,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Join.
      *
      * @param <E>
      * @param toStringFunc
@@ -3239,7 +3145,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Only one.
      *
      * @return
      * @throws DuplicatedResultException if there are more than one element in this {@code Seq}.
@@ -3265,7 +3170,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -3275,7 +3179,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -3285,7 +3188,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To array.
      *
      * @param <A>
      * @param a
@@ -3297,7 +3199,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -3306,7 +3207,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To set.
      *
      * @return
      */
@@ -3315,7 +3215,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To collection.
      *
      * @param <C>
      * @param supplier
@@ -3332,7 +3231,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To multiset.
      *
      * @return
      */
@@ -3347,7 +3245,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To multiset.
      *
      * @param supplier
      * @return
@@ -3363,7 +3260,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3381,7 +3277,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3401,7 +3296,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3422,7 +3316,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3452,7 +3345,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -3468,7 +3360,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <A>
@@ -3487,7 +3378,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3508,7 +3398,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To map.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3775,7 +3664,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Group to.
      *
      * @param <K> the key type
      * @param <E>
@@ -3788,7 +3676,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Group to.
      *
      * @param <K> the key type
      * @param <M>
@@ -3820,7 +3707,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Group to.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3838,7 +3724,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Group to.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -3985,7 +3870,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <E>
@@ -3998,7 +3882,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4021,7 +3904,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4039,7 +3921,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To multimap.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -4522,7 +4403,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Iterator.
      *
      * @return
      */
@@ -4536,7 +4416,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     //    }
 
     /**
-     * Apply.
      *
      * @param <R>
      * @param <E>
@@ -4562,7 +4441,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -4593,7 +4471,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -4603,7 +4480,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -4624,7 +4500,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
     }
 
     /**
-     * To string.
      *
      * @return
      */
@@ -4663,7 +4538,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return true, if successful
@@ -4674,7 +4548,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param o
          * @return true, if successful
@@ -4685,7 +4558,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * Contains.
          *
          * @param o
          * @return true, if successful
@@ -4704,7 +4576,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * Contains all.
          *
          * @param c
          * @return true, if successful
@@ -4743,7 +4614,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * Retain all.
          *
          * @param c
          * @return true, if successful
@@ -4772,7 +4642,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * Size.
          *
          * @return
          */
@@ -4782,7 +4651,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * Iterator.
          *
          * @return
          */
@@ -4824,7 +4692,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * To array.
          *
          * @return
          */
@@ -4841,7 +4708,6 @@ public final class Seq<T> extends ImmutableCollection<T> {
         }
 
         /**
-         * To array.
          *
          * @param <A>
          * @param a

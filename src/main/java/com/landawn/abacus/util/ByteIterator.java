@@ -44,7 +44,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     };
 
     /**
-     * Empty.
      *
      * @return
      */
@@ -53,7 +52,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @return
@@ -64,7 +62,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Of.
      *
      * @param a
      * @param fromIndex
@@ -217,7 +214,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Generate.
      *
      * @param hasNext
      * @param supplier
@@ -245,7 +241,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Next.
      *
      * @return
      * @Deprecated use <code>nextByte()</code> instead.
@@ -257,14 +252,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Next byte.
      *
      * @return
      */
     public abstract byte nextByte();
 
     /**
-     * To array.
      *
      * @return
      */
@@ -273,7 +266,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -288,7 +280,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -297,7 +288,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Foreach remaining.
      *
      * @param <E>
      * @param action

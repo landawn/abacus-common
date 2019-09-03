@@ -52,7 +52,6 @@ public final class Futures {
     }
 
     /**
-     * Compose.
      *
      * @param <T1>
      * @param <T2>
@@ -73,7 +72,6 @@ public final class Futures {
     }
 
     /**
-     * Compose.
      *
      * @param <T1>
      * @param <T2>
@@ -103,7 +101,6 @@ public final class Futures {
     }
 
     /**
-     * Compose.
      *
      * @param <T1>
      * @param <T2>
@@ -126,7 +123,6 @@ public final class Futures {
     }
 
     /**
-     * Compose.
      *
      * @param <T1>
      * @param <T2>
@@ -158,7 +154,6 @@ public final class Futures {
     }
 
     /**
-     * Compose.
      *
      * @param <T>
      * @param <FC>
@@ -178,7 +173,6 @@ public final class Futures {
     }
 
     /**
-     * Compose.
      *
      * @param <T>
      * @param <FC>
@@ -269,7 +263,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T1>
      * @param <T2>
@@ -288,7 +281,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T1>
      * @param <T2>
@@ -310,7 +302,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T1>
      * @param <T2>
@@ -334,7 +325,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T1>
      * @param <T2>
@@ -360,7 +350,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T1>
      * @param <T2>
@@ -389,7 +378,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T1>
      * @param <T2>
@@ -420,7 +408,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T1>
      * @param <T2>
@@ -442,7 +429,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T1>
      * @param <T2>
@@ -466,7 +452,6 @@ public final class Futures {
     }
 
     /**
-     * Combine.
      *
      * @param <T>
      * @param <R>
@@ -717,7 +702,6 @@ public final class Futures {
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param cfs
@@ -729,7 +713,6 @@ public final class Futures {
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param cfs
@@ -740,7 +723,6 @@ public final class Futures {
     }
 
     /**
-     * Iterate.
      *
      * @param <T>
      * @param cfs
@@ -754,7 +736,6 @@ public final class Futures {
     }
 
     /**
-     * Iterate 02.
      *
      * @param <T>
      * @param cfs
@@ -765,7 +746,6 @@ public final class Futures {
     }
 
     /**
-     * Iterate 02.
      *
      * @param <T>
      * @param cfs
@@ -796,7 +776,6 @@ public final class Futures {
     }
 
     /**
-     * Iteratte.
      *
      * @param <T>
      * @param cfs
@@ -808,7 +787,6 @@ public final class Futures {
     }
 
     /**
-     * Iteratte.
      *
      * @param <T>
      * @param cfs
@@ -819,7 +797,6 @@ public final class Futures {
     }
 
     /**
-     * Iteratte.
      *
      * @param <T>
      * @param cfs
@@ -834,7 +811,6 @@ public final class Futures {
     }
 
     /**
-     * Iterate 22.
      *
      * @param <T>
      * @param cfs
@@ -845,7 +821,6 @@ public final class Futures {
     }
 
     /**
-     * Iterate 22.
      *
      * @param <T>
      * @param cfs
@@ -902,7 +877,6 @@ public final class Futures {
     }
 
     /**
-     * Handle.
      *
      * @param <R>
      * @param result

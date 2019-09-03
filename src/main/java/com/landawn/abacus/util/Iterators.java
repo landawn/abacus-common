@@ -54,7 +54,6 @@ public final class Iterators {
     }
 
     /**
-     * Contains.
      *
      * @param iter
      * @param objToFind
@@ -75,7 +74,6 @@ public final class Iterators {
     }
 
     /**
-     * Index of.
      *
      * @param iter
      * @param objToFind
@@ -100,7 +98,6 @@ public final class Iterators {
     }
 
     /**
-     * Occurrences of.
      *
      * @param iter
      * @param objToFind
@@ -123,7 +120,6 @@ public final class Iterators {
     }
 
     /**
-     * Count.
      *
      * @param iter
      * @return
@@ -144,7 +140,6 @@ public final class Iterators {
     }
 
     /**
-     * Count.
      *
      * @param <T>
      * @param iter
@@ -170,7 +165,6 @@ public final class Iterators {
     }
 
     /**
-     * To list.
      *
      * @param <T>
      * @param iter
@@ -191,7 +185,6 @@ public final class Iterators {
     }
 
     /**
-     * To set.
      *
      * @param <T>
      * @param iter
@@ -212,7 +205,6 @@ public final class Iterators {
     }
 
     /**
-     * To collection.
      *
      * @param <T>
      * @param <C>
@@ -235,7 +227,6 @@ public final class Iterators {
     }
 
     /**
-     * To map.
      *
      * @param <T>
      * @param <K> the key type
@@ -264,7 +255,6 @@ public final class Iterators {
     }
 
     /**
-     * To map.
      *
      * @param <T>
      * @param <K> the key type
@@ -299,7 +289,6 @@ public final class Iterators {
     }
 
     /**
-     * To map.
      *
      * @param <T>
      * @param <K> the key type
@@ -337,7 +326,6 @@ public final class Iterators {
     }
 
     /**
-     * For each.
      *
      * @param <T>
      * @param <E>
@@ -358,7 +346,6 @@ public final class Iterators {
     }
 
     /**
-     * For each.
      *
      * @param <T>
      * @param <E>
@@ -381,7 +368,6 @@ public final class Iterators {
     }
 
     /**
-     * For each.
      *
      * @param <T>
      * @param <U>
@@ -418,7 +404,6 @@ public final class Iterators {
     }
 
     /**
-     * For each.
      *
      * @param <T>
      * @param <T2>
@@ -467,7 +452,6 @@ public final class Iterators {
     }
 
     /**
-     * For each.
      *
      * @param <A>
      * @param <B>
@@ -491,7 +475,6 @@ public final class Iterators {
     }
 
     /**
-     * For each.
      *
      * @param <A>
      * @param <B>
@@ -517,7 +500,6 @@ public final class Iterators {
     }
 
     /**
-     * For each.
      *
      * @param <A>
      * @param <B>
@@ -548,7 +530,6 @@ public final class Iterators {
     }
 
     /**
-     * For each.
      *
      * @param <A>
      * @param <B>
@@ -804,7 +785,6 @@ public final class Iterators {
     }
 
     /**
-     * Repeat.
      *
      * @param <T>
      * @param e
@@ -839,7 +819,6 @@ public final class Iterators {
     };
 
     /**
-     * Repeat each.
      *
      * @param <T>
      * @param c
@@ -885,7 +864,6 @@ public final class Iterators {
     }
 
     /**
-     * Repeat all.
      *
      * @param <T>
      * @param c
@@ -1017,7 +995,6 @@ public final class Iterators {
     };
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1055,7 +1032,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1093,7 +1069,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1131,7 +1106,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1169,7 +1143,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1207,7 +1180,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1245,7 +1217,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1283,7 +1254,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1319,7 +1289,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1355,7 +1324,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1391,7 +1359,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1427,7 +1394,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1463,7 +1429,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1499,7 +1464,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1535,7 +1499,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param a
      * @return
@@ -1571,7 +1534,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param <T>
      * @param a
@@ -1595,7 +1557,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param <T>
      * @param a
@@ -1619,7 +1580,6 @@ public final class Iterators {
     }
 
     /**
-     * Concatt.
      *
      * @param <T>
      * @param c
@@ -1656,7 +1616,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param <T>
      * @param a
@@ -1672,7 +1631,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param <T>
      * @param c
@@ -1708,7 +1666,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param <A>
      * @param <B>
@@ -1786,7 +1743,6 @@ public final class Iterators {
     }
 
     /**
-     * Concat.
      *
      * @param <A>
      * @param <B>
@@ -1865,7 +1821,6 @@ public final class Iterators {
     }
 
     /**
-     * Merge.
      *
      * @param <T>
      * @param a
@@ -1883,7 +1838,6 @@ public final class Iterators {
     }
 
     /**
-     * Merge.
      *
      * @param <T>
      * @param a
@@ -1956,7 +1910,6 @@ public final class Iterators {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -1974,7 +1927,6 @@ public final class Iterators {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -2004,7 +1956,6 @@ public final class Iterators {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -2026,7 +1977,6 @@ public final class Iterators {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -2060,7 +2010,6 @@ public final class Iterators {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -2081,7 +2030,6 @@ public final class Iterators {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -2114,7 +2062,6 @@ public final class Iterators {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -2139,7 +2086,6 @@ public final class Iterators {
     }
 
     /**
-     * Zip.
      *
      * @param <A>
      * @param <B>
@@ -2175,7 +2121,6 @@ public final class Iterators {
     }
 
     /**
-     * Unzip.
      *
      * @param <T>
      * @param <L>
@@ -2189,7 +2134,6 @@ public final class Iterators {
     }
 
     /**
-     * Unzipp.
      *
      * @param <T>
      * @param <L>
@@ -2204,7 +2148,6 @@ public final class Iterators {
     }
 
     /**
-     * Split.
      *
      * @param <T>
      * @param iter
@@ -2244,7 +2187,6 @@ public final class Iterators {
     }
 
     /**
-     * Gets the.
      *
      * @param <T>
      * @param iter
@@ -2270,7 +2212,6 @@ public final class Iterators {
     }
 
     /**
-     * First.
      *
      * @param <T>
      * @param iter
@@ -2304,7 +2245,6 @@ public final class Iterators {
     }
 
     /**
-     * Last.
      *
      * @param <T>
      * @param iter
@@ -2583,7 +2523,6 @@ public final class Iterators {
     }
 
     /**
-     * Filter.
      *
      * @param <T>
      * @param iter
@@ -2632,7 +2571,6 @@ public final class Iterators {
     }
 
     /**
-     * Map.
      *
      * @param <T>
      * @param <U>
@@ -2661,7 +2599,6 @@ public final class Iterators {
     }
 
     /**
-     * Flat map.
      *
      * @param <T>
      * @param <U>
@@ -2708,7 +2645,6 @@ public final class Iterators {
     }
 
     /**
-     * Generate.
      *
      * @param <T>
      * @param <U>
@@ -2735,7 +2671,6 @@ public final class Iterators {
     }
 
     /**
-     * Generate.
      *
      * @param <T>
      * @param <U>

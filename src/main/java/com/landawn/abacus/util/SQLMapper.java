@@ -91,7 +91,6 @@ public final class SQLMapper {
     }
 
     /**
-     * From file.
      *
      * @param filePath it could be multiple file paths separated by ',' or ';'
      * @return
@@ -140,7 +139,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -149,7 +147,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Gets the.
      *
      * @param id
      * @return
@@ -177,7 +174,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Adds the.
      *
      * @param id
      * @param namedSQL
@@ -190,7 +186,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Adds the.
      *
      * @param id
      * @param sql
@@ -204,7 +199,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Check id.
      *
      * @param id
      */
@@ -221,7 +215,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Removes the.
      *
      * @param id
      */
@@ -234,7 +227,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Save to.
      *
      * @param file
      */
@@ -281,7 +273,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -291,7 +282,6 @@ public final class SQLMapper {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -302,7 +292,6 @@ public final class SQLMapper {
     }
 
     /**
-     * To string.
      *
      * @return
      */

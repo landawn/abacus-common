@@ -118,7 +118,6 @@ public class Hex {
     }
 
     /**
-     * Decode.
      *
      * @param data
      * @return

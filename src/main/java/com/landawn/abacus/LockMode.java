@@ -106,7 +106,6 @@ public enum LockMode {
     private final int intValue;
 
     /**
-     * Constructor.
      *
      * @param value
      */
@@ -115,7 +114,6 @@ public enum LockMode {
     }
 
     /**
-     * Method intValue.
      * 
      * @return int
      */
@@ -124,7 +122,6 @@ public enum LockMode {
     }
 
     /**
-     * Method valueOf.
      *
      * @param intValue
      * @return LockMode

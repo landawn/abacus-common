@@ -56,7 +56,6 @@ public class ByteTriple {
     }
 
     /**
-     * Of.
      *
      * @param _1 the 1
      * @param _2 the 2
@@ -68,7 +67,6 @@ public class ByteTriple {
     }
 
     /**
-     * Min.
      *
      * @return
      */
@@ -77,7 +75,6 @@ public class ByteTriple {
     }
 
     /**
-     * Max.
      *
      * @return
      */
@@ -86,7 +83,6 @@ public class ByteTriple {
     }
 
     /**
-     * Median.
      *
      * @return
      */
@@ -95,7 +91,6 @@ public class ByteTriple {
     }
 
     /**
-     * Sum.
      *
      * @return
      */
@@ -104,7 +99,6 @@ public class ByteTriple {
     }
 
     /**
-     * Average.
      *
      * @return
      */
@@ -113,7 +107,6 @@ public class ByteTriple {
     }
 
     /**
-     * Reversed.
      *
      * @return
      */
@@ -122,7 +115,6 @@ public class ByteTriple {
     }
 
     /**
-     * To array.
      *
      * @return
      */
@@ -131,7 +123,6 @@ public class ByteTriple {
     }
 
     /**
-     * To list.
      *
      * @return
      */
@@ -140,7 +131,6 @@ public class ByteTriple {
     }
 
     /**
-     * For each.
      *
      * @param <E>
      * @param comsumer
@@ -153,7 +143,6 @@ public class ByteTriple {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param action
@@ -164,7 +153,6 @@ public class ByteTriple {
     }
 
     /**
-     * Map.
      *
      * @param <U>
      * @param <E>
@@ -177,7 +165,6 @@ public class ByteTriple {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -189,7 +176,6 @@ public class ByteTriple {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -198,7 +184,6 @@ public class ByteTriple {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -208,7 +193,6 @@ public class ByteTriple {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -226,7 +210,6 @@ public class ByteTriple {
     }
 
     /**
-     * To string.
      *
      * @return
      */

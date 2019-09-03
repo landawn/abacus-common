@@ -301,7 +301,6 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -316,7 +315,6 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -337,7 +335,6 @@ abstract class AbstractConnectionManager implements ConnectionManager {
     }
 
     /**
-     * To string.
      *
      * @return
      */

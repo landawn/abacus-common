@@ -68,14 +68,12 @@ public interface ConnectionManager {
     Connection getConnection();
 
     /**
-     * Close connection.
      *
      * @param conn
      */
     void closeConnection(Connection conn);
 
     /**
-     * Detroy connection.
      *
      * @param conn
      */

@@ -77,7 +77,6 @@ public class AbacusException extends RuntimeException {
     }
 
     /**
-     * Method toString.
      * 
      * @return String
      */

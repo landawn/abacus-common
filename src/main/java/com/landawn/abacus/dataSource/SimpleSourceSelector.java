@@ -34,7 +34,6 @@ public class SimpleSourceSelector implements DataSourceSelector {
     private static final String QUERY_WITH_DATA_SOURCE = "queryWithDataSource";
 
     /**
-     * Select.
      *
      * @param dataSourceManager
      * @param entityName
@@ -49,7 +48,6 @@ public class SimpleSourceSelector implements DataSourceSelector {
     }
 
     /**
-     * Select.
      *
      * @param dataSourceManager
      * @param entityName

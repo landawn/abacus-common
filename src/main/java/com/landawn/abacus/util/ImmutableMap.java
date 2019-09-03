@@ -53,7 +53,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Empty.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -64,7 +63,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -79,7 +77,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -97,7 +94,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -117,7 +113,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -140,7 +135,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -165,7 +159,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -192,7 +185,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -221,7 +213,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -239,7 +230,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Copy of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -272,7 +262,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param k
      * @param v
@@ -286,7 +275,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Removes the.
      *
      * @param o
      * @return
@@ -299,7 +287,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Put all.
      *
      * @param map
      * @deprecated Unsupported operation.
@@ -325,7 +312,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Removes the.
      *
      * @param key
      * @param value
@@ -339,7 +325,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Replace.
      *
      * @param key
      * @param oldValue
@@ -354,7 +339,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Replace.
      *
      * @param key
      * @param value
@@ -396,7 +380,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Compute.
      *
      * @param key
      * @param remappingFunction
@@ -410,7 +393,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Merge.
      *
      * @param key
      * @param value
@@ -425,7 +407,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Clear.
      *
      * @deprecated Unsupported operation.
      */
@@ -446,7 +427,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Contains key.
      *
      * @param key
      * @return true, if successful
@@ -457,7 +437,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Contains value.
      *
      * @param value
      * @return true, if successful
@@ -468,7 +447,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Gets the.
      *
      * @param key
      * @return
@@ -479,7 +457,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -489,7 +466,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Values.
      *
      * @return
      */
@@ -499,7 +475,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Entry set.
      *
      * @return
      */
@@ -509,7 +484,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Size.
      *
      * @return
      */
@@ -519,7 +493,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -530,7 +503,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -540,7 +512,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * To string.
      *
      * @return
      */

@@ -1,3 +1,8 @@
+### 1.8.17
+
+* Improvements and bug fix.
+
+
 ### 1.8.16
 
 * Rename `Collectors.max/minBy(Comparator)` to `Collectors.max/min(Comparator)`.

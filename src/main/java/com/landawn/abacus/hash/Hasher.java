@@ -54,7 +54,6 @@ import com.landawn.abacus.util.function.BiConsumer;
 public interface Hasher {
 
     /**
-     * Put.
      *
      * @param b
      * @return
@@ -62,7 +61,6 @@ public interface Hasher {
     Hasher put(byte b);
 
     /**
-     * Put.
      *
      * @param bytes
      * @return
@@ -70,7 +68,6 @@ public interface Hasher {
     Hasher put(byte[] bytes);
 
     /**
-     * Put.
      *
      * @param bytes
      * @param off
@@ -80,7 +77,6 @@ public interface Hasher {
     Hasher put(byte[] bytes, int off, int len);
 
     /**
-     * Put.
      *
      * @param s
      * @return
@@ -88,7 +84,6 @@ public interface Hasher {
     Hasher put(short s);
 
     /**
-     * Put.
      *
      * @param i
      * @return
@@ -96,7 +91,6 @@ public interface Hasher {
     Hasher put(int i);
 
     /**
-     * Put.
      *
      * @param l
      * @return
@@ -128,7 +122,6 @@ public interface Hasher {
     Hasher put(boolean b);
 
     /**
-     * Put.
      *
      * @param c
      * @return
@@ -136,7 +129,6 @@ public interface Hasher {
     Hasher put(char c);
 
     /**
-     * Put.
      *
      * @param chars
      * @return
@@ -144,7 +136,6 @@ public interface Hasher {
     Hasher put(char[] chars);
 
     /**
-     * Put.
      *
      * @param chars
      * @param off

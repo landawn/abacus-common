@@ -48,7 +48,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Empty.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -59,7 +58,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -78,7 +76,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -101,7 +98,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -127,7 +123,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -156,7 +151,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -188,7 +182,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -223,7 +216,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -261,7 +253,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -279,7 +270,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Copy of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -295,7 +285,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -308,7 +297,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Lower entry.
      *
      * @param key
      * @return
@@ -319,7 +307,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Lower key.
      *
      * @param key
      * @return
@@ -330,7 +317,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Floor entry.
      *
      * @param key
      * @return
@@ -341,7 +327,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Floor key.
      *
      * @param key
      * @return
@@ -352,7 +337,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Ceiling entry.
      *
      * @param key
      * @return
@@ -363,7 +347,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Ceiling key.
      *
      * @param key
      * @return
@@ -374,7 +357,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Higher entry.
      *
      * @param key
      * @return
@@ -385,7 +367,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Higher key.
      *
      * @param key
      * @return
@@ -396,7 +377,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * First entry.
      *
      * @return
      */
@@ -406,7 +386,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Last entry.
      *
      * @return
      */
@@ -436,7 +415,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Descending map.
      *
      * @return
      */
@@ -466,7 +444,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Sub map.
      *
      * @param fromKey
      * @param fromInclusive
@@ -480,7 +457,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Head map.
      *
      * @param toKey
      * @param inclusive
@@ -492,7 +468,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * Tail map.
      *
      * @param fromKey
      * @param inclusive

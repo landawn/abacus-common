@@ -519,7 +519,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Creates the.
      *
      * @return
      */
@@ -528,7 +527,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Of.
      *
      * @param headers
      * @return
@@ -540,7 +538,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Copy of.
      *
      * @param headers
      * @return
@@ -676,7 +673,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Sets the.
      *
      * @param name
      * @param value
@@ -701,7 +697,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Gets the.
      *
      * @param headerName
      * @return
@@ -711,7 +706,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Removes the.
      *
      * @param headerName
      * @return
@@ -746,7 +740,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -755,7 +748,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -765,7 +757,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * Equals.
      *
      * @param obj
      * @return true, if successful
@@ -776,7 +767,6 @@ public final class HttpHeaders {
     }
 
     /**
-     * To string.
      *
      * @return
      */

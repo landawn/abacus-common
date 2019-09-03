@@ -20,7 +20,6 @@ import org.ehcache.Cache;
 
 // TODO: Auto-generated Javadoc
 /**
- * TODO.
  *
  * @author haiyang li
  * @param <K> the key type
@@ -58,7 +57,6 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param k
      * @param v
@@ -76,7 +74,6 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Removes the.
      *
      * @param k
      */
@@ -88,7 +85,6 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Contains key.
      *
      * @param k
      * @return true, if successful
@@ -101,7 +97,6 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -111,7 +106,6 @@ public class Ehcache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Size.
      *
      * @return
      */

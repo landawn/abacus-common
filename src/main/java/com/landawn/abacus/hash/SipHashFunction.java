@@ -69,7 +69,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     }
 
     /**
-     * Bits.
      *
      * @return
      */
@@ -79,7 +78,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     }
 
     /**
-     * New hasher.
      *
      * @return
      */
@@ -91,7 +89,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     // TODO(kak): Implement and benchmark the hashFoo() shortcuts.
 
     /**
-     * To string.
      *
      * @return
      */
@@ -101,7 +98,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     }
 
     /**
-     * Equals.
      *
      * @param object
      * @return true, if successful
@@ -116,7 +112,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     }
 
     /**
-     * Hash code.
      *
      * @return
      */
@@ -185,7 +180,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         }
 
         /**
-         * Process.
          *
          * @param buffer
          */
@@ -196,7 +190,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         }
 
         /**
-         * Process remaining.
          *
          * @param buffer
          */
@@ -209,7 +202,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         }
 
         /**
-         * Make hash.
          *
          * @return
          */
@@ -226,7 +218,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         }
 
         /**
-         * Process M.
          *
          * @param m
          */
@@ -237,7 +228,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         }
 
         /**
-         * Sip round.
          *
          * @param iterations
          */

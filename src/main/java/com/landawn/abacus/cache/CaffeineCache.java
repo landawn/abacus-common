@@ -21,7 +21,6 @@ import com.landawn.abacus.util.N;
 
 // TODO: Auto-generated Javadoc
 /**
- * TODO.
  *
  * @author haiyang li
  * @param <K> the key type
@@ -59,7 +58,6 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Put.
      *
      * @param k
      * @param v
@@ -77,7 +75,6 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Removes the.
      *
      * @param k
      */
@@ -89,7 +86,6 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Contains key.
      *
      * @param k
      * @return true, if successful
@@ -102,7 +98,6 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Key set.
      *
      * @return
      */
@@ -112,7 +107,6 @@ public class CaffeineCache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Size.
      *
      * @return
      */

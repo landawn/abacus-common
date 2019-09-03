@@ -31,7 +31,6 @@ import java.lang.annotation.Target;
 public @interface Column {
 
     /**
-     * Value.
      *
      * @return
      */

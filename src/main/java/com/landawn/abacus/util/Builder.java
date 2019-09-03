@@ -54,7 +54,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param val
      * @return
@@ -65,7 +64,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param val
      * @return
@@ -76,7 +74,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param val
      * @return
@@ -87,7 +84,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param val
      * @return
@@ -98,7 +94,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param val
      * @return
@@ -109,7 +104,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param val
      * @return
@@ -120,7 +114,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param val
      * @return
@@ -131,7 +124,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param val
      * @return
@@ -142,7 +134,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <L>
@@ -155,7 +146,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param <C>
@@ -168,7 +158,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -182,7 +171,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param val
@@ -194,7 +182,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param val
@@ -206,7 +193,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param <K> the key type
      * @param <E>
@@ -221,7 +207,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param val
@@ -233,7 +218,6 @@ public class Builder<T> {
     }
 
     /**
-     * Of.
      *
      * @param <T>
      * @param val
@@ -249,7 +233,6 @@ public class Builder<T> {
     //    }
 
     /**
-     * Val.
      *
      * @return
      */
@@ -258,7 +241,6 @@ public class Builder<T> {
     }
 
     /**
-     * Accept.
      *
      * @param <E>
      * @param consumer
@@ -272,7 +254,6 @@ public class Builder<T> {
     }
 
     /**
-     * Map.
      *
      * @param <R>
      * @param <E>
@@ -285,7 +266,6 @@ public class Builder<T> {
     }
 
     /**
-     * Filter.
      *
      * @param <E>
      * @param predicate
@@ -298,7 +278,6 @@ public class Builder<T> {
     }
 
     /**
-     * Stream.
      *
      * @return
      */
@@ -424,7 +403,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sets the.
          *
          * @param index
          * @param e
@@ -437,7 +415,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -449,7 +426,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -487,7 +463,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -532,7 +507,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sets the.
          *
          * @param index
          * @param e
@@ -545,7 +519,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -557,7 +530,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -595,7 +567,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -640,7 +611,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sets the.
          *
          * @param index
          * @param e
@@ -653,7 +623,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -665,7 +634,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -703,7 +671,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -748,7 +715,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sets the.
          *
          * @param index
          * @param e
@@ -761,7 +727,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -773,7 +738,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -811,7 +775,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -856,7 +819,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sets the.
          *
          * @param index
          * @param e
@@ -869,7 +831,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -881,7 +842,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -919,7 +879,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -964,7 +923,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sets the.
          *
          * @param index
          * @param e
@@ -977,7 +935,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -989,7 +946,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -1027,7 +983,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -1072,7 +1027,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sets the.
          *
          * @param index
          * @param e
@@ -1085,7 +1039,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -1097,7 +1050,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -1135,7 +1087,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -1180,7 +1131,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sets the.
          *
          * @param index
          * @param e
@@ -1193,7 +1143,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -1205,7 +1154,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -1243,7 +1191,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -1291,7 +1238,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param index
          * @param e
@@ -1321,7 +1267,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param index
          * @return
@@ -1351,7 +1296,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -1377,7 +1321,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -1420,7 +1363,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -1468,7 +1410,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -1533,7 +1474,6 @@ public class Builder<T> {
         }
 
         /**
-         * Adds the.
          *
          * @param e
          * @return
@@ -1581,7 +1521,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param e
          * @return
@@ -1648,7 +1587,6 @@ public class Builder<T> {
         }
 
         /**
-         * Put.
          *
          * @param k
          * @param v
@@ -1661,7 +1599,6 @@ public class Builder<T> {
         }
 
         /**
-         * Put all.
          *
          * @param m
          * @return
@@ -1709,7 +1646,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param k
          * @return
@@ -1757,7 +1693,6 @@ public class Builder<T> {
         }
 
         /**
-         * Put.
          *
          * @param key
          * @param e
@@ -1770,7 +1705,6 @@ public class Builder<T> {
         }
 
         /**
-         * Put all.
          *
          * @param k
          * @param c
@@ -1783,7 +1717,6 @@ public class Builder<T> {
         }
 
         /**
-         * Put all.
          *
          * @param m
          * @return
@@ -1795,7 +1728,6 @@ public class Builder<T> {
         }
 
         /**
-         * Put all.
          *
          * @param m
          * @return
@@ -1807,7 +1739,6 @@ public class Builder<T> {
         }
 
         /**
-         * Removes the.
          *
          * @param k
          * @param e
@@ -1884,7 +1815,6 @@ public class Builder<T> {
         }
 
         /**
-         * Rename column.
          *
          * @param columnName
          * @param newColumnName
@@ -1897,7 +1827,6 @@ public class Builder<T> {
         }
 
         /**
-         * Rename columns.
          *
          * @param oldNewNames
          * @return
@@ -1909,7 +1838,6 @@ public class Builder<T> {
         }
 
         /**
-         * Rename column.
          *
          * @param <E>
          * @param columnName
@@ -1924,7 +1852,6 @@ public class Builder<T> {
         }
 
         /**
-         * Rename columns.
          *
          * @param <E>
          * @param columnNames
@@ -1939,7 +1866,6 @@ public class Builder<T> {
         }
 
         /**
-         * Rename columns.
          *
          * @param <E>
          * @param func
@@ -2175,7 +2101,6 @@ public class Builder<T> {
         }
 
         /**
-         * Update column.
          *
          * @param <T>
          * @param <E>
@@ -2191,7 +2116,6 @@ public class Builder<T> {
         }
 
         /**
-         * Update columns.
          *
          * @param <T>
          * @param <E>
@@ -2207,7 +2131,6 @@ public class Builder<T> {
         }
 
         /**
-         * Convert column.
          *
          * @param columnName
          * @param targetType
@@ -2220,7 +2143,6 @@ public class Builder<T> {
         }
 
         /**
-         * Convert columns.
          *
          * @param columnTargetTypes
          * @return
@@ -2232,7 +2154,6 @@ public class Builder<T> {
         }
 
         /**
-         * Combine columns.
          *
          * @param columnNames
          * @param newColumnName
@@ -2246,7 +2167,6 @@ public class Builder<T> {
         }
 
         /**
-         * Combine columns.
          *
          * @param <E>
          * @param columnNames
@@ -2263,7 +2183,6 @@ public class Builder<T> {
         }
 
         /**
-         * Combine columns.
          *
          * @param <E>
          * @param columnNames
@@ -2280,7 +2199,6 @@ public class Builder<T> {
         }
 
         /**
-         * Combine columns.
          *
          * @param <E>
          * @param columnNames
@@ -2297,7 +2215,6 @@ public class Builder<T> {
         }
 
         /**
-         * Combine columns.
          *
          * @param <E>
          * @param columnNameFilter
@@ -2314,7 +2231,6 @@ public class Builder<T> {
         }
 
         /**
-         * Combine columns.
          *
          * @param <E>
          * @param <E2>
@@ -2333,7 +2249,6 @@ public class Builder<T> {
         }
 
         /**
-         * Divide column.
          *
          * @param <T>
          * @param <E>
@@ -2351,7 +2266,6 @@ public class Builder<T> {
         }
 
         /**
-         * Divide column.
          *
          * @param <T>
          * @param <E>
@@ -2369,7 +2283,6 @@ public class Builder<T> {
         }
 
         /**
-         * Divide column.
          *
          * @param <T>
          * @param <E>
@@ -2387,7 +2300,6 @@ public class Builder<T> {
         }
 
         /**
-         * Divide column.
          *
          * @param <T>
          * @param <E>
@@ -2405,7 +2317,6 @@ public class Builder<T> {
         }
 
         /**
-         * Update all.
          *
          * @param <E>
          * @param func
@@ -2419,7 +2330,6 @@ public class Builder<T> {
         }
 
         /**
-         * Replace if.
          *
          * @param <E>
          * @param func
@@ -2434,7 +2344,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sort by.
          *
          * @param columnName
          * @return
@@ -2446,7 +2355,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sort by.
          *
          * @param <T>
          * @param columnName
@@ -2460,7 +2368,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sort by.
          *
          * @param columnNames
          * @return
@@ -2472,7 +2379,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sort by.
          *
          * @param columnNames
          * @param cmp
@@ -2485,7 +2391,6 @@ public class Builder<T> {
         }
 
         /**
-         * Sort by.
          *
          * @param columnNames
          * @param keyMapper

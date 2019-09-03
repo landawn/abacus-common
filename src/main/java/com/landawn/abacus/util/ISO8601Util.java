@@ -73,7 +73,6 @@ public final class ISO8601Util {
     }
 
     /**
-     * Format.
      *
      * @param date
      * @param millis
@@ -125,7 +124,6 @@ public final class ISO8601Util {
      */
 
     /**
-     * Parses the.
      *
      * @param date
      * @return

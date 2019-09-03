@@ -60,7 +60,6 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     }
 
     /**
-     * Lock.
      *
      * @param target
      * @param lockMode
@@ -73,7 +72,6 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     }
 
     /**
-     * Lock.
      *
      * @param target
      * @param lockMode
@@ -173,7 +171,6 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     }
 
     /**
-     * Unlock.
      *
      * @param target
      * @param refLockCode
@@ -247,7 +244,6 @@ public final class LocalXLock<T> extends AbstractXLock<T> {
     }
 
     /**
-     * Close lock.
      *
      * @param target
      * @param modeLock

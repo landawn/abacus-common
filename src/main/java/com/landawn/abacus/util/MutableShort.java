@@ -61,7 +61,6 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     /**
-     * Of.
      *
      * @param value
      * @return
@@ -71,7 +70,6 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     /**
-     * Value.
      *
      * @return
      */

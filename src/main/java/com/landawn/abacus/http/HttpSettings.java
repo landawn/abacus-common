@@ -64,7 +64,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Creates the.
      *
      * @return
      */
@@ -158,7 +157,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Do input.
      *
      * @return true, if successful
      * @see java.net.HttpURLConnection#setDoInput(boolean)
@@ -182,7 +180,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Do output.
      *
      * @return true, if successful
      * @see java.net.HttpURLConnection#setDoOutput(boolean)
@@ -275,7 +272,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Header.
      *
      * @param name
      * @param value
@@ -288,7 +284,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Headers.
      *
      * @param name1
      * @param value1
@@ -304,7 +299,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Headers.
      *
      * @param name1
      * @param value1
@@ -323,7 +317,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Headers.
      *
      * @param headers
      * @return
@@ -335,7 +328,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Headers.
      *
      * @param headers
      * @return
@@ -351,7 +343,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Headers.
      *
      * @return
      */
@@ -364,7 +355,6 @@ public final class HttpSettings {
     }
 
     /**
-     * Copy.
      *
      * @return
      */
@@ -381,7 +371,6 @@ public final class HttpSettings {
     }
 
     /**
-     * To string.
      *
      * @return
      */

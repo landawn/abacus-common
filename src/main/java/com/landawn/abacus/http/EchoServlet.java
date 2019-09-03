@@ -57,7 +57,6 @@ public class EchoServlet extends AbstractHttpServlet {
     private boolean isGetFirst;
 
     /**
-     * Inits the.
      *
      * @throws ServletException the servlet exception
      */
@@ -67,7 +66,6 @@ public class EchoServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Inits the.
      *
      * @param config
      * @throws ServletException the servlet exception
@@ -80,7 +78,6 @@ public class EchoServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Do get.
      *
      * @param req
      * @param resp
@@ -91,7 +88,6 @@ public class EchoServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Do post.
      *
      * @param req
      * @param resp
@@ -102,7 +98,6 @@ public class EchoServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Do put.
      *
      * @param req
      * @param resp
@@ -113,7 +108,6 @@ public class EchoServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Do delete.
      *
      * @param req
      * @param resp
@@ -124,7 +118,6 @@ public class EchoServlet extends AbstractHttpServlet {
     }
 
     /**
-     * Execute.
      *
      * @param request
      * @param response
