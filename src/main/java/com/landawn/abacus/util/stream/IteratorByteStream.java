@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
@@ -48,7 +48,7 @@ import com.landawn.abacus.util.function.ObjByteConsumer;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * 
+ *
  */
 class IteratorByteStream extends AbstractByteStream {
     ByteIteratorEx elements;
@@ -341,8 +341,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -408,8 +407,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -475,8 +473,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1367,13 +1364,8 @@ class IteratorByteStream extends AbstractByteStream {
     }
 
     @Override
-    public ByteStream parallel(int maxThreadNum, Splitor splitor) {
-        return new ParallelIteratorByteStream(elements, sorted, checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), asyncExecutor(), closeHandlers);
-    }
-
-    @Override
-    public ByteStream parallel(final int maxThreadNum, final Executor executor) {
-        return new ParallelIteratorByteStream(elements, sorted, checkMaxThreadNum(maxThreadNum), splitor(), createAsyncExecutor(executor), closeHandlers);
+    protected ByteStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        return new ParallelIteratorByteStream(elements, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

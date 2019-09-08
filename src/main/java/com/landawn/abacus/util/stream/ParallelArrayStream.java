@@ -5061,14 +5061,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     }
 
     @Override
-    public Stream<T> parallel(int maxThreadNum, Splitor splitor) {
-        checkMaxThreadNum(maxThreadNum);
-        checkSplitor(splitor);
-
-        return new ParallelArrayStream<>(elements, fromIndex, toIndex, sorted, cmp, maxThreadNum, splitor, asyncExecutor, closeHandlers);
-    }
-
-    @Override
     protected int maxThreadNum() {
         return maxThreadNum;
     }

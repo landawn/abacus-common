@@ -28,9 +28,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.concurrent.Executor;
 import java.util.stream.StreamSupport;
 
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.DoubleSummaryStatistics;
@@ -60,7 +60,7 @@ import com.landawn.abacus.util.function.ObjDoubleConsumer;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * 
+ *
  */
 class IteratorDoubleStream extends AbstractDoubleStream {
     final DoubleIteratorEx elements;
@@ -407,8 +407,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -474,8 +474,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -541,8 +541,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -608,8 +608,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -675,8 +675,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1640,13 +1640,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
     }
 
     @Override
-    public DoubleStream parallel(int maxThreadNum, Splitor splitor) {
-        return new ParallelIteratorDoubleStream(elements, sorted, checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), asyncExecutor(), closeHandlers);
-    }
-
-    @Override
-    public DoubleStream parallel(final int maxThreadNum, final Executor executor) {
-        return new ParallelIteratorDoubleStream(elements, sorted, checkMaxThreadNum(maxThreadNum), splitor(), createAsyncExecutor(executor), closeHandlers);
+    protected DoubleStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        return new ParallelIteratorDoubleStream(elements, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

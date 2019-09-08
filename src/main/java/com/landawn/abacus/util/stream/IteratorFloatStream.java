@@ -25,8 +25,8 @@ import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.FloatList;
@@ -56,7 +56,7 @@ import com.landawn.abacus.util.function.ObjFloatConsumer;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * 
+ *
  */
 class IteratorFloatStream extends AbstractFloatStream {
     final FloatIteratorEx elements;
@@ -403,8 +403,8 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -470,8 +470,8 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -537,8 +537,8 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -604,8 +604,8 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -671,8 +671,8 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1636,13 +1636,8 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public FloatStream parallel(int maxThreadNum, Splitor splitor) {
-        return new ParallelIteratorFloatStream(elements, sorted, checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), asyncExecutor(), closeHandlers);
-    }
-
-    @Override
-    public FloatStream parallel(final int maxThreadNum, final Executor executor) {
-        return new ParallelIteratorFloatStream(elements, sorted, checkMaxThreadNum(maxThreadNum), splitor(), createAsyncExecutor(executor), closeHandlers);
+    protected FloatStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        return new ParallelIteratorFloatStream(elements, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

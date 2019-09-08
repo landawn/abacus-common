@@ -56,7 +56,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 
 /**
- * 
+ *
  */
 final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     private final int maxThreadNum;
@@ -621,7 +621,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         }
 
         return container == NONE ? supplier.get() : container;
-    };
+    }
 
     @Override
     public <E extends Exception> boolean anyMatch(final Try.DoublePredicate<E> predicate) throws E {
@@ -999,14 +999,6 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         }
 
         return tmp;
-    }
-
-    @Override
-    public DoubleStream parallel(int maxThreadNum, Splitor splitor) {
-        checkMaxThreadNum(maxThreadNum);
-        checkSplitor(splitor);
-
-        return new ParallelIteratorDoubleStream(elements, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

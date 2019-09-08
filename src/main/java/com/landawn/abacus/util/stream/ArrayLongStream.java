@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.IntIterator;
@@ -54,7 +54,7 @@ import com.landawn.abacus.util.function.ObjLongConsumer;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * 
+ *
  */
 class ArrayLongStream extends AbstractLongStream {
     final long[] elements;
@@ -523,8 +523,8 @@ class ArrayLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -591,8 +591,8 @@ class ArrayLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -659,8 +659,8 @@ class ArrayLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -727,8 +727,8 @@ class ArrayLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -795,8 +795,8 @@ class ArrayLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
+                : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1182,7 +1182,7 @@ class ArrayLongStream extends AbstractLongStream {
     public LongStream limit(final long maxSize) {
         checkArgNotNegative(maxSize, "maxSize");
 
-        return newStream(elements, fromIndex, (int) (fromIndex + maxSize), sorted);
+        return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted);
     }
 
     @Override
@@ -1927,14 +1927,8 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream parallel(final int maxThreadNum, final Splitor splitor) {
-        return new ParallelArrayLongStream(elements, fromIndex, toIndex, sorted, checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), asyncExecutor(),
-                closeHandlers);
-    }
-
-    @Override
-    public LongStream parallel(final int maxThreadNum, final Executor executor) {
-        return new ParallelArrayLongStream(elements, fromIndex, toIndex, sorted, checkMaxThreadNum(maxThreadNum), splitor(), createAsyncExecutor(executor),
+    protected LongStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        return new ParallelArrayLongStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 

@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.DoubleIterator;
@@ -2320,7 +2320,7 @@ class ArrayStream<T> extends AbstractStream<T> {
     public Stream<T> limit(final long maxSize) {
         checkArgNotNegative(maxSize, "maxSize");
 
-        return newStream(elements, fromIndex, (int) (fromIndex + maxSize), sorted, cmp);
+        return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted, cmp);
     }
 
     @Override
@@ -3381,14 +3381,8 @@ class ArrayStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Stream<T> parallel(final int maxThreadNum, final Splitor splitor) {
-        return new ParallelArrayStream<>(elements, fromIndex, toIndex, sorted, cmp, checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), asyncExecutor(),
-                closeHandlers);
-    }
-
-    @Override
-    public Stream<T> parallel(final int maxThreadNum, final Executor executor) {
-        return new ParallelArrayStream<>(elements, fromIndex, toIndex, sorted, cmp, checkMaxThreadNum(maxThreadNum), splitor(), createAsyncExecutor(executor),
+    protected Stream<T> parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        return new ParallelArrayStream<>(elements, fromIndex, toIndex, sorted, cmp, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 

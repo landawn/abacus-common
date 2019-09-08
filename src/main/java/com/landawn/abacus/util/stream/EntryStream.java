@@ -62,9 +62,9 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
-/** 
+/**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
- * 
+ *
  */
 public final class EntryStream<K, V> implements AutoCloseable {
 
@@ -134,7 +134,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     @SequentialOnly
     public <KK> EntryStream<KK, V> selectByKey(Class<KK> clazz) {
         if (isParallel()) {
-            return (EntryStream<KK, V>) sequential().filterByKey(Fn.instanceOf(clazz)).parallel(maxThreadNum(), splitor());
+            return (EntryStream<KK, V>) sequential().filterByKey(Fn.instanceOf(clazz)).parallel(maxThreadNum(), splitor(), asyncExecutor());
         } else {
             return (EntryStream<KK, V>) filterByKey(Fn.instanceOf(clazz));
         }
@@ -156,7 +156,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     @SequentialOnly
     public <VV> EntryStream<K, VV> selectByValue(Class<VV> clazz) {
         if (isParallel()) {
-            return (EntryStream<K, VV>) sequential().filterByValue(Fn.instanceOf(clazz)).parallel(maxThreadNum(), splitor());
+            return (EntryStream<K, VV>) sequential().filterByValue(Fn.instanceOf(clazz)).parallel(maxThreadNum(), splitor(), asyncExecutor());
         } else {
             return (EntryStream<K, VV>) filterByValue(Fn.instanceOf(clazz));
         }
@@ -239,7 +239,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<Map.Entry<K, V>, Map.Entry<KK, VV>> mapper = new Function<Map.Entry<K, V>, Map.Entry<KK, VV>>() {
             @Override
             public Entry<KK, VV> apply(Entry<K, V> t) {
-                return new SimpleImmutableEntry<KK, VV>(keyMapper.apply(t.getKey(), t.getValue()), valueMapper.apply(t.getKey(), t.getValue()));
+                return new SimpleImmutableEntry<>(keyMapper.apply(t.getKey(), t.getValue()), valueMapper.apply(t.getKey(), t.getValue()));
             }
         };
 
@@ -258,7 +258,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapper = new Function<Map.Entry<K, V>, Map.Entry<KK, V>>() {
             @Override
             public Entry<KK, V> apply(Entry<K, V> entry) {
-                return new SimpleImmutableEntry<KK, V>(keyMapper.apply(entry.getKey(), entry.getValue()), entry.getValue());
+                return new SimpleImmutableEntry<>(keyMapper.apply(entry.getKey(), entry.getValue()), entry.getValue());
             }
         };
 
@@ -277,7 +277,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapper = new Function<Map.Entry<K, V>, Map.Entry<K, VV>>() {
             @Override
             public Entry<K, VV> apply(Entry<K, V> entry) {
-                return new SimpleImmutableEntry<K, VV>(entry.getKey(), keyMapper.apply(entry.getKey(), entry.getValue()));
+                return new SimpleImmutableEntry<>(entry.getKey(), keyMapper.apply(entry.getKey(), entry.getValue()));
             }
         };
 
@@ -453,7 +453,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @return
      * @see Collectors#groupingBy(Function)
@@ -464,14 +464,14 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
         if (isParallel()) {
-            return of(s.sequential().groupBy(keyMapper, valueMapper).parallel(s.maxThreadNum(), s.splitor()));
+            return of(s.sequential().groupBy(keyMapper, valueMapper).parallel(s.maxThreadNum(), s.splitor(), s.asyncExecutor()));
         } else {
             return of(s.groupBy(keyMapper, valueMapper));
         }
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param mapFactory
      * @return
@@ -483,7 +483,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
         if (isParallel()) {
-            return of(s.sequential().groupBy(keyMapper, valueMapper, mapFactory).parallel(s.maxThreadNum(), s.splitor()));
+            return of(s.sequential().groupBy(keyMapper, valueMapper, mapFactory).parallel(s.maxThreadNum(), s.splitor(), s.asyncExecutor()));
         } else {
             return of(s.groupBy(keyMapper, valueMapper, mapFactory));
         }
@@ -497,7 +497,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -512,7 +512,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param downstream
      * @return
      * @see Collectors#groupingBy(Function, Collector)
@@ -525,7 +525,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param downstream
      * @param mapFactory
      * @return
@@ -539,7 +539,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @param mapFactory
@@ -554,7 +554,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @return
@@ -568,7 +568,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param mergeFunction
      * @return
      */
@@ -578,14 +578,14 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
         if (isParallel()) {
-            return of(s.sequential().groupBy(keyMapper, valueMapper, mergeFunction).parallel(s.maxThreadNum(), s.splitor()));
+            return of(s.sequential().groupBy(keyMapper, valueMapper, mergeFunction).parallel(s.maxThreadNum(), s.splitor(), s.asyncExecutor()));
         } else {
             return of(s.groupBy(keyMapper, valueMapper, mergeFunction));
         }
     }
 
     /**
-     * 
+     *
      * @param mergeFunction
      * @param mapFactory
      * @return
@@ -596,14 +596,14 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
         if (isParallel()) {
-            return of(s.sequential().groupBy(keyMapper, valueMapper, mergeFunction, mapFactory).parallel(s.maxThreadNum(), s.splitor()));
+            return of(s.sequential().groupBy(keyMapper, valueMapper, mergeFunction, mapFactory).parallel(s.maxThreadNum(), s.splitor(), s.asyncExecutor()));
         } else {
             return of(s.groupBy(keyMapper, valueMapper, mergeFunction, mapFactory));
         }
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -618,7 +618,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -635,7 +635,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param collapsible
      * @return
      * @see Stream#collapse(BiPredicate, Collector)
@@ -648,10 +648,10 @@ public final class EntryStream<K, V> implements AutoCloseable {
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @param collector
      * @return
@@ -696,9 +696,9 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
-     * @return 
+     * @return
      */
     @ParallelSupported
     public EntryStream<K, V> sortedByInt(final ToIntFunction<? super Map.Entry<K, V>> keyMapper) {
@@ -708,9 +708,9 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
-     * @return 
+     * @return
      */
     @ParallelSupported
     public EntryStream<K, V> sortedByLong(final ToLongFunction<? super Map.Entry<K, V>> keyMapper) {
@@ -720,9 +720,9 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
-     * @return 
+     * @return
      */
     @ParallelSupported
     public EntryStream<K, V> sortedByDouble(final ToDoubleFunction<? super Map.Entry<K, V>> keyMapper) {
@@ -741,7 +741,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<? super Entry<K, V>, K> keyMapper = Fn.key();
 
         if (isParallel()) {
-            return of(s.sequential().distinctBy(keyMapper).parallel(s.maxThreadNum(), s.splitor()));
+            return of(s.sequential().distinctBy(keyMapper).parallel(s.maxThreadNum(), s.splitor(), s.asyncExecutor()));
         } else {
             return of(s.distinctBy(keyMapper));
         }
@@ -752,7 +752,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
         final Function<? super Entry<K, V>, V> keyMapper = Fn.value();
 
         if (isParallel()) {
-            return of(s.sequential().distinctBy(keyMapper).parallel(s.maxThreadNum(), s.splitor()));
+            return of(s.sequential().distinctBy(keyMapper).parallel(s.maxThreadNum(), s.splitor(), s.asyncExecutor()));
         } else {
             return of(s.distinctBy(keyMapper));
         }
@@ -970,7 +970,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
 
     /**
      * Remember to close this Stream after the iteration is done, if required.
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -1022,7 +1022,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @return
      */
     @ParallelSupported
@@ -1031,7 +1031,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @return
      */
     @ParallelSupported
@@ -1040,7 +1040,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -1053,7 +1053,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param mergeFunction
      * @return
      */
@@ -1067,7 +1067,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param mapFactory
      * @return
      */
@@ -1081,7 +1081,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param mergeFunction
      * @param mapFactory
      * @return
@@ -1096,7 +1096,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -1109,7 +1109,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -1123,7 +1123,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -1137,7 +1137,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -1152,7 +1152,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param downstream
      * @return
      * @see Collectors#groupingBy(Function, Collector)
@@ -1164,7 +1164,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param downstream
      * @param mapFactory
      * @return
@@ -1176,7 +1176,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @param mapFactory
@@ -1190,7 +1190,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @return
@@ -1208,7 +1208,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @return
      * @see Collectors#groupingBy(Function)
@@ -1223,7 +1223,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param mapFactory
      * @return
@@ -1245,7 +1245,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -1264,7 +1264,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @return
      * @see Collectors#toMultimap(Function, Function)
@@ -1279,7 +1279,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param mapFactory
      * @return
@@ -1295,7 +1295,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -1308,7 +1308,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -1421,12 +1421,20 @@ public final class EntryStream<K, V> implements AutoCloseable {
         return of(s.parallel(maxThreadNum, splitor));
     }
 
+    public EntryStream<K, V> parallel(final int maxThreadNum, final Splitor splitor, final Executor executor) {
+        return of(s.parallel(maxThreadNum, splitor, executor));
+    }
+
     public EntryStream<K, V> parallel(final int maxThreadNum, final Executor executor) {
         return of(s.parallel(maxThreadNum, executor));
     }
 
     public EntryStream<K, V> parallel(final Executor executor) {
         return of(s.parallel(executor));
+    }
+
+    protected EntryStream<K, V> parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        return of(s.parallel(maxThreadNum, splitor, asyncExecutor));
     }
 
     protected int maxThreadNum() {
@@ -1471,20 +1479,20 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * To reduce the memory footprint, Only one instance of <code>DisposableEntry</code> is created, 
+     * To reduce the memory footprint, Only one instance of <code>DisposableEntry</code> is created,
      * and the same entry instance is returned and set with different keys/values during iteration of the returned stream.
      * The elements only can be retrieved one by one, can't be modified or saved.
      * The returned Stream doesn't support the operations which require two or more elements at the same time: (e.g. sort/distinct/pairMap/slidingMap/sliding/split/toList/toSet/...).
      * , and can't be parallel stream.
-     * Operations: filter/map/toMap/groupBy/groupTo/... are supported. 
-     * 
+     * Operations: filter/map/toMap/groupBy/groupTo/... are supported.
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
-     * 
+     *
      * @see DisposableEntry
      * @see NoCachingNoUpdating
-     * 
+     *
      * @deprecated
      */
     @Deprecated
@@ -1509,7 +1517,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -1539,7 +1547,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @return
      * @see #mapToDisposableEntry(Function, Function)
@@ -1570,7 +1578,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @return
      * @see #mapToDisposableEntry(Function, Function)
@@ -1601,7 +1609,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param valueMapper
      * @return
      * @see #mapToDisposableEntry(Function, Function)
@@ -1632,7 +1640,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * 
+     *
      * @param valueMapper
      * @return
      * @see #mapToDisposableEntry(Function, Function)
@@ -1726,19 +1734,19 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     static <K, V> EntryStream<K, V> of(final Stream<? extends Map.Entry<? extends K, ? extends V>> s) {
-        return new EntryStream<K, V>(s);
+        return new EntryStream<>(s);
     }
 
     public static <K, V> EntryStream<K, V> of(final Map<K, V> map) {
-        return new EntryStream<K, V>(map, Stream.of(map));
+        return new EntryStream<>(map, Stream.of(map));
     }
 
     public static <K, V> EntryStream<K, V> of(final Iterator<? extends Map.Entry<? extends K, ? extends V>> iterator) {
-        return new EntryStream<K, V>(Stream.of(iterator));
+        return new EntryStream<>(Stream.of(iterator));
     }
 
     public static <K, V> EntryStream<K, V> of(final Collection<? extends Map.Entry<? extends K, ? extends V>> entries) {
-        return new EntryStream<K, V>(Stream.of(entries));
+        return new EntryStream<>(Stream.of(entries));
     }
 
     //    @SafeVarargs

@@ -55,8 +55,8 @@ import com.landawn.abacus.util.function.ToFloatFunction;
 import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 
-/** 
- * 
+/**
+ *
  */
 final class ParallelArrayLongStream extends ArrayLongStream {
     private final int maxThreadNum;
@@ -1497,7 +1497,7 @@ final class ParallelArrayLongStream extends ArrayLongStream {
         Stream<Long> tmp = boxed;
 
         if (tmp == null) {
-            tmp = new ParallelIteratorStream<Long>(iteratorEx(), sorted, sorted ? LONG_COMPARATOR : null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
+            tmp = new ParallelIteratorStream<>(iteratorEx(), sorted, sorted ? LONG_COMPARATOR : null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
             boxed = tmp;
         }
 
@@ -1556,14 +1556,6 @@ final class ParallelArrayLongStream extends ArrayLongStream {
         }
 
         return tmp;
-    }
-
-    @Override
-    public LongStream parallel(int maxThreadNum, Splitor splitor) {
-        checkMaxThreadNum(maxThreadNum);
-        checkSplitor(splitor);
-
-        return new ParallelArrayLongStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

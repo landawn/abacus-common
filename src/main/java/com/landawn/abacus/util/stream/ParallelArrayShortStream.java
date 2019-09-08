@@ -52,8 +52,8 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 
-/** 
- * 
+/**
+ *
  */
 final class ParallelArrayShortStream extends ArrayShortStream {
     private final int maxThreadNum;
@@ -231,7 +231,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
 
     @Override
     public Stream<ShortList> slidingToList(final int windowSize, final int increment) {
-        return new ParallelIteratorStream<ShortList>(sequential().slidingToList(windowSize, increment).iteratorEx(), false, null, maxThreadNum, splitor,
+        return new ParallelIteratorStream<>(sequential().slidingToList(windowSize, increment).iteratorEx(), false, null, maxThreadNum, splitor,
                 asyncExecutor, closeHandlers);
     }
 
@@ -1438,7 +1438,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
         Stream<Short> tmp = boxed;
 
         if (tmp == null) {
-            tmp = new ParallelIteratorStream<Short>(iteratorEx(), sorted, sorted ? SHORT_COMPARATOR : null, maxThreadNum, splitor, asyncExecutor,
+            tmp = new ParallelIteratorStream<>(iteratorEx(), sorted, sorted ? SHORT_COMPARATOR : null, maxThreadNum, splitor, asyncExecutor,
                     closeHandlers);
             boxed = tmp;
         }
@@ -1498,14 +1498,6 @@ final class ParallelArrayShortStream extends ArrayShortStream {
         }
 
         return tmp;
-    }
-
-    @Override
-    public ShortStream parallel(int maxThreadNum, Splitor splitor) {
-        checkMaxThreadNum(maxThreadNum);
-        checkSplitor(splitor);
-
-        return new ParallelArrayShortStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

@@ -51,8 +51,8 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToCharFunction;
 import com.landawn.abacus.util.function.ToIntFunction;
 
-/**  
- * 
+/**
+ *
  */
 final class ParallelArrayCharStream extends ArrayCharStream {
     private final int maxThreadNum;
@@ -1431,7 +1431,7 @@ final class ParallelArrayCharStream extends ArrayCharStream {
         Stream<Character> tmp = boxed;
 
         if (tmp == null) {
-            tmp = new ParallelIteratorStream<Character>(iteratorEx(), sorted, sorted ? CHAR_COMPARATOR : null, maxThreadNum, splitor, asyncExecutor,
+            tmp = new ParallelIteratorStream<>(iteratorEx(), sorted, sorted ? CHAR_COMPARATOR : null, maxThreadNum, splitor, asyncExecutor,
                     closeHandlers);
             boxed = tmp;
         }
@@ -1491,14 +1491,6 @@ final class ParallelArrayCharStream extends ArrayCharStream {
         }
 
         return tmp;
-    }
-
-    @Override
-    public CharStream parallel(int maxThreadNum, Splitor splitor) {
-        checkMaxThreadNum(maxThreadNum);
-        checkSplitor(splitor);
-
-        return new ParallelArrayCharStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

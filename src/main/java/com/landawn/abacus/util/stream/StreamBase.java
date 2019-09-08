@@ -676,19 +676,36 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     }
 
     @Override
-    public S parallel(int maxThreadNum) {
+    public S parallel(final int maxThreadNum) {
         return parallel(maxThreadNum, DEFAULT_SPLITOR);
     }
 
     @Override
-    public S parallel(Splitor splitor) {
+    public S parallel(final Splitor splitor) {
         return parallel(DEFAULT_MAX_THREAD_NUM, splitor);
     }
 
     @Override
-    public S parallel(final Executor exector) {
-        return parallel(DEFAULT_MAX_THREAD_NUM, exector);
+    public S parallel(final int maxThreadNum, final Splitor splitor) {
+        return parallel(checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), DEFAULT_ASYNC_EXECUTOR);
     }
+
+    @Override
+    public S parallel(final int maxThreadNum, final Splitor splitor, final Executor executor) {
+        return parallel(checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), createAsyncExecutor(executor));
+    }
+
+    @Override
+    public S parallel(final int maxThreadNum, final Executor executor) {
+        return parallel(maxThreadNum, DEFAULT_SPLITOR, executor);
+    }
+
+    @Override
+    public S parallel(final Executor executor) {
+        return parallel(DEFAULT_MAX_THREAD_NUM, DEFAULT_SPLITOR, executor);
+    }
+
+    protected abstract S parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor);
 
     //    @Deprecated
     //    @Override
@@ -704,8 +721,8 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     //
     //    @Deprecated
     //    @Override
-    //    public <SS extends BaseStream<?, ?, ?, ?, ?, ?, ?, ?, ?>> SS parallelOnly(int maxThreadNum, final Executor exector, final Function<? super S, SS> func) {
-    //        return (SS) parallel(maxThreadNum, exector).__(func).sequential();
+    //    public <SS extends BaseStream<?, ?, ?, ?, ?, ?, ?, ?, ?>> SS parallelOnly(int maxThreadNum, final Executor executor, final Function<? super S, SS> func) {
+    //        return (SS) parallel(maxThreadNum, executor).__(func).sequential();
     //    }
 
     protected int maxThreadNum() {

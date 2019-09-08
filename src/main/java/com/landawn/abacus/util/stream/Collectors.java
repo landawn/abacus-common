@@ -1904,6 +1904,14 @@ public abstract class Collectors {
         return reducing(0, accumulator, combiner);
     }
 
+    public static <T, U> Collector<T, ?, Long> countingBy(final Function<? super T, ? extends U> mapper) {
+        return mapping(mapper, counting());
+    }
+
+    public static <T, U> Collector<T, ?, Integer> countingIntBy(final Function<? super T, ? extends U> mapper) {
+        return mapping(mapper, countingInt());
+    }
+
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, Optional<T>> min() {
         return min(Fn.nullsLast());

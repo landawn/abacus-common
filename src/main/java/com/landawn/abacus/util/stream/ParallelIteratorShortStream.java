@@ -52,7 +52,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 
 /**
- * 
+ *
  */
 final class ParallelIteratorShortStream extends IteratorShortStream {
     private final int maxThreadNum;
@@ -922,14 +922,6 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
         }
 
         return tmp;
-    }
-
-    @Override
-    public ShortStream parallel(int maxThreadNum, Splitor splitor) {
-        checkMaxThreadNum(maxThreadNum);
-        checkSplitor(splitor);
-
-        return new ParallelIteratorShortStream(elements, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

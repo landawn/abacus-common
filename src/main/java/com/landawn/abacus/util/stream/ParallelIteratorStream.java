@@ -3594,14 +3594,6 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     }
 
     @Override
-    public Stream<T> parallel(int maxThreadNum, Splitor splitor) {
-        checkMaxThreadNum(maxThreadNum);
-        checkSplitor(splitor);
-
-        return new ParallelIteratorStream<>(elements, sorted, cmp, maxThreadNum, splitor, asyncExecutor, closeHandlers);
-    }
-
-    @Override
     protected int maxThreadNum() {
         return maxThreadNum;
     }

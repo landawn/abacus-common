@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.FloatList;
@@ -53,7 +53,7 @@ import com.landawn.abacus.util.function.ObjFloatConsumer;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * 
+ *
  */
 class ArrayFloatStream extends AbstractFloatStream {
     final float[] elements;
@@ -522,8 +522,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -590,8 +589,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -658,8 +656,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -726,8 +723,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -794,8 +790,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1181,7 +1176,7 @@ class ArrayFloatStream extends AbstractFloatStream {
     public FloatStream limit(final long maxSize) {
         checkArgNotNegative(maxSize, "maxSize");
 
-        return newStream(elements, fromIndex, (int) (fromIndex + maxSize), sorted);
+        return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted);
     }
 
     @Override
@@ -1835,14 +1830,8 @@ class ArrayFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public FloatStream parallel(final int maxThreadNum, final Splitor splitor) {
-        return new ParallelArrayFloatStream(elements, fromIndex, toIndex, sorted, checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), asyncExecutor(),
-                closeHandlers);
-    }
-
-    @Override
-    public FloatStream parallel(final int maxThreadNum, final Executor executor) {
-        return new ParallelArrayFloatStream(elements, fromIndex, toIndex, sorted, checkMaxThreadNum(maxThreadNum), splitor(), createAsyncExecutor(executor),
+    protected FloatStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        return new ParallelArrayFloatStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 

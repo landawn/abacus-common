@@ -133,13 +133,13 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.QueuedIterator;
 /**
  * Note: This class includes codes copied from StreamEx: https://github.com/amaembo/streamex under Apache License, version 2.0.
  * <br />
- * 
+ *
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
- * 
- * @param <T> the type of the stream elements 
+ *
+ * @param <T> the type of the stream elements
  * @see IntStream
  * @see LongStream
- * @see DoubleStream 
+ * @see DoubleStream
  */
 public abstract class Stream<T>
         extends StreamBase<T, Object[], Predicate<? super T>, Consumer<? super T>, List<T>, Optional<T>, Indexed<T>, ObjIterator<T>, Stream<T>> {
@@ -153,7 +153,7 @@ public abstract class Stream<T>
     @SequentialOnly
     public <U> Stream<U> select(Class<U> targetType) {
         if (isParallel()) {
-            return (Stream<U>) sequential().filter(Fn.instanceOf(targetType)).parallel(maxThreadNum(), splitor());
+            return (Stream<U>) sequential().filter(Fn.instanceOf(targetType)).parallel(maxThreadNum(), splitor(), asyncExecutor());
         } else {
             return (Stream<U>) filter(Fn.instanceOf(targetType));
         }
@@ -167,14 +167,14 @@ public abstract class Stream<T>
     //    /**
     //     * Returns a stream consisting of the results of applying the given function
     //     * to the every two adjacent elements of this stream.
-    //     * 
+    //     *
     //     * <pre>
     //     * <code>
     //     * Stream.of("a", "b", "c", "d", "e").biMap((i, j) -> i + "-" + j).println();
     //     * // print out: [a-b, c-d, e-null]
     //     * </code>
     //     * </pre>
-    //     * 
+    //     *
     //     * @param mapper
     //     * @param ignoreNotPaired flag to identify if need to ignore the last element when the total length of the stream is odd number. Default value is false
     //     * @return
@@ -186,14 +186,14 @@ public abstract class Stream<T>
     //    /**
     //     * Returns a stream consisting of the results of applying the given function
     //     * to the every three adjacent elements of this stream.
-    //     * 
+    //     *
     //     * <pre>
     //     * <code>
     //     * Stream.of("a", "b", "c", "d", "e").triMap((i, j, k) -> i + "-" + j + "-" + k).println();
     //     * // print out: [a-b-c, d-e-null]
     //     * </code>
     //     * </pre>
-    //     * 
+    //     *
     //     * @param mapper
     //     * @param ignoreNotPaired  flag to identify if need to ignore the last one or two elements when the total length of the stream is not multiple of 3. Default value is false
     //     * @return
@@ -205,7 +205,7 @@ public abstract class Stream<T>
 
     /**
      * Slide with <code>windowSize = 2</code> and the specified <code>increment</code>, then <code>map</code> by the specified <code>mapper</code>.
-     * 
+     *
      * @param mapper
      * @param increment
      * @return
@@ -221,7 +221,7 @@ public abstract class Stream<T>
 
     /**
      * Slide with <code>windowSize = 3</code> and the specified <code>increment</code>, then <code>map</code> by the specified <code>mapper</code>.
-     * 
+     *
      * @param mapper
      * @param increment
      * @return
@@ -234,22 +234,22 @@ public abstract class Stream<T>
 
     /**
      * Note: copied from StreamEx: https://github.com/amaembo/streamex
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns a stream consisting of results of applying the given function to
      * the ranges created from the source elements.
-     * 
+     *
      * <pre>
      * <code>
      * Stream.of("a", "ab", "ac", "b", "c", "cb").rangeMap((a, b) -> b.startsWith(a), (a, b) -> a + "->" + b).toList(); // a->ac, b->b, c->cb
      * </code>
      * </pre>
-     * 
+     *
      * <p>
      * This is a <a href="package-summary.html#StreamOps">quasi-intermediate</a>
      * partial reduction operation.
-     * 
+     *
      * @param <U> the type of the resulting elements
      * @param sameRange a non-interfering, stateless predicate to apply to
      *        the leftmost and next elements which returns true for elements
@@ -376,7 +376,7 @@ public abstract class Stream<T>
             final Supplier<? extends Map<K, List<T>>> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -386,7 +386,7 @@ public abstract class Stream<T>
     public abstract <K, V> Stream<Map.Entry<K, List<V>>> groupBy(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -428,7 +428,7 @@ public abstract class Stream<T>
     //            final Supplier<? extends Map<K, List<T>>> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @return
@@ -439,7 +439,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mapFactory
@@ -484,7 +484,7 @@ public abstract class Stream<T>
     //            final Supplier<? extends Map<K, List<T>>> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @return
@@ -495,7 +495,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mapFactory
@@ -533,7 +533,7 @@ public abstract class Stream<T>
     //            final Supplier<? extends Map<K, V>> mapFactory);
 
     /**
-     * 
+     *
      * @param predicate
      * @return
      * @see Collectors#partitioningBy(Predicate)
@@ -542,7 +542,7 @@ public abstract class Stream<T>
     public abstract Stream<Map.Entry<Boolean, List<T>>> partitionBy(final Predicate<? super T> predicate);
 
     /**
-     * 
+     *
      * @param predicate
      * @param downstream
      * @return
@@ -564,7 +564,7 @@ public abstract class Stream<T>
             final Supplier<? extends Map<K, List<T>>> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -574,7 +574,7 @@ public abstract class Stream<T>
     public abstract <K, V> EntryStream<K, List<V>> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -609,7 +609,7 @@ public abstract class Stream<T>
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory);
 
     /**
-     * 
+     *
      * @param predicate
      * @return
      * @see Collectors#partitioningBy(Predicate)
@@ -618,7 +618,7 @@ public abstract class Stream<T>
     public abstract EntryStream<Boolean, List<T>> partitionByToEntry(final Predicate<? super T> predicate);
 
     /**
-     * 
+     *
      * @param predicate
      * @param downstream
      * @return
@@ -641,7 +641,7 @@ public abstract class Stream<T>
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <p>Example:
      * <pre>
      * <code>
@@ -652,10 +652,10 @@ public abstract class Stream<T>
      * Stream.of(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b, (a, b) -> a + b) => [6, 3, 2, 1]
      * </code>
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @param mergeFunction
      * @return
@@ -673,7 +673,7 @@ public abstract class Stream<T>
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
      * the merger function and return a new stream.
-     * 
+     *
      * <p>Example:
      * <pre>
      * <code>
@@ -684,10 +684,10 @@ public abstract class Stream<T>
      * Stream.of(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b, Collectors.summingInt(Fn.unboxI())) => [6, 3, 2, 1]
      * </code>
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param collapsible
      * @param collector
      * @return
@@ -713,7 +713,7 @@ public abstract class Stream<T>
      * Stream.of(1, 2, 3, 3, 2, 1).scan((a, b) -> a + b) => [1, 3, 6, 9, 11, 12]
      * </code>
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
@@ -741,13 +741,13 @@ public abstract class Stream<T>
      * Stream.of(1, 2, 3, 3, 2, 1).scan(10, (a, b) -> a + b) => [11, 13, 16, 19, 21, 22]
      * </code>
      * </pre>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
      *
-     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream. 
+     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream.
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
-     * 
+     *
      * @param accumulator the accumulation function
      * @return
      */
@@ -755,7 +755,7 @@ public abstract class Stream<T>
     public abstract <U> Stream<U> scan(final U init, final BiFunction<U, ? super T, U> accumulator);
 
     /**
-     * 
+     *
      * @param init
      * @param accumulator
      * @param initIncluded
@@ -766,10 +766,10 @@ public abstract class Stream<T>
 
     /**
      * Returns Stream of Stream with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
      */
@@ -778,10 +778,10 @@ public abstract class Stream<T>
 
     /**
      * Returns Stream of Stream with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @param collectionSupplier
      * @return
@@ -790,7 +790,7 @@ public abstract class Stream<T>
     public abstract <C extends Collection<T>> Stream<C> split(int chunkSize, IntFunction<? extends C> collectionSupplier);
 
     /**
-     * 
+     *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @param collector
      * @return
@@ -827,7 +827,7 @@ public abstract class Stream<T>
 
     /**
      * Split this stream by the specified duration.
-     * 
+     *
      * @param duration
      * @return
      * @see Fn#window(Duration, LongSupplier)
@@ -836,7 +836,7 @@ public abstract class Stream<T>
     public abstract Stream<Stream<T>> window(Duration duration);
 
     /**
-     * 
+     *
      * @param duration
      * @param startTime
      * @return
@@ -848,7 +848,7 @@ public abstract class Stream<T>
     public abstract Stream<Stream<T>> window(Duration duration, LongSupplier startTime);
 
     /**
-     * 
+     *
      * @param duration
      * @return
      * @see #window(Duration)
@@ -859,7 +859,7 @@ public abstract class Stream<T>
     public abstract Stream<List<T>> windowToList(Duration duration);
 
     /**
-     * 
+     *
      * @param duration
      * @return
      * @see #window(Duration)
@@ -870,7 +870,7 @@ public abstract class Stream<T>
     public abstract Stream<Set<T>> windowToSet(Duration duration);
 
     /**
-     * 
+     *
      * @param duration
      * @param collectionSupplier
      * @return
@@ -882,7 +882,7 @@ public abstract class Stream<T>
     public abstract <C extends Collection<T>> Stream<C> window(Duration duration, Supplier<? extends C> collectionSupplier);
 
     /**
-     * 
+     *
      * @param duration
      * @param startTime
      * @param collectionSupplier
@@ -895,7 +895,7 @@ public abstract class Stream<T>
     public abstract <C extends Collection<T>> Stream<C> window(Duration duration, LongSupplier startTime, Supplier<? extends C> collectionSupplier);
 
     /**
-     * 
+     *
      * @param duration
      * @param collector
      * @return
@@ -907,7 +907,7 @@ public abstract class Stream<T>
     public abstract <A, R> Stream<R> window(Duration duration, Collector<? super T, A, R> collector);
 
     /**
-     * 
+     *
      * @param duration
      * @param startTime
      * @param collector
@@ -920,7 +920,7 @@ public abstract class Stream<T>
     public abstract <A, R> Stream<R> window(Duration duration, LongSupplier startTime, Collector<? super T, A, R> collector);
 
     /**
-     * 
+     *
      * @param duration
      * @param incrementInMillis
      * @return
@@ -932,7 +932,7 @@ public abstract class Stream<T>
     public abstract Stream<Stream<T>> window(Duration duration, long incrementInMillis);
 
     /**
-     * 
+     *
      * @param duration
      * @param incrementInMillis
      * @param startTime
@@ -945,7 +945,7 @@ public abstract class Stream<T>
     public abstract Stream<Stream<T>> window(Duration duration, long incrementInMillis, LongSupplier startTime);
 
     /**
-     * 
+     *
      * @param duration
      * @param incrementInMillis
      * @return
@@ -957,7 +957,7 @@ public abstract class Stream<T>
     public abstract Stream<List<T>> windowToList(Duration duration, long incrementInMillis);
 
     /**
-     * 
+     *
      * @param duration
      * @param incrementInMillis
      * @return
@@ -969,7 +969,7 @@ public abstract class Stream<T>
     public abstract Stream<Set<T>> windowToSet(Duration duration, long incrementInMillis);
 
     /**
-     * 
+     *
      * @param duration
      * @param incrementInMillis
      * @param collectionSupplier
@@ -982,7 +982,7 @@ public abstract class Stream<T>
     public abstract <C extends Collection<T>> Stream<C> window(Duration duration, long incrementInMillis, Supplier<? extends C> collectionSupplier);
 
     /**
-     * 
+     *
      * @param duration
      * @param incrementInMillis
      * @param startTime
@@ -997,7 +997,7 @@ public abstract class Stream<T>
             Supplier<? extends C> collectionSupplier);
 
     /**
-     * 
+     *
      * @param duration
      * @param incrementInMillis
      * @param collector
@@ -1010,7 +1010,7 @@ public abstract class Stream<T>
     public abstract <A, R> Stream<R> window(Duration duration, long incrementInMillis, Collector<? super T, A, R> collector);
 
     /**
-     * 
+     *
      * @param duration
      * @param incrementInMillis
      * @param startTime
@@ -1023,8 +1023,8 @@ public abstract class Stream<T>
     @SequentialOnly
     public abstract <A, R> Stream<R> window(Duration duration, long incrementInMillis, LongSupplier startTime, Collector<? super T, A, R> collector);
 
-    /** 
-     * 
+    /**
+     *
      * @param maxWindowSize
      * @param maxDuration
      * @return
@@ -1035,7 +1035,7 @@ public abstract class Stream<T>
     public abstract Stream<Stream<T>> window(int maxWindowSize, Duration maxDuration);
 
     /**
-     * 
+     *
      * @param maxWindowSize
      * @param maxDuration
      * @param startTime
@@ -1048,8 +1048,8 @@ public abstract class Stream<T>
     public abstract Stream<Stream<T>> window(int maxWindowSize, Duration maxDuration, LongSupplier startTime);
 
     /**
-     * 
-     * @param maxWindowSize 
+     *
+     * @param maxWindowSize
      * @param maxDuration
      * @param collectionSupplier
      * @return
@@ -1062,7 +1062,7 @@ public abstract class Stream<T>
 
     /**
      * Split this stream at where {@code maxWindowSize} or {@code maxDuration} reaches first.
-     * 
+     *
      * @param maxWindowSize
      * @param maxDuration
      * @param startTime
@@ -1077,7 +1077,7 @@ public abstract class Stream<T>
             Supplier<? extends C> collectionSupplier);
 
     /**
-     * 
+     *
      * @param maxWindowSize
      * @param maxDuration
      * @param collector
@@ -1091,7 +1091,7 @@ public abstract class Stream<T>
 
     /**
      * Split this stream at where {@code maxWindowSize} or {@code maxDuration} reaches first.
-     * 
+     *
      * @param maxWindowSize
      * @param maxDuration
      * @param startTime
@@ -1107,10 +1107,10 @@ public abstract class Stream<T>
     /**
      * <code>Stream.of(1).intersperse(9) --> [1]</code>
      * <code>Stream.of(1, 2, 3).intersperse(9) --> [1, 9, 2, 9, 3]</code>
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param delimiter
      * @return
      */
@@ -1119,7 +1119,7 @@ public abstract class Stream<T>
 
     /**
      * Distinct and filter by occurrences.
-     * 
+     *
      * @param occurrencesFilter
      * @return
      */
@@ -1131,8 +1131,8 @@ public abstract class Stream<T>
     }
 
     /**
-     * Distinct by the value mapped from <code>keyMapper</code> 
-     * 
+     * Distinct by the value mapped from <code>keyMapper</code>
+     *
      * @param keyMapper don't change value of the input parameter.
      * @return
      */
@@ -1141,7 +1141,7 @@ public abstract class Stream<T>
 
     /**
      * Distinct and filter by occurrences.
-     * 
+     *
      * @param keyMapper
      * @param occurrencesFilter
      * @return
@@ -1155,10 +1155,10 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param n
      * @return
      */
@@ -1168,7 +1168,7 @@ public abstract class Stream<T>
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param n
      * @param comparator
      * @return
@@ -1210,7 +1210,7 @@ public abstract class Stream<T>
 
     /**
      * Slide with <code>windowSize = 2</code> and the specified <code>increment</code>, then <code>consume</code> by the specified <code>mapper</code>.
-     * 
+     *
      * @param mapper
      * @param increment
      * @return
@@ -1223,7 +1223,7 @@ public abstract class Stream<T>
 
     /**
      * Slide with <code>windowSize = 3</code> and the specified <code>increment</code>, then <code>consume</code> by the specified <code>mapper</code>.
-     * 
+     *
      * @param mapper
      * @param increment
      * @return
@@ -1256,7 +1256,7 @@ public abstract class Stream<T>
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param init
      * @param predicateForFirst
      * @param predicateForLast
@@ -1269,7 +1269,7 @@ public abstract class Stream<T>
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param preFunc
      * @param predicateForFirst
      * @param predicateForLast
@@ -1292,7 +1292,7 @@ public abstract class Stream<T>
     public abstract <A> A[] toArray(IntFunction<A[]> generator);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -1304,7 +1304,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -1318,7 +1318,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -1328,7 +1328,7 @@ public abstract class Stream<T>
     public abstract <K, V> Map<K, V> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -1340,7 +1340,7 @@ public abstract class Stream<T>
             BinaryOperator<V> mergeFunction);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -1352,7 +1352,7 @@ public abstract class Stream<T>
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mergeFunction
@@ -1365,7 +1365,7 @@ public abstract class Stream<T>
             BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @return
@@ -1375,7 +1375,7 @@ public abstract class Stream<T>
     public abstract <K, A, D> Map<K, D> toMap(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param downstream
      * @param mapFactory
@@ -1387,7 +1387,7 @@ public abstract class Stream<T>
             final Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param downstream
@@ -1399,7 +1399,7 @@ public abstract class Stream<T>
             final Collector<? super V, A, D> downstream);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param downstream
@@ -1412,7 +1412,7 @@ public abstract class Stream<T>
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream, final Supplier<? extends M> mapFactory);
 
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @return
@@ -1423,7 +1423,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mergeFunction
@@ -1435,7 +1435,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mapFactory
@@ -1447,7 +1447,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper, Supplier<? extends M> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mergeFunction
@@ -1460,8 +1460,8 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory);
     //
     //    /**
-    //     * 
-    //     * @param flatKeyMapper 
+    //     *
+    //     * @param flatKeyMapper
     //     * @param downstream
     //     * @return
     //     * @see Collectors#groupingBy(Function, Collector)
@@ -1471,7 +1471,7 @@ public abstract class Stream<T>
     //            final Collector<? super T, A, D> downstream);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param downstream
     //     * @param mapFactory
@@ -1483,7 +1483,7 @@ public abstract class Stream<T>
     //            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param downstream
@@ -1495,7 +1495,7 @@ public abstract class Stream<T>
     //            final BiFunction<? super K, ? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param downstream
@@ -1509,7 +1509,7 @@ public abstract class Stream<T>
     //            final Supplier<? extends M> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @return
@@ -1520,7 +1520,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mergeFunction
@@ -1532,7 +1532,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mapFactory
@@ -1544,7 +1544,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper, Supplier<? extends M> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mergeFunction
@@ -1557,7 +1557,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param downstream
     //     * @return
@@ -1568,7 +1568,7 @@ public abstract class Stream<T>
     //            final Collector<? super T, A, D> downstream);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param downstream
     //     * @param mapFactory
@@ -1580,7 +1580,7 @@ public abstract class Stream<T>
     //            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param downstream
@@ -1592,7 +1592,7 @@ public abstract class Stream<T>
     //            final BiFunction<? super K, ? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param downstream
@@ -1606,7 +1606,7 @@ public abstract class Stream<T>
     //            final Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @return
      * @see Collectors#groupingBy(Function)
@@ -1615,7 +1615,7 @@ public abstract class Stream<T>
     public abstract <K> Map<K, List<T>> groupTo(Function<? super T, ? extends K> keyMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param mapFactory
      * @return
@@ -1628,7 +1628,7 @@ public abstract class Stream<T>
     public abstract <K, V> Map<K, List<V>> groupTo(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -1640,7 +1640,7 @@ public abstract class Stream<T>
             Supplier<? extends M> mapFactory);
 
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @return
     //     * @see Collectors#groupingBy(Function)
@@ -1649,7 +1649,7 @@ public abstract class Stream<T>
     //    public abstract <K> Map<K, List<T>> flatGroupTo(Function<? super T, ? extends Stream<? extends K>> flatKeyMapper);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param mapFactory
     //     * @return
@@ -1664,7 +1664,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mapFactory
@@ -1676,7 +1676,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper, Supplier<? extends M> mapFactory);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @return
     //     * @see Collectors#groupingBy(Function)
@@ -1685,7 +1685,7 @@ public abstract class Stream<T>
     //    public abstract <K> Map<K, List<T>> flattGroupTo(Function<? super T, ? extends Collection<? extends K>> flatKeyMapper);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param mapFactory
     //     * @return
@@ -1700,7 +1700,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper);
     //
     //    /**
-    //     * 
+    //     *
     //     * @param flatKeyMapper
     //     * @param valueMapper
     //     * @param mapFactory
@@ -1712,7 +1712,7 @@ public abstract class Stream<T>
     //            BiFunction<? super K, ? super T, ? extends V> valueMapper, Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param predicate
      * @return
      * @see Collectors#partitioningBy(Predicate)
@@ -1721,7 +1721,7 @@ public abstract class Stream<T>
     public abstract Map<Boolean, List<T>> partitionTo(final Predicate<? super T> predicate);
 
     /**
-     * 
+     *
      * @param predicate
      * @param downstream
      * @return
@@ -1731,7 +1731,7 @@ public abstract class Stream<T>
     public abstract <A, D> Map<Boolean, D> partitionTo(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @return
      * @see Collectors#toMultimap(Function, Function)
@@ -1740,7 +1740,7 @@ public abstract class Stream<T>
     public abstract <K> ListMultimap<K, T> toMultimap(Function<? super T, ? extends K> keyMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param mapFactory
      * @return
@@ -1751,7 +1751,7 @@ public abstract class Stream<T>
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
@@ -1761,7 +1761,7 @@ public abstract class Stream<T>
     public abstract <K, V> ListMultimap<K, V> toMultimap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param keyMapper
      * @param valueMapper
      * @param mapFactory
@@ -1773,7 +1773,7 @@ public abstract class Stream<T>
             Function<? super T, ? extends V> valueMapper, Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param flatKeyMapper
      * @return
      * @see Collectors#toMultimap(Function, Function)
@@ -1782,7 +1782,7 @@ public abstract class Stream<T>
     public abstract <K> ListMultimap<K, T> flatToMultimap(Function<? super T, ? extends Stream<? extends K>> flatKeyMapper);
 
     /**
-     * 
+     *
      * @param flatKeyMapper
      * @param mapFactory
      * @return
@@ -1793,7 +1793,7 @@ public abstract class Stream<T>
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param flatKeyMapper
      * @param valueMapper
      * @return
@@ -1804,7 +1804,7 @@ public abstract class Stream<T>
             BiFunction<? super K, ? super T, ? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param flatKeyMapper
      * @param valueMapper
      * @param mapFactory
@@ -1817,7 +1817,7 @@ public abstract class Stream<T>
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param flatKeyMapper
      * @return
      * @see Collectors#toMultimap(Function, Function)
@@ -1826,7 +1826,7 @@ public abstract class Stream<T>
     public abstract <K> ListMultimap<K, T> flattToMultimap(Function<? super T, ? extends Collection<? extends K>> flatKeyMapper);
 
     /**
-     * 
+     *
      * @param flatKeyMapper
      * @param mapFactory
      * @return
@@ -1837,7 +1837,7 @@ public abstract class Stream<T>
             Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @param flatKeyMapper
      * @param valueMapper
      * @return
@@ -1848,7 +1848,7 @@ public abstract class Stream<T>
             BiFunction<? super K, ? super T, ? extends V> valueMapper);
 
     /**
-     * 
+     *
      * @param flatKeyMapper
      * @param valueMapper
      * @param mapFactory
@@ -1861,7 +1861,7 @@ public abstract class Stream<T>
             Supplier<? extends M> mapFactory);
 
     /**
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -1875,7 +1875,7 @@ public abstract class Stream<T>
     public abstract DataSet toDataSet(boolean isFirstTitle);
 
     /**
-     * 
+     *
      * @param columnNames it can be null or empty if this is Map or entity stream.
      * @return
      */
@@ -1915,11 +1915,11 @@ public abstract class Stream<T>
     public abstract <R> R toSetAndThen(Function<? super Set<T>, R> func);
 
     /**
-     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements. 
+     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements.
      * It may cause <code>out of memory error</code> if <code>n</code> is big enough.
-     * 
+     *
      * <br />
-     * 
+     *
      * All the elements will be loaded to get the last {@code n} elements and the Stream will be closed after that, if a terminal operation is triggered.
      *
      * @param n
@@ -1929,12 +1929,12 @@ public abstract class Stream<T>
     public abstract Stream<T> last(int n);
 
     /**
-     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements. 
+     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements.
      * It may cause <code>out of memory error</code> if <code>n</code> is big enough.
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param n
      * @return
      */
@@ -1964,7 +1964,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param k
      * @param comparator
      * @return Optional.empty() if there is no element or count less than k, otherwise the kth largest element.
@@ -2008,7 +2008,7 @@ public abstract class Stream<T>
      * [1, 2, 3]
      * </code>
      * </pre>
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -2024,7 +2024,7 @@ public abstract class Stream<T>
      * [2, 3]
      * </code>
      * </pre>
-     * 
+     *
      * @param len
      * @return
      */
@@ -2048,7 +2048,7 @@ public abstract class Stream<T>
      * [3, 3]
      * </code>
      * </pre>
-     * 
+     *
      * @param len
      * @param repeat
      * @return
@@ -2069,7 +2069,7 @@ public abstract class Stream<T>
      * [2, 1, 3]
      * </code>
      * </pre>
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -2088,7 +2088,7 @@ public abstract class Stream<T>
      * [3, 2, 1]
      * </code>
      * </pre>
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -2107,9 +2107,9 @@ public abstract class Stream<T>
     public abstract Stream<List<T>> cartesianProduct(Collection<? extends Collection<? extends T>> cs);
 
     /**
-     * 
+     *
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     * 
+     *
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2120,9 +2120,9 @@ public abstract class Stream<T>
     public abstract <U> Stream<Pair<T, U>> innerJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
 
     /**
-     * 
+     *
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     * 
+     *
      * @param b
      * @param predicate
      * @return
@@ -2132,9 +2132,9 @@ public abstract class Stream<T>
     public abstract <U> Stream<Pair<T, U>> innerJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
-     * 
+     *
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     * 
+     *
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2146,7 +2146,7 @@ public abstract class Stream<T>
 
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     * 
+     *
      * @param b
      * @param predicate
      * @return
@@ -2156,9 +2156,9 @@ public abstract class Stream<T>
     public abstract <U> Stream<Pair<T, U>> fullJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
-     * 
+     *
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     * 
+     *
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2170,7 +2170,7 @@ public abstract class Stream<T>
 
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     * 
+     *
      * @param b
      * @param predicate
      * @return
@@ -2180,9 +2180,9 @@ public abstract class Stream<T>
     public abstract <U> Stream<Pair<T, U>> leftJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
-     * 
+     *
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     * 
+     *
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2194,7 +2194,7 @@ public abstract class Stream<T>
 
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     * 
+     *
      * @param b
      * @param predicate
      * @return
@@ -2217,7 +2217,7 @@ public abstract class Stream<T>
 
     /**
      * Intersect with the specified Collection by the values mapped by <code>mapper</code>.
-     * 
+     *
      * @param mapper
      * @param c
      * @return
@@ -2228,7 +2228,7 @@ public abstract class Stream<T>
 
     /**
      * Except with the specified Collection by the values mapped by <code>mapper</code>.
-     * 
+     *
      * @param mapper
      * @param c
      * @return
@@ -2272,10 +2272,10 @@ public abstract class Stream<T>
 
     //    /**
     //     * Returns a reusable stream which can be repeatedly used.
-    //     * 
+    //     *
     //     * <br />
     //     * All elements will be loaded to memory.
-    //     * 
+    //     *
     //     * @param generator
     //     * @return
     //     */
@@ -2284,7 +2284,7 @@ public abstract class Stream<T>
 
     /**
      * The Stream will be closed finally, no matter it's empty or not.
-     * 
+     *
      * @param func
      * @return
      */
@@ -2293,9 +2293,9 @@ public abstract class Stream<T>
 
     /**
      * The Stream will be closed finally, no matter it's empty or not.
-     * 
+     *
      * @param action
-     * 
+     *
      */
     @Beta
     public abstract <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super Stream<T>, E> action) throws E;
@@ -2303,7 +2303,7 @@ public abstract class Stream<T>
     /**
      * Returns a new Stream with elements from a temporary queue which is filled by reading the elements from this Stream asynchronously.
      * Default queue size is 64.
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -2311,7 +2311,7 @@ public abstract class Stream<T>
 
     /**
      * Returns a new Stream with elements from a temporary queue which is filled by reading the elements from this Stream asynchronously.
-     * 
+     *
      * @param queueSize
      * @return
      */
@@ -2319,7 +2319,7 @@ public abstract class Stream<T>
     public abstract Stream<T> queued(int queueSize);
 
     /**
-     * 
+     *
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -2360,7 +2360,7 @@ public abstract class Stream<T>
 
     /**
      * Remember to close this Stream after the iteration is done, if required.
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -2368,7 +2368,7 @@ public abstract class Stream<T>
 
     /**
      * Remember to close this Stream after the iteration is done, if required.
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -2385,8 +2385,8 @@ public abstract class Stream<T>
 
     abstract ObjIteratorEx<T> iteratorEx();
 
-    /** 
-     * 
+    /**
+     *
      * @param action a terminal operation should be called.
      * @return
      */
@@ -2402,7 +2402,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param action a terminal operation should be called.
      * @param executor
      * @return
@@ -2420,7 +2420,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param action a terminal operation should be called.
      * @return
      */
@@ -2436,7 +2436,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param action a terminal operation should be called.
      * @param executor
      * @return
@@ -2460,21 +2460,21 @@ public abstract class Stream<T>
     }
 
     /**
-     * To reduce the memory footprint, Only one instance of <code>DisposableEntry</code> is created, 
+     * To reduce the memory footprint, Only one instance of <code>DisposableEntry</code> is created,
      * and the same entry instance is returned and set with different keys/values during iteration of the returned stream.
      * The elements only can be retrieved one by one, can't be modified or saved.
      * The returned Stream doesn't support the operations which require two or more elements at the same time: (e.g. sort/distinct/pairMap/slidingMap/sliding/split/toList/toSet/...).
      * , and can't be parallel stream.
-     * Operations: filter/map/toMap/groupBy/groupTo/... are supported. 
-     * 
-     * 
+     * Operations: filter/map/toMap/groupBy/groupTo/... are supported.
+     *
+     *
      * @param keyMapper
      * @param valueMapper
      * @return
-     * 
+     *
      * @see DisposableEntry
      * @see NoCachingNoUpdating
-     * 
+     *
      * @deprecated
      */
     @Deprecated
@@ -2521,7 +2521,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param startIndex
      * @param endIndex
@@ -2592,7 +2592,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param startIndex
      * @param endIndex
@@ -3445,7 +3445,7 @@ public abstract class Stream<T>
      * the provided {@code init}.  For {@code n > 0}, the element at position
      * {@code n}, will be the result of applying the function {@code f} to the
      * element at position {@code n - 1}.
-     * 
+     *
      * @param init
      * @param hasNext
      * @param f
@@ -3481,7 +3481,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param init
      * @param hasNext test if has next by hasNext.test(init) for first time and hasNext.test(f.apply(previous)) for remaining.
      * @param f
@@ -3559,7 +3559,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param intervalInMillis
      * @param s
      * @return
@@ -3569,7 +3569,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param delayInMillis
      * @param intervalInMillis
      * @param s
@@ -3581,7 +3581,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param delay
      * @param interval
      * @param unit
@@ -3604,7 +3604,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param delayInMillis
      * @param intervalInMillis
      * @param s
@@ -3616,7 +3616,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param delay
      * @param interval
      * @param unit
@@ -3631,10 +3631,10 @@ public abstract class Stream<T>
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
+     *
      * @param resultSet
      * @return
-     * @throws UncheckedSQLException 
+     * @throws UncheckedSQLException
      */
     public static Stream<Object[]> rows(final ResultSet resultSet) throws UncheckedSQLException {
         return rows(Object[].class, resultSet);
@@ -3642,11 +3642,11 @@ public abstract class Stream<T>
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
+     *
      * @param targetClass Array/List/Map or Entity with getter/setter methods.
      * @param resultSet
      * @return
-     * @throws UncheckedSQLException 
+     * @throws UncheckedSQLException
      */
     public static <T> Stream<T> rows(final Class<T> targetClass, final ResultSet resultSet) throws UncheckedSQLException {
         return ExceptionalStream.rows(targetClass, resultSet).unchecked();
@@ -3654,11 +3654,11 @@ public abstract class Stream<T>
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
+     *
      * @param resultSet
      * @param rowMapper
      * @return
-     * @throws UncheckedSQLException 
+     * @throws UncheckedSQLException
      */
     public static <T> Stream<T> rows(final ResultSet resultSet, final JdbcUtil.RowMapper<T> rowMapper) throws UncheckedSQLException {
         return ExceptionalStream.rows(resultSet, rowMapper).unchecked();
@@ -3666,11 +3666,11 @@ public abstract class Stream<T>
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
+     *
      * @param resultSet
      * @param rowMapper
      * @return
-     * @throws UncheckedSQLException 
+     * @throws UncheckedSQLException
      */
     public static <T> Stream<T> rows(final ResultSet resultSet, final JdbcUtil.BiRowMapper<T> rowMapper) throws UncheckedSQLException {
         return ExceptionalStream.rows(resultSet, rowMapper).unchecked();
@@ -3678,11 +3678,11 @@ public abstract class Stream<T>
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
+     *
      * @param resultSet
      * @param columnIndex starts from 0, not 1.
      * @return
-     * @throws UncheckedSQLException 
+     * @throws UncheckedSQLException
      */
     public static <T> Stream<T> rows(final ResultSet resultSet, final int columnIndex) throws UncheckedSQLException {
         return ExceptionalStream.<T> rows(resultSet, columnIndex).unchecked();
@@ -3690,11 +3690,11 @@ public abstract class Stream<T>
 
     /**
      * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     * 
+     *
      * @param resultSet
      * @param columnName
      * @return
-     * @throws UncheckedSQLException 
+     * @throws UncheckedSQLException
      */
     public static <T> Stream<T> rows(final ResultSet resultSet, final String columnName) throws UncheckedSQLException {
         return ExceptionalStream.<T> rows(resultSet, columnName).unchecked();
@@ -3732,7 +3732,7 @@ public abstract class Stream<T>
 
     /**
      * It's user's responsibility to close the input <code>reader</code> after the stream is finished.
-     * 
+     *
      * @param reader
      * @return
      * @throws UncheckedIOException
@@ -3851,7 +3851,7 @@ public abstract class Stream<T>
 
     /**
      * Sample code:
-     * 
+     *
      * <pre>
      * <code>
      * final BlockingQueue<String> queue = new ArrayBlockingQueue<>(32);
@@ -3864,7 +3864,7 @@ public abstract class Stream<T>
      * N.sleep(10);
      * </code>
      * </pre>
-     * 
+     *
      * @param queue
      * @param duration
      * @param onComplete
@@ -3919,7 +3919,7 @@ public abstract class Stream<T>
 
     /**
      * Sample code:
-     * 
+     *
      * <pre>
      * <code>
      * final BlockingQueue<String> queue = new ArrayBlockingQueue<>(32);
@@ -3932,7 +3932,7 @@ public abstract class Stream<T>
      * N.println("==================");
      * </code>
      * </pre>
-     * 
+     *
      * @param queue
      * @param hasMore
      * @param maxWaitIntervalInMillis
@@ -4123,7 +4123,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @return
     //     */
@@ -4133,7 +4133,7 @@ public abstract class Stream<T>
     //
     //    /**
     //     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-    //     * 
+    //     *
     //     * Put the stream in try-catch to stop the back-end reading thread if error happens
     //     * <br />
     //     * <code>
@@ -4141,7 +4141,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
     //     * @param queueSize Default value is N.min(128, a.length * 16)
@@ -4169,7 +4169,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @return
     //     */
@@ -4179,7 +4179,7 @@ public abstract class Stream<T>
     //
     //    /**
     //     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-    //     * 
+    //     *
     //     * Put the stream in try-catch to stop the back-end reading thread if error happens
     //     * <br />
     //     * <code>
@@ -4187,7 +4187,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
     //     * @param queueSize Default value is N.min(128, a.length * 16)
@@ -4215,7 +4215,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @return
      */
@@ -4226,7 +4226,7 @@ public abstract class Stream<T>
 
     /**
      * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-     * 
+     *
      * Put the stream in try-catch to stop the back-end reading thread if error happens
      * <br />
      * <code>
@@ -4234,7 +4234,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
      * @param queueSize Default value is N.min(128, a.length * 16)
@@ -4256,7 +4256,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @return
      */
@@ -4267,7 +4267,7 @@ public abstract class Stream<T>
 
     /**
      * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-     * 
+     *
      * Put the stream in try-catch to stop the back-end reading thread if error happens
      * <br />
      * <code>
@@ -4275,7 +4275,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
      * @param queueSize Default value is N.min(128, a.length * 16)
@@ -4297,7 +4297,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @return
      */
@@ -4313,7 +4313,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @param readThreadNum
      * @return
@@ -4324,7 +4324,7 @@ public abstract class Stream<T>
 
     /**
      * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-     * 
+     *
      * Put the stream in try-catch to stop the back-end reading thread if error happens
      * <br />
      * <code>
@@ -4332,7 +4332,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, c.size())
      * @param queueSize Default value is N.min(128, c.size() * 16)
@@ -4457,7 +4457,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @return
      */
@@ -4473,7 +4473,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @param readThreadNum
      * @return
@@ -4484,7 +4484,7 @@ public abstract class Stream<T>
 
     /**
      * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-     * 
+     *
      * Put the stream in try-catch to stop the back-end reading thread if error happens
      * <br />
      * <code>
@@ -4492,7 +4492,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, c.size())
      * @param queueSize Default value is N.min(128, c.size() * 16)
@@ -4606,7 +4606,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4618,7 +4618,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4630,7 +4630,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4652,7 +4652,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4674,7 +4674,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4686,7 +4686,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4698,7 +4698,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -4745,7 +4745,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -4760,7 +4760,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -4778,7 +4778,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -4808,7 +4808,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -4841,7 +4841,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -4857,7 +4857,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -4876,7 +4876,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -4944,7 +4944,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4956,7 +4956,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4968,7 +4968,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -4990,7 +4990,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5012,7 +5012,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5024,7 +5024,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5036,7 +5036,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -5083,7 +5083,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5098,7 +5098,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5116,7 +5116,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5146,7 +5146,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5179,7 +5179,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5195,7 +5195,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5214,7 +5214,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -5282,7 +5282,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5294,7 +5294,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5306,7 +5306,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5328,7 +5328,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5350,7 +5350,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5362,7 +5362,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5374,7 +5374,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -5421,7 +5421,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5437,7 +5437,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5455,7 +5455,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5485,7 +5485,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5518,7 +5518,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5534,7 +5534,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5553,7 +5553,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -5621,7 +5621,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5633,7 +5633,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5645,7 +5645,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5667,7 +5667,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5689,7 +5689,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5701,7 +5701,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5713,7 +5713,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -5760,7 +5760,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5775,7 +5775,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5793,7 +5793,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5823,7 +5823,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5856,7 +5856,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -5872,7 +5872,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -5891,7 +5891,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -5959,7 +5959,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5971,7 +5971,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -5983,7 +5983,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6005,7 +6005,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6027,7 +6027,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6039,7 +6039,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6051,7 +6051,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -6098,7 +6098,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6113,7 +6113,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6131,7 +6131,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6161,7 +6161,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6194,7 +6194,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6210,7 +6210,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6229,7 +6229,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -6297,7 +6297,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6309,7 +6309,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6321,7 +6321,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6343,7 +6343,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6365,7 +6365,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6377,7 +6377,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6389,7 +6389,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -6436,7 +6436,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6452,7 +6452,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6470,7 +6470,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6500,7 +6500,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6533,7 +6533,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6549,7 +6549,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6568,7 +6568,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -6636,7 +6636,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6648,7 +6648,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6660,7 +6660,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6682,7 +6682,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6704,7 +6704,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6716,7 +6716,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6728,7 +6728,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -6775,7 +6775,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6791,7 +6791,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6809,7 +6809,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6839,7 +6839,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6872,7 +6872,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -6888,7 +6888,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -6907,7 +6907,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -6975,7 +6975,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6987,7 +6987,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -6999,7 +6999,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -7012,7 +7012,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -7025,7 +7025,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -7047,7 +7047,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -7070,7 +7070,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -7082,7 +7082,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @return
@@ -7110,7 +7110,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until one of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -7166,7 +7166,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -7182,7 +7182,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -7200,7 +7200,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -7216,7 +7216,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -7234,7 +7234,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -7264,7 +7264,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -7297,7 +7297,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA value to fill if "a" runs out of values first.
@@ -7313,7 +7313,7 @@ public abstract class Stream<T>
     /**
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -7353,7 +7353,7 @@ public abstract class Stream<T>
     /**
      * Zip together the iterators until all of them runs out of values.
      * Each array of values is combined into a single value using the supplied zipFunction function.
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -7419,7 +7419,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param valuesForNone value to fill for any iterator runs out of values.
      * @param zipFunction
@@ -7487,7 +7487,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param zipFunction
@@ -7505,7 +7505,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param zipFunction
@@ -7528,7 +7528,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param c
@@ -7549,7 +7549,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param zipFunction
@@ -7568,7 +7568,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param zipFunction
@@ -7593,7 +7593,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param c
@@ -7614,7 +7614,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param zipFunction
@@ -7633,7 +7633,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param zipFunction
@@ -7732,7 +7732,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -7841,7 +7841,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param zipFunction
@@ -7859,7 +7859,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param zipFunction
@@ -7884,7 +7884,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -7925,7 +7925,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -7942,7 +7942,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -7974,7 +7974,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @param zipFunction
      * @return
@@ -7991,7 +7991,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -8095,7 +8095,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param valueForNoneA
@@ -8116,7 +8116,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param valueForNoneA
@@ -8138,7 +8138,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param c
@@ -8161,7 +8161,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param c
@@ -8185,7 +8185,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param valueForNoneA
@@ -8206,7 +8206,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param valueForNoneA
@@ -8228,7 +8228,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param c
@@ -8251,7 +8251,7 @@ public abstract class Stream<T>
     //     *            stream.forEach(N::println);
     //     *        }
     //     * </code>
-    //     * 
+    //     *
     //     * @param a
     //     * @param b
     //     * @param c
@@ -8276,7 +8276,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA
@@ -8297,7 +8297,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA
@@ -8388,7 +8388,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -8411,7 +8411,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -8515,7 +8515,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA
@@ -8536,7 +8536,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param valueForNoneA
@@ -8558,7 +8558,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -8581,7 +8581,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -8632,7 +8632,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @param valuesForNone
      * @param zipFunction
@@ -8651,7 +8651,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @param valuesForNone
      * @param zipFunction
@@ -8687,7 +8687,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @param valuesForNone
      * @param zipFunction
@@ -8706,7 +8706,7 @@ public abstract class Stream<T>
      *            stream.forEach(N::println);
      *        }
      * </code>
-     * 
+     *
      * @param c
      * @param valuesForNone
      * @param zipFunction
@@ -8796,7 +8796,7 @@ public abstract class Stream<T>
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param c
     //     * @param unzip the second parameter is an output parameter.
     //     * @return
@@ -8808,7 +8808,7 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param iter
     //     * @param unzip the second parameter is an output parameter.
     //     * @return
@@ -8820,7 +8820,7 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param c
     //     * @param unzip the second parameter is an output parameter.
     //     * @return
@@ -8833,7 +8833,7 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param iter
     //     * @param unzip the second parameter is an output parameter.
     //     * @return
@@ -8846,7 +8846,7 @@ public abstract class Stream<T>
     //    }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -8892,7 +8892,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -8904,7 +8904,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -8916,7 +8916,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -8929,7 +8929,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -8997,7 +8997,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param c
@@ -9010,7 +9010,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param a
      * @param b
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -9048,7 +9048,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -9076,7 +9076,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -9135,7 +9135,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -9145,7 +9145,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @param maxThreadNum
@@ -9225,7 +9225,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -9235,7 +9235,7 @@ public abstract class Stream<T>
     }
 
     /**
-     * 
+     *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @param maxThreadNum
@@ -9501,12 +9501,12 @@ public abstract class Stream<T>
     /**
      * SOO = Sequential Only Operations.
      * These operations run sequentially only, even under parallel stream.
-     * 
+     *
      * Mostly, if an operation is a single operation, or has to be executed in order,
      *  or there is no benefit to execute it in parallel, it will run sequentially, even under parallel stream.
      *
      */
-    public static enum SOO {
+    public enum SOO {
         split, splitToList, splitToSet, splitAt, splitBy, sliding, slidingToList, //
         intersection, difference, symmetricDifference, //
         reversed, shuffled, rotated, distinct, hasDuplicates, //
@@ -9523,13 +9523,13 @@ public abstract class Stream<T>
     /**
      * PSO = Parallel supported Operations.
      * These operations run in parallel under parallel stream.
-     * 
+     *
      * Mostly, if an operation can be executed in parallel and has benefit to execute it in parallel. it will run in parallel under parallel stream.
-     * 
+     *
      * @author haiyangl
      *
      */
-    public static enum PSO {
+    public enum PSO {
         map, slidingMap, mapToEntry, mapTo_, mapFirst, mapFirstOrElse, mapLast, mapLastOrElse, //
         flatMap, flattMap, flatMapp, flatMapTo_, //
         filter, takeWhile, dropWhile, removeIf, skipNull, //
@@ -9543,13 +9543,13 @@ public abstract class Stream<T>
 
     /**
      * LAIO = Loading All Intermediate Operations.
-     * 
+     *
      * Intermediate operations which will load or go through all the elements in the stream.
      * <br />
      * These operation are stateful intermediate operations, which means that subsequent operations no longer operate on the backing collection/iterator, but on an internal state.
-     * 
+     *
      */
-    public static enum LAIO {
+    public enum LAIO {
         sorted, sortedBy, reverseSorted, resversed, shuffled, rotated, last_n, //
         groupBy, groupByToEntity, partitionBy, partitionByToEntity, countBy, countByToEntry; //
         // HEADD, TAILL, HEAD_AND_TAILL;

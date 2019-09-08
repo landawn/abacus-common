@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,7 +133,7 @@ public class AsyncExecutor {
      * @return
      */
     public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> command) {
-        return execute(new FutureTask<Void>(Fnn.toCallable(command)));
+        return execute(new FutureTask<>(Fnn.toCallable(command)));
     }
 
     /**

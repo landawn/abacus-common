@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
@@ -49,7 +49,7 @@ import com.landawn.abacus.util.function.ObjByteConsumer;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * 
+ *
  */
 class ArrayByteStream extends AbstractByteStream {
     final byte[] elements;
@@ -430,8 +430,7 @@ class ArrayByteStream extends AbstractByteStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -498,8 +497,7 @@ class ArrayByteStream extends AbstractByteStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -566,8 +564,7 @@ class ArrayByteStream extends AbstractByteStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<Runnable>(1)
-                : new LocalArrayDeque<Runnable>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -869,7 +866,7 @@ class ArrayByteStream extends AbstractByteStream {
     public ByteStream limit(final long maxSize) {
         checkArgNotNegative(maxSize, "maxSize");
 
-        return newStream(elements, fromIndex, (int) (fromIndex + maxSize), sorted);
+        return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted);
     }
 
     @Override
@@ -1549,14 +1546,8 @@ class ArrayByteStream extends AbstractByteStream {
     }
 
     @Override
-    public ByteStream parallel(final int maxThreadNum, final Splitor splitor) {
-        return new ParallelArrayByteStream(elements, fromIndex, toIndex, sorted, checkMaxThreadNum(maxThreadNum), checkSplitor(splitor), asyncExecutor(),
-                closeHandlers);
-    }
-
-    @Override
-    public ByteStream parallel(final int maxThreadNum, final Executor executor) {
-        return new ParallelArrayByteStream(elements, fromIndex, toIndex, sorted, checkMaxThreadNum(maxThreadNum), splitor(), createAsyncExecutor(executor),
+    protected ByteStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        return new ParallelArrayByteStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 

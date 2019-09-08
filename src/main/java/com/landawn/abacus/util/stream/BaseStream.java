@@ -36,7 +36,7 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Supplier;
 
-/** 
+/**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  *
  * @param <T> the type of the stream elements
@@ -47,7 +47,7 @@ import com.landawn.abacus.util.function.Supplier;
  * @param <OT> the type of Optional
  * @param <IT> the type of Indexed
  * @param <ITER> the type of Iterator
- * @param <S> the type of of the stream implementing {@code BaseStream} 
+ * @param <S> the type of of the stream implementing {@code BaseStream}
  * @see Stream
  * @see IntStream
  * @see LongStream
@@ -57,7 +57,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Returns a stream consisting of the elements of this stream that match the given predicate.
-     * 
+     *
      * @param predicate
      * @return
      */
@@ -66,9 +66,9 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Keep the elements until the given predicate returns false. The stream should be sorted, which means if x is the first element: <code>predicate.text(x)</code> returns false, any element y behind x: <code>predicate.text(y)</code> should returns false.
-     * 
+     *
      * In parallel Streams, the elements after the first element which <code>predicate</code> returns false may be tested by predicate too.
-     * 
+     *
      * @param predicate
      * @return
      */
@@ -77,9 +77,9 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Remove the elements until the given predicate returns false. The stream should be sorted, which means if x is the first element: <code>predicate.text(x)</code> returns true, any element y behind x: <code>predicate.text(y)</code> should returns true.
-     * 
+     *
      * In parallel Streams, the elements after the first element which <code>predicate</code> returns false may be tested by predicate too.
-     * 
+     *
      * @param predicate
      * @return
      */
@@ -88,13 +88,13 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Remove the elements until the given predicate returns false. The stream should be sorted, which means if x is the first element: <code>predicate.text(x)</code> returns true, any element y behind x: <code>predicate.text(y)</code> should returns true.
-     * 
+     *
      * In parallel Streams, the elements after the first element which <code>predicate</code> returns false may be tested by predicate too.
-     * 
-     * 
+     *
+     *
      * @param predicate
      * @param consumer
-     * @return 
+     * @return
      */
     @ParallelSupported
     S dropWhile(P predicate, C consumer);
@@ -107,7 +107,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Returns Stream of {@code S} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     * 
+     *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
      */
@@ -116,24 +116,24 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Returns Stream of {@code PL} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
      */
     @SequentialOnly
-    public abstract Stream<PL> splitToList(int chunkSize);
+    Stream<PL> splitToList(int chunkSize);
 
     /**
      * Split the stream by the specified predicate.
-     * 
-     * 
+     *
+     *
      * This stream should be sorted by value which is used to verify the border.
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param predicate
      * @return
      */
@@ -142,9 +142,9 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Split the stream by the specified predicate.
-     * 
+     *
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param predicate
      * @return
      */
@@ -154,7 +154,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     /**
      * Split the stream into two pieces at <code>where</code>.
      * The first piece will be loaded into memory.
-     * 
+     *
      * @param where
      * @return
      */
@@ -164,13 +164,13 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     /**
      * Split the stream into two pieces at <code>where</code> turns to {@code false}
      * The first piece will be loaded into memory.
-     * 
+     *
      * <pre>
      * <code>
      * Stream.of(1, 3, 2, 4, 2, 5).splitBy(i -> i <= 3).forEach(s -> s.println()); // [1, 3, 2], [4, 2, 5]
      * </code>
      * </pre>
-     * 
+     *
      * @param where
      * @return
      */
@@ -178,7 +178,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     Stream<S> splitBy(P where);
 
     /**
-     * 
+     *
      * @param windowSize
      * @return
      * @see #sliding(int, int)
@@ -187,7 +187,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     Stream<S> sliding(int windowSize);
 
     /**
-     * 
+     *
      * @param windowSize
      * @return
      * @see #sliding(int, int)
@@ -204,23 +204,23 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * [4, 5, 6] <br />
      * [5, 6, 7] <br />
      * [6, 7, 8] <br />
-     * 
+     *
      * <br>============================================================================</br>
      * <code>Stream.of(1, 2, 3, 4, 5, 6, 7, 8).sliding(3, 3).forEach(Stream::println)</code>
      * <br /> output: <br />
      * [1, 2, 3] <br />
      * [4, 5, 6] <br />
      * [7, 8] <br />
-     * 
+     *
      * <br>============================================================================</br>
      * <code>Stream.of(1, 2, 3, 4, 5, 6, 7, 5).sliding(3, 5).forEach(Stream::println)</code>
      * <br /> output: <br />
      * [1, 2, 3] <br />
      * [6, 7, 8] <br />
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param windowSize
      * @param increment
      * @return
@@ -229,7 +229,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     Stream<S> sliding(int windowSize, int increment);
 
     /**
-     * 
+     *
      * @param windowSize
      * @param increment
      * @return
@@ -241,7 +241,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param c
      * @return
      * @see IntList#intersection(IntList)
@@ -252,7 +252,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param c
      * @return
      * @see IntList#difference(IntList)
@@ -263,7 +263,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @param c
      * @return
      * @see IntList#symmetricDifference(IntList)
@@ -274,56 +274,56 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     /**
      * <br />
      * All elements will be loaded to memory and sorted if not yet.
-     * 
+     *
      * @return
      */
     @SequentialOnly
     Optional<Map<Percentage, T>> percentiles();
 
     /**
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream and all elements will be loaded to memory.
-     * 
+     *
      * @return
      */
     @SequentialOnly
     S reversed();
 
     /**
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream and all elements will be loaded to memory.
-     * 
+     *
      * @return
      */
     @SequentialOnly
     S shuffled();
 
     /**
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream and all elements will be loaded to memory.
-     * 
+     *
      * @return
      */
     @SequentialOnly
     S shuffled(Random rnd);
 
     /**
-     * 
+     *
      * <br />
      * This method only run sequentially, even in parallel stream and all elements will be loaded to memory.
-     * 
+     *
      * @return
      */
     @SequentialOnly
     S rotated(int distance);
 
     /**
-     * Returns a stream consisting of the distinct elements of this stream. 
+     * Returns a stream consisting of the distinct elements of this stream.
      *
-     * @return 
+     * @return
      */
     @SequentialOnly
     S distinct();
@@ -354,7 +354,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //    /**
     //     * <br />
     //     * This method only run sequentially, even in parallel stream and all elements will be loaded to memory.
-    //     * 
+    //     *
     //     * @return
     //     */
     //    @SequentialOnly
@@ -363,7 +363,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -376,7 +376,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix);
 
     /**
-     * 
+     *
      * @param n
      * @return
      */
@@ -384,7 +384,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     S skip(long n);
 
     /**
-     * 
+     *
      * @param n
      * @param consumer
      * @return
@@ -393,7 +393,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     S skip(long n, C consumer);
 
     /**
-     * 
+     *
      * @param maxSize
      * @return
      */
@@ -402,7 +402,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Same as: {@code stream.skip(from).limit(to - from)}.
-     * 
+     *
      * @param from
      * @param to
      * @return
@@ -414,14 +414,14 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     S step(long step);
 
     /**
-     * 
+     *
      * @return
      */
     @SequentialOnly
     long count();
 
     /**
-     * 
+     *
      * @param action
      * @return
      */
@@ -430,7 +430,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Same as {@code peek}
-     * 
+     *
      * @param action
      * @return
      * @see #peek(Object)
@@ -445,7 +445,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     OT last();
 
     /**
-     * 
+     *
      * @return
      * @throws DuplicatedResultException if there are more than one element in this stream.
      */
@@ -453,7 +453,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     OT onlyOne() throws DuplicatedResultException;
 
     /**
-     * 
+     *
      * @return
      */
     @SequentialOnly
@@ -488,7 +488,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Returns an iterator for the elements of this stream.
-     * 
+     *
      * <br />
      * Remember to close this Stream after the iteration is done, if required.
      *
@@ -508,7 +508,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //    Try<S> tried();
 
     /**
-     * 
+     *
      * @param closeHandler
      * @return
      */
@@ -516,39 +516,39 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     S onClose(Runnable closeHandler);
 
     /**
-     * 
+     *
      */
     @Override
     @SequentialOnly
     void close();
 
     /**
-     * 
+     *
      * @return
      */
     boolean isParallel();
 
     /**
-     * 
+     *
      * @return
      */
     S sequential();
 
     /**
-     * 
+     *
      * @return
      */
     S parallel();
 
     /**
-     * 
+     *
      * @param maxThreadNum
      * @return
      */
     S parallel(int maxThreadNum);
 
     /**
-     * 
+     *
      * @param splitor
      * @return
      */
@@ -556,9 +556,9 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * Returns an equivalent stream that is parallel. May return itself if the stream was already parallel with the same <code>maxThreadNum</code> and <code>splitor</code> as the specified ones.
-     * 
+     *
      * <br></br>
-     * When to use parallel Streams? 
+     * When to use parallel Streams?
      * <ul>
      * <li>First of all, do NOT and should NOT use parallel Streams if you don't have any problem with sequential Streams, because using parallel Streams has extra cost.</li>
      * <li>Consider using parallel Streams only when <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">N(the number of elements) * Q(cost per element of F, the per-element function (usually a lambda)) is big enough(e.g. IO involved. Network: DB/web service request..., Reading/Writing file...)</a>.</li>
@@ -570,15 +570,15 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * Profiler.run(1, 1, 3, "parallel", () -> Stream.of(list).parallel().operation(F)...).printResult();
      * </code>
      * </pre>
-     * 
+     *
      * Here is a sample performance test with computer: CPU Intel i7-3520M 4-cores 2.9 GHz, JDK 1.8.0_101, Windows 7:
-     * 
+     *
      * <pre>
      * <code>
      * public void test_perf() {
      *     final String[] strs = new String[10_000];
      *     N.fill(strs, N.uuid());
-     * 
+     *
      *     final int m = 1;
      *     final Function<String, Long> mapper = str -> {
      *         long result = 0;
@@ -587,15 +587,15 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      *         }
      *         return result;
      *     };
-     * 
+     *
      *     final MutableLong sum = MutableLong.of(0);
-     * 
+     *
      *     for (int i = 0, len = strs.length; i < len; i++) {
      *         sum.add(mapper.apply(strs[i]));
      *     }
-     * 
+     *
      *     final int threadNum = 1, loopNum = 100, roundNum = 3;
-     * 
+     *
      *     Profiler.run(threadNum, loopNum, roundNum, "For Loop", () -> {
      *         long result = 0;
      *         for (int i = 0, len = strs.length; i < len; i++) {
@@ -603,16 +603,16 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      *         }
      *         assertEquals(sum.longValue(), result);
      *     }).printResult();
-     * 
+     *
      *     Profiler.run(threadNum, loopNum, roundNum, "JDK Sequential",
      *             () -> assertEquals(sum.longValue(), java.util.stream.Stream.of(strs).map(mapper).mapToLong(e -> e).sum())).printResult();
-     * 
+     *
      *     Profiler.run(threadNum, loopNum, roundNum, "JDK Parallel",
      *             () -> assertEquals(sum.longValue(), java.util.stream.Stream.of(strs).parallel().map(mapper).mapToLong(e -> e).sum())).printResult();
-     * 
+     *
      *     Profiler.run(threadNum, loopNum, roundNum, "Abcus Sequential",
      *             () -> assertEquals(sum.longValue(), Stream.of(strs).map(mapper).mapToLong(e -> e).sum().longValue())).printResult();
-     * 
+     *
      *     Profiler.run(threadNum, loopNum, roundNum, "Abcus Parallel",
      *             () -> assertEquals(sum.longValue(), Stream.of(strs).parallel().map(mapper).mapToLong(e -> e).sum().longValue())).printResult();
      * }
@@ -628,52 +628,52 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * <tr><td>Abcus Sequential</td><td>0.3</td><td>2</td><td>11</td><td>22</td><td>112</td><td>212</td></tr>
      * <tr><td>Abcus Parallel</td><td>11</td><td>11</td><td>11</td><td>16</td><td>77</td><td>128</td></tr>
      * </table>
-     *  
+     *
      * <b>Comparison:</b>
      * <ul>
      * <li>Again, do NOT and should NOT use parallel Streams if you don't have any performance problem with sequential Streams, because using parallel Streams has extra cost.</li>
      * <li>Again, consider using parallel Streams only when <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">N(the number of elements) * Q(cost per element of F, the per-element function (usually a lambda)) is big enough</a>.</li>
      * <li>The implementation of parallel Streams in Abacus is more than 10 times, slower than parallel Streams in JDK when Q is tiny(here is less than 0.0002 milliseconds by the test): </li>
      * <ul>
-     *      <li>The implementation of parallel Streams in JDK 8 still can beat the sequential/for loop when Q is tiny(Here is 0.00002 milliseconds by the test). 
-     *      That's amazing, considering the extra cost brought by parallel computation. It's well done.</li>      
-     *      <li>The implementation of parallel Streams in Abacus is pretty simple and straight forward. 
+     *      <li>The implementation of parallel Streams in JDK 8 still can beat the sequential/for loop when Q is tiny(Here is 0.00002 milliseconds by the test).
+     *      That's amazing, considering the extra cost brought by parallel computation. It's well done.</li>
+     *      <li>The implementation of parallel Streams in Abacus is pretty simple and straight forward.
      *      The extra cost(starting threads/synchronization/queue...) brought by parallel Streams in Abacus is too bigger to tiny Q(Here is less than 0.001 milliseconds by the test).
      *      But it starts to be faster than sequential Streams when Q is big enough(Here is 0.001 milliseconds by the test) and starts to catch the parallel Streams in JDK when Q is bigger(Here is 0.01 milliseconds by the test).</li>
-     *      <li>Consider using the parallel Streams in Abacus when Q is big enough, specially when IO involved in F. 
+     *      <li>Consider using the parallel Streams in Abacus when Q is big enough, specially when IO involved in F.
      *      Because one IO operation(e.g. DB/web service request..., Reading/Writing file...) usually takes 1 to 1000 milliseconds, or even longer.
      *      By the parallel Streams APIs in Abacus, it's very simple to specify max thread numbers. Sometimes, it's much faster to execute IO/Network requests with a bit more threads.
-     *      It's fair to say that the parallel Streams in Abacus is high efficient, may same as or faster than the parallel Streams in JDK when Q is big enough, except F is heavy cpu-used operation. 
+     *      It's fair to say that the parallel Streams in Abacus is high efficient, may same as or faster than the parallel Streams in JDK when Q is big enough, except F is heavy cpu-used operation.
      *      Most of the times, the Q is big enough to consider using parallel Stream is because IO/Network is involved in F.</li>
      * </ul>
      * <li>JDK 7 is supported by the Streams in Abacus. It's perfect to work with <a href="https://github.com/orfjackal/retrolambda">retrolambda</a> on Android</li>
      * <li>All primitive types are supported by Stream APIs in Abacus except boolean</li>
      * </ul>
-     * 
+     *
      * <br></br>
-     * A bit more about Lambdas/Stream APIs, you may heard that Lambdas/Stream APIs is <a href="http://blog.takipi.com/benchmark-how-java-8-lambdas-and-streams-can-make-your-code-5-times-slower/">5 time slower than imperative programming</a>. 
+     * A bit more about Lambdas/Stream APIs, you may heard that Lambdas/Stream APIs is <a href="http://blog.takipi.com/benchmark-how-java-8-lambdas-and-streams-can-make-your-code-5-times-slower/">5 time slower than imperative programming</a>.
      * It's true when Q and F is VERY, VERY tiny, like <code>f = (int a, int b) -> a + b;</code>.
      * But if we look into the samples in the article and think about it: it just takes less than 1 milliseconds to get the max value in 100k numbers.
-     * There is potential performance issue only if the "get the max value in 100K numbers" call many, many times in your API or single request. 
-     * Otherwise, the difference between 0.1 milliseconds to 0.5 milliseconds can be totally ignored. 
+     * There is potential performance issue only if the "get the max value in 100K numbers" call many, many times in your API or single request.
+     * Otherwise, the difference between 0.1 milliseconds to 0.5 milliseconds can be totally ignored.
      * Usually we meet performance issue only if Q and F is big enough. However, the performance of Lambdas/Streams APIs is closed to for loop when Q and F is big enough.
      * No matter in which scenario, We don't need and should not concern the performance of Lambdas/Stream APIs.
-     * 
+     *
      * <br></br>
-     * Although it's is parallel Streams, it doesn't means all the methods are executed in parallel. 
+     * Although it's is parallel Streams, it doesn't means all the methods are executed in parallel.
      * Because the sequential way is as fast, or even faster than the parallel way for some methods, or is pretty difficult, if not possible, to implement the method by parallel approach.
-     * Here are the methods which are executed sequentially even in parallel Streams.  
+     * Here are the methods which are executed sequentially even in parallel Streams.
      * <br></br>
-     * <i>splitXXX/splitAt/splitBy/slidingXXX/collapse, distinct, reverse, rotate, shuffle, indexed, cached, top, kthLargest, count, toArray, toList, toList, toSet, toMultiset, toLongMultiset, 
+     * <i>splitXXX/splitAt/splitBy/slidingXXX/collapse, distinct, reverse, rotate, shuffle, indexed, cached, top, kthLargest, count, toArray, toList, toList, toSet, toMultiset, toLongMultiset,
      * intersection(Collection c), difference(Collection c), symmetricDifference(Collection c), forEach(identity, accumulator, predicate), findFirstOrLast, findFirstAndLast</i>
-     * 
+     *
      * @param maxThreadNum Default value is the number of cpu-cores. Steps/operations will be executed sequentially if <code>maxThreadNum</code> is 1.
      * @param splitor The target array is split by ranges for multiple threads if splitor is <code>splitor.ARRAY</code> and target stream composed by array. It looks like:
-     *        
+     *
      * <pre><code>
      * for (int i = 0; i < maxThreadNum; i++) {
      *     final int sliceIndex = i;
-     * 
+     *
      *     futureList.add(asyncExecutor.execute(new Runnable() {
      *         public void run() {
      *             int cursor = fromIndex + sliceIndex * sliceSize;
@@ -691,7 +691,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      *     futureList.add(asyncExecutor.execute(new Runnable() {
      *         public void run() {
      *             T next = null;
-     * 
+     *
      *             while (true) {
      *                 synchronized (elements) {
      *                     if (cursor.intValue() < toIndex) {
@@ -700,13 +700,13 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      *                         break;
      *                     }
      *                 }
-     * 
+     *
      *                 action.accept(next);
      *             }
      *         }
      *     }));
      * }
-     * </code></pre>       
+     * </code></pre>
      *        Using <code>splitor.ARRAY</code> only when F (the per-element function (usually a lambda)) is very tiny and the cost of synchronization on the target array/iterator is too big to it.
      *        For the F involving IO or taking 'long' to complete, choose <code>splitor.ITERATOR</code>. Default value is <code>splitor.ITERATOR</code>.
      * @return
@@ -718,16 +718,25 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     S parallel(int maxThreadNum, Splitor splitor);
 
     /**
-     * 
+     *
      * @param maxThreadNum
-     * @param executor should be able to execute sum of {@code maxThreadNum} operations in parallel.
+     * @param splitor
+     * @param executor should be able to execute {@code maxThreadNum} * {@code following up operations} in parallel.
+     * @return
+     */
+    S parallel(int maxThreadNum, Splitor splitor, Executor executor);
+
+    /**
+     *
+     * @param maxThreadNum
+     * @param executor should be able to execute {@code maxThreadNum} * {@code following up operations} in parallel.
      * @return
      */
     S parallel(int maxThreadNum, Executor executor);
 
     /**
-     * 
-     * @param executor should be able to execute sum of {@code maxThreadNum} operations in parallel.
+     *
+     * @param executor should be able to execute {@code maxThreadNum} * {@code following up operations} in parallel.
      * @return
      */
     S parallel(Executor executor);
@@ -740,7 +749,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //     * thisStream.parallel().(action by func).sequential();
     //     * </code>
     //     * </pre>
-    //     *  
+    //     *
     //     * @param func
     //     * @return
     //     * @deprecated
@@ -756,7 +765,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //     * thisStream.parallel(maxThreadNum).(action by func).sequential();
     //     * </code>
     //     * </pre>
-    //     * 
+    //     *
     //     * @param maxThreadNum
     //     * @param func
     //     * @return
@@ -767,15 +776,15 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //
     //    /**
     //     * Returns a new sequential {@code S} by apply {@code thisStream.parallel(maxThreadNum, executor)} to the specified {@code func}.
-    //     * 
+    //     *
     //     * <pre>
     //     * <code>
     //     * thisStream.parallel(maxThreadNum, executor).(action by func).sequential();
     //     * </code>
     //     * </pre>
-    //     * 
+    //     *
     //     * @param maxThreadNum
-    //     * @param executor should be able to execute sum of {@code maxThreadNum} operations in parallel.
+    //     * @param executor should be able to execute {@code maxThreadNum} * {@code following up operations} in parallel.
     //     * @return
     //     * @deprecated
     //     */
@@ -784,7 +793,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     //    /**
     //     * Return the underlying <code>maxThreadNum</code> if the stream is parallel, otherwise <code>1</code> is returned.
-    //     * 
+    //     *
     //     * @return
     //     */
     //    int maxThreadNum();
@@ -793,7 +802,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //     * Returns a parallel stream with the specified <code>maxThreadNum</code> . Or return
     //     * itself, either because the stream was already parallel with same <code>maxThreadNum</code>, or because
     //     * it's a sequential stream.
-    //     * 
+    //     *
     //     * @param maxThreadNum
     //     * @return
     //     * @deprecated
@@ -803,7 +812,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     //    /**
     //     * Return the underlying <code>splitor</code> if the stream is parallel, otherwise the default value <code>splitor.ITERATOR</code> is returned.
-    //     * 
+    //     *
     //     * @return
     //     */
     //    Splitor splitor();
@@ -812,7 +821,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //     * Returns a parallel stream with the specified <code>splitor</code> . Or return
     //     * itself, either because the stream was already parallel with same <code>splitor</code>, or because
     //     * it's a sequential stream.
-    //     * 
+    //     *
     //     * @param splitor
     //     * @return
     //     * @deprecated
@@ -820,7 +829,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //    @Deprecated
     //    S splitor(Splitor splitor);
 
-    public static enum Splitor {
+    public enum Splitor {
         ARRAY, ITERATOR;
     }
 }

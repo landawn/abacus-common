@@ -1363,7 +1363,7 @@ public final class JdbcUtil {
      * <code>
      * public void doSomethingA() {
      *     ...
-     *     final SQLTransaction tranA = JdbcUtil.beginTransacion(dataSource1, isolation);
+     *     final SQLTransaction tranA = JdbcUtil.beginTransaction(dataSource1, isolation);
      *     
      *     try {
      *         ...
@@ -1379,7 +1379,7 @@ public final class JdbcUtil {
      * 
      * public void doSomethingB() {
      *     ...
-     *     final SQLTransaction tranB = JdbcUtil.beginTransacion(dataSource1, isolation);
+     *     final SQLTransaction tranB = JdbcUtil.beginTransaction(dataSource1, isolation);
      *     try {
      *         // do your work with the conn...
      *         ...
@@ -1391,7 +1391,7 @@ public final class JdbcUtil {
      * 
      * public void doSomethingC() {
      *     ...
-     *     final SQLTransaction tranC = JdbcUtil.beginTransacion(dataSource2, isolation);
+     *     final SQLTransaction tranC = JdbcUtil.beginTransaction(dataSource2, isolation);
      *     try {
      *         // do your work with the conn...
      *         ...
@@ -1409,7 +1409,7 @@ public final class JdbcUtil {
      * <code>
      * public void doSomethingA() {
      *     ...
-     *     final SQLTransaction tranA = JdbcUtil.beginTransacion(dataSource1, isolation);
+     *     final SQLTransaction tranA = JdbcUtil.beginTransaction(dataSource1, isolation);
      *     boolean flagToCommit = false;
      *     try {
      *         // do your work with the conn...
@@ -12165,9 +12165,9 @@ public final class JdbcUtil {
         /** The Constant logger. */
         private static final Logger logger = LoggerFactory.getLogger(SimpleTransaction.class);
 
-        /** The Constant threadTransacionMap. */
-        private static final Map<String, SimpleTransaction> threadTransacionMap = new ConcurrentHashMap<>();
-        // private static final Map<String, SimpleTransaction> attachedThreadTransacionMap = new ConcurrentHashMap<>();
+        /** The Constant threadTransactionMap. */
+        private static final Map<String, SimpleTransaction> threadTransactionMap = new ConcurrentHashMap<>();
+        // private static final Map<String, SimpleTransaction> attachedThreadTransactionMap = new ConcurrentHashMap<>();
 
         /** The id. */
         private final String id;
@@ -12291,16 +12291,16 @@ public final class JdbcUtil {
         //        final String resourceId = ttid.substring(ttid.lastIndexOf('_') + 1);
         //        final String targetTTID = currentThreadName + "_" + resourceId;
         //
-        //        if (attachedThreadTransacionMap.containsKey(targetTTID)) {
-        //            throw new IllegalStateException("Transaction(id=" + attachedThreadTransacionMap.get(targetTTID).id()
+        //        if (attachedThreadTransactionMap.containsKey(targetTTID)) {
+        //            throw new IllegalStateException("Transaction(id=" + attachedThreadTransactionMap.get(targetTTID).id()
         //                    + ") has already been attached to current thread: " + currentThreadName);
-        //        } else if (threadTransacionMap.containsKey(targetTTID)) {
+        //        } else if (threadTransactionMap.containsKey(targetTTID)) {
         //            throw new IllegalStateException(
-        //                    "Transaction(id=" + threadTransacionMap.get(targetTTID).id() + ") has already been created in current thread: " + currentThreadName);
+        //                    "Transaction(id=" + threadTransactionMap.get(targetTTID).id() + ") has already been created in current thread: " + currentThreadName);
         //        }
         //
-        //        attachedThreadTransacionMap.put(targetTTID, this);
-        //        threadTransacionMap.put(targetTTID, this);
+        //        attachedThreadTransactionMap.put(targetTTID, this);
+        //        threadTransactionMap.put(targetTTID, this);
         //    }
         //
         //    public void detach() {
@@ -12308,13 +12308,13 @@ public final class JdbcUtil {
         //        final String resourceId = ttid.substring(ttid.lastIndexOf('_') + 1);
         //        final String targetTTID = currentThreadName + "_" + resourceId;
         //
-        //        if (!attachedThreadTransacionMap.containsKey(targetTTID)) {
+        //        if (!attachedThreadTransactionMap.containsKey(targetTTID)) {
         //            throw new IllegalStateException(
-        //                    "Transaction(id=" + attachedThreadTransacionMap.get(targetTTID).id() + ") is not attached to current thread: " + currentThreadName);
+        //                    "Transaction(id=" + attachedThreadTransactionMap.get(targetTTID).id() + ") is not attached to current thread: " + currentThreadName);
         //        }
         //
-        //        threadTransacionMap.remove(targetTTID);
-        //        attachedThreadTransacionMap.remove(targetTTID);
+        //        threadTransactionMap.remove(targetTTID);
+        //        attachedThreadTransactionMap.remove(targetTTID);
         //    }
 
         /**
@@ -12480,10 +12480,10 @@ public final class JdbcUtil {
             final int res = refCount.decrementAndGet();
 
             if (res == 0) {
-                threadTransacionMap.remove(id);
+                threadTransactionMap.remove(id);
                 logger.info("Finishing transaction(id={})", timeId);
 
-                logger.debug("Remaining active transactions: {}", threadTransacionMap.values());
+                logger.debug("Remaining active transactions: {}", threadTransactionMap.values());
             } else if (res > 0) {
                 this.isolationLevel = isolationLevelStack.pop();
 
@@ -12533,7 +12533,7 @@ public final class JdbcUtil {
          * @return
          */
         static SimpleTransaction getTransaction(final javax.sql.DataSource ds) {
-            return threadTransacionMap.get(getTransactionId(ds));
+            return threadTransactionMap.get(getTransactionId(ds));
         }
 
         /**
@@ -12543,7 +12543,7 @@ public final class JdbcUtil {
          * @return
          */
         static SimpleTransaction getTransaction(final Connection conn) {
-            return threadTransacionMap.get(getTransactionThreadId(conn));
+            return threadTransactionMap.get(getTransactionThreadId(conn));
         }
 
         /**
@@ -12553,7 +12553,7 @@ public final class JdbcUtil {
          * @return
          */
         static SimpleTransaction putTransaction(final javax.sql.DataSource ds, final SimpleTransaction tran) {
-            return threadTransacionMap.put(getTransactionId(ds), tran);
+            return threadTransactionMap.put(getTransactionId(ds), tran);
         }
 
         /**
@@ -12563,7 +12563,7 @@ public final class JdbcUtil {
          * @return
          */
         static SimpleTransaction putTransaction(final Connection conn, final SimpleTransaction tran) {
-            return threadTransacionMap.put(getTransactionThreadId(conn), tran);
+            return threadTransactionMap.put(getTransactionThreadId(conn), tran);
         }
 
         /**
