@@ -1615,7 +1615,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         return N.asList(a);
     }
 
-    static int sum(final char[] a) {
+    static long sum(final char[] a) {
         if (a == null || a.length == 0) {
             return 0;
         }
@@ -1623,17 +1623,17 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         return sum(a, 0, a.length);
     }
 
-    static int sum(final char[] a, final int from, final int to) {
+    static long sum(final char[] a, final int from, final int to) {
         long sum = 0;
 
         for (int i = from; i < to; i++) {
             sum += a[i];
         }
 
-        return N.toIntExact(sum);
+        return sum;
     }
 
-    static int sum(final byte[] a) {
+    static long sum(final byte[] a) {
         if (a == null || a.length == 0) {
             return 0;
         }
@@ -1641,17 +1641,17 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         return sum(a, 0, a.length);
     }
 
-    static int sum(final byte[] a, final int from, final int to) {
+    static long sum(final byte[] a, final int from, final int to) {
         long sum = 0;
 
         for (int i = from; i < to; i++) {
             sum += a[i];
         }
 
-        return N.toIntExact(sum);
+        return sum;
     }
 
-    static int sum(final short[] a) {
+    static long sum(final short[] a) {
         if (a == null || a.length == 0) {
             return 0;
         }
@@ -1659,17 +1659,17 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         return sum(a, 0, a.length);
     }
 
-    static int sum(final short[] a, final int from, final int to) {
+    static long sum(final short[] a, final int from, final int to) {
         long sum = 0;
 
         for (int i = from; i < to; i++) {
             sum += a[i];
         }
 
-        return N.toIntExact(sum);
+        return sum;
     }
 
-    static int sum(final int[] a) {
+    static long sum(final int[] a) {
         if (a == null || a.length == 0) {
             return 0;
         }
@@ -1677,14 +1677,14 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         return sum(a, 0, a.length);
     }
 
-    static int sum(final int[] a, final int from, final int to) {
+    static long sum(final int[] a, final int from, final int to) {
         long sum = 0;
 
         for (int i = from; i < to; i++) {
             sum += a[i];
         }
 
-        return N.toIntExact(sum);
+        return sum;
     }
 
     static long sum(final long[] a) {

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -544,7 +544,7 @@ public final class JdbcUtil {
      *
      * @param sqlDataSource
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public static DataSource wrap(final javax.sql.DataSource sqlDataSource) {
@@ -649,8 +649,8 @@ public final class JdbcUtil {
     }
 
     /**
-     * Spring Transaction is supported and Integrated. 
-     * If this method is called where a Spring transaction is started with the specified {@code DataSource}, 
+     * Spring Transaction is supported and Integrated.
+     * If this method is called where a Spring transaction is started with the specified {@code DataSource},
      * the {@code Connection} started the Spring Transaction will be returned. Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be returned.
      *
      * @param ds
@@ -679,8 +679,8 @@ public final class JdbcUtil {
     }
 
     /**
-     * Spring Transaction is supported and Integrated. 
-     * If this method is called where a Spring transaction is started with the specified {@code DataSource}, 
+     * Spring Transaction is supported and Integrated.
+     * If this method is called where a Spring transaction is started with the specified {@code DataSource},
      * the specified {@code Connection} won't be returned to {@code DataSource}(Connection pool) until the transaction is committed or rolled back. Otherwise the specified {@code Connection} will be directly returned back to {@code DataSource}(Connection pool).
      *
      * @param conn
@@ -1345,26 +1345,26 @@ public final class JdbcUtil {
     }
 
     /**
-     * Starts a global transaction which will be shared by all in-line database query with the same {@code DataSource} in the same thread, 
+     * Starts a global transaction which will be shared by all in-line database query with the same {@code DataSource} in the same thread,
      * including methods: {@code JdbcUtil.beginTransaction/prepareQuery/prepareNamedQuery/prepareCallableQuery, SQLExecutor(Mapper).beginTransaction/get/insert/batchInsert/update/batchUpdate/query/list/findFirst/...}
-     * 
+     *
      * <br />
-     * Spring Transaction is supported and Integrated. 
-     * If this method is called at where a Spring transaction is started with the specified {@code DataSource}, 
-     * the {@code Connection} started the Spring Transaction will be used here. 
-     * That's to say the Spring transaction will have the final control on commit/roll back over the {@code Connection}. 
-     * 
+     * Spring Transaction is supported and Integrated.
+     * If this method is called at where a Spring transaction is started with the specified {@code DataSource},
+     * the {@code Connection} started the Spring Transaction will be used here.
+     * That's to say the Spring transaction will have the final control on commit/roll back over the {@code Connection}.
+     *
      * <br />
      * <br />
-     * 
+     *
      * Here is the general code pattern to work with {@code SQLTransaction}.
-     * 
+     *
      * <pre>
      * <code>
      * public void doSomethingA() {
      *     ...
      *     final SQLTransaction tranA = JdbcUtil.beginTransaction(dataSource1, isolation);
-     *     
+     *
      *     try {
      *         ...
      *         doSomethingB(); // Share the same transaction 'tranA' because they're in the same thread and start transaction with same DataSource 'dataSource1'.
@@ -1376,7 +1376,7 @@ public final class JdbcUtil {
      *         tranA.rollbackIfNotCommitted();
      *     }
      * }
-     * 
+     *
      * public void doSomethingB() {
      *     ...
      *     final SQLTransaction tranB = JdbcUtil.beginTransaction(dataSource1, isolation);
@@ -1388,7 +1388,7 @@ public final class JdbcUtil {
      *         tranB.rollbackIfNotCommitted();
      *     }
      * }
-     * 
+     *
      * public void doSomethingC() {
      *     ...
      *     final SQLTransaction tranC = JdbcUtil.beginTransaction(dataSource2, isolation);
@@ -1402,7 +1402,7 @@ public final class JdbcUtil {
      * }
      * </pre>
      * </code>
-     * 
+     *
      * It's incorrect to use flag to identity the transaction should be committed or rolled back.
      * Don't write below code:
      * <pre>
@@ -1498,7 +1498,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -1532,7 +1532,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -1626,9 +1626,9 @@ public final class JdbcUtil {
     }
 
     /**
-     *  
+     *
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -1684,7 +1684,7 @@ public final class JdbcUtil {
     }
 
     /**
-     *  
+     *
      * Never write below code because it will definitely cause {@code Connection} leak:
      * <pre>
      * <code>
@@ -1776,7 +1776,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -1810,7 +1810,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -1845,7 +1845,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -1878,7 +1878,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -1910,9 +1910,9 @@ public final class JdbcUtil {
     }
 
     /**
-     *  
+     *
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -1970,7 +1970,7 @@ public final class JdbcUtil {
     }
 
     /**
-     *  
+     *
      * Never write below code because it will definitely cause {@code Connection} leak:
      * <pre>
      * <code>
@@ -2105,7 +2105,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -2141,7 +2141,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -2178,7 +2178,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -2213,7 +2213,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -2247,9 +2247,9 @@ public final class JdbcUtil {
     }
 
     /**
-     *  
+     *
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -2308,7 +2308,7 @@ public final class JdbcUtil {
     }
 
     /**
-     *  
+     *
      * Never write below code because it will definitely cause {@code Connection} leak:
      * <pre>
      * <code>
@@ -2406,7 +2406,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -2440,7 +2440,7 @@ public final class JdbcUtil {
 
     /**
      * If this method is called where a transaction is started by {@code JdbcUtil.beginTransaction} or in {@code Spring} with the same {@code DataSource} in the same thread,
-     * the {@code Connection} started the Transaction will be used here. 
+     * the {@code Connection} started the Transaction will be used here.
      * Otherwise a {@code Connection} directly from the specified {@code DataSource}(Connection pool) will be borrowed and used.
      *
      * @param ds
@@ -2736,13 +2736,13 @@ public final class JdbcUtil {
                 stmt.addBatch();
 
                 if (++idx % batchSize == 0) {
-                    res += stmt.executeUpdate();
+                    res += N.sum(stmt.executeBatch());
                     stmt.clearBatch();
                 }
             }
 
             if (idx % batchSize != 0) {
-                res += stmt.executeUpdate();
+                res += N.sum(stmt.executeBatch());
                 stmt.clearBatch();
             }
 
@@ -2946,15 +2946,15 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @return
      * @throws UncheckedSQLException the unchecked SQL exception
@@ -2964,7 +2964,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param selectColumnNames
@@ -2972,9 +2972,9 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
-     * </code></pre> 
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
+     * </code></pre>
      * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
@@ -2984,7 +2984,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param selectColumnNames
@@ -2994,8 +2994,8 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @return
      * @throws UncheckedSQLException the unchecked SQL exception
@@ -3006,7 +3006,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param selectColumnNames
@@ -3016,9 +3016,9 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
-     * </code></pre>  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
+     * </code></pre>
      * @param batchSize
      * @param batchInterval
      * @return
@@ -3030,7 +3030,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param <E>
      * @param dataset
@@ -3042,8 +3042,8 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param batchSize
      * @param batchInterval
@@ -3068,15 +3068,15 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param columnTypeMap
      * @return
@@ -3089,7 +3089,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param offset
@@ -3098,8 +3098,8 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param columnTypeMap
      * @return
@@ -3112,7 +3112,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param offset
@@ -3121,8 +3121,8 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param batchSize
      * @param batchInterval
@@ -3137,7 +3137,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param <E>
      * @param dataset
@@ -3148,8 +3148,8 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param batchSize
      * @param batchInterval
@@ -3176,15 +3176,15 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param conn
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param stmtSetter
      * @return
@@ -3196,7 +3196,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param offset
@@ -3205,8 +3205,8 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param stmtSetter
      * @return
@@ -3218,7 +3218,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param offset
@@ -3227,8 +3227,8 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param batchSize
      * @param batchInterval
@@ -3242,7 +3242,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param <E>
      * @param dataset
@@ -3253,8 +3253,8 @@ public final class JdbcUtil {
      * @param insertSQL the column order in the sql must be consistent with the column order in the DataSet. Here is sample about how to create the sql:
      * <pre><code>
      *         List<String> columnNameList = new ArrayList<>(dataset.columnNameList());
-     *         columnNameList.retainAll(yourSelectColumnNames);        
-     *         String sql = RE.insert(columnNameList).into(tableName).sql();  
+     *         columnNameList.retainAll(yourSelectColumnNames);
+     *         String sql = RE.insert(columnNameList).into(tableName).sql();
      * </code></pre>
      * @param batchSize
      * @param batchInterval
@@ -3280,7 +3280,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
@@ -3292,7 +3292,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param selectColumnNames
@@ -3305,7 +3305,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param selectColumnNames
@@ -3321,7 +3321,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param selectColumnNames
@@ -3339,7 +3339,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param <E>
      * @param dataset
@@ -3368,7 +3368,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param stmt the column order in the sql must be consistent with the column order in the DataSet.
@@ -3383,7 +3383,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param offset
@@ -3400,7 +3400,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param offset
@@ -3419,7 +3419,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param <E>
      * @param dataset
@@ -3526,7 +3526,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param offset
@@ -3542,7 +3542,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param dataset
      * @param offset
@@ -3560,7 +3560,7 @@ public final class JdbcUtil {
     }
 
     /**
-     * Imports the data from <code>DataSet</code> to database. 
+     * Imports the data from <code>DataSet</code> to database.
      *
      * @param <E>
      * @param dataset
@@ -4817,11 +4817,11 @@ public final class JdbcUtil {
      * The backed {@code PreparedStatement/CallableStatement} will be closed by default
      * after any execution methods(which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/...).
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
-     * 
+     *
      * <br />
-     * Generally, don't cache or reuse the instance of this class, 
+     * Generally, don't cache or reuse the instance of this class,
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
-     * 
+     *
      * <br />
      * Remember: parameter/column index in {@code PreparedStatement/ResultSet} starts from 1, not 0.
      *
@@ -4876,10 +4876,10 @@ public final class JdbcUtil {
         }
 
         //        /**
-        //         * It's designed to void try-catch. 
+        //         * It's designed to void try-catch.
         //         * This method should be called immediately after {@code JdbcUtil#prepareCallableQuery/SQLExecutor#prepareQuery}.
-        //         * 
-        //         * @return 
+        //         *
+        //         * @return
         //         */
         //        public Try<Q> tried() {
         //            assertNotClosed();
@@ -7710,7 +7710,7 @@ public final class JdbcUtil {
 
         /**
          * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *  
+         *
          *
          * @param <T>
          * @param <ID>
@@ -7837,7 +7837,7 @@ public final class JdbcUtil {
 
         /**
          * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *  
+         *
          *
          * @param <T>
          * @param batchParameters
@@ -8174,28 +8174,28 @@ public final class JdbcUtil {
 
     /**
      * The backed {@code PreparedStatement/CallableStatement} will be closed by default
-     * after any execution methods(which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/...). 
+     * after any execution methods(which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/...).
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
-     * 
+     *
      * <br />
-     * Generally, don't cache or reuse the instance of this class, 
+     * Generally, don't cache or reuse the instance of this class,
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
-     * 
+     *
      * <br />
      * The {@code ResultSet} returned by query will always be closed after execution, even {@code 'closeAfterExecution'} flag is set to {@code false}.
-     * 
+     *
      * <br />
      * Remember: parameter/column index in {@code PreparedStatement/ResultSet} starts from 1, not 0.
-     * 
+     *
      * @author haiyangl
-     * 
+     *
      * @see {@link com.landawn.abacus.annotation.ReadOnly}
      * @see {@link com.landawn.abacus.annotation.ReadOnlyId}
      * @see {@link com.landawn.abacus.annotation.NonUpdatable}
      * @see {@link com.landawn.abacus.annotation.Transient}
      * @see {@link com.landawn.abacus.annotation.Table}
-     * @see {@link com.landawn.abacus.annotation.Column} 
-     * 
+     * @see {@link com.landawn.abacus.annotation.Column}
+     *
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html</a>
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html</a>
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html</a>
@@ -8227,26 +8227,26 @@ public final class JdbcUtil {
      * The backed {@code PreparedStatement/CallableStatement} will be closed by default
      * after any execution methods(which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/...).
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
-     * 
+     *
      * <br />
-     * Generally, don't cache or reuse the instance of this class, 
+     * Generally, don't cache or reuse the instance of this class,
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
-     * 
+     *
      * <br />
      * The {@code ResultSet} returned by query will always be closed after execution, even {@code 'closeAfterExecution'} flag is set to {@code false}.
-     * 
+     *
      * <br />
      * Remember: parameter/column index in {@code PreparedStatement/ResultSet} starts from 1, not 0.
-     * 
+     *
      * @author haiyangl
-     * 
+     *
      * @see {@link com.landawn.abacus.annotation.ReadOnly}
      * @see {@link com.landawn.abacus.annotation.ReadOnlyId}
      * @see {@link com.landawn.abacus.annotation.NonUpdatable}
      * @see {@link com.landawn.abacus.annotation.Transient}
      * @see {@link com.landawn.abacus.annotation.Table}
-     * @see {@link com.landawn.abacus.annotation.Column} 
-     * 
+     * @see {@link com.landawn.abacus.annotation.Column}
+     *
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html</a>
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html</a>
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html</a>
@@ -8875,7 +8875,7 @@ public final class JdbcUtil {
         }
 
         /**
-         *  
+         *
          *
          * @param parameterName
          * @param x
@@ -8889,7 +8889,7 @@ public final class JdbcUtil {
         }
 
         /**
-         *  
+         *
          *
          * @param parameterName
          * @param x
@@ -8903,7 +8903,7 @@ public final class JdbcUtil {
         }
 
         /**
-         *  
+         *
          *
          * @param parameterName
          * @param x
@@ -9497,28 +9497,28 @@ public final class JdbcUtil {
 
     /**
      * The backed {@code PreparedStatement/CallableStatement} will be closed by default
-     * after any execution methods(which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/...). 
+     * after any execution methods(which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/...).
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
-     * 
+     *
      * <br />
-     * Generally, don't cache or reuse the instance of this class, 
+     * Generally, don't cache or reuse the instance of this class,
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
-     * 
+     *
      * <br />
      * The {@code ResultSet} returned by query will always be closed after execution, even {@code 'closeAfterExecution'} flag is set to {@code false}.
-     * 
+     *
      * <br />
      * Remember: parameter/column index in {@code PreparedStatement/ResultSet} starts from 1, not 0.
-     * 
+     *
      * @author haiyangl
-     * 
+     *
      * @see {@link com.landawn.abacus.annotation.ReadOnly}
      * @see {@link com.landawn.abacus.annotation.ReadOnlyId}
      * @see {@link com.landawn.abacus.annotation.NonUpdatable}
      * @see {@link com.landawn.abacus.annotation.Transient}
      * @see {@link com.landawn.abacus.annotation.Table}
-     * @see {@link com.landawn.abacus.annotation.Column} 
-     * 
+     * @see {@link com.landawn.abacus.annotation.Column}
+     *
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html</a>
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html</a>
      * @see <a href="http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html">http://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html</a>
@@ -11461,7 +11461,7 @@ public final class JdbcUtil {
         }
 
         /**
-         *  
+         *
          *
          * @param parameterName
          * @param x
@@ -11515,7 +11515,7 @@ public final class JdbcUtil {
         }
 
         /**
-         *  
+         *
          *
          * @param parameterName
          * @param x
@@ -11569,7 +11569,7 @@ public final class JdbcUtil {
         }
 
         /**
-         *  
+         *
          *
          * @param parameterName
          * @param x
@@ -11623,7 +11623,7 @@ public final class JdbcUtil {
         }
 
         /**
-         *  
+         *
          *
          * @param parameterName
          * @param x
@@ -11677,7 +11677,7 @@ public final class JdbcUtil {
         }
 
         /**
-         *  
+         *
          *
          * @param parameterName
          * @param x
@@ -12096,7 +12096,7 @@ public final class JdbcUtil {
 
         /**
          * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *  
+         *
          *
          * @param <T>
          * @param <ID>
@@ -12133,7 +12133,7 @@ public final class JdbcUtil {
 
         /**
          * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *  
+         *
          *
          * @param <T>
          * @param batchParameters
@@ -12284,7 +12284,7 @@ public final class JdbcUtil {
 
         //    /**
         //     * Attaches this transaction to current thread.
-        //     * 
+        //     *
         //     */
         //    public void attach() {
         //        final String currentThreadName = Thread.currentThread().getName();
@@ -12598,7 +12598,7 @@ public final class JdbcUtil {
     /**
      * The Enum FetchDirection.
      */
-    public static enum FetchDirection {
+    public enum FetchDirection {
 
         /** The forward. */
         FORWARD(ResultSet.FETCH_FORWARD),
@@ -12655,7 +12655,7 @@ public final class JdbcUtil {
      *
      * @param <QS>
      */
-    public static interface ParametersSetter<QS> extends Try.Consumer<QS, SQLException> {
+    public interface ParametersSetter<QS> extends Try.Consumer<QS, SQLException> {
 
         /**
          *
@@ -12672,7 +12672,7 @@ public final class JdbcUtil {
      * @param <QS>
      * @param <T>
      */
-    public static interface BiParametersSetter<QS, T> extends Try.BiConsumer<QS, T, SQLException> {
+    public interface BiParametersSetter<QS, T> extends Try.BiConsumer<QS, T, SQLException> {
 
         /**
          *
@@ -12690,7 +12690,7 @@ public final class JdbcUtil {
      * @param <QS>
      * @param <T>
      */
-    public static interface TriParametersSetter<QS, T> extends Try.TriConsumer<NamedSQL, QS, T, SQLException> {
+    public interface TriParametersSetter<QS, T> extends Try.TriConsumer<NamedSQL, QS, T, SQLException> {
 
         /**
          *
@@ -12708,10 +12708,10 @@ public final class JdbcUtil {
      *
      * @param <T>
      */
-    public static interface ResultExtractor<T> extends Try.Function<ResultSet, T, SQLException> {
+    public interface ResultExtractor<T> extends Try.Function<ResultSet, T, SQLException> {
 
         /** The Constant TO_DATA_SET. */
-        public static final ResultExtractor<DataSet> TO_DATA_SET = new ResultExtractor<DataSet>() {
+        ResultExtractor<DataSet> TO_DATA_SET = new ResultExtractor<DataSet>() {
             @Override
             public DataSet apply(final ResultSet rs) throws SQLException {
                 return JdbcUtil.extractData(rs);
@@ -12735,7 +12735,7 @@ public final class JdbcUtil {
          * @param valueExtractor
          * @return
          */
-        public static <K, V> ResultExtractor<Map<K, V>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) {
+        static <K, V> ResultExtractor<Map<K, V>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) {
             return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
         }
 
@@ -12749,7 +12749,7 @@ public final class JdbcUtil {
          * @param supplier
          * @return
          */
-        public static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
+        static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
             return toMap(keyExtractor, valueExtractor, Fnn.throwingMerger(), supplier);
         }
@@ -12766,7 +12766,7 @@ public final class JdbcUtil {
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
          */
-        public static <K, V> ResultExtractor<Map<K, V>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
+        static <K, V> ResultExtractor<Map<K, V>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Try.BinaryOperator<V, SQLException> mergeFunction) {
             return toMap(keyExtractor, valueExtractor, mergeFunction, Suppliers.<K, V> ofMap());
         }
@@ -12785,7 +12785,7 @@ public final class JdbcUtil {
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
          */
-        public static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
+        static <K, V, M extends Map<K, V>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Try.BinaryOperator<V, SQLException> mergeFunction, final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
             N.checkArgNotNull(valueExtractor, "valueExtractor");
@@ -12817,7 +12817,7 @@ public final class JdbcUtil {
          * @param downstream
          * @return
          */
-        public static <K, V, A, D> ResultExtractor<Map<K, D>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
+        static <K, V, A, D> ResultExtractor<Map<K, D>> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream) {
             return toMap(keyExtractor, valueExtractor, downstream, Suppliers.<K, D> ofMap());
         }
@@ -12835,7 +12835,7 @@ public final class JdbcUtil {
          * @param supplier
          * @return
          */
-        public static <K, V, A, D, M extends Map<K, D>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
+        static <K, V, A, D, M extends Map<K, D>> ResultExtractor<M> toMap(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream, final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
             N.checkArgNotNull(valueExtractor, "valueExtractor");
@@ -12885,7 +12885,7 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException the SQL exception
          */
-        public static <K, V> ResultExtractor<Map<K, List<V>>> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) throws SQLException {
+        static <K, V> ResultExtractor<Map<K, List<V>>> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor) throws SQLException {
             return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
         }
 
@@ -12899,7 +12899,7 @@ public final class JdbcUtil {
          * @param supplier
          * @return
          */
-        public static <K, V, M extends Map<K, List<V>>> ResultExtractor<M> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
+        static <K, V, M extends Map<K, List<V>>> ResultExtractor<M> groupTo(final RowMapper<K> keyExtractor, final RowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
             N.checkArgNotNull(valueExtractor, "valueExtractor");
@@ -12936,7 +12936,7 @@ public final class JdbcUtil {
      *
      * @param <T>
      */
-    public static interface BiResultExtractor<T> extends Try.BiFunction<ResultSet, List<String>, T, SQLException> {
+    public interface BiResultExtractor<T> extends Try.BiFunction<ResultSet, List<String>, T, SQLException> {
 
         /**
          *
@@ -12956,7 +12956,7 @@ public final class JdbcUtil {
          * @param valueExtractor
          * @return
          */
-        public static <K, V> BiResultExtractor<Map<K, V>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor) {
+        static <K, V> BiResultExtractor<Map<K, V>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor) {
             return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
         }
 
@@ -12970,7 +12970,7 @@ public final class JdbcUtil {
          * @param supplier
          * @return
          */
-        public static <K, V, M extends Map<K, V>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
+        static <K, V, M extends Map<K, V>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
             return toMap(keyExtractor, valueExtractor, Fnn.throwingMerger(), supplier);
         }
@@ -12987,7 +12987,7 @@ public final class JdbcUtil {
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
          */
-        public static <K, V> BiResultExtractor<Map<K, V>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
+        static <K, V> BiResultExtractor<Map<K, V>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Try.BinaryOperator<V, SQLException> mergeFunction) {
             return toMap(keyExtractor, valueExtractor, mergeFunction, Suppliers.<K, V> ofMap());
         }
@@ -13006,7 +13006,7 @@ public final class JdbcUtil {
          * @see {@link Fn.EE#replacingMerger()}
          * @see {@link Fn.EE#ignoringMerger()}
          */
-        public static <K, V, M extends Map<K, V>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
+        static <K, V, M extends Map<K, V>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Try.BinaryOperator<V, SQLException> mergeFunction, final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
             N.checkArgNotNull(valueExtractor, "valueExtractor");
@@ -13038,7 +13038,7 @@ public final class JdbcUtil {
          * @param downstream
          * @return
          */
-        public static <K, V, A, D> BiResultExtractor<Map<K, D>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
+        static <K, V, A, D> BiResultExtractor<Map<K, D>> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream) {
             return toMap(keyExtractor, valueExtractor, downstream, Suppliers.<K, D> ofMap());
         }
@@ -13056,7 +13056,7 @@ public final class JdbcUtil {
          * @param supplier
          * @return
          */
-        public static <K, V, A, D, M extends Map<K, D>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
+        static <K, V, A, D, M extends Map<K, D>> BiResultExtractor<M> toMap(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Collector<? super V, A, D> downstream, final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
             N.checkArgNotNull(valueExtractor, "valueExtractor");
@@ -13106,8 +13106,7 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException the SQL exception
          */
-        public static <K, V> BiResultExtractor<Map<K, List<V>>> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor)
-                throws SQLException {
+        static <K, V> BiResultExtractor<Map<K, List<V>>> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor) throws SQLException {
             return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
         }
 
@@ -13121,7 +13120,7 @@ public final class JdbcUtil {
          * @param supplier
          * @return
          */
-        public static <K, V, M extends Map<K, List<V>>> BiResultExtractor<M> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
+        static <K, V, M extends Map<K, List<V>>> BiResultExtractor<M> groupTo(final BiRowMapper<K> keyExtractor, final BiRowMapper<V> valueExtractor,
                 final Supplier<? extends M> supplier) {
             N.checkArgNotNull(keyExtractor, "keyExtractor");
             N.checkArgNotNull(valueExtractor, "valueExtractor");
@@ -13158,10 +13157,10 @@ public final class JdbcUtil {
      *
      * @param <T>
      */
-    public static interface RowMapper<T> extends Try.Function<ResultSet, T, SQLException> {
+    public interface RowMapper<T> extends Try.Function<ResultSet, T, SQLException> {
 
         /** The Constant GET_BOOLEAN. */
-        public static final RowMapper<Boolean> GET_BOOLEAN = new RowMapper<Boolean>() {
+        RowMapper<Boolean> GET_BOOLEAN = new RowMapper<Boolean>() {
             @Override
             public Boolean apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getBoolean(1);
@@ -13169,7 +13168,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_BYTE. */
-        public static final RowMapper<Byte> GET_BYTE = new RowMapper<Byte>() {
+        RowMapper<Byte> GET_BYTE = new RowMapper<Byte>() {
             @Override
             public Byte apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getByte(1);
@@ -13177,7 +13176,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_SHORT. */
-        public static final RowMapper<Short> GET_SHORT = new RowMapper<Short>() {
+        RowMapper<Short> GET_SHORT = new RowMapper<Short>() {
             @Override
             public Short apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getShort(1);
@@ -13185,7 +13184,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_INT. */
-        public static final RowMapper<Integer> GET_INT = new RowMapper<Integer>() {
+        RowMapper<Integer> GET_INT = new RowMapper<Integer>() {
             @Override
             public Integer apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getInt(1);
@@ -13193,7 +13192,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_LONG. */
-        public static final RowMapper<Long> GET_LONG = new RowMapper<Long>() {
+        RowMapper<Long> GET_LONG = new RowMapper<Long>() {
             @Override
             public Long apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getLong(1);
@@ -13201,7 +13200,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_FLOAT. */
-        public static final RowMapper<Float> GET_FLOAT = new RowMapper<Float>() {
+        RowMapper<Float> GET_FLOAT = new RowMapper<Float>() {
             @Override
             public Float apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getFloat(1);
@@ -13209,7 +13208,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_DOUBLE. */
-        public static final RowMapper<Double> GET_DOUBLE = new RowMapper<Double>() {
+        RowMapper<Double> GET_DOUBLE = new RowMapper<Double>() {
             @Override
             public Double apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getDouble(1);
@@ -13217,7 +13216,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_BIG_DECIMAL. */
-        public static final RowMapper<BigDecimal> GET_BIG_DECIMAL = new RowMapper<BigDecimal>() {
+        RowMapper<BigDecimal> GET_BIG_DECIMAL = new RowMapper<BigDecimal>() {
             @Override
             public BigDecimal apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getBigDecimal(1);
@@ -13225,7 +13224,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_STRING. */
-        public static final RowMapper<String> GET_STRING = new RowMapper<String>() {
+        RowMapper<String> GET_STRING = new RowMapper<String>() {
             @Override
             public String apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getString(1);
@@ -13233,7 +13232,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_DATE. */
-        public static final RowMapper<Date> GET_DATE = new RowMapper<Date>() {
+        RowMapper<Date> GET_DATE = new RowMapper<Date>() {
             @Override
             public Date apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getDate(1);
@@ -13241,7 +13240,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_TIME. */
-        public static final RowMapper<Time> GET_TIME = new RowMapper<Time>() {
+        RowMapper<Time> GET_TIME = new RowMapper<Time>() {
             @Override
             public Time apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getTime(1);
@@ -13249,7 +13248,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_TIMESTAMP. */
-        public static final RowMapper<Timestamp> GET_TIMESTAMP = new RowMapper<Timestamp>() {
+        RowMapper<Timestamp> GET_TIMESTAMP = new RowMapper<Timestamp>() {
             @Override
             public Timestamp apply(final ResultSet rs) throws SQLException, RuntimeException {
                 return rs.getTimestamp(1);
@@ -13267,7 +13266,7 @@ public final class JdbcUtil {
 
         ///**
         // * Totally unnecessary. It's more efficient by direct call.
-        // * 
+        // *
         // * @param leftType
         // * @param rightType
         // * @return
@@ -13291,7 +13290,7 @@ public final class JdbcUtil {
         //
         ///**
         // * Totally unnecessary. It's more efficient by direct call.
-        // * 
+        // *
         // * @param leftType
         // * @param middleType
         // * @param rightType
@@ -13319,7 +13318,7 @@ public final class JdbcUtil {
         //
         ///**
         // * Totally unnecessary. It's more efficient by direct call.
-        // * 
+        // *
         // * @param type1
         // * @param type2
         // * @return
@@ -13343,7 +13342,7 @@ public final class JdbcUtil {
         //
         ///**
         // * Totally unnecessary. It's more efficient by direct call.
-        // * 
+        // *
         // * @param type1
         // * @param type2
         // * @param type3
@@ -13371,7 +13370,7 @@ public final class JdbcUtil {
         //
         ///**
         // * Totally unnecessary. It's more efficient by direct call.
-        // * 
+        // *
         // * @param type1
         // * @param type2
         // * @param type3
@@ -13402,7 +13401,7 @@ public final class JdbcUtil {
         //
         ///**
         // * Totally unnecessary. It's more efficient by direct call.
-        // * 
+        // *
         // * @param type1
         // * @param type2
         // * @param type3
@@ -13436,7 +13435,7 @@ public final class JdbcUtil {
         //
         ///**
         // * Totally unnecessary. It's more efficient by direct call.
-        // * 
+        // *
         // * @param type1
         // * @param type2
         // * @param type3
@@ -13473,7 +13472,7 @@ public final class JdbcUtil {
         //
         ///**
         // * Totally unnecessary. It's more efficient by direct call.
-        // * 
+        // *
         // * @param type1
         // * @param type2
         // * @param type3
@@ -13517,10 +13516,10 @@ public final class JdbcUtil {
      *
      * @param <T>
      */
-    public static interface BiRowMapper<T> extends Try.BiFunction<ResultSet, List<String>, T, SQLException> {
+    public interface BiRowMapper<T> extends Try.BiFunction<ResultSet, List<String>, T, SQLException> {
 
         /** The Constant GET_BOOLEAN. */
-        public static final BiRowMapper<Boolean> GET_BOOLEAN = new BiRowMapper<Boolean>() {
+        BiRowMapper<Boolean> GET_BOOLEAN = new BiRowMapper<Boolean>() {
             @Override
             public Boolean apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getBoolean(1);
@@ -13528,7 +13527,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_BYTE. */
-        public static final BiRowMapper<Byte> GET_BYTE = new BiRowMapper<Byte>() {
+        BiRowMapper<Byte> GET_BYTE = new BiRowMapper<Byte>() {
             @Override
             public Byte apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getByte(1);
@@ -13536,7 +13535,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_SHORT. */
-        public static final BiRowMapper<Short> GET_SHORT = new BiRowMapper<Short>() {
+        BiRowMapper<Short> GET_SHORT = new BiRowMapper<Short>() {
             @Override
             public Short apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getShort(1);
@@ -13544,7 +13543,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_INT. */
-        public static final BiRowMapper<Integer> GET_INT = new BiRowMapper<Integer>() {
+        BiRowMapper<Integer> GET_INT = new BiRowMapper<Integer>() {
             @Override
             public Integer apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getInt(1);
@@ -13552,7 +13551,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_LONG. */
-        public static final BiRowMapper<Long> GET_LONG = new BiRowMapper<Long>() {
+        BiRowMapper<Long> GET_LONG = new BiRowMapper<Long>() {
             @Override
             public Long apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getLong(1);
@@ -13560,7 +13559,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_FLOAT. */
-        public static final BiRowMapper<Float> GET_FLOAT = new BiRowMapper<Float>() {
+        BiRowMapper<Float> GET_FLOAT = new BiRowMapper<Float>() {
             @Override
             public Float apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getFloat(1);
@@ -13568,7 +13567,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_DOUBLE. */
-        public static final BiRowMapper<Double> GET_DOUBLE = new BiRowMapper<Double>() {
+        BiRowMapper<Double> GET_DOUBLE = new BiRowMapper<Double>() {
             @Override
             public Double apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getDouble(1);
@@ -13576,7 +13575,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_BIG_DECIMAL. */
-        public static final BiRowMapper<BigDecimal> GET_BIG_DECIMAL = new BiRowMapper<BigDecimal>() {
+        BiRowMapper<BigDecimal> GET_BIG_DECIMAL = new BiRowMapper<BigDecimal>() {
             @Override
             public BigDecimal apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getBigDecimal(1);
@@ -13584,7 +13583,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_STRING. */
-        public static final BiRowMapper<String> GET_STRING = new BiRowMapper<String>() {
+        BiRowMapper<String> GET_STRING = new BiRowMapper<String>() {
             @Override
             public String apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getString(1);
@@ -13592,7 +13591,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_DATE. */
-        public static final BiRowMapper<Date> GET_DATE = new BiRowMapper<Date>() {
+        BiRowMapper<Date> GET_DATE = new BiRowMapper<Date>() {
             @Override
             public Date apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getDate(1);
@@ -13600,7 +13599,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_TIME. */
-        public static final BiRowMapper<Time> GET_TIME = new BiRowMapper<Time>() {
+        BiRowMapper<Time> GET_TIME = new BiRowMapper<Time>() {
             @Override
             public Time apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getTime(1);
@@ -13608,7 +13607,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant GET_TIMESTAMP. */
-        public static final BiRowMapper<Timestamp> GET_TIMESTAMP = new BiRowMapper<Timestamp>() {
+        BiRowMapper<Timestamp> GET_TIMESTAMP = new BiRowMapper<Timestamp>() {
             @Override
             public Timestamp apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 return rs.getTimestamp(1);
@@ -13616,7 +13615,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant TO_ARRAY. */
-        public static final BiRowMapper<Object[]> TO_ARRAY = new BiRowMapper<Object[]>() {
+        BiRowMapper<Object[]> TO_ARRAY = new BiRowMapper<Object[]>() {
             @Override
             public Object[] apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 final int columnCount = columnLabels.size();
@@ -13631,7 +13630,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant TO_LIST. */
-        public static final BiRowMapper<List<Object>> TO_LIST = new BiRowMapper<List<Object>>() {
+        BiRowMapper<List<Object>> TO_LIST = new BiRowMapper<List<Object>>() {
             @Override
             public List<Object> apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 final int columnCount = columnLabels.size();
@@ -13646,7 +13645,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant TO_MAP. */
-        public static final BiRowMapper<Map<String, Object>> TO_MAP = new BiRowMapper<Map<String, Object>>() {
+        BiRowMapper<Map<String, Object>> TO_MAP = new BiRowMapper<Map<String, Object>>() {
             @Override
             public Map<String, Object> apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 final int columnCount = columnLabels.size();
@@ -13661,7 +13660,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant TO_LINKED_HASH_MAP. */
-        public static final BiRowMapper<Map<String, Object>> TO_LINKED_HASH_MAP = new BiRowMapper<Map<String, Object>>() {
+        BiRowMapper<Map<String, Object>> TO_LINKED_HASH_MAP = new BiRowMapper<Map<String, Object>>() {
             @Override
             public Map<String, Object> apply(final ResultSet rs, final List<String> columnLabels) throws SQLException, RuntimeException {
                 final int columnCount = columnLabels.size();
@@ -13686,14 +13685,14 @@ public final class JdbcUtil {
         T apply(ResultSet rs, List<String> columnLabels) throws SQLException;
 
         /**
-         * 
+         *
          * @param <T>
          * @param targetClass
          * @return
          */
-        public static <T> BiRowMapper<T> to(Class<? extends T> targetClass) {
+        static <T> BiRowMapper<T> to(Class<? extends T> targetClass) {
             return to(targetClass, false);
-        };
+        }
 
         /**
          * Don't cache or reuse the returned {@code BiRowMapper} instance.
@@ -13703,7 +13702,7 @@ public final class JdbcUtil {
          * @param ignoreNonMatchedColumns
          * @return
          */
-        public static <T> BiRowMapper<T> to(Class<? extends T> targetClass, final boolean ignoreNonMatchedColumns) {
+        static <T> BiRowMapper<T> to(Class<? extends T> targetClass, final boolean ignoreNonMatchedColumns) {
             if (Object[].class.isAssignableFrom(targetClass)) {
                 return new BiRowMapper<T>() {
                     @Override
@@ -13720,12 +13719,12 @@ public final class JdbcUtil {
                 };
             } else if (List.class.isAssignableFrom(targetClass)) {
                 return new BiRowMapper<T>() {
-                    private final boolean isListOrArrayList = targetClass.equals(List.class) || targetClass.equals(ArrayList.class);
+                    private boolean isListOrArrayList = targetClass.equals(List.class) || targetClass.equals(ArrayList.class);
 
                     @Override
                     public T apply(ResultSet rs, List<String> columnLabelList) throws SQLException {
                         final int columnCount = columnLabelList.size();
-                        final List<Object> c = isListOrArrayList ? new ArrayList<Object>(columnCount) : (List<Object>) N.newInstance(targetClass);
+                        final List<Object> c = isListOrArrayList ? new ArrayList<>(columnCount) : (List<Object>) N.newInstance(targetClass);
 
                         for (int i = 0; i < columnCount; i++) {
                             c.add(JdbcUtil.getColumnValue(rs, i + 1));
@@ -13736,14 +13735,14 @@ public final class JdbcUtil {
                 };
             } else if (Map.class.isAssignableFrom(targetClass)) {
                 return new BiRowMapper<T>() {
-                    private final boolean isMapOrHashMap = targetClass.equals(Map.class) || targetClass.equals(HashMap.class);
-                    private final boolean isLinkedHashMap = targetClass.equals(LinkedHashMap.class);
+                    private boolean isMapOrHashMap = targetClass.equals(Map.class) || targetClass.equals(HashMap.class);
+                    private boolean isLinkedHashMap = targetClass.equals(LinkedHashMap.class);
 
                     @Override
                     public T apply(ResultSet rs, List<String> columnLabelList) throws SQLException {
                         final int columnCount = columnLabelList.size();
-                        final Map<String, Object> m = isMapOrHashMap ? new HashMap<String, Object>(columnCount)
-                                : (isLinkedHashMap ? new LinkedHashMap<String, Object>(columnCount) : (Map<String, Object>) N.newInstance(targetClass));
+                        final Map<String, Object> m = isMapOrHashMap ? new HashMap<>(columnCount)
+                                : (isLinkedHashMap ? new LinkedHashMap<>(columnCount) : (Map<String, Object>) N.newInstance(targetClass));
 
                         for (int i = 0; i < columnCount; i++) {
                             m.put(columnLabelList.get(i), JdbcUtil.getColumnValue(rs, i + 1));
@@ -13754,8 +13753,8 @@ public final class JdbcUtil {
                 };
             } else if (ClassUtil.isEntity(targetClass)) {
                 return new BiRowMapper<T>() {
-                    private final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(targetClass);
-                    private final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+                    private boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(targetClass);
+                    private EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
                     private volatile String[] columnLabels = null;
                     private volatile PropInfo[] propInfos;
                     private volatile Type<?>[] columnTypes = null;
@@ -13829,7 +13828,7 @@ public final class JdbcUtil {
                 };
             } else {
                 return new BiRowMapper<T>() {
-                    private final Type<? extends T> targetType = N.typeOf(targetClass);
+                    private Type<? extends T> targetType = N.typeOf(targetClass);
                     private int columnCount = 0;
 
                     @Override
@@ -13849,9 +13848,9 @@ public final class JdbcUtil {
     /**
      * Don't use {@code RowConsumer} in {@link PreparedQuery#forEach(RowConsumer)} or any place where multiple records will be consumed by it, if column labels/count are used in {@link RowConsumer#accept(ResultSet)}.
      * Consider using {@code BiRowConsumer} instead because it's more efficient to consume multiple records when column labels/count are used.
-     * 
+     *
      */
-    public static interface RowConsumer extends Try.Consumer<ResultSet, SQLException> {
+    public interface RowConsumer extends Try.Consumer<ResultSet, SQLException> {
 
         /**
          *
@@ -13865,7 +13864,7 @@ public final class JdbcUtil {
     /**
      * The Interface BiRowConsumer.
      */
-    public static interface BiRowConsumer extends Try.BiConsumer<ResultSet, List<String>, SQLException> {
+    public interface BiRowConsumer extends Try.BiConsumer<ResultSet, List<String>, SQLException> {
 
         /**
          *
@@ -13880,12 +13879,12 @@ public final class JdbcUtil {
     /**
      * Don't use {@code RowFilter} in {@link PreparedQuery#list(RowFilter, RowMapper)}, {@link PreparedQuery#forEach(RowFilter, RowConsumer)}  or any place where multiple records will be tested by it, if column labels/count are used in {@link RowFilter#test(ResultSet)}.
      * Consider using {@code BiRowConsumer} instead because it's more efficient to test multiple records when column labels/count are used.
-     * 
+     *
      */
-    public static interface RowFilter extends Try.Predicate<ResultSet, SQLException> {
+    public interface RowFilter extends Try.Predicate<ResultSet, SQLException> {
 
         /** The Constant ALWAYS_TRUE. */
-        public static final RowFilter ALWAYS_TRUE = new RowFilter() {
+        RowFilter ALWAYS_TRUE = new RowFilter() {
             @Override
             public boolean test(ResultSet rs) throws SQLException, RuntimeException {
                 return true;
@@ -13893,7 +13892,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant ALWAYS_FALSE. */
-        public static final RowFilter ALWAYS_FALSE = new RowFilter() {
+        RowFilter ALWAYS_FALSE = new RowFilter() {
             @Override
             public boolean test(ResultSet rs) throws SQLException, RuntimeException {
                 return false;
@@ -13913,10 +13912,10 @@ public final class JdbcUtil {
     /**
      * The Interface BiRowFilter.
      */
-    public static interface BiRowFilter extends Try.BiPredicate<ResultSet, List<String>, SQLException> {
+    public interface BiRowFilter extends Try.BiPredicate<ResultSet, List<String>, SQLException> {
 
         /** The Constant ALWAYS_TRUE. */
-        public static final BiRowFilter ALWAYS_TRUE = new BiRowFilter() {
+        BiRowFilter ALWAYS_TRUE = new BiRowFilter() {
             @Override
             public boolean test(ResultSet rs, List<String> columnLabels) throws SQLException, RuntimeException {
                 return true;
@@ -13924,7 +13923,7 @@ public final class JdbcUtil {
         };
 
         /** The Constant ALWAYS_FALSE. */
-        public static final BiRowFilter ALWAYS_FALSE = new BiRowFilter() {
+        BiRowFilter ALWAYS_FALSE = new BiRowFilter() {
             @Override
             public boolean test(ResultSet rs, List<String> columnLabels) throws SQLException, RuntimeException {
                 return false;
@@ -13946,31 +13945,31 @@ public final class JdbcUtil {
     private static final Map<Class<?>, JdbcUtil.Dao> daoPool = new ConcurrentHashMap<>();
 
     /**
-     * This interface is designed to share/manager SQL queries by Java APIs/methods with static parameter types and return type, while hiding the SQL scripts. 
+     * This interface is designed to share/manager SQL queries by Java APIs/methods with static parameter types and return type, while hiding the SQL scripts.
      * It's a gift from nature and created by thoughts.
-     * 
+     *
      * <br />
      * Note: Setting parameters by 'ParametersSetter' or Retrieving result/record by 'ResultExtractor/BiResultExtractor/RowMapper/BiRowMapper' is disabled.
-     * 
+     *
      * <br />
-     * 
+     *
      * <li>The SQL operations/methods should be annotated with SQL scripts by {@code @Select/@Insert/@Update/@Delete/@NamedSelect/@NamedInsert/@NamedUpdate/@NamedDelete}.</li>
-     * 
-     * <li>The Order of the parameters in the method should be consistent with parameter order in SQL scripts for parameterized SQL. 
+     *
+     * <li>The Order of the parameters in the method should be consistent with parameter order in SQL scripts for parameterized SQL.
      * For named parameterized SQL, the parameters must be binded with names through {@code @Bind}, or {@code Map/Entity} with getter/setter methods.</li>
-     * 
+     *
      * <li>SQL parameters can be set through input method parameters(by multiple parameters or a {@code Collection}, or a {@code Map/Entity} for named sql), or by {@code JdbcUtil.ParametersSetter<PreparedQuery/PreparedCallabeQuery...>}.</li>
-     * 
+     *
      * <li>{@code ResultExtractor/BiResultExtractor/RowMapper/BiRowMapper} can be specified by the last parameter of the method.</li>
-     * 
+     *
      * <li>The return type of the method must be same as the return type of {@code ResultExtractor/BiResultExtractor} if it's specified by the last parameter of the method.</li>
-     * 
-     * <li>The return type of update/delete operations only can int/Integer/long/Long/boolean/Boolean/void. If it's long/Long, {@code PreparedQuery#largeUpdate()} will be called, 
+     *
+     * <li>The return type of update/delete operations only can int/Integer/long/Long/boolean/Boolean/void. If it's long/Long, {@code PreparedQuery#largeUpdate()} will be called,
      * otherwise, {@code PreparedQuery#update()} will be called.</li>
-     * 
+     *
      * <li>Remember declaring {@code throws SQLException} in the method.</li>
      * <br />
-     * <li>Which underline {@code PreparedQuery/PreparedCallableQuery} method to call for SQL methods/operations annotated with {@code @Select/@NamedSelect}: 
+     * <li>Which underline {@code PreparedQuery/PreparedCallableQuery} method to call for SQL methods/operations annotated with {@code @Select/@NamedSelect}:
      * <ul>
      *   <li>If {@code ResultExtractor/BiResultExtractor} is specified by the last parameter of the method, {@code PreparedQuery#query(ResultExtractor/BiResultExtractor)} will be called.</li>
      *   <li>Or else if {@code RowMapper/BiRowMapper} is specified by the last parameter of the method:</li>
@@ -14032,53 +14031,53 @@ public final class JdbcUtil {
      *      <ul>
      *          <li>Or else, {@code PreparedQuery#queryForSingleResult(Class).orElse(N.defaultValueOf(returnType)} will be called.</li>
      *      </ul>
-     * </ul> 
-     * 
+     * </ul>
+     *
      * <br />
      * <br />
-     * 
+     *
      * Here is a simple {@code UserDao} sample.
-     * 
+     *
      * <pre>
-     * <code> 
+     * <code>
      * public static interface UserDao extends JdbcUtil.CrudDao<User, Long, SQLBuilder.PSC> {
      *     &#064NamedInsert("INSERT INTO user (id, first_name, last_name, email) VALUES (:id, :firstName, :lastName, :email)")
      *     void insertWithId(User user) throws SQLException;
-     * 
+     *
      *     &#064NamedUpdate("UPDATE user SET first_name = :firstName, last_name = :lastName WHERE id = :id")
      *     int updateFirstAndLastName(@Bind("firstName") String newFirstName, @Bind("lastName") String newLastName, @Bind("id") long id) throws SQLException;
-     *     
+     *
      *     &#064NamedSelect("SELECT first_name, last_name FROM user WHERE id = :id")
      *     User getFirstAndLastNameBy(@Bind("id") long id) throws SQLException;
-     *     
+     *
      *     &#064NamedSelect("SELECT id, first_name, last_name, email FROM user")
      *     Stream<User> allUsers() throws SQLException;
      * }
      * </code>
-     * </pre> 
-     * 
+     * </pre>
+     *
      * Here is the generate way to work with transaction started by {@code SQLExecutor}.
-     * 
+     *
      * <pre>
-     * <code> 
+     * <code>
      * static final UserDao userDao = Dao.newInstance(UserDao.class, dataSource);
      * ...
-     * 
+     *
      * final SQLTransaction tran = JdbcUtil.beginTransaction(dataSource, IsolationLevel.READ_COMMITTED);
-     * 
+     *
      * try {
      *      userDao.getById(id);
      *      userDao.update(...);
      *      // more...
-     * 
+     *
      *      tran.commit();
      * } finally {
-     *      // The connection will be automatically closed after the transaction is committed or rolled back.            
+     *      // The connection will be automatically closed after the transaction is committed or rolled back.
      *      tran.rollbackIfNotCommitted();
      * }
      * </code>
-     * </pre> 
-     * 
+     * </pre>
+     *
      * @see JdbcUtil#prepareQuery(javax.sql.DataSource, String)
      * @see JdbcUtil#prepareNamedQuery(javax.sql.DataSource, String)
      * @see JdbcUtil#beginTransaction(javax.sql.DataSource, IsolationLevel, boolean)
@@ -14086,7 +14085,7 @@ public final class JdbcUtil {
      * @see CrudDao
      * @see SQLExecutor.Mapper
      */
-    public static interface Dao {
+    public interface Dao {
 
         /**
          * The Interface Select.
@@ -14370,10 +14369,10 @@ public final class JdbcUtil {
          *
          * @return
          */
-        public javax.sql.DataSource dataSource();
+        javax.sql.DataSource dataSource();
 
         //    /**
-        //     * 
+        //     *
         //     * @param isolationLevel
         //     * @return
         //     * @throws UncheckedSQLException
@@ -14388,13 +14387,13 @@ public final class JdbcUtil {
         //     * <br />
         //     * <br />
         //     * The transaction will be shared cross the instances of {@code SQLExecutor/Dao} by the methods called in the same thread with same {@code DataSource}.
-        //     * 
+        //     *
         //     * <br />
         //     * <br />
-        //     * 
+        //     *
         //     * The general programming way with SQLExecutor/Dao is to execute sql scripts(generated by SQLBuilder) with array/list/map/entity by calling (batch)insert/update/delete/query/... methods.
         //     * If Transaction is required, it can be started:
-        //     * 
+        //     *
         //     * <pre>
         //     * <code>
         //     *   final SQLTransaction tran = someDao.beginTransaction(IsolationLevel.READ_COMMITTED);
@@ -14405,12 +14404,12 @@ public final class JdbcUtil {
         //     *
         //     *       tran.commit();
         //     *   } finally {
-        //     *       // The connection will be automatically closed after the transaction is committed or rolled back.            
+        //     *       // The connection will be automatically closed after the transaction is committed or rolled back.
         //     *       tran.rollbackIfNotCommitted();
         //     *   }
         //     * </code>
         //     * </pre>
-        //     * 
+        //     *
         //     * @param isolationLevel
         //     * @param forUpdateOnly
         //     * @return
@@ -14542,7 +14541,7 @@ public final class JdbcUtil {
          * @return
          * @see SQLExecutor#createDao(Class)
          */
-        public static <T extends Dao> T newInstance(final Class<T> daoInterface, final javax.sql.DataSource ds) {
+        static <T extends Dao> T newInstance(final Class<T> daoInterface, final javax.sql.DataSource ds) {
             N.checkArgNotNull(daoInterface, "daoInterface");
             N.checkArgNotNull(ds, "dataSource");
 
@@ -14569,7 +14568,7 @@ public final class JdbcUtil {
      * @See CrudDao
      * @see SQLExecutor.Mapper
      */
-    public static interface BasicDao<T, SB extends SQLBuilder> extends Dao {
+    public interface BasicDao<T, SB extends SQLBuilder> extends Dao {
 
         /**
          *
@@ -14862,7 +14861,7 @@ public final class JdbcUtil {
      * @see BasicDao
      * @see SQLExecutor.Mapper
      */
-    public static interface CrudDao<T, ID, SB extends SQLBuilder> extends BasicDao<T, SB> {
+    public interface CrudDao<T, ID, SB extends SQLBuilder> extends BasicDao<T, SB> {
 
         /**
          *
@@ -15805,7 +15804,7 @@ public final class JdbcUtil {
 
                     final Try.BiFunction<AbstractPreparedQuery, Object[], T, Exception> queryFunc = createQueryFunctionByMethod(m);
 
-                    // Getting ClassCastException. Not sure why query result is being casted Dao. It seems there is a bug in JDk compiler. 
+                    // Getting ClassCastException. Not sure why query result is being casted Dao. It seems there is a bug in JDk compiler.
                     //   call = (proxy, args) -> queryFunc.apply(JdbcUtil.prepareQuery(proxy, ds, query, isNamedQuery, fetchSize, queryTimeout, returnGeneratedKeys, args, paramSetter), args);
 
                     call = new Try.BiFunction<Dao, Object[], Object, Exception>() {
@@ -16265,7 +16264,7 @@ public final class JdbcUtil {
 
         if (List.class.isAssignableFrom(returnType)) {
 
-            // Check if return type is generic List type. 
+            // Check if return type is generic List type.
             if (method.getGenericReturnType() instanceof ParameterizedType) {
                 final ParameterizedType parameterizedReturnType = (ParameterizedType) method.getGenericReturnType();
 

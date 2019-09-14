@@ -973,7 +973,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         boolean isDone = true;
 
         try {
@@ -1036,7 +1036,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
             close();
         }
 
-        return N.toIntExact(result);
+        return result;
     }
 
     @Override

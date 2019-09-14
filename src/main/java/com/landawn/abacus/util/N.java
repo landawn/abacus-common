@@ -7303,13 +7303,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        long sum = 0;
+        int sum = 0;
 
         for (int i = from; i < to; i++) {
             sum += a[i];
         }
 
-        return toIntExact(sum);
+        return sum;
     }
 
     /**
@@ -7344,13 +7344,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        long sum = 0;
+        int sum = 0;
 
         for (int i = from; i < to; i++) {
             sum += a[i];
         }
 
-        return toIntExact(sum);
+        return sum;
     }
 
     /**
@@ -7385,13 +7385,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        long sum = 0;
+        int sum = 0;
 
         for (int i = from; i < to; i++) {
             sum += a[i];
         }
 
-        return toIntExact(sum);
+        return sum;
     }
 
     /**
@@ -7426,13 +7426,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        long sum = 0;
+        int sum = 0;
 
         for (int i = from; i < to; i++) {
             sum += a[i];
         }
 
-        return toIntExact(sum);
+        return sum;
     }
 
     /**
@@ -7592,13 +7592,7 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        long sum = 0;
-
-        for (int i = from; i < to; i++) {
-            sum += a[i];
-        }
-
-        return ((double) sum) / (to - from);
+        return ((double) sum(a, from, to)) / (to - from);
     }
 
     /**
@@ -7635,13 +7629,7 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        long sum = 0;
-
-        for (int i = from; i < to; i++) {
-            sum += a[i];
-        }
-
-        return ((double) sum) / (to - from);
+        return ((double) sum(a, from, to)) / (to - from);
     }
 
     /**
@@ -7678,13 +7666,7 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        long sum = 0;
-
-        for (int i = from; i < to; i++) {
-            sum += a[i];
-        }
-
-        return ((double) sum) / (to - from);
+        return ((double) sum(a, from, to)) / (to - from);
     }
 
     /**
@@ -7721,13 +7703,7 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        long sum = 0;
-
-        for (int i = from; i < to; i++) {
-            sum += a[i];
-        }
-
-        return ((double) sum) / (to - from);
+        return ((double) sum(a, from, to)) / (to - from);
     }
 
     /**
@@ -7764,13 +7740,7 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        long sum = 0;
-
-        for (int i = from; i < to; i++) {
-            sum += a[i];
-        }
-
-        return ((double) sum) / (to - from);
+        return ((double) sum(a, from, to)) / (to - from);
     }
 
     /**
@@ -14577,13 +14547,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        long result = 0;
+        int sum = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result += func.applyAsInt(a[i]);
+            sum += func.applyAsInt(a[i]);
         }
 
-        return toIntExact(result);
+        return sum;
     }
 
     /**
@@ -14622,13 +14592,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        long result = 0;
+        int sum = 0;
 
         for (T e : c) {
-            result += func.applyAsInt(e);
+            sum += func.applyAsInt(e);
         }
 
-        return toIntExact(result);
+        return sum;
     }
 
     /**
@@ -14650,13 +14620,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        long result = 0;
+        int sum = 0;
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result += func.applyAsInt(list.get(i));
+                sum += func.applyAsInt(list.get(i));
             }
         } else {
             int idx = 0;
@@ -14666,7 +14636,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result += func.applyAsInt(e);
+                sum += func.applyAsInt(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -14674,7 +14644,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return toIntExact(result);
+        return sum;
     }
 
     /**
@@ -14735,13 +14705,13 @@ public final class N extends CommonUtil {
             return 0L;
         }
 
-        long result = 0;
+        long sum = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result += func.applyAsLong(a[i]);
+            sum += func.applyAsLong(a[i]);
         }
 
-        return result;
+        return sum;
     }
 
     /**
@@ -14780,13 +14750,13 @@ public final class N extends CommonUtil {
             return 0L;
         }
 
-        long result = 0;
+        long sum = 0;
 
         for (T e : c) {
-            result += func.applyAsLong(e);
+            sum += func.applyAsLong(e);
         }
 
-        return result;
+        return sum;
     }
 
     /**
@@ -14808,13 +14778,13 @@ public final class N extends CommonUtil {
             return 0L;
         }
 
-        long result = 0;
+        long sum = 0;
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result += func.applyAsLong(list.get(i));
+                sum += func.applyAsLong(list.get(i));
             }
         } else {
             int idx = 0;
@@ -14824,7 +14794,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result += func.applyAsLong(e);
+                sum += func.applyAsLong(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -14832,7 +14802,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return sum;
     }
 
     /**
@@ -15051,13 +15021,7 @@ public final class N extends CommonUtil {
             return OptionalDouble.empty();
         }
 
-        long sum = 0;
-
-        for (int i = fromIndex; i < toIndex; i++) {
-            sum += func.applyAsInt(a[i]);
-        }
-
-        return OptionalDouble.of(((double) sum) / (toIndex - fromIndex));
+        return OptionalDouble.of(((double) sumInt(a, fromIndex, toIndex, func)) / (toIndex - fromIndex));
     }
 
     /**
@@ -15096,13 +15060,7 @@ public final class N extends CommonUtil {
             return OptionalDouble.empty();
         }
 
-        long sum = 0;
-
-        for (T e : c) {
-            sum += func.applyAsInt(e);
-        }
-
-        return OptionalDouble.of(((double) sum) / c.size());
+        return OptionalDouble.of(((double) sumInt(c, func)) / c.size());
     }
 
     /**
@@ -15124,31 +15082,7 @@ public final class N extends CommonUtil {
             return OptionalDouble.empty();
         }
 
-        long sum = 0;
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                sum += func.applyAsInt(list.get(i));
-            }
-        } else {
-            int idx = 0;
-
-            for (T e : c) {
-                if (idx++ < fromIndex) {
-                    continue;
-                }
-
-                sum += func.applyAsInt(e);
-
-                if (idx >= toIndex) {
-                    break;
-                }
-            }
-        }
-
-        return OptionalDouble.of(((double) sum) / (toIndex - fromIndex));
+        return OptionalDouble.of(((double) sumInt(c, fromIndex, toIndex, func)) / (toIndex - fromIndex));
     }
 
     /**

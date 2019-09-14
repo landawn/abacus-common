@@ -81,7 +81,7 @@ public final class IntPair {
      * @return
      */
     public int sum() {
-        return N.toIntExact(0L + _1 + _2);
+        return _1 + _2;
     }
 
     /**
@@ -89,7 +89,7 @@ public final class IntPair {
      * @return
      */
     public double average() {
-        return (0d + _1 + _2) / 2;
+        return ((double) sum()) / 2;
     }
 
     /**

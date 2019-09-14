@@ -545,7 +545,7 @@ public abstract class CharStream
      */
     public abstract OptionalChar kthLargest(int k);
 
-    public abstract int sum();
+    public abstract long sum();
 
     public abstract OptionalDouble average();
 

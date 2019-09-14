@@ -1276,7 +1276,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         assertNotClosed();
 
         try {
@@ -1286,7 +1286,7 @@ class IteratorShortStream extends AbstractShortStream {
                 result += elements.nextShort();
             }
 
-            return N.toIntExact(result);
+            return result;
         } finally {
             close();
         }

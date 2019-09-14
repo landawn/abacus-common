@@ -389,7 +389,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     public abstract OptionalInt kthLargest(int k);
 
-    public abstract int sum();
+    public abstract long sum();
 
     public abstract OptionalDouble average();
 

@@ -1241,7 +1241,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         assertNotClosed();
 
         try {

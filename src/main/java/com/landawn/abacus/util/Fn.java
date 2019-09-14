@@ -393,7 +393,7 @@ public abstract class Fn extends Comparators {
 
     /** The Constant NULL_TO_EMPTY_L. */
     @SuppressWarnings("rawtypes")
-    private static final Function<List, List> NULL_TO_EMPTY_L = new Function<List, List>() {
+    private static final Function<List, List> NULL_TO_EMPTY_LIST = new Function<List, List>() {
         @Override
         public List apply(List t) {
             return t == null ? N.emptyList() : t;
@@ -402,7 +402,7 @@ public abstract class Fn extends Comparators {
 
     /** The Constant NULL_TO_EMPTY_S. */
     @SuppressWarnings("rawtypes")
-    private static final Function<Set, Set> NULL_TO_EMPTY_S = new Function<Set, Set>() {
+    private static final Function<Set, Set> NULL_TO_EMPTY_SET = new Function<Set, Set>() {
         @Override
         public Set apply(Set t) {
             return t == null ? N.emptySet() : t;
@@ -411,7 +411,7 @@ public abstract class Fn extends Comparators {
 
     /** The Constant NULL_TO_EMPTY_M. */
     @SuppressWarnings("rawtypes")
-    private static final Function<Map, Map> NULL_TO_EMPTY_M = new Function<Map, Map>() {
+    private static final Function<Map, Map> NULL_TO_EMPTY_MAP = new Function<Map, Map>() {
         @Override
         public Map apply(Map t) {
             return t == null ? N.emptyMap() : t;
@@ -445,7 +445,7 @@ public abstract class Fn extends Comparators {
 
     /** The Constant SIZE_M. */
     @SuppressWarnings("rawtypes")
-    private static final Function<Map, Integer> SIZE_M = new Function<Map, Integer>() {
+    private static final Function<Map, Integer> SIZE_MAP = new Function<Map, Integer>() {
         @Override
         public Integer apply(Map t) {
             return t == null ? 0 : t.size();
@@ -1373,7 +1373,6 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Null to empty.
      *
      * @return
      */
@@ -1382,37 +1381,71 @@ public abstract class Fn extends Comparators {
     }
 
     /**
-     * Null to empty L.
      *
      * @param <T>
      * @return
+     * @deprecated replaced by {@code nullToEmptyList}
      */
+    @Deprecated
     @SuppressWarnings("rawtypes")
     public static <T> Function<List<T>, List<T>> nullToEmptyL() {
-        return (Function) NULL_TO_EMPTY_L;
+        return (Function) NULL_TO_EMPTY_LIST;
     }
 
     /**
-     * Null to empty S.
      *
      * @param <T>
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Function<Set<T>, Set<T>> nullToEmptyS() {
-        return (Function) NULL_TO_EMPTY_S;
+    public static <T> Function<List<T>, List<T>> nullToEmptyList() {
+        return (Function) NULL_TO_EMPTY_LIST;
     }
 
     /**
-     * Null to empty M.
+     *
+     * @param <T>
+     * @return
+     * @deprecated replaced by {@code nullToEmptySet}
+     */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
+    public static <T> Function<Set<T>, Set<T>> nullToEmptyS() {
+        return (Function) NULL_TO_EMPTY_SET;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> Function<Set<T>, Set<T>> nullToEmptySet() {
+        return (Function) NULL_TO_EMPTY_SET;
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return
+     * @deprecated replaced by {@code nullToEmptyMap}
+     */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
+    public static <K, V> Function<Map<K, V>, Map<K, V>> nullToEmptyM() {
+        return (Function) NULL_TO_EMPTY_MAP;
+    }
+
+    /**
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Function<Map<K, V>, Map<K, V>> nullToEmptyM() {
-        return (Function) NULL_TO_EMPTY_M;
+    public static <K, V> Function<Map<K, V>, Map<K, V>> nullToEmptyMap() {
+        return (Function) NULL_TO_EMPTY_MAP;
     }
 
     /**
@@ -1451,7 +1484,7 @@ public abstract class Fn extends Comparators {
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> Function<T, Integer> sizeM() {
-        return (Function<T, Integer>) SIZE_M;
+        return (Function<T, Integer>) SIZE_MAP;
     }
 
     /**
@@ -9061,6 +9094,14 @@ public abstract class Fn extends Comparators {
             }
         };
 
+        /** The Constant LEN. */
+        private static final Function<char[], Integer> LEN = new Function<char[], Integer>() {
+            @Override
+            public Integer apply(char[] t) {
+                return t == null ? 0 : t.length;
+            }
+        };
+
         /**
          * Instantiates a new fn C.
          */
@@ -9175,6 +9216,14 @@ public abstract class Fn extends Comparators {
         }
 
         /**
+         *
+         * @return
+         */
+        public static Function<char[], Integer> len() {
+            return LEN;
+        }
+
+        /**
          * Returns a stateful <code>CharBiFunction</code>. Don't save it or use it in parallel stream.
          *
          * @return
@@ -9264,6 +9313,14 @@ public abstract class Fn extends Comparators {
             @Override
             public boolean test(byte t, byte u) {
                 return t <= u;
+            }
+        };
+
+        /** The Constant LEN. */
+        private static final Function<byte[], Integer> LEN = new Function<byte[], Integer>() {
+            @Override
+            public Integer apply(byte[] t) {
+                return t == null ? 0 : t.length;
             }
         };
 
@@ -9381,6 +9438,46 @@ public abstract class Fn extends Comparators {
         }
 
         /**
+         *
+         * @return
+         */
+        public static Function<byte[], Integer> len() {
+            return LEN;
+        }
+
+        /** The Constant SUM. */
+        private static final Function<byte[], Integer> SUM = new Function<byte[], Integer>() {
+            @Override
+            public Integer apply(byte[] t) {
+                return N.sum(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<byte[], Integer> sum() {
+            return SUM;
+        }
+
+        /** The Constant AVERAGE. */
+        private static final Function<byte[], Double> AVERAGE = new Function<byte[], Double>() {
+            @Override
+            public Double apply(byte[] t) {
+                return N.average(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<byte[], Double> average() {
+            return AVERAGE;
+        }
+
+        /**
          * Returns a stateful <code>ByteBiFunction</code>. Don't save it or use it in parallel stream.
          *
          * @return
@@ -9470,6 +9567,14 @@ public abstract class Fn extends Comparators {
             @Override
             public boolean test(short t, short u) {
                 return t <= u;
+            }
+        };
+
+        /** The Constant LEN. */
+        private static final Function<short[], Integer> LEN = new Function<short[], Integer>() {
+            @Override
+            public Integer apply(short[] t) {
+                return t == null ? 0 : t.length;
             }
         };
 
@@ -9587,6 +9692,46 @@ public abstract class Fn extends Comparators {
         }
 
         /**
+         *
+         * @return
+         */
+        public static Function<short[], Integer> len() {
+            return LEN;
+        }
+
+        /** The Constant SUM. */
+        private static final Function<short[], Integer> SUM = new Function<short[], Integer>() {
+            @Override
+            public Integer apply(short[] t) {
+                return N.sum(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<short[], Integer> sum() {
+            return SUM;
+        }
+
+        /** The Constant AVERAGE. */
+        private static final Function<short[], Double> AVERAGE = new Function<short[], Double>() {
+            @Override
+            public Double apply(short[] t) {
+                return N.average(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<short[], Double> average() {
+            return AVERAGE;
+        }
+
+        /**
          * Returns a stateful <code>ShortBiFunction</code>. Don't save it or use it in parallel stream.
          *
          * @return
@@ -9676,6 +9821,14 @@ public abstract class Fn extends Comparators {
             @Override
             public boolean test(int t, int u) {
                 return t <= u;
+            }
+        };
+
+        /** The Constant LEN. */
+        private static final Function<int[], Integer> LEN = new Function<int[], Integer>() {
+            @Override
+            public Integer apply(int[] t) {
+                return t == null ? 0 : t.length;
             }
         };
 
@@ -9793,6 +9946,46 @@ public abstract class Fn extends Comparators {
         }
 
         /**
+         *
+         * @return
+         */
+        public static Function<int[], Integer> len() {
+            return LEN;
+        }
+
+        /** The Constant SUM. */
+        private static final Function<int[], Integer> SUM = new Function<int[], Integer>() {
+            @Override
+            public Integer apply(int[] t) {
+                return N.sum(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<int[], Integer> sum() {
+            return SUM;
+        }
+
+        /** The Constant AVERAGE. */
+        private static final Function<int[], Double> AVERAGE = new Function<int[], Double>() {
+            @Override
+            public Double apply(int[] t) {
+                return N.average(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<int[], Double> average() {
+            return AVERAGE;
+        }
+
+        /**
          * Returns a stateful <code>IntBiFunction</code>. Don't save it or use it in parallel stream.
          *
          * @return
@@ -9882,6 +10075,14 @@ public abstract class Fn extends Comparators {
             @Override
             public boolean test(long t, long u) {
                 return t <= u;
+            }
+        };
+
+        /** The Constant LEN. */
+        private static final Function<long[], Integer> LEN = new Function<long[], Integer>() {
+            @Override
+            public Integer apply(long[] t) {
+                return t == null ? 0 : t.length;
             }
         };
 
@@ -9999,6 +10200,46 @@ public abstract class Fn extends Comparators {
         }
 
         /**
+         *
+         * @return
+         */
+        public static Function<long[], Integer> len() {
+            return LEN;
+        }
+
+        /** The Constant SUM. */
+        private static final Function<long[], Long> SUM = new Function<long[], Long>() {
+            @Override
+            public Long apply(long[] t) {
+                return N.sum(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<long[], Long> sum() {
+            return SUM;
+        }
+
+        /** The Constant AVERAGE. */
+        private static final Function<long[], Double> AVERAGE = new Function<long[], Double>() {
+            @Override
+            public Double apply(long[] t) {
+                return N.average(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<long[], Double> average() {
+            return AVERAGE;
+        }
+
+        /**
          * Returns a stateful <code>LongBiFunction</code>. Don't save it or use it in parallel stream.
          *
          * @return
@@ -10088,6 +10329,14 @@ public abstract class Fn extends Comparators {
             @Override
             public boolean test(float t, float u) {
                 return t <= u;
+            }
+        };
+
+        /** The Constant LEN. */
+        private static final Function<float[], Integer> LEN = new Function<float[], Integer>() {
+            @Override
+            public Integer apply(float[] t) {
+                return t == null ? 0 : t.length;
             }
         };
 
@@ -10205,6 +10454,46 @@ public abstract class Fn extends Comparators {
         }
 
         /**
+         *
+         * @return
+         */
+        public static Function<float[], Integer> len() {
+            return LEN;
+        }
+
+        /** The Constant SUM. */
+        private static final Function<float[], Float> SUM = new Function<float[], Float>() {
+            @Override
+            public Float apply(float[] t) {
+                return N.sum(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<float[], Float> sum() {
+            return SUM;
+        }
+
+        /** The Constant AVERAGE. */
+        private static final Function<float[], Double> AVERAGE = new Function<float[], Double>() {
+            @Override
+            public Double apply(float[] t) {
+                return N.average(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<float[], Double> average() {
+            return AVERAGE;
+        }
+
+        /**
          * Returns a stateful <code>FloatBiFunction</code>. Don't save it or use it in parallel stream.
          *
          * @return
@@ -10294,6 +10583,14 @@ public abstract class Fn extends Comparators {
             @Override
             public boolean test(double t, double u) {
                 return N.compare(t, u) <= 0;
+            }
+        };
+
+        /** The Constant LEN. */
+        private static final Function<double[], Integer> LEN = new Function<double[], Integer>() {
+            @Override
+            public Integer apply(double[] t) {
+                return t == null ? 0 : t.length;
             }
         };
 
@@ -10408,6 +10705,46 @@ public abstract class Fn extends Comparators {
             N.checkArgNotNull(c);
 
             return c;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public static Function<double[], Integer> len() {
+            return LEN;
+        }
+
+        /** The Constant SUM. */
+        private static final Function<double[], Double> SUM = new Function<double[], Double>() {
+            @Override
+            public Double apply(double[] t) {
+                return N.sum(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<double[], Double> sum() {
+            return SUM;
+        }
+
+        /** The Constant AVERAGE. */
+        private static final Function<double[], Double> AVERAGE = new Function<double[], Double>() {
+            @Override
+            public Double apply(double[] t) {
+                return N.average(t);
+            }
+        };
+
+        /**
+         *
+         * @return
+         */
+        public static Function<double[], Double> average() {
+            return AVERAGE;
         }
 
         /**

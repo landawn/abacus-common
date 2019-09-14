@@ -1760,7 +1760,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         assertNotClosed();
 
         try {
@@ -1770,7 +1770,7 @@ class IteratorIntStream extends AbstractIntStream {
                 result += elements.nextInt();
             }
 
-            return N.toIntExact(result);
+            return result;
         } finally {
             close();
         }

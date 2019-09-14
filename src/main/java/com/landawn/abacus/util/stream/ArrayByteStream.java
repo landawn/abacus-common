@@ -1241,7 +1241,7 @@ class ArrayByteStream extends AbstractByteStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         assertNotClosed();
 
         try {

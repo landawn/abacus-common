@@ -87,7 +87,6 @@ import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
-import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BiFunction;
@@ -458,10 +457,10 @@ public abstract class Collectors {
         }
     };
 
-    static final Function<long[], Integer> SummingInt_Finisher = new Function<long[], Integer>() {
+    static final Function<long[], Long> SummingInt_Finisher = new Function<long[], Long>() {
         @Override
-        public Integer apply(long[] a) {
-            return N.toIntExact(a[0]);
+        public Long apply(long[] a) {
+            return a[0];
         }
     };
 
@@ -481,10 +480,10 @@ public abstract class Collectors {
         }
     };
 
-    static final Function<long[], OptionalInt> SummingInt_Finisher_2 = new Function<long[], OptionalInt>() {
+    static final Function<long[], OptionalLong> SummingInt_Finisher_2 = new Function<long[], OptionalLong>() {
         @Override
-        public OptionalInt apply(long[] a) {
-            return a[1] == 0 ? OptionalInt.empty() : OptionalInt.of(N.toIntExact(a[0]));
+        public OptionalLong apply(long[] a) {
+            return a[1] == 0 ? OptionalLong.empty() : OptionalLong.of(a[0]);
         }
     };
 
@@ -1877,17 +1876,26 @@ public abstract class Collectors {
      * @return a collector which counts a number of distinct classes the mapper
      *         function returns for the stream elements.
      */
-    public static <T> Collector<T, ?, Integer> distinctCount(Function<? super T, ?> mapper) {
-        final Collector<Object, ?, Set<Object>> downstream = Collectors.toSet();
+    public static <T> Collector<T, ?, Integer> distinctCount(final Function<? super T, ?> mapper) {
+        final Supplier<Set<Object>> supplier = Suppliers.<Object> ofSet();
 
-        final Function<Set<Object>, Integer> finisher = new Function<Set<Object>, Integer>() {
+        final BiConsumer<Set<Object>, T> accumulator = new BiConsumer<Set<Object>, T>() {
             @Override
-            public Integer apply(Set<Object> t) {
-                return t.size();
+            public void accept(Set<Object> c, T t) {
+                c.add(mapper.apply(t));
             }
         };
 
-        return Collectors.collectingAndThen(Collectors.mapping(mapper, downstream), finisher);
+        final BinaryOperator<Set<Object>> combiner = BinaryOperators.<Object, Set<Object>> ofAddAllToBigger();
+
+        final Function<Set<Object>, Integer> finisher = new Function<Set<Object>, Integer>() {
+            @Override
+            public Integer apply(Set<Object> c) {
+                return c.size();
+            }
+        };
+
+        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
     public static <T> Collector<T, ?, Long> counting() {
@@ -1902,14 +1910,6 @@ public abstract class Collectors {
         final BinaryOperator<Integer> combiner = CountingInt_Combiner;
 
         return reducing(0, accumulator, combiner);
-    }
-
-    public static <T, U> Collector<T, ?, Long> countingBy(final Function<? super T, ? extends U> mapper) {
-        return mapping(mapper, counting());
-    }
-
-    public static <T, U> Collector<T, ?, Integer> countingIntBy(final Function<? super T, ? extends U> mapper) {
-        return mapping(mapper, countingInt());
     }
 
     @SuppressWarnings("rawtypes")
@@ -2718,7 +2718,7 @@ public abstract class Collectors {
         return maxAlll(Fn.reversedOrder(comparator), downstream, finisher);
     }
 
-    public static <T> Collector<T, ?, Integer> summingInt(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Long> summingInt(final ToIntFunction<? super T> mapper) {
         final Supplier<long[]> supplier = SummingInt_Supplier;
 
         final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
@@ -2729,12 +2729,12 @@ public abstract class Collectors {
         };
 
         final BinaryOperator<long[]> combiner = SummingInt_Combiner;
-        final Function<long[], Integer> finisher = SummingInt_Finisher;
+        final Function<long[], Long> finisher = SummingInt_Finisher;
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, OptionalInt> summingIntt(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalLong> summingIntt(final ToIntFunction<? super T> mapper) {
         final Supplier<long[]> supplier = SummingInt_Supplier_2;
 
         final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
@@ -2745,7 +2745,7 @@ public abstract class Collectors {
         };
 
         final BinaryOperator<long[]> combiner = SummingInt_Combiner_2;
-        final Function<long[], OptionalInt> finisher = SummingInt_Finisher_2;
+        final Function<long[], OptionalLong> finisher = SummingInt_Finisher_2;
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -3683,6 +3683,28 @@ public abstract class Collectors {
         };
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+    }
+
+    public static <T, K> Collector<T, ?, Map<K, Long>> countingBy(Function<? super T, ? extends K> keyMapper) {
+        return countingBy(keyMapper, Suppliers.<K, Long> ofMap());
+    }
+
+    public static <T, K, M extends Map<K, Long>> Collector<T, ?, M> countingBy(final Function<? super T, ? extends K> keyMapper,
+            final Supplier<? extends M> mapFactory) {
+        final Collector<? super T, ?, Long> downstream = counting();
+
+        return groupingBy(keyMapper, downstream, mapFactory);
+    }
+
+    public static <T, K> Collector<T, ?, Map<K, Integer>> countingIntBy(Function<? super T, ? extends K> keyMapper) {
+        return countingIntBy(keyMapper, Suppliers.<K, Integer> ofMap());
+    }
+
+    public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingIntBy(final Function<? super T, ? extends K> keyMapper,
+            final Supplier<? extends M> mapFactory) {
+        final Collector<? super T, ?, Integer> downstream = countingInt();
+
+        return groupingBy(keyMapper, downstream, mapFactory);
     }
 
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap() {

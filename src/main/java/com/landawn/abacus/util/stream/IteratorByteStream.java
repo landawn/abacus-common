@@ -1154,7 +1154,7 @@ class IteratorByteStream extends AbstractByteStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         assertNotClosed();
 
         try {
@@ -1164,7 +1164,7 @@ class IteratorByteStream extends AbstractByteStream {
                 result += elements.nextByte();
             }
 
-            return N.toIntExact(result);
+            return result;
         } finally {
             close();
         }

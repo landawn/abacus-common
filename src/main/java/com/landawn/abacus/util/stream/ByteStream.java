@@ -373,7 +373,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @return int
      */
-    public abstract int sum();
+    public abstract long sum();
 
     public abstract OptionalDouble average();
 

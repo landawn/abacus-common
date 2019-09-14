@@ -95,7 +95,7 @@ public final class IntTriple {
      * @return
      */
     public int sum() {
-        return N.toIntExact(0L + _1 + _2 + _3);
+        return _1 + _2 + _3;
     }
 
     /**
@@ -103,7 +103,7 @@ public final class IntTriple {
      * @return
      */
     public double average() {
-        return (0d + _1 + _2 + _3) / 3;
+        return ((double) sum()) / 3;
     }
 
     /**

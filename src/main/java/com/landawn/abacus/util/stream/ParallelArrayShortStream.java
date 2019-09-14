@@ -786,7 +786,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         boolean isDone = true;
 
         try {
@@ -849,7 +849,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             close();
         }
 
-        return N.toIntExact(result);
+        return result;
     }
 
     @Override

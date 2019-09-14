@@ -1899,7 +1899,7 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         assertNotClosed();
 
         try {

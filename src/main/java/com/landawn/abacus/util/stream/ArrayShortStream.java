@@ -1326,7 +1326,7 @@ class ArrayShortStream extends AbstractShortStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         assertNotClosed();
 
         try {

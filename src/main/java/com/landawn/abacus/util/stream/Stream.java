@@ -1973,7 +1973,7 @@ public abstract class Stream<T>
     public abstract Optional<T> kthLargest(int k, Comparator<? super T> comparator);
 
     @ParallelSupported
-    public abstract int sumInt(ToIntFunction<? super T> mapper);
+    public abstract long sumInt(ToIntFunction<? super T> mapper);
 
     @ParallelSupported
     public abstract long sumLong(ToLongFunction<? super T> mapper);

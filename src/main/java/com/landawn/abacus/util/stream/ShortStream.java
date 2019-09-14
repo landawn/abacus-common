@@ -346,7 +346,7 @@ public abstract class ShortStream
      */
     public abstract OptionalShort kthLargest(int k);
 
-    public abstract int sum();
+    public abstract long sum();
 
     public abstract OptionalDouble average();
 

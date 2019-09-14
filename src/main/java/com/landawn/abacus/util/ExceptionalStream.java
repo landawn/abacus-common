@@ -47,7 +47,6 @@ import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
-import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.Function;
@@ -3849,12 +3848,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      * @throws E the e
      */
-    public OptionalInt sumInt(Try.ToIntFunction<? super T, E> func) throws E {
+    public OptionalLong sumInt(Try.ToIntFunction<? super T, E> func) throws E {
         assertNotClosed();
 
         try {
             if (elements.hasNext() == false) {
-                return OptionalInt.empty();
+                return OptionalLong.empty();
             }
 
             long sum = 0;
@@ -3863,7 +3862,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 sum += func.applyAsInt(elements.next());
             }
 
-            return OptionalInt.of(N.toIntExact(sum));
+            return OptionalLong.of(sum);
         } finally {
             close();
         }

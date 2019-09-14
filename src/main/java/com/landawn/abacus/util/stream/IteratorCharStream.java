@@ -1157,7 +1157,7 @@ class IteratorCharStream extends AbstractCharStream {
     }
 
     @Override
-    public int sum() {
+    public long sum() {
         assertNotClosed();
 
         try {
@@ -1167,7 +1167,7 @@ class IteratorCharStream extends AbstractCharStream {
                 result += elements.nextChar();
             }
 
-            return N.toIntExact(result);
+            return result;
         } finally {
             close();
         }

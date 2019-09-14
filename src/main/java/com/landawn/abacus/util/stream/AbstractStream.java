@@ -93,7 +93,7 @@ import com.landawn.abacus.util.function.TriFunction;
 
 /**
  *
- * @param <T> 
+ * @param <T>
  */
 abstract class AbstractStream<T> extends Stream<T> {
 
@@ -266,7 +266,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         final Function<T, Map.Entry<K, V>> mapper = new Function<T, Map.Entry<K, V>>() {
             @Override
             public Entry<K, V> apply(T t) {
-                return new SimpleImmutableEntry<K, V>(keyMapper.apply(t), valueMapper.apply(t));
+                return new SimpleImmutableEntry<>(keyMapper.apply(t), valueMapper.apply(t));
             }
         };
 
@@ -807,7 +807,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                         }
                     }
 
-                    result = new ArrayStream<T>(Stream.toArray(list), 0, list.size(), sorted, cmp, null);
+                    result = new ArrayStream<>(Stream.toArray(list), 0, list.size(), sorted, cmp, null);
                 } else {
                     IteratorEx<T> iterEx = iter;
 
@@ -836,7 +836,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                         };
                     }
 
-                    result = new IteratorStream<T>(iterEx, sorted, cmp, null);
+                    result = new IteratorStream<>(iterEx, sorted, cmp, null);
                 }
 
                 cursor++;
@@ -1076,7 +1076,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             private final long durationInMillis = duration.toMillis();
             private final boolean useQueue = incrementInMillis < durationInMillis;
 
-            private final Deque<Timed<T>> queue = useQueue ? new ArrayDeque<Timed<T>>() : null;
+            private final Deque<Timed<T>> queue = useQueue ? new ArrayDeque<>() : null;
             private Iterator<Timed<T>> queueIter;
 
             private ObjIteratorEx<T> iter;
@@ -1234,7 +1234,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             private final long durationInMillis = duration.toMillis();
             private final boolean useQueue = incrementInMillis < durationInMillis;
 
-            private final Deque<Timed<T>> queue = useQueue ? new ArrayDeque<Timed<T>>() : null;
+            private final Deque<Timed<T>> queue = useQueue ? new ArrayDeque<>() : null;
             private Iterator<Timed<T>> queueIter;
 
             private Supplier<A> supplier;
@@ -2293,7 +2293,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public int sumInt(ToIntFunction<? super T> mapper) {
+    public long sumInt(ToIntFunction<? super T> mapper) {
         return collect(Collectors.summingInt(mapper));
     }
 
