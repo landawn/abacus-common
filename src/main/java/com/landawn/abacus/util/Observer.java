@@ -31,7 +31,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.landawn.abacus.annotation.NonNull;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.Function;
@@ -57,7 +56,7 @@ public abstract class Observer<T> {
     protected static final Runnable EMPTY_ACTION = new Runnable() {
         @Override
         public void run() {
-            // Do nothing;            
+            // Do nothing;
         }
     };
 
@@ -157,7 +156,7 @@ public abstract class Observer<T> {
     }
 
     /**
-     *  
+     *
      *
      * @param delayInMillis
      * @return
@@ -168,7 +167,7 @@ public abstract class Observer<T> {
     }
 
     /**
-     *  
+     *
      *
      * @param delay
      * @param unit
@@ -183,7 +182,7 @@ public abstract class Observer<T> {
     }
 
     /**
-     *   
+     *
      *
      * @param periodInMillis
      * @return
@@ -205,7 +204,7 @@ public abstract class Observer<T> {
     }
 
     /**
-     *   
+     *
      *
      * @param period
      * @param unit
@@ -217,7 +216,7 @@ public abstract class Observer<T> {
     }
 
     /**
-     *  
+     *
      *
      * @param initialDelay
      * @param period
@@ -934,7 +933,7 @@ public abstract class Observer<T> {
          *
          * @param value
          */
-        public void onNext(@NonNull final T value) {
+        public void onNext(final T value) {
             if (downDispatcher != null) {
                 downDispatcher.onNext(value);
             }
@@ -944,7 +943,7 @@ public abstract class Observer<T> {
          * Signal a Exception exception.
          * @param error the Exception to signal, not null
          */
-        public void onError(@NonNull final Exception error) {
+        public void onError(final Exception error) {
             if (downDispatcher != null) {
                 downDispatcher.onError(error);
             }

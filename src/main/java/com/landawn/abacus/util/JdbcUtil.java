@@ -93,6 +93,7 @@ import com.landawn.abacus.IsolationLevel;
 import com.landawn.abacus.SliceSelector;
 import com.landawn.abacus.Transaction;
 import com.landawn.abacus.Transaction.Status;
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.condition.Condition;
@@ -655,8 +656,9 @@ public final class JdbcUtil {
      *
      * @param ds
      * @return
+     * @throws UncheckedSQLException the unchecked SQL exception
      */
-    public static Connection getConnection(final javax.sql.DataSource ds) {
+    public static Connection getConnection(final javax.sql.DataSource ds) throws UncheckedSQLException {
         if (isInSpring) {
             try {
                 return org.springframework.jdbc.datasource.DataSourceUtils.getConnection(ds);
@@ -2531,7 +2533,7 @@ public final class JdbcUtil {
      * @throws SQLException the SQL exception
      */
     @SafeVarargs
-    public static PreparedStatement prepareStatement(final Connection conn, final String sql, final Object... parameters) throws SQLException {
+    static PreparedStatement prepareStatement(final Connection conn, final String sql, final Object... parameters) throws SQLException {
         N.checkArgNotNull(conn, "conn");
         N.checkArgNotNull(sql, "sql");
 
@@ -2554,7 +2556,7 @@ public final class JdbcUtil {
      * @throws SQLException the SQL exception
      */
     @SafeVarargs
-    public static CallableStatement prepareCall(final Connection conn, final String sql, final Object... parameters) throws SQLException {
+    static CallableStatement prepareCall(final Connection conn, final String sql, final Object... parameters) throws SQLException {
         N.checkArgNotNull(conn, "conn");
         N.checkArgNotNull(sql, "sql");
 
@@ -2577,7 +2579,7 @@ public final class JdbcUtil {
      * @return
      * @throws SQLException the SQL exception
      */
-    public static PreparedStatement batchPrepareStatement(final Connection conn, final String sql, final List<?> parametersList) throws SQLException {
+    static PreparedStatement prepareBatchStatement(final Connection conn, final String sql, final List<?> parametersList) throws SQLException {
         N.checkArgNotNull(conn, "conn");
         N.checkArgNotNull(sql, "sql");
 
@@ -2593,7 +2595,6 @@ public final class JdbcUtil {
     }
 
     /**
-     * Batch prepare call.
      *
      * @param conn
      * @param sql
@@ -2601,7 +2602,7 @@ public final class JdbcUtil {
      * @return
      * @throws SQLException the SQL exception
      */
-    public static CallableStatement batchPrepareCall(final Connection conn, final String sql, final List<?> parametersList) throws SQLException {
+    static CallableStatement prepareBatchCall(final Connection conn, final String sql, final List<?> parametersList) throws SQLException {
         N.checkArgNotNull(conn, "conn");
         N.checkArgNotNull(sql, "sql");
 
@@ -4814,6 +4815,36 @@ public final class JdbcUtil {
     }
 
     /**
+     *
+     * @param sqlCmd
+     * @throws UncheckedSQLException
+     */
+    @Beta
+    static void run(Try.Runnable<SQLException> sqlCmd) throws UncheckedSQLException {
+        try {
+            sqlCmd.run();
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param sqlCmd
+     * @return
+     * @throws UncheckedSQLException
+     */
+    @Beta
+    static <R> R call(Try.Callable<R, SQLException> sqlCmd) throws UncheckedSQLException {
+        try {
+            return sqlCmd.call();
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
+    }
+
+    /**
      * The backed {@code PreparedStatement/CallableStatement} will be closed by default
      * after any execution methods(which will trigger the backed {@code PreparedStatement/CallableStatement} to be executed, for example: get/query/queryForInt/Long/../findFirst/list/execute/...).
      * except the {@code 'closeAfterExecution'} flag is set to {@code false} by calling {@code #closeAfterExecution(false)}.
@@ -4847,7 +4878,7 @@ public final class JdbcUtil {
         boolean isBatch = false;
 
         /** The close after execution. */
-        boolean closeAfterExecution = true;
+        boolean isCloseAfterExecution = true;
 
         /** The is closed. */
         boolean isClosed = false;
@@ -4888,26 +4919,24 @@ public final class JdbcUtil {
         //        }
 
         /**
-         * Close after execution.
          *
-         * @param closeAfterExecution
+         * @param closeAfterExecution default is {@code true}.
          * @return
          */
         public Q closeAfterExecution(boolean closeAfterExecution) {
             assertNotClosed();
 
-            this.closeAfterExecution = closeAfterExecution;
+            this.isCloseAfterExecution = closeAfterExecution;
 
             return (Q) this;
         }
 
         /**
-         * Close after execution.
          *
-         * @return true, if successful
+         * @return
          */
-        public boolean closeAfterExecution() {
-            return closeAfterExecution;
+        boolean isCloseAfterExecution() {
+            return isCloseAfterExecution;
         }
 
         /**
@@ -6068,6 +6097,100 @@ public final class JdbcUtil {
 
             try {
                 paramSetter.accept((Q) this, parameter);
+
+                noException = true;
+            } finally {
+                if (noException == false) {
+                    close();
+                }
+            }
+
+            return (Q) this;
+        }
+
+        /**
+         * @param <T>
+         * @param batchParameters
+         * @param parametersSetter
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        <T> Q setBatchParameters(final Collection<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
+            return setBatchParameters(batchParameters.iterator(), parametersSetter);
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param batchParameters
+         * @param parametersSetter
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        <T> Q setBatchParameters(final Iterator<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
+            checkArgNotNull(batchParameters, "batchParameters");
+            checkArgNotNull(parametersSetter, "parametersSetter");
+
+            boolean noException = false;
+
+            try {
+                if (isBatch) {
+                    stmt.clearBatch();
+                }
+
+                final Iterator<T> iter = batchParameters;
+
+                while (iter.hasNext()) {
+                    parametersSetter.accept((Q) this, iter.next());
+                    stmt.addBatch();
+                    isBatch = true;
+                }
+
+                noException = true;
+            } finally {
+                if (noException == false) {
+                    close();
+                }
+            }
+
+            return (Q) this;
+        }
+
+        /**
+         * @param <T>
+         * @param batchParameters
+         * @param parametersSetter
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        @Beta
+        public <T> Q addBatchParameters(final Collection<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
+            return addBatchParameters(batchParameters.iterator(), parametersSetter);
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param batchParameters
+         * @param parametersSetter
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        @Beta
+        public <T> Q addBatchParameters(final Iterator<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
+            checkArgNotNull(batchParameters, "batchParameters");
+            checkArgNotNull(parametersSetter, "parametersSetter");
+
+            boolean noException = false;
+
+            try {
+                final Iterator<T> iter = batchParameters;
+
+                while (iter.hasNext()) {
+                    parametersSetter.accept((Q) this, iter.next());
+                    stmt.addBatch();
+                    isBatch = true;
+                }
 
                 noException = true;
             } finally {
@@ -7627,7 +7750,19 @@ public final class JdbcUtil {
             assertNotClosed();
 
             try {
-                return executeBatchInsert();
+                stmt.executeBatch();
+
+                final List<ID> result = new ArrayList<>();
+
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    while (rs.next()) {
+                        result.add((ID) JdbcUtil.getColumnValue(rs, 1));
+                    }
+
+                    return result;
+                } finally {
+                    stmt.clearBatch();
+                }
             } finally {
                 closeAfterExecutionIfAllowed();
             }
@@ -7694,72 +7829,6 @@ public final class JdbcUtil {
         }
 
         /**
-         * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *
-         * @param <T>
-         * @param <ID>
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        public <T, ID> List<ID> batchInsert(final Collection<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter)
-                throws SQLException {
-            return batchInsert(batchParameters.iterator(), parametersSetter);
-        }
-
-        /**
-         * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *
-         *
-         * @param <T>
-         * @param <ID>
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        public <T, ID> List<ID> batchInsert(final Iterator<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
-            checkArgNotNull(parametersSetter, "parametersSetter");
-
-            try {
-                final Iterator<T> iter = batchParameters == null ? N.<T> emptyIterator() : batchParameters;
-
-                while (iter.hasNext()) {
-                    parametersSetter.accept((Q) this, iter.next());
-                    addBatch();
-                }
-
-                return executeBatchInsert();
-            } finally {
-                closeAfterExecutionIfAllowed();
-            }
-        }
-
-        /**
-         * Execute batch insert.
-         *
-         * @param <ID>
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        <ID> List<ID> executeBatchInsert() throws SQLException {
-            stmt.executeBatch();
-
-            final List<ID> result = new ArrayList<>();
-
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                while (rs.next()) {
-                    result.add((ID) JdbcUtil.getColumnValue(rs, 1));
-                }
-
-                return result;
-            } finally {
-                stmt.clearBatch();
-            }
-        }
-
-        /**
          *
          * @return
          * @throws SQLException the SQL exception
@@ -7783,7 +7852,11 @@ public final class JdbcUtil {
             assertNotClosed();
 
             try {
-                return executeBatchUpdate();
+                try {
+                    return stmt.executeBatch();
+                } finally {
+                    stmt.clearBatch();
+                }
             } finally {
                 closeAfterExecutionIfAllowed();
             }
@@ -7814,65 +7887,13 @@ public final class JdbcUtil {
             assertNotClosed();
 
             try {
-                final long[] result = stmt.executeLargeBatch();
-                stmt.clearBatch();
-                return result;
-            } finally {
-                closeAfterExecutionIfAllowed();
-            }
-        }
-
-        /**
-         * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *
-         * @param <T>
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        public <T> int batchUpdate(final Collection<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
-            return batchUpdate(batchParameters == null ? N.<T> emptyIterator() : batchParameters.iterator(), parametersSetter);
-        }
-
-        /**
-         * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *
-         *
-         * @param <T>
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        public <T> int batchUpdate(final Iterator<T> batchParameters, final BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
-            checkArgNotNull(parametersSetter, "parametersSetter");
-
-            try {
-                final Iterator<T> iter = batchParameters == null ? N.<T> emptyIterator() : batchParameters;
-
-                while (iter.hasNext()) {
-                    parametersSetter.accept((Q) this, iter.next());
-                    addBatch();
+                try {
+                    return stmt.executeLargeBatch();
+                } finally {
+                    stmt.clearBatch();
                 }
-
-                return N.sum(executeBatchUpdate());
             } finally {
                 closeAfterExecutionIfAllowed();
-            }
-        }
-
-        /**
-         * Execute batch update.
-         *
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        int[] executeBatchUpdate() throws SQLException {
-            try {
-                return stmt.executeBatch();
-            } finally {
-                stmt.clearBatch();
             }
         }
 
@@ -8000,7 +8021,6 @@ public final class JdbcUtil {
                         return func.apply(q);
                     }
                 });
-
             }
         }
 
@@ -8056,7 +8076,6 @@ public final class JdbcUtil {
                         action.accept(q);
                         return null;
                     }
-
                 });
             }
         }
@@ -8157,7 +8176,7 @@ public final class JdbcUtil {
          * @throws SQLException the SQL exception
          */
         void closeAfterExecutionIfAllowed() throws SQLException {
-            if (closeAfterExecution) {
+            if (isCloseAfterExecution) {
                 close();
             }
         }
@@ -12082,78 +12101,44 @@ public final class JdbcUtil {
         }
 
         /**
-         * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *
          * @param <T>
-         * @param <ID>
-         * @param parametersSetter
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        public <T, ID> List<ID> batchInsert(final Collection<T> batchParameters) throws SQLException {
-            return batchInsert(batchParameters.iterator());
-        }
-
-        /**
-         * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *
-         *
-         * @param <T>
-         * @param <ID>
          * @param batchParameters
          * @return
          * @throws SQLException the SQL exception
          */
-        public <T, ID> List<ID> batchInsert(final Iterator<T> batchParameters) throws SQLException {
+        public <T> NamedQuery addBatchParameters(final Collection<T> batchParameters) throws SQLException {
+            return addBatchParameters(batchParameters.iterator());
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param batchParameters
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        public <T> NamedQuery addBatchParameters(final Iterator<T> batchParameters) throws SQLException {
+            checkArgNotNull(batchParameters, "batchParameters");
+
+            boolean noException = false;
+
             try {
-                final Iterator<T> iter = batchParameters == null ? N.<T> emptyIterator() : batchParameters;
+                final Iterator<T> iter = batchParameters;
 
                 while (iter.hasNext()) {
                     StatementSetter.DEFAULT.setParameters(namedSQL, stmt, iter.next());
-                    addBatch();
+                    stmt.addBatch();
+                    isBatch = true;
                 }
 
-                return executeBatchInsert();
+                noException = true;
             } finally {
-                closeAfterExecutionIfAllowed();
-            }
-        }
-
-        /**
-         * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *
-         * @param <T>
-         * @param batchParameters
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        public <T> int batchUpdate(final Collection<T> batchParameters) throws SQLException {
-            return batchUpdate(batchParameters == null ? N.<T> emptyIterator() : batchParameters.iterator());
-        }
-
-        /**
-         * All will be done in one batch. Exception may occur if the size of {@code batchParameters} is too big.
-         *
-         *
-         * @param <T>
-         * @param batchParameters
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        public <T> int batchUpdate(final Iterator<T> batchParameters) throws SQLException {
-
-            try {
-                final Iterator<T> iter = batchParameters == null ? N.<T> emptyIterator() : batchParameters;
-
-                while (iter.hasNext()) {
-                    StatementSetter.DEFAULT.setParameters(namedSQL, stmt, iter.next());
-                    addBatch();
+                if (noException == false) {
+                    close();
                 }
-
-                return N.sum(executeBatchUpdate());
-            } finally {
-                closeAfterExecutionIfAllowed();
             }
+
+            return this;
         }
     }
 
@@ -14454,7 +14439,7 @@ public final class JdbcUtil {
          *
          * @param query
          * @return
-         * @throws SQLException the SQL exception
+         * @throws SQLException
          */
         PreparedQuery prepareQuery(final String query) throws SQLException;
 
@@ -14463,72 +14448,69 @@ public final class JdbcUtil {
          * @param query
          * @param generateKeys
          * @return
+         * @throws SQLException
          */
-        PreparedQuery prepareQuery(final String query, final boolean generateKeys);
+        PreparedQuery prepareQuery(final String query, final boolean generateKeys) throws SQLException;
 
         /**
          *
          * @param sql
          * @param stmtCreator
          * @return
-         * @throws SQLException the SQL exception
+         * @throws SQLException
          */
         PreparedQuery prepareQuery(final String sql, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator) throws SQLException;
 
         /**
-         * Prepare named query.
          *
          * @param namedQuery
          * @return
-         * @throws SQLException the SQL exception
+         * @throws SQLException
          */
         NamedQuery prepareNamedQuery(final String namedQuery) throws SQLException;
 
         /**
-         * Prepare named query.
          *
          * @param namedQuery
          * @param generateKeys
          * @return
+         * @throws SQLException
          */
-        NamedQuery prepareNamedQuery(final String namedQuery, final boolean generateKeys);
+        NamedQuery prepareNamedQuery(final String namedQuery, final boolean generateKeys) throws SQLException;
 
         /**
-         * Prepare named query.
          *
          * @param namedQuery
          * @param stmtCreator
          * @return
-         * @throws SQLException the SQL exception
+         * @throws SQLException
          */
         NamedQuery prepareNamedQuery(final String namedQuery, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator)
                 throws SQLException;
 
         /**
-         * Prepare named query.
          *
          * @param namedSQL the named query
          * @return
-         * @throws SQLException the SQL exception
+         * @throws SQLException
          */
         NamedQuery prepareNamedQuery(final NamedSQL namedSQL) throws SQLException;
 
         /**
-         * Prepare named query.
          *
          * @param namedSQL the named query
          * @param generateKeys
          * @return
+         * @throws SQLException
          */
-        NamedQuery prepareNamedQuery(final NamedSQL namedSQL, final boolean generateKeys);
+        NamedQuery prepareNamedQuery(final NamedSQL namedSQL, final boolean generateKeys) throws SQLException;
 
         /**
-         * Prepare named query.
          *
          * @param namedSQL the named query
          * @param stmtCreator
          * @return
-         * @throws SQLException the SQL exception
+         * @throws SQLException
          */
         NamedQuery prepareNamedQuery(final NamedSQL namedSQL, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator)
                 throws SQLException;
@@ -15396,7 +15378,7 @@ public final class JdbcUtil {
                         final Object idPropValue = N.isNullOrEmpty(entities) ? null : ClassUtil.getPropValue(N.first(entities).get(), idPropName);
 
                         if (JdbcUtil.isDefaultIdPropValue(idPropValue)) {
-                            final List<Object> ids = proxy.prepareNamedQuery(insertWithoutIdSQL, true).batchInsert(entities);
+                            final List<Object> ids = proxy.prepareNamedQuery(insertWithoutIdSQL, true).addBatchParameters(entities).batchInsert();
 
                             if (N.notNullOrEmpty(entities) && ids.size() == N.size(entities)) {
                                 int idx = 0;
@@ -15414,7 +15396,7 @@ public final class JdbcUtil {
 
                             return ids;
                         } else {
-                            proxy.prepareNamedQuery(insertWithIdSQL).batchUpdate(entities);
+                            proxy.prepareNamedQuery(insertWithIdSQL).addBatchParameters(entities).batchUpdate();
 
                             if (N.first(entities).orNull() instanceof DirtyMarker) {
                                 for (Object e : entities) {
@@ -15508,7 +15490,7 @@ public final class JdbcUtil {
                         final String sql = namedUpdateFunc.apply(entityClass).set(entity, idPropNameSet).where(CF.eq(idPropName)).sql();
                         final NamedSQL namedSQL = NamedSQL.parse(sql);
 
-                        final int result = proxy.prepareNamedQuery(namedSQL).batchUpdate(entities);
+                        final int result = N.sum(proxy.prepareNamedQuery(namedSQL).addBatchParameters(entities).batchUpdate());
 
                         if (entity instanceof DirtyMarker) {
                             final Collection<String> propNamesToUpdate = namedSQL.getNamedParameters();
@@ -15534,7 +15516,7 @@ public final class JdbcUtil {
                         final String sql = namedUpdateFunc.apply(entityClass).set(propNamesToUpdate).where(CF.eq(idPropName)).sql();
                         final NamedSQL namedSQL = NamedSQL.parse(sql);
 
-                        final int result = proxy.prepareNamedQuery(namedSQL).batchUpdate(entities);
+                        final int result = N.sum(proxy.prepareNamedQuery(namedSQL).addBatchParameters(entities).batchUpdate());
 
                         if (N.first(entities).orNull() instanceof DirtyMarker) {
                             for (Object e : entities) {
@@ -15560,7 +15542,9 @@ public final class JdbcUtil {
                             return 0;
                         }
 
-                        return proxy.prepareQuery(query).batchUpdate(entities, (q, e) -> q.setObject(1, ClassUtil.getPropValue(e, idPropName)));
+                        return N.sum(proxy.prepareQuery(query)
+                                .setBatchParameters(entities, (q, e) -> q.setObject(1, ClassUtil.getPropValue(e, idPropName)))
+                                .batchUpdate());
                     };
                 } else {
                     call = (proxy, args) -> {

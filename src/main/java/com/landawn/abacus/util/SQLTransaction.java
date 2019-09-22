@@ -451,19 +451,17 @@ public final class SQLTransaction implements Transaction {
     }
 
     /**
-     * Gets the transaction id.
      *
-     * @param dataSourceOrConnection
+     * @param ds
      * @param creator
      * @return
      */
-    static String getTransactionId(Object dataSourceOrConnection, final CreatedBy creator) {
-        return StringUtil.concat(System.identityHashCode(dataSourceOrConnection), "_", Thread.currentThread().getId(), "_", Thread.currentThread().getName(),
-                "_", creator.ordinal());
+    static String getTransactionId(javax.sql.DataSource ds, final CreatedBy creator) {
+        return StringUtil.concat(System.identityHashCode(ds), "_", Thread.currentThread().getId(), "_", Thread.currentThread().getName(), "_",
+                creator.ordinal());
     }
 
     /**
-     * Gets the transaction.
      *
      * @param ds
      * @param creator
