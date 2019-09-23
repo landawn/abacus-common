@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,13 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.landawn.abacus.util.function.Supplier;
+import com.landawn.abacus.util.stream.ByteStream;
+import com.landawn.abacus.util.stream.CharStream;
 import com.landawn.abacus.util.stream.DoubleStream;
+import com.landawn.abacus.util.stream.FloatStream;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.LongStream;
+import com.landawn.abacus.util.stream.ShortStream;
 import com.landawn.abacus.util.stream.Stream;
 
 // TODO: Auto-generated Javadoc
@@ -882,24 +886,6 @@ public class u {
 
         /**
          *
-         * @param optional
-         * @return
-         */
-        @Override
-        public int compareTo(OptionalBoolean optional) {
-            if (optional == null || optional.isPresent == false) {
-                return isPresent ? 1 : 0;
-            }
-
-            if (isPresent == false) {
-                return -1;
-            }
-
-            return Boolean.compare(this.get(), optional.get());
-        }
-
-        /**
-         *
          * @return
          */
         public Stream<Boolean> stream() {
@@ -914,12 +900,80 @@ public class u {
          *
          * @return
          */
+        public List<Boolean> toList() {
+            if (isPresent()) {
+                return N.asList(value);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Set<Boolean> toSet() {
+            if (isPresent()) {
+                return N.asSet(value);
+            } else {
+                return N.newHashSet();
+            }
+        }
+
+        /**
+         * To immutable list.
+         *
+         * @return
+         */
+        public ImmutableList<Boolean> toImmutableList() {
+            if (isPresent()) {
+                return ImmutableList.of(value);
+            } else {
+                return ImmutableList.<Boolean> empty();
+            }
+        }
+
+        /**
+         * To immutable set.
+         *
+         * @return
+         */
+        public ImmutableSet<Boolean> toImmutableSet() {
+            if (isPresent()) {
+                return ImmutableSet.of(value);
+            } else {
+                return ImmutableSet.<Boolean> empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
         public Optional<Boolean> boxed() {
             if (isPresent) {
                 return Optional.of(value);
             } else {
                 return Optional.<Boolean> empty();
             }
+        }
+
+        /**
+         *
+         * @param optional
+         * @return
+         */
+        @Override
+        public int compareTo(OptionalBoolean optional) {
+            if (optional == null || optional.isPresent == false) {
+                return isPresent ? 1 : 0;
+            }
+
+            if (isPresent == false) {
+                return -1;
+            }
+
+            return Boolean.compare(this.get(), optional.get());
         }
 
         /**
@@ -1265,6 +1319,80 @@ public class u {
 
         /**
          *
+         * @return
+         */
+        public CharStream stream() {
+            if (isPresent) {
+                return CharStream.of(value);
+            } else {
+                return CharStream.empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public List<Character> toList() {
+            if (isPresent()) {
+                return N.asList(value);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Set<Character> toSet() {
+            if (isPresent()) {
+                return N.asSet(value);
+            } else {
+                return N.newHashSet();
+            }
+        }
+
+        /**
+         * To immutable list.
+         *
+         * @return
+         */
+        public ImmutableList<Character> toImmutableList() {
+            if (isPresent()) {
+                return ImmutableList.of(value);
+            } else {
+                return ImmutableList.<Character> empty();
+            }
+        }
+
+        /**
+         * To immutable set.
+         *
+         * @return
+         */
+        public ImmutableSet<Character> toImmutableSet() {
+            if (isPresent()) {
+                return ImmutableSet.of(value);
+            } else {
+                return ImmutableSet.<Character> empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Optional<Character> boxed() {
+            if (isPresent()) {
+                return Optional.of(value);
+            } else {
+                return Optional.<Character> empty();
+            }
+        }
+
+        /**
+         *
          * @param optional
          * @return
          */
@@ -1279,18 +1407,6 @@ public class u {
             }
 
             return Character.compare(this.get(), optional.get());
-        }
-
-        /**
-         *
-         * @return
-         */
-        public Optional<Character> boxed() {
-            if (isPresent()) {
-                return Optional.of(value);
-            } else {
-                return Optional.<Character> empty();
-            }
         }
 
         /**
@@ -1642,6 +1758,80 @@ public class u {
 
         /**
          *
+         * @return
+         */
+        public ByteStream stream() {
+            if (isPresent) {
+                return ByteStream.of(value);
+            } else {
+                return ByteStream.empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public List<Byte> toList() {
+            if (isPresent()) {
+                return N.asList(value);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Set<Byte> toSet() {
+            if (isPresent()) {
+                return N.asSet(value);
+            } else {
+                return N.newHashSet();
+            }
+        }
+
+        /**
+         * To immutable list.
+         *
+         * @return
+         */
+        public ImmutableList<Byte> toImmutableList() {
+            if (isPresent()) {
+                return ImmutableList.of(value);
+            } else {
+                return ImmutableList.<Byte> empty();
+            }
+        }
+
+        /**
+         * To immutable set.
+         *
+         * @return
+         */
+        public ImmutableSet<Byte> toImmutableSet() {
+            if (isPresent()) {
+                return ImmutableSet.of(value);
+            } else {
+                return ImmutableSet.<Byte> empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Optional<Byte> boxed() {
+            if (isPresent) {
+                return Optional.of(value);
+            } else {
+                return Optional.<Byte> empty();
+            }
+        }
+
+        /**
+         *
          * @param optional
          * @return
          */
@@ -1656,18 +1846,6 @@ public class u {
             }
 
             return Byte.compare(this.get(), optional.get());
-        }
-
-        /**
-         *
-         * @return
-         */
-        public Optional<Byte> boxed() {
-            if (isPresent) {
-                return Optional.of(value);
-            } else {
-                return Optional.<Byte> empty();
-            }
         }
 
         /**
@@ -2011,6 +2189,80 @@ public class u {
 
         /**
          *
+         * @return
+         */
+        public ShortStream stream() {
+            if (isPresent) {
+                return ShortStream.of(value);
+            } else {
+                return ShortStream.empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public List<Short> toList() {
+            if (isPresent()) {
+                return N.asList(value);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Set<Short> toSet() {
+            if (isPresent()) {
+                return N.asSet(value);
+            } else {
+                return N.newHashSet();
+            }
+        }
+
+        /**
+         * To immutable list.
+         *
+         * @return
+         */
+        public ImmutableList<Short> toImmutableList() {
+            if (isPresent()) {
+                return ImmutableList.of(value);
+            } else {
+                return ImmutableList.<Short> empty();
+            }
+        }
+
+        /**
+         * To immutable set.
+         *
+         * @return
+         */
+        public ImmutableSet<Short> toImmutableSet() {
+            if (isPresent()) {
+                return ImmutableSet.of(value);
+            } else {
+                return ImmutableSet.<Short> empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Optional<Short> boxed() {
+            if (isPresent) {
+                return Optional.of(value);
+            } else {
+                return Optional.<Short> empty();
+            }
+        }
+
+        /**
+         *
          * @param optional
          * @return
          */
@@ -2025,18 +2277,6 @@ public class u {
             }
 
             return Short.compare(this.get(), optional.get());
-        }
-
-        /**
-         *
-         * @return
-         */
-        public Optional<Short> boxed() {
-            if (isPresent) {
-                return Optional.of(value);
-            } else {
-                return Optional.<Short> empty();
-            }
         }
 
         /**
@@ -2425,24 +2665,6 @@ public class u {
 
         /**
          *
-         * @param optional
-         * @return
-         */
-        @Override
-        public int compareTo(OptionalInt optional) {
-            if (optional == null || optional.isPresent == false) {
-                return isPresent ? 1 : 0;
-            }
-
-            if (isPresent == false) {
-                return -1;
-            }
-
-            return Integer.compare(this.get(), optional.get());
-        }
-
-        /**
-         *
          * @return
          */
         public IntStream stream() {
@@ -2450,6 +2672,56 @@ public class u {
                 return IntStream.of(value);
             } else {
                 return IntStream.empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public List<Integer> toList() {
+            if (isPresent()) {
+                return N.asList(value);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Set<Integer> toSet() {
+            if (isPresent()) {
+                return N.asSet(value);
+            } else {
+                return N.newHashSet();
+            }
+        }
+
+        /**
+         * To immutable list.
+         *
+         * @return
+         */
+        public ImmutableList<Integer> toImmutableList() {
+            if (isPresent()) {
+                return ImmutableList.of(value);
+            } else {
+                return ImmutableList.<Integer> empty();
+            }
+        }
+
+        /**
+         * To immutable set.
+         *
+         * @return
+         */
+        public ImmutableSet<Integer> toImmutableSet() {
+            if (isPresent()) {
+                return ImmutableSet.of(value);
+            } else {
+                return ImmutableSet.<Integer> empty();
             }
         }
 
@@ -2475,6 +2747,24 @@ public class u {
             } else {
                 return java.util.OptionalInt.empty();
             }
+        }
+
+        /**
+         *
+         * @param optional
+         * @return
+         */
+        @Override
+        public int compareTo(OptionalInt optional) {
+            if (optional == null || optional.isPresent == false) {
+                return isPresent ? 1 : 0;
+            }
+
+            if (isPresent == false) {
+                return -1;
+            }
+
+            return Integer.compare(this.get(), optional.get());
         }
 
         /**
@@ -2848,24 +3138,6 @@ public class u {
 
         /**
          *
-         * @param optional
-         * @return
-         */
-        @Override
-        public int compareTo(OptionalLong optional) {
-            if (optional == null || optional.isPresent == false) {
-                return isPresent ? 1 : 0;
-            }
-
-            if (isPresent == false) {
-                return -1;
-            }
-
-            return Long.compare(this.get(), optional.get());
-        }
-
-        /**
-         *
          * @return
          */
         public LongStream stream() {
@@ -2873,6 +3145,56 @@ public class u {
                 return LongStream.of(value);
             } else {
                 return LongStream.empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public List<Long> toList() {
+            if (isPresent()) {
+                return N.asList(value);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Set<Long> toSet() {
+            if (isPresent()) {
+                return N.asSet(value);
+            } else {
+                return N.newHashSet();
+            }
+        }
+
+        /**
+         * To immutable list.
+         *
+         * @return
+         */
+        public ImmutableList<Long> toImmutableList() {
+            if (isPresent()) {
+                return ImmutableList.of(value);
+            } else {
+                return ImmutableList.<Long> empty();
+            }
+        }
+
+        /**
+         * To immutable set.
+         *
+         * @return
+         */
+        public ImmutableSet<Long> toImmutableSet() {
+            if (isPresent()) {
+                return ImmutableSet.of(value);
+            } else {
+                return ImmutableSet.<Long> empty();
             }
         }
 
@@ -2898,6 +3220,24 @@ public class u {
             } else {
                 return java.util.OptionalLong.empty();
             }
+        }
+
+        /**
+         *
+         * @param optional
+         * @return
+         */
+        @Override
+        public int compareTo(OptionalLong optional) {
+            if (optional == null || optional.isPresent == false) {
+                return isPresent ? 1 : 0;
+            }
+
+            if (isPresent == false) {
+                return -1;
+            }
+
+            return Long.compare(this.get(), optional.get());
         }
 
         /**
@@ -3241,6 +3581,80 @@ public class u {
 
         /**
          *
+         * @return
+         */
+        public FloatStream stream() {
+            if (isPresent) {
+                return FloatStream.of(value);
+            } else {
+                return FloatStream.empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public List<Float> toList() {
+            if (isPresent()) {
+                return N.asList(value);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Set<Float> toSet() {
+            if (isPresent()) {
+                return N.asSet(value);
+            } else {
+                return N.newHashSet();
+            }
+        }
+
+        /**
+         * To immutable list.
+         *
+         * @return
+         */
+        public ImmutableList<Float> toImmutableList() {
+            if (isPresent()) {
+                return ImmutableList.of(value);
+            } else {
+                return ImmutableList.<Float> empty();
+            }
+        }
+
+        /**
+         * To immutable set.
+         *
+         * @return
+         */
+        public ImmutableSet<Float> toImmutableSet() {
+            if (isPresent()) {
+                return ImmutableSet.of(value);
+            } else {
+                return ImmutableSet.<Float> empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Optional<Float> boxed() {
+            if (isPresent) {
+                return Optional.of(value);
+            } else {
+                return Optional.<Float> empty();
+            }
+        }
+
+        /**
+         *
          * @param optional
          * @return
          */
@@ -3255,18 +3669,6 @@ public class u {
             }
 
             return Float.compare(this.get(), optional.get());
-        }
-
-        /**
-         *
-         * @return
-         */
-        public Optional<Float> boxed() {
-            if (isPresent) {
-                return Optional.of(value);
-            } else {
-                return Optional.<Float> empty();
-            }
         }
 
         /**
@@ -3641,24 +4043,6 @@ public class u {
 
         /**
          *
-         * @param optional
-         * @return
-         */
-        @Override
-        public int compareTo(OptionalDouble optional) {
-            if (optional == null || optional.isPresent == false) {
-                return isPresent ? 1 : 0;
-            }
-
-            if (isPresent == false) {
-                return -1;
-            }
-
-            return Double.compare(this.get(), optional.get());
-        }
-
-        /**
-         *
          * @return
          */
         public DoubleStream stream() {
@@ -3666,6 +4050,56 @@ public class u {
                 return DoubleStream.of(value);
             } else {
                 return DoubleStream.empty();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public List<Double> toList() {
+            if (isPresent()) {
+                return N.asList(value);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Set<Double> toSet() {
+            if (isPresent()) {
+                return N.asSet(value);
+            } else {
+                return N.newHashSet();
+            }
+        }
+
+        /**
+         * To immutable list.
+         *
+         * @return
+         */
+        public ImmutableList<Double> toImmutableList() {
+            if (isPresent()) {
+                return ImmutableList.of(value);
+            } else {
+                return ImmutableList.<Double> empty();
+            }
+        }
+
+        /**
+         * To immutable set.
+         *
+         * @return
+         */
+        public ImmutableSet<Double> toImmutableSet() {
+            if (isPresent()) {
+                return ImmutableSet.of(value);
+            } else {
+                return ImmutableSet.<Double> empty();
             }
         }
 
@@ -3691,6 +4125,24 @@ public class u {
             } else {
                 return java.util.OptionalDouble.empty();
             }
+        }
+
+        /**
+         *
+         * @param optional
+         * @return
+         */
+        @Override
+        public int compareTo(OptionalDouble optional) {
+            if (optional == null || optional.isPresent == false) {
+                return isPresent ? 1 : 0;
+            }
+
+            if (isPresent == false) {
+                return -1;
+            }
+
+            return Double.compare(this.get(), optional.get());
         }
 
         /**
@@ -4997,6 +5449,7 @@ public class u {
          * @param <E>
          * @param action
          * @throws E the e
+         * @deprecated replaced by {@link #ifNotNull(com.landawn.abacus.util.Try.Consumer)}
          */
         @Deprecated
         public <E extends Exception> void acceptIfNotNull(final Try.Consumer<? super T, E> action) throws E {
@@ -5072,27 +5525,6 @@ public class u {
         }
 
         /**
-         *
-         * @return
-         */
-        public Stream<T> stream() {
-            return Stream.of(value);
-        }
-
-        /**
-         * Stream if not null.
-         *
-         * @return
-         */
-        public Stream<T> streamIfNotNull() {
-            if (isNotNull()) {
-                return Stream.of(value);
-            } else {
-                return Stream.<T> empty();
-            }
-        }
-
-        /**
          * Or else if null.
          *
          * @param other
@@ -5135,6 +5567,27 @@ public class u {
                 return value;
             } else {
                 throw exceptionSupplier.get();
+            }
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Stream<T> stream() {
+            return Stream.of(value);
+        }
+
+        /**
+         * Stream if not null.
+         *
+         * @return
+         */
+        public Stream<T> streamIfNotNull() {
+            if (isNotNull()) {
+                return Stream.of(value);
+            } else {
+                return Stream.<T> empty();
             }
         }
 
