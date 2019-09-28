@@ -56,7 +56,7 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToCharFunction;
 
 /**
- * 
+ *
  */
 abstract class AbstractCharStream extends CharStream {
 
@@ -267,7 +267,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream removeIf(final CharPredicate predicate, final CharConsumer action) {
+    public CharStream removeIf(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
         checkArgNotNull(predicate);
 
@@ -275,7 +275,7 @@ abstract class AbstractCharStream extends CharStream {
             @Override
             public boolean test(char value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return false;
                 }
 
@@ -285,15 +285,33 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream dropWhile(final CharPredicate predicate, final CharConsumer action) {
+    public CharStream filter(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
-        checkArgNotNull(action);
+        checkArgNotNull(predicate);
+
+        return filter(new CharPredicate() {
+            @Override
+            public boolean test(char value) {
+                if (!predicate.test(value)) {
+                    actionOnDroppedItem.accept(value);
+                    return false;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public CharStream dropWhile(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
+        checkArgNotNull(predicate);
+        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new CharPredicate() {
             @Override
             public boolean test(char value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return true;
                 }
 

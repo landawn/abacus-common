@@ -137,7 +137,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> peekLast(final Consumer<? super T> action) {
-        final Function<? super T, ? extends T> mapperForFirst = new Function<T, T>() {
+        final Function<? super T, ? extends T> mapperForLast = new Function<T, T>() {
             @Override
             public T apply(T t) {
                 action.accept(t);
@@ -145,7 +145,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
         };
 
-        return mapLast(mapperForFirst);
+        return mapLast(mapperForLast);
     }
 
     @Override
@@ -161,15 +161,15 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> removeIf(final Predicate<? super T> predicate, final Consumer<? super T> action) {
+    public Stream<T> removeIf(final Predicate<? super T> predicate, final Consumer<? super T> actionOnDroppedItem) {
         checkArgNotNull(predicate);
-        checkArgNotNull(action);
+        checkArgNotNull(actionOnDroppedItem);
 
         return filter(new Predicate<T>() {
             @Override
             public boolean test(T value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return false;
                 }
 
@@ -179,15 +179,33 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> dropWhile(final Predicate<? super T> predicate, final Consumer<? super T> action) {
+    public Stream<T> filter(final Predicate<? super T> predicate, final Consumer<? super T> actionOnDroppedItem) {
         checkArgNotNull(predicate);
-        checkArgNotNull(action);
+        checkArgNotNull(actionOnDroppedItem);
+
+        return filter(new Predicate<T>() {
+            @Override
+            public boolean test(T value) {
+                if (!predicate.test(value)) {
+                    actionOnDroppedItem.accept(value);
+                    return false;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public Stream<T> dropWhile(final Predicate<? super T> predicate, final Consumer<? super T> actionOnDroppedItem) {
+        checkArgNotNull(predicate);
+        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new Predicate<T>() {
             @Override
             public boolean test(T value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return true;
                 }
 

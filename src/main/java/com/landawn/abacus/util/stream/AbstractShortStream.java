@@ -56,7 +56,7 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToShortFunction;
 
 /**
- * 
+ *
  */
 abstract class AbstractShortStream extends ShortStream {
 
@@ -267,7 +267,7 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream removeIf(final ShortPredicate predicate, final ShortConsumer action) {
+    public ShortStream removeIf(final ShortPredicate predicate, final ShortConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
         checkArgNotNull(predicate);
 
@@ -275,7 +275,7 @@ abstract class AbstractShortStream extends ShortStream {
             @Override
             public boolean test(short value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return false;
                 }
 
@@ -285,15 +285,33 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream dropWhile(final ShortPredicate predicate, final ShortConsumer action) {
+    public ShortStream filter(final ShortPredicate predicate, final ShortConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
-        checkArgNotNull(action);
+        checkArgNotNull(predicate);
+
+        return filter(new ShortPredicate() {
+            @Override
+            public boolean test(short value) {
+                if (!predicate.test(value)) {
+                    actionOnDroppedItem.accept(value);
+                    return false;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public ShortStream dropWhile(final ShortPredicate predicate, final ShortConsumer actionOnDroppedItem) {
+        checkArgNotNull(predicate);
+        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new ShortPredicate() {
             @Override
             public boolean test(short value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return true;
                 }
 

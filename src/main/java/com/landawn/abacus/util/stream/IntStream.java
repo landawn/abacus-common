@@ -424,7 +424,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public abstract Stream<Integer> boxed();
 
     /**
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */

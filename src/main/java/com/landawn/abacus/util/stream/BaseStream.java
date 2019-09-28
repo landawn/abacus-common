@@ -65,6 +65,16 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     S filter(P predicate);
 
     /**
+     * Returns a stream consisting of the elements of this stream that match the given predicate.
+     *
+     * @param predicate
+     * @param actionOnDroppedItem
+     * @return
+     */
+    @ParallelSupported
+    S filter(P predicate, C actionOnDroppedItem);
+
+    /**
      * Keep the elements until the given predicate returns false. The stream should be sorted, which means if x is the first element: <code>predicate.text(x)</code> returns false, any element y behind x: <code>predicate.text(y)</code> should returns false.
      *
      * In parallel Streams, the elements after the first element which <code>predicate</code> returns false may be tested by predicate too.
@@ -93,17 +103,32 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      *
      *
      * @param predicate
-     * @param consumer
+     * @param actionOnDroppedItem
      * @return
      */
     @ParallelSupported
-    S dropWhile(P predicate, C consumer);
+    S dropWhile(P predicate, C actionOnDroppedItem);
 
+    /**
+     *
+     * @param predicate
+     * @return
+     * @deprecated
+     */
+    @Deprecated
     @ParallelSupported
     S removeIf(P predicate);
 
+    /**
+     *
+     * @param predicate
+     * @param actionOnDroppedItem
+     * @return
+     * @deprecated
+     */
+    @Deprecated
     @ParallelSupported
-    S removeIf(P predicate, C consumer);
+    S removeIf(P predicate, C actionOnDroppedItem);
 
     /**
      * Returns Stream of {@code S} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
@@ -400,15 +425,17 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     @SequentialOnly
     S limit(long maxSize);
 
-    /**
-     * Same as: {@code stream.skip(from).limit(to - from)}.
-     *
-     * @param from
-     * @param to
-     * @return
-     */
-    @SequentialOnly
-    S slice(long from, long to);
+    //    /**
+    //     * Same as: {@code stream.skip(from).limit(to - from)}.
+    //     *
+    //     * @param from
+    //     * @param to
+    //     * @return
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @SequentialOnly
+    //    S slice(long from, long to);
 
     @SequentialOnly
     S step(long step);
@@ -490,7 +517,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * Returns an iterator for the elements of this stream.
      *
      * <br />
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */

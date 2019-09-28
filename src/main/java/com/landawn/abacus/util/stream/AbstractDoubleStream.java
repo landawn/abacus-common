@@ -57,7 +57,7 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToDoubleFunction;
 
 /**
- * 
+ *
  */
 abstract class AbstractDoubleStream extends DoubleStream {
 
@@ -268,7 +268,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public DoubleStream removeIf(final DoublePredicate predicate, final DoubleConsumer action) {
+    public DoubleStream removeIf(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
         checkArgNotNull(predicate);
 
@@ -276,7 +276,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             @Override
             public boolean test(double value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return false;
                 }
 
@@ -286,15 +286,33 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public DoubleStream dropWhile(final DoublePredicate predicate, final DoubleConsumer action) {
+    public DoubleStream filter(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
-        checkArgNotNull(action);
+        checkArgNotNull(predicate);
+
+        return filter(new DoublePredicate() {
+            @Override
+            public boolean test(double value) {
+                if (!predicate.test(value)) {
+                    actionOnDroppedItem.accept(value);
+                    return false;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public DoubleStream dropWhile(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
+        checkArgNotNull(predicate);
+        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new DoublePredicate() {
             @Override
             public boolean test(double value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return true;
                 }
 

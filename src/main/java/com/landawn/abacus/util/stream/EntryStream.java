@@ -187,11 +187,27 @@ public final class EntryStream<K, V> implements AutoCloseable {
         return of(s.filter(predicate));
     }
 
+    /**
+     *
+     * @param <KK>
+     * @param predicate
+     * @return
+     * @deprecated
+     */
+    @Deprecated
     @ParallelSupported
     public <KK> EntryStream<K, V> removeIf(final Predicate<? super Map.Entry<K, V>> predicate) {
         return of(s.removeIf(predicate));
     }
 
+    /**
+     *
+     * @param <KK>
+     * @param predicate
+     * @return
+     * @deprecated
+     */
+    @Deprecated
     @ParallelSupported
     public <KK> EntryStream<K, V> removeIf(final BiPredicate<? super K, ? super V> predicate) {
         return of(s.removeIf(Fn.Entries.p(predicate)));
@@ -836,10 +852,18 @@ public final class EntryStream<K, V> implements AutoCloseable {
         return of(s.limit(maxSize));
     }
 
-    @SequentialOnly
-    public EntryStream<K, V> slice(final long from, final long to) {
-        return of(s.slice(from, to));
-    }
+    //    /**
+    //     *
+    //     * @param from
+    //     * @param to
+    //     * @return
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @SequentialOnly
+    //    public EntryStream<K, V> slice(final long from, final long to) {
+    //        return of(s.slice(from, to));
+    //    }
 
     @ParallelSupported
     public EntryStream<K, V> peek(final Consumer<? super Map.Entry<K, V>> action) {
@@ -969,7 +993,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     /**
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */

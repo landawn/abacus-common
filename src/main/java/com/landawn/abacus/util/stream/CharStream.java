@@ -594,7 +594,7 @@ public abstract class CharStream
     public abstract Stream<Character> boxed();
 
     /**
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */

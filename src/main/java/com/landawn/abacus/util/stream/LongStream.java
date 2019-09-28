@@ -404,7 +404,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public abstract Stream<Long> boxed();
 
     /**
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */

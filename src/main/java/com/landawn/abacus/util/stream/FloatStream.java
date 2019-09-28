@@ -393,7 +393,7 @@ public abstract class FloatStream
     public abstract Stream<Float> boxed();
 
     /**
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */

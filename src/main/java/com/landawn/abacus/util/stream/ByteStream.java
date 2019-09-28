@@ -402,7 +402,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public abstract Stream<Byte> boxed();
 
     /**
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */

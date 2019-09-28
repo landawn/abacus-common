@@ -58,7 +58,7 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToFloatFunction;
 
 /**
- * 
+ *
  */
 abstract class AbstractFloatStream extends FloatStream {
 
@@ -269,7 +269,7 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public FloatStream removeIf(final FloatPredicate predicate, final FloatConsumer action) {
+    public FloatStream removeIf(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
         checkArgNotNull(predicate);
 
@@ -277,7 +277,7 @@ abstract class AbstractFloatStream extends FloatStream {
             @Override
             public boolean test(float value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return false;
                 }
 
@@ -287,15 +287,33 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public FloatStream dropWhile(final FloatPredicate predicate, final FloatConsumer action) {
+    public FloatStream filter(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
-        checkArgNotNull(action);
+        checkArgNotNull(predicate);
+
+        return filter(new FloatPredicate() {
+            @Override
+            public boolean test(float value) {
+                if (!predicate.test(value)) {
+                    actionOnDroppedItem.accept(value);
+                    return false;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public FloatStream dropWhile(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
+        checkArgNotNull(predicate);
+        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new FloatPredicate() {
             @Override
             public boolean test(float value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return true;
                 }
 

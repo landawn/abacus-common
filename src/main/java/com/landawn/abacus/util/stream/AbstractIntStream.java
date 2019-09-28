@@ -56,7 +56,7 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.function.ToIntFunction;
 
 /**
- * 
+ *
  */
 abstract class AbstractIntStream extends IntStream {
 
@@ -267,7 +267,7 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream removeIf(final IntPredicate predicate, final IntConsumer action) {
+    public IntStream removeIf(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
         checkArgNotNull(predicate);
 
@@ -275,7 +275,7 @@ abstract class AbstractIntStream extends IntStream {
             @Override
             public boolean test(int value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return false;
                 }
 
@@ -285,15 +285,33 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream dropWhile(final IntPredicate predicate, final IntConsumer action) {
+    public IntStream filter(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
         checkArgNotNull(predicate);
-        checkArgNotNull(action);
+        checkArgNotNull(predicate);
+
+        return filter(new IntPredicate() {
+            @Override
+            public boolean test(int value) {
+                if (!predicate.test(value)) {
+                    actionOnDroppedItem.accept(value);
+                    return false;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public IntStream dropWhile(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
+        checkArgNotNull(predicate);
+        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new IntPredicate() {
             @Override
             public boolean test(int value) {
                 if (predicate.test(value)) {
-                    action.accept(value);
+                    actionOnDroppedItem.accept(value);
                     return true;
                 }
 

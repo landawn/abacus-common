@@ -2761,19 +2761,21 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, sorted, comparator, closeHandlers);
     }
 
-    /**
-     *
-     * @param from
-     * @param to
-     * @return
-     */
-    public ExceptionalStream<T, E> slice(final long from, final long to) {
-        checkArgNotNegative(from, "from");
-        checkArgNotNegative(to, "to");
-        checkArgument(to >= from, "'to' can't be less than `from`");
-
-        return from == 0 ? limit(to) : skip(from).limit(to - from);
-    }
+    //    /**
+    //     *
+    //     * @param from
+    //     * @param to
+    //     * @return
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    public ExceptionalStream<T, E> slice(final long from, final long to) {
+    //        checkArgNotNegative(from, "from");
+    //        checkArgNotNegative(to, "to");
+    //        checkArgument(to >= from, "'to' can't be less than `from`");
+    //
+    //        return from == 0 ? limit(to) : skip(from).limit(to - from);
+    //    }
 
     /**
      *
@@ -3908,13 +3910,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 return OptionalDouble.empty();
             }
 
-            final List<Double> list = new ArrayList<>();
+            final KahanSummation summation = new KahanSummation();
 
             while (elements.hasNext()) {
-                list.add(func.applyAsDouble(elements.next()));
+                summation.add(func.applyAsDouble(elements.next()));
             }
 
-            return OptionalDouble.of(N.sumDouble(list));
+            return OptionalDouble.of(summation.sum());
         } finally {
             close();
         }
@@ -3990,13 +3992,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 return OptionalDouble.empty();
             }
 
-            final List<Double> list = new ArrayList<>();
+            final KahanSummation summation = new KahanSummation();
 
             while (elements.hasNext()) {
-                list.add(func.applyAsDouble(elements.next()));
+                summation.add(func.applyAsDouble(elements.next()));
             }
 
-            return N.averageLong(list);
+            return summation.average();
         } finally {
             close();
         }
@@ -4654,24 +4656,24 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return obj;
     }
 
-    /**
-     *
-     * @param b
-     * @param errorMessage
-     */
-    private void checkArgument(boolean b, String errorMessage) {
-        if (!b) {
-            try {
-                N.checkArgument(b, errorMessage);
-            } finally {
-                try {
-                    close();
-                } catch (Exception e) {
-                    throw N.toRuntimeException(e);
-                }
-            }
-        }
-    }
+    //    /**
+    //     *
+    //     * @param b
+    //     * @param errorMessage
+    //     */
+    //    private void checkArgument(boolean b, String errorMessage) {
+    //        if (!b) {
+    //            try {
+    //                N.checkArgument(b, errorMessage);
+    //            } finally {
+    //                try {
+    //                    close();
+    //                } catch (Exception e) {
+    //                    throw N.toRuntimeException(e);
+    //                }
+    //            }
+    //        }
+    //    }
 
     /**
      *

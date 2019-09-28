@@ -2359,7 +2359,7 @@ public abstract class Stream<T>
             final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) throws SQLException;
 
     /**
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */
@@ -2367,7 +2367,7 @@ public abstract class Stream<T>
     public abstract java.util.stream.Stream<T> toJdkStream();
 
     /**
-     * Remember to close this Stream after the iteration is done, if required.
+     * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
      */
