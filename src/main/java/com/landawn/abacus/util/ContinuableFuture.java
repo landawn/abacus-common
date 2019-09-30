@@ -103,7 +103,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <E>
      * @param action
      * @return
+     * @deprecated
+     * @see N#asyncExecute(com.landawn.abacus.util.Try.Runnable)
      */
+    @Deprecated
     public static <E extends Exception> ContinuableFuture<Void> run(final Try.Runnable<E> action) {
         return run(action, DEFAULT_EXECUTOR);
     }
@@ -135,7 +138,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <E>
      * @param action
      * @return
+     * @deprecated
+     * @see N#asyncExecute(Callable)
      */
+    @Deprecated
     public static <T, E extends Exception> ContinuableFuture<T> call(final Try.Callable<T, E> action) {
         return call(action, DEFAULT_EXECUTOR);
     }
@@ -203,7 +209,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return
      */
     public static <T> ContinuableFuture<T> wrap(Future<T> future) {
-        return new ContinuableFuture<T>(future);
+        return new ContinuableFuture<>(future);
     }
 
     /**
@@ -1119,7 +1125,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //     * other given ContinuableFuture complete normally. If both of the given
     //     * ContinuableFutures complete exceptionally, then the returned
     //     * ContinuableFuture also does so.
-    //     * 
+    //     *
     //     * @param other
     //     * @param action
     //     * @return
@@ -1133,7 +1139,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //     * other given ContinuableFuture complete normally. If both of the given
     //     * ContinuableFutures complete exceptionally, then the returned
     //     * ContinuableFuture also does so.
-    //     * 
+    //     *
     //     * @param other
     //     * @param action
     //     * @return
@@ -1148,7 +1154,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //     * argument to the supplied function. Otherwise, if this ContinuableFuture
     //     * completes normally, then the returned ContinuableFuture also completes
     //     * normally with the same value.
-    //     * 
+    //     *
     //     * @param action
     //     * @return
     //     */

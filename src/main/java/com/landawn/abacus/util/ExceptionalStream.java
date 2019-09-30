@@ -4429,7 +4429,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     public ContinuableFuture<Void> asyncRun(final Try.Consumer<? super ExceptionalStream<T, E>, E> action) {
         checkArgNotNull(action, "action");
 
-        return ContinuableFuture.run(new Try.Runnable<E>() {
+        return N.asyncExecute(new Try.Runnable<E>() {
             @Override
             public void run() throws E {
                 action.accept(ExceptionalStream.this);
@@ -4466,7 +4466,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     public <R> ContinuableFuture<R> asyncCall(final Try.Function<? super ExceptionalStream<T, E>, R, E> action) {
         checkArgNotNull(action, "action");
 
-        return ContinuableFuture.call(new Try.Callable<R, E>() {
+        return N.asyncExecute(new Try.Callable<R, E>() {
             @Override
             public R call() throws E {
                 return action.apply(ExceptionalStream.this);

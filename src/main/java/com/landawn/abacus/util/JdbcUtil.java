@@ -74,6 +74,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -176,6 +177,9 @@ public final class JdbcUtil {
 
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(JdbcUtil.class);
+
+    /** The async executor. */
+    private static final AsyncExecutor asyncExecutor = new AsyncExecutor(Math.min(8, IOUtil.CPU_CORES), 64, 180L, TimeUnit.SECONDS);
 
     /** The Constant CURRENT_DIR_PATH. */
     // ...
@@ -1473,6 +1477,94 @@ public final class JdbcUtil {
     }
 
     /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param ds
+     * @param callable
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> T doInTransaction(final javax.sql.DataSource ds, final Try.Callable<T, E> callable) throws E {
+        final SQLTransaction tran = JdbcUtil.beginTransaction(ds);
+        T result = null;
+
+        try {
+            result = callable.call();
+            tran.commit();
+        } finally {
+            tran.rollbackIfNotCommitted();
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param ds
+     * @param func
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> T doInTransaction(final javax.sql.DataSource ds, final Try.Function<javax.sql.DataSource, T, E> func) throws E {
+        final SQLTransaction tran = JdbcUtil.beginTransaction(ds);
+        T result = null;
+
+        try {
+            result = func.apply(ds);
+            tran.commit();
+        } finally {
+            tran.rollbackIfNotCommitted();
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param ds
+     * @param runnable
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <E extends Exception> void runInTransaction(final javax.sql.DataSource ds, final Try.Runnable<E> runnable) throws E {
+        final SQLTransaction tran = JdbcUtil.beginTransaction(ds);
+
+        try {
+            runnable.run();
+            tran.commit();
+        } finally {
+            tran.rollbackIfNotCommitted();
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param ds
+     * @param action
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <E extends Exception> void runInTransaction(final javax.sql.DataSource ds, final Try.Consumer<javax.sql.DataSource, E> action) throws E {
+        final SQLTransaction tran = JdbcUtil.beginTransaction(ds);
+
+        try {
+            action.accept(ds);
+            tran.commit();
+        } finally {
+            tran.rollbackIfNotCommitted();
+        }
+    }
+
+    /**
      * Gets the SQL operation.
      *
      * @param sql
@@ -2724,9 +2816,15 @@ public final class JdbcUtil {
         }
 
         final NamedSQL namedSQL = NamedSQL.parse(sql);
+        final boolean originalAutoCommit = conn.getAutoCommit();
         PreparedStatement stmt = null;
+        boolean noException = false;
 
         try {
+            if (originalAutoCommit && listOfParameters.size() > batchSize) {
+                conn.setAutoCommit(false);
+            }
+
             stmt = conn.prepareStatement(namedSQL.getParameterizedSQL());
 
             int res = 0;
@@ -2747,9 +2845,27 @@ public final class JdbcUtil {
                 stmt.clearBatch();
             }
 
+            noException = true;
+
             return res;
         } finally {
-            JdbcUtil.closeQuietly(stmt);
+            if (originalAutoCommit && listOfParameters.size() > batchSize) {
+                try {
+                    if (noException) {
+                        conn.commit();
+                    } else {
+                        conn.rollback();
+                    }
+                } finally {
+                    try {
+                        conn.setAutoCommit(true);
+                    } finally {
+                        JdbcUtil.closeQuietly(stmt);
+                    }
+                }
+            } else {
+                JdbcUtil.closeQuietly(stmt);
+            }
         }
     }
 
@@ -4862,9 +4978,6 @@ public final class JdbcUtil {
      */
     static abstract class AbstractPreparedQuery<S extends PreparedStatement, Q extends AbstractPreparedQuery<S, Q>> implements AutoCloseable {
 
-        /** The async executor. */
-        final AsyncExecutor asyncExecutor;
-
         /** The stmt. */
         final S stmt;
 
@@ -4892,18 +5005,7 @@ public final class JdbcUtil {
          * @param stmt
          */
         AbstractPreparedQuery(S stmt) {
-            this(stmt, null);
-        }
-
-        /**
-         * Instantiates a new abstract prepared query.
-         *
-         * @param stmt
-         * @param asyncExecutor
-         */
-        AbstractPreparedQuery(S stmt, AsyncExecutor asyncExecutor) {
             this.stmt = stmt;
-            this.asyncExecutor = asyncExecutor;
         }
 
         //        /**
@@ -6108,53 +6210,53 @@ public final class JdbcUtil {
             return (Q) this;
         }
 
-        /**
-         * @param <T>
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        <T> Q setBatchParameters(final Collection<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
-            return setBatchParameters(batchParameters.iterator(), parametersSetter);
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param batchParameters
-         * @param parametersSetter
-         * @return
-         * @throws SQLException the SQL exception
-         */
-        <T> Q setBatchParameters(final Iterator<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
-            checkArgNotNull(batchParameters, "batchParameters");
-            checkArgNotNull(parametersSetter, "parametersSetter");
-
-            boolean noException = false;
-
-            try {
-                if (isBatch) {
-                    stmt.clearBatch();
-                }
-
-                final Iterator<T> iter = batchParameters;
-
-                while (iter.hasNext()) {
-                    parametersSetter.accept((Q) this, iter.next());
-                    stmt.addBatch();
-                    isBatch = true;
-                }
-
-                noException = true;
-            } finally {
-                if (noException == false) {
-                    close();
-                }
-            }
-
-            return (Q) this;
-        }
+        //    /**
+        //     * @param <T>
+        //     * @param batchParameters
+        //     * @param parametersSetter
+        //     * @return
+        //     * @throws SQLException the SQL exception
+        //     */
+        //    <T> Q setBatchParameters(final Collection<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
+        //        return setBatchParameters(batchParameters.iterator(), parametersSetter);
+        //    }
+        //
+        //    /**
+        //     *
+        //     * @param <T>
+        //     * @param batchParameters
+        //     * @param parametersSetter
+        //     * @return
+        //     * @throws SQLException the SQL exception
+        //     */
+        //    <T> Q setBatchParameters(final Iterator<T> batchParameters, BiParametersSetter<? super Q, ? super T> parametersSetter) throws SQLException {
+        //        checkArgNotNull(batchParameters, "batchParameters");
+        //        checkArgNotNull(parametersSetter, "parametersSetter");
+        //
+        //        boolean noException = false;
+        //
+        //        try {
+        //            if (isBatch) {
+        //                stmt.clearBatch();
+        //            }
+        //
+        //            final Iterator<T> iter = batchParameters;
+        //
+        //            while (iter.hasNext()) {
+        //                parametersSetter.accept((Q) this, iter.next());
+        //                stmt.addBatch();
+        //                isBatch = true;
+        //            }
+        //
+        //            noException = true;
+        //        } finally {
+        //            if (noException == false) {
+        //                close();
+        //            }
+        //        }
+        //
+        //        return (Q) this;
+        //    }
 
         /**
          * @param <T>
@@ -8006,22 +8108,12 @@ public final class JdbcUtil {
 
             final Q q = (Q) this;
 
-            if (asyncExecutor == null) {
-                return ContinuableFuture.call(new Try.Callable<R, SQLException>() {
-                    @Override
-                    public R call() throws SQLException {
-                        return func.apply(q);
-                    }
-                });
-            } else {
-                return asyncExecutor.execute(new Try.Callable<R, SQLException>() {
-
-                    @Override
-                    public R call() throws SQLException {
-                        return func.apply(q);
-                    }
-                });
-            }
+            return asyncExecutor.execute(new Try.Callable<R, SQLException>() {
+                @Override
+                public R call() throws SQLException {
+                    return func.apply(q);
+                }
+            });
         }
 
         /**
@@ -8061,23 +8153,12 @@ public final class JdbcUtil {
 
             final Q q = (Q) this;
 
-            if (asyncExecutor == null) {
-                return ContinuableFuture.run(new Try.Runnable<SQLException>() {
-                    @Override
-                    public void run() throws SQLException {
-                        action.accept(q);
-                    }
-                });
-            } else {
-                return asyncExecutor.execute(new Try.Callable<Void, SQLException>() {
-
-                    @Override
-                    public Void call() throws SQLException {
-                        action.accept(q);
-                        return null;
-                    }
-                });
-            }
+            return asyncExecutor.execute(new Try.Runnable<SQLException>() {
+                @Override
+                public void run() throws SQLException {
+                    action.accept(q);
+                }
+            });
         }
 
         /**
@@ -8230,16 +8311,6 @@ public final class JdbcUtil {
         PreparedQuery(PreparedStatement stmt) {
             super(stmt);
         }
-
-        /**
-         * Instantiates a new prepared query.
-         *
-         * @param stmt
-         * @param asyncExecutor
-         */
-        PreparedQuery(PreparedStatement stmt, AsyncExecutor asyncExecutor) {
-            super(stmt, asyncExecutor);
-        }
     }
 
     /**
@@ -8283,17 +8354,6 @@ public final class JdbcUtil {
          */
         PreparedCallableQuery(CallableStatement stmt) {
             super(stmt);
-            this.stmt = stmt;
-        }
-
-        /**
-         * Instantiates a new prepared callable query.
-         *
-         * @param stmt
-         * @param asyncExecutor
-         */
-        PreparedCallableQuery(CallableStatement stmt, AsyncExecutor asyncExecutor) {
-            super(stmt, asyncExecutor);
             this.stmt = stmt;
         }
 
@@ -9565,20 +9625,6 @@ public final class JdbcUtil {
          */
         NamedQuery(final PreparedStatement stmt, final NamedSQL namedSQL) {
             super(stmt);
-            this.namedSQL = namedSQL;
-            this.parameterNames = namedSQL.getNamedParameters();
-            this.parameterCount = namedSQL.getParameterCount();
-        }
-
-        /**
-         * Instantiates a new named query.
-         *
-         * @param stmt
-         * @param namedSQL
-         * @param asyncExecutor
-         */
-        NamedQuery(final PreparedStatement stmt, final NamedSQL namedSQL, AsyncExecutor asyncExecutor) {
-            super(stmt, asyncExecutor);
             this.namedSQL = namedSQL;
             this.parameterNames = namedSQL.getNamedParameters();
             this.parameterCount = namedSQL.getParameterCount();
@@ -14441,7 +14487,9 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        PreparedQuery prepareQuery(final String query) throws SQLException;
+        default PreparedQuery prepareQuery(final String query) throws SQLException {
+            return JdbcUtil.prepareQuery(dataSource(), query);
+        }
 
         /**
          *
@@ -14450,7 +14498,9 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        PreparedQuery prepareQuery(final String query, final boolean generateKeys) throws SQLException;
+        default PreparedQuery prepareQuery(final String query, final boolean generateKeys) throws SQLException {
+            return JdbcUtil.prepareQuery(dataSource(), query, generateKeys);
+        }
 
         /**
          *
@@ -14459,7 +14509,10 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        PreparedQuery prepareQuery(final String sql, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator) throws SQLException;
+        default PreparedQuery prepareQuery(final String sql, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator)
+                throws SQLException {
+            return JdbcUtil.prepareQuery(dataSource(), sql, stmtCreator);
+        }
 
         /**
          *
@@ -14467,7 +14520,9 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        NamedQuery prepareNamedQuery(final String namedQuery) throws SQLException;
+        default NamedQuery prepareNamedQuery(final String namedQuery) throws SQLException {
+            return JdbcUtil.prepareNamedQuery(dataSource(), namedQuery);
+        }
 
         /**
          *
@@ -14476,7 +14531,9 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        NamedQuery prepareNamedQuery(final String namedQuery, final boolean generateKeys) throws SQLException;
+        default NamedQuery prepareNamedQuery(final String namedQuery, final boolean generateKeys) throws SQLException {
+            return JdbcUtil.prepareNamedQuery(dataSource(), namedQuery, generateKeys);
+        }
 
         /**
          *
@@ -14485,8 +14542,10 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        NamedQuery prepareNamedQuery(final String namedQuery, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator)
-                throws SQLException;
+        default NamedQuery prepareNamedQuery(final String namedQuery, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator)
+                throws SQLException {
+            return JdbcUtil.prepareNamedQuery(dataSource(), namedQuery, stmtCreator);
+        }
 
         /**
          *
@@ -14494,7 +14553,9 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        NamedQuery prepareNamedQuery(final NamedSQL namedSQL) throws SQLException;
+        default NamedQuery prepareNamedQuery(final NamedSQL namedSQL) throws SQLException {
+            return JdbcUtil.prepareNamedQuery(dataSource(), namedSQL);
+        }
 
         /**
          *
@@ -14503,7 +14564,9 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        NamedQuery prepareNamedQuery(final NamedSQL namedSQL, final boolean generateKeys) throws SQLException;
+        default NamedQuery prepareNamedQuery(final NamedSQL namedSQL, final boolean generateKeys) throws SQLException {
+            return JdbcUtil.prepareNamedQuery(dataSource(), namedSQL, generateKeys);
+        }
 
         /**
          *
@@ -14512,8 +14575,10 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException
          */
-        NamedQuery prepareNamedQuery(final NamedSQL namedSQL, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator)
-                throws SQLException;
+        default NamedQuery prepareNamedQuery(final NamedSQL namedSQL, final Try.BiFunction<Connection, String, PreparedStatement, SQLException> stmtCreator)
+                throws SQLException {
+            return JdbcUtil.prepareNamedQuery(dataSource(), namedSQL, stmtCreator);
+        }
 
         /**
          *
@@ -14558,7 +14623,57 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException the SQL exception
          */
-        void save(T entityToSave) throws SQLException;
+        void save(final T entityToSave) throws SQLException;
+
+        /**
+         * Insert the specified entities to database by batch.
+         *
+         * @param entitiesToSave
+         * @return
+         * @throws SQLException the SQL exception
+         * @see CrudDao#batchInsert(Collection)
+         */
+        default void saveAll(final Collection<? extends T> entitiesToSave) throws SQLException {
+            saveAll(entitiesToSave, JdbcSettings.DEFAULT_BATCH_SIZE);
+        }
+
+        /**
+         * Insert the specified entities to database by batch.
+         *
+         * @param entitiesToSave
+         * @param batchSize
+         * @return
+         * @throws SQLException the SQL exception
+         * @see CrudDao#batchInsert(Collection)
+         */
+        void saveAll(final Collection<? extends T> entitiesToSave, final int batchSize) throws SQLException;
+
+        /**
+         * Insert the specified entities to database by batch.
+         *
+         * @param namedInsertSQL
+         * @param entitiesToSave
+         * @return
+         * @throws SQLException the SQL exception
+         * @see CrudDao#batchInsert(Collection)
+         */
+        @Beta
+        default void saveAll(final String namedInsertSQL, final Collection<? extends T> entitiesToSave) throws SQLException {
+            saveAll(namedInsertSQL, entitiesToSave, JdbcSettings.DEFAULT_BATCH_SIZE);
+        }
+
+        /**
+         * Insert the specified entities to database by batch.
+         *
+         * @param namedInsertSQL
+         * @param entitiesToSave
+         * @param batchSize
+         * @return
+         * @throws SQLException the SQL exception
+         * @see CrudDao#batchInsert(Collection)
+         */
+        @Beta
+        void saveAll(final String namedInsertSQL, final Collection<? extends T> entitiesToSave, final int batchSize) throws SQLException;
 
         /**
          *
@@ -14851,7 +14966,7 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException the SQL exception
          */
-        ID insert(T entityToSave) throws SQLException;
+        ID insert(final T entityToSave) throws SQLException;
 
         /**
          *
@@ -14859,36 +14974,67 @@ public final class JdbcUtil {
          * @return
          * @throws SQLException the SQL exception
          */
-        List<ID> batchInsert(Collection<T> entities) throws SQLException;
+        default List<ID> batchInsert(final Collection<? extends T> entities) throws SQLException {
+            return batchInsert(entities, JdbcSettings.DEFAULT_BATCH_SIZE);
+        }
+
+        /**
+         *
+         * @param entities
+         * @param batchSize
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        List<ID> batchInsert(final Collection<? extends T> entities, final int batchSize) throws SQLException;
+
+        /**
+         *
+         * @param namedInsertSQL
+         * @param entities
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        @Beta
+        default List<ID> batchInsert(final String namedInsertSQL, final Collection<? extends T> entities) throws SQLException {
+            return batchInsert(namedInsertSQL, entities, JdbcSettings.DEFAULT_BATCH_SIZE);
+        }
+
+        /**
+         *
+         * @param namedInsertSQL
+         * @param entities
+         * @param batchSize
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        @Beta
+        List<ID> batchInsert(final String namedInsertSQL, final Collection<? extends T> entities, final int batchSize) throws SQLException;
 
         /**
          *
          * @param id
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        Optional<T> get(ID id) throws UnsupportedOperationException, SQLException;
+        Optional<T> get(ID id) throws SQLException;
 
         /**
          *
          * @param selectPropNames
          * @param id
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        Optional<T> get(Collection<String> selectPropNames, ID id) throws UnsupportedOperationException, SQLException;
+        Optional<T> get(Collection<String> selectPropNames, ID id) throws SQLException;
 
         /**
          * Gets the t.
          *
          * @param id
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        T gett(ID id) throws UnsupportedOperationException, SQLException;
+        T gett(ID id) throws SQLException;
 
         /**
          * Gets the t.
@@ -14896,95 +15042,119 @@ public final class JdbcUtil {
          * @param selectPropNames
          * @param id
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        T gett(Collection<String> selectPropNames, ID id) throws UnsupportedOperationException, SQLException;
+        T gett(Collection<String> selectPropNames, ID id) throws SQLException;
 
         /**
          *
          * @param id
          * @return true, if successful
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        boolean exists(ID id) throws UnsupportedOperationException, SQLException;
+        boolean exists(ID id) throws SQLException;
 
         /**
          *
          * @param entityToUpdate
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        int update(T entityToUpdate) throws UnsupportedOperationException, SQLException;
+        int update(T entityToUpdate) throws SQLException;
 
         /**
          *
          * @param entityToUpdate
          * @param propNamesToUpdate
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        int update(T entityToUpdate, Collection<String> propNamesToUpdate) throws UnsupportedOperationException, SQLException;
+        int update(T entityToUpdate, Collection<String> propNamesToUpdate) throws SQLException;
 
         /**
          *
          * @param updateProps
          * @param id
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        int update(Map<String, Object> updateProps, ID id) throws UnsupportedOperationException, SQLException;
+        int update(Map<String, Object> updateProps, ID id) throws SQLException;
 
         /**
          *
          * @param entities
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        int batchUpdate(Collection<T> entities) throws UnsupportedOperationException, SQLException;
+        default int batchUpdate(Collection<? extends T> entities) throws SQLException {
+            return batchUpdate(entities, JdbcSettings.DEFAULT_BATCH_SIZE);
+        }
+
+        /**
+         *
+         * @param entities
+         * @param batchSize
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        int batchUpdate(Collection<? extends T> entities, int batchSize) throws SQLException;
 
         /**
          *
          * @param entities
          * @param propNamesToUpdate
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        int batchUpdate(Collection<T> entities, Collection<String> propNamesToUpdate) throws UnsupportedOperationException, SQLException;
+        default int batchUpdate(Collection<? extends T> entities, Collection<String> propNamesToUpdate) throws SQLException {
+            return batchUpdate(entities, JdbcSettings.DEFAULT_BATCH_SIZE);
+        }
+
+        /**
+         *
+         * @param entities
+         * @param propNamesToUpdate
+         * @param batchSize
+         * @return
+         * @throws SQLException the SQL exception
+         */
+        int batchUpdate(Collection<? extends T> entities, Collection<String> propNamesToUpdate, int batchSize) throws SQLException;
 
         /**
          * Delete by id.
          *
          * @param id
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        int deleteById(ID id) throws UnsupportedOperationException, SQLException;
+        int deleteById(ID id) throws SQLException;
 
         /**
          *
          * @param entity
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        int delete(T entity) throws UnsupportedOperationException, SQLException;
+        int delete(T entity) throws SQLException;
 
         /**
          *
          * @param entities
          * @return
-         * @throws UnsupportedOperationException if no {@code id} defined in target entity class.
          * @throws SQLException the SQL exception
          */
-        int batchDelete(Collection<? extends T> entities) throws UnsupportedOperationException, SQLException;
+        default int batchDelete(Collection<? extends T> entities) throws SQLException {
+            return batchDelete(entities, JdbcSettings.DEFAULT_BATCH_SIZE);
+        }
+
+        /**
+        *
+        * @param entities
+        * @param batchSize
+        * @return
+        * @throws SQLException the SQL exception
+        */
+        int batchDelete(Collection<? extends T> entities, int batchSize) throws SQLException;
     }
 
     /**
@@ -15024,13 +15194,20 @@ public final class JdbcUtil {
                 }
 
                 if (CrudDao.class.isAssignableFrom(daoInterface)) {
-                    if (ClassUtil.getIdFieldNames((Class) typeArguments[0]).size() != 1) {
+                    final List<String> idFieldNames = ClassUtil.getIdFieldNames((Class) typeArguments[0]);
+
+                    if (idFieldNames.size() != 1) {
                         throw new IllegalArgumentException("To support CRUD operations by extending CrudDao interface, the entity class: " + typeArguments[0]
                                 + " must have one and only one field annotated with @Id");
                     }
 
                     if (typeArguments.length >= 2 && typeArguments[1].equals(EntityId.class)) {
                         throw new IllegalArgumentException("EntityId for id is not supported yet");
+                    } else if (((Class) typeArguments[1])
+                            .isAssignableFrom(ClassUtil.getPropGetMethod((Class) typeArguments[0], idFieldNames.get(0)).getReturnType())) {
+                        throw new IllegalArgumentException("The id type declared in Dao type parameters: " + typeArguments[1]
+                                + " is not assignable from the id property type in the entity class: "
+                                + ClassUtil.getPropGetMethod((Class) typeArguments[0], idFieldNames.get(0)).getReturnType());
                     }
                 }
             }
@@ -15074,39 +15251,62 @@ public final class JdbcUtil {
                 : (sbc.equals(PSC.class) ? clazz -> NSC.update(clazz) : (sbc.equals(PAC.class) ? clazz -> NAC.update(clazz) : clazz -> NLC.update(clazz)));
 
         for (Method m : sqlMethods) {
-            final Annotation sqlAnno = StreamEx.of(m.getAnnotations()).filter(anno -> JdbcUtil.sqlAnnoMap.containsKey(anno.annotationType())).first().orNull();
-
-            final Class<?>[] paramTypes = m.getParameterTypes();
-            final Class<?> returnType = m.getReturnType();
-            final int paramLen = paramTypes.length;
             Try.BiFunction<Dao, Object[], ?, Exception> call = null;
 
-            if (m.getDeclaringClass().equals(BasicDao.class)) {
-                final List<String> idPropNames = ClassUtil.getIdFieldNames(entityClass, true);
-                final boolean isFakeId = ClassUtil.isFakeId(idPropNames);
-                final String idPropName = idPropNames.get(0);
+            if (!Modifier.isAbstract(m.getModifiers())) {
+                final MethodHandle methodHandle = createMethodHandle(m);
 
-                String sql_insertWithId = null;
-                String sql_insertWithoutId = null;
+                call = (proxy, args) -> {
+                    try {
+                        return methodHandle.bindTo(proxy).invokeWithArguments(args);
+                    } catch (Throwable e) {
+                        throw new Exception(e);
+                    }
+                };
+            } else {
+                final Annotation sqlAnno = StreamEx.of(m.getAnnotations())
+                        .filter(anno -> JdbcUtil.sqlAnnoMap.containsKey(anno.annotationType()))
+                        .first()
+                        .orNull();
 
-                if (sbc.equals(PSC.class)) {
-                    sql_insertWithId = NSC.insertInto(entityClass).sql();
-                    sql_insertWithoutId = NSC.insertInto(entityClass, N.asSet(idPropName)).sql();
-                } else if (sbc.equals(PAC.class)) {
-                    sql_insertWithId = NAC.insertInto(entityClass).sql();
-                    sql_insertWithoutId = NAC.insertInto(entityClass, N.asSet(idPropName)).sql();
-                } else {
-                    sql_insertWithId = NLC.insertInto(entityClass).sql();
-                    sql_insertWithoutId = NLC.insertInto(entityClass, N.asSet(idPropName)).sql();
-                }
+                final Class<?>[] paramTypes = m.getParameterTypes();
+                final Class<?> returnType = m.getReturnType();
+                final int paramLen = paramTypes.length;
 
-                final NamedSQL insertWithIdSQL = NamedSQL.parse(sql_insertWithId);
-                final NamedSQL insertWithoutIdSQL = NamedSQL.parse(sql_insertWithoutId);
+                if (m.getDeclaringClass().equals(BasicDao.class)) {
+                    final List<String> idPropNames = ClassUtil.getIdFieldNames(entityClass, true);
+                    final boolean isFakeId = ClassUtil.isFakeId(idPropNames);
+                    final String idPropName = idPropNames.get(0);
 
-                if (m.getName().equals("save") && paramLen == 1) {
-                    if (isFakeId) {
+                    String sql_insertWithId = null;
+                    String sql_insertWithoutId = null;
+
+                    if (sbc.equals(PSC.class)) {
+                        sql_insertWithId = NSC.insertInto(entityClass).sql();
+                        sql_insertWithoutId = NSC.insertInto(entityClass, N.asSet(idPropName)).sql();
+                    } else if (sbc.equals(PAC.class)) {
+                        sql_insertWithId = NAC.insertInto(entityClass).sql();
+                        sql_insertWithoutId = NAC.insertInto(entityClass, N.asSet(idPropName)).sql();
+                    } else {
+                        sql_insertWithId = NLC.insertInto(entityClass).sql();
+                        sql_insertWithoutId = NLC.insertInto(entityClass, N.asSet(idPropName)).sql();
+                    }
+
+                    final NamedSQL insertWithIdSQL = NamedSQL.parse(sql_insertWithId);
+                    final NamedSQL insertWithoutIdSQL = NamedSQL.parse(sql_insertWithoutId);
+
+                    if (m.getName().equals("save") && paramLen == 1) {
                         call = (proxy, args) -> {
-                            proxy.prepareNamedQuery(insertWithoutIdSQL, false).setParameters(args[0]).update();
+                            if (isFakeId) {
+                                proxy.prepareNamedQuery(insertWithoutIdSQL).setParameters(args[0]).update();
+                            } else if (JdbcUtil.isDefaultIdPropValue(ClassUtil.getPropValue(args[0], idPropName))) {
+                                proxy.prepareNamedQuery(insertWithoutIdSQL, true)
+                                        .setParameters(args[0])
+                                        .insert()
+                                        .ifPresent(id -> ClassUtil.setPropValue(args[0], idPropName, id));
+                            } else {
+                                proxy.prepareNamedQuery(insertWithIdSQL).setParameters(args[0]).update();
+                            }
 
                             if (args[0] instanceof DirtyMarker) {
                                 DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
@@ -15114,273 +15314,61 @@ public final class JdbcUtil {
 
                             return null;
                         };
-                    } else {
+                    } else if (m.getName().equals("saveAll") && paramLen == 2 && int.class.equals(paramTypes[1])) {
                         call = (proxy, args) -> {
-                            final Object idPropValue = ClassUtil.getPropValue(args[0], idPropName);
+                            final Collection<?> entities = (Collection<Object>) args[0];
+                            final int batchSize = (Integer) args[1];
+                            N.checkArgPositive(batchSize, "batchSize");
 
-                            if (JdbcUtil.isDefaultIdPropValue(idPropValue)) {
-                                proxy.prepareNamedQuery(insertWithoutIdSQL, true)
-                                        .setParameters(args[0])
-                                        .insert()
-                                        .ifPresent(id -> ClassUtil.setPropValue(args[0], idPropName, id))
-                                        .orElse(N.defaultValueOf(returnType));
+                            if (N.isNullOrEmpty(entities)) {
+                                return 0;
+                            }
 
-                                if (args[0] instanceof DirtyMarker) {
-                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
+                            List<Object> ids = null;
+                            final Object idPropValue = isFakeId || N.isNullOrEmpty(entities) ? null
+                                    : ClassUtil.getPropValue(N.first(entities).get(), idPropName);
+                            final boolean isDefaultIdPropValue = JdbcUtil.isDefaultIdPropValue(idPropValue);
+
+                            if (entities.size() <= batchSize) {
+                                if (isFakeId) {
+                                    proxy.prepareNamedQuery(insertWithoutIdSQL).addBatchParameters(entities).batchUpdate();
+                                } else if (isDefaultIdPropValue) {
+                                    ids = proxy.prepareNamedQuery(insertWithoutIdSQL, true).addBatchParameters(entities).batchInsert();
+                                } else {
+                                    proxy.prepareNamedQuery(insertWithIdSQL).addBatchParameters(entities).batchUpdate();
                                 }
-
-                                return null;
                             } else {
-                                proxy.prepareNamedQuery(insertWithIdSQL).setParameters(args[0]).update();
+                                final SQLTransaction tran = JdbcUtil.beginTransaction(proxy.dataSource());
 
-                                if (args[0] instanceof DirtyMarker) {
-                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
+                                try {
+                                    if (isFakeId) {
+                                        try (NamedQuery nameQuery = proxy.prepareNamedQuery(insertWithoutIdSQL).closeAfterExecution(false)) {
+                                            ExceptionalStream.of(entities)
+                                                    .splitToList(batchSize) //
+                                                    .forEach(bp -> nameQuery.addBatchParameters(bp).batchUpdate());
+                                        }
+                                    } else if (isDefaultIdPropValue) {
+                                        try (NamedQuery nameQuery = proxy.prepareNamedQuery(insertWithoutIdSQL, true).closeAfterExecution(false)) {
+                                            ids = ExceptionalStream.of(entities)
+                                                    .splitToList(batchSize)
+                                                    .flattMap(bp -> nameQuery.addBatchParameters(bp).batchInsert())
+                                                    .toList();
+                                        }
+                                    } else {
+                                        try (NamedQuery nameQuery = proxy.prepareNamedQuery(insertWithIdSQL).closeAfterExecution(false)) {
+                                            ExceptionalStream.of(entities)
+                                                    .splitToList(batchSize) //
+                                                    .forEach(bp -> nameQuery.addBatchParameters(bp).batchUpdate());
+                                        }
+                                    }
+
+                                    tran.commit();
+                                } finally {
+                                    tran.rollbackIfNotCommitted();
                                 }
-
-                                return null;
-                            }
-                        };
-                    }
-                } else if (m.getName().equals("exists") && paramLen == 1 && Condition.class.isAssignableFrom(m.getParameterTypes()[0])) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply(SQLBuilder._1).from(entityClass).where((Condition) args[0]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).exists();
-                    };
-                } else if (m.getName().equals("count") && paramLen == 1 && Condition.class.isAssignableFrom(m.getParameterTypes()[0])) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply(SQLBuilder.COUNT_ALL).from(entityClass).where((Condition) args[0]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForInt().orZero();
-                    };
-                } else if (m.getName().equals("findFirst") && paramLen == 1 && paramTypes[0].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFromFunc.apply(entityClass).where((Condition) args[0]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).findFirst(entityClass);
-                    };
-                } else if (m.getName().equals("findFirst") && paramLen == 2 && paramTypes[0].equals(Collection.class)
-                        && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).findFirst(entityClass);
-                    };
-                } else if (m.getName().equals("list") && paramLen == 1 && paramTypes[0].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFromFunc.apply(entityClass).where((Condition) args[0]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).list(entityClass);
-                    };
-                } else if (m.getName().equals("list") && paramLen == 2 && paramTypes[0].equals(Collection.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).list(entityClass);
-                    };
-                } else if (m.getName().equals("query") && paramLen == 1 && paramTypes[0].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFromFunc.apply(entityClass).where((Condition) args[0]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).query();
-                    };
-                } else if (m.getName().equals("query") && paramLen == 2 && paramTypes[0].equals(Collection.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).query();
-                    };
-                } else if (m.getName().equals("queryForBoolean") && paramLen == 2 && paramTypes[0].equals(String.class)
-                        && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForBoolean();
-                    };
-                } else if (m.getName().equals("queryForChar") && paramLen == 2 && paramTypes[0].equals(String.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForChar();
-                    };
-                } else if (m.getName().equals("queryForByte") && paramLen == 2 && paramTypes[0].equals(String.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForByte();
-                    };
-                } else if (m.getName().equals("queryForShort") && paramLen == 2 && paramTypes[0].equals(String.class)
-                        && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForShort();
-                    };
-                } else if (m.getName().equals("queryForInt") && paramLen == 2 && paramTypes[0].equals(String.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForInt();
-                    };
-                } else if (m.getName().equals("queryForLong") && paramLen == 2 && paramTypes[0].equals(String.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForLong();
-                    };
-                } else if (m.getName().equals("queryForFloat") && paramLen == 2 && paramTypes[0].equals(String.class)
-                        && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForFloat();
-                    };
-                } else if (m.getName().equals("queryForDouble") && paramLen == 2 && paramTypes[0].equals(String.class)
-                        && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForDouble();
-                    };
-                } else if (m.getName().equals("queryForString") && paramLen == 2 && paramTypes[0].equals(String.class)
-                        && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForString();
-                    };
-                } else if (m.getName().equals("queryForDate") && paramLen == 2 && paramTypes[0].equals(String.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForDate();
-                    };
-                } else if (m.getName().equals("queryForTime") && paramLen == 2 && paramTypes[0].equals(String.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForTime();
-                    };
-                } else if (m.getName().equals("queryForTimestamp") && paramLen == 2 && paramTypes[0].equals(String.class)
-                        && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForTimestamp();
-                    };
-                } else if (m.getName().equals("queryForSingleResult") && paramLen == 3 && paramTypes[0].equals(Class.class)
-                        && paramTypes[1].equals(String.class) && paramTypes[2].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[1]).from(entityClass).where((Condition) args[2]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForSingleResult((Class) args[0]);
-                    };
-                } else if (m.getName().equals("queryForSingleNonNull") && paramLen == 3 && paramTypes[0].equals(Class.class)
-                        && paramTypes[1].equals(String.class) && paramTypes[2].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[1]).from(entityClass).where((Condition) args[2]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForSingleNonNull((Class) args[0]);
-                    };
-                } else if (m.getName().equals("queryForUniqueResult") && paramLen == 3 && paramTypes[0].equals(Class.class)
-                        && paramTypes[1].equals(String.class) && paramTypes[2].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[1]).from(entityClass).where((Condition) args[2]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForUniqueResult((Class) args[0]);
-                    };
-                } else if (m.getName().equals("queryForUniqueNonNull") && paramLen == 3 && paramTypes[0].equals(Class.class)
-                        && paramTypes[1].equals(String.class) && paramTypes[2].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc.apply((String) args[1]).from(entityClass).where((Condition) args[2]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForUniqueNonNull((Class) args[0]);
-                    };
-                } else if (m.getName().equals("stream") && paramLen == 1 && paramTypes[0].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFromFunc.apply(entityClass).where((Condition) args[0]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).stream(entityClass);
-                    };
-                } else if (m.getName().equals("stream") && paramLen == 2 && paramTypes[0].equals(Collection.class) && paramTypes[1].equals(Condition.class)) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where((Condition) args[1]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).stream(entityClass);
-                    };
-                } else if (m.getName().equals("update") && paramLen == 2 && Map.class.equals(paramTypes[0])
-                        && Condition.class.isAssignableFrom(m.getParameterTypes()[1])) {
-                    call = (proxy, args) -> {
-                        final Map<String, Object> props = (Map<String, Object>) args[0];
-                        final Condition cond = (Condition) args[1];
-                        N.checkArgNotNullOrEmpty(props, "updateProps");
-
-                        final SP sp = parameterizedUpdateFunc.apply(entityClass).set(props).where(cond).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).update();
-                    };
-                } else if (m.getName().equals("delete") && paramLen == 1 && Condition.class.isAssignableFrom(m.getParameterTypes()[0])) {
-                    call = (proxy, args) -> {
-                        final SP sp = parameterizedDeleteFromFunc.apply(entityClass).where((Condition) args[0]).pair();
-                        return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).update();
-                    };
-                } else {
-                    call = (proxy, args) -> {
-                        throw new UnsupportedOperationException("Unsupported operation: " + m);
-                    };
-                }
-            } else if (m.getDeclaringClass().equals(CrudDao.class)) {
-                final List<String> idPropNames = ClassUtil.getIdFieldNames(entityClass);
-                final Set<String> idPropNameSet = N.newHashSet(idPropNames);
-                final String idPropName = idPropNames.get(0);
-
-                String sql_getById = null;
-                String sql_existsById = null;
-                String sql_insertWithId = null;
-                String sql_insertWithoutId = null;
-                String sql_updateById = null;
-                String sql_deleteById = null;
-
-                if (sbc.equals(PSC.class)) {
-                    sql_getById = PSC.selectFrom(entityClass).where(CF.eq(idPropName)).sql();
-                    sql_existsById = PSC.select(SQLBuilder._1).from(entityClass).where(CF.eq(idPropName)).sql();
-                    sql_insertWithId = NSC.insertInto(entityClass).sql();
-                    sql_insertWithoutId = NSC.insertInto(entityClass, N.asSet(idPropName)).sql();
-                    sql_updateById = NSC.update(entityClass, idPropNameSet).where(CF.eq(idPropName)).sql();
-                    sql_deleteById = PSC.deleteFrom(entityClass).where(CF.eq(idPropName)).sql();
-                } else if (sbc.equals(PAC.class)) {
-                    sql_getById = PAC.selectFrom(entityClass).where(CF.eq(idPropName)).sql();
-                    sql_existsById = PAC.select(SQLBuilder._1).from(entityClass).where(CF.eq(idPropName)).sql();
-                    sql_updateById = NAC.update(entityClass, idPropNameSet).where(CF.eq(idPropName)).sql();
-                    sql_insertWithId = NAC.insertInto(entityClass).sql();
-                    sql_insertWithoutId = NAC.insertInto(entityClass, N.asSet(idPropName)).sql();
-                    sql_deleteById = PAC.deleteFrom(entityClass).where(CF.eq(idPropName)).sql();
-                } else {
-                    sql_getById = PLC.selectFrom(entityClass).where(CF.eq(idPropName)).sql();
-                    sql_existsById = PLC.select(SQLBuilder._1).from(entityClass).where(CF.eq(idPropName)).sql();
-                    sql_insertWithId = NLC.insertInto(entityClass).sql();
-                    sql_insertWithoutId = NLC.insertInto(entityClass, N.asSet(idPropName)).sql();
-                    sql_updateById = NLC.update(entityClass, idPropNameSet).where(CF.eq(idPropName)).sql();
-                    sql_deleteById = PLC.deleteFrom(entityClass).where(CF.eq(idPropName)).sql();
-                }
-
-                final NamedSQL insertWithIdSQL = NamedSQL.parse(sql_insertWithId);
-                final NamedSQL insertWithoutIdSQL = NamedSQL.parse(sql_insertWithoutId);
-                final NamedSQL updateByIdSQL = NamedSQL.parse(sql_updateById);
-
-                if (m.getName().equals("insert")) {
-                    call = (proxy, args) -> {
-                        final Object idPropValue = ClassUtil.getPropValue(args[0], idPropName);
-
-                        if (JdbcUtil.isDefaultIdPropValue(idPropValue)) {
-                            final Object id = proxy.prepareNamedQuery(insertWithoutIdSQL, true)
-                                    .setParameters(args[0])
-                                    .insert()
-                                    .ifPresent(ret -> ClassUtil.setPropValue(args[0], idPropName, ret))
-                                    .orElse(N.defaultValueOf(returnType));
-
-                            if (args[0] instanceof DirtyMarker) {
-                                DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
                             }
 
-                            return id;
-                        } else {
-                            proxy.prepareNamedQuery(insertWithIdSQL).setParameters(args[0]).update();
-
-                            if (args[0] instanceof DirtyMarker) {
-                                DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
-                            }
-
-                            return idPropValue;
-                        }
-                    };
-                } else if (m.getName().equals("batchInsert")) {
-                    call = (proxy, args) -> {
-                        final Collection<?> entities = (Collection<Object>) args[0];
-
-                        if (N.isNullOrEmpty(entities)) {
-                            return 0;
-                        }
-
-                        final Object idPropValue = N.isNullOrEmpty(entities) ? null : ClassUtil.getPropValue(N.first(entities).get(), idPropName);
-
-                        if (JdbcUtil.isDefaultIdPropValue(idPropValue)) {
-                            final List<Object> ids = proxy.prepareNamedQuery(insertWithoutIdSQL, true).addBatchParameters(entities).batchInsert();
-
-                            if (N.notNullOrEmpty(entities) && ids.size() == N.size(entities)) {
+                            if (N.notNullOrEmpty(ids) && N.notNullOrEmpty(entities) && ids.size() == N.size(entities)) {
                                 int idx = 0;
 
                                 for (Object e : entities) {
@@ -15394,9 +15382,59 @@ public final class JdbcUtil {
                                 }
                             }
 
-                            return ids;
-                        } else {
-                            proxy.prepareNamedQuery(insertWithIdSQL).addBatchParameters(entities).batchUpdate();
+                            return null;
+                        };
+                    } else if (m.getName().equals("saveAll") && paramLen == 3 && int.class.equals(paramTypes[2])) {
+                        call = (proxy, args) -> {
+                            final String namedInsertSQL = (String) args[0];
+                            final Collection<?> entities = (Collection<Object>) args[1];
+                            final int batchSize = (Integer) args[2];
+                            N.checkArgPositive(batchSize, "batchSize");
+
+                            if (N.isNullOrEmpty(entities)) {
+                                return 0;
+                            }
+
+                            List<Object> ids = null;
+
+                            if (entities.size() <= batchSize) {
+                                if (isFakeId) {
+                                    proxy.prepareNamedQuery(namedInsertSQL).addBatchParameters(entities).batchUpdate();
+                                } else {
+                                    ids = proxy.prepareNamedQuery(namedInsertSQL, true).addBatchParameters(entities).batchInsert();
+                                }
+                            } else {
+                                final SQLTransaction tran = JdbcUtil.beginTransaction(proxy.dataSource());
+
+                                try {
+                                    if (isFakeId) {
+                                        try (NamedQuery nameQuery = proxy.prepareNamedQuery(namedInsertSQL).closeAfterExecution(false)) {
+                                            ExceptionalStream.of(entities)
+                                                    .splitToList(batchSize) //
+                                                    .forEach(bp -> nameQuery.addBatchParameters(bp).batchUpdate());
+                                        }
+                                    } else {
+                                        try (NamedQuery nameQuery = proxy.prepareNamedQuery(namedInsertSQL, true).closeAfterExecution(false)) {
+                                            ids = ExceptionalStream.of(entities)
+                                                    .splitToList(batchSize)
+                                                    .flattMap(bp -> nameQuery.addBatchParameters(bp).batchInsert())
+                                                    .toList();
+                                        }
+                                    }
+
+                                    tran.commit();
+                                } finally {
+                                    tran.rollbackIfNotCommitted();
+                                }
+                            }
+
+                            if (N.notNullOrEmpty(ids) && N.notNullOrEmpty(entities) && ids.size() == N.size(entities)) {
+                                int idx = 0;
+
+                                for (Object e : entities) {
+                                    ClassUtil.setPropValue(e, idPropName, ids.get(idx++));
+                                }
+                            }
 
                             if (N.first(entities).orNull() instanceof DirtyMarker) {
                                 for (Object e : entities) {
@@ -15404,528 +15442,918 @@ public final class JdbcUtil {
                                 }
                             }
 
-                            return StreamEx.of(entities).map(e -> ClassUtil.getPropValue(e, idPropName)).toList();
-                        }
-                    };
-                } else if (m.getName().equals("get")) {
-                    if (paramLen == 1) {
-                        final String query = sql_getById;
-                        call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, args[0]).get(entityClass);
-                    } else {
-                        call = (proxy, args) -> proxy
-                                .prepareQuery(parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where(CF.eq(idPropName)).sql())
-                                .setObject(1, args[1])
-                                .get(entityClass);
-                    }
-                } else if (m.getName().equals("gett")) {
-                    if (paramLen == 1) {
-                        final String query = sql_getById;
-                        call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, args[0]).gett(entityClass);
-                    } else {
-                        call = (proxy, args) -> proxy
-                                .prepareQuery(parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where(CF.eq(idPropName)).sql())
-                                .setObject(1, args[1])
-                                .gett(entityClass);
-                    }
-                } else if (m.getName().equals("exists") && paramLen == 1 && !Condition.class.isAssignableFrom(paramTypes[0])) {
-                    final String query = sql_existsById;
-                    call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, args[0]).exists();
-                } else if (m.getName().equals("update") && paramLen == 1) {
-                    if (DirtyMarker.class.isAssignableFrom(paramTypes[0])) {
-                        call = (proxy, args) -> {
-                            final String sql = namedUpdateFunc.apply(entityClass).set(args[0], idPropNameSet).where(CF.eq(idPropName)).sql();
-                            final NamedSQL namedSQL = NamedSQL.parse(sql);
-
-                            final int result = proxy.prepareNamedQuery(namedSQL).setParameters(args[0]).update();
-
-                            DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
-
-                            return result;
+                            return null;
                         };
-                    } else {
+                    } else if (m.getName().equals("exists") && paramLen == 1 && Condition.class.isAssignableFrom(m.getParameterTypes()[0])) {
                         call = (proxy, args) -> {
-                            final int result = proxy.prepareNamedQuery(updateByIdSQL).setParameters(args[0]).update();
-
-                            if (args[0] instanceof DirtyMarker) {
-                                DirtyMarkerUtil.markDirty((DirtyMarker) args[0], updateByIdSQL.getNamedParameters(), false);
-                            }
-
-                            return result;
+                            final SP sp = parameterizedSelectFunc.apply(SQLBuilder._1).from(entityClass).where((Condition) args[0]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).exists();
                         };
-                    }
-                } else if (m.getName().equals("update") && paramLen == 2 && !Map.class.equals(paramTypes[0]) && Collection.class.equals(paramTypes[1])) {
-                    call = (proxy, args) -> {
-                        final Collection<String> propNamesToUpdate = (Collection<String>) args[1];
-                        N.checkArgNotNullOrEmpty(propNamesToUpdate, "propNamesToUpdate");
+                    } else if (m.getName().equals("count") && paramLen == 1 && Condition.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply(SQLBuilder.COUNT_ALL).from(entityClass).where((Condition) args[0]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForInt().orZero();
+                        };
+                    } else if (m.getName().equals("findFirst") && paramLen == 1 && paramTypes[0].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFromFunc.apply(entityClass).where((Condition) args[0]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).findFirst(entityClass);
+                        };
+                    } else if (m.getName().equals("findFirst") && paramLen == 2 && paramTypes[0].equals(Collection.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).findFirst(entityClass);
+                        };
+                    } else if (m.getName().equals("list") && paramLen == 1 && paramTypes[0].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFromFunc.apply(entityClass).where((Condition) args[0]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).list(entityClass);
+                        };
+                    } else if (m.getName().equals("list") && paramLen == 2 && paramTypes[0].equals(Collection.class) && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).list(entityClass);
+                        };
+                    } else if (m.getName().equals("query") && paramLen == 1 && paramTypes[0].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFromFunc.apply(entityClass).where((Condition) args[0]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).query();
+                        };
+                    } else if (m.getName().equals("query") && paramLen == 2 && paramTypes[0].equals(Collection.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).query();
+                        };
+                    } else if (m.getName().equals("queryForBoolean") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForBoolean();
+                        };
+                    } else if (m.getName().equals("queryForChar") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForChar();
+                        };
+                    } else if (m.getName().equals("queryForByte") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForByte();
+                        };
+                    } else if (m.getName().equals("queryForShort") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForShort();
+                        };
+                    } else if (m.getName().equals("queryForInt") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForInt();
+                        };
+                    } else if (m.getName().equals("queryForLong") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForLong();
+                        };
+                    } else if (m.getName().equals("queryForFloat") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForFloat();
+                        };
+                    } else if (m.getName().equals("queryForDouble") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForDouble();
+                        };
+                    } else if (m.getName().equals("queryForString") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForString();
+                        };
+                    } else if (m.getName().equals("queryForDate") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForDate();
+                        };
+                    } else if (m.getName().equals("queryForTime") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForTime();
+                        };
+                    } else if (m.getName().equals("queryForTimestamp") && paramLen == 2 && paramTypes[0].equals(String.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForTimestamp();
+                        };
+                    } else if (m.getName().equals("queryForSingleResult") && paramLen == 3 && paramTypes[0].equals(Class.class)
+                            && paramTypes[1].equals(String.class) && paramTypes[2].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[1]).from(entityClass).where((Condition) args[2]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForSingleResult((Class) args[0]);
+                        };
+                    } else if (m.getName().equals("queryForSingleNonNull") && paramLen == 3 && paramTypes[0].equals(Class.class)
+                            && paramTypes[1].equals(String.class) && paramTypes[2].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[1]).from(entityClass).where((Condition) args[2]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForSingleNonNull((Class) args[0]);
+                        };
+                    } else if (m.getName().equals("queryForUniqueResult") && paramLen == 3 && paramTypes[0].equals(Class.class)
+                            && paramTypes[1].equals(String.class) && paramTypes[2].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[1]).from(entityClass).where((Condition) args[2]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForUniqueResult((Class) args[0]);
+                        };
+                    } else if (m.getName().equals("queryForUniqueNonNull") && paramLen == 3 && paramTypes[0].equals(Class.class)
+                            && paramTypes[1].equals(String.class) && paramTypes[2].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc.apply((String) args[1]).from(entityClass).where((Condition) args[2]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).queryForUniqueNonNull((Class) args[0]);
+                        };
+                    } else if (m.getName().equals("stream") && paramLen == 1 && paramTypes[0].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFromFunc.apply(entityClass).where((Condition) args[0]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).stream(entityClass);
+                        };
+                    } else if (m.getName().equals("stream") && paramLen == 2 && paramTypes[0].equals(Collection.class)
+                            && paramTypes[1].equals(Condition.class)) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where((Condition) args[1]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).stream(entityClass);
+                        };
+                    } else if (m.getName().equals("update") && paramLen == 2 && Map.class.equals(paramTypes[0])
+                            && Condition.class.isAssignableFrom(m.getParameterTypes()[1])) {
+                        call = (proxy, args) -> {
+                            final Map<String, Object> props = (Map<String, Object>) args[0];
+                            final Condition cond = (Condition) args[1];
+                            N.checkArgNotNullOrEmpty(props, "updateProps");
 
-                        final String sql = namedUpdateFunc.apply(entityClass).set(propNamesToUpdate).where(CF.eq(idPropName)).sql();
-                        final NamedSQL namedSQL = NamedSQL.parse(sql);
-
-                        final int result = proxy.prepareNamedQuery(namedSQL).setParameters(args[0]).update();
-
-                        if (args[0] instanceof DirtyMarker) {
-                            DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
-                        }
-
-                        return result;
-                    };
-                } else if (m.getName().equals("update") && paramLen == 2 && Map.class.equals(paramTypes[0])) {
-                    call = (proxy, args) -> {
-                        final Map<String, Object> props = (Map<String, Object>) args[0];
-                        N.checkArgNotNullOrEmpty(props, "updateProps");
-                        final String query = parameterizedUpdateFunc.apply(entityClass).set(props.keySet()).where(CF.eq(idPropName)).sql();
-
-                        return proxy.prepareQuery(query).setParameters(1, props.values()).setObject(props.size() + 1, args[1]).update();
-                    };
-                } else if (m.getName().equals("batchUpdate") && paramLen == 1) {
-                    call = (proxy, args) -> {
-                        final Collection<Object> entities = (Collection<Object>) args[0];
-
-                        if (N.isNullOrEmpty(entities)) {
-                            return 0;
-                        }
-
-                        final Object entity = N.firstNonNull(entities).get();
-
-                        final String sql = namedUpdateFunc.apply(entityClass).set(entity, idPropNameSet).where(CF.eq(idPropName)).sql();
-                        final NamedSQL namedSQL = NamedSQL.parse(sql);
-
-                        final int result = N.sum(proxy.prepareNamedQuery(namedSQL).addBatchParameters(entities).batchUpdate());
-
-                        if (entity instanceof DirtyMarker) {
-                            final Collection<String> propNamesToUpdate = namedSQL.getNamedParameters();
-
-                            for (Object e : entities) {
-                                DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
-                            }
-                        }
-
-                        return result;
-                    };
-                } else if (m.getName().equals("batchUpdate") && paramLen == 2 && Collection.class.isAssignableFrom(paramTypes[1])) {
-                    call = (proxy, args) -> {
-                        final Collection<Object> entities = (Collection<Object>) args[0];
-                        final Collection<String> propNamesToUpdate = (Collection<String>) args[1];
-
-                        N.checkArgNotNullOrEmpty(propNamesToUpdate, "propNamesToUpdate");
-
-                        if (N.isNullOrEmpty(entities)) {
-                            return 0;
-                        }
-
-                        final String sql = namedUpdateFunc.apply(entityClass).set(propNamesToUpdate).where(CF.eq(idPropName)).sql();
-                        final NamedSQL namedSQL = NamedSQL.parse(sql);
-
-                        final int result = N.sum(proxy.prepareNamedQuery(namedSQL).addBatchParameters(entities).batchUpdate());
-
-                        if (N.first(entities).orNull() instanceof DirtyMarker) {
-                            for (Object e : entities) {
-                                DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
-                            }
-                        }
-
-                        return result;
-                    };
-                } else if (m.getName().equals("deleteById")) {
-                    final String query = sql_deleteById;
-                    call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, args[0]).update();
-                } else if (m.getName().equals("delete") && paramLen == 1 && !Condition.class.isAssignableFrom(m.getParameterTypes()[0])) {
-                    final String query = sql_deleteById;
-                    call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, ClassUtil.getPropValue(args[0], idPropName)).update();
-                } else if (m.getName().equals("batchDelete")) {
-                    final String query = sql_deleteById;
-
-                    call = (proxy, args) -> {
-                        final Collection<?> entities = (Collection<?>) args[0];
-
-                        if (N.isNullOrEmpty(entities)) {
-                            return 0;
-                        }
-
-                        return N.sum(proxy.prepareQuery(query)
-                                .setBatchParameters(entities, (q, e) -> q.setObject(1, ClassUtil.getPropValue(e, idPropName)))
-                                .batchUpdate());
-                    };
-                } else {
-                    call = (proxy, args) -> {
-                        throw new UnsupportedOperationException("Unsupported operation: " + m);
-                    };
-                }
-            } else if (sqlAnno == null) {
-                if (Modifier.isAbstract(m.getModifiers())) {
-                    if (m.getName().equals("dataSource") && javax.sql.DataSource.class.isAssignableFrom(returnType) && paramLen == 0) {
-                        call = (proxy, args) -> ds;
-                    } else if (m.getName().equals("prepareQuery") && returnType.equals(PreparedQuery.class) && paramLen == 1
-                            && paramTypes[0].equals(String.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareQuery(proxy.dataSource(), (String) args[0]);
-                    } else if (m.getName().equals("prepareQuery") && returnType.equals(PreparedQuery.class) && paramLen == 2
-                            && paramTypes[0].equals(String.class) && paramTypes[1].equals(boolean.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareQuery(proxy.dataSource(), (String) args[0], (Boolean) args[1]);
-                    } else if (m.getName().equals("prepareQuery") && returnType.equals(PreparedQuery.class) && paramLen == 2
-                            && paramTypes[0].equals(String.class) && paramTypes[1].equals(Try.BiFunction.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareQuery(proxy.dataSource(), (String) args[0],
-                                (Try.BiFunction<Connection, String, PreparedStatement, SQLException>) args[1]);
-                    } else if (m.getName().equals("prepareNamedQuery") && returnType.equals(NamedQuery.class) && paramLen == 1
-                            && paramTypes[0].equals(String.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareNamedQuery(proxy.dataSource(), (String) args[0]);
-                    } else if (m.getName().equals("prepareNamedQuery") && returnType.equals(NamedQuery.class) && paramLen == 2
-                            && paramTypes[0].equals(String.class) && paramTypes[1].equals(boolean.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareNamedQuery(proxy.dataSource(), (String) args[0], (Boolean) args[1]);
-                    } else if (m.getName().equals("prepareNamedQuery") && returnType.equals(NamedQuery.class) && paramLen == 2
-                            && paramTypes[0].equals(String.class) && paramTypes[1].equals(Try.BiFunction.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareNamedQuery(proxy.dataSource(), (String) args[0],
-                                (Try.BiFunction<Connection, String, PreparedStatement, SQLException>) args[1]);
-                    } else if (m.getName().equals("prepareNamedQuery") && returnType.equals(NamedQuery.class) && paramLen == 1
-                            && paramTypes[0].equals(NamedSQL.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareNamedQuery(proxy.dataSource(), (NamedSQL) args[0]);
-                    } else if (m.getName().equals("prepareNamedQuery") && returnType.equals(NamedQuery.class) && paramLen == 2
-                            && paramTypes[0].equals(NamedSQL.class) && paramTypes[1].equals(boolean.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareNamedQuery(proxy.dataSource(), (NamedSQL) args[0], (Boolean) args[1]);
-                    } else if (m.getName().equals("prepareNamedQuery") && returnType.equals(NamedQuery.class) && paramLen == 2
-                            && paramTypes[0].equals(NamedSQL.class) && paramTypes[1].equals(Try.BiFunction.class)) {
-                        call = (proxy, args) -> JdbcUtil.prepareNamedQuery(proxy.dataSource(), (NamedSQL) args[0],
-                                (Try.BiFunction<Connection, String, PreparedStatement, SQLException>) args[1]);
+                            final SP sp = parameterizedUpdateFunc.apply(entityClass).set(props).where(cond).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).update();
+                        };
+                    } else if (m.getName().equals("delete") && paramLen == 1 && Condition.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                        call = (proxy, args) -> {
+                            final SP sp = parameterizedDeleteFromFunc.apply(entityClass).where((Condition) args[0]).pair();
+                            return proxy.prepareQuery(sp.sql).setParameters(1, sp.parameters).update();
+                        };
                     } else {
                         call = (proxy, args) -> {
                             throw new UnsupportedOperationException("Unsupported operation: " + m);
                         };
                     }
+                } else if (m.getDeclaringClass().equals(CrudDao.class)) {
+                    final List<String> idPropNames = ClassUtil.getIdFieldNames(entityClass);
+                    final Set<String> idPropNameSet = N.newHashSet(idPropNames);
+                    final String idPropName = idPropNames.get(0);
+
+                    String sql_getById = null;
+                    String sql_existsById = null;
+                    String sql_insertWithId = null;
+                    String sql_insertWithoutId = null;
+                    String sql_updateById = null;
+                    String sql_deleteById = null;
+
+                    if (sbc.equals(PSC.class)) {
+                        sql_getById = PSC.selectFrom(entityClass).where(CF.eq(idPropName)).sql();
+                        sql_existsById = PSC.select(SQLBuilder._1).from(entityClass).where(CF.eq(idPropName)).sql();
+                        sql_insertWithId = NSC.insertInto(entityClass).sql();
+                        sql_insertWithoutId = NSC.insertInto(entityClass, N.asSet(idPropName)).sql();
+                        sql_updateById = NSC.update(entityClass, idPropNameSet).where(CF.eq(idPropName)).sql();
+                        sql_deleteById = PSC.deleteFrom(entityClass).where(CF.eq(idPropName)).sql();
+                    } else if (sbc.equals(PAC.class)) {
+                        sql_getById = PAC.selectFrom(entityClass).where(CF.eq(idPropName)).sql();
+                        sql_existsById = PAC.select(SQLBuilder._1).from(entityClass).where(CF.eq(idPropName)).sql();
+                        sql_updateById = NAC.update(entityClass, idPropNameSet).where(CF.eq(idPropName)).sql();
+                        sql_insertWithId = NAC.insertInto(entityClass).sql();
+                        sql_insertWithoutId = NAC.insertInto(entityClass, N.asSet(idPropName)).sql();
+                        sql_deleteById = PAC.deleteFrom(entityClass).where(CF.eq(idPropName)).sql();
+                    } else {
+                        sql_getById = PLC.selectFrom(entityClass).where(CF.eq(idPropName)).sql();
+                        sql_existsById = PLC.select(SQLBuilder._1).from(entityClass).where(CF.eq(idPropName)).sql();
+                        sql_insertWithId = NLC.insertInto(entityClass).sql();
+                        sql_insertWithoutId = NLC.insertInto(entityClass, N.asSet(idPropName)).sql();
+                        sql_updateById = NLC.update(entityClass, idPropNameSet).where(CF.eq(idPropName)).sql();
+                        sql_deleteById = PLC.deleteFrom(entityClass).where(CF.eq(idPropName)).sql();
+                    }
+
+                    final NamedSQL insertWithIdSQL = NamedSQL.parse(sql_insertWithId);
+                    final NamedSQL insertWithoutIdSQL = NamedSQL.parse(sql_insertWithoutId);
+                    final NamedSQL updateByIdSQL = NamedSQL.parse(sql_updateById);
+
+                    if (m.getName().equals("insert")) {
+                        call = (proxy, args) -> {
+                            final Object idPropValue = ClassUtil.getPropValue(args[0], idPropName);
+
+                            if (JdbcUtil.isDefaultIdPropValue(idPropValue)) {
+                                final Object id = proxy.prepareNamedQuery(insertWithoutIdSQL, true)
+                                        .setParameters(args[0])
+                                        .insert()
+                                        .ifPresent(ret -> ClassUtil.setPropValue(args[0], idPropName, ret))
+                                        .orElse(N.defaultValueOf(returnType));
+
+                                if (args[0] instanceof DirtyMarker) {
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
+                                }
+
+                                return id;
+                            } else {
+                                proxy.prepareNamedQuery(insertWithIdSQL).setParameters(args[0]).update();
+
+                                if (args[0] instanceof DirtyMarker) {
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], false);
+                                }
+
+                                return idPropValue;
+                            }
+                        };
+                    } else if (m.getName().equals("batchInsert") && paramLen == 2 && int.class.equals(paramTypes[1])) {
+                        call = (proxy, args) -> {
+                            final Collection<?> entities = (Collection<Object>) args[0];
+                            final int batchSize = (Integer) args[1];
+                            N.checkArgPositive(batchSize, "batchSize");
+
+                            if (N.isNullOrEmpty(entities)) {
+                                return 0;
+                            }
+
+                            List<Object> ids = null;
+                            final Object idPropValue = N.isNullOrEmpty(entities) ? null : ClassUtil.getPropValue(N.first(entities).get(), idPropName);
+                            final boolean isDefaultIdPropValue = JdbcUtil.isDefaultIdPropValue(idPropValue);
+
+                            if (entities.size() <= batchSize) {
+                                if (isDefaultIdPropValue) {
+                                    ids = proxy.prepareNamedQuery(insertWithoutIdSQL, true).addBatchParameters(entities).batchInsert();
+                                } else {
+                                    proxy.prepareNamedQuery(insertWithIdSQL).addBatchParameters(entities).batchUpdate();
+                                }
+                            } else {
+                                final SQLTransaction tran = JdbcUtil.beginTransaction(proxy.dataSource());
+
+                                try {
+                                    if (isDefaultIdPropValue) {
+                                        try (NamedQuery nameQuery = proxy.prepareNamedQuery(insertWithoutIdSQL, true).closeAfterExecution(false)) {
+                                            ids = ExceptionalStream.of(entities)
+                                                    .splitToList(batchSize)
+                                                    .flattMap(bp -> nameQuery.addBatchParameters(bp).batchInsert())
+                                                    .toList();
+                                        }
+                                    } else {
+                                        try (NamedQuery nameQuery = proxy.prepareNamedQuery(insertWithIdSQL).closeAfterExecution(false)) {
+                                            ExceptionalStream.of(entities)
+                                                    .splitToList(batchSize) //
+                                                    .forEach(bp -> nameQuery.addBatchParameters(bp).batchUpdate());
+                                        }
+                                    }
+
+                                    tran.commit();
+                                } finally {
+                                    tran.rollbackIfNotCommitted();
+                                }
+                            }
+
+                            if (isDefaultIdPropValue) {
+                                if (N.notNullOrEmpty(ids) && N.notNullOrEmpty(entities) && ids.size() == N.size(entities)) {
+                                    int idx = 0;
+
+                                    for (Object e : entities) {
+                                        ClassUtil.setPropValue(e, idPropName, ids.get(idx++));
+                                    }
+                                }
+                            } else {
+                                ids = StreamEx.of(entities).map(e -> ClassUtil.getPropValue(e, idPropName)).toList();
+                            }
+
+                            if (N.first(entities).orNull() instanceof DirtyMarker) {
+                                for (Object e : entities) {
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
+                                }
+                            }
+
+                            return ids;
+                        };
+                    } else if (m.getName().equals("batchInsert") && paramLen == 3 && int.class.equals(paramTypes[2])) {
+                        call = (proxy, args) -> {
+                            final String namedInsertSQL = (String) args[0];
+                            final Collection<?> entities = (Collection<Object>) args[1];
+                            final int batchSize = (Integer) args[2];
+                            N.checkArgPositive(batchSize, "batchSize");
+
+                            if (N.isNullOrEmpty(entities)) {
+                                return 0;
+                            }
+
+                            List<Object> ids = null;
+
+                            if (entities.size() <= batchSize) {
+                                ids = proxy.prepareNamedQuery(namedInsertSQL, true).addBatchParameters(entities).batchInsert();
+                            } else {
+                                final SQLTransaction tran = JdbcUtil.beginTransaction(proxy.dataSource());
+
+                                try {
+                                    try (NamedQuery nameQuery = proxy.prepareNamedQuery(namedInsertSQL, true).closeAfterExecution(false)) {
+                                        ids = ExceptionalStream.of(entities)
+                                                .splitToList(batchSize)
+                                                .flattMap(bp -> nameQuery.addBatchParameters(bp).batchInsert())
+                                                .toList();
+                                    }
+
+                                    tran.commit();
+                                } finally {
+                                    tran.rollbackIfNotCommitted();
+                                }
+                            }
+
+                            if (N.notNullOrEmpty(ids) && N.notNullOrEmpty(entities) && ids.size() == N.size(entities)) {
+                                int idx = 0;
+
+                                for (Object e : entities) {
+                                    ClassUtil.setPropValue(e, idPropName, ids.get(idx++));
+                                }
+                            } else {
+                                ids = StreamEx.of(entities).map(e -> ClassUtil.getPropValue(e, idPropName)).toList();
+                            }
+
+                            if (N.first(entities).orNull() instanceof DirtyMarker) {
+                                for (Object e : entities) {
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
+                                }
+                            }
+
+                            return ids;
+                        };
+                    } else if (m.getName().equals("get")) {
+                        if (paramLen == 1) {
+                            final String query = sql_getById;
+                            call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, args[0]).get(entityClass);
+                        } else {
+                            call = (proxy, args) -> proxy
+                                    .prepareQuery(parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where(CF.eq(idPropName)).sql())
+                                    .setObject(1, args[1])
+                                    .get(entityClass);
+                        }
+                    } else if (m.getName().equals("gett")) {
+                        if (paramLen == 1) {
+                            final String query = sql_getById;
+                            call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, args[0]).gett(entityClass);
+                        } else {
+                            call = (proxy, args) -> proxy
+                                    .prepareQuery(parameterizedSelectFunc2.apply((Collection<String>) args[0]).from(entityClass).where(CF.eq(idPropName)).sql())
+                                    .setObject(1, args[1])
+                                    .gett(entityClass);
+                        }
+                    } else if (m.getName().equals("exists") && paramLen == 1 && !Condition.class.isAssignableFrom(paramTypes[0])) {
+                        final String query = sql_existsById;
+                        call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, args[0]).exists();
+                    } else if (m.getName().equals("update") && paramLen == 1) {
+                        if (DirtyMarker.class.isAssignableFrom(paramTypes[0])) {
+                            call = (proxy, args) -> {
+                                final String sql = namedUpdateFunc.apply(entityClass).set(args[0], idPropNameSet).where(CF.eq(idPropName)).sql();
+                                final NamedSQL namedSQL = NamedSQL.parse(sql);
+
+                                final int result = proxy.prepareNamedQuery(namedSQL).setParameters(args[0]).update();
+
+                                DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
+
+                                return result;
+                            };
+                        } else {
+                            call = (proxy, args) -> {
+                                final int result = proxy.prepareNamedQuery(updateByIdSQL).setParameters(args[0]).update();
+
+                                if (args[0] instanceof DirtyMarker) {
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) args[0], updateByIdSQL.getNamedParameters(), false);
+                                }
+
+                                return result;
+                            };
+                        }
+                    } else if (m.getName().equals("update") && paramLen == 2 && !Map.class.equals(paramTypes[0]) && Collection.class.equals(paramTypes[1])) {
+                        call = (proxy, args) -> {
+                            final Collection<String> propNamesToUpdate = (Collection<String>) args[1];
+                            N.checkArgNotNullOrEmpty(propNamesToUpdate, "propNamesToUpdate");
+
+                            final String sql = namedUpdateFunc.apply(entityClass).set(propNamesToUpdate).where(CF.eq(idPropName)).sql();
+                            final NamedSQL namedSQL = NamedSQL.parse(sql);
+
+                            final int result = proxy.prepareNamedQuery(namedSQL).setParameters(args[0]).update();
+
+                            if (args[0] instanceof DirtyMarker) {
+                                DirtyMarkerUtil.markDirty((DirtyMarker) args[0], namedSQL.getNamedParameters(), false);
+                            }
+
+                            return result;
+                        };
+                    } else if (m.getName().equals("update") && paramLen == 2 && Map.class.equals(paramTypes[0])) {
+                        call = (proxy, args) -> {
+                            final Map<String, Object> props = (Map<String, Object>) args[0];
+                            N.checkArgNotNullOrEmpty(props, "updateProps");
+                            final String query = parameterizedUpdateFunc.apply(entityClass).set(props.keySet()).where(CF.eq(idPropName)).sql();
+
+                            return proxy.prepareQuery(query).setParameters(1, props.values()).setObject(props.size() + 1, args[1]).update();
+                        };
+                    } else if (m.getName().equals("batchUpdate") && paramLen == 2 && int.class.equals(paramTypes[1])) {
+                        call = (proxy, args) -> {
+                            final Collection<Object> entities = (Collection<Object>) args[0];
+                            final int batchSize = (Integer) args[1];
+                            N.checkArgPositive(batchSize, "batchSize");
+
+                            if (N.isNullOrEmpty(entities)) {
+                                return 0;
+                            }
+
+                            final Object entity = N.firstNonNull(entities).get();
+                            final String sql = namedUpdateFunc.apply(entityClass).set(entity, idPropNameSet).where(CF.eq(idPropName)).sql();
+                            final NamedSQL namedSQL = NamedSQL.parse(sql);
+                            int result = 0;
+
+                            if (entities.size() <= batchSize) {
+                                result = N.sum(proxy.prepareNamedQuery(namedSQL).addBatchParameters(entities).batchUpdate());
+                            } else {
+                                final SQLTransaction tran = JdbcUtil.beginTransaction(proxy.dataSource());
+
+                                try {
+                                    try (NamedQuery nameQuery = proxy.prepareNamedQuery(namedSQL).closeAfterExecution(false)) {
+                                        result = (int) ExceptionalStream.of(entities)
+                                                .splitToList(batchSize) //
+                                                .sumInt(bp -> N.sum(proxy.prepareNamedQuery(namedSQL).addBatchParameters(bp).batchUpdate()))
+                                                .orZero();
+                                    }
+
+                                    tran.commit();
+                                } finally {
+                                    tran.rollbackIfNotCommitted();
+                                }
+                            }
+
+                            if (entity instanceof DirtyMarker) {
+                                final Collection<String> propNamesToUpdate = namedSQL.getNamedParameters();
+
+                                for (Object e : entities) {
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
+                                }
+                            }
+
+                            return result;
+                        };
+                    } else if (m.getName().equals("batchUpdate") && paramLen == 3 && int.class.equals(paramTypes[2])) {
+                        call = (proxy, args) -> {
+                            final Collection<Object> entities = (Collection<Object>) args[0];
+                            final Collection<String> propNamesToUpdate = (Collection<String>) args[1];
+                            final int batchSize = (Integer) args[2];
+                            N.checkArgPositive(batchSize, "batchSize");
+
+                            N.checkArgNotNullOrEmpty(propNamesToUpdate, "propNamesToUpdate");
+
+                            if (N.isNullOrEmpty(entities)) {
+                                return 0;
+                            }
+
+                            final String sql = namedUpdateFunc.apply(entityClass).set(propNamesToUpdate).where(CF.eq(idPropName)).sql();
+                            final NamedSQL namedSQL = NamedSQL.parse(sql);
+                            int result = 0;
+
+                            if (entities.size() <= batchSize) {
+                                result = N.sum(proxy.prepareNamedQuery(namedSQL).addBatchParameters(entities).batchUpdate());
+                            } else {
+                                final SQLTransaction tran = JdbcUtil.beginTransaction(proxy.dataSource());
+
+                                try {
+                                    try (NamedQuery nameQuery = proxy.prepareNamedQuery(namedSQL).closeAfterExecution(false)) {
+                                        result = (int) ExceptionalStream.of(entities)
+                                                .splitToList(batchSize) //
+                                                .sumInt(bp -> N.sum(proxy.prepareNamedQuery(namedSQL).addBatchParameters(bp).batchUpdate()))
+                                                .orZero();
+                                    }
+
+                                    tran.commit();
+                                } finally {
+                                    tran.rollbackIfNotCommitted();
+                                }
+                            }
+
+                            if (N.first(entities).orNull() instanceof DirtyMarker) {
+                                for (Object e : entities) {
+                                    DirtyMarkerUtil.markDirty((DirtyMarker) e, propNamesToUpdate, false);
+                                }
+                            }
+
+                            return result;
+                        };
+                    } else if (m.getName().equals("deleteById")) {
+                        final String query = sql_deleteById;
+                        call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, args[0]).update();
+                    } else if (m.getName().equals("delete") && paramLen == 1 && !Condition.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                        final String query = sql_deleteById;
+                        call = (proxy, args) -> proxy.prepareQuery(query).setObject(1, ClassUtil.getPropValue(args[0], idPropName)).update();
+                    } else if (m.getName().equals("batchDelete") && paramLen == 2 && int.class.equals(paramTypes[1])) {
+                        final String query = sql_deleteById;
+
+                        call = (proxy, args) -> {
+                            final Collection<?> entities = (Collection<?>) args[0];
+                            final int batchSize = (Integer) args[1];
+                            N.checkArgPositive(batchSize, "batchSize");
+
+                            if (N.isNullOrEmpty(entities)) {
+                                return 0;
+                            }
+
+                            if (entities.size() <= batchSize) {
+                                return N.sum(proxy.prepareQuery(query)
+                                        .addBatchParameters(entities, (q, e) -> q.setObject(1, ClassUtil.getPropValue(e, idPropName)))
+                                        .batchUpdate());
+                            } else {
+                                final SQLTransaction tran = JdbcUtil.beginTransaction(proxy.dataSource());
+                                int result = 0;
+
+                                try {
+                                    try (PreparedQuery preparedQuery = proxy.prepareQuery(query).closeAfterExecution(false)) {
+                                        result = (int) ExceptionalStream.of(entities)
+                                                .splitToList(batchSize)
+                                                .sumInt(bp -> N.sum(
+                                                        preparedQuery.addBatchParameters(bp, (q, e) -> q.setObject(1, ClassUtil.getPropValue(e, idPropName)))
+                                                                .batchUpdate()))
+                                                .orZero();
+                                    }
+
+                                    tran.commit();
+                                } finally {
+                                    tran.rollbackIfNotCommitted();
+                                }
+
+                                return (int) result;
+                            }
+                        };
+                    } else {
+                        call = (proxy, args) -> {
+                            throw new UnsupportedOperationException("Unsupported operation: " + m);
+                        };
+                    }
+                } else if (sqlAnno == null) {
+                    if (Modifier.isAbstract(m.getModifiers())) {
+                        if (m.getName().equals("dataSource") && javax.sql.DataSource.class.isAssignableFrom(returnType) && paramLen == 0) {
+                            call = (proxy, args) -> ds;
+                        } else {
+                            call = (proxy, args) -> {
+                                throw new UnsupportedOperationException("Unsupported operation: " + m);
+                            };
+                        }
+                    } else {
+                        final MethodHandle methodHandle = createMethodHandle(m);
+
+                        call = (proxy, args) -> {
+                            try {
+                                return methodHandle.bindTo(proxy).invokeWithArguments(args);
+                            } catch (Throwable e) {
+                                throw new Exception(e);
+                            }
+                        };
+                    }
                 } else {
-                    final MethodHandle methodHandle = createMethodHandle(m);
+                    final Class<?> lastParamType = paramLen == 0 ? null : paramTypes[paramLen - 1];
+                    final String query = N.checkArgNotNullOrEmpty(JdbcUtil.sqlAnnoMap.get(sqlAnno.annotationType()).apply(sqlAnno),
+                            "sql can't be null or empty");
 
-                    call = (proxy, args) -> {
-                        try {
-                            return methodHandle.bindTo(proxy).invokeWithArguments(args);
-                        } catch (Throwable e) {
-                            throw new Exception(e);
-                        }
-                    };
-                }
-            } else {
-                final Class<?> lastParamType = paramLen == 0 ? null : paramTypes[paramLen - 1];
-                final String query = N.checkArgNotNullOrEmpty(JdbcUtil.sqlAnnoMap.get(sqlAnno.annotationType()).apply(sqlAnno), "sql can't be null or empty");
+                    final boolean isNamedQuery = sqlAnno.annotationType().getSimpleName().startsWith("Named");
+                    final NamedSQL namedSQL = isNamedQuery ? NamedSQL.parse(query) : null;
 
-                final boolean isNamedQuery = sqlAnno.annotationType().getSimpleName().startsWith("Named");
-                final NamedSQL namedSQL = isNamedQuery ? NamedSQL.parse(query) : null;
+                    if ((paramLen > 0 && JdbcUtil.ParametersSetter.class.isAssignableFrom(paramTypes[0]))
+                            || (paramLen > 1 && JdbcUtil.BiParametersSetter.class.isAssignableFrom(paramTypes[1]))
+                            || (paramLen > 1 && JdbcUtil.TriParametersSetter.class.isAssignableFrom(paramTypes[1]))) {
+                        throw new UnsupportedOperationException(
+                                "Setting parameters by 'ParametersSetter/BiParametersSetter/TriParametersSetter' is disabled. Can't use it in method: "
+                                        + m.getName());
+                    }
 
-                if ((paramLen > 0 && JdbcUtil.ParametersSetter.class.isAssignableFrom(paramTypes[0]))
-                        || (paramLen > 1 && JdbcUtil.BiParametersSetter.class.isAssignableFrom(paramTypes[1]))
-                        || (paramLen > 1 && JdbcUtil.TriParametersSetter.class.isAssignableFrom(paramTypes[1]))) {
-                    throw new UnsupportedOperationException(
-                            "Setting parameters by 'ParametersSetter/BiParametersSetter/TriParametersSetter' is disabled. Can't use it in method: "
-                                    + m.getName());
-                }
+                    if (paramLen > 0 && (ResultExtractor.class.isAssignableFrom(lastParamType) || BiResultExtractor.class.isAssignableFrom(lastParamType)
+                            || RowMapper.class.isAssignableFrom(lastParamType) || BiRowMapper.class.isAssignableFrom(lastParamType))) {
+                        throw new UnsupportedOperationException(
+                                "Retrieving result/record by 'ResultExtractor/BiResultExtractor/RowMapper/BiRowMapper' is disabled. Can't use it in method: "
+                                        + m.getName());
+                    }
 
-                if (paramLen > 0 && (ResultExtractor.class.isAssignableFrom(lastParamType) || BiResultExtractor.class.isAssignableFrom(lastParamType)
-                        || RowMapper.class.isAssignableFrom(lastParamType) || BiRowMapper.class.isAssignableFrom(lastParamType))) {
-                    throw new UnsupportedOperationException(
-                            "Retrieving result/record by 'ResultExtractor/BiResultExtractor/RowMapper/BiRowMapper' is disabled. Can't use it in method: "
-                                    + m.getName());
-                }
+                    if (java.util.Optional.class.isAssignableFrom(returnType) || java.util.OptionalInt.class.isAssignableFrom(returnType)
+                            || java.util.OptionalLong.class.isAssignableFrom(returnType) || java.util.OptionalDouble.class.isAssignableFrom(returnType)) {
+                        throw new UnsupportedOperationException("the return type of the method: " + m.getName() + " can't be: " + returnType);
+                    }
 
-                if (java.util.Optional.class.isAssignableFrom(returnType) || java.util.OptionalInt.class.isAssignableFrom(returnType)
-                        || java.util.OptionalLong.class.isAssignableFrom(returnType) || java.util.OptionalDouble.class.isAssignableFrom(returnType)) {
-                    throw new UnsupportedOperationException("the return type of the method: " + m.getName() + " can't be: " + returnType);
-                }
+                    if (StreamEx.of(m.getExceptionTypes()).noneMatch(e -> SQLException.class.equals(e))) {
+                        throw new UnsupportedOperationException("'throws SQLException' is not declared in method: " + m.getName());
+                    }
 
-                if (StreamEx.of(m.getExceptionTypes()).noneMatch(e -> SQLException.class.equals(e))) {
-                    throw new UnsupportedOperationException("'throws SQLException' is not declared in method: " + m.getName());
-                }
+                    if (paramLen > 0 && (Map.class.isAssignableFrom(paramTypes[0]) || ClassUtil.isEntity(paramTypes[0])) && isNamedQuery == false) {
+                        throw new IllegalArgumentException(
+                                "Using named query: @NamedSelect/Update/Insert/Delete when parameter type is Map or entity with Getter/Setter methods");
+                    }
 
-                if (paramLen > 0 && (Map.class.isAssignableFrom(paramTypes[0]) || ClassUtil.isEntity(paramTypes[0])) && isNamedQuery == false) {
-                    throw new IllegalArgumentException(
-                            "Using named query: @NamedSelect/Update/Insert/Delete when parameter type is Map or entity with Getter/Setter methods");
-                }
+                    BiParametersSetter<AbstractPreparedQuery, Object[]> parametersSetter = null;
 
-                BiParametersSetter<AbstractPreparedQuery, Object[]> parametersSetter = null;
+                    if (paramLen == 0) {
+                        parametersSetter = null;
+                    } else if (JdbcUtil.ParametersSetter.class.isAssignableFrom(paramTypes[0])) {
+                        parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
+                            @Override
+                            public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
+                                preparedQuery.settParameters((JdbcUtil.ParametersSetter) args[0]);
+                            }
+                        };
+                    } else if (paramLen > 1 && JdbcUtil.BiParametersSetter.class.isAssignableFrom(paramTypes[1])) {
+                        parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
+                            @Override
+                            public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
+                                preparedQuery.settParameters(args[0], (JdbcUtil.BiParametersSetter) args[1]);
+                            }
+                        };
+                    } else if (paramLen > 1 && JdbcUtil.TriParametersSetter.class.isAssignableFrom(paramTypes[1])) {
+                        parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
+                            @Override
+                            public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
+                                ((NamedQuery) preparedQuery).setParameters(args[0], (JdbcUtil.TriParametersSetter) args[1]);
+                            }
+                        };
+                    } else if (Collection.class.isAssignableFrom(paramTypes[0])) {
+                        parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
+                            @Override
+                            public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
+                                preparedQuery.setParameters(1, (Collection) args[0]);
+                            }
+                        };
+                    } else {
+                        final boolean isLastParameterMapperOrExtractor = ResultExtractor.class.isAssignableFrom(lastParamType)
+                                || BiResultExtractor.class.isAssignableFrom(lastParamType) || RowMapper.class.isAssignableFrom(lastParamType)
+                                || BiRowMapper.class.isAssignableFrom(lastParamType);
 
-                if (paramLen == 0) {
-                    parametersSetter = null;
-                } else if (JdbcUtil.ParametersSetter.class.isAssignableFrom(paramTypes[0])) {
-                    parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
-                        @Override
-                        public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                            preparedQuery.settParameters((JdbcUtil.ParametersSetter) args[0]);
-                        }
-                    };
-                } else if (paramLen > 1 && JdbcUtil.BiParametersSetter.class.isAssignableFrom(paramTypes[1])) {
-                    parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
-                        @Override
-                        public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                            preparedQuery.settParameters(args[0], (JdbcUtil.BiParametersSetter) args[1]);
-                        }
-                    };
-                } else if (paramLen > 1 && JdbcUtil.TriParametersSetter.class.isAssignableFrom(paramTypes[1])) {
-                    parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
-                        @Override
-                        public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                            ((NamedQuery) preparedQuery).setParameters(args[0], (JdbcUtil.TriParametersSetter) args[1]);
-                        }
-                    };
-                } else if (Collection.class.isAssignableFrom(paramTypes[0])) {
-                    parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
-                        @Override
-                        public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                            preparedQuery.setParameters(1, (Collection) args[0]);
-                        }
-                    };
-                } else {
-                    final boolean isLastParameterMapperOrExtractor = ResultExtractor.class.isAssignableFrom(lastParamType)
-                            || BiResultExtractor.class.isAssignableFrom(lastParamType) || RowMapper.class.isAssignableFrom(lastParamType)
-                            || BiRowMapper.class.isAssignableFrom(lastParamType);
+                        if (isLastParameterMapperOrExtractor && paramLen == 1) {
+                            // ignore
+                        } else if ((isLastParameterMapperOrExtractor && paramLen == 2) || (!isLastParameterMapperOrExtractor && paramLen == 1)) {
+                            if (isNamedQuery) {
+                                final Dao.Bind binder = StreamEx.of(m.getParameterAnnotations())
+                                        .limit(1)
+                                        .flatMapp(e -> e)
+                                        .select(Dao.Bind.class)
+                                        .first()
+                                        .orNull();
 
-                    if (isLastParameterMapperOrExtractor && paramLen == 1) {
-                        // ignore
-                    } else if ((isLastParameterMapperOrExtractor && paramLen == 2) || (!isLastParameterMapperOrExtractor && paramLen == 1)) {
-                        if (isNamedQuery) {
-                            final Dao.Bind binder = StreamEx.of(m.getParameterAnnotations()).limit(1).flatMapp(e -> e).select(Dao.Bind.class).first().orNull();
-
-                            if (binder != null) {
+                                if (binder != null) {
+                                    parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
+                                        @Override
+                                        public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
+                                            ((NamedQuery) preparedQuery).setObject(binder.value(), args[0]);
+                                        }
+                                    };
+                                } else if (Map.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                                    parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
+                                        @Override
+                                        public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
+                                            ((NamedQuery) preparedQuery).setParameters((Map<String, ?>) args[0]);
+                                        }
+                                    };
+                                } else if (ClassUtil.isEntity(m.getParameterTypes()[0])) {
+                                    parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
+                                        @Override
+                                        public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
+                                            ((NamedQuery) preparedQuery).setParameters(args[0]);
+                                        }
+                                    };
+                                } else {
+                                    throw new UnsupportedOperationException("In method: " + ClassUtil.getSimpleClassName(daoInterface) + "." + m.getName()
+                                            + ", parameters for named query have to be binded with names through annotation @Bind, or Map/Entity with getter/setter methods. Can not be: "
+                                            + ClassUtil.getSimpleClassName(m.getParameterTypes()[0]));
+                                }
+                            } else {
                                 parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
                                     @Override
                                     public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                                        ((NamedQuery) preparedQuery).setObject(binder.value(), args[0]);
+                                        preparedQuery.setObject(1, args[0]);
                                     }
                                 };
-                            } else if (Map.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                            }
+                        } else if (paramLen > 2 || !isLastParameterMapperOrExtractor) {
+                            if (isNamedQuery) {
+                                final String[] paramNames = IntStreamEx.range(0, paramLen - (isLastParameterMapperOrExtractor ? 1 : 0))
+                                        .mapToObj(i -> StreamEx.of(m.getParameterAnnotations()[i])
+                                                .select(Dao.Bind.class)
+                                                .first()
+                                                .orElseThrow(() -> new UnsupportedOperationException(
+                                                        "In method: " + ClassUtil.getSimpleClassName(daoInterface) + "." + m.getName() + ", parameters[" + i
+                                                                + "]: " + ClassUtil.getSimpleClassName(m.getParameterTypes()[i])
+                                                                + " is not binded with parameter named through annotation @Bind")))
+                                        .map(b -> b.value())
+                                        .toArray(len -> new String[len]);
+
                                 parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
                                     @Override
                                     public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                                        ((NamedQuery) preparedQuery).setParameters((Map<String, ?>) args[0]);
-                                    }
-                                };
-                            } else if (ClassUtil.isEntity(m.getParameterTypes()[0])) {
-                                parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
-                                    @Override
-                                    public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                                        ((NamedQuery) preparedQuery).setParameters(args[0]);
+                                        final NamedQuery namedQuery = ((NamedQuery) preparedQuery);
+
+                                        for (int i = 0, count = paramNames.length; i < count; i++) {
+                                            namedQuery.setObject(paramNames[i], args[i]);
+                                        }
                                     }
                                 };
                             } else {
-                                throw new UnsupportedOperationException("In method: " + ClassUtil.getSimpleClassName(daoInterface) + "." + m.getName()
-                                        + ", parameters for named query have to be binded with names through annotation @Bind, or Map/Entity with getter/setter methods. Can not be: "
-                                        + ClassUtil.getSimpleClassName(m.getParameterTypes()[0]));
+                                parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
+                                    @Override
+                                    public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
+                                        if (isLastParameterMapperOrExtractor) {
+                                            preparedQuery.setParameters(1, Arrays.asList(N.copyOfRange(args, 0, args.length - 1)));
+                                        } else {
+                                            preparedQuery.setParameters(1, Arrays.asList(args));
+                                        }
+                                    }
+                                };
                             }
                         } else {
-                            parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
-                                @Override
-                                public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                                    preparedQuery.setObject(1, args[0]);
-                                }
-                            };
+                            // ignore.
                         }
-                    } else if (paramLen > 2 || !isLastParameterMapperOrExtractor) {
-                        if (isNamedQuery) {
-                            final String[] paramNames = IntStreamEx.range(0, paramLen - (isLastParameterMapperOrExtractor ? 1 : 0))
-                                    .mapToObj(i -> StreamEx.of(m.getParameterAnnotations()[i])
-                                            .select(Dao.Bind.class)
-                                            .first()
-                                            .orElseThrow(() -> new UnsupportedOperationException("In method: " + ClassUtil.getSimpleClassName(daoInterface)
-                                                    + "." + m.getName() + ", parameters[" + i + "]: " + ClassUtil.getSimpleClassName(m.getParameterTypes()[i])
-                                                    + " is not binded with parameter named through annotation @Bind")))
-                                    .map(b -> b.value())
-                                    .toArray(len -> new String[len]);
+                    }
 
-                            parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
-                                @Override
-                                public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                                    final NamedQuery namedQuery = ((NamedQuery) preparedQuery);
+                    final BiParametersSetter<AbstractPreparedQuery, Object[]> finalParametersSetter = parametersSetter;
 
-                                    for (int i = 0, count = paramNames.length; i < count; i++) {
-                                        namedQuery.setObject(paramNames[i], args[i]);
-                                    }
+                    Tuple2<Integer, Integer> tp = null;
+
+                    if (sqlAnno instanceof Dao.Select) {
+                        tp = Tuple.of(((Dao.Select) sqlAnno).queryTimeout(), ((Dao.Select) sqlAnno).fetchSize());
+                    } else if (sqlAnno instanceof Dao.NamedSelect) {
+                        tp = Tuple.of(((Dao.NamedSelect) sqlAnno).queryTimeout(), ((Dao.NamedSelect) sqlAnno).fetchSize());
+                    } else if (sqlAnno instanceof Dao.Insert) {
+                        tp = Tuple.of(((Dao.Insert) sqlAnno).queryTimeout(), -1);
+                    } else if (sqlAnno instanceof Dao.NamedInsert) {
+                        tp = Tuple.of(((Dao.NamedInsert) sqlAnno).queryTimeout(), -1);
+                    } else if (sqlAnno instanceof Dao.Update) {
+                        tp = Tuple.of(((Dao.Update) sqlAnno).queryTimeout(), -1);
+                    } else if (sqlAnno instanceof Dao.NamedUpdate) {
+                        tp = Tuple.of(((Dao.NamedUpdate) sqlAnno).queryTimeout(), -1);
+                    } else if (sqlAnno instanceof Dao.Delete) {
+                        tp = Tuple.of(((Dao.Delete) sqlAnno).queryTimeout(), -1);
+                    } else if (sqlAnno instanceof Dao.NamedDelete) {
+                        tp = Tuple.of(((Dao.NamedDelete) sqlAnno).queryTimeout(), -1);
+                    } else {
+                        tp = Tuple.of(-1, -1);
+                    }
+
+                    final int queryTimeout = tp._1;
+                    final int fetchSize = tp._2;
+
+                    final boolean returnGeneratedKeys = (sqlAnno.annotationType().equals(Dao.Insert.class)
+                            || sqlAnno.annotationType().equals(Dao.NamedInsert.class)) && !returnType.equals(void.class);
+
+                    if (sqlAnno.annotationType().equals(Dao.Select.class) || sqlAnno.annotationType().equals(Dao.NamedSelect.class)) {
+                        final boolean idDirtyMarker = ClassUtil.isEntity(returnType) && DirtyMarker.class.isAssignableFrom(returnType);
+
+                        final Try.BiFunction<AbstractPreparedQuery, Object[], T, Exception> queryFunc = createQueryFunctionByMethod(m);
+
+                        // Getting ClassCastException. Not sure why query result is being casted Dao. It seems there is a bug in JDk compiler.
+                        //   call = (proxy, args) -> queryFunc.apply(JdbcUtil.prepareQuery(proxy, ds, query, isNamedQuery, fetchSize, queryTimeout, returnGeneratedKeys, args, paramSetter), args);
+
+                        call = new Try.BiFunction<Dao, Object[], Object, Exception>() {
+                            @Override
+                            public Object apply(Dao proxy, Object[] args) throws Exception {
+                                Object result = queryFunc.apply(JdbcUtil.prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout,
+                                        returnGeneratedKeys, args, finalParametersSetter), args);
+
+                                if (idDirtyMarker) {
+                                    ((DirtyMarker) result).markDirty(false);
                                 }
+
+                                return result;
+                            }
+                        };
+                    } else if (sqlAnno.annotationType().equals(Dao.Insert.class) || sqlAnno.annotationType().equals(Dao.NamedInsert.class)) {
+                        final boolean idDirtyMarker = paramTypes.length == 1 && ClassUtil.isEntity(paramTypes[0])
+                                && DirtyMarker.class.isAssignableFrom(paramTypes[0]);
+
+                        final String idPropName = paramTypes.length == 1 && ClassUtil.isEntity(paramTypes[0])
+                                && ClassUtil.getIdFieldNames(paramTypes[0]).size() == 1 ? ClassUtil.getIdFieldNames(paramTypes[0]).get(0) : null;
+
+                        if (void.class.equals(returnType)) {
+                            call = (proxy, args) -> {
+                                prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter)
+                                        .update();
+
+                                if (idDirtyMarker) {
+                                    ((DirtyMarker) args[0]).markDirty(false);
+                                }
+
+                                return null;
+                            };
+                        } else if (Optional.class.equals(returnType)) {
+                            call = (proxy, args) -> {
+                                final Object result = JdbcUtil
+                                        .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
+                                                finalParametersSetter)
+                                        .insert()
+                                        .ifPresent(id -> If.notNullOrEmpty(idPropName).then(() -> ClassUtil.setPropValue(args[0], idPropName, id)));
+
+                                if (idDirtyMarker) {
+                                    ((DirtyMarker) args[0]).markDirty(false);
+                                }
+
+                                return result;
                             };
                         } else {
-                            parametersSetter = new BiParametersSetter<AbstractPreparedQuery, Object[]>() {
-                                @Override
-                                public void accept(AbstractPreparedQuery preparedQuery, Object[] args) throws SQLException {
-                                    if (isLastParameterMapperOrExtractor) {
-                                        preparedQuery.setParameters(1, Arrays.asList(N.copyOfRange(args, 0, args.length - 1)));
+                            call = (proxy, args) -> {
+                                final Object result = JdbcUtil
+                                        .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
+                                                finalParametersSetter)
+                                        .insert()
+                                        .ifPresent(id -> If.notNullOrEmpty(idPropName).then(() -> ClassUtil.setPropValue(args[0], idPropName, id)))
+                                        .orElse(N.defaultValueOf(returnType));
+
+                                if (idDirtyMarker) {
+                                    ((DirtyMarker) args[0]).markDirty(false);
+                                }
+
+                                return result;
+                            };
+                        }
+                    } else if (sqlAnno.annotationType().equals(Dao.Update.class) || sqlAnno.annotationType().equals(Dao.Delete.class)
+                            || sqlAnno.annotationType().equals(Dao.NamedUpdate.class) || sqlAnno.annotationType().equals(Dao.NamedDelete.class)) {
+                        if (!(returnType.equals(int.class) || returnType.equals(Integer.class) || returnType.equals(long.class) || returnType.equals(Long.class)
+                                || returnType.equals(boolean.class) || returnType.equals(Boolean.class) || returnType.equals(void.class))) {
+                            throw new UnsupportedOperationException(
+                                    "The return type of update/delete operations can only be: int/Integer/long/Long/boolean/Boolean/void, can't be: "
+                                            + returnType);
+                        }
+
+                        final boolean idDirtyMarker = paramTypes.length == 1 && ClassUtil.isEntity(paramTypes[0])
+                                && DirtyMarker.class.isAssignableFrom(paramTypes[0]);
+
+                        if (returnType.equals(int.class) || returnType.equals(Integer.class)) {
+                            call = (proxy, args) -> {
+                                final Object result = JdbcUtil
+                                        .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
+                                                finalParametersSetter)
+                                        .update();
+
+                                if (idDirtyMarker) {
+                                    if (isNamedQuery
+                                            && (sqlAnno.annotationType().equals(Dao.Update.class) || sqlAnno.annotationType().equals(Dao.NamedUpdate.class))) {
+                                        ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
                                     } else {
-                                        preparedQuery.setParameters(1, Arrays.asList(args));
+                                        ((DirtyMarker) args[0]).markDirty(false);
                                     }
                                 }
+
+                                return result;
+                            };
+                        } else if (returnType.equals(boolean.class) || returnType.equals(Boolean.class)) {
+                            call = (proxy, args) -> {
+                                final Object result = JdbcUtil
+                                        .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
+                                                finalParametersSetter)
+                                        .update() > 0;
+
+                                if (idDirtyMarker) {
+                                    if (isNamedQuery
+                                            && (sqlAnno.annotationType().equals(Dao.Update.class) || sqlAnno.annotationType().equals(Dao.NamedUpdate.class))) {
+                                        ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
+                                    } else {
+                                        ((DirtyMarker) args[0]).markDirty(false);
+                                    }
+                                }
+
+                                return result;
+                            };
+                        } else if (returnType.equals(long.class) || returnType.equals(Long.class)) {
+                            call = (proxy, args) -> {
+                                final Object result = JdbcUtil
+                                        .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
+                                                finalParametersSetter)
+                                        .largeUpate();
+
+                                if (idDirtyMarker) {
+                                    ((DirtyMarker) args[0]).markDirty(false);
+                                }
+
+                                return result;
+                            };
+                        } else {
+                            call = (proxy, args) -> {
+                                prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter)
+                                        .update();
+
+                                if (idDirtyMarker) {
+                                    ((DirtyMarker) args[0]).markDirty(false);
+                                }
+
+                                return null;
                             };
                         }
                     } else {
-                        // ignore.
+                        throw new UnsupportedOperationException("Unsupported sql annotation: " + sqlAnno.annotationType());
                     }
-                }
-
-                final BiParametersSetter<AbstractPreparedQuery, Object[]> finalParametersSetter = parametersSetter;
-
-                Tuple2<Integer, Integer> tp = null;
-
-                if (sqlAnno instanceof Dao.Select) {
-                    tp = Tuple.of(((Dao.Select) sqlAnno).queryTimeout(), ((Dao.Select) sqlAnno).fetchSize());
-                } else if (sqlAnno instanceof Dao.NamedSelect) {
-                    tp = Tuple.of(((Dao.NamedSelect) sqlAnno).queryTimeout(), ((Dao.NamedSelect) sqlAnno).fetchSize());
-                } else if (sqlAnno instanceof Dao.Insert) {
-                    tp = Tuple.of(((Dao.Insert) sqlAnno).queryTimeout(), -1);
-                } else if (sqlAnno instanceof Dao.NamedInsert) {
-                    tp = Tuple.of(((Dao.NamedInsert) sqlAnno).queryTimeout(), -1);
-                } else if (sqlAnno instanceof Dao.Update) {
-                    tp = Tuple.of(((Dao.Update) sqlAnno).queryTimeout(), -1);
-                } else if (sqlAnno instanceof Dao.NamedUpdate) {
-                    tp = Tuple.of(((Dao.NamedUpdate) sqlAnno).queryTimeout(), -1);
-                } else if (sqlAnno instanceof Dao.Delete) {
-                    tp = Tuple.of(((Dao.Delete) sqlAnno).queryTimeout(), -1);
-                } else if (sqlAnno instanceof Dao.NamedDelete) {
-                    tp = Tuple.of(((Dao.NamedDelete) sqlAnno).queryTimeout(), -1);
-                } else {
-                    tp = Tuple.of(-1, -1);
-                }
-
-                final int queryTimeout = tp._1;
-                final int fetchSize = tp._2;
-
-                final boolean returnGeneratedKeys = (sqlAnno.annotationType().equals(Dao.Insert.class)
-                        || sqlAnno.annotationType().equals(Dao.NamedInsert.class)) && !returnType.equals(void.class);
-
-                if (sqlAnno.annotationType().equals(Dao.Select.class) || sqlAnno.annotationType().equals(Dao.NamedSelect.class)) {
-                    final boolean idDirtyMarker = ClassUtil.isEntity(returnType) && DirtyMarker.class.isAssignableFrom(returnType);
-
-                    final Try.BiFunction<AbstractPreparedQuery, Object[], T, Exception> queryFunc = createQueryFunctionByMethod(m);
-
-                    // Getting ClassCastException. Not sure why query result is being casted Dao. It seems there is a bug in JDk compiler.
-                    //   call = (proxy, args) -> queryFunc.apply(JdbcUtil.prepareQuery(proxy, ds, query, isNamedQuery, fetchSize, queryTimeout, returnGeneratedKeys, args, paramSetter), args);
-
-                    call = new Try.BiFunction<Dao, Object[], Object, Exception>() {
-                        @Override
-                        public Object apply(Dao proxy, Object[] args) throws Exception {
-                            Object result = queryFunc.apply(JdbcUtil.prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout,
-                                    returnGeneratedKeys, args, finalParametersSetter), args);
-
-                            if (idDirtyMarker) {
-                                ((DirtyMarker) result).markDirty(false);
-                            }
-
-                            return result;
-                        }
-                    };
-                } else if (sqlAnno.annotationType().equals(Dao.Insert.class) || sqlAnno.annotationType().equals(Dao.NamedInsert.class)) {
-                    final boolean idDirtyMarker = paramTypes.length == 1 && ClassUtil.isEntity(paramTypes[0])
-                            && DirtyMarker.class.isAssignableFrom(paramTypes[0]);
-
-                    final String idPropName = paramTypes.length == 1 && ClassUtil.isEntity(paramTypes[0])
-                            && ClassUtil.getIdFieldNames(paramTypes[0]).size() == 1 ? ClassUtil.getIdFieldNames(paramTypes[0]).get(0) : null;
-
-                    if (void.class.equals(returnType)) {
-                        call = (proxy, args) -> {
-                            prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter)
-                                    .update();
-
-                            if (idDirtyMarker) {
-                                ((DirtyMarker) args[0]).markDirty(false);
-                            }
-
-                            return null;
-                        };
-                    } else if (Optional.class.equals(returnType)) {
-                        call = (proxy, args) -> {
-                            final Object result = JdbcUtil
-                                    .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
-                                            finalParametersSetter)
-                                    .insert()
-                                    .ifPresent(id -> If.notNullOrEmpty(idPropName).then(() -> ClassUtil.setPropValue(args[0], idPropName, id)));
-
-                            if (idDirtyMarker) {
-                                ((DirtyMarker) args[0]).markDirty(false);
-                            }
-
-                            return result;
-                        };
-                    } else {
-                        call = (proxy, args) -> {
-                            final Object result = JdbcUtil
-                                    .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
-                                            finalParametersSetter)
-                                    .insert()
-                                    .ifPresent(id -> If.notNullOrEmpty(idPropName).then(() -> ClassUtil.setPropValue(args[0], idPropName, id)))
-                                    .orElse(N.defaultValueOf(returnType));
-
-                            if (idDirtyMarker) {
-                                ((DirtyMarker) args[0]).markDirty(false);
-                            }
-
-                            return result;
-                        };
-                    }
-                } else if (sqlAnno.annotationType().equals(Dao.Update.class) || sqlAnno.annotationType().equals(Dao.Delete.class)
-                        || sqlAnno.annotationType().equals(Dao.NamedUpdate.class) || sqlAnno.annotationType().equals(Dao.NamedDelete.class)) {
-                    if (!(returnType.equals(int.class) || returnType.equals(Integer.class) || returnType.equals(long.class) || returnType.equals(Long.class)
-                            || returnType.equals(boolean.class) || returnType.equals(Boolean.class) || returnType.equals(void.class))) {
-                        throw new UnsupportedOperationException(
-                                "The return type of update/delete operations can only be: int/Integer/long/Long/boolean/Boolean/void, can't be: " + returnType);
-                    }
-
-                    final boolean idDirtyMarker = paramTypes.length == 1 && ClassUtil.isEntity(paramTypes[0])
-                            && DirtyMarker.class.isAssignableFrom(paramTypes[0]);
-
-                    if (returnType.equals(int.class) || returnType.equals(Integer.class)) {
-                        call = (proxy, args) -> {
-                            final Object result = JdbcUtil
-                                    .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
-                                            finalParametersSetter)
-                                    .update();
-
-                            if (idDirtyMarker) {
-                                if (isNamedQuery
-                                        && (sqlAnno.annotationType().equals(Dao.Update.class) || sqlAnno.annotationType().equals(Dao.NamedUpdate.class))) {
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
-                                } else {
-                                    ((DirtyMarker) args[0]).markDirty(false);
-                                }
-                            }
-
-                            return result;
-                        };
-                    } else if (returnType.equals(boolean.class) || returnType.equals(Boolean.class)) {
-                        call = (proxy, args) -> {
-                            final Object result = JdbcUtil
-                                    .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
-                                            finalParametersSetter)
-                                    .update() > 0;
-
-                            if (idDirtyMarker) {
-                                if (isNamedQuery
-                                        && (sqlAnno.annotationType().equals(Dao.Update.class) || sqlAnno.annotationType().equals(Dao.NamedUpdate.class))) {
-                                    ((DirtyMarker) args[0]).markDirty(namedSQL.getNamedParameters(), false);
-                                } else {
-                                    ((DirtyMarker) args[0]).markDirty(false);
-                                }
-                            }
-
-                            return result;
-                        };
-                    } else if (returnType.equals(long.class) || returnType.equals(Long.class)) {
-                        call = (proxy, args) -> {
-                            final Object result = JdbcUtil
-                                    .prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args,
-                                            finalParametersSetter)
-                                    .largeUpate();
-
-                            if (idDirtyMarker) {
-                                ((DirtyMarker) args[0]).markDirty(false);
-                            }
-
-                            return result;
-                        };
-                    } else {
-                        call = (proxy, args) -> {
-                            prepareQuery(proxy, query, isNamedQuery, namedSQL, fetchSize, queryTimeout, returnGeneratedKeys, args, finalParametersSetter)
-                                    .update();
-
-                            if (idDirtyMarker) {
-                                ((DirtyMarker) args[0]).markDirty(false);
-                            }
-
-                            return null;
-                        };
-                    }
-                } else {
-                    throw new UnsupportedOperationException("Unsupported sql annotation: " + sqlAnno.annotationType());
                 }
             }
 
