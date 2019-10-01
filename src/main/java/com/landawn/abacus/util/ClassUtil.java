@@ -93,7 +93,6 @@ import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.ReadOnlyId;
-import com.landawn.abacus.condition.Condition;
 import com.landawn.abacus.core.NameUtil;
 import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -298,8 +297,8 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(OptionalLong.class.getCanonicalName(), OptionalLong.class);
         BUILT_IN_TYPE.put(OptionalFloat.class.getCanonicalName(), OptionalFloat.class);
         BUILT_IN_TYPE.put(OptionalDouble.class.getCanonicalName(), OptionalDouble.class);
-        BUILT_IN_TYPE.put(Nullable.class.getCanonicalName(), Nullable.class);
         BUILT_IN_TYPE.put(Optional.class.getCanonicalName(), Optional.class);
+        BUILT_IN_TYPE.put(Nullable.class.getCanonicalName(), Nullable.class);
 
         BUILT_IN_TYPE.put(Fraction.class.getCanonicalName(), Fraction.class);
         BUILT_IN_TYPE.put(Range.class.getCanonicalName(), Range.class);
@@ -346,7 +345,6 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(HBaseColumn.class.getCanonicalName(), HBaseColumn.class);
 
         BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
-        BUILT_IN_TYPE.put(Condition.class.getCanonicalName(), Condition.class);
         BUILT_IN_TYPE.put(DataSet.class.getCanonicalName(), DataSet.class);
         BUILT_IN_TYPE.put(RowDataSet.class.getCanonicalName(), RowDataSet.class);
 
@@ -790,7 +788,7 @@ public final class ClassUtil {
 
     /**
      * Copied from Apache Commons Lang under Apache License v2.
-     * 
+     *
      * <p>Gets a {@code List} of super classes for the given class, excluding {@code Object.class}.</p>
      *
      * @param cls the class to look up.
@@ -810,7 +808,7 @@ public final class ClassUtil {
 
     /**
      * Copied from Apache Commons Lang under Apache License v2.
-     * 
+     *
      * <p>Gets a {@code List} of all interfaces implemented by the given
      * class and its super classes.</p>
      *
@@ -1140,7 +1138,7 @@ public final class ClassUtil {
             throw new IllegalArgumentException("No resource found by package " + pkgName);
         }
 
-        List<Class<?>> classes = new ArrayList<Class<?>>();
+        List<Class<?>> classes = new ArrayList<>();
         for (URL resource : resourceList) {
             // Get a File object for the package
             String fullPath = resource.getPath().replace("%20", " ").replaceFirst("[.]jar[!].*", JAR_POSTFIX).replaceFirst("file:", "");
@@ -1934,7 +1932,7 @@ public final class ClassUtil {
      * Returns the property get method declared in the specified {@code cls}
      * with the specified property name {@code propName}.
      * {@code null} is returned if no method is found.
-     * 
+     *
      * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
      * getter/setter method for the class/bean generated/wrote by JAXB
      * specification
@@ -2782,7 +2780,7 @@ public final class ClassUtil {
         /**
          * Method mask.
          */
-        static final void methodMask() {
+        static void methodMask() {
         }
     }
 }

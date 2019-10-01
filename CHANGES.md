@@ -1,3 +1,8 @@
+### 1.9.0
+
+* Move `JdbcUtil/Dao/SQLExecutor/Mapper/SQLBuilder/... ` to a new project: https://github.com/landawn/abacus-jdbc
+
+
 ### 1.8.22
 
 * Improvements and bug fix.

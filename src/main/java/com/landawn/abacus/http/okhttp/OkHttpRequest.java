@@ -55,9 +55,9 @@ import okhttp3.Response;
 import okhttp3.internal.Util;
 
 /**
- * 
+ *
  * @since 1.3
- * 
+ *
  * @author Haiyang Li
  */
 public class OkHttpRequest {
@@ -189,7 +189,7 @@ public class OkHttpRequest {
         return this;
     }
 
-    /** 
+    /**
      * Removes all headers on this builder and adds {@code headers}.
      */
     public OkHttpRequest headers(Headers headers) {

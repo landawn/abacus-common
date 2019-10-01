@@ -1443,7 +1443,7 @@ public final class HttpProxy {
     /**
      * The Interface Handler.
      */
-    public static interface Handler {
+    public interface Handler {
 
         /**
          *
