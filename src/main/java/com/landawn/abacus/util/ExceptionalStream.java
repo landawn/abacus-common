@@ -699,7 +699,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                         @Override
                         public void close() throws IOException {
                             if (closeReader) {
-                                IOUtil.close(reader);
+                                IOUtil.close(bufferedReader);
                             }
                         }
                     };

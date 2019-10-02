@@ -3779,7 +3779,7 @@ public abstract class Stream<T>
                         @Override
                         public void close() {
                             if (closeReader) {
-                                IOUtil.closeQuietly(reader);
+                                IOUtil.closeQuietly(bufferedReader);
                             }
                         }
                     };
