@@ -55,7 +55,6 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.Iterables;
 import com.landawn.abacus.util.Iterators;
-import com.landawn.abacus.util.JdbcUtil;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multimap;
@@ -3728,7 +3727,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
-            final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) throws SQLException {
+            final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException {
         PreparedStatement stmt = null;
 
         try {
@@ -3736,13 +3735,13 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             return persist(stmt, batchSize, batchInterval, stmtSetter);
         } finally {
-            JdbcUtil.closeQuietly(stmt);
+            IOUtil.closeQuietly(stmt);
         }
     }
 
     @Override
     public long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) throws SQLException {
+            final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException {
         checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
                 batchInterval);
         assertNotClosed();

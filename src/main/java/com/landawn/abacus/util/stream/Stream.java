@@ -66,7 +66,6 @@ import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
-import com.landawn.abacus.util.JdbcUtil;
 import com.landawn.abacus.util.Keyed;
 import com.landawn.abacus.util.LineIterator;
 import com.landawn.abacus.util.ListMultimap;
@@ -2352,11 +2351,11 @@ public abstract class Stream<T>
 
     @SequentialOnly
     public abstract long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
-            final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) throws SQLException;
+            final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
 
     @SequentialOnly
     public abstract long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final JdbcUtil.BiParametersSetter<? super PreparedStatement, ? super T> stmtSetter) throws SQLException;
+            final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
 
     /**
      * Remember to close this Stream after the iteration is done, if needed.
@@ -3660,7 +3659,7 @@ public abstract class Stream<T>
      * @return
      * @throws UncheckedSQLException
      */
-    public static <T> Stream<T> rows(final ResultSet resultSet, final JdbcUtil.RowMapper<T> rowMapper) throws UncheckedSQLException {
+    public static <T> Stream<T> rows(final ResultSet resultSet, final Try.Function<ResultSet, T, SQLException> rowMapper) throws UncheckedSQLException {
         return ExceptionalStream.rows(resultSet, rowMapper).unchecked();
     }
 
@@ -3672,7 +3671,8 @@ public abstract class Stream<T>
      * @return
      * @throws UncheckedSQLException
      */
-    public static <T> Stream<T> rows(final ResultSet resultSet, final JdbcUtil.BiRowMapper<T> rowMapper) throws UncheckedSQLException {
+    public static <T> Stream<T> rows(final ResultSet resultSet, final Try.BiFunction<ResultSet, List<String>, T, SQLException> rowMapper)
+            throws UncheckedSQLException {
         return ExceptionalStream.rows(resultSet, rowMapper).unchecked();
     }
 

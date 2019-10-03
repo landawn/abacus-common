@@ -25,21 +25,13 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -57,8 +49,6 @@ import com.landawn.abacus.parser.Exclusion;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.SQLExecutor.JdbcSettings;
-import com.landawn.abacus.util.SQLExecutor.ResultExtractor;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -70,7 +60,7 @@ import com.landawn.abacus.util.SQLExecutor.ResultExtractor;
 public final class PropertiesUtil {
 
     /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
+    static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
     /** The Constant TYPE. */
     private static final String TYPE = "type";
@@ -78,203 +68,8 @@ public final class PropertiesUtil {
     /** The Constant xsc. */
     private static final XMLSerializationConfig xsc = XSC.of(true, true, DateTimeFormat.ISO_8601_DATETIME, Exclusion.NONE, null);
 
-    /** The Constant CONFIG_ENTITY_RESULT_SET_EXTRACTOR. */
-    private static final ResultExtractor<ConfigEntity> CONFIG_ENTITY_RESULT_SET_EXTRACTOR = new ResultExtractor<ConfigEntity>() {
-        @Override
-        public ConfigEntity extractData(ResultSet rs, JdbcSettings jdbcSettings) throws SQLException {
-            long offset = jdbcSettings.getOffset();
-            long count = jdbcSettings.getCount();
-
-            if (JdbcUtil.skip(rs, offset) >= offset) {
-                while ((count-- > 0) && rs.next()) {
-                    ConfigEntity entity = new ConfigEntity();
-                    List<String> columnLabelList = JdbcUtil.getColumnLabelList(rs);
-                    int columnCount = columnLabelList.size();
-                    Method method = null;
-                    Object propValue = null;
-
-                    for (int i = 0; i < columnCount; i++) {
-                        method = ClassUtil.getPropSetMethod(ConfigEntity.class, columnLabelList.get(i));
-                        propValue = JdbcUtil.getColumnValue(rs, i + 1);
-
-                        if (method != null) {
-                            if (method.getName().equals("setIncludedServers") || method.getName().equals("setExcludedServers")) {
-                                if (propValue == null || N.isNullOrEmpty(propValue.toString().trim())) {
-                                    propValue = new ArrayList<>();
-                                } else {
-                                    propValue = Splitter.defauLt().trim(true).split(propValue.toString().trim());
-                                }
-                            } else if (method.getName().equals("setStatus")) {
-                                if (propValue == null || N.isNullOrEmpty(propValue.toString().trim())) {
-                                    propValue = null;
-                                } else {
-                                    propValue = Status.valueOf(propValue.toString().trim());
-                                }
-                            }
-
-                            ClassUtil.setPropValue(entity, method, propValue);
-                        }
-                    }
-
-                    return entity;
-                }
-            }
-
-            return null;
-        }
-    };
-
-    /** The Constant scheduledExecutor. */
-    private static final ScheduledExecutorService scheduledExecutor;
-    static {
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-        executor.setRemoveOnCancelPolicy(true);
-        scheduledExecutor = MoreExecutors.getExitingScheduledExecutorService(executor);
-    }
-
     /** The Constant registeredAutoRefreshProperties. */
     private static final Map<Resource, Properties<?, ?>> registeredAutoRefreshProperties = new ConcurrentHashMap<>(256);
-
-    static {
-        final Runnable refreshTask = new TimerTask() {
-            @Override
-            public void run() {
-                synchronized (registeredAutoRefreshProperties) {
-                    Map<Properties<?, ?>, Resource> m = null;
-
-                    Properties<?, ?> properties = null;
-                    Resource resource = null;
-                    File file = null;
-                    SQLExecutor sqlExecutor = null;
-                    String sql = null;
-                    ResultExtractor<ConfigEntity> resultExtractor = null;
-
-                    for (Map.Entry<Resource, Properties<?, ?>> entry : registeredAutoRefreshProperties.entrySet()) {
-                        resource = entry.getKey();
-                        properties = entry.getValue();
-
-                        file = resource.getFile();
-
-                        if (file != null) {
-                            if (file.lastModified() > resource.getLastLoadTime()) {
-                                long lastLoadTime = file.lastModified();
-                                InputStream is = null;
-
-                                if (logger.isWarnEnabled()) {
-                                    logger.warn("Start to refresh properties with the updated file: " + file.getAbsolutePath());
-                                    logger.warn("[PROPERTIES]" + properties);
-                                }
-
-                                try {
-                                    is = new FileInputStream(resource.getFile());
-
-                                    if (resource.getType() == ResourceType.PROPERTIES) {
-                                        load((Properties<String, String>) properties, is);
-                                    } else {
-                                        loadFromXML(properties, properties.getClass(), is);
-                                    }
-
-                                    if (m == null) {
-                                        m = new HashMap<>();
-                                    }
-
-                                    m.put(properties, resource);
-
-                                    resource.setLastLoadTime(lastLoadTime);
-                                } catch (Exception e) {
-                                    logger.error("Failed to refresh properties: " + properties, e);
-                                } finally {
-                                    IOUtil.close(is);
-                                }
-
-                                if (logger.isWarnEnabled()) {
-                                    logger.warn("End to refresh properties with the updated file: " + file.getAbsolutePath());
-                                    logger.warn("[NEW PROPERTIES]" + properties);
-                                }
-                            }
-                        } else {
-                            sqlExecutor = resource.getSqlExecutor();
-                            sql = resource.getSql();
-                            resultExtractor = resource.getResultSetExtractor();
-                            try {
-                                if (resultExtractor == null) {
-                                    resultExtractor = CONFIG_ENTITY_RESULT_SET_EXTRACTOR;
-                                }
-
-                                ConfigEntity entity = sqlExecutor.query(sql, resultExtractor);
-
-                                if (entity == null || N.isNullOrEmpty(entity.getContent())) {
-                                    throw new AbacusException("No record found or the content of properties is empty");
-                                }
-
-                                if (entity.getLastUpdateTime().getTime() > resource.getLastLoadTime()) {
-                                    boolean isIncluded = false;
-
-                                    if (N.notNullOrEmpty(entity.getExcludedServers())) {
-                                        isIncluded = true;
-
-                                        for (String serverName : entity.getExcludedServers()) {
-                                            if (IOUtil.HOST_NAME.matches(serverName)) {
-                                                isIncluded = false;
-
-                                                break;
-                                            }
-                                        }
-                                    } else if (N.notNullOrEmpty(entity.getIncludedServers())) {
-                                        for (String serverName : entity.getIncludedServers()) {
-                                            if (IOUtil.HOST_NAME.matches(serverName)) {
-                                                isIncluded = true;
-
-                                                break;
-                                            }
-                                        }
-                                    } else {
-                                        isIncluded = true;
-                                    }
-
-                                    if (isIncluded) {
-                                        if (logger.isWarnEnabled()) {
-                                            logger.warn("Start to refresh properties with sql: " + sql);
-                                            logger.warn("[PROPERTIES]" + properties);
-                                        }
-
-                                        if (resource.getType() == ResourceType.PROPERTIES) {
-                                            load((Properties<String, String>) properties, IOUtil.string2InputStream(entity.getContent()));
-                                        } else {
-                                            loadFromXML(properties, properties.getClass(), IOUtil.string2InputStream(entity.getContent()));
-                                        }
-
-                                        if (m == null) {
-                                            m = new HashMap<>();
-                                        }
-
-                                        m.put(properties, resource);
-
-                                        if (logger.isWarnEnabled()) {
-                                            logger.warn("End to refresh properties with sql: " + sql);
-                                            logger.warn("[NEW PROPERTIES]" + properties);
-                                        }
-                                    } else {
-                                        if (logger.isWarnEnabled()) {
-                                            logger.warn("Properties is not refreshed because it's excluded or not included by: [excludedServers]: "
-                                                    + entity.getExcludedServers() + ". [includedServers]: " + entity.getIncludedServers());
-                                        }
-                                    }
-
-                                    resource.setLastLoadTime(entity.getLastUpdateTime().getTime());
-                                }
-                            } catch (Exception e) {
-                                logger.error("Failed to refresh properties: " + properties, e);
-                            }
-
-                        }
-                    }
-                }
-            }
-        };
-
-        scheduledExecutor.scheduleWithFixedDelay(refreshTask, 1000, 1000, TimeUnit.MICROSECONDS);
-    }
 
     /**
      * Instantiates a new properties util.
@@ -393,56 +188,6 @@ public final class PropertiesUtil {
 
     /**
      *
-     * @param sqlExecutor
-     * @param sql
-     * @param autoRefresh
-     * @return
-     */
-    public static Properties<String, String> load(SQLExecutor sqlExecutor, String sql, boolean autoRefresh) {
-        return load(null, sqlExecutor, sql, autoRefresh);
-    }
-
-    /**
-     *
-     * @param targetProperties
-     * @param sqlExecutor
-     * @param sql
-     * @param autoRefresh
-     * @return
-     */
-    private static Properties<String, String> load(Properties<String, String> targetProperties, SQLExecutor sqlExecutor, String sql, boolean autoRefresh) {
-
-        ConfigEntity entity = sqlExecutor.query(sql, CONFIG_ENTITY_RESULT_SET_EXTRACTOR);
-
-        if (entity == null || N.isNullOrEmpty(entity.getContent())) {
-            throw new AbacusException("No record found or the content of properties is empty");
-        }
-
-        Properties<String, String> properties = null;
-
-        if (autoRefresh) {
-            Class<?> targetClass = targetProperties == null ? Properties.class : targetProperties.getClass();
-            Resource resource = new Resource(targetClass, sqlExecutor, sql, CONFIG_ENTITY_RESULT_SET_EXTRACTOR, ResourceType.PROPERTIES);
-            resource.setLastLoadTime(entity.getLastUpdateTime().getTime());
-
-            synchronized (registeredAutoRefreshProperties) {
-                properties = (Properties<String, String>) registeredAutoRefreshProperties.get(resource);
-
-                if (properties == null) {
-                    properties = load(targetProperties, IOUtil.string2InputStream(entity.getContent()));
-
-                    registeredAutoRefreshProperties.put(resource, properties);
-                }
-            }
-        } else {
-            properties = load(targetProperties, IOUtil.string2InputStream(entity.getContent()));
-        }
-
-        return properties;
-    }
-
-    /**
-     *
      * @param targetProperties
      * @param newProperties
      * @return
@@ -512,18 +257,6 @@ public final class PropertiesUtil {
     /**
      * Load from XML.
      *
-     * @param sqlExecutor
-     * @param sql
-     * @param autoRefresh
-     * @return
-     */
-    public static Properties<String, String> loadFromXML(SQLExecutor sqlExecutor, String sql, boolean autoRefresh) {
-        return loadFromXML(Properties.class, sqlExecutor, sql, autoRefresh);
-    }
-
-    /**
-     * Load from XML.
-     *
      * @param <T>
      * @param targetClass
      * @param file
@@ -584,45 +317,6 @@ public final class PropertiesUtil {
      */
     public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, InputStream is) {
         return loadFromXML(null, targetClass, is);
-    }
-
-    /**
-     * Load from XML.
-     *
-     * @param <T>
-     * @param targetClass
-     * @param sqlExecutor
-     * @param sql
-     * @param autoRefresh
-     * @return
-     */
-    public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, SQLExecutor sqlExecutor, String sql, boolean autoRefresh) {
-        ConfigEntity entity = sqlExecutor.query(sql, CONFIG_ENTITY_RESULT_SET_EXTRACTOR);
-
-        if (entity == null || N.isNullOrEmpty(entity.getContent())) {
-            throw new AbacusException("No record found or the content of properties is empty");
-        }
-
-        T properties = null;
-
-        if (autoRefresh) {
-            Resource resource = new Resource(targetClass, sqlExecutor, sql, CONFIG_ENTITY_RESULT_SET_EXTRACTOR, ResourceType.XML);
-            resource.setLastLoadTime(entity.getLastUpdateTime().getTime());
-
-            synchronized (registeredAutoRefreshProperties) {
-                properties = (T) registeredAutoRefreshProperties.get(resource);
-
-                if (properties == null) {
-                    properties = loadFromXML(targetClass, IOUtil.string2InputStream(entity.getContent()));
-
-                    registeredAutoRefreshProperties.put(resource, properties);
-                }
-            }
-        } else {
-            properties = loadFromXML(targetClass, IOUtil.string2InputStream(entity.getContent()));
-        }
-
-        return properties;
     }
 
     /**
@@ -1748,15 +1442,6 @@ public final class PropertiesUtil {
         /** The file path. */
         private final String filePath;
 
-        /** The sql executor. */
-        private final SQLExecutor sqlExecutor;
-
-        /** The sql. */
-        private final String sql;
-
-        /** The result extractor. */
-        private final ResultExtractor<ConfigEntity> resultExtractor;
-
         /** The last load time. */
         private long lastLoadTime;
 
@@ -1774,28 +1459,6 @@ public final class PropertiesUtil {
             this.targetClass = cls;
             this.file = file;
             this.filePath = file.getPath();
-            this.sqlExecutor = null;
-            this.sql = null;
-            this.resultExtractor = null;
-            this.resourceType = resourceType;
-        }
-
-        /**
-         * Instantiates a new resource.
-         *
-         * @param cls
-         * @param sqlExecutor
-         * @param sql
-         * @param resultExtractor
-         * @param resourceType
-         */
-        public Resource(Class<?> cls, SQLExecutor sqlExecutor, String sql, ResultExtractor<ConfigEntity> resultExtractor, ResourceType resourceType) {
-            this.targetClass = cls;
-            this.file = null;
-            this.filePath = null;
-            this.sqlExecutor = sqlExecutor;
-            this.sql = sql;
-            this.resultExtractor = resultExtractor;
             this.resourceType = resourceType;
         }
 
@@ -1827,33 +1490,6 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Gets the sql executor.
-         *
-         * @return
-         */
-        public SQLExecutor getSqlExecutor() {
-            return sqlExecutor;
-        }
-
-        /**
-         * Gets the sql.
-         *
-         * @return
-         */
-        public String getSql() {
-            return sql;
-        }
-
-        /**
-         * Gets the result set extractor.
-         *
-         * @return
-         */
-        public ResultExtractor<ConfigEntity> getResultSetExtractor() {
-            return resultExtractor;
-        }
-
-        /**
          * Gets the type.
          *
          * @return
@@ -1872,7 +1508,6 @@ public final class PropertiesUtil {
             int result = 1;
             result = prime * result + N.hashCode(targetClass);
             result = prime * result + N.hashCode(filePath);
-            result = prime * result + N.hashCode(sql);
             return result;
         }
 
@@ -1890,7 +1525,7 @@ public final class PropertiesUtil {
             if (obj instanceof Resource) {
                 Resource other = (Resource) obj;
 
-                return N.equals(other.targetClass, targetClass) && N.equals(other.filePath, filePath) && N.equals(other.sql, sql);
+                return N.equals(other.targetClass, targetClass) && N.equals(other.filePath, filePath);
 
             }
 
@@ -1903,7 +1538,7 @@ public final class PropertiesUtil {
          */
         @Override
         public String toString() {
-            return "{file=" + file + ", sql=" + sql + "}";
+            return "{file=" + file + "}";
         }
     }
 

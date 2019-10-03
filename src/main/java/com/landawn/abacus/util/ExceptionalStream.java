@@ -21,7 +21,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -744,7 +743,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         N.checkArgNotNull(targetClass, "targetClass");
         N.checkArgNotNull(resultSet, "resultSet");
 
-        return rows(resultSet, JdbcUtil.BiRowMapper.to(targetClass));
+        return rows(resultSet, JDBCUtil.to(targetClass));
     }
 
     /**
@@ -765,7 +764,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return rows(targetClass, resultSet).onClose(new Try.Runnable<SQLException>() {
                 @Override
                 public void run() throws SQLException {
-                    JdbcUtil.closeQuietly(resultSet);
+                    JDBCUtil.closeQuietly(resultSet);
                 }
             });
         } else {
@@ -781,7 +780,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param rowMapper
      * @return
      */
-    public static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final JdbcUtil.RowMapper<T> rowMapper) {
+    public static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final Try.Function<ResultSet, T, SQLException> rowMapper) {
         N.checkArgNotNull(resultSet, "resultSet");
         N.checkArgNotNull(rowMapper, "rowMapper");
 
@@ -814,7 +813,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
                 final long m = hasNext ? n - 1 : n;
 
-                JdbcUtil.skip(resultSet, m);
+                JDBCUtil.skip(resultSet, m);
 
                 hasNext = false;
             }
@@ -831,7 +830,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param rowMapper
      * @return
      */
-    public static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet, final JdbcUtil.BiRowMapper<T> rowMapper) {
+    public static <T> ExceptionalStream<T, SQLException> rows(final ResultSet resultSet,
+            final Try.BiFunction<ResultSet, List<String>, T, SQLException> rowMapper) {
         N.checkArgNotNull(resultSet, "resultSet");
         N.checkArgNotNull(rowMapper, "rowMapper");
 
@@ -857,7 +857,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 hasNext = false;
 
                 if (columnLabels == null) {
-                    columnLabels = JdbcUtil.getColumnLabelList(resultSet);
+                    columnLabels = JDBCUtil.getColumnLabelList(resultSet);
                 }
 
                 return rowMapper.apply(resultSet, columnLabels);
@@ -869,7 +869,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
                 final long m = hasNext ? n - 1 : n;
 
-                JdbcUtil.skip(resultSet, m);
+                JDBCUtil.skip(resultSet, m);
 
                 hasNext = false;
             }
@@ -920,7 +920,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                     throw new NoSuchElementException("No more rows");
                 }
 
-                final T next = (T) JdbcUtil.getColumnValue(resultSet, newColumnIndex);
+                final T next = (T) JDBCUtil.getColumnValue(resultSet, newColumnIndex);
                 hasNext = false;
                 return next;
             }
@@ -931,7 +931,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
                 final long m = hasNext ? n - 1 : n;
 
-                JdbcUtil.skip(resultSet, m);
+                JDBCUtil.skip(resultSet, m);
 
                 hasNext = false;
             }
@@ -958,7 +958,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return (ExceptionalStream<T, SQLException>) rows(resultSet, columnIndex).onClose(new Try.Runnable<SQLException>() {
                 @Override
                 public void run() throws SQLException {
-                    JdbcUtil.closeQuietly(resultSet);
+                    JDBCUtil.closeQuietly(resultSet);
                 }
             });
         } else {
@@ -998,9 +998,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                     throw new NoSuchElementException("No more rows");
                 }
 
-                columnIndex = columnIndex == -1 ? getColumnIndex(resultSet, columnName) : columnIndex;
+                columnIndex = columnIndex == -1 ? JDBCUtil.getColumnIndex(resultSet, columnName) : columnIndex;
 
-                final T next = (T) JdbcUtil.getColumnValue(resultSet, columnIndex);
+                final T next = (T) JDBCUtil.getColumnValue(resultSet, columnIndex);
                 hasNext = false;
                 return next;
             }
@@ -1011,7 +1011,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
                 final long m = hasNext ? n - 1 : n;
 
-                JdbcUtil.skip(resultSet, m);
+                JDBCUtil.skip(resultSet, m);
 
                 hasNext = false;
             }
@@ -1040,42 +1040,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return (ExceptionalStream<T, SQLException>) rows(resultSet, columnName).onClose(new Try.Runnable<SQLException>() {
                 @Override
                 public void run() throws SQLException {
-                    JdbcUtil.closeQuietly(resultSet);
+                    JDBCUtil.closeQuietly(resultSet);
                 }
             });
         } else {
             return rows(resultSet, columnName);
         }
-    }
-
-    /**
-     * Gets the column index.
-     *
-     * @param resultSet
-     * @param columnName
-     * @return
-     * @throws UncheckedSQLException the unchecked SQL exception
-     */
-    private static int getColumnIndex(final ResultSet resultSet, final String columnName) throws UncheckedSQLException {
-        int columnIndex = -1;
-
-        try {
-            final ResultSetMetaData rsmd = resultSet.getMetaData();
-            final int columnCount = rsmd.getColumnCount();
-
-            for (int i = 1; i <= columnCount; i++) {
-                if (JdbcUtil.getColumnLabel(rsmd, i).equals(columnName)) {
-                    columnIndex = i - 1;
-                    break;
-                }
-            }
-        } catch (SQLException e) {
-            throw new UncheckedSQLException(e);
-        }
-
-        N.checkArgument(columnIndex >= 0, "No column found by name %s", columnName);
-
-        return columnIndex;
     }
 
     /**
