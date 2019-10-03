@@ -201,7 +201,7 @@ compile 'abacus-util-se:1.9.3'
 Please refer to [Wiki](https://github.com/landawn/abacus-util/wiki)
 
 
-## Also See: [abacus-jdbc](https://github.com/landawn/abacus-jdbc), [abacus-entity-manager](https://github.com/landawn/abacus-entity-manager), [abacus-da](https://github.com/landawn/abacus-da) and [abacus-android](https://github.com/landawn/abacus-android)
+## Also See: [abacus-jdbc](https://github.com/landawn/abacus-jdbc), [abacus-da](https://github.com/landawn/abacus-da) and [abacus-android](https://github.com/landawn/abacus-android)
 
 
 ## Recommended Java programming libraries/frameworks:
