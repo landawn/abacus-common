@@ -46,12 +46,12 @@ import com.landawn.abacus.type.Type;
  *
  * @see {@code com.landawn.abacus.util.JdbcUtil}
  */
-final class JDBCUtil {
+final class InternalJdbcUtil {
 
     /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(JDBCUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(InternalJdbcUtil.class);
 
-    private JDBCUtil() {
+    private InternalJdbcUtil() {
         // singleton for utility class
     }
 
@@ -338,7 +338,7 @@ final class JDBCUtil {
                     final Object[] a = Array.newInstance(targetClass.getComponentType(), columnCount);
 
                     for (int i = 0; i < columnCount; i++) {
-                        a[i] = JDBCUtil.getColumnValue(rs, i + 1);
+                        a[i] = InternalJdbcUtil.getColumnValue(rs, i + 1);
                     }
 
                     return (T) a;
@@ -354,7 +354,7 @@ final class JDBCUtil {
                     final List<Object> c = isListOrArrayList ? new ArrayList<>(columnCount) : (List<Object>) N.newInstance(targetClass);
 
                     for (int i = 0; i < columnCount; i++) {
-                        c.add(JDBCUtil.getColumnValue(rs, i + 1));
+                        c.add(InternalJdbcUtil.getColumnValue(rs, i + 1));
                     }
 
                     return (T) c;
@@ -372,7 +372,7 @@ final class JDBCUtil {
                             : (isLinkedHashMap ? new LinkedHashMap<>(columnCount) : (Map<String, Object>) N.newInstance(targetClass));
 
                     for (int i = 0; i < columnCount; i++) {
-                        m.put(columnLabelList.get(i), JDBCUtil.getColumnValue(rs, i + 1));
+                        m.put(columnLabelList.get(i), InternalJdbcUtil.getColumnValue(rs, i + 1));
                     }
 
                     return (T) m;

@@ -41,6 +41,8 @@ import com.landawn.abacus.DataSet;
 import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.parser.JSONDeserializationConfig;
+import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.parser.JSONSerializationConfig;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
@@ -61,6 +63,9 @@ public final class CSVUtil {
 
     /** The Constant jsonParser. */
     private static final JSONParser jsonParser = ParserFactory.createJSONParser();
+
+    /** The Constant jsonParser. */
+    private static final JSONDeserializationConfig jdc = JDC.create().setElementType(String.class);
 
     /**
      *
@@ -236,7 +241,7 @@ public final class CSVUtil {
         try {
             List<String> tmp = new ArrayList<>();
             String line = br.readLine();
-            jsonParser.readString(tmp, line);
+            jsonParser.readString(tmp, line, jdc);
             final String[] titles = tmp.toArray(new String[tmp.size()]);
 
             final int columnCount = titles.length;
@@ -263,7 +268,7 @@ public final class CSVUtil {
             }
 
             while (count > 0 && (line = br.readLine()) != null) {
-                jsonParser.readString(strs, line);
+                jsonParser.readString(strs, line, jdc);
 
                 if (filter != null && filter.test(strs) == false) {
                     continue;
@@ -274,6 +279,8 @@ public final class CSVUtil {
                         columnList.get(columnIndex++).add(strs[i]);
                     }
                 }
+
+                N.fill(strs, null);
 
                 count--;
             }
@@ -477,7 +484,7 @@ public final class CSVUtil {
         try {
             List<String> tmp = new ArrayList<>();
             String line = br.readLine();
-            jsonParser.readString(tmp, line);
+            jsonParser.readString(tmp, line, jdc);
             final String[] titles = tmp.toArray(new String[tmp.size()]);
 
             final int columnCount = titles.length;
@@ -512,7 +519,7 @@ public final class CSVUtil {
             }
 
             while (count > 0 && (line = br.readLine()) != null) {
-                jsonParser.readString(strs, line);
+                jsonParser.readString(strs, line, jdc);
 
                 if (filter != null && filter.test(strs) == false) {
                     continue;
@@ -523,6 +530,8 @@ public final class CSVUtil {
                         columnList.get(columnIndex++).add(columnTypes[i].valueOf(strs[i]));
                     }
                 }
+
+                N.fill(strs, null);
 
                 count--;
             }
@@ -695,7 +704,7 @@ public final class CSVUtil {
         try {
             List<String> tmp = new ArrayList<>();
             String line = br.readLine();
-            jsonParser.readString(tmp, line);
+            jsonParser.readString(tmp, line, jdc);
             final String[] titles = tmp.toArray(new String[tmp.size()]);
 
             final int columnCount = titles.length;
@@ -723,7 +732,7 @@ public final class CSVUtil {
             }
 
             while (count > 0 && (line = br.readLine()) != null) {
-                jsonParser.readString(strs, line);
+                jsonParser.readString(strs, line, jdc);
 
                 if (filter != null && filter.test(strs) == false) {
                     continue;
@@ -734,6 +743,8 @@ public final class CSVUtil {
                         columnList.get(columnIndex++).add(columnTypes[i].valueOf(strs[i]));
                     }
                 }
+
+                N.fill(strs, null);
 
                 count--;
             }
@@ -903,7 +914,7 @@ public final class CSVUtil {
         try {
             List<String> tmp = new ArrayList<>();
             String line = br.readLine();
-            jsonParser.readString(tmp, line);
+            jsonParser.readString(tmp, line, jdc);
             final String[] titles = tmp.toArray(new String[tmp.size()]);
 
             final int columnCount = titles.length;
@@ -923,7 +934,7 @@ public final class CSVUtil {
             }
 
             while (count > 0 && (line = br.readLine()) != null) {
-                jsonParser.readString(strs, line);
+                jsonParser.readString(strs, line, jdc);
 
                 if (filter != null && filter.test(strs) == false) {
                     continue;
@@ -934,6 +945,8 @@ public final class CSVUtil {
                         columnList.get(columnIndex++).add(columnTypes[i].valueOf(strs[i]));
                     }
                 }
+
+                N.fill(strs, null);
 
                 count--;
             }
@@ -1010,7 +1023,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            JDBCUtil.closeQuietly(stmt);
+            InternalJdbcUtil.closeQuietly(stmt);
         }
     }
 
@@ -1072,7 +1085,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            JDBCUtil.closeQuietly(rs);
+            InternalJdbcUtil.closeQuietly(rs);
         }
     }
 
@@ -1277,7 +1290,7 @@ public final class CSVUtil {
             String label = null;
 
             for (int i = 0; i < columnCount; i++) {
-                label = JDBCUtil.getColumnLabel(rsmd, i + 1);
+                label = InternalJdbcUtil.getColumnLabel(rsmd, i + 1);
 
                 if (columnNameSet == null || columnNameSet.remove(label)) {
                     columnNames[i] = label;
@@ -1328,7 +1341,7 @@ public final class CSVUtil {
                     type = typeArray[i];
 
                     if (type == null) {
-                        value = JDBCUtil.getColumnValue(rs, i + 1);
+                        value = InternalJdbcUtil.getColumnValue(rs, i + 1);
 
                         if (value == null) {
                             bw.write(N.NULL_CHAR_ARRAY);
@@ -1435,7 +1448,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            JDBCUtil.closeQuietly(stmt);
+            InternalJdbcUtil.closeQuietly(stmt);
         }
     }
 
@@ -1649,7 +1662,7 @@ public final class CSVUtil {
             Type<Object> type = null;
 
             while (result < count && (line = br.readLine()) != null) {
-                jsonParser.readString(strs, line);
+                jsonParser.readString(strs, line, jdc);
 
                 if (filter != null && filter.test(strs) == false) {
                     continue;
@@ -1677,6 +1690,8 @@ public final class CSVUtil {
                         N.sleep(batchInterval);
                     }
                 }
+
+                N.fill(strs, null);
             }
 
             if ((result % batchSize) > 0) {
@@ -1761,7 +1776,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            JDBCUtil.closeQuietly(stmt);
+            InternalJdbcUtil.closeQuietly(stmt);
         }
     }
 
@@ -1957,7 +1972,7 @@ public final class CSVUtil {
         try {
             List<String> tmp = new ArrayList<>();
             String line = br.readLine();
-            jsonParser.readString(tmp, line);
+            jsonParser.readString(tmp, line, jdc);
             final String[] titles = tmp.toArray(new String[tmp.size()]);
 
             final Type<Object>[] columnTypes = new Type[titles.length];
@@ -1984,7 +1999,7 @@ public final class CSVUtil {
             Type<Object> type = null;
 
             while (result < count && (line = br.readLine()) != null) {
-                jsonParser.readString(strs, line);
+                jsonParser.readString(strs, line, jdc);
 
                 if (filter != null && filter.test(strs) == false) {
                     continue;
@@ -2018,6 +2033,8 @@ public final class CSVUtil {
                         N.sleep(batchInterval);
                     }
                 }
+
+                N.fill(strs, null);
             }
 
             if ((result % batchSize) > 0) {
@@ -2100,7 +2117,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            JDBCUtil.closeQuietly(stmt);
+            InternalJdbcUtil.closeQuietly(stmt);
         }
     }
 
@@ -2291,14 +2308,14 @@ public final class CSVUtil {
         try {
             List<String> tmp = new ArrayList<>();
             String line = br.readLine();
-            jsonParser.readString(tmp, line);
+            jsonParser.readString(tmp, line, jdc);
             final String[] strs = new String[tmp.size()];
 
             while (offset-- > 0 && br.readLine() != null) {
             }
 
             while (result < count && (line = br.readLine()) != null) {
-                jsonParser.readString(strs, line);
+                jsonParser.readString(strs, line, jdc);
 
                 if (filter != null && filter.test(strs) == false) {
                     continue;
@@ -2315,6 +2332,8 @@ public final class CSVUtil {
                         N.sleep(batchInterval);
                     }
                 }
+
+                N.fill(strs, null);
             }
 
             if ((result % batchSize) > 0) {

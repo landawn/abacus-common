@@ -28,10 +28,15 @@ import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -60,7 +65,7 @@ import com.landawn.abacus.type.Type;
 public final class PropertiesUtil {
 
     /** The Constant logger. */
-    static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
     /** The Constant TYPE. */
     private static final String TYPE = "type";
@@ -68,8 +73,78 @@ public final class PropertiesUtil {
     /** The Constant xsc. */
     private static final XMLSerializationConfig xsc = XSC.of(true, true, DateTimeFormat.ISO_8601_DATETIME, Exclusion.NONE, null);
 
+    /** The Constant scheduledExecutor. */
+    private static final ScheduledExecutorService scheduledExecutor;
+    static {
+        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+        executor.setRemoveOnCancelPolicy(true);
+        scheduledExecutor = MoreExecutors.getExitingScheduledExecutorService(executor);
+    }
+
     /** The Constant registeredAutoRefreshProperties. */
     private static final Map<Resource, Properties<?, ?>> registeredAutoRefreshProperties = new ConcurrentHashMap<>(256);
+
+    static {
+        final Runnable refreshTask = new TimerTask() {
+            @Override
+            public void run() {
+                synchronized (registeredAutoRefreshProperties) {
+                    Map<Properties<?, ?>, Resource> m = null;
+                    Properties<?, ?> properties = null;
+                    Resource resource = null;
+                    File file = null;
+
+                    for (Map.Entry<Resource, Properties<?, ?>> entry : registeredAutoRefreshProperties.entrySet()) {
+                        resource = entry.getKey();
+                        properties = entry.getValue();
+
+                        file = resource.getFile();
+
+                        if (file != null) {
+                            if (file.lastModified() > resource.getLastLoadTime()) {
+                                long lastLoadTime = file.lastModified();
+                                InputStream is = null;
+
+                                if (logger.isWarnEnabled()) {
+                                    logger.warn("Start to refresh properties with the updated file: " + file.getAbsolutePath());
+                                    logger.warn("[PROPERTIES]" + properties);
+                                }
+
+                                try {
+                                    is = new FileInputStream(resource.getFile());
+
+                                    if (resource.getType() == ResourceType.PROPERTIES) {
+                                        load((Properties<String, String>) properties, is);
+                                    } else {
+                                        loadFromXML(properties, properties.getClass(), is);
+                                    }
+
+                                    if (m == null) {
+                                        m = new HashMap<>();
+                                    }
+
+                                    m.put(properties, resource);
+
+                                    resource.setLastLoadTime(lastLoadTime);
+                                } catch (Exception e) {
+                                    logger.error("Failed to refresh properties: " + properties, e);
+                                } finally {
+                                    IOUtil.close(is);
+                                }
+
+                                if (logger.isWarnEnabled()) {
+                                    logger.warn("End to refresh properties with the updated file: " + file.getAbsolutePath());
+                                    logger.warn("[NEW PROPERTIES]" + properties);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        scheduledExecutor.scheduleWithFixedDelay(refreshTask, 1000, 1000, TimeUnit.MICROSECONDS);
+    }
 
     /**
      * Instantiates a new properties util.
@@ -1541,5 +1616,4 @@ public final class PropertiesUtil {
             return "{file=" + file + "}";
         }
     }
-
 }
