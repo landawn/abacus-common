@@ -48,7 +48,8 @@ public abstract class AbstractHttpClient implements Closeable {
 
     /** The Constant asyncExecutor. */
     // for static asynchronization operation.
-    protected static final AsyncExecutor asyncExecutor = new AsyncExecutor(Math.min(8, IOUtil.CPU_CORES), 256, 180L, TimeUnit.SECONDS);
+    protected static final AsyncExecutor asyncExecutor = new AsyncExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(256, IOUtil.CPU_CORES), 180L,
+            TimeUnit.SECONDS);
 
     /** The url. */
     // ...

@@ -97,10 +97,10 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     // static final int MAX_THREAD_POOL_SIZE = Integer.MAX_VALUE;
     static final int MAX_THREAD_NUM_PER_OPERATION = 1024;
 
-    static final int CORE_THREAD_POOL_SIZE = 64;
+    static final int CORE_THREAD_POOL_SIZE = Math.max(64, IOUtil.CPU_CORES);
 
-    static final int DEFAULT_MAX_THREAD_NUM = Math.max(8, IOUtil.CPU_CORES * 2);
-    static final int DEFAULT_READING_THREAD_NUM = Math.max(8, IOUtil.CPU_CORES * 2);
+    static final int DEFAULT_MAX_THREAD_NUM = Math.max(8, IOUtil.CPU_CORES);
+    static final int DEFAULT_READING_THREAD_NUM = Math.max(8, IOUtil.CPU_CORES);
 
     static final int MAX_QUEUE_SIZE = 8192;
     static final int DEFAULT_QUEUE_SIZE_PER_ITERATOR = 64;
