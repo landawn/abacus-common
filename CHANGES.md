@@ -1,3 +1,9 @@
+### 1.9.5
+
+* Rename `EnumType.STRING` to `EnumBy.NAME`.
+* Improvements and bug fix.
+
+
 ### 1.9.4
 
 * Improvements and bug fix.

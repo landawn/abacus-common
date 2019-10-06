@@ -20,7 +20,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.text.DecimalFormat;
 
-import com.landawn.abacus.annotation.Type.EnumType;
+import com.landawn.abacus.annotation.Type.EnumBy;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -46,7 +46,7 @@ public @interface JsonXmlField {
      *
      * @return
      */
-    EnumType enumerated() default EnumType.STRING;
+    EnumBy enumerated() default EnumBy.NAME;
 
     /**
      *

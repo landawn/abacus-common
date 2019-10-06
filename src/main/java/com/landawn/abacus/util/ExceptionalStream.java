@@ -4547,6 +4547,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    ExceptionalIterator<T, E> iterator() {
+        return elements;
+    }
+
     /**
      * Assert not closed.
      */

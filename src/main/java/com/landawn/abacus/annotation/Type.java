@@ -56,7 +56,7 @@ public @interface Type {
      *
      * @return
      */
-    EnumType enumerated() default EnumType.STRING;
+    EnumBy enumerated() default EnumBy.NAME;
 
     /**
      *
@@ -67,12 +67,12 @@ public @interface Type {
     /**
      * The Enum EnumType.
      */
-    public static enum EnumType {
+    public static enum EnumBy {
         /** Persist enumerated type property or field as an integer. */
         ORDINAL,
 
         /** Persist enumerated type property or field as a string. */
-        STRING
+        NAME
     }
 
     /**
