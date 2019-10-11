@@ -945,13 +945,31 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public DoubleStream append(DoubleStream stream) {
-        return DoubleStream.concat(this, stream);
+    @SafeVarargs
+    public final DoubleStream prepend(final double... a) {
+        return prepend(DoubleStream.of(a));
     }
 
     @Override
     public DoubleStream prepend(DoubleStream stream) {
         return DoubleStream.concat(stream, this);
+    }
+
+    @Override
+    @SafeVarargs
+    public final DoubleStream append(final double... a) {
+        return append(DoubleStream.of(a));
+    }
+
+    @Override
+    public DoubleStream append(DoubleStream stream) {
+        return DoubleStream.concat(this, stream);
+    }
+
+    @Override
+    @SafeVarargs
+    public final DoubleStream appendIfEmpty(final double... a) {
+        return appendIfEmpty(() -> DoubleStream.of(a));
     }
 
     @Override

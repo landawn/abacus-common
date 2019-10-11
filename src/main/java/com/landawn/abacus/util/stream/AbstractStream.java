@@ -3622,10 +3622,10 @@ abstract class AbstractStream<T> extends Stream<T> {
         return append(Stream.of(c));
     }
 
-    @Override
-    public Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs) {
-        return append(Stream.of(cs).flattMap(Fn.<Collection<? extends T>> identity()));
-    }
+    //    @Override
+    //    public Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs) {
+    //        return append(Stream.of(cs).flattMap(Fn.<Collection<? extends T>> identity()));
+    //    }
 
     @Override
     public Stream<T> prepend(Stream<T> stream) {
@@ -3637,10 +3637,10 @@ abstract class AbstractStream<T> extends Stream<T> {
         return prepend(Stream.of(c));
     }
 
-    @Override
-    public Stream<T> prependAlll(Collection<? extends Collection<? extends T>> cs) {
-        return prepend(Stream.of(cs).flattMap(Fn.<Collection<? extends T>> identity()));
-    }
+    //    @Override
+    //    public Stream<T> prependAlll(Collection<? extends Collection<? extends T>> cs) {
+    //        return prepend(Stream.of(cs).flattMap(Fn.<Collection<? extends T>> identity()));
+    //    }
 
     @Override
     public Stream<T> merge(final Stream<? extends T> b, final BiFunction<? super T, ? super T, Nth> nextSelector) {

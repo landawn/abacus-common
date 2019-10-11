@@ -286,6 +286,12 @@ public abstract class CharStream
     @SequentialOnly
     public abstract CharStream scan(final char init, final CharBinaryOperator accumulator, final boolean initIncluded);
 
+    public abstract CharStream prepend(final char... a);
+
+    public abstract CharStream append(final char... a);
+
+    public abstract CharStream appendIfEmpty(final char... a);
+
     public abstract CharList toCharList();
 
     /**

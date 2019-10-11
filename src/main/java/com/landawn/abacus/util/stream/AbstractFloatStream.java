@@ -951,13 +951,31 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public FloatStream append(FloatStream stream) {
-        return FloatStream.concat(this, stream);
+    @SafeVarargs
+    public final FloatStream prepend(final float... a) {
+        return prepend(FloatStream.of(a));
     }
 
     @Override
     public FloatStream prepend(FloatStream stream) {
         return FloatStream.concat(stream, this);
+    }
+
+    @Override
+    @SafeVarargs
+    public final FloatStream append(final float... a) {
+        return append(FloatStream.of(a));
+    }
+
+    @Override
+    public FloatStream append(FloatStream stream) {
+        return FloatStream.concat(this, stream);
+    }
+
+    @Override
+    @SafeVarargs
+    public final FloatStream appendIfEmpty(final float... a) {
+        return appendIfEmpty(() -> FloatStream.of(a));
     }
 
     @Override

@@ -41,6 +41,7 @@ import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BiFunction;
@@ -3324,9 +3325,57 @@ class ArrayStream<T> extends AbstractStream<T> {
     @Override
     public Stream<T> appendIfEmpty(final Supplier<Stream<T>> supplier) {
         if (fromIndex == toIndex) {
-            return append(supplier.get());
+            final Holder<Stream<T>> holder = new Holder<>();
+
+            return newStream(new ObjIteratorEx<T>() {
+                private ObjIteratorEx<? extends T> iter;
+
+                @Override
+                public boolean hasNext() {
+                    if (iter == null) {
+                        init();
+                    }
+
+                    return iter.hasNext();
+                }
+
+                @Override
+                public T next() {
+                    if (iter == null) {
+                        init();
+                    }
+
+                    return iter.next();
+                }
+
+                @Override
+                public void skip(long n) {
+                    if (iter == null) {
+                        init();
+                    }
+
+                    iter.skip(n);
+                }
+
+                @Override
+                public long count() {
+                    if (iter == null) {
+                        init();
+                    }
+
+                    return iter.count();
+                }
+
+                private void init() {
+                    if (iter == null) {
+                        final Stream<T> s = supplier.get();
+                        holder.setValue(s);
+                        iter = s.iteratorEx();
+                    }
+                }
+            }, false, null).onClose(() -> close(holder));
         } else {
-            return this;
+            return newStream(elements, fromIndex, toIndex, sorted, cmp);
         }
     }
 
@@ -3339,9 +3388,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 return Optional.empty();
             }
         } finally {
-            if (isClosed == false) {
-                close();
-            }
+            close();
         }
     }
 
@@ -3352,9 +3399,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 action.accept(this);
             }
         } finally {
-            if (isClosed == false) {
-                close();
-            }
+            close();
         }
     }
 
@@ -3372,7 +3417,8 @@ class ArrayStream<T> extends AbstractStream<T> {
      */
     @Override
     public Stream<T> queued(int queueSize) {
-        return this;
+        // return this;
+        return newStream(elements, fromIndex, toIndex, sorted, cmp);
     }
 
     @Override
@@ -3382,8 +3428,7 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     protected Stream<T> parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
-        return new ParallelArrayStream<>(elements, fromIndex, toIndex, sorted, cmp, maxThreadNum, splitor, asyncExecutor,
-                closeHandlers);
+        return new ParallelArrayStream<>(elements, fromIndex, toIndex, sorted, cmp, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

@@ -949,13 +949,31 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream append(ShortStream stream) {
-        return ShortStream.concat(this, stream);
+    @SafeVarargs
+    public final ShortStream prepend(final short... a) {
+        return prepend(ShortStream.of(a));
     }
 
     @Override
     public ShortStream prepend(ShortStream stream) {
         return ShortStream.concat(stream, this);
+    }
+
+    @Override
+    @SafeVarargs
+    public final ShortStream append(final short... a) {
+        return append(ShortStream.of(a));
+    }
+
+    @Override
+    public ShortStream append(ShortStream stream) {
+        return ShortStream.concat(this, stream);
+    }
+
+    @Override
+    @SafeVarargs
+    public final ShortStream appendIfEmpty(final short... a) {
+        return appendIfEmpty(() -> ShortStream.of(a));
     }
 
     @Override

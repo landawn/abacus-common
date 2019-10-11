@@ -1,3 +1,10 @@
+### 1.9.6
+
+* Remove `Stream.prepend/appendAlll`.
+* Add `Bastream.appendIfEmpty, apply/acceptIfNotEmpty`.
+* Improvements and bug fix.
+
+
 ### 1.9.5
 
 * Rename `EnumType.STRING` to `EnumBy.NAME`.

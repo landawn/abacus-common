@@ -243,6 +243,12 @@ public abstract class FloatStream
     @SequentialOnly
     public abstract FloatStream scan(final float init, final FloatBinaryOperator accumulator, final boolean initIncluded);
 
+    public abstract FloatStream prepend(final float... a);
+
+    public abstract FloatStream append(final float... a);
+
+    public abstract FloatStream appendIfEmpty(final float... a);
+
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.

@@ -944,13 +944,31 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream append(ByteStream stream) {
-        return ByteStream.concat(this, stream);
+    @SafeVarargs
+    public final ByteStream prepend(final byte... a) {
+        return prepend(ByteStream.of(a));
     }
 
     @Override
     public ByteStream prepend(ByteStream stream) {
         return ByteStream.concat(stream, this);
+    }
+
+    @Override
+    @SafeVarargs
+    public final ByteStream append(final byte... a) {
+        return append(ByteStream.of(a));
+    }
+
+    @Override
+    public ByteStream append(ByteStream stream) {
+        return ByteStream.concat(this, stream);
+    }
+
+    @Override
+    @SafeVarargs
+    public final ByteStream appendIfEmpty(final byte... a) {
+        return appendIfEmpty(() -> ByteStream.of(a));
     }
 
     @Override

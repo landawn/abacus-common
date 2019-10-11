@@ -46,6 +46,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BiFunction;
@@ -3275,17 +3276,123 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Stream<T> appendIfEmpty(Collection<? extends T> c) {
-        return elements.hasNext() == false ? append(c) : this;
+    public Stream<T> appendIfEmpty(final Collection<? extends T> c) {
+        if (N.isNullOrEmpty(c)) {
+            return newStream(elements, sorted, cmp);
+        }
+
+        return newStream(new ObjIteratorEx<T>() {
+            private Iterator<? extends T> iter;
+
+            @Override
+            public boolean hasNext() {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.next();
+            }
+
+            @Override
+            public void skip(long n) {
+                if (iter == null) {
+                    init();
+                }
+
+                if (iter == elements) {
+                    elements.skip(n);
+                }
+            }
+
+            @Override
+            public long count() {
+                if (iter == null) {
+                    init();
+                }
+
+                if (iter == elements) {
+                    return elements.count();
+                } else {
+                    return super.count();
+                }
+            }
+
+            private void init() {
+                if (iter == null) {
+                    if (elements.hasNext()) {
+                        iter = elements;
+                    } else {
+                        iter = c.iterator();
+                    }
+                }
+            }
+        }, false, null);
     }
 
     @Override
     public Stream<T> appendIfEmpty(final Supplier<Stream<T>> supplier) {
-        if (elements.hasNext() == false) {
-            return append(supplier.get());
-        } else {
-            return this;
-        }
+        final Holder<Stream<T>> holder = new Holder<>();
+
+        return newStream(new ObjIteratorEx<T>() {
+            private ObjIteratorEx<? extends T> iter;
+
+            @Override
+            public boolean hasNext() {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.next();
+            }
+
+            @Override
+            public void skip(long n) {
+                if (iter == null) {
+                    init();
+                }
+
+                iter.skip(n);
+            }
+
+            @Override
+            public long count() {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.count();
+            }
+
+            private void init() {
+                if (iter == null) {
+                    if (elements.hasNext()) {
+                        iter = elements;
+                    } else {
+                        final Stream<T> s = supplier.get();
+                        holder.setValue(s);
+                        iter = s.iteratorEx();
+                    }
+                }
+            }
+        }, false, null).onClose(() -> close(holder));
     }
 
     @Override
@@ -3297,9 +3404,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return Optional.empty();
             }
         } finally {
-            if (isClosed == false) {
-                close();
-            }
+            close();
         }
     }
 
@@ -3310,9 +3415,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 action.accept(this);
             }
         } finally {
-            if (isClosed == false) {
-                close();
-            }
+            close();
         }
     }
 

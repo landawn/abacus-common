@@ -43,6 +43,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Primitives;
 import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalLong;
@@ -408,8 +409,7 @@ class IteratorLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
-                : new LocalArrayDeque<>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -475,8 +475,7 @@ class IteratorLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
-                : new LocalArrayDeque<>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -542,8 +541,7 @@ class IteratorLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
-                : new LocalArrayDeque<>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -609,8 +607,7 @@ class IteratorLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
-                : new LocalArrayDeque<>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -676,8 +673,7 @@ class IteratorLongStream extends AbstractLongStream {
             }
         };
 
-        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1)
-                : new LocalArrayDeque<>(closeHandlers);
+        final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
             @Override
@@ -1723,10 +1719,82 @@ class IteratorLongStream extends AbstractLongStream {
 
     @Override
     public LongStream appendIfEmpty(final Supplier<LongStream> supplier) {
-        if (elements.hasNext() == false) {
-            return append(supplier.get());
-        } else {
-            return this;
+        final Holder<LongStream> holder = new Holder<>();
+
+        return newStream(new LongIteratorEx() {
+            private LongIteratorEx iter;
+
+            @Override
+            public boolean hasNext() {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public long nextLong() {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.nextLong();
+            }
+
+            @Override
+            public void skip(long n) {
+                if (iter == null) {
+                    init();
+                }
+
+                iter.skip(n);
+            }
+
+            @Override
+            public long count() {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.count();
+            }
+
+            private void init() {
+                if (iter == null) {
+                    if (elements.hasNext()) {
+                        iter = elements;
+                    } else {
+                        final LongStream s = supplier.get();
+                        holder.setValue(s);
+                        iter = s.iteratorEx();
+                    }
+                }
+            }
+        }, false).onClose(() -> close(holder));
+    }
+
+    @Override
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super LongStream, R, E> func) throws E {
+        try {
+            if (elements.hasNext()) {
+                return Optional.of(func.apply(this));
+            } else {
+                return Optional.empty();
+            }
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super LongStream, E> action) throws E {
+        try {
+            if (elements.hasNext()) {
+                action.accept(this);
+            }
+        } finally {
+            close();
         }
     }
 

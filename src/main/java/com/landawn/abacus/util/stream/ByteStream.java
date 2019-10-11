@@ -233,6 +233,12 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @SequentialOnly
     public abstract ByteStream scan(final byte init, final ByteBinaryOperator accumulator, final boolean initIncluded);
 
+    public abstract ByteStream prepend(final byte... a);
+
+    public abstract ByteStream append(final byte... a);
+
+    public abstract ByteStream appendIfEmpty(final byte... a);
+
     /**
      *
      * @return

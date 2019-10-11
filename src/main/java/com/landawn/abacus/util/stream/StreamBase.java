@@ -846,6 +846,13 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         }
     }
 
+    @SuppressWarnings("rawtypes")
+    static void close(Holder<? extends BaseStream> holder) {
+        if (holder.value() != null) {
+            holder.value().close();
+        }
+    }
+
     void assertNotClosed() {
         if (isClosed) {
             throw new IllegalStateException("This stream has been closed");

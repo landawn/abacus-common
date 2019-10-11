@@ -32,6 +32,7 @@ import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.Percentage;
+import com.landawn.abacus.util.Try;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Supplier;
@@ -375,6 +376,10 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     @SequentialOnly
     S appendIfEmpty(Supplier<S> suppliers);
+
+    <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super S, R, E> func) throws E;
+
+    <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super S, E> action) throws E;
 
     //    /**
     //     * <br />

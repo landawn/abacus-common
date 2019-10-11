@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
@@ -44,6 +45,7 @@ import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.StringUtil.Strings;
+import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalLong;
@@ -233,17 +235,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return empty();
         }
 
-        return newStream(new ExceptionalIterator<T, E>() {
-            @Override
-            public boolean hasNext() throws E {
-                return iter.hasNext();
-            }
-
-            @Override
-            public T next() throws E {
-                return iter.next();
-            }
-        });
+        return newStream(ExceptionalIterator.wrap(iter));
     }
 
     /**
@@ -2159,13 +2151,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
-    /**
-     *
-     * @param s
-     * @return
-     */
-    public ExceptionalStream<T, E> prepend(ExceptionalStream<T, E> s) {
-        return concat(s, this);
+    @SafeVarargs
+    public final ExceptionalStream<T, E> prepend(final T... a) {
+        return prepend(ExceptionalStream.of(a));
+    }
+
+    public ExceptionalStream<T, E> prepend(final Collection<? extends T> c) {
+        return prepend(ExceptionalStream.of(c));
     }
 
     /**
@@ -2173,8 +2165,87 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param s
      * @return
      */
-    public ExceptionalStream<T, E> append(ExceptionalStream<T, E> s) {
+    public ExceptionalStream<T, E> prepend(final ExceptionalStream<T, E> s) {
+        return concat(s, this);
+    }
+
+    @SafeVarargs
+    public final ExceptionalStream<T, E> append(final T... a) {
+        return append(ExceptionalStream.of(a));
+    }
+
+    public ExceptionalStream<T, E> append(final Collection<? extends T> c) {
+        return append(ExceptionalStream.of(c));
+    }
+
+    /**
+     *
+     * @param s
+     * @return
+     */
+    public ExceptionalStream<T, E> append(final ExceptionalStream<T, E> s) {
         return concat(this, s);
+    }
+
+    @SafeVarargs
+    public final ExceptionalStream<T, E> appendIfEmpty(final T... a) {
+        return appendIfEmpty(Arrays.asList(a));
+    }
+
+    public ExceptionalStream<T, E> appendIfEmpty(final Collection<? extends T> c) {
+        if (N.isNullOrEmpty(c)) {
+            return newStream(elements, closeHandlers);
+        }
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private ExceptionalIterator<T, E> iter;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.next();
+            }
+
+            @Override
+            public void skip(long n) throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                iter.skip(n);
+            }
+
+            @Override
+            public long count() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.count();
+            }
+
+            private void init() throws E {
+                if (iter == null) {
+                    if (elements.hasNext()) {
+                        iter = elements;
+                    } else {
+                        iter = ExceptionalIterator.wrap(c.iterator());
+                    }
+                }
+            }
+        }, closeHandlers);
     }
 
     /**
@@ -2184,11 +2255,87 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      * @throws E the e
      */
-    public ExceptionalStream<T, E> appendIfEmpty(Supplier<? extends ExceptionalStream<T, E>> supplier) throws E {
-        if (elements.hasNext() == false) {
-            return append(supplier.get());
-        } else {
-            return this;
+    public ExceptionalStream<T, E> appendIfEmpty(final Supplier<? extends ExceptionalStream<T, E>> supplier) throws E {
+        final Holder<ExceptionalStream<T, E>> holder = new Holder<>();
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private ExceptionalIterator<T, E> iter;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.next();
+            }
+
+            @Override
+            public void skip(long n) throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                iter.skip(n);
+            }
+
+            @Override
+            public long count() throws E {
+                if (iter == null) {
+                    init();
+                }
+
+                return iter.count();
+            }
+
+            private void init() throws E {
+                if (iter == null) {
+                    if (elements.hasNext()) {
+                        iter = elements;
+                    } else {
+                        final ExceptionalStream<T, E> s = supplier.get();
+                        holder.setValue(s);
+                        iter = s.iterator();
+                    }
+                }
+            }
+        }, closeHandlers).onClose(() -> close(holder));
+    }
+
+    void close(Holder<? extends ExceptionalStream<T, E>> holder) throws E {
+        if (holder.value() != null) {
+            holder.value().close();
+        }
+    }
+
+    public <R> Optional<R> applyIfNotEmpty(final Try.Function<? super ExceptionalStream<T, E>, R, E> func) throws E {
+        try {
+            if (elements.hasNext()) {
+                return Optional.of(func.apply(this));
+            } else {
+                return Optional.empty();
+            }
+        } finally {
+            close();
+        }
+    }
+
+    public void acceptIfNotEmpty(Try.Consumer<? super ExceptionalStream<T, E>, E> action) throws E {
+        try {
+            if (elements.hasNext()) {
+                action.accept(this);
+            }
+        } finally {
+            close();
         }
     }
 
@@ -2772,7 +2919,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         final Comparator<? super T> cmp = comparator == null ? Comparators.NATURAL_ORDER : comparator;
 
         if (sorted && cmp == this.comparator) {
-            return this;
+            return newStream(elements, sorted, comparator, closeHandlers);
         }
 
         return lazyLoad(new Function<Object[], Object[]>() {
@@ -4771,6 +4918,24 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 throw new NoSuchElementException();
             }
         };
+
+        public static <T, E extends Exception> ExceptionalIterator<T, E> wrap(final Iterator<? extends T> iter) {
+            if (iter == null) {
+                return EMPTY;
+            }
+
+            return new ExceptionalIterator<T, E>() {
+                @Override
+                public boolean hasNext() throws E {
+                    return iter.hasNext();
+                }
+
+                @Override
+                public T next() throws E {
+                    return iter.next();
+                }
+            };
+        }
 
         /**
          * Lazy evaluation.

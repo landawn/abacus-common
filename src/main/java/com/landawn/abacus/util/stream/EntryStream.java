@@ -833,6 +833,18 @@ public final class EntryStream<K, V> implements AutoCloseable {
         return of(s.append(set));
     }
 
+    @SuppressWarnings("rawtypes")
+    @SequentialOnly
+    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> appendIfEmpty(M map) {
+        if (N.isNullOrEmpty(map)) {
+            return of(s);
+        }
+
+        final Set<Map.Entry<K, V>> set = (Set) map.entrySet();
+
+        return of(s.appendIfEmpty(set));
+    }
+
     public EntryStream<K, V> appendIfEmpty(final Supplier<? extends EntryStream<K, V>> supplier) {
         return EntryStream.of(s.appendIfEmpty(new Supplier<Stream<Map.Entry<K, V>>>() {
             @Override
@@ -840,6 +852,14 @@ public final class EntryStream<K, V> implements AutoCloseable {
                 return supplier.get().s;
             }
         }));
+    }
+
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super EntryStream<K, V>, R, E> func) throws E {
+        return s.applyIfNotEmpty(ss -> func.apply(EntryStream.this));
+    }
+
+    public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super EntryStream<K, V>, E> action) throws E {
+        s.acceptIfNotEmpty(ss -> action.accept(EntryStream.this));
     }
 
     @SequentialOnly

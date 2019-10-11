@@ -948,13 +948,31 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
-    public LongStream append(LongStream stream) {
-        return LongStream.concat(this, stream);
+    @SafeVarargs
+    public final LongStream prepend(final long... a) {
+        return prepend(LongStream.of(a));
     }
 
     @Override
     public LongStream prepend(LongStream stream) {
         return LongStream.concat(stream, this);
+    }
+
+    @Override
+    @SafeVarargs
+    public final LongStream append(final long... a) {
+        return append(LongStream.of(a));
+    }
+
+    @Override
+    public LongStream append(LongStream stream) {
+        return LongStream.concat(this, stream);
+    }
+
+    @Override
+    @SafeVarargs
+    public final LongStream appendIfEmpty(final long... a) {
+        return appendIfEmpty(() -> LongStream.of(a));
     }
 
     @Override

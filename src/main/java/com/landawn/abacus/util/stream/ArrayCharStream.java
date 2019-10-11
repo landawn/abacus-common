@@ -34,6 +34,8 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.u.Holder;
+import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -1539,16 +1541,87 @@ class ArrayCharStream extends AbstractCharStream {
     @Override
     public CharStream appendIfEmpty(final Supplier<CharStream> supplier) {
         if (fromIndex == toIndex) {
-            return append(supplier.get());
+            final Holder<CharStream> holder = new Holder<>();
+
+            return newStream(new CharIteratorEx() {
+                private CharIteratorEx iter;
+
+                @Override
+                public boolean hasNext() {
+                    if (iter == null) {
+                        init();
+                    }
+
+                    return iter.hasNext();
+                }
+
+                @Override
+                public char nextChar() {
+                    if (iter == null) {
+                        init();
+                    }
+
+                    return iter.nextChar();
+                }
+
+                @Override
+                public void skip(long n) {
+                    if (iter == null) {
+                        init();
+                    }
+
+                    iter.skip(n);
+                }
+
+                @Override
+                public long count() {
+                    if (iter == null) {
+                        init();
+                    }
+
+                    return iter.count();
+                }
+
+                private void init() {
+                    if (iter == null) {
+                        final CharStream s = supplier.get();
+                        holder.setValue(s);
+                        iter = s.iteratorEx();
+                    }
+                }
+            }, false).onClose(() -> close(holder));
         } else {
-            return this;
+            return newStream(elements, fromIndex, toIndex, sorted);
+        }
+    }
+
+    @Override
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super CharStream, R, E> func) throws E {
+        try {
+            if (fromIndex < toIndex) {
+                return Optional.of(func.apply(this));
+            } else {
+                return Optional.empty();
+            }
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super CharStream, E> action) throws E {
+        try {
+            if (fromIndex < toIndex) {
+                action.accept(this);
+            }
+        } finally {
+            close();
         }
     }
 
     @Override
     protected CharStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
-        return new ParallelArrayCharStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor,
-                closeHandlers);
+        return new ParallelArrayCharStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override

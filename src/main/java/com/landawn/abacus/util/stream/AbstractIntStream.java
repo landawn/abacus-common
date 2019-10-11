@@ -949,13 +949,31 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream append(IntStream stream) {
-        return IntStream.concat(this, stream);
+    @SafeVarargs
+    public final IntStream prepend(final int... a) {
+        return prepend(IntStream.of(a));
     }
 
     @Override
     public IntStream prepend(IntStream stream) {
         return IntStream.concat(stream, this);
+    }
+
+    @Override
+    @SafeVarargs
+    public final IntStream append(final int... a) {
+        return append(IntStream.of(a));
+    }
+
+    @Override
+    public IntStream append(IntStream stream) {
+        return IntStream.concat(this, stream);
+    }
+
+    @Override
+    @SafeVarargs
+    public final IntStream appendIfEmpty(final int... a) {
+        return appendIfEmpty(() -> IntStream.of(a));
     }
 
     @Override

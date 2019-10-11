@@ -220,6 +220,12 @@ public abstract class ShortStream
     @SequentialOnly
     public abstract ShortStream scan(final short init, final ShortBinaryOperator accumulator, final boolean initIncluded);
 
+    public abstract ShortStream prepend(final short... a);
+
+    public abstract ShortStream append(final short... a);
+
+    public abstract ShortStream appendIfEmpty(final short... a);
+
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.

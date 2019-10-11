@@ -2236,18 +2236,9 @@ public abstract class Stream<T>
     @ParallelSupported
     public abstract Stream<T> difference(Function<? super T, ?> mapper, Collection<?> c);
 
-    @SafeVarargs
-    @SequentialOnly
-    public final Stream<T> append(T... a) {
-        return append(Arrays.asList(a));
-    }
-
-    @SequentialOnly
-    public abstract Stream<T> append(Collection<? extends T> c);
-
-    @SequentialOnly
-    public abstract Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs);
-
+    //    @SequentialOnly
+    //    public abstract Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs);
+    
     @SafeVarargs
     @SequentialOnly
     public final Stream<T> prepend(T... a) {
@@ -2257,8 +2248,22 @@ public abstract class Stream<T>
     @SequentialOnly
     public abstract Stream<T> prepend(Collection<? extends T> c);
 
+    @SafeVarargs
     @SequentialOnly
-    public abstract Stream<T> prependAlll(Collection<? extends Collection<? extends T>> cs);
+    public final Stream<T> append(T... a) {
+        return append(Arrays.asList(a));
+    }
+
+    @SequentialOnly
+    public abstract Stream<T> append(Collection<? extends T> c);
+
+    //    @SequentialOnly
+    //    public abstract Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs);
+
+    
+
+    //    @SequentialOnly
+    //    public abstract Stream<T> prependAlll(Collection<? extends Collection<? extends T>> cs);
 
     @SafeVarargs
     @SequentialOnly
@@ -2281,23 +2286,23 @@ public abstract class Stream<T>
     //    @SequentialOnly
     //    public abstract Stream<T> cached(IntFunction<T[]> generator);
 
-    /**
-     * The Stream will be closed finally, no matter it's empty or not.
-     *
-     * @param func
-     * @return
-     */
-    @Beta
-    public abstract <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super Stream<T>, R, E> func) throws E;
-
-    /**
-     * The Stream will be closed finally, no matter it's empty or not.
-     *
-     * @param action
-     *
-     */
-    @Beta
-    public abstract <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super Stream<T>, E> action) throws E;
+    //    /**
+    //     * The Stream will be closed finally, no matter it's empty or not.
+    //     *
+    //     * @param func
+    //     * @return
+    //     */
+    //    @Beta
+    //    public abstract <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super Stream<T>, R, E> func) throws E;
+    //
+    //    /**
+    //     * The Stream will be closed finally, no matter it's empty or not.
+    //     *
+    //     * @param action
+    //     *
+    //     */
+    //    @Beta
+    //    public abstract <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super Stream<T>, E> action) throws E;
 
     /**
      * Returns a new Stream with elements from a temporary queue which is filled by reading the elements from this Stream asynchronously.

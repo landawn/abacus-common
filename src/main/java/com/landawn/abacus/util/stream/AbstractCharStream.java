@@ -944,13 +944,31 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream append(CharStream stream) {
-        return CharStream.concat(this, stream);
+    @SafeVarargs
+    public final CharStream prepend(final char... a) {
+        return prepend(CharStream.of(a));
     }
 
     @Override
     public CharStream prepend(CharStream stream) {
         return CharStream.concat(stream, this);
+    }
+
+    @Override
+    @SafeVarargs
+    public final CharStream append(final char... a) {
+        return append(CharStream.of(a));
+    }
+
+    @Override
+    public CharStream append(CharStream stream) {
+        return CharStream.concat(this, stream);
+    }
+
+    @Override
+    @SafeVarargs
+    public final CharStream appendIfEmpty(final char... a) {
+        return appendIfEmpty(() -> CharStream.of(a));
     }
 
     @Override

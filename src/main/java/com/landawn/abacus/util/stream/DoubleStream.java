@@ -243,6 +243,12 @@ public abstract class DoubleStream
     @SequentialOnly
     public abstract DoubleStream scan(final double init, final DoubleBinaryOperator accumulator, final boolean initIncluded);
 
+    public abstract DoubleStream prepend(final double... a);
+
+    public abstract DoubleStream append(final double... a);
+
+    public abstract DoubleStream appendIfEmpty(final double... a);
+
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.

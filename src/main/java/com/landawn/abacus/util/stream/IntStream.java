@@ -260,6 +260,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @SequentialOnly
     public abstract IntStream scan(final int init, final IntBinaryOperator accumulator, final boolean initIncluded);
 
+    public abstract IntStream prepend(final int... a);
+
+    public abstract IntStream append(final int... a);
+
+    public abstract IntStream appendIfEmpty(final int... a);
+
     /**
      *
      * <br />

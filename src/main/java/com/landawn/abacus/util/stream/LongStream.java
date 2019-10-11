@@ -245,6 +245,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SequentialOnly
     public abstract LongStream scan(final long init, final LongBinaryOperator accumulator, final boolean initIncluded);
 
+    public abstract LongStream prepend(final long... a);
+
+    public abstract LongStream append(final long... a);
+
+    public abstract LongStream appendIfEmpty(final long... a);
+
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
