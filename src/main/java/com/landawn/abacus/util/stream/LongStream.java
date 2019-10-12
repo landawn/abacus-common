@@ -28,6 +28,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
@@ -71,6 +72,7 @@ import com.landawn.abacus.util.function.ToLongFunction;
 /**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  *
+ * @see BaseStream
  * @see Stream
  */
 public abstract class LongStream extends StreamBase<Long, long[], LongPredicate, LongConsumer, LongList, OptionalLong, IndexedLong, LongIterator, LongStream> {
@@ -154,7 +156,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
-    public abstract <T> Stream<T> rangeMapp(final LongBiPredicate sameRange, final LongBiFunction<T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final LongBiPredicate sameRange, final LongBiFunction<T> mapper);
 
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
@@ -428,8 +430,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
     abstract LongIteratorEx iteratorEx();
 
+    @SequentialOnly
+    @Beta
+    @SuppressWarnings("rawtypes")
     @Override
-    public <R> R __(Function<? super LongStream, R> transfer) {
+    public <SS extends BaseStream> SS __(Function<? super LongStream, SS> transfer) {
         return transfer.apply(this);
     }
 

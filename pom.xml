@@ -4,7 +4,7 @@
 
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-util</artifactId>
-	<version>1.9.7</version>
+	<version>1.9.8</version>
 	<packaging>jar</packaging>
 
 	<name>abacus-util</name>
@@ -29,13 +29,6 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.8</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.landawn</groupId>
-			<artifactId>abacus-jdbc</artifactId>
-			<version>0.9.1</version>
 			<scope>provided</scope>
 		</dependency>
 

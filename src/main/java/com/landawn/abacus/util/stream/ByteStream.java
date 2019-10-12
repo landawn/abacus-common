@@ -24,6 +24,7 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Random;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
@@ -67,6 +68,7 @@ import com.landawn.abacus.util.function.ToByteFunction;
 /**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  *
+ * @see BaseStream
  * @see Stream
  */
 public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate, ByteConsumer, ByteList, OptionalByte, IndexedByte, ByteIterator, ByteStream> {
@@ -142,7 +144,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
-    public abstract <T> Stream<T> rangeMapp(final ByteBiPredicate sameRange, final ByteBiFunction<T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final ByteBiPredicate sameRange, final ByteBiFunction<T> mapper);
 
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
@@ -426,8 +428,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     abstract ByteIteratorEx iteratorEx();
 
+    @SequentialOnly
+    @Beta
+    @SuppressWarnings("rawtypes")
     @Override
-    public <R> R __(Function<? super ByteStream, R> transfer) {
+    public <SS extends BaseStream> SS __(Function<? super ByteStream, SS> transfer) {
         return transfer.apply(this);
     }
 

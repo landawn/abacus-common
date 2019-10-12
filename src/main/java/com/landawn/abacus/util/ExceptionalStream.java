@@ -53,6 +53,7 @@ import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
+import com.landawn.abacus.util.stream.BaseStream;
 import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
@@ -66,6 +67,8 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <T>
  * @param <E>
  * @since 1.3
+ * @see BaseStream
+ * @see Stream
  */
 @SequentialOnly
 public class ExceptionalStream<T, E extends Exception> implements AutoCloseable {
@@ -2308,7 +2311,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                     }
                 }
             }
-        }, closeHandlers).onClose(() -> close(holder));
+        }, closeHandlers).onClose(new Try.Runnable<E>() {
+            @Override
+            public void run() throws E {
+                close(holder);
+            }
+        });
     }
 
     void close(Holder<? extends ExceptionalStream<T, E>> holder) throws E {
@@ -4525,12 +4533,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      *
-     * @param <R>
+     * @param <SS>
      * @param transfer
      * @return
      * @throws E the e
      */
-    public <R> R __(Try.Function<? super ExceptionalStream<T, E>, R, ? extends E> transfer) throws E {
+    @Beta
+    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(
+            Try.Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>, ? extends E> transfer) throws E {
         checkArgNotNull(transfer, "transfer");
 
         return transfer.apply(this);

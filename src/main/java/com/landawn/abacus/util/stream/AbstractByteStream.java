@@ -140,7 +140,7 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapp(final ByteBiPredicate sameRange, final ByteBiFunction<T> mapper) {
+    public <T> Stream<T> rangeMapToObj(final ByteBiPredicate sameRange, final ByteBiFunction<T> mapper) {
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {

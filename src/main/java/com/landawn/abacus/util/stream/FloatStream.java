@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Random;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
@@ -68,6 +69,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
 /**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  *
+ * @see BaseStream
  * @see Stream
  */
 public abstract class FloatStream
@@ -152,7 +154,7 @@ public abstract class FloatStream
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
-    public abstract <T> Stream<T> rangeMapp(final FloatBiPredicate sameRange, final FloatBiFunction<T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final FloatBiPredicate sameRange, final FloatBiFunction<T> mapper);
 
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
@@ -417,8 +419,11 @@ public abstract class FloatStream
 
     abstract FloatIteratorEx iteratorEx();
 
+    @SequentialOnly
+    @Beta
+    @SuppressWarnings("rawtypes")
     @Override
-    public <R> R __(Function<? super FloatStream, R> transfer) {
+    public <SS extends BaseStream> SS __(Function<? super FloatStream, SS> transfer) {
         return transfer.apply(this);
     }
 

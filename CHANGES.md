@@ -1,3 +1,9 @@
+### 1.9.7
+
+* Rename `Stream.rangeMapp` to `rangeMapToObj`.
+* Improvements and bug fix.
+
+
 ### 1.9.6
 
 * Remove `Stream.prepend/appendAlll`.

@@ -65,6 +65,8 @@ import com.landawn.abacus.util.stream.BaseStream.Splitor;
 /**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  *
+ * @see BaseStream
+ * @see Stream
  */
 public final class EntryStream<K, V> implements AutoCloseable {
 
@@ -1445,7 +1447,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @SequentialOnly
-    public <R> R __(Function<? super EntryStream<K, V>, R> transfer) {
+    @Beta
+    public <KK, VV> EntryStream<KK, VV> __(Function<? super EntryStream<K, V>, EntryStream<KK, VV>> transfer) {
         return transfer.apply(this);
     }
 

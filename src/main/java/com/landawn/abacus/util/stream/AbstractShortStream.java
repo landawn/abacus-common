@@ -140,7 +140,7 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapp(final ShortBiPredicate sameRange, final ShortBiFunction<T> mapper) {
+    public <T> Stream<T> rangeMapToObj(final ShortBiPredicate sameRange, final ShortBiFunction<T> mapper) {
         final ShortIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {

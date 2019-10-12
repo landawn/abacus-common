@@ -140,7 +140,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapp(final CharBiPredicate sameRange, final CharBiFunction<T> mapper) {
+    public <T> Stream<T> rangeMapToObj(final CharBiPredicate sameRange, final CharBiFunction<T> mapper) {
         final CharIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {

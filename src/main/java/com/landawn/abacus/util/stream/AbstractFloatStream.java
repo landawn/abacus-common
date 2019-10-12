@@ -142,7 +142,7 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapp(final FloatBiPredicate sameRange, final FloatBiFunction<T> mapper) {
+    public <T> Stream<T> rangeMapToObj(final FloatBiPredicate sameRange, final FloatBiFunction<T> mapper) {
         final FloatIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {

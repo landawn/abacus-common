@@ -22,8 +22,10 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableSet;
@@ -63,6 +65,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     S filter(P predicate);
 
     /**
@@ -73,6 +76,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     S filter(P predicate, C actionOnDroppedItem);
 
     /**
@@ -84,6 +88,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     S takeWhile(P predicate);
 
     /**
@@ -95,6 +100,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     S dropWhile(P predicate);
 
     /**
@@ -108,6 +114,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     S dropWhile(P predicate, C actionOnDroppedItem);
 
     /**
@@ -118,6 +125,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @Deprecated
     @ParallelSupported
+    @IntermediateOp
     S removeIf(P predicate);
 
     /**
@@ -129,6 +137,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @Deprecated
     @ParallelSupported
+    @IntermediateOp
     S removeIf(P predicate, C actionOnDroppedItem);
 
     /**
@@ -138,6 +147,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<S> split(int chunkSize);
 
     /**
@@ -150,6 +160,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<PL> splitToList(int chunkSize);
 
     /**
@@ -164,6 +175,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<S> split(final P predicate);
 
     /**
@@ -175,6 +187,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<PL> splitToList(final P predicate);
 
     /**
@@ -185,6 +198,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<S> splitAt(int where);
 
     /**
@@ -201,6 +215,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<S> splitBy(P where);
 
     /**
@@ -210,6 +225,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @see #sliding(int, int)
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<S> sliding(int windowSize);
 
     /**
@@ -219,6 +235,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @see #sliding(int, int)
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<PL> slidingToList(int windowSize);
 
     /**
@@ -252,6 +269,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<S> sliding(int windowSize, int increment);
 
     /**
@@ -262,6 +280,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @see #sliding(int, int)
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<PL> slidingToList(int windowSize, int increment);
 
     /**
@@ -273,6 +292,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @see IntList#intersection(IntList)
      */
     @SequentialOnly
+    @IntermediateOp
     S intersection(Collection<?> c);
 
     /**
@@ -284,6 +304,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @see IntList#difference(IntList)
      */
     @SequentialOnly
+    @IntermediateOp
     S difference(Collection<?> c);
 
     /**
@@ -304,6 +325,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Optional<Map<Percentage, T>> percentiles();
 
     /**
@@ -314,6 +336,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     S reversed();
 
     /**
@@ -324,6 +347,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     S shuffled();
 
     /**
@@ -334,6 +358,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     S shuffled(Random rnd);
 
     /**
@@ -344,6 +369,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     S rotated(int distance);
 
     /**
@@ -352,6 +378,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     S distinct();
 
     /**
@@ -363,23 +390,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     S sorted();
-
-    @ParallelSupported
-    S reverseSorted();
-
-    @SequentialOnly
-    S prepend(S stream);
-
-    @SequentialOnly
-    S append(S s);
-
-    @SequentialOnly
-    S appendIfEmpty(Supplier<S> suppliers);
-
-    <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super S, R, E> func) throws E;
-
-    <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super S, E> action) throws E;
 
     //    /**
     //     * <br />
@@ -390,6 +402,10 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //    @SequentialOnly
     //    S cached();
 
+    @ParallelSupported
+    @IntermediateOp
+    S reverseSorted();
+
     /**
      * <br />
      * This method only run sequentially, even in parallel stream.
@@ -397,13 +413,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     Stream<IT> indexed();
-
-    @SequentialOnly
-    String join(CharSequence delimiter);
-
-    @SequentialOnly
-    String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix);
 
     /**
      *
@@ -411,6 +422,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     S skip(long n);
 
     /**
@@ -420,6 +432,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     S skip(long n, C consumer);
 
     /**
@@ -428,6 +441,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     S limit(long maxSize);
 
     //    /**
@@ -443,14 +457,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //    S slice(long from, long to);
 
     @SequentialOnly
+    @IntermediateOp
     S step(long step);
-
-    /**
-     *
-     * @return
-     */
-    @SequentialOnly
-    long count();
 
     /**
      *
@@ -458,6 +466,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     S peek(C action);
 
     /**
@@ -468,12 +477,86 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @see #peek(Object)
      */
     @ParallelSupported
+    @IntermediateOp
     S carry(C action);
 
     @SequentialOnly
+    @IntermediateOp
+    S prepend(S stream);
+
+    @SequentialOnly
+    @IntermediateOp
+    S append(S s);
+
+    @SequentialOnly
+    @IntermediateOp
+    S appendIfEmpty(Supplier<S> suppliers);
+
+    /**
+     * This is a terminal operation. That's to say this stream will be closed after this operation.
+     * 
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
+     * @throws E
+     */
+    @TerminalOp
+    <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super S, R, E> func) throws E;
+
+    /**
+     * This is a terminal operation. That's to say this stream will be closed after this operation.
+     * 
+     * @param <E>
+     * @param action
+     * @throws E
+     */
+    @TerminalOp
+    <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super S, E> action) throws E;
+
+    //    /**
+    //     * <br />
+    //     * This method only run sequentially, even in parallel stream and all elements will be loaded to memory.
+    //     *
+    //     * @return
+    //     */
+    //    @SequentialOnly
+    //    S cached();
+
+    @SequentialOnly
+    @TerminalOp
+    String join(CharSequence delimiter);
+
+    @SequentialOnly
+    @TerminalOp
+    String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix);
+
+    //    /**
+    //     * Same as: {@code stream.skip(from).limit(to - from)}.
+    //     *
+    //     * @param from
+    //     * @param to
+    //     * @return
+    //     * @deprecated
+    //     */
+    //    @Deprecated
+    //    @SequentialOnly
+    //    S slice(long from, long to);
+
+    /**
+     *
+     * @return
+     */
+    @SequentialOnly
+    @TerminalOp
+    long count();
+
+    @SequentialOnly
+    @TerminalOp
     OT first();
 
     @SequentialOnly
+    @TerminalOp
     OT last();
 
     /**
@@ -482,6 +565,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @throws DuplicatedResultException if there are more than one element in this stream.
      */
     @SequentialOnly
+    @TerminalOp
     OT onlyOne() throws DuplicatedResultException;
 
     /**
@@ -489,34 +573,49 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @TerminalOp
     A toArray();
 
     @SequentialOnly
+    @TerminalOp
     List<T> toList();
 
     @SequentialOnly
+    @TerminalOp
     Set<T> toSet();
 
     @SequentialOnly
+    @TerminalOp
     ImmutableList<T> toImmutableList();
 
     @SequentialOnly
+    @TerminalOp
     ImmutableSet<T> toImmutableSet();
 
     @SequentialOnly
+    @TerminalOp
     <CC extends Collection<T>> CC toCollection(Supplier<? extends CC> supplier);
 
     @SequentialOnly
+    @TerminalOp
     Multiset<T> toMultiset();
 
     @SequentialOnly
+    @TerminalOp
     Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier);
 
     @SequentialOnly
+    @TerminalOp
     LongMultiset<T> toLongMultiset();
 
     @SequentialOnly
+    @TerminalOp
     LongMultiset<T> toLongMultiset(Supplier<? extends LongMultiset<T>> supplier);
+
+    @Beta
+    @SequentialOnly
+    @TerminalOp
+    void println();
 
     /**
      * Returns an iterator for the elements of this stream.
@@ -529,12 +628,10 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     @SequentialOnly
     ITER iterator();
 
+    @SequentialOnly
     @Beta
-    @SequentialOnly
-    void println();
-
-    @SequentialOnly
-    <R> R __(Function<? super S, R> transfer);
+    @SuppressWarnings("rawtypes")
+    <SS extends BaseStream> SS __(Function<? super S, SS> transfer);
 
     //    @SequentialOnly
     //    Try<S> tried();

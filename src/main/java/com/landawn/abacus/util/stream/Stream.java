@@ -45,8 +45,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.AsyncExecutor;
@@ -136,6 +138,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.QueuedIterator;
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  *
  * @param <T> the type of the stream elements
+ * @see BaseStream
  * @see IntStream
  * @see LongStream
  * @see DoubleStream
@@ -150,6 +153,7 @@ public abstract class Stream<T>
     }
 
     @SequentialOnly
+    @IntermediateOp
     public <U> Stream<U> select(Class<U> targetType) {
         if (isParallel()) {
             return (Stream<U>) sequential().filter(Fn.instanceOf(targetType)).parallel(maxThreadNum(), splitor(), asyncExecutor());
@@ -159,6 +163,7 @@ public abstract class Stream<T>
     }
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> map(Function<? super T, ? extends R> mapper);
 
     //    public abstract <R> Stream<R> biMap(BiFunction<? super T, ? super T, ? extends R> mapper);
@@ -200,6 +205,7 @@ public abstract class Stream<T>
     //    public abstract <R> Stream<R> triMap(TriFunction<? super T, ? super T, ? super T, ? extends R> mapper, boolean ignoreNotPaired);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> slidingMap(BiFunction<? super T, ? super T, R> mapper);
 
     /**
@@ -210,12 +216,15 @@ public abstract class Stream<T>
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> slidingMap(BiFunction<? super T, ? super T, R> mapper, int increment);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> slidingMap(BiFunction<? super T, ? super T, R> mapper, int increment, boolean ignoreNotPaired);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> slidingMap(TriFunction<? super T, ? super T, ? super T, R> mapper);
 
     /**
@@ -226,9 +235,11 @@ public abstract class Stream<T>
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> slidingMap(TriFunction<? super T, ? super T, ? super T, R> mapper, int increment);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> slidingMap(TriFunction<? super T, ? super T, ? super T, R> mapper, int increment, boolean ignoreNotPaired);
 
     /**
@@ -262,115 +273,151 @@ public abstract class Stream<T>
      * @see #collapse(BiPredicate, BinaryOperator)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <U> Stream<U> rangeMap(final BiPredicate<? super T, ? super T> sameRange, final BiFunction<? super T, ? super T, ? extends U> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract Stream<T> mapFirst(Function<? super T, ? extends T> mapperForFirst);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> mapFirstOrElse(Function<? super T, ? extends R> mapperForFirst, Function<? super T, ? extends R> mapperForElse);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract Stream<T> mapLast(Function<? super T, ? extends T> mapperForLast);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> mapLastOrElse(Function<? super T, ? extends R> mapperForLast, Function<? super T, ? extends R> mapperForElse);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract CharStream mapToChar(ToCharFunction<? super T> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract ByteStream mapToByte(ToByteFunction<? super T> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract ShortStream mapToShort(ToShortFunction<? super T> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract IntStream mapToInt(ToIntFunction<? super T> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract LongStream mapToLong(ToLongFunction<? super T> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract FloatStream mapToFloat(ToFloatFunction<? super T> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract DoubleStream mapToDouble(ToDoubleFunction<? super T> mapper);
 
     // public abstract <K, V> EntryStream<K, V> mapToEntry();
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <K, V> EntryStream<K, V> mapToEntry(Function<? super T, ? extends Map.Entry<? extends K, ? extends V>> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <K, V> EntryStream<K, V> mapToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     // public abstract <U> Stream<U> mapp(Function<? super T, ? extends Optional<? extends U>> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> flattMap(Function<? super T, ? extends Collection<? extends R>> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <R> Stream<R> flatMapp(Function<? super T, R[]> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract CharStream flatMapToChar(Function<? super T, ? extends CharStream> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract CharStream flattMapToChar(Function<? super T, char[]> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract ByteStream flatMapToByte(Function<? super T, ? extends ByteStream> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract ByteStream flattMapToByte(Function<? super T, byte[]> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract ShortStream flatMapToShort(Function<? super T, ? extends ShortStream> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract ShortStream flattMapToShort(Function<? super T, short[]> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract IntStream flatMapToInt(Function<? super T, ? extends IntStream> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract IntStream flattMapToInt(Function<? super T, int[]> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract LongStream flatMapToLong(Function<? super T, ? extends LongStream> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract LongStream flattMapToLong(Function<? super T, long[]> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract FloatStream flatMapToFloat(Function<? super T, ? extends FloatStream> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract FloatStream flattMapToFloat(Function<? super T, float[]> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract DoubleStream flatMapToDouble(Function<? super T, ? extends DoubleStream> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract DoubleStream flattMapToDouble(Function<? super T, double[]> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <K, V> EntryStream<K, V> flatMapToEntry(Function<? super T, ? extends Stream<? extends Map.Entry<? extends K, ? extends V>>> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <K, V> EntryStream<K, V> flattMapToEntry(Function<? super T, ? extends Map<? extends K, ? extends V>> mapper);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <K, V> EntryStream<K, V> flatMappToEntry(Function<? super T, ? extends EntryStream<? extends K, ? extends V>> mapper);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K> Stream<Map.Entry<K, List<T>>> groupBy(final Function<? super T, ? extends K> keyMapper);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K> Stream<Map.Entry<K, List<T>>> groupBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory);
 
@@ -382,6 +429,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> Stream<Map.Entry<K, List<V>>> groupBy(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
@@ -393,29 +441,36 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> Stream<Map.Entry<K, List<V>>> groupBy(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends Map<K, List<V>>> mapFactory);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, A, D> Stream<Map.Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, A, D> Stream<Map.Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, A, D> Stream<Map.Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, A, D> Stream<Map.Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream, final Supplier<? extends Map<K, D>> mapFactory);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> Stream<Map.Entry<K, V>> groupBy(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> Stream<Map.Entry<K, V>> groupBy(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory);
 
@@ -538,6 +593,7 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract Stream<Map.Entry<Boolean, List<T>>> partitionBy(final Predicate<? super T> predicate);
 
     /**
@@ -548,17 +604,22 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <A, D> Stream<Map.Entry<Boolean, D>> partitionBy(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream);
 
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOp
     public <K> Stream<Map.Entry<K, Integer>> countBy(final Function<? super T, ? extends K> keyMapper) {
         return groupBy(keyMapper, Collectors.countingInt());
     }
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K> EntryStream<K, List<T>> groupByToEntry(final Function<? super T, ? extends K> keyMapper);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K> EntryStream<K, List<T>> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory);
 
@@ -570,6 +631,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> EntryStream<K, List<V>> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
@@ -581,29 +643,36 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> EntryStream<K, List<V>> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends Map<K, List<V>>> mapFactory);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream, final Supplier<? extends Map<K, D>> mapFactory);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> EntryStream<K, V> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> EntryStream<K, V> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory);
 
@@ -614,6 +683,7 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract EntryStream<Boolean, List<T>> partitionByToEntry(final Predicate<? super T> predicate);
 
     /**
@@ -624,17 +694,21 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <A, D> EntryStream<Boolean, D> partitionByToEntry(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream);
 
     @ParallelSupported
+    @TerminalOp
     public <K> EntryStream<K, Integer> countByToEntry(final Function<? super T, ? extends K> keyMapper) {
         return groupByToEntry(keyMapper, Collectors.countingInt());
     }
 
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Stream<T>> collapse(final BiPredicate<? super T, ? super T> collapsible);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> collapse(final BiPredicate<? super T, ? super T> collapsible, Supplier<? extends C> supplier);
 
     /**
@@ -660,12 +734,15 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> collapse(final BiPredicate<? super T, ? super T> collapsible, final BiFunction<? super T, ? super T, T> mergeFunction);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <U> Stream<U> collapse(final BiPredicate<? super T, ? super T> collapsible, final U init, final BiFunction<U, ? super T, U> op);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <R> Stream<R> collapse(final BiPredicate<? super T, ? super T> collapsible, final Supplier<R> supplier,
             final BiConsumer<? super R, ? super T> accumulator);
 
@@ -692,6 +769,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <R, A> Stream<R> collapse(final BiPredicate<? super T, ? super T> collapsible, final Collector<? super T, A, R> collector);
 
     /**
@@ -720,6 +798,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> scan(final BiFunction<? super T, ? super T, T> accumulator);
 
     /**
@@ -751,6 +830,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <U> Stream<U> scan(final U init, final BiFunction<U, ? super T, U> accumulator);
 
     /**
@@ -761,6 +841,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <U> Stream<U> scan(final U init, final BiFunction<U, ? super T, U> accumulator, final boolean initIncluded);
 
     /**
@@ -773,6 +854,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Set<T>> splitToSet(int chunkSize);
 
     /**
@@ -786,6 +868,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> split(int chunkSize, IntFunction<? extends C> collectionSupplier);
 
     /**
@@ -795,33 +878,43 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> split(int chunkSize, Collector<? super T, A, R> collector);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Set<T>> splitToSet(Predicate<? super T> predicate);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> split(Predicate<? super T> predicate, Supplier<? extends C> collectionSupplier);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> split(Predicate<? super T> predicate, Collector<? super T, A, R> collector);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> splitAt(int where, Collector<? super T, A, R> collector);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> splitBy(Predicate<? super T> where, Collector<? super T, A, R> collector);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> sliding(int windowSize, IntFunction<? extends C> collectionSupplier);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> sliding(int windowSize, int increment, IntFunction<? extends C> collectionSupplier);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> sliding(int windowSize, Collector<? super T, A, R> collector);
 
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> sliding(int windowSize, int increment, Collector<? super T, A, R> collector);
 
     /**
@@ -832,6 +925,7 @@ public abstract class Stream<T>
      * @see Fn#window(Duration, LongSupplier)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Stream<T>> window(Duration duration);
 
     /**
@@ -844,6 +938,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Stream<T>> window(Duration duration, LongSupplier startTime);
 
     /**
@@ -855,6 +950,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> windowToList(Duration duration);
 
     /**
@@ -866,6 +962,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Set<T>> windowToSet(Duration duration);
 
     /**
@@ -878,6 +975,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> window(Duration duration, Supplier<? extends C> collectionSupplier);
 
     /**
@@ -891,6 +989,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> window(Duration duration, LongSupplier startTime, Supplier<? extends C> collectionSupplier);
 
     /**
@@ -903,6 +1002,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> window(Duration duration, Collector<? super T, A, R> collector);
 
     /**
@@ -916,6 +1016,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> window(Duration duration, LongSupplier startTime, Collector<? super T, A, R> collector);
 
     /**
@@ -928,6 +1029,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Stream<T>> window(Duration duration, long incrementInMillis);
 
     /**
@@ -941,6 +1043,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Stream<T>> window(Duration duration, long incrementInMillis, LongSupplier startTime);
 
     /**
@@ -953,6 +1056,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> windowToList(Duration duration, long incrementInMillis);
 
     /**
@@ -965,6 +1069,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Set<T>> windowToSet(Duration duration, long incrementInMillis);
 
     /**
@@ -978,6 +1083,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> window(Duration duration, long incrementInMillis, Supplier<? extends C> collectionSupplier);
 
     /**
@@ -992,6 +1098,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> window(Duration duration, long incrementInMillis, LongSupplier startTime,
             Supplier<? extends C> collectionSupplier);
 
@@ -1006,6 +1113,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> window(Duration duration, long incrementInMillis, Collector<? super T, A, R> collector);
 
     /**
@@ -1020,6 +1128,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> window(Duration duration, long incrementInMillis, LongSupplier startTime, Collector<? super T, A, R> collector);
 
     /**
@@ -1031,6 +1140,7 @@ public abstract class Stream<T>
      * @see Fn#window(int, Duration, LongSupplier, Supplier)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Stream<T>> window(int maxWindowSize, Duration maxDuration);
 
     /**
@@ -1044,6 +1154,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<Stream<T>> window(int maxWindowSize, Duration maxDuration, LongSupplier startTime);
 
     /**
@@ -1057,6 +1168,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> window(int maxWindowSize, Duration maxDuration, Supplier<? extends C> collectionSupplier);
 
     /**
@@ -1072,6 +1184,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <C extends Collection<T>> Stream<C> window(int maxWindowSize, Duration maxDuration, LongSupplier startTime,
             Supplier<? extends C> collectionSupplier);
 
@@ -1086,6 +1199,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> window(int maxWindowSize, Duration maxDuration, Collector<? super T, A, R> collector);
 
     /**
@@ -1101,6 +1215,7 @@ public abstract class Stream<T>
      * @see #sliding(int, int, Collector)
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract <A, R> Stream<R> window(int maxWindowSize, Duration maxDuration, LongSupplier startTime, Collector<? super T, A, R> collector);
 
     /**
@@ -1114,6 +1229,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> intersperse(T delimiter);
 
     /**
@@ -1123,6 +1239,7 @@ public abstract class Stream<T>
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     public Stream<T> distinct(final Predicate<? super Long> occurrencesFilter) {
         final Supplier<? extends Map<T, Long>> supplier = isParallel() ? Suppliers.<T, Long> ofConcurrentHashMap() : Suppliers.<T, Long> ofLinkedHashMap();
 
@@ -1136,6 +1253,7 @@ public abstract class Stream<T>
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract Stream<T> distinctBy(Function<? super T, ?> keyMapper);
 
     /**
@@ -1145,6 +1263,8 @@ public abstract class Stream<T>
      * @param occurrencesFilter
      * @return
      */
+    @ParallelSupported
+    @IntermediateOp
     public <K> Stream<T> distinctBy(final Function<? super T, K> keyMapper, final Predicate<? super Long> occurrencesFilter) {
         final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = isParallel() ? Suppliers.<Keyed<K, T>, Long> ofConcurrentHashMap()
                 : Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
@@ -1152,6 +1272,27 @@ public abstract class Stream<T>
         return groupBy(Fn.<K, T> keyed(keyMapper), Collectors.counting(), supplier).filter(Fn.<Keyed<K, T>, Long> testByValue(occurrencesFilter))
                 .map(Fn.<T, K, Long> kk());
     }
+
+    @ParallelSupported
+    @IntermediateOp
+    public abstract Stream<T> sorted(Comparator<? super T> comparator);
+
+    @SuppressWarnings("rawtypes")
+    @ParallelSupported
+    @IntermediateOp
+    public abstract Stream<T> sortedBy(Function<? super T, ? extends Comparable> keyMapper);
+
+    @ParallelSupported
+    @IntermediateOp
+    public abstract Stream<T> sortedByInt(ToIntFunction<? super T> keyMapper);
+
+    @ParallelSupported
+    @IntermediateOp
+    public abstract Stream<T> sortedByLong(ToLongFunction<? super T> keyMapper);
+
+    @ParallelSupported
+    @IntermediateOp
+    public abstract Stream<T> sortedByDouble(ToDoubleFunction<? super T> keyMapper);
 
     /**
      *
@@ -1162,6 +1303,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> top(int n);
 
     /**
@@ -1173,38 +1315,63 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> top(int n, Comparator<? super T> comparator);
 
-    @ParallelSupported
-    public abstract Stream<T> sorted(Comparator<? super T> comparator);
+    /**
+     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements.
+     * It may cause <code>out of memory error</code> if <code>n</code> is big enough.
+     *
+     * <br />
+     *
+     * All the elements will be loaded to get the last {@code n} elements and the Stream will be closed after that, if a terminal operation is triggered.
+     *
+     * @param n
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public abstract Stream<T> last(int n);
 
-    @SuppressWarnings("rawtypes")
-    @ParallelSupported
-    public abstract Stream<T> sortedBy(Function<? super T, ? extends Comparable> keyMapper);
+    /**
+     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements.
+     * It may cause <code>out of memory error</code> if <code>n</code> is big enough.
+     *
+     * <br />
+     * This method only run sequentially, even in parallel stream.
+     *
+     * @param n
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public abstract Stream<T> skipLast(int n);
 
     @ParallelSupported
-    public abstract Stream<T> sortedByInt(ToIntFunction<? super T> keyMapper);
+    @IntermediateOp
+    public abstract Stream<T> skipNull();
 
     @ParallelSupported
-    public abstract Stream<T> sortedByLong(ToLongFunction<? super T> keyMapper);
-
-    @ParallelSupported
-    public abstract Stream<T> sortedByDouble(ToDoubleFunction<? super T> keyMapper);
-
-    @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> void forEach(Try.Consumer<? super T, E> action) throws E;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception, E2 extends Exception> void forEach(Try.Consumer<? super T, E> action, Try.Runnable<E2> onComplete) throws E, E2;
 
+    @ParallelSupported
+    @TerminalOp
     public abstract <U, E extends Exception, E2 extends Exception> void forEach(final Try.Function<? super T, ? extends Collection<U>, E> flatMapper,
             final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2;
 
+    @ParallelSupported
+    @TerminalOp
     public abstract <T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(
             final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action) throws E;
 
     /**
@@ -1215,9 +1382,11 @@ public abstract class Stream<T>
      * @return
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action, final int increment) throws E;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action) throws E;
 
     /**
@@ -1228,27 +1397,35 @@ public abstract class Stream<T>
      * @return
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> boolean anyMatch(Try.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> boolean allMatch(Try.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> boolean noneMatch(Try.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> boolean nMatch(long atLeast, long atMost, Try.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> Optional<T> findFirst(Try.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> Optional<T> findLast(Try.Predicate<? super T, E> predicate) throws E;
 
     @SequentialOnly
+    @TerminalOp
     public abstract <E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(Try.Predicate<? super T, E> predicateForFirst,
             Try.Predicate<? super T, E2> predicateForLast) throws E, E2;
 
@@ -1262,6 +1439,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @TerminalOp
     public abstract <U, E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final U init,
             final Try.BiPredicate<? super T, ? super U, E> predicateForFirst, final Try.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2;
 
@@ -1275,19 +1453,24 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @TerminalOp
     public abstract <U, E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final Function<? super T, U> preFunc,
             final Try.BiPredicate<? super T, ? super U, E> predicateForFirst, final Try.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2;
 
     @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> Optional<T> findAny(Try.Predicate<? super T, E> predicate) throws E;
 
     @SequentialOnly
+    @TerminalOp
     public abstract boolean containsAll(T... a);
 
     @SequentialOnly
+    @TerminalOp
     public abstract boolean containsAll(Collection<? extends T> c);
 
     @SequentialOnly
+    @TerminalOp
     public abstract <A> A[] toArray(IntFunction<A[]> generator);
 
     /**
@@ -1298,6 +1481,7 @@ public abstract class Stream<T>
      * @see Collectors#toMap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public <K, V> ImmutableMap<K, V> toImmutableMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
         return ImmutableMap.of(toMap(keyMapper, valueMapper));
     }
@@ -1311,6 +1495,7 @@ public abstract class Stream<T>
      * @see Collectors#toMap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public <K, V> ImmutableMap<K, V> toImmutableMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction) {
         return ImmutableMap.of(toMap(keyMapper, valueMapper, mergeFunction));
@@ -1324,6 +1509,7 @@ public abstract class Stream<T>
      * @see Collectors#toMap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> Map<K, V> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
@@ -1335,6 +1521,7 @@ public abstract class Stream<T>
      * @see Collectors#toMap(Function, Function, BinaryOperator)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> Map<K, V> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction);
 
@@ -1347,6 +1534,7 @@ public abstract class Stream<T>
      * @see Collectors#toMap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, M extends Map<K, V>> M toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends M> mapFactory);
 
@@ -1360,6 +1548,7 @@ public abstract class Stream<T>
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, M extends Map<K, V>> M toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory);
 
@@ -1371,6 +1560,7 @@ public abstract class Stream<T>
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, A, D> Map<K, D> toMap(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream);
 
     /**
@@ -1382,6 +1572,7 @@ public abstract class Stream<T>
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, A, D, M extends Map<K, D>> M toMap(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream,
             final Supplier<? extends M> mapFactory);
 
@@ -1394,6 +1585,7 @@ public abstract class Stream<T>
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, A, D> Map<K, D> toMap(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             final Collector<? super V, A, D> downstream);
 
@@ -1407,6 +1599,7 @@ public abstract class Stream<T>
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, A, D, M extends Map<K, D>> M toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream, final Supplier<? extends M> mapFactory);
 
@@ -1611,6 +1804,7 @@ public abstract class Stream<T>
      * @see Collectors#groupingBy(Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K> Map<K, List<T>> groupTo(Function<? super T, ? extends K> keyMapper);
 
     /**
@@ -1621,9 +1815,11 @@ public abstract class Stream<T>
      * @see Collectors#groupingBy(Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, M extends Map<K, List<T>>> M groupTo(final Function<? super T, ? extends K> keyMapper, final Supplier<? extends M> mapFactory);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> Map<K, List<V>> groupTo(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
@@ -1635,6 +1831,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, M extends Map<K, List<V>>> M groupTo(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends M> mapFactory);
 
@@ -1717,6 +1914,7 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract Map<Boolean, List<T>> partitionTo(final Predicate<? super T> predicate);
 
     /**
@@ -1727,6 +1925,7 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <A, D> Map<Boolean, D> partitionTo(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream);
 
     /**
@@ -1736,6 +1935,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K> ListMultimap<K, T> toMultimap(Function<? super T, ? extends K> keyMapper);
 
     /**
@@ -1746,6 +1946,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(Function<? super T, ? extends K> keyMapper,
             Supplier<? extends M> mapFactory);
 
@@ -1757,6 +1958,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> ListMultimap<K, V> toMultimap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
@@ -1768,6 +1970,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M toMultimap(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper, Supplier<? extends M> mapFactory);
 
@@ -1778,6 +1981,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K> ListMultimap<K, T> flatToMultimap(Function<? super T, ? extends Stream<? extends K>> flatKeyMapper);
 
     /**
@@ -1788,6 +1992,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V extends Collection<T>, M extends Multimap<K, T, V>> M flatToMultimap(Function<? super T, ? extends Stream<? extends K>> flatKeyMapper,
             Supplier<? extends M> mapFactory);
 
@@ -1799,6 +2004,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> ListMultimap<K, V> flatToMultimap(Function<? super T, ? extends Stream<? extends K>> flatKeyMapper,
             BiFunction<? super K, ? super T, ? extends V> valueMapper);
 
@@ -1811,6 +2017,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M flatToMultimap(
             Function<? super T, ? extends Stream<? extends K>> flatKeyMapper, BiFunction<? super K, ? super T, ? extends V> valueMapper,
             Supplier<? extends M> mapFactory);
@@ -1822,6 +2029,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K> ListMultimap<K, T> flattToMultimap(Function<? super T, ? extends Collection<? extends K>> flatKeyMapper);
 
     /**
@@ -1832,6 +2040,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V extends Collection<T>, M extends Multimap<K, T, V>> M flattToMultimap(
             Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, Supplier<? extends M> mapFactory);
 
@@ -1843,6 +2052,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V> ListMultimap<K, V> flattToMultimap(Function<? super T, ? extends Collection<? extends K>> flatKeyMapper,
             BiFunction<? super K, ? super T, ? extends V> valueMapper);
 
@@ -1855,6 +2065,7 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @TerminalOp
     public abstract <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M flattToMultimap(
             Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, BiFunction<? super K, ? super T, ? extends V> valueMapper,
             Supplier<? extends M> mapFactory);
@@ -1864,6 +2075,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @TerminalOp
     public abstract DataSet toDataSet();
 
     /**
@@ -1871,6 +2083,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @TerminalOp
     public abstract DataSet toDataSet(boolean isFirstTitle);
 
     /**
@@ -1879,72 +2092,59 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @TerminalOp
     public abstract DataSet toDataSet(final List<String> columnNames);
 
     @ParallelSupported
     public abstract T reduce(T identity, BinaryOperator<T> accumulator);
 
     @ParallelSupported
+    @TerminalOp
     public abstract Optional<T> reduce(BinaryOperator<T> accumulator);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <U> U reduce(U identity, BiFunction<U, ? super T, U> accumulator, BinaryOperator<U> combiner);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, BiConsumer<? super R, ? super T> accumulator, BiConsumer<R, R> combiner);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, BiConsumer<? super R, ? super T> accumulator);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <R, A> R collect(Collector<? super T, A, R> collector);
 
+    @ParallelSupported
+    @TerminalOp
     public abstract <R, A> R collect(java.util.stream.Collector<? super T, A, R> collector);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <R, A, RR> RR collectAndThen(Collector<? super T, A, R> downstream, Function<? super R, RR> func);
 
     @ParallelSupported
+    @TerminalOp
     public abstract <R, A, RR> RR collectAndThen(java.util.stream.Collector<? super T, A, R> downstream, java.util.function.Function<? super R, RR> func);
 
     @SequentialOnly
+    @TerminalOp
     public abstract <R> R toListAndThen(Function<? super List<T>, R> func);
 
     @SequentialOnly
+    @TerminalOp
     public abstract <R> R toSetAndThen(Function<? super Set<T>, R> func);
 
-    /**
-     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements.
-     * It may cause <code>out of memory error</code> if <code>n</code> is big enough.
-     *
-     * <br />
-     *
-     * All the elements will be loaded to get the last {@code n} elements and the Stream will be closed after that, if a terminal operation is triggered.
-     *
-     * @param n
-     * @return
-     */
-    @SequentialOnly
-    public abstract Stream<T> last(int n);
-
-    /**
-     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements.
-     * It may cause <code>out of memory error</code> if <code>n</code> is big enough.
-     *
-     * <br />
-     * This method only run sequentially, even in parallel stream.
-     *
-     * @param n
-     * @return
-     */
-    @SequentialOnly
-    public abstract Stream<T> skipLast(int n);
-
     @ParallelSupported
+    @TerminalOp
     public abstract Optional<T> min(Comparator<? super T> comparator);
 
     @SuppressWarnings("rawtypes")
     @ParallelSupported
+    @TerminalOp
     public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
         final Comparator<? super T> comparator = Fn.comparingBy(keyMapper);
 
@@ -1952,10 +2152,12 @@ public abstract class Stream<T>
     }
 
     @ParallelSupported
+    @TerminalOp
     public abstract Optional<T> max(Comparator<? super T> comparator);
 
     @SuppressWarnings("rawtypes")
     @ParallelSupported
+    @TerminalOp
     public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
         final Comparator<? super T> comparator = Fn.comparingBy(keyMapper);
 
@@ -1969,28 +2171,40 @@ public abstract class Stream<T>
      * @return Optional.empty() if there is no element or count less than k, otherwise the kth largest element.
      */
     @ParallelSupported
+    @TerminalOp
     public abstract Optional<T> kthLargest(int k, Comparator<? super T> comparator);
 
     @ParallelSupported
+    @TerminalOp
     public abstract long sumInt(ToIntFunction<? super T> mapper);
 
     @ParallelSupported
+    @TerminalOp
     public abstract long sumLong(ToLongFunction<? super T> mapper);
 
     @ParallelSupported
+    @TerminalOp
     public abstract double sumDouble(ToDoubleFunction<? super T> mapper);
 
     @ParallelSupported
+    @TerminalOp
     public abstract OptionalDouble averageInt(ToIntFunction<? super T> mapper);
 
     @ParallelSupported
+    @TerminalOp
     public abstract OptionalDouble averageLong(ToLongFunction<? super T> mapper);
 
     @ParallelSupported
+    @TerminalOp
     public abstract OptionalDouble averageDouble(ToDoubleFunction<? super T> mapper);
 
     @SequentialOnly
+    @TerminalOp
     public abstract Optional<Map<Percentage, T>> percentiles(Comparator<? super T> comparator);
+
+    @SequentialOnly
+    @TerminalOp
+    public abstract boolean hasDuplicates();
 
     /**
      * <pre>
@@ -2011,6 +2225,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> combinations();
 
     /**
@@ -2028,6 +2243,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> combinations(int len);
 
     /**
@@ -2053,6 +2269,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> combinations(int len, boolean repeat);
 
     /**
@@ -2072,6 +2289,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> permutations();
 
     /**
@@ -2091,18 +2309,22 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> orderedPermutations();
 
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> orderedPermutations(Comparator<? super T> comparator);
 
     @SequentialOnly
+    @IntermediateOp
     @SafeVarargs
     public final Stream<List<T>> cartesianProduct(Collection<? extends T>... cs) {
         return cartesianProduct(Arrays.asList(cs));
     }
 
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<List<T>> cartesianProduct(Collection<? extends Collection<? extends T>> cs);
 
     /**
@@ -2116,6 +2338,7 @@ public abstract class Stream<T>
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> innerJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
 
     /**
@@ -2128,6 +2351,7 @@ public abstract class Stream<T>
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> innerJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
@@ -2141,6 +2365,7 @@ public abstract class Stream<T>
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> fullJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
 
     /**
@@ -2152,6 +2377,7 @@ public abstract class Stream<T>
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> fullJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
@@ -2165,6 +2391,7 @@ public abstract class Stream<T>
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> leftJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
 
     /**
@@ -2176,6 +2403,7 @@ public abstract class Stream<T>
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> leftJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
@@ -2189,6 +2417,7 @@ public abstract class Stream<T>
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> rightJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
 
     /**
@@ -2200,18 +2429,15 @@ public abstract class Stream<T>
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> rightJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
 
-    @SequentialOnly
-    public abstract boolean hasDuplicates();
-
     @ParallelSupported
-    public abstract Stream<T> skipNull();
-
-    @ParallelSupported
+    @IntermediateOp
     public abstract Stream<T> peekFirst(Consumer<? super T> action);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract Stream<T> peekLast(Consumer<? super T> action);
 
     /**
@@ -2223,6 +2449,7 @@ public abstract class Stream<T>
      * @see IntList#intersection(IntList)
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract Stream<T> intersection(Function<? super T, ?> mapper, Collection<?> c);
 
     /**
@@ -2234,44 +2461,49 @@ public abstract class Stream<T>
      * @see IntList#difference(IntList)
      */
     @ParallelSupported
+    @IntermediateOp
     public abstract Stream<T> difference(Function<? super T, ?> mapper, Collection<?> c);
 
     //    @SequentialOnly
     //    public abstract Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs);
-    
+
     @SafeVarargs
     @SequentialOnly
+    @IntermediateOp
     public final Stream<T> prepend(T... a) {
         return prepend(Arrays.asList(a));
     }
 
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> prepend(Collection<? extends T> c);
 
     @SafeVarargs
     @SequentialOnly
+    @IntermediateOp
     public final Stream<T> append(T... a) {
         return append(Arrays.asList(a));
     }
 
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> append(Collection<? extends T> c);
 
     //    @SequentialOnly
     //    public abstract Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs);
-
-    
 
     //    @SequentialOnly
     //    public abstract Stream<T> prependAlll(Collection<? extends Collection<? extends T>> cs);
 
     @SafeVarargs
     @SequentialOnly
+    @IntermediateOp
     public final Stream<T> appendIfEmpty(T... a) {
         return appendIfEmpty(Arrays.asList(a));
     }
 
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> appendIfEmpty(Collection<? extends T> c);
 
     //    /**
@@ -2311,6 +2543,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> queued();
 
     /**
@@ -2320,6 +2553,7 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> queued(int queueSize);
 
     /**
@@ -2329,36 +2563,46 @@ public abstract class Stream<T>
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     public abstract Stream<T> merge(final Stream<? extends T> b, final BiFunction<? super T, ? super T, Nth> nextSelector);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <T2, R> Stream<R> zipWith(final Stream<T2> b, final BiFunction<? super T, ? super T2, R> zipFunction);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <T2, T3, R> Stream<R> zipWith(final Stream<T2> b, final Stream<T3> c, final TriFunction<? super T, ? super T2, ? super T3, R> zipFunction);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <T2, R> Stream<R> zipWith(final Stream<T2> b, final T valueForNoneA, final T2 valueForNoneB,
             final BiFunction<? super T, ? super T2, R> zipFunction);
 
     @ParallelSupported
+    @IntermediateOp
     public abstract <T2, T3, R> Stream<R> zipWith(final Stream<T2> b, final Stream<T3> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
             final TriFunction<? super T, ? super T2, ? super T3, R> zipFunction);
 
     @SequentialOnly
+    @TerminalOp
     public abstract long persist(File file, Try.Function<? super T, String, IOException> toLine) throws IOException;
 
     @SequentialOnly
+    @TerminalOp
     public abstract long persist(OutputStream os, Try.Function<? super T, String, IOException> toLine) throws IOException;
 
     @SequentialOnly
+    @TerminalOp
     public abstract long persist(Writer writer, Try.Function<? super T, String, IOException> toLine) throws IOException;
 
     @SequentialOnly
+    @TerminalOp
     public abstract long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
             final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
 
     @SequentialOnly
+    @TerminalOp
     public abstract long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
             final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
 
@@ -2394,6 +2638,7 @@ public abstract class Stream<T>
      * @param action a terminal operation should be called.
      * @return
      */
+    @Beta
     public <E extends Exception> ContinuableFuture<Void> asyncRun(final Try.Consumer<? super Stream<T>, E> action) {
         checkArgNotNull(action, "action");
 
@@ -2411,6 +2656,7 @@ public abstract class Stream<T>
      * @param executor
      * @return
      */
+    @Beta
     public <E extends Exception> ContinuableFuture<Void> asyncRun(final Try.Consumer<? super Stream<T>, E> action, final Executor executor) {
         checkArgNotNull(action, "action");
         checkArgNotNull(executor, "executor");
@@ -2428,6 +2674,7 @@ public abstract class Stream<T>
      * @param action a terminal operation should be called.
      * @return
      */
+    @Beta
     public <R, E extends Exception> ContinuableFuture<R> asyncCall(final Try.Function<? super Stream<T>, R, E> action) {
         checkArgNotNull(action, "action");
 
@@ -2445,6 +2692,7 @@ public abstract class Stream<T>
      * @param executor
      * @return
      */
+    @Beta
     public <R, E extends Exception> ContinuableFuture<R> asyncCall(final Try.Function<? super Stream<T>, R, E> action, final Executor executor) {
         checkArgNotNull(action, "action");
         checkArgNotNull(executor, "executor");
@@ -2458,8 +2706,10 @@ public abstract class Stream<T>
     }
 
     @SequentialOnly
+    @Beta
+    @SuppressWarnings("rawtypes")
     @Override
-    public <R> R __(Function<? super Stream<T>, R> transfer) {
+    public <SS extends BaseStream> SS __(Function<? super Stream<T>, SS> transfer) {
         return transfer.apply(this);
     }
 

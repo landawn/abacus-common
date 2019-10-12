@@ -24,6 +24,7 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Random;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.CharList;
@@ -67,6 +68,7 @@ import com.landawn.abacus.util.function.ToCharFunction;
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  * <br />
  *
+ * @see BaseStream
  * @see Stream
  */
 public abstract class CharStream
@@ -195,7 +197,7 @@ public abstract class CharStream
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
-    public abstract <T> Stream<T> rangeMapp(final CharBiPredicate sameRange, final CharBiFunction<T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final CharBiPredicate sameRange, final CharBiFunction<T> mapper);
 
     /**
      * Merge series of adjacent elements which satisfy the given predicate using
@@ -618,8 +620,11 @@ public abstract class CharStream
 
     abstract CharIteratorEx iteratorEx();
 
+    @SequentialOnly
+    @Beta
+    @SuppressWarnings("rawtypes")
     @Override
-    public <R> R __(Function<? super CharStream, R> transfer) {
+    public <SS extends BaseStream> SS __(Function<? super CharStream, SS> transfer) {
         return transfer.apply(this);
     }
 

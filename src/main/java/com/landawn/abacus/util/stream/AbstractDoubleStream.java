@@ -141,7 +141,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapp(final DoubleBiPredicate sameRange, final DoubleBiFunction<T> mapper) {
+    public <T> Stream<T> rangeMapToObj(final DoubleBiPredicate sameRange, final DoubleBiFunction<T> mapper) {
         final DoubleIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {

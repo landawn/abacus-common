@@ -139,7 +139,7 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapp(final LongBiPredicate sameRange, final LongBiFunction<T> mapper) {
+    public <T> Stream<T> rangeMapToObj(final LongBiPredicate sameRange, final LongBiFunction<T> mapper) {
         final LongIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {

@@ -140,7 +140,7 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapp(final IntBiPredicate sameRange, final IntBiFunction<T> mapper) {
+    public <T> Stream<T> rangeMapToObj(final IntBiPredicate sameRange, final IntBiFunction<T> mapper) {
         final IntIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
