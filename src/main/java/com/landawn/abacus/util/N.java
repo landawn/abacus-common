@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -5362,7 +5363,7 @@ public final class N extends CommonUtil {
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
      */
-    public static <T> T[] remove(final T[] a, final Object element) {
+    public static <T> T[] remove(final T[] a, final T element) {
         if (isNullOrEmpty(a)) {
             return a;
         }
@@ -5383,7 +5384,7 @@ public final class N extends CommonUtil {
      * @param element the element to be removed
      * @return <tt>true</tt> if this collection changed as a result of the call
      */
-    static boolean remove(final Collection<?> c, final Object element) {
+    public static <T> boolean remove(final Collection<T> c, final T element) {
         if (isNullOrEmpty(c)) {
             return false;
         }
@@ -5643,7 +5644,7 @@ public final class N extends CommonUtil {
      * @return A new array containing the existing elements except the
      *         occurrences of the specified element.
      */
-    public static <T> T[] removeAllOccurrences(final T[] a, final Object element) {
+    public static <T> T[] removeAllOccurrences(final T[] a, final T element) {
         if (isNullOrEmpty(a)) {
             return a;
         }
@@ -5669,12 +5670,12 @@ public final class N extends CommonUtil {
      * @param element
      * @return true, if successful
      */
-    public static boolean removeAllOccurrences(Collection<?> c, final Object element) {
+    public static <T> boolean removeAllOccurrences(final Collection<T> c, final T element) {
         if (isNullOrEmpty(c)) {
             return false;
         }
 
-        return Iterables.removeAll(c, asSet(element));
+        return removeAll(c, asSet(element));
     }
 
     /**
@@ -5871,7 +5872,7 @@ public final class N extends CommonUtil {
      * @see Collection#removeAll(Collection)
      */
     @SafeVarargs
-    public static <T> T[] removeAll(final T[] a, final Object... elements) {
+    public static <T> T[] removeAll(final T[] a, final T... elements) {
         if (isNullOrEmpty(a)) {
             return a;
         } else if (isNullOrEmpty(elements)) {
@@ -5900,11 +5901,40 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     @SafeVarargs
-    public static boolean removeAll(final Collection<?> c, final Object... elements) {
+    public static <T> boolean removeAll(final Collection<T> c, final T... elements) {
         if (isNullOrEmpty(c) || isNullOrEmpty(elements)) {
             return false;
         } else {
-            return Iterables.removeAll(c, asSet(elements));
+            return removeAll(c, asSet(elements));
+        }
+    }
+
+    /**
+     * Removes the all.
+     *
+     * @param c
+     * @param objsToRemove
+     * @return true, if successful
+     */
+    public static <T> boolean removeAll(final Collection<T> c, final Collection<? extends T> objsToRemove) {
+        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToRemove)) {
+            return false;
+        }
+
+        if (c instanceof HashSet && !(objsToRemove instanceof Set)) {
+            boolean result = false;
+
+            for (Object e : objsToRemove) {
+                result |= c.remove(e);
+
+                if (c.size() == 0) {
+                    break;
+                }
+            }
+
+            return result;
+        } else {
+            return c.removeAll(objsToRemove);
         }
     }
 
@@ -7259,6 +7289,27 @@ public final class N extends CommonUtil {
             }
 
             return false;
+        }
+    }
+
+    /**
+     *
+     * @param c
+     * @param objsToKeep
+     * @return true, if successful
+     */
+    public static <T> boolean retainAll(final Collection<T> c, final Collection<? extends T> objsToKeep) {
+        if (N.isNullOrEmpty(c)) {
+            return false;
+        } else if (N.isNullOrEmpty(objsToKeep)) {
+            c.clear();
+            return true;
+        }
+
+        if (c instanceof HashSet && !(objsToKeep instanceof Set) && (c.size() > 9 || objsToKeep.size() > 9)) {
+            return c.retainAll(N.newHashSet(objsToKeep));
+        } else {
+            return c.retainAll(objsToKeep);
         }
     }
 
