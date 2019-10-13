@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 
@@ -85,7 +86,7 @@ public class Join extends AbstractCondition {
      * @param condition
      */
     protected Join(Operator operator, String joinEntity, Condition condition) {
-        this(operator, N.asList(joinEntity), condition);
+        this(operator, Array.asList(joinEntity), condition);
     }
 
     /**

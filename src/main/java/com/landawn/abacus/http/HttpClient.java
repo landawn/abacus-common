@@ -53,7 +53,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
 // TODO: Auto-generated Javadoc
 /**
  * Any header can be set into the parameter <code>settings</code>
- * 
+ *
  * <br>HttpClient is thread safe.</br>
  *
  * @author Haiyang Li
@@ -382,12 +382,12 @@ public final class HttpClient extends AbstractHttpClient {
                 } else {
                     if (resultClass != null && resultClass.equals(HttpResponse.class)) {
                         return (T) new HttpResponse(sentRequestAtMillis, System.currentTimeMillis(), code, connection.getResponseMessage(), respHeaders,
-                                IOUtil.readBytes(is), respContentFormat);
+                                IOUtil.readAllBytes(is), respContentFormat);
                     } else {
                         if (resultClass == null || resultClass.equals(String.class)) {
                             return (T) IOUtil.readString(is, respCharset);
                         } else if (byte[].class.equals(resultClass)) {
-                            return (T) IOUtil.readBytes(is);
+                            return (T) IOUtil.readAllBytes(is);
                         } else {
                             if (respContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
                                 return HTTP.kryoParser.deserialize(resultClass, is);

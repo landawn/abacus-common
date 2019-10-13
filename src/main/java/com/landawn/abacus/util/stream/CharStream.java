@@ -26,6 +26,7 @@ import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
@@ -37,6 +38,7 @@ import com.landawn.abacus.util.IndexedChar;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil;
@@ -1395,7 +1397,7 @@ public abstract class CharStream
     @SafeVarargs
     public static CharStream concat(final char[]... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorCharStream(new CharIteratorEx() {
-            private final Iterator<char[]> iter = N.asList(a).iterator();
+            private final Iterator<char[]> iter = ObjIterator.of(a);
             private CharIterator cur;
 
             @Override
@@ -1421,7 +1423,7 @@ public abstract class CharStream
     @SafeVarargs
     public static CharStream concat(final CharIterator... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorCharStream(new CharIteratorEx() {
-            private final Iterator<? extends CharIterator> iter = N.asList(a).iterator();
+            private final Iterator<? extends CharIterator> iter = ObjIterator.of(a);
             private CharIterator cur;
 
             @Override
@@ -1446,7 +1448,7 @@ public abstract class CharStream
 
     @SafeVarargs
     public static CharStream concat(final CharStream... a) {
-        return N.isNullOrEmpty(a) ? empty() : concat(N.asList(a));
+        return N.isNullOrEmpty(a) ? empty() : concat(Array.asList(a));
     }
 
     public static CharStream concat(final Collection<? extends CharStream> c) {
@@ -1600,7 +1602,7 @@ public abstract class CharStream
      * @return
      */
     public static CharStream zip(final CharStream a, final CharStream b, final CharBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1612,7 +1614,7 @@ public abstract class CharStream
      * @return
      */
     public static CharStream zip(final CharStream a, final CharStream b, final CharStream c, final CharTernaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1786,7 +1788,7 @@ public abstract class CharStream
      */
     public static CharStream zip(final CharStream a, final CharStream b, final char valueForNoneA, final char valueForNoneB,
             final CharBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1805,7 +1807,7 @@ public abstract class CharStream
     public static CharStream zip(final CharStream a, final CharStream b, final CharStream c, final char valueForNoneA, final char valueForNoneB,
             final char valueForNoneC, final CharTernaryOperator zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1967,7 +1969,7 @@ public abstract class CharStream
      * @return
      */
     public static CharStream merge(final CharStream a, final CharStream b, final CharBiFunction<Nth> nextSelector) {
-        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(N.asList(a, b)));
+        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**

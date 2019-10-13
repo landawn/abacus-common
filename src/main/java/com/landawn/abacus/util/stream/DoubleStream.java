@@ -28,6 +28,7 @@ import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.DoubleIterator;
@@ -39,6 +40,7 @@ import com.landawn.abacus.util.IndexedDouble;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.Try;
@@ -990,7 +992,7 @@ public abstract class DoubleStream
     @SafeVarargs
     public static DoubleStream concat(final double[]... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorDoubleStream(new DoubleIteratorEx() {
-            private final Iterator<double[]> iter = N.asList(a).iterator();
+            private final Iterator<double[]> iter = ObjIterator.of(a);
             private DoubleIterator cur;
 
             @Override
@@ -1016,7 +1018,7 @@ public abstract class DoubleStream
     @SafeVarargs
     public static DoubleStream concat(final DoubleIterator... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorDoubleStream(new DoubleIteratorEx() {
-            private final Iterator<? extends DoubleIterator> iter = N.asList(a).iterator();
+            private final Iterator<? extends DoubleIterator> iter = ObjIterator.of(a);
             private DoubleIterator cur;
 
             @Override
@@ -1041,7 +1043,7 @@ public abstract class DoubleStream
 
     @SafeVarargs
     public static DoubleStream concat(final DoubleStream... a) {
-        return N.isNullOrEmpty(a) ? empty() : concat(N.asList(a));
+        return N.isNullOrEmpty(a) ? empty() : concat(Array.asList(a));
     }
 
     public static DoubleStream concat(final Collection<? extends DoubleStream> c) {
@@ -1195,7 +1197,7 @@ public abstract class DoubleStream
      * @return
      */
     public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1207,7 +1209,7 @@ public abstract class DoubleStream
      * @return
      */
     public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleTernaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1383,7 +1385,7 @@ public abstract class DoubleStream
      */
     public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final double valueForNoneA, final double valueForNoneB,
             final DoubleBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1402,7 +1404,7 @@ public abstract class DoubleStream
     public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleStream c, final double valueForNoneA, final double valueForNoneB,
             final double valueForNoneC, final DoubleTernaryOperator zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1564,7 +1566,7 @@ public abstract class DoubleStream
      * @return
      */
     public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleBiFunction<Nth> nextSelector) {
-        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(N.asList(a, b)));
+        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**

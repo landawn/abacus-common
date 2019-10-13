@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,9 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.RandomAccess;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,12 +48,11 @@ import com.landawn.abacus.util.u.Holder;
  * @since 0.8
  */
 public final class Array {
-
-    /** The Constant parallelSortExecutor. */
-    static final AsyncExecutor parallelSortExecutor = new AsyncExecutor(Math.min(8, IOUtil.CPU_CORES), IOUtil.CPU_CORES, 180L, TimeUnit.SECONDS);
-
     /** The cpu cores. */
-    static volatile int CPU_CORES = IOUtil.CPU_CORES;
+    static volatile int CPU_CORES = Runtime.getRuntime().availableProcessors();
+
+    static final Executor parallelSortExecutor = new ThreadPoolExecutor(Math.min(8, CPU_CORES), CPU_CORES, 180L, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<Runnable>());
 
     /** The Constant MIN_ARRAY_SORT_GRAN. */
     static final int MIN_ARRAY_SORT_GRAN = 8192;
@@ -2484,7 +2486,7 @@ public final class Array {
 
             activeThreadNum.incrementAndGet();
 
-            parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+            parallelSortExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -2522,7 +2524,7 @@ public final class Array {
 
                     activeThreadNum.incrementAndGet();
 
-                    parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+                    parallelSortExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -2625,7 +2627,7 @@ public final class Array {
 
             activeThreadNum.incrementAndGet();
 
-            parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+            parallelSortExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -2663,7 +2665,7 @@ public final class Array {
 
                     activeThreadNum.incrementAndGet();
 
-                    parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+                    parallelSortExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -2766,7 +2768,7 @@ public final class Array {
 
             activeThreadNum.incrementAndGet();
 
-            parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+            parallelSortExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -2804,7 +2806,7 @@ public final class Array {
 
                     activeThreadNum.incrementAndGet();
 
-                    parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+                    parallelSortExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -2907,7 +2909,7 @@ public final class Array {
 
             activeThreadNum.incrementAndGet();
 
-            parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+            parallelSortExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -2945,7 +2947,7 @@ public final class Array {
 
                     activeThreadNum.incrementAndGet();
 
-                    parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+                    parallelSortExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -3048,7 +3050,7 @@ public final class Array {
 
             activeThreadNum.incrementAndGet();
 
-            parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+            parallelSortExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -3086,7 +3088,7 @@ public final class Array {
 
                     activeThreadNum.incrementAndGet();
 
-                    parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+                    parallelSortExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -3189,7 +3191,7 @@ public final class Array {
 
             activeThreadNum.incrementAndGet();
 
-            parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+            parallelSortExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -3227,7 +3229,7 @@ public final class Array {
 
                     activeThreadNum.incrementAndGet();
 
-                    parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+                    parallelSortExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -3349,7 +3351,7 @@ public final class Array {
 
             activeThreadNum.incrementAndGet();
 
-            parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+            parallelSortExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -3387,7 +3389,7 @@ public final class Array {
 
                     activeThreadNum.incrementAndGet();
 
-                    parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+                    parallelSortExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -3536,7 +3538,7 @@ public final class Array {
 
             activeThreadNum.incrementAndGet();
 
-            parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+            parallelSortExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -3574,7 +3576,7 @@ public final class Array {
 
                     activeThreadNum.incrementAndGet();
 
-                    parallelSortExecutor.execute(new Try.Runnable<RuntimeException>() {
+                    parallelSortExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -3921,7 +3923,7 @@ public final class Array {
 
     /**
      * Note: All the objects with same value will be replaced with first element with the same value.
-     *   
+     *
      *
      * @param a
      */
@@ -4006,7 +4008,7 @@ public final class Array {
      * @param <T>
      * @param c
      */
-    static <T extends Comparable<T>> void bucketSort(final List<T> c) {
+    static <T extends Comparable<? super T>> void bucketSort(final List<T> c) {
         if (N.isNullOrEmpty(c)) {
             return;
         }
@@ -4022,7 +4024,7 @@ public final class Array {
      * @param fromIndex
      * @param toIndex
      */
-    static <T extends Comparable<T>> void bucketSort(final List<T> c, final int fromIndex, final int toIndex) {
+    static <T extends Comparable<? super T>> void bucketSort(final List<T> c, final int fromIndex, final int toIndex) {
         bucketSort(c, fromIndex, toIndex, null);
     }
 
@@ -5096,7 +5098,7 @@ public final class Array {
      * @param k
      * @return
      */
-    static <T extends Comparable<T>> T kthLargest(final T[] a, int k) {
+    static <T extends Comparable<? super T>> T kthLargest(final T[] a, int k) {
         return kthLargest(a, 0, a.length, k);
     }
 
@@ -5109,7 +5111,7 @@ public final class Array {
      * @param k
      * @return
      */
-    static <T extends Comparable<T>> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k) {
+    static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k) {
         return (T) kthLargest(a, fromIndex, toIndex, k, Comparators.NATURAL_ORDER);
     }
 
@@ -5195,7 +5197,7 @@ public final class Array {
      * @param k
      * @return
      */
-    static <T extends Comparable<T>> T kthLargest(final Collection<? extends T> c, int k) {
+    static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, int k) {
         return kthLargest(c, 0, c.size(), k);
     }
 
@@ -5208,7 +5210,7 @@ public final class Array {
      * @param k
      * @return
      */
-    static <T extends Comparable<T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k) {
+    static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k) {
         return (T) kthLargest(c, fromIndex, toIndex, k, Comparators.NATURAL_ORDER);
     }
 

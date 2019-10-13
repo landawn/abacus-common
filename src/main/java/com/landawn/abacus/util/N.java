@@ -8533,7 +8533,7 @@ public final class N extends CommonUtil {
      * @param a
      * @return
      */
-    public static <T extends Comparable<T>> List<T> minAll(final T[] a) {
+    public static <T extends Comparable<? super T>> List<T> minAll(final T[] a) {
         return minAll(a, NULL_MAX_COMPARATOR);
     }
 
@@ -8578,7 +8578,7 @@ public final class N extends CommonUtil {
      * @param c
      * @return
      */
-    public static <T extends Comparable<T>> List<T> minAll(final Collection<T> c) {
+    public static <T extends Comparable<? super T>> List<T> minAll(final Collection<T> c) {
         return minAll(c, NULL_MAX_COMPARATOR);
     }
 
@@ -9305,7 +9305,7 @@ public final class N extends CommonUtil {
      * @param a
      * @return
      */
-    public static <T extends Comparable<T>> List<T> maxAll(final T[] a) {
+    public static <T extends Comparable<? super T>> List<T> maxAll(final T[] a) {
         return maxAll(a, NULL_MIN_COMPARATOR);
     }
 
@@ -9350,7 +9350,7 @@ public final class N extends CommonUtil {
      * @param c
      * @return
      */
-    public static <T extends Comparable<T>> List<T> maxAll(final Collection<T> c) {
+    public static <T extends Comparable<? super T>> List<T> maxAll(final Collection<T> c) {
         return maxAll(c, NULL_MIN_COMPARATOR);
     }
 
@@ -10211,7 +10211,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
-    public static <T extends Comparable<T>> T kthLargest(final T[] a, final int k) {
+    public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int k) {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10227,7 +10227,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
-    public static <T extends Comparable<T>> T kthLargest(final T[] a, final int from, final int to, final int k) {
+    public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int from, final int to, final int k) {
         if (isNullOrEmpty(a) || to - from < 1) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
@@ -10277,7 +10277,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
      */
-    public static <T extends Comparable<T>> T kthLargest(final Collection<? extends T> c, final int k) {
+    public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return Array.kthLargest(c, k);
@@ -10293,7 +10293,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if <code>to - from</code> is less than <code>k</code>.
      */
-    public static <T extends Comparable<T>> T kthLargest(final Collection<? extends T> c, final int from, final int to, final int k) {
+    public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int from, final int to, final int k) {
         if (isNullOrEmpty(c) || to - from < 1) {
             throw new IllegalArgumentException("The length of collection can not be null or empty");
         }
@@ -13855,7 +13855,8 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
-        final List<R> result = new ArrayList<>(toIndex - fromIndex);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final List<R> result = new ArrayList<>(len);
         Collection<? extends R> mr = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -13911,7 +13912,8 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
-        final List<R> result = new ArrayList<>(toIndex - fromIndex);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final List<R> result = new ArrayList<>(len);
         Collection<? extends R> mr = null;
 
         if (c instanceof List && c instanceof RandomAccess) {
@@ -13990,7 +13992,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final C result = supplier.apply(toIndex - fromIndex);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final C result = supplier.apply(len);
         Collection<? extends R> mr = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -14050,7 +14053,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final C result = supplier.apply(toIndex - fromIndex);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final C result = supplier.apply(len);
         Collection<? extends R> mr = null;
 
         if (c instanceof List && c instanceof RandomAccess) {
@@ -14132,7 +14136,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final C result = supplier.apply(a.length);
+        final int len = a.length > N.MAX_ARRAY_SIZE / 2 ? N.MAX_ARRAY_SIZE : a.length * 2;
+        final C result = supplier.apply(len);
 
         for (T e : a) {
             final Collection<? extends T2> c1 = func.apply(e);
@@ -14201,7 +14206,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final C result = supplier.apply(c.size());
+        final int len = c.size() > N.MAX_ARRAY_SIZE / 2 ? N.MAX_ARRAY_SIZE : c.size() * 2;
+        final C result = supplier.apply(len);
 
         for (T e : c) {
             final Collection<? extends T2> c1 = func.apply(e);
@@ -14263,7 +14269,8 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
-        final List<R> result = new ArrayList<>(toIndex - fromIndex);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final List<R> result = new ArrayList<>(len);
         R[] mr = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -14318,7 +14325,8 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
-        final List<R> result = new ArrayList<>(toIndex - fromIndex);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final List<R> result = new ArrayList<>(len);
         R[] mr = null;
 
         if (c instanceof List && c instanceof RandomAccess) {
@@ -14397,7 +14405,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final C result = supplier.apply(toIndex - fromIndex);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final C result = supplier.apply(len);
         R[] mr = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -14457,7 +14466,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final C result = supplier.apply(toIndex - fromIndex);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final C result = supplier.apply(len);
         R[] mr = null;
 
         if (c instanceof List && c instanceof RandomAccess) {
@@ -16288,7 +16298,7 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<T>> List<T> top(final T[] a, final int n) {
+    public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int n) {
         return top(a, n, NATURAL_ORDER);
     }
 
@@ -16313,7 +16323,7 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n) {
+    public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n) {
         return top(a, fromIndex, toIndex, n, NATURAL_ORDER);
     }
 
@@ -16360,7 +16370,7 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<T>> List<T> top(final Collection<? extends T> c, final int n) {
+    public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int n) {
         return top(c, n, null);
     }
 
@@ -16385,7 +16395,7 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<T>> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n) {
+    public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n) {
         return top(c, fromIndex, toIndex, n, null);
     }
 
@@ -16478,7 +16488,7 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<T>> List<T> topp(final T[] a, final int n) {
+    public static <T extends Comparable<? super T>> List<T> topp(final T[] a, final int n) {
         return topp(a, n, NATURAL_ORDER);
     }
 
@@ -16505,7 +16515,7 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<T>> List<T> topp(final T[] a, final int fromIndex, final int toIndex, final int n) {
+    public static <T extends Comparable<? super T>> List<T> topp(final T[] a, final int fromIndex, final int toIndex, final int n) {
         return topp(a, fromIndex, toIndex, n, NATURAL_ORDER);
     }
 
@@ -16584,7 +16594,7 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<T>> List<T> topp(final Collection<? extends T> c, final int n) {
+    public static <T extends Comparable<? super T>> List<T> topp(final Collection<? extends T> c, final int n) {
         return topp(c, n, null);
     }
 
@@ -16611,7 +16621,7 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<T>> List<T> topp(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n) {
+    public static <T extends Comparable<? super T>> List<T> topp(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n) {
         return topp(c, fromIndex, toIndex, n, null);
     }
 

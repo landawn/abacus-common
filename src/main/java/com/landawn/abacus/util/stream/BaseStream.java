@@ -77,6 +77,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @ParallelSupported
     @IntermediateOp
+    @Beta
     S filter(P predicate, C actionOnDroppedItem);
 
     /**
@@ -115,6 +116,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @ParallelSupported
     @IntermediateOp
+    @Beta
     S dropWhile(P predicate, C actionOnDroppedItem);
 
     /**
@@ -433,6 +435,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @ParallelSupported
     @IntermediateOp
+    @Beta
     S skip(long n, C consumer);
 
     /**
@@ -494,7 +497,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * This is a terminal operation. That's to say this stream will be closed after this operation.
-     * 
+     *
      * @param <R>
      * @param <E>
      * @param func
@@ -506,7 +509,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     /**
      * This is a terminal operation. That's to say this stream will be closed after this operation.
-     * 
+     *
      * @param <E>
      * @param action
      * @throws E

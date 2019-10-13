@@ -164,7 +164,7 @@ public class EchoServlet extends AbstractHttpServlet {
             }
 
             if (N.isNullOrEmpty(paramMap)) {
-                bytes = IOUtil.readBytes(is);
+                bytes = IOUtil.readAllBytes(is);
 
                 logger.info("Request body: " + new String(bytes, charset));
 

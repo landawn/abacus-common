@@ -1912,8 +1912,7 @@ public abstract class Collectors {
         return reducing(0, accumulator, combiner);
     }
 
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Collector<T, ?, Optional<T>> min() {
+    public static <T extends Comparable<? super T>> Collector<T, ?, Optional<T>> min() {
         return min(Fn.nullsLast());
     }
 
@@ -1969,8 +1968,7 @@ public abstract class Collectors {
         return minOrThrow(comparator, noSuchElementExceptionSupplier);
     }
 
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Collector<T, ?, Optional<T>> max() {
+    public static <T extends Comparable<? super T>> Collector<T, ?, Optional<T>> max() {
         return max(Fn.nullsFirst());
     }
 
@@ -2139,8 +2137,7 @@ public abstract class Collectors {
      * @see #maxAll(Comparator)
      * @see #maxAll(Collector)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Collector<T, ?, List<T>> maxAll() {
+    public static <T extends Comparable<? super T>> Collector<T, ?, List<T>> maxAll() {
         return maxAll(Fn.nullsFirst());
     }
 
@@ -2251,8 +2248,7 @@ public abstract class Collectors {
      * @return
      * @see Collectors#maxAll(Comparator, int, boolean)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Collector<T, ?, List<T>> maxAll(final boolean areAllLargestSame) {
+    public static <T extends Comparable<? super T>> Collector<T, ?, List<T>> maxAll(final boolean areAllLargestSame) {
         return maxAll(Integer.MAX_VALUE, areAllLargestSame);
     }
 
@@ -2264,8 +2260,7 @@ public abstract class Collectors {
      * @return
      * @see Collectors#maxAll(Comparator, int, boolean)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Collector<T, ?, List<T>> maxAll(final int atMostSize, final boolean areAllLargestSame) {
+    public static <T extends Comparable<? super T>> Collector<T, ?, List<T>> maxAll(final int atMostSize, final boolean areAllLargestSame) {
         return maxAll(Fn.nullsFirst(), atMostSize, areAllLargestSame);
     }
 
@@ -2583,8 +2578,7 @@ public abstract class Collectors {
      * @see #minAll(Comparator)
      * @see #minAll(Collector)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Collector<T, ?, List<T>> minAll() {
+    public static <T extends Comparable<? super T>> Collector<T, ?, List<T>> minAll() {
         return minAll(Fn.nullsLast());
     }
 
@@ -2625,8 +2619,7 @@ public abstract class Collectors {
      * @return
      * @see Collectors#maxAll(Comparator, int, boolean)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Collector<T, ?, List<T>> minAll(final boolean areAllSmallestSame) {
+    public static <T extends Comparable<? super T>> Collector<T, ?, List<T>> minAll(final boolean areAllSmallestSame) {
         return minAll(Integer.MAX_VALUE, areAllSmallestSame);
     }
 
@@ -2638,8 +2631,7 @@ public abstract class Collectors {
      * @return
      * @see Collectors#maxAll(Comparator, int, boolean)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Collector<T, ?, List<T>> minAll(final int atMostSize, final boolean areAllSmallestSame) {
+    public static <T extends Comparable<? super T>> Collector<T, ?, List<T>> minAll(final int atMostSize, final boolean areAllSmallestSame) {
         return minAll(Fn.nullsLast(), atMostSize, areAllSmallestSame);
     }
 
@@ -4233,7 +4225,7 @@ public abstract class Collectors {
     public static <T, A1, A2, A3, A4, R1, R2, R3, R4> Collector<T, Tuple4<A1, A2, A3, A4>, Tuple4<R1, R2, R3, R4>> combine(
             final Collector<? super T, A1, R1> collector1, final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3,
             final Collector<? super T, A4, R4> collector4) {
-        final List<Collector<? super T, ?, ?>> collectors = (List) N.asList(collector1, collector2, collector3, collector4);
+        final List<Collector<? super T, ?, ?>> collectors = (List) Array.asList(collector1, collector2, collector3, collector4);
 
         final Function<List<?>, Tuple4<A1, A2, A3, A4>> func = new Function<List<?>, Tuple4<A1, A2, A3, A4>>() {
             @Override
@@ -4250,7 +4242,7 @@ public abstract class Collectors {
             final Collector<? super T, A1, R1> collector1, final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3,
             final Collector<? super T, A4, R4> collector4, final Collector<? super T, A5, R5> collector5) {
 
-        final List<Collector<? super T, ?, ?>> collectors = (List) N.asList(collector1, collector2, collector3, collector4, collector5);
+        final List<Collector<? super T, ?, ?>> collectors = (List) Array.asList(collector1, collector2, collector3, collector4, collector5);
 
         final Function<List<?>, Tuple5<A1, A2, A3, A4, A5>> func = new Function<List<?>, Tuple5<A1, A2, A3, A4, A5>>() {
             @Override
@@ -4554,7 +4546,7 @@ public abstract class Collectors {
     public static <T, A1, A2, A3, A4, R1, R2, R3, R4> Collector<T, Tuple4<A1, A2, A3, A4>, Tuple4<R1, R2, R3, R4>> combine(
             final java.util.stream.Collector<? super T, A1, R1> collector1, final java.util.stream.Collector<? super T, A2, R2> collector2,
             final java.util.stream.Collector<? super T, A3, R3> collector3, final java.util.stream.Collector<? super T, A4, R4> collector4) {
-        final List<java.util.stream.Collector<? super T, ?, ?>> collectors = (List) N.asList(collector1, collector2, collector3, collector4);
+        final List<java.util.stream.Collector<? super T, ?, ?>> collectors = (List) Array.asList(collector1, collector2, collector3, collector4);
 
         final Function<List<?>, Tuple4<A1, A2, A3, A4>> func = new Function<List<?>, Tuple4<A1, A2, A3, A4>>() {
             @Override
@@ -4572,7 +4564,7 @@ public abstract class Collectors {
             final java.util.stream.Collector<? super T, A3, R3> collector3, final java.util.stream.Collector<? super T, A4, R4> collector4,
             final java.util.stream.Collector<? super T, A5, R5> collector5) {
 
-        final List<java.util.stream.Collector<? super T, ?, ?>> collectors = (List) N.asList(collector1, collector2, collector3, collector4, collector5);
+        final List<java.util.stream.Collector<? super T, ?, ?>> collectors = (List) Array.asList(collector1, collector2, collector3, collector4, collector5);
 
         final Function<List<?>, Tuple5<A1, A2, A3, A4, A5>> func = new Function<List<?>, Tuple5<A1, A2, A3, A4, A5>>() {
             @Override

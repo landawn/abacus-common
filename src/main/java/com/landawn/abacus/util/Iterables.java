@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +45,7 @@ import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
@@ -68,166 +70,176 @@ public final class Iterables {
     }
 
     /**
+     * Returns a read-only <code>Seq</code>.
      *
-     * @param <T>
-     * @param a
-     * @param b
+     * @param fromIndex
+     * @param toIndex
      * @return
      */
-    public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.newHashSet();
-        } else if (N.isNullOrEmpty(b)) {
-            return N.newHashSet(a);
-        }
+    public static <T> ImmutableCollection<? extends T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
-        final Set<T> result = N.newHashSet(a);
-
-        Iterables.removeAll(a, b);
-
-        return result;
-    }
-
-    /**
-     * Symmetric different set.
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? N.newHashSet() : N.newHashSet(b);
-        } else if (N.isNullOrEmpty(b)) {
-            return N.isNullOrEmpty(a) ? N.newHashSet() : N.newHashSet(a);
-        }
-
-        final Set<T> commonSet = Iterables.commonSet(a, b);
-        final Set<T> result = N.newHashSet(a);
-
-        for (T e : a) {
-            if (!commonSet.contains(e)) {
-                result.add(e);
-            }
-        }
-
-        for (T e : b) {
-            if (!commonSet.contains(e)) {
-                result.add(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
-        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-            return N.newHashSet();
-        }
-
-        return commonSet(N.asList(a, (Collection<? extends T>) b));
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
-     * @return
-     */
-    public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
         if (N.isNullOrEmpty(c)) {
-            return N.newHashSet();
-        } else if (c.size() == 1) {
-            return N.newHashSet(c.iterator().next());
+            return ImmutableList.empty();
         }
 
-        Collection<? extends T> smallest = null;
-
-        for (Collection<? extends T> e : c) {
-            if (N.isNullOrEmpty(e)) {
-                return N.newHashSet();
-            }
-
-            if (smallest == null || e.size() < smallest.size()) {
-                smallest = e;
-            }
+        if (c instanceof List) {
+            return ImmutableList.of(((List<T>) c).subList(fromIndex, toIndex));
         }
 
-        final Map<T, MutableInt> map = new HashMap<>();
-
-        for (T e : smallest) {
-            map.put(e, new MutableInt(1));
-        }
-
-        int cnt = 1;
-        MutableInt val = null;
-
-        for (Collection<? extends T> ec : c) {
-            if (ec == smallest) {
-                continue;
-            }
-
-            for (T e : ec) {
-                val = map.get(e);
-
-                if (val == null) {
-                    // do nothing.
-                } else if (val.intValue() < cnt) {
-                    // map.remove(e);
-                } else if (val.intValue() == cnt) {
-                    val.increment();
-                }
-            }
-
-            cnt++;
-        }
-
-        final Set<T> result = N.newHashSet(map.size());
-
-        for (Map.Entry<T, MutableInt> entry : map.entrySet()) {
-            if (entry.getValue().intValue() == cnt) {
-                result.add(entry.getKey());
-            }
-        }
-
-        return result;
+        return new Slice<>(c, fromIndex, toIndex);
     }
 
     /**
-     * Removes the all.
+     * Returns a read-only <code>Seq</code>.
      *
-     * @param c
-     * @param objsToRemove
-     * @return true, if successful
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
-    public static boolean removeAll(Collection<?> c, Collection<?> objsToRemove) {
-        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToRemove)) {
+    public static <T> ImmutableCollection<? extends T> slice(final T[] a, final int fromIndex, final int toIndex) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a)) {
+            return ImmutableList.empty();
+        }
+
+        return ImmutableList.of(Array.asList(a).subList(fromIndex, toIndex));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> min(final Collection<? extends T> c) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.min(c));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> min(final T[] a) {
+        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a));
+    }
+
+    public static <T> Nullable<T> min(final Collection<? extends T> c, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.min(c, cmp));
+    }
+
+    public static <T> Nullable<T> min(final T[] a, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a, cmp));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> minBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
+        return min(c, Fn.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
+        return min(a, Fn.comparingBy(keyMapper));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> max(final Collection<? extends T> c) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.max(c));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> max(final T[] a) {
+        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a));
+    }
+
+    public static <T> Nullable<T> max(final Collection<? extends T> c, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.max(c, cmp));
+    }
+
+    public static <T> Nullable<T> max(final T[] a, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a, cmp));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> maxBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
+        return max(c, Fn.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
+        return max(a, Fn.comparingBy(keyMapper));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> median(final T[] a) {
+        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a));
+    }
+
+    public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c, cmp));
+    }
+
+    public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a, cmp));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
+        return median(c, Fn.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
+        return median(a, Fn.comparingBy(keyMapper));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
+        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k));
+    }
+
+    public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));
+    }
+
+    public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k, cmp));
+    }
+
+    public static boolean containsAll(final Collection<?> c, final Collection<?> objsToFind) {
+        if (N.isNullOrEmpty(objsToFind)) {
+            return true;
+        } else if (N.isNullOrEmpty(c)) {
             return false;
         }
 
-        if (c instanceof HashSet && !(objsToRemove instanceof Set)) {
-            boolean result = false;
+        return c.containsAll(objsToFind);
+    }
 
-            for (Object e : objsToRemove) {
-                result |= c.remove(e);
-
-                if (c.size() == 0) {
-                    break;
-                }
-            }
-
-            return result;
-        } else {
-            return c.removeAll(objsToRemove);
+    public static boolean containsAll(final Collection<?> c, final Object[] objsToFind) {
+        if (N.isNullOrEmpty(objsToFind)) {
+            return true;
+        } else if (N.isNullOrEmpty(c)) {
+            return false;
         }
+
+        return c.containsAll(Array.asList(objsToFind));
+    }
+
+    public static boolean containsAny(final Collection<?> c, final Collection<?> objsToFind) {
+        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToFind)) {
+            return false;
+        }
+
+        return !N.disjoint(c, objsToFind);
+    }
+
+    /**
+     *
+     * @param a
+     * @return true, if successful
+     */
+    public static boolean containsAny(final Collection<?> c, final Object[] objsToFind) {
+        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToFind)) {
+            return false;
+        }
+
+        return !N.disjoint(c, Array.asList(objsToFind));
     }
 
     /**
@@ -291,6 +303,26 @@ public final class Iterables {
     }
 
     /**
+     *
+     * @param c
+     * @param objToFind
+     * @return
+     */
+    public static OptionalInt indexOf(final Object[] a, final Object objToFind) {
+        if (N.isNullOrEmpty(a)) {
+            return OptionalInt.empty();
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            if (N.equals(a[i], objToFind)) {
+                return OptionalInt.of(i);
+            }
+        }
+
+        return OptionalInt.empty();
+    }
+
+    /**
      * Last index of.
      *
      * @param c
@@ -345,6 +377,26 @@ public final class Iterables {
 
             return OptionalInt.empty();
         }
+    }
+
+    /**
+     *
+     * @param c
+     * @param objToFind
+     * @return
+     */
+    public static OptionalInt lastIndexOf(final Object[] a, final Object objToFind) {
+        if (N.isNullOrEmpty(a)) {
+            return OptionalInt.empty();
+        }
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (N.equals(a[i], objToFind)) {
+                return OptionalInt.of(i);
+            }
+        }
+
+        return OptionalInt.empty();
     }
 
     /**
@@ -484,6 +536,116 @@ public final class Iterables {
     }
 
     /**
+     * Find first or last index.
+     *
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
+            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(c)) {
+            return OptionalInt.empty();
+        }
+
+        final OptionalInt res = findFirstIndex(c, predicateForFirst);
+
+        return res.isPresent() ? res : findLastIndex(c, predicateForLast);
+    }
+
+    /**
+     * Find first or last index.
+     *
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final T[] a,
+            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(a)) {
+            return OptionalInt.empty();
+        }
+
+        final OptionalInt res = findFirstIndex(a, predicateForFirst);
+
+        return res.isPresent() ? res : findLastIndex(a, predicateForLast);
+    }
+
+    /**
+     * Find first and last index.
+     *
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
+            final Try.Predicate<? super T, E> predicate) throws E {
+        return findFirstAndLastIndex(c, predicate, predicate);
+    }
+
+    /**
+     * Find first and last index.
+     *
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
+            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(c)) {
+            return Pair.of(OptionalInt.empty(), OptionalInt.empty());
+        }
+
+        return Pair.of(findFirstIndex(c, predicateForFirst), findLastIndex(c, predicateForLast));
+    }
+
+    /**
+     * Find first and last index.
+     *
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Try.Predicate<? super T, E> predicate)
+            throws E {
+        return findFirstAndLastIndex(a, predicate, predicate);
+    }
+
+    /**
+     * Find first and last index.
+     *
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a,
+            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(a)) {
+            return Pair.of(OptionalInt.empty(), OptionalInt.empty());
+        }
+
+        return Pair.of(findFirstIndex(a, predicateForFirst), findLastIndex(a, predicateForLast));
+    }
+
+    /**
      *
      * @param <T>
      * @param <E>
@@ -515,7 +677,7 @@ public final class Iterables {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> Nullable<T> findFirst(final Collection<T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findFirst(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Nullable.empty();
         }
@@ -561,7 +723,7 @@ public final class Iterables {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> Nullable<T> findLast(final Collection<T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findLast(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
         return findLast(c, predicate, false);
     }
 
@@ -599,7 +761,7 @@ public final class Iterables {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Optional.empty();
         }
@@ -647,7 +809,7 @@ public final class Iterables {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
         return findLast(c, predicate, true);
     }
 
@@ -662,7 +824,8 @@ public final class Iterables {
      * @return
      * @throws E the e
      */
-    private static <T, R, E extends Exception> R findLast(final Collection<T> c, Try.Predicate<? super T, E> predicate, boolean isForNonNull) throws E {
+    private static <T, R, E extends Exception> R findLast(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate, boolean isForNonNull)
+            throws E {
         if (N.isNullOrEmpty(c)) {
             return (R) (isForNonNull ? Optional.empty() : Nullable.empty());
         }
@@ -719,6 +882,1163 @@ public final class Iterables {
     }
 
     /**
+     * Find first or last.
+     *
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final Collection<? extends T> c,
+            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(c)) {
+            return Nullable.<T> empty();
+        }
+
+        final Nullable<T> res = findFirst(c, predicateForFirst);
+
+        return res.isPresent() ? res : findLast(c, predicateForLast);
+    }
+
+    /**
+     * Find first or last.
+     *
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final T[] a, final Try.Predicate<? super T, E> predicateForFirst,
+            final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(a)) {
+            return Nullable.<T> empty();
+        }
+
+        final Nullable<T> res = findFirst(a, predicateForFirst);
+
+        return res.isPresent() ? res : findLast(a, predicateForLast);
+    }
+
+    /**
+     * Find first and last.
+     *
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
+            final Try.Predicate<? super T, E> predicate) throws E {
+        return findFirstAndLast(c, predicate, predicate);
+    }
+
+    /**
+     * Find first and last.
+     *
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
+            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(c)) {
+            return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
+        }
+
+        return Pair.of(findFirst(c, predicateForFirst), findLast(c, predicateForLast));
+    }
+
+    /**
+     * Find first and last.
+     *
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+        return findFirstAndLast(a, predicate, predicate);
+    }
+
+    /**
+     * Find first and last.
+     *
+     * @param <E>
+     * @param <E2>
+     * @param predicateForFirst
+     * @param predicateForLast
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a,
+            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(a)) {
+            return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
+        }
+
+        return Pair.of(findFirst(a, predicateForFirst), findLast(a, predicateForLast));
+    }
+
+    /**
+     * Return at most first <code>n</code> elements.
+     *
+     * @param n
+     * @return
+     */
+    public static <T> List<T> first(final Collection<? extends T> c, final int n) {
+        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (N.isNullOrEmpty(c) || n == 0) {
+            return new ArrayList<>();
+        } else if (c.size() <= n) {
+            return new ArrayList<>(c);
+        } else if (c instanceof List) {
+            return new ArrayList<>(((List<T>) c).subList(0, n));
+        } else {
+            final List<T> result = new ArrayList<>(N.min(n, c.size()));
+            int cnt = 0;
+
+            for (T e : c) {
+                result.add(e);
+
+                if (++cnt == n) {
+                    break;
+                }
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     * Return at most last <code>n</code> elements.
+     *
+     * @param n
+     * @return
+     */
+    public static <T> List<T> last(final Collection<? extends T> c, final int n) {
+        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (N.isNullOrEmpty(c) || n == 0) {
+            return new ArrayList<>();
+        } else if (c.size() <= n) {
+            return new ArrayList<>(c);
+        } else if (c instanceof List) {
+            return new ArrayList<>(((List<T>) c).subList(c.size() - n, c.size()));
+        } else {
+            final List<T> result = new ArrayList<>(N.min(n, c.size()));
+            final Iterator<? extends T> iter = c.iterator();
+            int offset = c.size() - n;
+
+            while (offset-- > 0) {
+                iter.next();
+            }
+
+            while (iter.hasNext()) {
+                result.add(iter.next());
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        if (N.isNullOrEmpty(c)) {
+            return true;
+        }
+
+        for (T e : c) {
+            if (filter.test(e) == false) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    public static <T, E extends Exception> boolean allMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return true;
+        }
+
+        for (T e : a) {
+            if (filter.test(e) == false) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        if (N.isNullOrEmpty(c)) {
+            return false;
+        }
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return false;
+        }
+
+        for (T e : a) {
+            if (filter.test(e)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        if (N.isNullOrEmpty(c)) {
+            return true;
+        }
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return true;
+        }
+
+        for (T e : a) {
+            if (filter.test(e)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param atLeast
+     * @param atMost
+     * @param filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    public static <T, E extends Exception> boolean nMatch(final Collection<? extends T> c, final int atLeast, final int atMost,
+            final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNegative(atLeast, "atLeast");
+        N.checkArgNotNegative(atMost, "atMost");
+        N.checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+
+        long cnt = 0;
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                if (++cnt > atMost) {
+                    return false;
+                }
+            }
+        }
+
+        return cnt >= atLeast && cnt <= atMost;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param atLeast
+     * @param atMost
+     * @param filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNegative(atLeast, "atLeast");
+        N.checkArgNotNegative(atMost, "atMost");
+        N.checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+
+        long cnt = 0;
+
+        for (T e : a) {
+            if (filter.test(e)) {
+                if (++cnt > atMost) {
+                    return false;
+                }
+            }
+        }
+
+        return cnt >= atLeast && cnt <= atMost;
+    }
+
+    /**
+     * For each pair.
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Try.BiConsumer<? super T, ? super T, E> action) throws E {
+        forEachPair(c, action, 1);
+    }
+
+    /**
+     * For each pair.
+     *
+     * @param <E>
+     * @param action
+     * @param increment
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Try.BiConsumer<? super T, ? super T, E> action,
+            final int increment) throws E {
+        N.checkArgNotNull(action);
+        final int windowSize = 2;
+        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+
+        if (N.isNullOrEmpty(c)) {
+            return;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        Iterators.forEachPair(iter, action, increment);
+    }
+
+    public static <T, E extends Exception> void forEachPair(final T[] a, final Try.BiConsumer<? super T, ? super T, E> action) throws E {
+        forEachPair(a, action, 1);
+    }
+
+    public static <T, E extends Exception> void forEachPair(final T[] a, final Try.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
+        N.checkArgNotNull(action);
+        final int windowSize = 2;
+        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        final Iterator<? extends T> iter = ObjIterator.of(a);
+        Iterators.forEachPair(iter, action, increment);
+    }
+
+    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c, final Try.TriConsumer<? super T, ? super T, ? super T, E> action)
+            throws E {
+        forEachTriple(c, action, 1);
+    }
+
+    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c, final Try.TriConsumer<? super T, ? super T, ? super T, E> action,
+            final int increment) throws E {
+        N.checkArgNotNull(action);
+        final int windowSize = 3;
+        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+
+        if (N.isNullOrEmpty(c)) {
+            return;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        Iterators.forEachTriple(iter, action, increment);
+    }
+
+    public static <T, E extends Exception> void forEachTriple(final T[] a, final Try.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+        forEachTriple(a, action, 1);
+    }
+
+    public static <T, E extends Exception> void forEachTriple(final T[] a, final Try.TriConsumer<? super T, ? super T, ? super T, E> action,
+            final int increment) throws E {
+        N.checkArgNotNull(action);
+        final int windowSize = 3;
+        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        final Iterator<? extends T> iter = ObjIterator.of(a);
+        Iterators.forEachTriple(iter, action, increment);
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> takeWhile(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter);
+
+        final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
+
+        if (N.isNullOrEmpty(c)) {
+            return result;
+        }
+
+        for (T e : c) {
+            if (filter.test(e)) {
+                result.add(e);
+            } else {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> takeWhile(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter);
+
+        final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
+
+        if (N.isNullOrEmpty(a)) {
+            return result;
+        }
+
+        for (T e : a) {
+            if (filter.test(e)) {
+                result.add(e);
+            } else {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Take while inclusive.
+     *
+     * @param <E>
+     * @param filter
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> takeWhileInclusive(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter);
+
+        final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
+
+        if (N.isNullOrEmpty(c)) {
+            return result;
+        }
+
+        for (T e : c) {
+            result.add(e);
+
+            if (filter.test(e) == false) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Take while inclusive.
+     *
+     * @param <E>
+     * @param filter
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> takeWhileInclusive(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter);
+
+        final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
+
+        if (N.isNullOrEmpty(a)) {
+            return result;
+        }
+
+        for (T e : a) {
+            result.add(e);
+
+            if (filter.test(e) == false) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> dropWhile(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter);
+
+        final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
+
+        if (N.isNullOrEmpty(c)) {
+            return result;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            if (filter.test(e) == false) {
+                result.add(e);
+                break;
+            }
+        }
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> dropWhile(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter);
+
+        final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
+
+        if (N.isNullOrEmpty(a)) {
+            return result;
+        }
+
+        final int len = a.length;
+        int idx = 0;
+
+        while (idx < len && filter.test(a[idx]) == true) {
+            idx++;
+        }
+
+        while (idx < len) {
+            result.add(a[idx++]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> skipUntil(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter);
+
+        final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
+
+        if (N.isNullOrEmpty(c)) {
+            return result;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            if (filter.test(e)) {
+                result.add(e);
+                break;
+            }
+        }
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param filter
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> List<T> skipUntil(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter);
+
+        final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
+
+        if (N.isNullOrEmpty(a)) {
+            return result;
+        }
+
+        final int len = a.length;
+        int idx = 0;
+
+        while (idx < len && filter.test(a[idx]) == false) {
+            idx++;
+        }
+
+        while (idx < len) {
+            result.add(a[idx++]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
+        if (N.isNullOrEmpty(a)) {
+            return N.newHashSet();
+        } else if (N.isNullOrEmpty(b)) {
+            return N.newHashSet(a);
+        }
+
+        final Set<T> result = N.newHashSet(a);
+
+        Iterables.removeAll(a, b);
+
+        return result;
+    }
+
+    /**
+     * Symmetric different set.
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(b) ? N.<T> newHashSet() : N.<T> newHashSet(b);
+        } else if (N.isNullOrEmpty(b)) {
+            return N.isNullOrEmpty(a) ? N.<T> newHashSet() : N.<T> newHashSet(a);
+        }
+
+        final Set<T> commonSet = Iterables.commonSet(a, b);
+        final Set<T> result = N.newHashSet(a);
+
+        for (T e : a) {
+            if (!commonSet.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        for (T e : b) {
+            if (!commonSet.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
+        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+            return N.newHashSet();
+        }
+
+        return commonSet(Array.asList(a, (Collection<? extends T>) b));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
+        if (N.isNullOrEmpty(c)) {
+            return N.newHashSet();
+        } else if (c.size() == 1) {
+            return N.newHashSet(c.iterator().next());
+        }
+
+        Collection<? extends T> smallest = null;
+
+        for (Collection<? extends T> e : c) {
+            if (N.isNullOrEmpty(e)) {
+                return N.newHashSet();
+            }
+
+            if (smallest == null || e.size() < smallest.size()) {
+                smallest = e;
+            }
+        }
+
+        final Map<T, MutableInt> map = new HashMap<>();
+
+        for (T e : smallest) {
+            map.put(e, new MutableInt(1));
+        }
+
+        int cnt = 1;
+        MutableInt val = null;
+
+        for (Collection<? extends T> ec : c) {
+            if (ec == smallest) {
+                continue;
+            }
+
+            for (T e : ec) {
+                val = map.get(e);
+
+                if (val == null) {
+                    // do nothing.
+                } else if (val.intValue() < cnt) {
+                    // map.remove(e);
+                } else if (val.intValue() == cnt) {
+                    val.increment();
+                }
+            }
+
+            cnt++;
+        }
+
+        final Set<T> result = N.newHashSet(map.size());
+
+        for (Map.Entry<T, MutableInt> entry : map.entrySet()) {
+            if (entry.getValue().intValue() == cnt) {
+                result.add(entry.getKey());
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
+            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+        final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
+
+        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+            return result;
+        }
+
+        final ListMultimap<Object, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+
+        for (T left : a) {
+            final List<U> rights = rightKeyMap.get(leftKeyMapper.apply(left));
+
+            if (N.notNullOrEmpty(rights)) {
+                for (U right : rights) {
+                    result.add(Pair.of(left, right));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <E>
+     * @param b
+     * @param predicate
+     * @return
+     * @throws E the e
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    public static <T, U, E extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
+
+        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+            return result;
+        }
+
+        for (T left : a) {
+            for (U right : b) {
+                if (predicate.test(left, right)) {
+                    result.add(Pair.of(left, right));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
+            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+        final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
+
+        if (N.isNullOrEmpty(a)) {
+            for (T left : a) {
+                result.add(Pair.of(left, (U) null));
+            }
+        } else if (N.isNullOrEmpty(b)) {
+            for (U right : b) {
+                result.add(Pair.of((T) null, right));
+            }
+        } else {
+            final ListMultimap<Object, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+            final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+            for (T left : a) {
+                final List<U> rights = rightKeyMap.get(leftKeyMapper.apply(left));
+
+                if (N.notNullOrEmpty(rights)) {
+                    for (U right : rights) {
+                        result.add(Pair.of(left, right));
+                        joinedRights.put(right, right);
+                    }
+                } else {
+                    result.add(Pair.of(left, (U) null));
+                }
+            }
+
+            for (U right : b) {
+                if (joinedRights.containsKey(right) == false) {
+                    result.add(Pair.of((T) null, right));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <E>
+     * @param b
+     * @param predicate
+     * @return
+     * @throws E the e
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    public static <T, U, E extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
+
+        if (N.isNullOrEmpty(a)) {
+            for (T left : a) {
+                result.add(Pair.of(left, (U) null));
+            }
+        } else if (N.isNullOrEmpty(b)) {
+            for (U right : b) {
+                result.add(Pair.of((T) null, right));
+            }
+        } else {
+            final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+            for (T left : a) {
+                boolean joined = false;
+
+                for (U right : b) {
+                    if (predicate.test(left, right)) {
+                        result.add(Pair.of(left, right));
+                        joinedRights.put(right, right);
+                        joined = true;
+                    }
+                }
+
+                if (joined == false) {
+                    result.add(Pair.of(left, (U) null));
+                }
+            }
+
+            for (U right : b) {
+                if (joinedRights.containsKey(right) == false) {
+                    result.add(Pair.of((T) null, right));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
+            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+        final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
+
+        if (N.isNullOrEmpty(a)) {
+            return result;
+        } else if (N.isNullOrEmpty(b)) {
+            for (T left : a) {
+                result.add(Pair.of(left, (U) null));
+            }
+        } else {
+            final ListMultimap<Object, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+
+            for (T left : a) {
+                final List<U> rights = rightKeyMap.get(leftKeyMapper.apply(left));
+
+                if (N.notNullOrEmpty(rights)) {
+                    for (U right : rights) {
+                        result.add(Pair.of(left, right));
+                    }
+                } else {
+                    result.add(Pair.of(left, (U) null));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param predicate
+     * @return
+     * @throws E the e
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    public static <T, U, E extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
+
+        if (N.isNullOrEmpty(a)) {
+            return result;
+        } else if (N.isNullOrEmpty(b)) {
+            for (T left : a) {
+                result.add(Pair.of(left, (U) null));
+            }
+        } else {
+            for (T left : a) {
+                boolean joined = false;
+
+                for (U right : b) {
+                    if (predicate.test(left, right)) {
+                        result.add(Pair.of(left, right));
+                        joined = true;
+                    }
+                }
+
+                if (joined == false) {
+                    result.add(Pair.of(left, (U) null));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
+            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+        final List<Pair<T, U>> result = new ArrayList<>(N.size(b));
+
+        if (N.isNullOrEmpty(b)) {
+            return result;
+        } else if (N.isNullOrEmpty(a)) {
+            for (U right : b) {
+                result.add(Pair.of((T) null, right));
+            }
+        } else {
+            final ListMultimap<Object, T> leftKeyMap = ListMultimap.from(a, leftKeyMapper);
+
+            for (U right : b) {
+                final List<T> lefts = leftKeyMap.get(rightKeyMapper.apply(right));
+
+                if (N.notNullOrEmpty(lefts)) {
+                    for (T left : lefts) {
+                        result.add(Pair.of(left, right));
+                    }
+                } else {
+                    result.add(Pair.of((T) null, right));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param predicate
+     * @return
+     * @throws E the e
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    public static <T, U, E extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        final List<Pair<T, U>> result = new ArrayList<>(N.size(b));
+
+        if (N.isNullOrEmpty(b)) {
+            return result;
+        } else if (N.isNullOrEmpty(a)) {
+            for (U right : b) {
+                result.add(Pair.of((T) null, right));
+            }
+        } else {
+            for (U right : b) {
+                boolean joined = false;
+
+                for (T left : a) {
+                    if (predicate.test(left, right)) {
+                        result.add(Pair.of(left, right));
+                        joined = true;
+                    }
+                }
+
+                if (joined == false) {
+                    result.add(Pair.of((T) null, right));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
      *
      * @param <T>
      * @param c
@@ -744,20 +2064,20 @@ public final class Iterables {
     /**
      * Note: copy from Google Guava under Apache License v2.
      * <br />
-     * 
+     *
      * Returns the set of all possible subsets of {@code set}. For example,
      * {@code powerSet(ImmutableSet.of(1, 2))} returns the set {@code {{},
      * {1}, {2}, {1, 2}}}.
-     * 
+     *
      * <p>Elements appear in these subsets in the same iteration order as they
      * appeared in the input set. The order in which these subsets appear in the
      * outer set is undefined. Note that the power set of the empty set is not the
      * empty set, but a one-element set containing the empty set.
-     * 
+     *
      * <p>The returned set and its constituent sets use {@code equals} to decide
      * whether two elements are identical, even if the input set uses a different
      * concept of equivalence.
-     * 
+     *
      * <p><i>Performance notes:</i> while the power set of a set with size {@code
      * n} is of size {@code 2^n}, its memory usage is only {@code O(n)}. When the
      * power set is constructed, the input set is merely copied. Only as the
@@ -780,17 +2100,17 @@ public final class Iterables {
     /**
      * Note: copy from Google Guava under Apache License v2.
      * <br />
-     * 
+     *
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Collection}.
-     * 
+     *
      * <p><i>Notes:</i> This is an implementation of the Plain Changes algorithm
      * for permutations generation, described in Knuth's "The Art of Computer
      * Programming", Volume 4, Chapter 7, Section 7.2.1.2.
-     * 
+     *
      * <p>If the input list contains equal elements, some of the generated
      * permutations will be equal.
-     * 
+     *
      * <p>An empty collection has only one permutation, which is an empty list.
      *
      * @param <E>
@@ -801,29 +2121,29 @@ public final class Iterables {
      *     null elements.
      */
     public static <E> Collection<List<E>> permutations(Collection<E> elements) {
-        return new PermutationCollection<E>(elements);
+        return new PermutationCollection<>(elements);
     }
 
     /**
      * Note: copy from Google Guava under Apache License v2.
      * <br />
-     * 
+     *
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Iterable}.
-     * 
+     *
      * <p><i>Notes:</i> This is an implementation of the algorithm for
      * Lexicographical Permutations Generation, described in Knuth's "The Art of
      * Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2. The
      * iteration order follows the lexicographical order. This means that
      * the first permutation will be in ascending order, and the last will be in
      * descending order.
-     * 
+     *
      * <p>Duplicate elements are considered equal. For example, the list [1, 1]
      * will have only one permutation, instead of two. This is why the elements
      * have to implement {@link Comparable}.
-     * 
+     *
      * <p>An empty iterable has only one permutation, which is an empty list.
-     * 
+     *
      * <p>This method is equivalent to
      * {@code Collections2.orderedPermutations(list, Ordering.natural())}.
      *
@@ -841,13 +2161,13 @@ public final class Iterables {
     /**
      * Note: copy from Google Guava under Apache License v2.
      * <br />
-     * 
+     *
      * Returns a {@link Collection} of all the permutations of the specified
      * {@link Iterable} using the specified {@link Comparator} for establishing
      * the lexicographical ordering.
-     * 
+     *
      * <p>Examples: <pre>   {@code
-     * 
+     *
      *   for (List<String> perm : orderedPermutations(asList("b", "c", "a"))) {
      *     println(perm);
      *   }
@@ -857,7 +2177,7 @@ public final class Iterables {
      *   // -> ["b", "c", "a"]
      *   // -> ["c", "a", "b"]
      *   // -> ["c", "b", "a"]
-     * 
+     *
      *   for (List<Integer> perm : orderedPermutations(asList(1, 2, 2, 1))) {
      *     println(perm);
      *   }
@@ -867,17 +2187,17 @@ public final class Iterables {
      *   // -> [2, 1, 1, 2]
      *   // -> [2, 1, 2, 1]
      *   // -> [2, 2, 1, 1]}</pre>
-     * 
+     *
      * <p><i>Notes:</i> This is an implementation of the algorithm for
      * Lexicographical Permutations Generation, described in Knuth's "The Art of
      * Computer Programming", Volume 4, Chapter 7, Section 7.2.1.2. The
      * iteration order follows the lexicographical order. This means that
      * the first permutation will be in ascending order, and the last will be in
      * descending order.
-     * 
+     *
      * <p>Elements that compare equal are considered equal and no new permutations
      * are created by swapping them.
-     * 
+     *
      * <p>An empty iterable has only one permutation, which is an empty list.
      *
      * @param <E>
@@ -889,24 +2209,24 @@ public final class Iterables {
      *     null elements, or if the specified comparator is null.
      */
     public static <E> Collection<List<E>> orderedPermutations(Collection<E> elements, Comparator<? super E> comparator) {
-        return new OrderedPermutationCollection<E>(elements, comparator);
+        return new OrderedPermutationCollection<>(elements, comparator);
     }
 
     /**
      * Note: copy from Google Guava under Apache License v2.
      * <br />
-     * 
+     *
      * Returns every possible list that can be formed by choosing one element
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
      * product</a>" of the lists. For example: <pre>   {@code
-     * 
+     *
      *   Lists.cartesianProduct(ImmutableList.of(
      *       ImmutableList.of(1, 2),
      *       ImmutableList.of("A", "B", "C")))}</pre>
-     * 
+     *
      * <p>returns a list containing six lists in the following order:
-     * 
+     *
      * <ul>
      * <li>{@code ImmutableList.of(1, "A")}
      * <li>{@code ImmutableList.of(1, "B")}
@@ -915,11 +2235,11 @@ public final class Iterables {
      * <li>{@code ImmutableList.of(2, "B")}
      * <li>{@code ImmutableList.of(2, "C")}
      * </ul>
-     * 
+     *
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
      * <pre>   {@code
-     * 
+     *
      *   for (B b0 : lists.get(0)) {
      *     for (B b1 : lists.get(1)) {
      *       ...
@@ -927,12 +2247,12 @@ public final class Iterables {
      *       // operate on tuple
      *     }
      *   }}</pre>
-     * 
+     *
      * <p>Note that if any input list is empty, the Cartesian product will also be
      * empty. If no lists at all are provided (an empty list), the resulting
      * Cartesian product has one element, an empty list (counter-intuitive, but
      * mathematically consistent).
-     * 
+     *
      * <p><i>Performance notes:</i> while the cartesian product of lists of size
      * {@code m, n, p} is a list of size {@code m x n x p}, its actual memory
      * consumption is much smaller. When the cartesian product is constructed, the
@@ -959,18 +2279,18 @@ public final class Iterables {
     /**
      * Note: copy from Google Guava under Apache License v2.
      * <br />
-     * 
+     *
      * Returns every possible list that can be formed by choosing one element
      * from each of the given lists in order; the "n-ary
      * <a href="http://en.wikipedia.org/wiki/Cartesian_product">Cartesian
      * product</a>" of the lists. For example: <pre>   {@code
-     * 
+     *
      *   Lists.cartesianProduct(ImmutableList.of(
      *       ImmutableList.of(1, 2),
      *       ImmutableList.of("A", "B", "C")))}</pre>
-     * 
+     *
      * <p>returns a list containing six lists in the following order:
-     * 
+     *
      * <ul>
      * <li>{@code ImmutableList.of(1, "A")}
      * <li>{@code ImmutableList.of(1, "B")}
@@ -979,11 +2299,11 @@ public final class Iterables {
      * <li>{@code ImmutableList.of(2, "B")}
      * <li>{@code ImmutableList.of(2, "C")}
      * </ul>
-     * 
+     *
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
      * <pre>   {@code
-     * 
+     *
      *   for (B b0 : lists.get(0)) {
      *     for (B b1 : lists.get(1)) {
      *       ...
@@ -991,12 +2311,12 @@ public final class Iterables {
      *       // operate on tuple
      *     }
      *   }}</pre>
-     * 
+     *
      * <p>Note that if any input list is empty, the Cartesian product will also be
      * empty. If no lists at all are provided (an empty list), the resulting
      * Cartesian product has one element, an empty list (counter-intuitive, but
      * mathematically consistent).
-     * 
+     *
      * <p><i>Performance notes:</i> while the cartesian product of lists of size
      * {@code m, n, p} is a list of size {@code m x n x p}, its actual memory
      * consumption is much smaller. When the cartesian product is constructed, the
@@ -1349,7 +2669,7 @@ public final class Iterables {
          * @param comparator
          */
         OrderedPermutationCollection(Collection<E> input, Comparator<? super E> comparator) {
-            this.inputList = new ArrayList<E>(input);
+            this.inputList = new ArrayList<>(input);
             N.sort(inputList, comparator);
             this.comparator = comparator;
             this.size = calculateSize(inputList, comparator);
@@ -1668,7 +2988,7 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, long offset, long count,
             final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
-        parse(N.asList(iter), offset, count, 0, processThreadNum, queueSize, elementParser, onComplete);
+        parse(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementParser, onComplete);
     }
 
     /**
@@ -1893,6 +3213,35 @@ public final class Iterables {
     }
 
     /**
+     * Removes the all.
+     *
+     * @param c
+     * @param objsToRemove
+     * @return true, if successful
+     */
+    public static boolean removeAll(Collection<?> c, Collection<?> objsToRemove) {
+        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToRemove)) {
+            return false;
+        }
+
+        if (c instanceof HashSet && !(objsToRemove instanceof Set)) {
+            boolean result = false;
+
+            for (Object e : objsToRemove) {
+                result |= c.remove(e);
+
+                if (c.size() == 0) {
+                    break;
+                }
+            }
+
+            return result;
+        } else {
+            return c.removeAll(objsToRemove);
+        }
+    }
+
+    /**
      * <pre>
      * <code>
      * final int[] a = Array.rangeClosed(1, 7);
@@ -2045,5 +3394,174 @@ public final class Iterables {
         };
 
         return Stream.of(iter);
+    }
+
+    /**
+     * The Class Slice.
+     *
+     * @param <T>
+     */
+    static final class Slice<T> extends ImmutableCollection<T> {
+
+        /** The from index. */
+        private final int fromIndex;
+
+        /** The to index. */
+        private final int toIndex;
+
+        /**
+         * Instantiates a new sub collection.
+         *
+         * @param a
+         * @param fromIndex
+         * @param toIndex
+         */
+        Slice(final T[] a, final int fromIndex, final int toIndex) {
+            this(Array.asList(a), fromIndex, toIndex);
+        }
+
+        /**
+         * Instantiates a new sub collection.
+         *
+         * @param c
+         * @param fromIndex
+         * @param toIndex
+         */
+        Slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+            super(c);
+            this.fromIndex = fromIndex;
+            this.toIndex = toIndex;
+        }
+
+        /**
+         *
+         * @param o
+         * @return true, if successful
+         */
+        @Override
+        public boolean contains(Object o) {
+            final Iterator<T> iter = this.iterator();
+
+            while (iter.hasNext()) {
+                if (N.equals(iter.next(), o)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         *
+         * @param c
+         * @return true, if successful
+         */
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            for (Object e : c) {
+                if (contains(e) == false) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Checks if is empty.
+         *
+         * @return true, if is empty
+         */
+        @Override
+        public boolean isEmpty() {
+            return size() == 0;
+        }
+
+        /**
+         *
+         * @return
+         */
+        @Override
+        public int size() {
+            return toIndex - fromIndex;
+        }
+
+        /**
+         *
+         * @return
+         */
+        @Override
+        public Iterator<T> iterator() {
+            final Iterator<T> iter = coll == null ? ObjIterator.<T> empty() : coll.iterator();
+
+            if (fromIndex > 0) {
+                int offset = 0;
+
+                while (offset++ < fromIndex) {
+                    iter.next();
+                }
+            }
+
+            return new Iterator<T>() {
+                private int cursor = fromIndex;
+
+                @Override
+                public boolean hasNext() {
+                    return cursor < toIndex;
+                }
+
+                @Override
+                public T next() {
+                    if (cursor >= toIndex) {
+                        throw new NoSuchElementException();
+                    }
+
+                    cursor++;
+                    return iter.next();
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+            };
+        }
+
+        /**
+         *
+         * @return
+         */
+        @Override
+        public Object[] toArray() {
+            final Iterator<T> iter = this.iterator();
+            final Object[] a = new Object[size()];
+
+            for (int i = 0, len = a.length; i < len; i++) {
+                a[i] = iter.next();
+            }
+
+            return a;
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param a
+         * @return
+         */
+        @Override
+        public <A> A[] toArray(A[] a) {
+            if (a.length < size()) {
+                a = N.copyOf(a, size());
+            }
+
+            final Iterator<T> iter = this.iterator();
+
+            for (int i = 0, len = a.length; i < len; i++) {
+                a[i] = (A) iter.next();
+            }
+
+            return a;
+        }
     }
 }

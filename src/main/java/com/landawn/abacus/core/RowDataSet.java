@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9886,7 +9886,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     //    @SuppressWarnings("rawtypes")
     //    @Override
-    //    public <T extends Comparable<T>> Map<String, T> percentiles(final String columnName) {
+    //    public <T extends Comparable<? super T>> Map<String, T> percentiles(final String columnName) {
     //        if (size() == 0) {
     //            throw new AbacusException("The size of dataset is 0");
     //        }
@@ -9939,7 +9939,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     //    @SuppressWarnings("rawtypes")
     //    @Override
-    //    public <T extends Comparable<T>> Map<String, T> percentiles(final String columnName) {
+    //    public <T extends Comparable<? super T>> Map<String, T> percentiles(final String columnName) {
     //        if (size() == 0) {
     //            throw new AbacusException("The size of dataset is 0");
     //        }
@@ -10506,7 +10506,7 @@ public class RowDataSet implements DataSet, Cloneable {
     //        }
     //
     //        return (T) _properties.remove(propName);
-    //    } 
+    //    }
 
     /**
      *
@@ -10544,7 +10544,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         return result;
-    };
+    }
 
     //    @Override
     //    public DataSetBuilder builder() {

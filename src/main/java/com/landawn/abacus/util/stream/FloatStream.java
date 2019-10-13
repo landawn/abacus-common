@@ -27,6 +27,7 @@ import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.FloatIterator;
@@ -38,6 +39,7 @@ import com.landawn.abacus.util.IndexedFloat;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.Try;
@@ -888,7 +890,7 @@ public abstract class FloatStream
     @SafeVarargs
     public static FloatStream concat(final float[]... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorFloatStream(new FloatIteratorEx() {
-            private final Iterator<float[]> iter = N.asList(a).iterator();
+            private final Iterator<float[]> iter = ObjIterator.of(a);
             private FloatIterator cur;
 
             @Override
@@ -914,7 +916,7 @@ public abstract class FloatStream
     @SafeVarargs
     public static FloatStream concat(final FloatIterator... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorFloatStream(new FloatIteratorEx() {
-            private final Iterator<? extends FloatIterator> iter = N.asList(a).iterator();
+            private final Iterator<? extends FloatIterator> iter = ObjIterator.of(a);
             private FloatIterator cur;
 
             @Override
@@ -939,7 +941,7 @@ public abstract class FloatStream
 
     @SafeVarargs
     public static FloatStream concat(final FloatStream... a) {
-        return N.isNullOrEmpty(a) ? empty() : concat(N.asList(a));
+        return N.isNullOrEmpty(a) ? empty() : concat(Array.asList(a));
     }
 
     public static FloatStream concat(final Collection<? extends FloatStream> c) {
@@ -1093,7 +1095,7 @@ public abstract class FloatStream
      * @return
      */
     public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1105,7 +1107,7 @@ public abstract class FloatStream
      * @return
      */
     public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatStream c, final FloatTernaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1280,7 +1282,7 @@ public abstract class FloatStream
      */
     public static FloatStream zip(final FloatStream a, final FloatStream b, final float valueForNoneA, final float valueForNoneB,
             final FloatBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1299,7 +1301,7 @@ public abstract class FloatStream
     public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatStream c, final float valueForNoneA, final float valueForNoneB,
             final float valueForNoneC, final FloatTernaryOperator zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1461,7 +1463,7 @@ public abstract class FloatStream
      * @return
      */
     public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<Nth> nextSelector) {
-        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(N.asList(a, b)));
+        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**

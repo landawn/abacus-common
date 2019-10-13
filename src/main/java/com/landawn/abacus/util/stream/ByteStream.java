@@ -26,6 +26,7 @@ import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
@@ -37,6 +38,7 @@ import com.landawn.abacus.util.IndexedByte;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.Try;
@@ -1119,7 +1121,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @SafeVarargs
     public static ByteStream concat(final byte[]... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorByteStream(new ByteIteratorEx() {
-            private final Iterator<byte[]> iter = N.asList(a).iterator();
+            private final Iterator<byte[]> iter = ObjIterator.of(a);;
             private ByteIterator cur;
 
             @Override
@@ -1145,7 +1147,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @SafeVarargs
     public static ByteStream concat(final ByteIterator... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorByteStream(new ByteIteratorEx() {
-            private final Iterator<? extends ByteIterator> iter = N.asList(a).iterator();
+            private final Iterator<? extends ByteIterator> iter = ObjIterator.of(a);
             private ByteIterator cur;
 
             @Override
@@ -1170,7 +1172,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     @SafeVarargs
     public static ByteStream concat(final ByteStream... a) {
-        return N.isNullOrEmpty(a) ? empty() : concat(N.asList(a));
+        return N.isNullOrEmpty(a) ? empty() : concat(Array.asList(a));
     }
 
     public static ByteStream concat(final Collection<? extends ByteStream> c) {
@@ -1324,7 +1326,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return
      */
     public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1336,7 +1338,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return
      */
     public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteStream c, final ByteTernaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1510,7 +1512,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      */
     public static ByteStream zip(final ByteStream a, final ByteStream b, final byte valueForNoneA, final byte valueForNoneB,
             final ByteBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1529,7 +1531,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteStream c, final byte valueForNoneA, final byte valueForNoneB,
             final byte valueForNoneC, final ByteTernaryOperator zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1691,7 +1693,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return
      */
     public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteBiFunction<Nth> nextSelector) {
-        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(N.asList(a, b)));
+        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**

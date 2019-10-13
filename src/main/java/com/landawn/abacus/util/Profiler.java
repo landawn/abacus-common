@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ import com.landawn.abacus.logging.LoggerFactory;
 // TODO: Auto-generated Javadoc
 /**
  * A simple way to run load/performance test.
- * 
+ *
  * <br />
  * <br />
  * Caution: if the loop number is too big, it may take a lot of memory to save the test result and impact the test result.
@@ -49,11 +49,11 @@ import com.landawn.abacus.logging.LoggerFactory;
  * final int bigLoopNum = 1000_000;
  * Profiler.run(threadNum, bigLoopNum, roundNum, "yourMethod", () -> yourMethod());
  * </code>
- * 
+ *
  * <b>// reduce the 'bigLoopNum' by for-loop:</b>
- * 
+ *
  * <code>
- * Profiler.run(threadNum, bigLoopNum / 1000, roundNum, "yourMethod", () -> 
+ * Profiler.run(threadNum, bigLoopNum / 1000, roundNum, "yourMethod", () ->
  *  {
  *      for (int i = 0; i < 1000; i++) {
  *          yourMethod();
@@ -176,7 +176,7 @@ public final class Profiler {
      */
     static MultiLoopsStatistics run(final Object instance, final Method method, final Object arg, final int threadNum, final long threadDelay,
             final int loopNum, final long loopDelay, final int roundNum) {
-        return run(instance, method, ((arg == null) ? null : N.asList(arg)), null, null, null, null, threadNum, threadDelay, loopNum, loopDelay, roundNum);
+        return run(instance, method, ((arg == null) ? null : Array.asList(arg)), null, null, null, null, threadNum, threadDelay, loopNum, loopDelay, roundNum);
     }
 
     /**
@@ -196,7 +196,7 @@ public final class Profiler {
 
     /**
      * Run performance test for the specified <code>method</code> with the specified <code>threadNum</code> and <code>loopNum</code> for each thread.
-     * The performance test will be repeatedly execute times specified by <code>roundNum</code>. 
+     * The performance test will be repeatedly execute times specified by <code>roundNum</code>.
      *
      * @param instance
      * @param method
@@ -221,7 +221,7 @@ public final class Profiler {
 
     /**
      * Run performance test for the specified <code>methodList</code> with the specified <code>threadNum</code> and <code>loopNum</code> for each thread.
-     * The performance test will be repeatly execute times specified by <code>roundNum</code>. 
+     * The performance test will be repeatly execute times specified by <code>roundNum</code>.
      *
      * @param instance it can be null if methods in the specified <code>methodList</code> are static methods
      * @param methodName
@@ -479,7 +479,7 @@ public final class Profiler {
      * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
-    static interface Statistics {
+    interface Statistics {
 
         /**
          * Gets the result.
@@ -565,7 +565,7 @@ public final class Profiler {
      * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
-    static interface LoopStatistics extends Statistics {
+    interface LoopStatistics extends Statistics {
 
         /**
          * Gets the method name list.
@@ -594,7 +594,7 @@ public final class Profiler {
          * @param methodName
          * @return
          */
-        public double getMethodTotalElapsedTimeInMillis(String methodName);
+        double getMethodTotalElapsedTimeInMillis(String methodName);
 
         /**
          * Gets the method max elapsed time in millis.
@@ -602,7 +602,7 @@ public final class Profiler {
          * @param methodName
          * @return
          */
-        public double getMethodMaxElapsedTimeInMillis(String methodName);
+        double getMethodMaxElapsedTimeInMillis(String methodName);
 
         /**
          * Gets the method min elapsed time in millis.
@@ -610,7 +610,7 @@ public final class Profiler {
          * @param methodName
          * @return
          */
-        public double getMethodMinElapsedTimeInMillis(String methodName);
+        double getMethodMinElapsedTimeInMillis(String methodName);
 
         /**
          * Gets the method average elapsed time in millis.
@@ -618,14 +618,14 @@ public final class Profiler {
          * @param methodName
          * @return
          */
-        public double getMethodAverageElapsedTimeInMillis(String methodName);
+        double getMethodAverageElapsedTimeInMillis(String methodName);
 
         /**
          * Gets the total elapsed time in millis.
          *
          * @return
          */
-        public double getTotalElapsedTimeInMillis();
+        double getTotalElapsedTimeInMillis();
 
         /**
          * Gets the method size.
@@ -633,7 +633,7 @@ public final class Profiler {
          * @param methodName
          * @return
          */
-        public int getMethodSize(String methodName);
+        int getMethodSize(String methodName);
 
         /**
          * Gets the method statistics list.
@@ -641,7 +641,7 @@ public final class Profiler {
          * @param methodName
          * @return
          */
-        public List<MethodStatistics> getMethodStatisticsList(String methodName);
+        List<MethodStatistics> getMethodStatisticsList(String methodName);
 
         /**
          * Gets the failed method statistics list.
@@ -649,7 +649,7 @@ public final class Profiler {
          * @param methodName
          * @return
          */
-        public List<MethodStatistics> getFailedMethodStatisticsList(String methodName);
+        List<MethodStatistics> getFailedMethodStatisticsList(String methodName);
 
         /**
          * Gets the all failed method statistics list.

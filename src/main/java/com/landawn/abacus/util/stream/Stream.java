@@ -51,6 +51,7 @@ import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.CharIterator;
@@ -3418,7 +3419,7 @@ public abstract class Stream<T>
         return of(iter);
     }
 
-    public static <K> Stream<K> ofKeys(Map<K, ?> map) {
+    public static <K> Stream<K> ofKeys(final Map<K, ?> map) {
         if (map == null || map.size() == 0) {
             return Stream.empty();
         }
@@ -3426,7 +3427,7 @@ public abstract class Stream<T>
         return of(map.keySet());
     }
 
-    public static <K, V> Stream<K> ofKeys(Map<K, V> map, Predicate<? super V> valueFilter) {
+    public static <K, V> Stream<K> ofKeys(final Map<K, V> map, final Predicate<? super V> valueFilter) {
         if (map == null || map.size() == 0) {
             return StreamEx.empty();
         }
@@ -3434,7 +3435,7 @@ public abstract class Stream<T>
         return EntryStream.of(map).filterByValue(valueFilter).keys();
     }
 
-    public static <V> Stream<V> ofValues(Map<?, V> map) {
+    public static <V> Stream<V> ofValues(final Map<?, V> map) {
         if (map == null || map.size() == 0) {
             return Stream.empty();
         }
@@ -3442,7 +3443,7 @@ public abstract class Stream<T>
         return of(map.values());
     }
 
-    public static <K, V> Stream<V> ofValues(Map<K, V> map, Predicate<? super K> keyFilter) {
+    public static <K, V> Stream<V> ofValues(final Map<K, V> map, final Predicate<? super K> keyFilter) {
         if (map == null || map.size() == 0) {
             return Stream.empty();
         }
@@ -3796,8 +3797,8 @@ public abstract class Stream<T>
         });
     }
 
-    public static <T> Stream<T> generate(final Supplier<T> s) {
-        N.checkArgNotNull(s);
+    public static <T> Stream<T> generate(final Supplier<T> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
 
         return of(new ObjIteratorEx<T>() {
             @Override
@@ -3807,7 +3808,7 @@ public abstract class Stream<T>
 
             @Override
             public T next() {
-                return s.get();
+                return supplier.get();
             }
         });
     }
@@ -4238,7 +4239,7 @@ public abstract class Stream<T>
     @SafeVarargs
     public static <T> Stream<T> concat(final T[]... a) {
         return N.isNullOrEmpty(a) ? (Stream<T>) empty() : new IteratorStream<>(new ObjIteratorEx<T>() {
-            private final Iterator<T[]> iter = N.asList(a).iterator();
+            private final Iterator<T[]> iter = ObjIterator.of(a);
             private Iterator<T> cur;
 
             @Override
@@ -4264,7 +4265,7 @@ public abstract class Stream<T>
     @SafeVarargs
     public static <T> Stream<T> concat(final Collection<? extends T>... a) {
         return N.isNullOrEmpty(a) ? (Stream<T>) empty() : new IteratorStream<>(new ObjIteratorEx<T>() {
-            private final Iterator<Collection<? extends T>> iter = N.asList(a).iterator();
+            private final Iterator<Collection<? extends T>> iter = ObjIterator.of(a);
             private Iterator<? extends T> cur;
 
             @Override
@@ -4293,7 +4294,7 @@ public abstract class Stream<T>
             return empty();
         }
 
-        return concatt(N.asList(a));
+        return concatt(Array.asList(a));
     }
 
     @SafeVarargs
@@ -4302,7 +4303,7 @@ public abstract class Stream<T>
             return empty();
         }
 
-        return concat(N.asList(a));
+        return concat(Array.asList(a));
     }
 
     public static <T> Stream<T> concat(final Collection<? extends Stream<? extends T>> c) {
@@ -4500,7 +4501,7 @@ public abstract class Stream<T>
             return empty();
         }
 
-        return parallelConcatt(N.asList(a), readThreadNum, queueSize);
+        return parallelConcatt(Array.asList(a), readThreadNum, queueSize);
     }
 
     /**
@@ -4541,7 +4542,7 @@ public abstract class Stream<T>
             return empty();
         }
 
-        return parallelConcat(N.asList(a), readThreadNum, queueSize);
+        return parallelConcat(Array.asList(a), readThreadNum, queueSize);
     }
 
     /**
@@ -4935,7 +4936,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final CharStream a, final CharStream b, final CharBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -4947,7 +4948,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final CharStream a, final CharStream b, final CharStream c, final CharTriFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -5106,7 +5107,7 @@ public abstract class Stream<T>
      */
     public static <R> Stream<R> zip(final CharStream a, final CharStream b, final char valueForNoneA, final char valueForNoneB,
             final CharBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -5125,7 +5126,7 @@ public abstract class Stream<T>
     public static <R> Stream<R> zip(final CharStream a, final CharStream b, final CharStream c, final char valueForNoneA, final char valueForNoneB,
             final char valueForNoneC, final CharTriFunction<R> zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -5273,7 +5274,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final ByteStream a, final ByteStream b, final ByteBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -5285,7 +5286,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final ByteStream a, final ByteStream b, final ByteStream c, final ByteTriFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -5444,7 +5445,7 @@ public abstract class Stream<T>
      */
     public static <R> Stream<R> zip(final ByteStream a, final ByteStream b, final byte valueForNoneA, final byte valueForNoneB,
             final ByteBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -5463,7 +5464,7 @@ public abstract class Stream<T>
     public static <R> Stream<R> zip(final ByteStream a, final ByteStream b, final ByteStream c, final byte valueForNoneA, final byte valueForNoneB,
             final byte valueForNoneC, final ByteTriFunction<R> zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -5611,7 +5612,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final ShortStream a, final ShortStream b, final ShortBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -5623,7 +5624,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final ShortStream a, final ShortStream b, final ShortStream c, final ShortTriFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -5783,7 +5784,7 @@ public abstract class Stream<T>
      */
     public static <R> Stream<R> zip(final ShortStream a, final ShortStream b, final short valueForNoneA, final short valueForNoneB,
             final ShortBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -5802,7 +5803,7 @@ public abstract class Stream<T>
     public static <R> Stream<R> zip(final ShortStream a, final ShortStream b, final ShortStream c, final short valueForNoneA, final short valueForNoneB,
             final short valueForNoneC, final ShortTriFunction<R> zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -5950,7 +5951,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final IntStream a, final IntStream b, final IntBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -5962,7 +5963,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final IntStream a, final IntStream b, final IntStream c, final IntTriFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -6121,7 +6122,7 @@ public abstract class Stream<T>
      */
     public static <R> Stream<R> zip(final IntStream a, final IntStream b, final int valueForNoneA, final int valueForNoneB,
             final IntBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -6140,7 +6141,7 @@ public abstract class Stream<T>
     public static <R> Stream<R> zip(final IntStream a, final IntStream b, final IntStream c, final int valueForNoneA, final int valueForNoneB,
             final int valueForNoneC, final IntTriFunction<R> zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -6288,7 +6289,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final LongStream a, final LongStream b, final LongBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -6300,7 +6301,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final LongStream a, final LongStream b, final LongStream c, final LongTriFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -6459,7 +6460,7 @@ public abstract class Stream<T>
      */
     public static <R> Stream<R> zip(final LongStream a, final LongStream b, final long valueForNoneA, final long valueForNoneB,
             final LongBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -6478,7 +6479,7 @@ public abstract class Stream<T>
     public static <R> Stream<R> zip(final LongStream a, final LongStream b, final LongStream c, final long valueForNoneA, final long valueForNoneB,
             final long valueForNoneC, final LongTriFunction<R> zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -6626,7 +6627,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final FloatStream a, final FloatStream b, final FloatBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -6638,7 +6639,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final FloatStream a, final FloatStream b, final FloatStream c, final FloatTriFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -6798,7 +6799,7 @@ public abstract class Stream<T>
      */
     public static <R> Stream<R> zip(final FloatStream a, final FloatStream b, final float valueForNoneA, final float valueForNoneB,
             final FloatBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -6817,7 +6818,7 @@ public abstract class Stream<T>
     public static <R> Stream<R> zip(final FloatStream a, final FloatStream b, final FloatStream c, final float valueForNoneA, final float valueForNoneB,
             final float valueForNoneC, final FloatTriFunction<R> zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -6965,7 +6966,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final DoubleStream a, final DoubleStream b, final DoubleBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -6977,7 +6978,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <R> Stream<R> zip(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleTriFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -7137,7 +7138,7 @@ public abstract class Stream<T>
      */
     public static <R> Stream<R> zip(final DoubleStream a, final DoubleStream b, final double valueForNoneA, final double valueForNoneB,
             final DoubleBiFunction<R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -7156,7 +7157,7 @@ public abstract class Stream<T>
     public static <R> Stream<R> zip(final DoubleStream a, final DoubleStream b, final DoubleStream c, final double valueForNoneA, final double valueForNoneB,
             final double valueForNoneC, final DoubleTriFunction<R> zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -7331,7 +7332,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <A, B, R> Stream<R> zip(final Stream<? extends A> a, final Stream<? extends B> b, final BiFunction<? super A, ? super B, R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -7344,7 +7345,7 @@ public abstract class Stream<T>
      */
     public static <A, B, C, R> Stream<R> zip(final Stream<? extends A> a, final Stream<? extends B> b, final Stream<? extends C> c,
             final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     public static <T, R> Stream<R> zip(final List<? extends Collection<? extends T>> c, final Function<? super List<? extends T>, R> zipFunction) {
@@ -7562,7 +7563,7 @@ public abstract class Stream<T>
      */
     public static <A, B, R> Stream<R> zip(final Stream<? extends A> a, final Stream<? extends B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, R> zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -7581,7 +7582,7 @@ public abstract class Stream<T>
     public static <A, B, C, R> Stream<R> zip(final Stream<? extends A> a, final Stream<? extends B> b, final Stream<? extends C> c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     public static <T, R> Stream<R> zip(final List<? extends Collection<? extends T>> c, final List<? extends T> valuesForNone,
@@ -8123,7 +8124,7 @@ public abstract class Stream<T>
      */
     public static <A, B, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final BiFunction<? super A, ? super B, R> zipFunction,
             final int queueSize) {
-        return parallelZip(a.iteratorEx(), b.iteratorEx(), zipFunction, queueSize).onClose(newCloseHandler(N.asList(a, b)));
+        return parallelZip(a.iteratorEx(), b.iteratorEx(), zipFunction, queueSize).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     public static <A, B, C, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final Stream<C> c,
@@ -8149,7 +8150,7 @@ public abstract class Stream<T>
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final Stream<C> c,
             final TriFunction<? super A, ? super B, ? super C, R> zipFunction, final int queueSize) {
-        return parallelZip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction, queueSize).onClose(newCloseHandler(N.asList(a, b, c)));
+        return parallelZip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction, queueSize).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     public static <T, R> Stream<R> parallelZip(final List<? extends Collection<? extends T>> c, final Function<? super List<? extends T>, R> zipFunction) {
@@ -8802,7 +8803,7 @@ public abstract class Stream<T>
      */
     public static <A, B, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, R> zipFunction, final int queueSize) {
-        return parallelZip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction, queueSize).onClose(newCloseHandler(N.asList(a, b)));
+        return parallelZip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction, queueSize).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -8850,7 +8851,7 @@ public abstract class Stream<T>
     public static <A, B, C, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final Stream<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, R> zipFunction, final int queueSize) {
         return parallelZip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, queueSize)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     public static <T, R> Stream<R> parallelZip(final List<? extends Collection<? extends T>> c, final List<? extends T> valuesForNone,
@@ -9272,7 +9273,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b, final BiFunction<? super T, ? super T, Nth> nextSelector) {
-        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(N.asList(a, b)));
+        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b, final Stream<? extends T> c,

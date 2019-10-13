@@ -1627,7 +1627,7 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        return concat(N.asList(a));
+        return concat(Array.asList(a));
     }
 
     /**

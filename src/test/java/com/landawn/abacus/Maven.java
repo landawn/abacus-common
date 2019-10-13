@@ -33,7 +33,7 @@ public class Maven {
 
         IOUtil.copy(sourceDir, targetDir);
 
-        StreamEx.listFiles(targetDir) // 
+        StreamEx.listFiles(targetDir) //
                 .filter(file -> file.getName().startsWith("settings"))
                 .forEach(file -> IOUtil.deleteIfExists(file));
 
@@ -42,13 +42,13 @@ public class Maven {
                 .peek(f -> N.println(f.getName()))
                 .forEach(f -> IOUtil.copy(f, targetDir));
 
-        StreamEx.listFiles(targetDir) // 
+        StreamEx.listFiles(targetDir) //
                 .forEach(file -> IOUtil.renameTo(file, file.getName().replace(sourceVersion, targetVersion)));
 
         StreamEx.listFiles(targetDir)
                 .filter(file -> file.getName().endsWith(".pom") || file.getName().endsWith(".xml") || file.getName().endsWith(".txt"))
                 .forEach(file -> {
-                    final List<String> lines = IOUtil.readLines(file);
+                    final List<String> lines = IOUtil.readAllLines(file);
                     final List<String> newLines = new ArrayList<>(lines.size());
                     for (String line : lines) {
                         newLines.add(line.replaceAll(sourceVersion, targetVersion));

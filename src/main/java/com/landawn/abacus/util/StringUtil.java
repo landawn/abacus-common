@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,7 @@ import com.landawn.abacus.util.function.IntUnaryOperator;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- * 
+ *
  * @author haiyangl
  *
  */
@@ -83,8 +83,8 @@ public abstract class StringUtil {
     private static final Map<Object, Splitter> trimPreserveSplitterPool = new HashMap<>();
 
     static {
-        final List<String> delimiters = N.asList(" ", "  ", "   ", "\t", "\n", "\r", ",", ", ", ";", "; ", ":", ": ", " : ", "-", " - ", "_", " _ ", "#", "##",
-                " # ", "=", "==", " = ", "|", " | ", "||", " || ", "&", "&&", "@", "@@", "$", "$$", "*", "**", "+", "++");
+        final List<String> delimiters = Array.asList(" ", "  ", "   ", "\t", "\n", "\r", ",", ", ", ";", "; ", ":", ": ", " : ", "-", " - ", "_", " _ ", "#",
+                "##", " # ", "=", "==", " = ", "|", " | ", "||", " || ", "&", "&&", "@", "@@", "$", "$$", "*", "**", "+", "++");
 
         for (String delimiter : delimiters) {
             splitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings(true));
@@ -772,7 +772,7 @@ public abstract class StringUtil {
     }
 
     /**
-     *  
+     *
      *
      * @param str
      * @return
@@ -1016,7 +1016,7 @@ public abstract class StringUtil {
      * ::= (#x20 | #x9 | #xD | #xA)+
      * <p>
      * Java's regexp pattern \s defines whitespace as [ \t\n\x0B\f\r]
-     * 
+     *
      * <p>
      * For reference:
      * </p>
@@ -1028,7 +1028,7 @@ public abstract class StringUtil {
      * <li>#xA = \n</li>
      * <li>#xD = \r</li>
      * </ul>
-     * 
+     *
      * <p>
      * The difference is that Java's whitespace includes vertical tab and form
      * feed, which this functional will also normalize. Additionally
@@ -1057,11 +1057,11 @@ public abstract class StringUtil {
      * <p>
      * Replaces all occurrences of a String within another String.
      * </p>
-     * 
+     *
      * <p>
      * A {@code null} reference passed to this method is a no-op.
      * </p>
-     * 
+     *
      * <pre>
      * N.replaceAll(null, *, *)        = null
      * N.replaceAll("", *, *)          = ""
@@ -1102,11 +1102,11 @@ public abstract class StringUtil {
      * Replaces a String with another String inside a larger String, for the
      * first {@code max} values of the search String.
      * </p>
-     * 
+     *
      * <p>
      * A {@code null} reference passed to this method is a no-op.
      * </p>
-     * 
+     *
      * <pre>
      * replace(null, *, *, *)         = null
      * replace("", *, *, *)           = ""
@@ -2260,7 +2260,7 @@ public abstract class StringUtil {
      * <p>
      * Note that ligatures will be left as is.
      * </p>
-     * 
+     *
      * <pre>
      * N.stripAccents(null)                = null
      * N.stripAccents("")                  = ""
@@ -2645,11 +2645,11 @@ public abstract class StringUtil {
     }
 
     /**
-     *  
+     *
      * <p>
      * Unwraps the specified string {@code str} if and only if it's wrapped by the specified {@code prefix} and {@code suffix}
      * </p>
-     * 
+     *
      * <pre>
      * N.unwrap(null, "[", "]") -> ""
      * N.unwrap("", "[", "]") -> ""
@@ -3640,7 +3640,7 @@ public abstract class StringUtil {
      * <code>true</code> is returned if the specified <code>str</code> only
      * includes characters ('0' ~ '9', '.', '-', '+', 'e').
      * <code>false</code> is return if the specified String is null/empty, or contains empty chars.
-     * 
+     *
      *  "0" => true
      *  " 0.1 " => false
      *  "abc" => false
@@ -3715,7 +3715,7 @@ public abstract class StringUtil {
      * <code>true</code> is returned if the specified <code>str</code> only
      * includes characters ('0' ~ '9', '-', '+' ).
      * <code>false</code> is return if the specified String is null/empty, or contains empty chars.
-     * 
+     *
      *  "-123" => true
      *  "+123" => true
      *  "123" => true
@@ -4034,22 +4034,22 @@ public abstract class StringUtil {
      * specified character, searching backward starting at the specified index.
      * For values of <code>ch</code> in the range from 0 to 0xFFFF (inclusive),
      * the index returned is the largest value <i>k</i> such that: <blockquote>
-     * 
+     *
      * <pre>
      * (this.charAt(<i>k</i>) == ch) && (<i>k</i> &lt;= fromIndex)
      * </pre>
-     * 
+     *
      * </blockquote> is true. For other values of <code>ch</code>, it is the
      * largest value <i>k</i> such that: <blockquote>
-     * 
+     *
      * <pre>
      * (this.codePointAt(<i>k</i>) == ch) && (<i>k</i> &lt;= fromIndex)
      * </pre>
-     * 
+     *
      * </blockquote> is true. In either case, if no such character occurs in
      * this string at or before position <code>fromIndex</code>, then
      * <code>-1</code> is returned.
-     * 
+     *
      * <p>
      * All indices are specified in <code>char</code> values (Unicode code
      * units).
@@ -4094,14 +4094,14 @@ public abstract class StringUtil {
      * Returns the index within <code>str</code> of the last occurrence of the
      * specified <code>substr</code>, searching backward starting at the
      * specified index.
-     * 
+     *
      * <p>
      * The returned index is the largest value <i>k</i> for which: <blockquote>
-     * 
+     *
      * <pre>
      * <i>k</i> &lt;= fromIndex && str.startsWith(substr, <i>k</i>)
      * </pre>
-     * 
+     *
      * </blockquote> If no such value of <i>k</i> exists, then {@code -1} is
      * returned.
      *
@@ -4759,7 +4759,7 @@ public abstract class StringUtil {
 
     /**
      * Note: copy rights: Google Guava.
-     * 
+     *
      * Returns the longest string {@code prefix} such that
      * {@code a.toString().startsWith(prefix) && b.toString().startsWith(prefix)}
      * , taking care not to split surrogate pairs. If {@code a} and {@code b}
@@ -4828,7 +4828,7 @@ public abstract class StringUtil {
 
     /**
      * Note: copy rights: Google Guava.
-     * 
+     *
      * Returns the longest string {@code suffix} such that
      * {@code a.toString().endsWith(suffix) && b.toString().endsWith(suffix)},
      * taking care not to split surrogate pairs. If {@code a} and {@code b} have
@@ -4901,7 +4901,7 @@ public abstract class StringUtil {
 
     /**
      * Note: copy rights: Google Guava.
-     * 
+     *
      * True when a valid surrogate pair starts at the given {@code index} in the
      * given {@code string}. Out-of-range indexes return false.
      *
@@ -4959,7 +4959,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * Returns an empty <code>Optional</code> if {@code inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex}, 
+     * Returns an empty <code>Optional</code> if {@code inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex},
      * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
      *
      * @param str
@@ -4976,7 +4976,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * Returns an empty <code>Optional</code> if {@code inclusiveBeginIndex < 0}, 
+     * Returns an empty <code>Optional</code> if {@code inclusiveBeginIndex < 0},
      * otherwise an {@code Optional} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
      *
      * @param str
@@ -4993,7 +4993,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * Returns an empty <code>Optional</code> if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0}, 
+     * Returns an empty <code>Optional</code> if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
      * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
      *
      * @param str
@@ -5010,7 +5010,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * Returns an empty <code>Optional</code> if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0}, 
+     * Returns an empty <code>Optional</code> if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
      * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
      *
      * @param str
@@ -5123,7 +5123,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * Returns an empty <code>Optional</code> if {@code exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex}, 
+     * Returns an empty <code>Optional</code> if {@code exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex},
      * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex + 1, exclusiveEndIndex)} is returned.
      *
      * @param str
@@ -5247,7 +5247,7 @@ public abstract class StringUtil {
      * @return
      */
     public static List<IntPair> findAllIndicesBetween(final String str, final char prefix, final char postfix) {
-        return N.isNullOrEmpty(str) ? new ArrayList<IntPair>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
+        return N.isNullOrEmpty(str) ? new ArrayList<>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
     }
 
     /**
@@ -5306,7 +5306,7 @@ public abstract class StringUtil {
      * @return
      */
     public static List<IntPair> findAllIndicesBetween(final String str, final String prefix, final String postfix) {
-        return N.isNullOrEmpty(str) ? new ArrayList<IntPair>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
+        return N.isNullOrEmpty(str) ? new ArrayList<>() : findAllIndicesBetween(str, 0, str.length(), prefix, postfix);
     }
 
     /**
@@ -5393,7 +5393,7 @@ public abstract class StringUtil {
      * @return
      */
     public static List<String> findAllSubstringsBetween(final String str, final char prefix, final char postfix) {
-        return N.isNullOrEmpty(str) ? new ArrayList<String>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
+        return N.isNullOrEmpty(str) ? new ArrayList<>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
     }
 
     /**
@@ -5426,7 +5426,7 @@ public abstract class StringUtil {
      * @return
      */
     public static List<String> findAllSubstringsBetween(final String str, final String prefix, final String postfix) {
-        return N.isNullOrEmpty(str) ? new ArrayList<String>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
+        return N.isNullOrEmpty(str) ? new ArrayList<>() : findAllSubstringsBetween(str, 0, str.length(), prefix, postfix);
     }
 
     /**
@@ -5477,7 +5477,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * Returns the first {@code n} chars of the specified {@code String} if its length is bigger than {@code n}, 
+     * Returns the first {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
      * or an empty String {@code ""} if {@code str} is empty or null, or itself it's length equal to or less than {@code n}.
      *
      * @param str
@@ -5497,7 +5497,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * Returns the last {@code n} chars of the specified {@code String} if its length is bigger than {@code n}, 
+     * Returns the last {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
      * or an empty String {@code ""} if {@code str} is empty or null, or itself it's length equal to or less than {@code n}.
      *
      * @param str
@@ -7234,7 +7234,7 @@ public abstract class StringUtil {
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param a
     //     * @return
     //     * @see #concat(Object, Object)
@@ -7262,7 +7262,7 @@ public abstract class StringUtil {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param c
     //     * @return
     //     * @deprecated
@@ -7291,7 +7291,7 @@ public abstract class StringUtil {
      * (0xhhhh) and octal (0dddd) notations. N.B. a leading zero means octal;
      * spaces are not trimmed.
      * </p>
-     * 
+     *
      * <p>
      * Returns an empty {@code OptionalInt} if the string is {@code null} or can't be parsed as {@code Integer}.
      * </p>
@@ -7317,7 +7317,7 @@ public abstract class StringUtil {
      * handles hex (0Xhhhh) and octal (0ddd) notations. N.B. a leading zero
      * means octal; spaces are not trimmed.
      * </p>
-     * 
+     *
      * <p>
      * Returns an empty {@code OptionalLong} if the string is {@code null} or can't be parsed as {@code Long}.
      * </p>
@@ -7342,7 +7342,7 @@ public abstract class StringUtil {
      * <p>
      * Convert a <code>String</code> to a <code>Float</code>.
      * </p>
-     * 
+     *
      * <p>
      * Returns an empty {@code OptionalFloat} if the string is {@code null} or can't be parsed as {@code Float}.
      * </p>
@@ -7366,7 +7366,7 @@ public abstract class StringUtil {
      * <p>
      * Convert a <code>String</code> to a <code>Double</code>.
      * </p>
-     * 
+     *
      * <p>
      * <p>
      * Returns an empty {@code OptionalDouble} if the string is {@code null} or can't be parsed as {@code Double}.
@@ -7393,7 +7393,7 @@ public abstract class StringUtil {
      * Convert a <code>String</code> to a <code>BigInteger</code>; since 3.2 it
      * handles hex (0x or #) and octal (0) notations.
      * </p>
-     * 
+     *
      * <p>
      * Returns an empty {@code Optional} if the string is {@code null} or can't be parsed as {@code BigInteger}.
      * </p>
@@ -7436,7 +7436,7 @@ public abstract class StringUtil {
      * <p>
      * Convert a <code>String</code> to a <code>BigDecimal</code>.
      * </p>
-     * 
+     *
      * <p>
      * Returns an empty {@code Optional} if the string is {@code null} or can't be parsed as {@code BigDecimal}.
      * </p>
@@ -7501,7 +7501,7 @@ public abstract class StringUtil {
      * <p>
      * Turns a string value into a java.lang.Number.
      * </p>
-     * 
+     *
      * <p>
      * If the string starts with {@code 0x} or {@code -0x} (lower or upper case)
      * or {@code #} or {@code -#}, it will be interpreted as a hexadecimal
@@ -7514,19 +7514,19 @@ public abstract class StringUtil {
      * create successively larger types from the type specified until one is
      * found that can represent the value.
      * </p>
-     * 
+     *
      * <p>
      * If a type specifier is not found, it will check for a decimal point and
      * then try successively larger types from <code>Integer</code> to
      * <code>BigInteger</code> and from <code>double</code> to
      * <code>BigDecimal</code>.
      * </p>
-     * 
+     *
      * <p>
      * Integral values with a leading {@code 0} will be interpreted as octal;
      * the returned number will be Integer, Long or BigDecimal as appropriate.
      * </p>
-     * 
+     *
      * <p>
      * Returns an empty {@code Optional} if the string is {@code null} or can't be parsed as {@code Number}.
      * </p>
@@ -7685,7 +7685,7 @@ public abstract class StringUtil {
         }
 
         if (dec == null && exp == null) { // no decimal point and no exponent
-            //Must be an Integer, Long, Biginteger          
+            //Must be an Integer, Long, Biginteger
             op = createInteger(str).boxed();
 
             if (op.isPresent()) {
@@ -7778,28 +7778,28 @@ public abstract class StringUtil {
 
     /**
      * Copied from Google Guava
-     * 
+     *
      * <br />
-     * 
+     *
      * Returns the given {@code template} string with each occurrence of {@code "%s"} replaced with
      * the corresponding argument value from {@code args}; or, if the placeholder and argument counts
      * do not match, returns a best-effort form of that string. Will not throw an exception under
      * normal conditions.
-     * 
+     *
      * <p><b>Note:</b> For most string-formatting needs, use {@link String#format String.format},
      * {@link java.io.PrintWriter#format PrintWriter.format}, and related methods. These support the
      * full range of <a
      * href="https://docs.oracle.com/javase/9/docs/api/java/util/Formatter.html#syntax">format
      * specifiers</a>, and alert you to usage errors by throwing {@link
      * java.util.IllegalFormatException}.
-     * 
+     *
      * <p>In certain cases, such as outputting debugging information or constructing a message to be
      * used for another unchecked exception, an exception during string formatting would serve little
      * purpose except to supplant the real information you were trying to provide. These are the cases
      * this method is made for; it instead generates a best-effort string with all supplied argument
      * values present. This method is also useful in environments such as GWT where {@code
      * String.format} is not available. As an example, method implementations of the {@code Preconditions} class use this formatter, for both of the reasons just discussed.
-     * 
+     *
      * <p><b>Warning:</b> Only the exact two-character placeholder sequence {@code "%s"} is
      * recognized.
      *

@@ -26,6 +26,7 @@ import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Fn.FnS;
@@ -34,6 +35,7 @@ import com.landawn.abacus.util.IndexedShort;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.ShortIterator;
@@ -1093,7 +1095,7 @@ public abstract class ShortStream
     @SafeVarargs
     public static ShortStream concat(final short[]... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorShortStream(new ShortIteratorEx() {
-            private final Iterator<short[]> iter = N.asList(a).iterator();
+            private final Iterator<short[]> iter = ObjIterator.of(a);
             private ShortIterator cur;
 
             @Override
@@ -1119,7 +1121,7 @@ public abstract class ShortStream
     @SafeVarargs
     public static ShortStream concat(final ShortIterator... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorShortStream(new ShortIteratorEx() {
-            private final Iterator<? extends ShortIterator> iter = N.asList(a).iterator();
+            private final Iterator<? extends ShortIterator> iter = ObjIterator.of(a);
             private ShortIterator cur;
 
             @Override
@@ -1144,7 +1146,7 @@ public abstract class ShortStream
 
     @SafeVarargs
     public static ShortStream concat(final ShortStream... a) {
-        return N.isNullOrEmpty(a) ? empty() : concat(N.asList(a));
+        return N.isNullOrEmpty(a) ? empty() : concat(Array.asList(a));
     }
 
     public static ShortStream concat(final Collection<? extends ShortStream> c) {
@@ -1298,7 +1300,7 @@ public abstract class ShortStream
      * @return
      */
     public static ShortStream zip(final ShortStream a, final ShortStream b, final ShortBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1310,7 +1312,7 @@ public abstract class ShortStream
      * @return
      */
     public static ShortStream zip(final ShortStream a, final ShortStream b, final ShortStream c, final ShortTernaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1485,7 +1487,7 @@ public abstract class ShortStream
      */
     public static ShortStream zip(final ShortStream a, final ShortStream b, final short valueForNoneA, final short valueForNoneB,
             final ShortBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1504,7 +1506,7 @@ public abstract class ShortStream
     public static ShortStream zip(final ShortStream a, final ShortStream b, final ShortStream c, final short valueForNoneA, final short valueForNoneB,
             final short valueForNoneC, final ShortTernaryOperator zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1666,7 +1668,7 @@ public abstract class ShortStream
      * @return
      */
     public static ShortStream merge(final ShortStream a, final ShortStream b, final ShortBiFunction<Nth> nextSelector) {
-        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(N.asList(a, b)));
+        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**

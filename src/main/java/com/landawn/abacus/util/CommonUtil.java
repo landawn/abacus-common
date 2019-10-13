@@ -1344,8 +1344,7 @@ class CommonUtil {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> TreeSet<T> newTreeSet() {
+    public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet() {
         return new TreeSet<>();
     }
 
@@ -1367,8 +1366,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> TreeSet<T> newTreeSet(Collection<? extends T> c) {
+    public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet(Collection<? extends T> c) {
         return CommonUtil.isNullOrEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
@@ -1623,8 +1621,7 @@ class CommonUtil {
      * @param <V> the value type
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <K extends Comparable, V> TreeMap<K, V> newTreeMap() {
+    public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap() {
         return new TreeMap<>();
     }
 
@@ -1649,8 +1646,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <K extends Comparable, V> TreeMap<K, V> newTreeMap(Map<? extends K, ? extends V> m) {
+    public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap(Map<? extends K, ? extends V> m) {
         return CommonUtil.isNullOrEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
@@ -1898,7 +1894,7 @@ class CommonUtil {
      * @param <E>
      * @return
      */
-    public static <K extends Comparable<K>, E> ListMultimap<K, E> newListSortedMultimap() {
+    public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newListSortedMultimap() {
         return new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
     }
 
@@ -1910,7 +1906,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    public static <K extends Comparable<K>, E> ListMultimap<K, E> newListSortedMultimap(final Map<? extends K, ? extends E> m) {
+    public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newListSortedMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
 
         multiMap.putAll(m);
@@ -2044,7 +2040,7 @@ class CommonUtil {
      * @param <E>
      * @return
      */
-    public static <K extends Comparable<K>, E> SetMultimap<K, E> newSetSortedMultimap() {
+    public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSetSortedMultimap() {
         return new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
     }
 
@@ -2056,7 +2052,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    public static <K extends Comparable<K>, E> SetMultimap<K, E> newSetSortedMultimap(final Map<? extends K, ? extends E> m) {
+    public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSetSortedMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
 
         multiMap.putAll(m);
@@ -15865,8 +15861,7 @@ class CommonUtil {
      * @param a
      * @param keyMapper
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> void sortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> void sortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
         sort(a, Comparators.comparingBy(keyMapper));
     }
 
@@ -15877,8 +15872,7 @@ class CommonUtil {
      * @param c
      * @param keyMapper
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> void sortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> void sortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
         sort(c, Comparators.comparingBy(keyMapper));
     }
 
@@ -16186,8 +16180,7 @@ class CommonUtil {
      * @param a
      * @param keyMapper
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> void parallelSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> void parallelSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
         parallelSort(a, Comparators.comparingBy(keyMapper));
     }
 
@@ -16199,8 +16192,7 @@ class CommonUtil {
      * @param c
      * @param keyMapper
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> void parallelSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> void parallelSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
         parallelSort(c, Comparators.comparingBy(keyMapper));
     }
 
@@ -16486,8 +16478,7 @@ class CommonUtil {
      * @param a
      * @param keyMapper
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> void reverseSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> void reverseSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
         sort(a, Comparators.reversedComparingBy(keyMapper));
     }
 
@@ -16499,8 +16490,7 @@ class CommonUtil {
      * @param c
      * @param keyMapper
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> void reverseSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> void reverseSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
         sort(c, Comparators.reversedComparingBy(keyMapper));
     }
 
@@ -16625,7 +16615,7 @@ class CommonUtil {
      * @param <T>
      * @param c
      */
-    public static <T extends Comparable<T>> void bucketSort(final List<T> c) {
+    public static <T extends Comparable<? super T>> void bucketSort(final List<T> c) {
         Array.bucketSort(c);
     }
 
@@ -16637,7 +16627,7 @@ class CommonUtil {
      * @param fromIndex
      * @param toIndex
      */
-    public static <T extends Comparable<T>> void bucketSort(final List<T> c, final int fromIndex, final int toIndex) {
+    public static <T extends Comparable<? super T>> void bucketSort(final List<T> c, final int fromIndex, final int toIndex) {
         Array.bucketSort(c, fromIndex, toIndex);
     }
 
@@ -16673,8 +16663,7 @@ class CommonUtil {
      * @param a
      * @param keyMapper
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
         bucketSort(a, Comparators.comparingBy(keyMapper));
     }
 
@@ -16686,8 +16675,7 @@ class CommonUtil {
      * @param c
      * @param keyMapper
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> void bucketSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> void bucketSortBy(final List<? extends T> c, final Function<? super T, ? extends U> keyMapper) {
         bucketSort(c, Comparators.comparingBy(keyMapper));
     }
 
@@ -16984,8 +16972,7 @@ class CommonUtil {
      * @param keyMapper
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> int binarySearchBy(final T[] a, final T key, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> int binarySearchBy(final T[] a, final T key, final Function<? super T, ? extends U> keyMapper) {
         return binarySearch(a, key, Comparators.comparingBy(keyMapper));
     }
 
@@ -16999,8 +16986,8 @@ class CommonUtil {
      * @param keyMapper
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> int binarySearchBy(final List<? extends T> c, final T key, final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> int binarySearchBy(final List<? extends T> c, final T key,
+            final Function<? super T, ? extends U> keyMapper) {
         return binarySearch(c, key, Comparators.comparingBy(keyMapper));
     }
 

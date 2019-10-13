@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,9 +33,9 @@ import com.landawn.abacus.util.function.ToShortFunction;
 
 // TODO: Auto-generated Javadoc
 /**
- * 
+ *
  * Factory utility class for Comparator.
- * 
+ *
  * @author haiyangl
  *
  */
@@ -206,8 +206,7 @@ public abstract class Comparators {
      * @param keyMapper
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> Comparator<T> comparingBy(final Function<? super T, ? extends U> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
         return new Comparator<T>() {
@@ -226,8 +225,7 @@ public abstract class Comparators {
      * @param keyMapper
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T, U extends Comparable> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyMapper) {
+    public static <T, U extends Comparable<? super U>> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
         return new Comparator<T>() {
@@ -428,8 +426,7 @@ public abstract class Comparators {
      * @param <V> the value type
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <K extends Comparable, V> Comparator<Map.Entry<K, V>> comparingByKey() {
+    public static <K extends Comparable<? super K>, V> Comparator<Map.Entry<K, V>> comparingByKey() {
         return new Comparator<Map.Entry<K, V>>() {
             @Override
             public int compare(Map.Entry<K, V> a, Map.Entry<K, V> b) {
@@ -445,8 +442,7 @@ public abstract class Comparators {
      * @param <V> the value type
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <K extends Comparable, V> Comparator<Map.Entry<K, V>> reversedComparingByKey() {
+    public static <K extends Comparable<? super K>, V> Comparator<Map.Entry<K, V>> reversedComparingByKey() {
         return new Comparator<Map.Entry<K, V>>() {
             @Override
             public int compare(Map.Entry<K, V> a, Map.Entry<K, V> b) {
@@ -462,8 +458,7 @@ public abstract class Comparators {
      * @param <V> the value type
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <K, V extends Comparable> Comparator<Map.Entry<K, V>> comparingByValue() {
+    public static <K, V extends Comparable<? super V>> Comparator<Map.Entry<K, V>> comparingByValue() {
         return new Comparator<Map.Entry<K, V>>() {
             @Override
             public int compare(Map.Entry<K, V> a, Map.Entry<K, V> b) {
@@ -479,8 +474,7 @@ public abstract class Comparators {
      * @param <V> the value type
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <K, V extends Comparable> Comparator<Map.Entry<K, V>> reversedComparingByValue() {
+    public static <K, V extends Comparable<? super V>> Comparator<Map.Entry<K, V>> reversedComparingByValue() {
         return new Comparator<Map.Entry<K, V>>() {
             @Override
             public int compare(Map.Entry<K, V> a, Map.Entry<K, V> b) {

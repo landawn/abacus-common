@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Fn.FnL;
@@ -41,6 +42,7 @@ import com.landawn.abacus.util.LongSummaryStatistics;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.Try;
@@ -1253,7 +1255,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SafeVarargs
     public static LongStream concat(final long[]... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorLongStream(new LongIteratorEx() {
-            private final Iterator<long[]> iter = N.asList(a).iterator();
+            private final Iterator<long[]> iter = ObjIterator.of(a);
             private LongIterator cur;
 
             @Override
@@ -1279,7 +1281,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SafeVarargs
     public static LongStream concat(final LongIterator... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorLongStream(new LongIteratorEx() {
-            private final Iterator<? extends LongIterator> iter = N.asList(a).iterator();
+            private final Iterator<? extends LongIterator> iter = ObjIterator.of(a);
             private LongIterator cur;
 
             @Override
@@ -1304,7 +1306,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
     @SafeVarargs
     public static LongStream concat(final LongStream... a) {
-        return N.isNullOrEmpty(a) ? empty() : concat(N.asList(a));
+        return N.isNullOrEmpty(a) ? empty() : concat(Array.asList(a));
     }
 
     public static LongStream concat(final Collection<? extends LongStream> c) {
@@ -1458,7 +1460,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @return
      */
     public static LongStream zip(final LongStream a, final LongStream b, final LongBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1470,7 +1472,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @return
      */
     public static LongStream zip(final LongStream a, final LongStream b, final LongStream c, final LongTernaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1644,7 +1646,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     public static LongStream zip(final LongStream a, final LongStream b, final long valueForNoneA, final long valueForNoneB,
             final LongBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1663,7 +1665,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public static LongStream zip(final LongStream a, final LongStream b, final LongStream c, final long valueForNoneA, final long valueForNoneB,
             final long valueForNoneC, final LongTernaryOperator zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1825,7 +1827,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @return
      */
     public static LongStream merge(final LongStream a, final LongStream b, final LongBiFunction<Nth> nextSelector) {
-        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(N.asList(a, b)));
+        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**

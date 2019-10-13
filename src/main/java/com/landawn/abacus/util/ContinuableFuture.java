@@ -1009,7 +1009,7 @@ public class ContinuableFuture<T> implements Future<T> {
         return execute(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                Futures.anyOf(N.asList(ContinuableFuture.this, other)).get();
+                Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
 
                 action.run();
                 return null;
@@ -1029,7 +1029,7 @@ public class ContinuableFuture<T> implements Future<T> {
         return execute(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                final T result = Futures.anyOf(N.asList(ContinuableFuture.this, other)).get();
+                final T result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
 
                 action.accept(result);
                 return null;
@@ -1050,7 +1050,7 @@ public class ContinuableFuture<T> implements Future<T> {
         return execute(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                final Result<T, Exception> result = Futures.anyOf(N.asList(ContinuableFuture.this, other)).gett();
+                final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).gett();
 
                 action.accept(result.orElse(null), result.getExceptionIfPresent());
                 return null;
@@ -1071,7 +1071,7 @@ public class ContinuableFuture<T> implements Future<T> {
         return execute(new Callable<R>() {
             @Override
             public R call() throws Exception {
-                Futures.anyOf(N.asList(ContinuableFuture.this, other)).get();
+                Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
 
                 return action.call();
             }
@@ -1092,7 +1092,7 @@ public class ContinuableFuture<T> implements Future<T> {
         return execute(new Callable<R>() {
             @Override
             public R call() throws Exception {
-                final T result = Futures.anyOf(N.asList(ContinuableFuture.this, other)).get();
+                final T result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
 
                 return action.apply(result);
             }
@@ -1113,7 +1113,7 @@ public class ContinuableFuture<T> implements Future<T> {
         return execute(new Callable<R>() {
             @Override
             public R call() throws Exception {
-                final Result<T, Exception> result = Futures.anyOf(N.asList(ContinuableFuture.this, other)).gett();
+                final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).gett();
 
                 return action.apply(result.orElse(null), result.getExceptionIfPresent());
             }
@@ -1131,7 +1131,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //     * @return
     //     */
     //    public <U> ContinuableFuture<U> applyToEither(final ContinuableFuture<? extends T> other, final Function<? super T, U> action) {
-    //        return Futures.anyOf(N.asList(this, other)).thenApply(action);
+    //        return Futures.anyOf(Array.asList(this, other)).thenApply(action);
     //    }
     //
     //    /**
@@ -1145,7 +1145,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //     * @return
     //     */
     //    public ContinuableFuture<Void> acceptEither(final ContinuableFuture<? extends T> other, final Consumer<? super T> action) {
-    //        return Futures.anyOf(N.asList(this, other)).thenAccept(action);
+    //        return Futures.anyOf(Array.asList(this, other)).thenAccept(action);
     //    }
 
     //    /**

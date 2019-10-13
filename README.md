@@ -11,7 +11,6 @@ A general programming library in Java. It's easy to learn and simple to use with
 [StringUtil](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/StringUtil_view.html), 
 [Array](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Array_view.html), 
 [Primitives](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Primitives_view.html), 
-[Seq](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Seq_view.html), 
 [Iterables](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Iterables_view.html),
 [Iterators](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Iterators_view.html),
 [Maps](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Maps_view.html), 

@@ -314,7 +314,7 @@ public class OkHttpRequest {
                 if (resultClass == null || resultClass.equals(String.class)) {
                     return (T) IOUtil.readString(is, respCharset);
                 } else if (byte[].class.equals(resultClass)) {
-                    return (T) IOUtil.readBytes(is);
+                    return (T) IOUtil.readAllBytes(is);
                 } else {
                     if (respContentFormat == ContentFormat.KRYO && kryoParser != null) {
                         return kryoParser.deserialize(resultClass, is);

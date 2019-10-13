@@ -29,7 +29,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <E>
  * @since 0.8
  */
-abstract class ImmutableCollection<E> extends AbstractCollection<E> {
+public abstract class ImmutableCollection<E> extends AbstractCollection<E> {
 
     /** The coll. */
     final Collection<E> coll;

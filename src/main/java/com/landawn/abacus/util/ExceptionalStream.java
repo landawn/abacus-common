@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
@@ -32,6 +33,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -75,6 +78,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
+
+    static final Random RAND = new SecureRandom();
 
     /** The elements. */
     private final ExceptionalIterator<T, E> elements;
@@ -411,6 +416,103 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      *
+     * @param <E>
+     * @param a
+     * @return
+     */
+    public static <E extends Exception> ExceptionalStream<Integer, E> of(final int[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        return newStream(new ExceptionalIterator<Integer, E>() {
+            private final int len = a.length;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                return idx < len;
+            }
+
+            @Override
+            public Integer next() throws E {
+                return a[idx++];
+            }
+        });
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param a
+     * @return
+     */
+    public static <E extends Exception> ExceptionalStream<Long, E> of(final long[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        return newStream(new ExceptionalIterator<Long, E>() {
+            private final int len = a.length;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                return idx < len;
+            }
+
+            @Override
+            public Long next() throws E {
+                return a[idx++];
+            }
+        });
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param a
+     * @return
+     */
+    public static <E extends Exception> ExceptionalStream<Double, E> of(final double[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        return newStream(new ExceptionalIterator<Double, E>() {
+            private final int len = a.length;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                return idx < len;
+            }
+
+            @Override
+            public Double next() throws E {
+                return a[idx++];
+            }
+        });
+    }
+
+    public static <K, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, ?> map) {
+        if (N.isNullOrEmpty(map)) {
+            return empty();
+        }
+
+        return of(map.keySet());
+    }
+
+    public static <V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<?, V> map) {
+        if (N.isNullOrEmpty(map)) {
+            return empty();
+        }
+
+        return of(map.values());
+    }
+
+    /**
+     *
      * @param <T>
      * @param <E>
      * @param hasNext
@@ -561,6 +663,48 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    public static <T, E extends Exception> ExceptionalStream<T, E> generate(final Try.Supplier<T, E> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            @Override
+            public boolean hasNext() throws E {
+                return true;
+            }
+
+            @Override
+            public T next() throws E {
+                return supplier.get();
+            }
+        });
+    }
+
+    public static <T, E extends Exception> ExceptionalStream<T, E> repeat(final T value, final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n == 0) {
+            return empty();
+        }
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private long cnt = n;
+
+            @Override
+            public boolean hasNext() throws E {
+                return cnt > 0;
+            }
+
+            @Override
+            public T next() throws E {
+                if (cnt-- <= 0) {
+                    throw new NoSuchElementException();
+                }
+
+                return value;
+            }
+        });
+    }
+
     /**
      *
      * @param file
@@ -626,6 +770,61 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         N.checkArgNotNull(reader, "reader");
 
         return newStream(createLazyLineIterator(null, null, Charsets.UTF_8, reader, false));
+    }
+
+    public static ExceptionalStream<File, IOException> listFiles(final File parentPath) {
+        if (!parentPath.exists()) {
+            return empty();
+        }
+
+        return of(parentPath.listFiles());
+    }
+
+    public static ExceptionalStream<File, IOException> listFiles(final File parentPath, final boolean recursively) {
+        if (!parentPath.exists()) {
+            return empty();
+        } else if (recursively == false) {
+            return of(parentPath.listFiles());
+        }
+
+        final ExceptionalIterator<File, IOException> iter = new ExceptionalIterator<File, IOException>() {
+            private final Queue<File> paths = N.asLinkedList(parentPath);
+            private File[] subFiles = null;
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                if ((subFiles == null || cursor >= subFiles.length) && paths.size() > 0) {
+                    cursor = 0;
+                    subFiles = null;
+
+                    while (paths.size() > 0) {
+                        subFiles = paths.poll().listFiles();
+
+                        if (N.notNullOrEmpty(subFiles)) {
+                            break;
+                        }
+                    }
+                }
+
+                return subFiles != null && cursor < subFiles.length;
+            }
+
+            @Override
+            public File next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                if (subFiles[cursor].isDirectory()) {
+                    paths.offer(subFiles[cursor]);
+                }
+
+                return subFiles[cursor++];
+            }
+        };
+
+        return newStream(iter);
     }
 
     /**
@@ -1043,6 +1242,24 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    @SafeVarargs
+    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final T[]... a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        return of(Iterators.concat(a));
+    }
+
+    @SafeVarargs
+    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Collection<? extends T>... a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        return of(Iterators.concat(a));
+    }
+
     /**
      *
      * @param <T>
@@ -1056,7 +1273,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return empty();
         }
 
-        return concat(N.asList(a));
+        return concat(Array.asList(a));
     }
 
     /**
@@ -1107,6 +1324,237 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 return iter.next();
             }
         }, closeHandlers);
+    }
+
+    /**
+     * Zip together the "a" and "b" arrays until one of them runs out of values.
+     * Each pair of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final A[] a, final B[] b,
+            final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
+        return zip(ObjIterator.of(a), ObjIterator.of(b), zipFunction);
+    }
+
+    /**
+     * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
+     * Each triple of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c,
+            final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
+        return zip(ObjIterator.of(a), ObjIterator.of(b), ObjIterator.of(c), zipFunction);
+    }
+
+    /**
+     * Zip together the "a" and "b" arrays until one of them runs out of values.
+     * Each pair of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+            final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
+        return zip(a.iterator(), b.iterator(), zipFunction);
+    }
+
+    /**
+     * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
+     * Each triple of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+            final Collection<? extends C> c, final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
+        return zip(a.iterator(), b.iterator(), c.iterator(), zipFunction);
+    }
+
+    /**
+     * Zip together the "a" and "b" iterators until one of them runs out of values.
+     * Each pair of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+            final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            @Override
+            public boolean hasNext() throws E {
+                return a.hasNext() && b.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                return zipFunction.apply(a.next(), b.next());
+            }
+        });
+    }
+
+    /**
+     * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
+     * Each triple of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+            final Iterator<? extends C> c, final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            @Override
+            public boolean hasNext() throws E {
+                return a.hasNext() && b.hasNext() && c.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                return zipFunction.apply(a.next(), b.next(), c.next());
+            }
+        });
+    }
+
+    /**
+     * Zip together the "a" and "b" iterators until all of them runs out of values.
+     * Each pair of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @param valueForNoneA value to fill if "a" runs out of values first.
+     * @param valueForNoneB value to fill if "b" runs out of values first.
+     * @param zipFunction
+     * @return
+     */
+    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+            final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
+        return zip(ObjIterator.of(a), ObjIterator.of(b), valueForNoneA, valueForNoneB, zipFunction);
+    }
+
+    /**
+     * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
+     * Each triple of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA value to fill if "a" runs out of values.
+     * @param valueForNoneB value to fill if "b" runs out of values.
+     * @param valueForNoneC value to fill if "c" runs out of values.
+     * @param zipFunction
+     * @return
+     */
+    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
+            final B valueForNoneB, final C valueForNoneC, final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
+        return zip(ObjIterator.of(a), ObjIterator.of(b), ObjIterator.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    }
+
+    /**
+     * Zip together the "a" and "b" iterators until all of them runs out of values.
+     * Each pair of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @param valueForNoneA value to fill if "a" runs out of values first.
+     * @param valueForNoneB value to fill if "b" runs out of values first.
+     * @param zipFunction
+     * @return
+     */
+    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+            final A valueForNoneA, final B valueForNoneB, final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
+        return zip(a.iterator(), b.iterator(), valueForNoneA, valueForNoneB, zipFunction);
+    }
+
+    /**
+     * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
+     * Each triple of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA value to fill if "a" runs out of values.
+     * @param valueForNoneB value to fill if "b" runs out of values.
+     * @param valueForNoneC value to fill if "c" runs out of values.
+     * @param zipFunction
+     * @return
+     */
+    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+            final Collection<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+            final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
+        return zip(a.iterator(), b.iterator(), c.iterator(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    }
+
+    /**
+     * Zip together the "a" and "b" iterators until all of them runs out of values.
+     * Each pair of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @param valueForNoneA value to fill if "a" runs out of values first.
+     * @param valueForNoneB value to fill if "b" runs out of values first.
+     * @param zipFunction
+     * @return
+     */
+    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+            final A valueForNoneA, final B valueForNoneB, final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            @Override
+            public boolean hasNext() throws E {
+                return a.hasNext() || b.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return zipFunction.apply(a.hasNext() ? a.next() : valueForNoneA, b.hasNext() ? b.next() : valueForNoneB);
+            }
+        });
+    }
+
+    /**
+     * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
+     * Each triple of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA value to fill if "a" runs out of values.
+     * @param valueForNoneB value to fill if "b" runs out of values.
+     * @param valueForNoneC value to fill if "c" runs out of values.
+     * @param zipFunction
+     * @return
+     */
+    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+            final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+            final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            @Override
+            public boolean hasNext() throws E {
+                return a.hasNext() || b.hasNext() || c.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return zipFunction.apply(a.hasNext() ? a.next() : valueForNoneA, b.hasNext() ? b.next() : valueForNoneB,
+                        c.hasNext() ? c.next() : valueForNoneC);
+            }
+        });
     }
 
     /**
@@ -2902,6 +3350,88 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     //        return from == 0 ? limit(to) : skip(from).limit(to - from);
     //    }
 
+    public ExceptionalStream<T, E> shuffled() {
+        return shuffled(RAND);
+    }
+
+    public ExceptionalStream<T, E> shuffled(final Random rnd) {
+        return lazyLoad(new Function<Object[], Object[]>() {
+            @Override
+            public Object[] apply(final Object[] a) {
+                N.shuffle(a, rnd);
+                return a;
+            }
+        }, false, null);
+    }
+
+    public ExceptionalStream<T, E> rotated(final int distance) {
+        if (distance == 0) {
+            return newStream(elements, closeHandlers);
+        }
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean initialized = false;
+            private T[] aar;
+            private int len;
+            private int start;
+            private int cnt = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                return cnt < len;
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return aar[(start + cnt++) % len];
+            }
+
+            @Override
+            public long count() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                return len - cnt;
+            }
+
+            @Override
+            public void skip(long n) throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                cnt = n < len - cnt ? cnt + (int) n : len;
+            }
+
+            private void init() throws E {
+                if (initialized == false) {
+                    initialized = true;
+                    aar = (T[]) ExceptionalStream.this.toArray();
+                    len = aar.length;
+
+                    if (len > 0) {
+                        start = distance % len;
+
+                        if (start < 0) {
+                            start += len;
+                        }
+
+                        start = len - start;
+                    }
+                }
+            }
+        });
+    }
+
     /**
      *
      * @return
@@ -3021,6 +3551,34 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 }
             }
         }, sorted, cmp, closeHandlers);
+    }
+
+    public ExceptionalStream<T, E> intersperse(final T delimiter) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            private final ExceptionalIterator<T, E> iter = iterator();
+            private boolean toInsert = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                if (toInsert) {
+                    toInsert = false;
+                    return delimiter;
+                } else {
+                    final T res = iter.next();
+                    toInsert = true;
+                    return res;
+                }
+            }
+        });
     }
 
     /**
@@ -3622,6 +4180,24 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      *
+     * @return
+     * @throws E the e
+     */
+    public ImmutableList<T> toImmutableList() throws E {
+        return ImmutableList.of(toList());
+    }
+
+    /**
+     *
+     * @return
+     * @throws E the e
+     */
+    public ImmutableSet<T> toImmutableSet() throws E {
+        return ImmutableSet.of(toSet());
+    }
+
+    /**
+     *
      * @param <C>
      * @param supplier
      * @return
@@ -3920,6 +4496,26 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 }
 
                 result.get(key).add(valueMapper.apply(next));
+            }
+
+            return result;
+        } finally {
+            close();
+        }
+    }
+
+    public Multiset<T> toMultiset() throws E {
+        return toMultiset(Suppliers.<T> ofMultiset());
+    }
+
+    public Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier) throws E {
+        assertNotClosed();
+
+        try {
+            final Multiset<T> result = supplier.get();
+
+            while (elements.hasNext()) {
+                result.add(elements.next());
             }
 
             return result;

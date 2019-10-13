@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.stream;
 
-import java.lang.reflect.Array;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +28,7 @@ import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Fn.FnI;
@@ -40,6 +40,7 @@ import com.landawn.abacus.util.IntSummaryStatistics;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.Try;
@@ -1501,7 +1502,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @SafeVarargs
     public static IntStream concat(final int[]... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorIntStream(new IntIteratorEx() {
-            private final Iterator<int[]> iter = N.asList(a).iterator();
+            private final Iterator<int[]> iter = ObjIterator.of(a);
             private IntIterator cur;
 
             @Override
@@ -1527,7 +1528,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @SafeVarargs
     public static IntStream concat(final IntIterator... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorIntStream(new IntIteratorEx() {
-            private final Iterator<? extends IntIterator> iter = N.asList(a).iterator();
+            private final Iterator<? extends IntIterator> iter = ObjIterator.of(a);
             private IntIterator cur;
 
             @Override
@@ -1552,7 +1553,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
     @SafeVarargs
     public static IntStream concat(final IntStream... a) {
-        return N.isNullOrEmpty(a) ? empty() : concat(N.asList(a));
+        return N.isNullOrEmpty(a) ? empty() : concat(Array.asList(a));
     }
 
     public static IntStream concat(final Collection<? extends IntStream> c) {
@@ -1706,7 +1707,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return
      */
     public static IntStream zip(final IntStream a, final IntStream b, final IntBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1718,7 +1719,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return
      */
     public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final IntTernaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(N.asList(a, b, c)));
+        return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -1891,7 +1892,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return
      */
     public static IntStream zip(final IntStream a, final IntStream b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction) {
-        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(N.asList(a, b)));
+        return zip(a.iteratorEx(), b.iteratorEx(), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -1910,7 +1911,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final int valueForNoneA, final int valueForNoneB,
             final int valueForNoneC, final IntTernaryOperator zipFunction) {
         return zip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(N.asList(a, b, c)));
+                .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
     /**
@@ -2072,7 +2073,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return
      */
     public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<Nth> nextSelector) {
-        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(N.asList(a, b)));
+        return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**

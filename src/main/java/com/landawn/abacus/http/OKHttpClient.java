@@ -57,7 +57,7 @@ import okhttp3.RequestBody;
 // TODO: Auto-generated Javadoc
 /**
  * Any header can be set into the parameter <code>settings</code>
- * 
+ *
  * <br>HttpClient is thread safe.</br>
  *
  * @author Haiyang Li
@@ -516,12 +516,12 @@ public final class OKHttpClient extends AbstractHttpClient {
                 } else {
                     if (resultClass != null && resultClass.equals(HttpResponse.class)) {
                         return (T) new HttpResponse(httpResponse.sentRequestAtMillis(), httpResponse.receivedResponseAtMillis(), httpResponse.code(),
-                                httpResponse.message(), respHeaders, IOUtil.readBytes(is), respContentFormat);
+                                httpResponse.message(), respHeaders, IOUtil.readAllBytes(is), respContentFormat);
                     } else {
                         if (resultClass == null || resultClass.equals(String.class)) {
                             return (T) IOUtil.readString(is, respCharset);
                         } else if (byte[].class.equals(resultClass)) {
-                            return (T) IOUtil.readBytes(is);
+                            return (T) IOUtil.readAllBytes(is);
                         } else {
                             if (respContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
                                 return HTTP.kryoParser.deserialize(resultClass, is);

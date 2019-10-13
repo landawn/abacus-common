@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -340,7 +340,7 @@ public final class IOUtil {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     /** The Constant EOF. */
-    // ... 
+    // ...
     public static final int EOF = -1;
 
     /** The Constant all_files_filter. */
@@ -638,6 +638,29 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
+    public static byte[] readAllBytes(final File file) throws UncheckedIOException {
+        return readBytes(file, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     * @param is
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static byte[] readAllBytes(final InputStream is) throws UncheckedIOException {
+        return readBytes(is, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     * @param file
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllBytes(File)}.
+     * @see #readAllBytes(File)
+     */
+    @Deprecated
     public static byte[] readBytes(final File file) throws UncheckedIOException {
         return readBytes(file, 0, Integer.MAX_VALUE);
     }
@@ -671,7 +694,10 @@ public final class IOUtil {
      * @param is
      * @return
      * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllBytes(InputStream)}.
+     * @see #readAllBytes(InputStream)
      */
+    @Deprecated
     public static byte[] readBytes(final InputStream is) throws UncheckedIOException {
         return readBytes(is, 0, Integer.MAX_VALUE);
     }
@@ -733,7 +759,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static char[] readChars(final File file) throws UncheckedIOException {
+    public static char[] readAllChars(final File file) throws UncheckedIOException {
         return readChars(file, 0, Integer.MAX_VALUE);
     }
 
@@ -744,6 +770,64 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
+    public static char[] readAllChars(final File file, final Charset encoding) throws UncheckedIOException {
+        return readChars(file, 0, Integer.MAX_VALUE, encoding);
+    }
+
+    /**
+     *
+     * @param is
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static char[] readAllChars(final InputStream is) throws UncheckedIOException {
+        return readChars(is, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     * @param is
+     * @param encoding
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static char[] readAllChars(final InputStream is, final Charset encoding) throws UncheckedIOException {
+        return readChars(is, 0, Integer.MAX_VALUE, encoding);
+    }
+
+    /**
+     *
+     * @param reader
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static char[] readAllChars(final Reader reader) throws UncheckedIOException {
+        return readChars(reader, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     * @param file
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllChars}
+     * @see #readAllChars(File)
+     */
+    @Deprecated
+    public static char[] readChars(final File file) throws UncheckedIOException {
+        return readChars(file, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     * @param file
+     * @param encoding
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllChars}
+     * @see #readAllChars(File, Charset)
+     */
+    @Deprecated
     public static char[] readChars(final File file, final Charset encoding) throws UncheckedIOException {
         return readChars(file, 0, Integer.MAX_VALUE, encoding);
     }
@@ -790,7 +874,10 @@ public final class IOUtil {
      * @param is
      * @return
      * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllChars}
+     * @see #readAllChars(InputStream)
      */
+    @Deprecated
     public static char[] readChars(final InputStream is) throws UncheckedIOException {
         return readChars(is, 0, Integer.MAX_VALUE);
     }
@@ -801,7 +888,10 @@ public final class IOUtil {
      * @param encoding
      * @return
      * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllChars}
+     * @see #readAllChars(InputStream, encoding)
      */
+    @Deprecated
     public static char[] readChars(final InputStream is, final Charset encoding) throws UncheckedIOException {
         return readChars(is, 0, Integer.MAX_VALUE, encoding);
     }
@@ -847,7 +937,10 @@ public final class IOUtil {
      * @param reader
      * @return
      * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllChars}
+     * @see #readAllChars(Reader)
      */
+    @Deprecated
     public static char[] readChars(final Reader reader) throws UncheckedIOException {
         return readChars(reader, 0, Integer.MAX_VALUE);
     }
@@ -910,6 +1003,7 @@ public final class IOUtil {
     }
 
     /**
+     * Read all content into one {@code String}.
      *
      * @param file
      * @return
@@ -920,6 +1014,7 @@ public final class IOUtil {
     }
 
     /**
+     * Read all content into one {@code String}.
      *
      * @param file
      * @param encoding
@@ -958,6 +1053,7 @@ public final class IOUtil {
     }
 
     /**
+     * Read all content into one {@code String}.
      *
      * @param is
      * @return
@@ -968,6 +1064,7 @@ public final class IOUtil {
     }
 
     /**
+     * Read all content into one {@code String}.
      *
      * @param is
      * @param encoding
@@ -1006,6 +1103,7 @@ public final class IOUtil {
     }
 
     /**
+     * Read all content into one {@code String}.
      *
      * @param reader
      * @return
@@ -1151,7 +1249,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static List<String> readLines(final File file) throws UncheckedIOException {
+    public static List<String> readAllLines(final File file) throws UncheckedIOException {
         return readLines(file, 0, Integer.MAX_VALUE);
     }
 
@@ -1162,8 +1260,66 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static List<String> readLines(final File file, final Charset encoding) throws UncheckedIOException {
+    public static List<String> readAllLines(final File file, final Charset encoding) throws UncheckedIOException {
         return readLines(file, 0, Integer.MAX_VALUE, encoding);
+    }
+
+    /**
+     *
+     * @param is
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static List<String> readAllLines(final InputStream is) throws UncheckedIOException {
+        return readLines(is, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     * @param is
+     * @param encoding
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static List<String> readAllLines(final InputStream is, final Charset encoding) throws UncheckedIOException {
+        return readLines(is, 0, Integer.MAX_VALUE, encoding);
+    }
+
+    /**
+     *
+     * @param reader
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static List<String> readAllLines(final Reader reader) throws UncheckedIOException {
+        return readLines(reader, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     * @param file
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllLines}
+     * @see #readAllLines(File)
+     */
+    @Deprecated
+    public static List<String> readLines(final File file) throws UncheckedIOException {
+        return readAllLines(file);
+    }
+
+    /**
+     *
+     * @param file
+     * @param encoding
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllLines}
+     * @see #readAllLines(File, Charset)
+     */
+    @Deprecated
+    public static List<String> readLines(final File file, final Charset encoding) throws UncheckedIOException {
+        return readAllLines(file, encoding);
     }
 
     /**
@@ -1208,7 +1364,10 @@ public final class IOUtil {
      * @param is
      * @return
      * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllLines}
+     * @see #readAllLines(is)
      */
+    @Deprecated
     public static List<String> readLines(final InputStream is) throws UncheckedIOException {
         return readLines(is, 0, Integer.MAX_VALUE);
     }
@@ -1219,7 +1378,10 @@ public final class IOUtil {
      * @param encoding
      * @return
      * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllLines}
+     * @see #readAllLines(is, Charset)
      */
+    @Deprecated
     public static List<String> readLines(final InputStream is, final Charset encoding) throws UncheckedIOException {
         return readLines(is, 0, Integer.MAX_VALUE, encoding);
     }
@@ -1266,7 +1428,10 @@ public final class IOUtil {
      * @param reader
      * @return
      * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@code readAllLines}
+     * @see #readAllLines(Reader)
      */
+    @Deprecated
     public static List<String> readLines(final Reader reader) throws UncheckedIOException {
         return readLines(reader, 0, Integer.MAX_VALUE);
     }
@@ -3622,13 +3787,13 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     * 
+     *
      * Fully maps a file in to memory as per
      * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}
      * using the requested {@link MapMode}.
-     * 
+     *
      * <p>Files are mapped from offset 0 to its length.
-     * 
+     *
      * <p>This only works for files <= {@link Integer#MAX_VALUE} bytes.
      *
      * @param file the file to map
@@ -3651,17 +3816,17 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     * 
+     *
      * Maps a file in to memory as per
      * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}
      * using the requested {@link MapMode}.
-     * 
+     *
      * <p>Files are mapped from offset 0 to {@code size}.
-     * 
+     *
      * <p>If the mode is {@link MapMode#READ_WRITE} and the file does not exist,
      * it will be created with the requested {@code size}. Thus this method is
      * useful for creating memory mapped files which do not yet exist.
-     * 
+     *
      * <p>This only works for files <= {@link Integer#MAX_VALUE} bytes.
      *
      * @param file the file to map
@@ -3691,10 +3856,10 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     * 
+     *
      * Returns the lexically cleaned form of the path name, <i>usually</i> (but
      * not always) equivalent to the original. The following heuristics are used:
-     * 
+     *
      * <ul>
      * <li>empty string becomes .
      * <li>. stays as .
@@ -3703,7 +3868,7 @@ public final class IOUtil {
      * <li>collapse multiple slashes
      * <li>delete trailing slashes (unless the path is just "/")
      * </ul>
-     * 
+     *
      * <p>These heuristics do not always match the behavior of the filesystem. In
      * particular, consider the path {@code a/../b}, which {@code simplifyPath}
      * will change to {@code b}. If {@code a} is a symlink to {@code x}, {@code
@@ -3762,7 +3927,7 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     * 
+     *
      * Returns the <a href="http://en.wikipedia.org/wiki/Filename_extension">file
      * extension</a> for the given file name, or the empty string if the file has
      * no extension.  The result does not include the '{@code .}'.
@@ -3781,7 +3946,7 @@ public final class IOUtil {
 
     /**
      * Note: copied from Google Guava under Apache License v2.
-     * 
+     *
      * Returns the file name without its
      * <a href="http://en.wikipedia.org/wiki/Filename_extension">file extension</a> or path. This is
      * similar to the {@code basename} unix command. The result does not include the '{@code .}'.
@@ -5066,7 +5231,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long merge(final File[] sourceFiles, final File destFile) throws UncheckedIOException {
-        return merge(N.asList(sourceFiles), destFile);
+        return merge(Array.asList(sourceFiles), destFile);
     }
 
     /**
@@ -5587,7 +5752,7 @@ public final class IOUtil {
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File file, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Try.Consumer<String, E> lineParser, final Try.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
-        parse(file.isDirectory() ? listFiles(file, true, true) : N.asList(file), lineOffset, count, processThreadNum, queueSize, lineParser, onComplete);
+        parse(file.isDirectory() ? listFiles(file, true, true) : Array.asList(file), lineOffset, count, processThreadNum, queueSize, lineParser, onComplete);
     }
 
     /**
@@ -5791,7 +5956,7 @@ public final class IOUtil {
     public static <E extends Exception, E2 extends Exception> void parse(final File file, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Try.Consumer<String, E> lineParser, final Try.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
-        parse(file.isDirectory() ? listFiles(file, true, true) : N.asList(file), lineOffset, count, readThreadNum, processThreadNum, queueSize, lineParser,
+        parse(file.isDirectory() ? listFiles(file, true, true) : Array.asList(file), lineOffset, count, readThreadNum, processThreadNum, queueSize, lineParser,
                 onComplete);
     }
 

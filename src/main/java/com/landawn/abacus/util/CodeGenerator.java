@@ -109,12 +109,12 @@ public final class CodeGenerator {
 
     /**
      * Write the generated methods by the fields defined the in specified class to the source file.
-     * 
+     *
      * <br />
      * Add below comments to specified the section where the generated methods should be written to
      * <pre>
      * =====>
-     * 
+     *
      * <=====
      * </pre>
      *
@@ -127,12 +127,12 @@ public final class CodeGenerator {
 
     /**
      * Write the generated methods by the fields defined the in specified class to the source file.
-     * 
+     *
      * <br />
      * Add below comments to specified the section where the generated methods should be written to
      * <pre>
      * =====>
-     * 
+     *
      * <=====
      * </pre>
      *
@@ -154,15 +154,15 @@ public final class CodeGenerator {
 
     /**
      * Write the generated methods by the fields defined the in specified class to the source file.
-     * 
+     *
      * <br />
      * Add below comments to specified the section where the generated methods should be written to
      * <pre>
      * =====>
-     * 
+     *
      * <=====
      * </pre>
-     *  
+     *
      *
      * @param srcDir
      * @param cls
@@ -195,7 +195,7 @@ public final class CodeGenerator {
         }
 
         final String simpleClassName = cls.getSimpleName();
-        final List<String> lines = ImmutableList.of(IOUtil.readLines(clsSourceFile));
+        final List<String> lines = ImmutableList.of(IOUtil.readAllLines(clsSourceFile));
         final Map<String, Type<?>> fieldTypes = new LinkedHashMap<>();
 
         for (Field field : cls.getDeclaredFields()) {
@@ -420,7 +420,7 @@ public final class CodeGenerator {
 
             if (N.notNullOrEmpty(annoMap)) {
                 final List<String> finalLines = new ArrayList<>();
-                final List<String> srcLines = IOUtil.readLines(clsSourceFile);
+                final List<String> srcLines = IOUtil.readAllLines(clsSourceFile);
 
                 for (int i = 0, len = srcLines.size(); i < len; i++) {
                     final String line = srcLines.get(i);
@@ -452,7 +452,7 @@ public final class CodeGenerator {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param srcDir
     //     * @param packageName
     //     * @param classNameFields
@@ -466,7 +466,7 @@ public final class CodeGenerator {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param srcDir
     //     * @param packageName
     //     * @param classNameFields
@@ -489,7 +489,7 @@ public final class CodeGenerator {
 
     //    /**
     //     * Generate and Print out the methods according to fields defined the in specified class.
-    //     * 
+    //     *
     //     * @param cls
     //     */
     //    public static void printClassMethod(final Class<?> cls) {
@@ -498,7 +498,7 @@ public final class CodeGenerator {
     //
     //    /**
     //     * Generate and Print out the methods according to fields defined the in specified class.
-    //     * 
+    //     *
     //     * @param cls
     //     * @param constructor generate constructor
     //     * @param copyMethod generate the copy method.
@@ -514,7 +514,7 @@ public final class CodeGenerator {
     //
     //    /**
     //     * Generate and Print out the methods according to fields defined the in specified class.
-    //     * 
+    //     *
     //     * @param cls
     //     * @param constructor
     //     * @param copyMethod
@@ -688,7 +688,7 @@ public final class CodeGenerator {
             final String fieldName = entry.getKey();
             final String simpleTypeName = getSimpleType(entry.getValue(), pkgName, importedClasses);
             //            final String getPrefix = boolean.class.equals(entry.getValue().getTypeClass()) || Boolean.class.equals(entry.getValue().getTypeClass()) ? "is"
-            //                    : "get"; 
+            //                    : "get";
             final String postfix = fieldName2MethodName.containsKey(fieldName) ? fieldName2MethodName.get(fieldName)
                     : (StringUtil.isAllUpperCase(fieldName) ? fieldName : StringUtil.capitalize(fieldName));
 
@@ -1120,7 +1120,7 @@ public final class CodeGenerator {
                 tmp += ">";
                 typeName = tmp;
 
-                //                for (Type<?> paraType : parameterTypes) {                    
+                //                for (Type<?> paraType : parameterTypes) {
                 //                    try {
                 //                        if (isUsualType(paraType.getTypeClass().getCanonicalName())) {
                 //                            typeName = typeName.replace(ClassUtil.getPackageName(paraType.getTypeClass()) + ".", "");

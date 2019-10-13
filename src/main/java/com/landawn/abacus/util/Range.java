@@ -27,11 +27,11 @@ import com.landawn.abacus.util.u.Optional;
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
- * 
+ *
  * <p>
  * An immutable range of objects from a minimum to maximum point inclusive.
  * </p>
- * 
+ *
  * <p>
  * #ThreadSafe# if the objects and comparator are thread-safe
  * </p>
@@ -40,8 +40,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <T>
  * @since 3.0
  */
-@SuppressWarnings("rawtypes")
-public final class Range<T extends Comparable> implements Serializable {
+public final class Range<T extends Comparable<? super T>> implements Serializable {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 545606166758706779L;
@@ -76,11 +75,11 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Obtains a range using the specified element as both the minimum and maximum in this range.
      * </p>
-     * 
+     *
      * <p>
      * The range uses the natural ordering of the elements to determine where values lie in the range.
      * </p>
-     * 
+     *
      * @param <T>
      *            the type of the elements in this range
      * @param element
@@ -88,7 +87,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * @return
      * @throws IllegalArgumentException if the element is null
      */
-    public static <T extends Comparable<T>> Range<T> just(final T element) {
+    public static <T extends Comparable<? super T>> Range<T> just(final T element) {
         return closed(element, element);
     }
 
@@ -100,12 +99,12 @@ public final class Range<T extends Comparable> implements Serializable {
      * @return
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
-    public static <T extends Comparable<T>> Range<T> open(final T min, final T max) {
+    public static <T extends Comparable<? super T>> Range<T> open(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
             throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");
         }
 
-        return new Range<T>(new LowerEndpoint<T>(min, false), new UpperEndpoint<T>(max, false), BoundType.OPEN_OPEN);
+        return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, false), BoundType.OPEN_OPEN);
     }
 
     /**
@@ -116,12 +115,12 @@ public final class Range<T extends Comparable> implements Serializable {
      * @return
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
-    public static <T extends Comparable<T>> Range<T> openClosed(final T min, final T max) {
+    public static <T extends Comparable<? super T>> Range<T> openClosed(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
             throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");
         }
 
-        return new Range<T>(new LowerEndpoint<T>(min, false), new UpperEndpoint<T>(max, true), BoundType.OPEN_CLOSED);
+        return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, true), BoundType.OPEN_CLOSED);
     }
 
     /**
@@ -132,12 +131,12 @@ public final class Range<T extends Comparable> implements Serializable {
      * @return
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
-    public static <T extends Comparable<T>> Range<T> closedOpen(final T min, final T max) {
+    public static <T extends Comparable<? super T>> Range<T> closedOpen(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
             throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");
         }
 
-        return new Range<T>(new LowerEndpoint<T>(min, true), new UpperEndpoint<T>(max, false), BoundType.CLOSED_OPEN);
+        return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, false), BoundType.CLOSED_OPEN);
     }
 
     /**
@@ -148,12 +147,12 @@ public final class Range<T extends Comparable> implements Serializable {
      * @return
      * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
      */
-    public static <T extends Comparable<T>> Range<T> closed(final T min, final T max) {
+    public static <T extends Comparable<? super T>> Range<T> closed(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
             throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");
         }
 
-        return new Range<T>(new LowerEndpoint<T>(min, true), new UpperEndpoint<T>(max, true), BoundType.CLOSED_CLOSED);
+        return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, true), BoundType.CLOSED_CLOSED);
     }
 
     /**
@@ -168,7 +167,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Gets the minimum value in this range.
      * </p>
-     * 
+     *
      * @return
      */
     public T lowerEndpoint() {
@@ -179,7 +178,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Gets the maximum value in this range.
      * </p>
-     * 
+     *
      * @return
      */
     public T upperEndpoint() {
@@ -193,7 +192,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether the specified element occurs within this range.
      * </p>
-     * 
+     *
      * @param element
      *            the element to check for, null returns false
      * @return true if the specified element occurs within this range
@@ -229,7 +228,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether this range starts with the specified element.
      * </p>
-     * 
+     *
      * @param element
      *            the element to check for, null returns false
      * @return true if the specified element occurs within this range
@@ -246,7 +245,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether this range starts with the specified element.
      * </p>
-     * 
+     *
      * @param element
      *            the element to check for, null returns false
      * @return true if the specified element occurs within this range
@@ -263,7 +262,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether this range is after the specified element.
      * </p>
-     * 
+     *
      * @param element
      *            the element to check for, null returns false
      * @return true if this range is entirely after the specified element
@@ -280,7 +279,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether this range is before the specified element.
      * </p>
-     * 
+     *
      * @param element
      *            the element to check for, null returns false
      * @return true if this range is entirely before the specified element
@@ -297,12 +296,12 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks where the specified element occurs relative to this range.
      * </p>
-     * 
+     *
      * <p>
      * Returns {@code -1} if this range is before the specified element,
-     * {@code 1} if the this range is after the specified element, otherwise {@code 0} if the specified element is contained in this range. 
+     * {@code 1} if the this range is after the specified element, otherwise {@code 0} if the specified element is contained in this range.
      * </p>
-     * 
+     *
      * @param element
      *            the element to check for, not null
      * @return -1, 0 or +1 depending on the element's location relative to the range
@@ -329,7 +328,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether this range contains all the elements of the specified range.
      * </p>
-     * 
+     *
      * @param other
      *            the range to check, null returns false
      * @return true if this range contains the specified range
@@ -349,8 +348,8 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether this range is completely after the specified range.
      * </p>
-     * 
-     * 
+     *
+     *
      * @param other
      *            the range to check, null returns false
      * @return true if this range is completely after the specified range
@@ -368,8 +367,8 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether this range is completely before the specified range.
      * </p>
-     * 
-     * 
+     *
+     *
      * @param other
      *            the range to check, null returns false
      * @return true if this range is completely before the specified range
@@ -388,12 +387,12 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Checks whether this range is overlapped by the specified range.
      * </p>
-     * 
+     *
      * <p>
      * Two ranges overlap if there is at least one element in common.
      * </p>
-     * 
-     * 
+     *
+     *
      * @param other
      *            the range to test, null returns false
      * @return true if the specified range overlaps with this range; otherwise, {@code false}
@@ -412,7 +411,7 @@ public final class Range<T extends Comparable> implements Serializable {
 
     /**
      * Calculate the intersection of {@code this} and an overlapping Range.
-     * 
+     *
      * @param other
      *            overlapping Range
      * @return range representing the intersection of {@code this} and {@code other}, {@code this} if equal, or <code>Optional.empty()</code> if they're not overlapped.
@@ -436,7 +435,7 @@ public final class Range<T extends Comparable> implements Serializable {
             boundType = newUpperEndpoint.isClosed ? BoundType.OPEN_CLOSED : BoundType.OPEN_OPEN;
         }
 
-        return Optional.of(new Range<T>(newLowerEndpoint, newUpperEndpoint, boundType));
+        return Optional.of(new Range<>(newLowerEndpoint, newUpperEndpoint, boundType));
     }
 
     /**
@@ -444,11 +443,11 @@ public final class Range<T extends Comparable> implements Serializable {
      * <br />
      * Returns the minimal range that {@linkplain #encloses encloses} both this range and {@code
      * other}. For example, the span of {@code [1..3]} and {@code (5..7)} is {@code [1..7)}.
-     * 
+     *
      * <p><i>If</i> the input ranges are {@linkplain #isConnected connected}, the returned range can
      * also be called their <i>union</i>. If they are not, note that the span might contain values
      * that are not contained in either input range.
-     * 
+     *
      * <p>Like {@link #intersection(Range) intersection}, this operation is commutative, associative
      * and idempotent. Unlike it, it is always well-defined for any two input ranges.
      *
@@ -467,7 +466,7 @@ public final class Range<T extends Comparable> implements Serializable {
             boundType = newUpperEndpoint.isClosed ? BoundType.OPEN_CLOSED : BoundType.OPEN_OPEN;
         }
 
-        return new Range<T>(newLowerEndpoint, newUpperEndpoint, boundType);
+        return new Range<>(newLowerEndpoint, newUpperEndpoint, boundType);
     }
 
     /**
@@ -491,11 +490,11 @@ public final class Range<T extends Comparable> implements Serializable {
      * Compares this range to another object to test if they are equal.
      * </p>
      * .
-     * 
+     *
      * <p>
      * To be equal, the minimum and maximum values must be equal, which ignores any differences in the comparator.
      * </p>
-     * 
+     *
      * @param obj
      *            the reference object with which to compare
      * @return true if this object is equal
@@ -518,7 +517,7 @@ public final class Range<T extends Comparable> implements Serializable {
      * <p>
      * Gets a suitable hash code for the range.
      * </p>
-     * 
+     *
      * @return a hash code value for this object
      */
     @Override
@@ -544,7 +543,7 @@ public final class Range<T extends Comparable> implements Serializable {
     /**
      * The Enum BoundType.
      */
-    public static enum BoundType {
+    public enum BoundType {
 
         /** The open open. */
         OPEN_OPEN,
@@ -561,7 +560,7 @@ public final class Range<T extends Comparable> implements Serializable {
      *
      * @param <T>
      */
-    static abstract class Endpoint<T extends Comparable> implements Serializable {
+    static abstract class Endpoint<T extends Comparable<? super T>> implements Serializable {
 
         /** The Constant serialVersionUID. */
         private static final long serialVersionUID = -1404748904424344410L;
@@ -606,7 +605,7 @@ public final class Range<T extends Comparable> implements Serializable {
      *
      * @param <T>
      */
-    static class LowerEndpoint<T extends Comparable> extends Endpoint<T> implements Serializable {
+    static class LowerEndpoint<T extends Comparable<? super T>> extends Endpoint<T> implements Serializable {
 
         /** The Constant serialVersionUID. */
         private static final long serialVersionUID = -1369183906861608859L;
@@ -635,7 +634,7 @@ public final class Range<T extends Comparable> implements Serializable {
          * <p>
          * Gets a suitable hash code for the range.
          * </p>
-         * 
+         *
          * @return a hash code value for this object
          */
         @Override
@@ -650,11 +649,11 @@ public final class Range<T extends Comparable> implements Serializable {
          * Compares this range to another object to test if they are equal.
          * </p>
          * .
-         * 
+         *
          * <p>
          * To be equal, the minimum and maximum values must be equal, which ignores any differences in the comparator.
          * </p>
-         * 
+         *
          * @param obj
          *            the reference object with which to compare
          * @return true if this object is equal
@@ -689,7 +688,7 @@ public final class Range<T extends Comparable> implements Serializable {
      *
      * @param <T>
      */
-    static class UpperEndpoint<T extends Comparable> extends Endpoint<T> implements Serializable {
+    static class UpperEndpoint<T extends Comparable<? super T>> extends Endpoint<T> implements Serializable {
 
         /** The Constant serialVersionUID. */
         private static final long serialVersionUID = 3180376045860768477L;

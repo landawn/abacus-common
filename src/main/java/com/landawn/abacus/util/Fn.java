@@ -1636,8 +1636,7 @@ public abstract class Fn extends Comparators {
      * @param target
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Predicate<T> greaterThan(final T target) {
+    public static <T extends Comparable<? super T>> Predicate<T> greaterThan(final T target) {
         return new Predicate<T>() {
             @Override
             public boolean test(T value) {
@@ -1652,8 +1651,7 @@ public abstract class Fn extends Comparators {
      * @param target
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Predicate<T> greaterEqual(final T target) {
+    public static <T extends Comparable<? super T>> Predicate<T> greaterEqual(final T target) {
         return new Predicate<T>() {
             @Override
             public boolean test(T value) {
@@ -1668,8 +1666,7 @@ public abstract class Fn extends Comparators {
      * @param target
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Predicate<T> lessThan(final T target) {
+    public static <T extends Comparable<? super T>> Predicate<T> lessThan(final T target) {
         return new Predicate<T>() {
             @Override
             public boolean test(T value) {
@@ -1684,8 +1681,7 @@ public abstract class Fn extends Comparators {
      * @param target
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Predicate<T> lessEqual(final T target) {
+    public static <T extends Comparable<? super T>> Predicate<T> lessEqual(final T target) {
         return new Predicate<T>() {
             @Override
             public boolean test(T value) {
@@ -1702,8 +1698,7 @@ public abstract class Fn extends Comparators {
      * @param maxValue
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Predicate<T> between(final T minValue, final T maxValue) {
+    public static <T extends Comparable<? super T>> Predicate<T> between(final T minValue, final T maxValue) {
         return new Predicate<T>() {
             @Override
             public boolean test(T value) {
@@ -1919,8 +1914,7 @@ public abstract class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> BiPredicate<T, T> greaterThan() {
+    public static <T extends Comparable<? super T>> BiPredicate<T, T> greaterThan() {
         return (BiPredicate<T, T>) BiPredicates.GREATER_THAN;
     }
 
@@ -1929,8 +1923,7 @@ public abstract class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> BiPredicate<T, T> greaterEqual() {
+    public static <T extends Comparable<? super T>> BiPredicate<T, T> greaterEqual() {
         return (BiPredicate<T, T>) BiPredicates.GREATER_EQUAL;
     }
 
@@ -1939,8 +1932,7 @@ public abstract class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> BiPredicate<T, T> lessThan() {
+    public static <T extends Comparable<? super T>> BiPredicate<T, T> lessThan() {
         return (BiPredicate<T, T>) BiPredicates.LESS_THAN;
     }
 
@@ -1949,8 +1941,7 @@ public abstract class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> BiPredicate<T, T> lessEqual() {
+    public static <T extends Comparable<? super T>> BiPredicate<T, T> lessEqual() {
         return (BiPredicate<T, T>) BiPredicates.LESS_EQUAL;
     }
 
@@ -3188,8 +3179,7 @@ public abstract class Fn extends Comparators {
      * @param target
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Function<T, Integer> compareTo(final T target) {
+    public static <T extends Comparable<? super T>> Function<T, Integer> compareTo(final T target) {
         return new Function<T, Integer>() {
             @Override
             public Integer apply(T t) {
@@ -3210,7 +3200,7 @@ public abstract class Fn extends Comparators {
         // N.checkArgNotNull(cmp);
 
         if (cmp == null || cmp == Comparators.naturalOrder()) {
-            return (Function) compareTo((Comparable) target);
+            return compareTo((Comparable) target);
         }
 
         return new Function<T, Integer>() {
@@ -3226,8 +3216,7 @@ public abstract class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> BiFunction<T, T, Integer> compare() {
+    public static <T extends Comparable<? super T>> BiFunction<T, T, Integer> compare() {
         return COMPARE;
     }
 
