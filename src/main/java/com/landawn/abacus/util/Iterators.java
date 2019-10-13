@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ import com.landawn.abacus.util.function.TriFunction;
 
 // TODO: Auto-generated Javadoc
 /**
- * The Class Iterators.
+ * The methods in this class should only read the input {@code Collections/Arrays}, not modify any of them.
  *
  * @author Haiyang Li
  * @since 0.9
@@ -816,7 +816,7 @@ public final class Iterators {
                 return e;
             }
         };
-    };
+    }
 
     /**
      *
@@ -900,7 +900,7 @@ public final class Iterators {
                 return iter.next();
             }
         };
-    };
+    }
 
     /**
      * Repeat each to size.
@@ -992,7 +992,7 @@ public final class Iterators {
                 return iter.next();
             }
         };
-    };
+    }
 
     /**
      *
@@ -2313,7 +2313,7 @@ public final class Iterators {
     /**
      * Calls {@code next()} on {@code iterator}, either {@code n} times
      * or until {@code hasNext()} returns {@code false}, whichever comes first.
-     * 
+     *
      * This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
      * @param <T>
@@ -2399,9 +2399,9 @@ public final class Iterators {
     /**
      * Calls {@code next()} on {@code iterator}, either {@code offset} times
      * or until {@code hasNext()} returns {@code false}, whichever comes first.
-     * 
+     *
      * This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
-     *  
+     *
      *
      * @param <T>
      * @param iter

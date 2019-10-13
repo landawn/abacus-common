@@ -3195,20 +3195,24 @@ public abstract class Fn extends Comparators {
      * @param cmp
      * @return
      */
-    @SuppressWarnings("rawtypes")
     public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> cmp) {
         // N.checkArgNotNull(cmp);
 
-        if (cmp == null || cmp == Comparators.naturalOrder()) {
-            return compareTo((Comparable) target);
+        if (cmp == null) {
+            return new Function<T, Integer>() {
+                @Override
+                public Integer apply(T t) {
+                    return NATURAL_ORDER.compare(t, target);
+                }
+            };
+        } else {
+            return new Function<T, Integer>() {
+                @Override
+                public Integer apply(T t) {
+                    return N.compare(t, target, cmp);
+                }
+            };
         }
-
-        return new Function<T, Integer>() {
-            @Override
-            public Integer apply(T t) {
-                return N.compare(t, target, cmp);
-            }
-        };
     }
 
     /**
