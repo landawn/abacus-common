@@ -87,6 +87,10 @@ import com.landawn.abacus.util.function.Predicate;
  */
 public final class N extends CommonUtil {
 
+    private static final float LOAD_FACTOR_FOR_FLAT_MAP = 1.75f;
+
+    private static final int LOAD_FACTOR_FOR_TWO_FLAT_MAP = 2;
+
     /** The Constant asyncExecutor. */
     private static final AsyncExecutor asyncExecutor = new AsyncExecutor(8, 256, 180L, TimeUnit.SECONDS);
 
@@ -10754,7 +10758,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, C extends Collection<? extends T>, E extends Exception> void forEach(final C c, final Try.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, final Try.Consumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(c)) {
@@ -10782,7 +10786,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, C extends Collection<? extends T>, E extends Exception> void forEach(final C c, int fromIndex, final int toIndex,
+    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, int fromIndex, final int toIndex,
             final Try.Consumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
@@ -10854,7 +10858,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, C extends Collection<? extends T>, E extends Exception> void forEach(final C c, final Try.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, final Try.IndexedConsumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(c)) {
@@ -10883,7 +10887,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, C extends Collection<? extends T>, E extends Exception> void forEach(final C c, int fromIndex, final int toIndex,
+    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, int fromIndex, final int toIndex,
             final Try.IndexedConsumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
@@ -13906,7 +13910,8 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
-        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE
+                : (int) ((toIndex - fromIndex) * LOAD_FACTOR_FOR_FLAT_MAP);
         final List<R> result = new ArrayList<>(len);
         Collection<? extends R> mr = null;
 
@@ -13963,7 +13968,8 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
-        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE
+                : (int) ((toIndex - fromIndex) * LOAD_FACTOR_FOR_FLAT_MAP);
         final List<R> result = new ArrayList<>(len);
         Collection<? extends R> mr = null;
 
@@ -14043,7 +14049,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE
+                : (int) ((toIndex - fromIndex) * LOAD_FACTOR_FOR_FLAT_MAP);
         final C result = supplier.apply(len);
         Collection<? extends R> mr = null;
 
@@ -14104,7 +14111,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE
+                : (int) ((toIndex - fromIndex) * LOAD_FACTOR_FOR_FLAT_MAP);
         final C result = supplier.apply(len);
         Collection<? extends R> mr = null;
 
@@ -14187,7 +14195,7 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final int len = a.length > N.MAX_ARRAY_SIZE / 2 ? N.MAX_ARRAY_SIZE : a.length * 2;
+        final int len = a.length > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_TWO_FLAT_MAP ? N.MAX_ARRAY_SIZE : a.length * LOAD_FACTOR_FOR_TWO_FLAT_MAP;
         final C result = supplier.apply(len);
 
         for (T e : a) {
@@ -14257,7 +14265,7 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final int len = c.size() > N.MAX_ARRAY_SIZE / 2 ? N.MAX_ARRAY_SIZE : c.size() * 2;
+        final int len = c.size() > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_TWO_FLAT_MAP ? N.MAX_ARRAY_SIZE : c.size() * LOAD_FACTOR_FOR_TWO_FLAT_MAP;
         final C result = supplier.apply(len);
 
         for (T e : c) {
@@ -14320,7 +14328,8 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
-        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE
+                : (int) ((toIndex - fromIndex) * LOAD_FACTOR_FOR_FLAT_MAP);
         final List<R> result = new ArrayList<>(len);
         R[] mr = null;
 
@@ -14376,7 +14385,8 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
-        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE
+                : (int) ((toIndex - fromIndex) * LOAD_FACTOR_FOR_FLAT_MAP);
         final List<R> result = new ArrayList<>(len);
         R[] mr = null;
 
@@ -14456,7 +14466,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE
+                : (int) ((toIndex - fromIndex) * LOAD_FACTOR_FOR_FLAT_MAP);
         final C result = supplier.apply(len);
         R[] mr = null;
 
@@ -14517,7 +14528,8 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / 1.75 ? N.MAX_ARRAY_SIZE : (int) ((toIndex - fromIndex) * 1.75);
+        final int len = (toIndex - fromIndex) > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE
+                : (int) ((toIndex - fromIndex) * LOAD_FACTOR_FOR_FLAT_MAP);
         final C result = supplier.apply(len);
         R[] mr = null;
 
@@ -17225,6 +17237,123 @@ public final class N extends CommonUtil {
         }
 
         return result;
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        return Iterables.allMatch(c, filter);
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean allMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        return Iterables.allMatch(a, filter);
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        return Iterables.anyMatch(c, filter);
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        return Iterables.anyMatch(a, filter);
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+        return Iterables.noneMatch(c, filter);
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+        return Iterables.noneMatch(a, filter);
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param atLeast the at least
+     * @param atMost the at most
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean nMatch(final Collection<? extends T> c, final int atLeast, final int atMost,
+            final Try.Predicate<? super T, E> filter) throws E {
+        return Iterables.nMatch(c, atLeast, atMost, filter);
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param atLeast the at least
+     * @param atMost the at most
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Try.Predicate<? super T, E> filter) throws E {
+        return Iterables.nMatch(a, atLeast, atMost, filter);
     }
 
     /**

@@ -1275,7 +1275,9 @@ public final class Iterables {
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
+     * @deprecated replaced by {@code N#allMatch(Collection, com.landawn.abacus.util.Try.Predicate)}
      */
+    @Deprecated
     public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -1299,7 +1301,9 @@ public final class Iterables {
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
+     * @deprecated replaced by {@code N#allMatch(Object[], com.landawn.abacus.util.Try.Predicate)}
      */
+    @Deprecated
     public static <T, E extends Exception> boolean allMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(a)) {
             return true;
@@ -1323,7 +1327,9 @@ public final class Iterables {
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
+     * @deprecated replaced by {@code N#anyMatch(Collection, com.landawn.abacus.util.Try.Predicate)}
      */
+    @Deprecated
     public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -1347,7 +1353,9 @@ public final class Iterables {
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
+     * @deprecated replaced by {@code N#anyMatch(Object[], com.landawn.abacus.util.Try.Predicate)}
      */
+    @Deprecated
     public static <T, E extends Exception> boolean anyMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(a)) {
             return false;
@@ -1371,7 +1379,9 @@ public final class Iterables {
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
+     * @deprecated replaced by {@code N#noneMatch(Collection, com.landawn.abacus.util.Try.Predicate)}
      */
+    @Deprecated
     public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -1395,7 +1405,9 @@ public final class Iterables {
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
+     * @deprecated replaced by {@code N#noneMatch(Object[], com.landawn.abacus.util.Try.Predicate)}
      */
+    @Deprecated
     public static <T, E extends Exception> boolean noneMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(a)) {
             return true;
@@ -1421,7 +1433,9 @@ public final class Iterables {
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
+     * @deprecated replaced by {@code N#nMatch(Collection, int, int, com.landawn.abacus.util.Try.Predicate)}
      */
+    @Deprecated
     public static <T, E extends Exception> boolean nMatch(final Collection<? extends T> c, final int atLeast, final int atMost,
             final Try.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNegative(atLeast, "atLeast");
@@ -1452,7 +1466,9 @@ public final class Iterables {
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
+     * @deprecated replaced by {@code N#nMatch(Object[], int, int, com.landawn.abacus.util.Try.Predicate)}
      */
+    @Deprecated
     public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Try.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNegative(atLeast, "atLeast");
         N.checkArgNotNegative(atMost, "atMost");
