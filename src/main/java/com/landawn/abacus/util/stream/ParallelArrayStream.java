@@ -175,7 +175,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
+        return newStream(Stream.parallelConcatt(iters, iters.size()), false, null);
     }
 
     @Override
@@ -229,7 +229,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             });
         }
 
-        return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
+        return newStream(Stream.parallelConcatt(iters, iters.size()), false, null);
     }
 
     @Override
@@ -304,7 +304,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             });
         }
 
-        return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
+        return newStream(Stream.parallelConcatt(iters, iters.size()), false, null);
     }
 
     @Override
@@ -378,7 +378,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
+        return newStream(Stream.parallelConcatt(iters, iters.size()), false, null);
     }
 
     @Override
@@ -428,7 +428,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             });
         }
 
-        return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
+        return newStream(Stream.parallelConcatt(iters, iters.size()), false, null);
     }
 
     @Override
@@ -479,7 +479,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             });
         }
 
-        return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
+        return newStream(Stream.parallelConcatt(iters, iters.size()), false, null);
     }
 
     @Override
@@ -1119,7 +1119,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
             for (int i = 0; i < threadNum; i++) {
                 iters.add(new ObjIteratorEx<R>() {
-
                     private T next = null;
                     private Iterator<? extends R> cur = null;
                     private Stream<? extends R> s = null;
@@ -1193,6 +1192,91 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         });
 
         return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);
+    }
+
+    @Override
+    public <R> Stream<R> flattMap(final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        assertNotClosed();
+
+        if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
+            return new ParallelIteratorStream<>(sequential().flattMap(mapper), false, null, maxThreadNum, splitor, asyncExecutor, null);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ObjIteratorEx<R>> iters = new ArrayList<>(threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+                iters.add(new ObjIteratorEx<R>() {
+                    private int cursor = fromIndex + sliceIndex * sliceSize;
+                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private Iterator<? extends R> cur = null;
+                    private Collection<? extends R> c = null;
+
+                    @Override
+                    public boolean hasNext() {
+                        while ((cur == null || cur.hasNext() == false) && cursor < to) {
+                            c = mapper.apply(elements[cursor++]);
+                            cur = N.isNullOrEmpty(c) ? null : c.iterator();
+                        }
+
+                        return cur != null && cur.hasNext();
+                    }
+
+                    @Override
+                    public R next() {
+                        if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
+                            throw new NoSuchElementException();
+                        }
+
+                        return cur.next();
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                iters.add(new ObjIteratorEx<R>() {
+                    private T next = null;
+                    private Iterator<? extends R> cur = null;
+                    private Collection<? extends R> c = null;
+
+                    @Override
+                    public boolean hasNext() {
+                        while ((cur == null || cur.hasNext() == false) && next != NONE) {
+                            synchronized (elements) {
+                                if (cursor.intValue() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    next = (T) NONE;
+                                    break;
+                                }
+                            }
+
+                            c = mapper.apply(next);
+                            cur = N.isNullOrEmpty(c) ? null : c.iterator();
+                        }
+
+                        return cur != null && cur.hasNext();
+                    }
+
+                    @Override
+                    public R next() {
+                        if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
+                            throw new NoSuchElementException();
+                        }
+
+                        return cur.next();
+                    }
+                });
+            }
+        }
+
+        return newStream(Stream.parallelConcatt(iters, iters.size()), false, null);
     }
 
     @Override
@@ -2340,7 +2424,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
+        return newStream(Stream.parallelConcatt(iters, iters.size()), false, null);
     }
 
     @Override

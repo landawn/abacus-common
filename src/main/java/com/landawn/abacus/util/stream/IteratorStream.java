@@ -915,6 +915,33 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
+    public <R> Stream<R> flattMap(final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        return newStream(new ObjIteratorEx<R>() {
+            private Iterator<? extends R> cur = null;
+            private Collection<? extends R> c = null;
+
+            @Override
+            public boolean hasNext() {
+                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
+                    c = mapper.apply(elements.next());
+                    cur = N.isNullOrEmpty(c) ? null : c.iterator();
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            @Override
+            public R next() {
+                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur.next();
+            }
+        }, false, null);
+    }
+
+    @Override
     public CharStream flatMapToChar(final Function<? super T, ? extends CharStream> mapper) {
         final CharIteratorEx iter = new CharIteratorEx() {
             private CharIterator cur = null;

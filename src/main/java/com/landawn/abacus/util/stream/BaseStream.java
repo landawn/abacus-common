@@ -615,9 +615,9 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     @TerminalOp
     LongMultiset<T> toLongMultiset(Supplier<? extends LongMultiset<T>> supplier);
 
-    @Beta
     @SequentialOnly
     @TerminalOp
+    @Beta
     void println();
 
     /**

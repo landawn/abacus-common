@@ -1,5 +1,11 @@
 ### 1.9.8
 
+* add `ExceptionalStream.zip/innerJoin/fullJoin/...`.
+* Improvements and bug fix.
+
+
+### 1.9.8
+
 * Remove `Seq`, replaced by `ExceptionalStream` and `Iterables`.
 * Improvements and bug fix.
 

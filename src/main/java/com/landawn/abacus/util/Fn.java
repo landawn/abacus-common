@@ -10877,6 +10877,17 @@ public abstract class Fn extends Comparators {
          *
          * @param <T>
          * @param <E>
+         * @return
+         */
+        @Beta
+        public static <T, E extends Exception> Try.Predicate<T, E> notNull() {
+            return Fn.NOT_NULL;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <E>
          * @param predicate
          * @return
          */

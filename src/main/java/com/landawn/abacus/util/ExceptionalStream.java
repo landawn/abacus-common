@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -80,6 +82,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
 
     static final Random RAND = new SecureRandom();
+
+    /** The Constant KK. */
+    static final Try.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception> KK = new Try.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception>() {
+        @Override
+        public Object apply(Map.Entry<Keyed<Object, Object>, Object> t) throws Exception {
+            return t.getKey().val();
+        }
+    };
 
     /** The elements. */
     private final ExceptionalIterator<T, E> elements;
@@ -1288,14 +1298,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return empty();
         }
 
-        final Deque<Try.Runnable<? extends E>> closeHandlers = new ArrayDeque<>();
-
-        for (ExceptionalStream<? extends T, E> e : c) {
-            if (N.notNullOrEmpty(e.closeHandlers)) {
-                closeHandlers.addAll(e.closeHandlers);
-            }
-        }
-
         return newStream(new ExceptionalIterator<T, E>() {
             private final Iterator<? extends ExceptionalStream<? extends T, E>> iterators = c.iterator();
             private ExceptionalStream<? extends T, E> cur;
@@ -1323,7 +1325,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
                 return iter.next();
             }
-        }, closeHandlers);
+        }, mergeCloseHandlers(c));
     }
 
     /**
@@ -1362,7 +1364,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
-        return zip(a.iterator(), b.iterator(), zipFunction);
+        return zip(Iterables.iterator(a), Iterables.iterator(b), zipFunction);
     }
 
     /**
@@ -1375,7 +1377,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Collection<? extends C> c, final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
-        return zip(a.iterator(), b.iterator(), c.iterator(), zipFunction);
+        return zip(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), zipFunction);
     }
 
     /**
@@ -1425,6 +1427,61 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
+     * Zip together the "a" and "b" streams until one of them runs out of values.
+     * Each pair of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
+            final ExceptionalStream<? extends B, E> b, final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            private final ExceptionalIterator<? extends A, E> iterA = a.elements;
+            private final ExceptionalIterator<? extends B, E> iterB = b.elements;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iterA.hasNext() && iterB.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                return zipFunction.apply(iterA.next(), iterB.next());
+            }
+        }, mergeCloseHandlers(Array.asList(a, b)));
+    }
+
+    /**
+     * Zip together the "a", "b" and "c" streams until one of them runs out of values.
+     * Each triple of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
+            final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c,
+            final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            private final ExceptionalIterator<? extends A, E> iterA = a.elements;
+            private final ExceptionalIterator<? extends B, E> iterB = b.elements;
+            private final ExceptionalIterator<? extends C, E> iterC = c.elements;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                return zipFunction.apply(iterA.next(), iterB.next(), iterC.next());
+            }
+        }, mergeCloseHandlers(Array.asList(a, b, c)));
+    }
+
+    /**
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
@@ -1471,7 +1528,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final A valueForNoneA, final B valueForNoneB, final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
-        return zip(a.iterator(), b.iterator(), valueForNoneA, valueForNoneB, zipFunction);
+        return zip(Iterables.iterator(a), Iterables.iterator(b), valueForNoneA, valueForNoneB, zipFunction);
     }
 
     /**
@@ -1490,7 +1547,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Collection<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
-        return zip(a.iterator(), b.iterator(), c.iterator(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        return zip(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     /**
@@ -1558,28 +1615,23 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
+     * Zip together the "a" and "b" streams until one of them runs out of values.
+     * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param predicate
+     * @param a
+     * @param b
      * @return
      */
-    public ExceptionalStream<T, E> filter(final Try.Predicate<? super T, ? extends E> predicate) {
-        checkArgNotNull(predicate, "predicate");
-
+    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
+            final ExceptionalStream<? extends B, E> b, final A valueForNoneA, final B valueForNoneB,
+            final Try.BiFunction<? super A, ? super B, T, E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
-            private final T NONE = (T) N.NULL_MASK;
-            private T next = NONE;
+            private final ExceptionalIterator<? extends A, E> iterA = a.elements;
+            private final ExceptionalIterator<? extends B, E> iterB = b.elements;
 
             @Override
             public boolean hasNext() throws E {
-                while (next == NONE && elements.hasNext()) {
-                    next = elements.next();
-
-                    if (predicate.test(next)) {
-                        break;
-                    }
-                }
-
-                return next != NONE;
+                return iterA.hasNext() || iterB.hasNext();
             }
 
             @Override
@@ -1588,9 +1640,108 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                     throw new NoSuchElementException();
                 }
 
-                final T result = next;
-                next = NONE;
-                return result;
+                return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
+            }
+        }, mergeCloseHandlers(Array.asList(a, b)));
+    }
+
+    /**
+     * Zip together the "a", "b" and "c" streams until one of them runs out of values.
+     * Each triple of values is combined into a single value using the supplied zipFunction function.
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
+            final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c, final A valueForNoneA, final B valueForNoneB,
+            final C valueForNoneC, final Try.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            private final ExceptionalIterator<? extends A, E> iterA = a.elements;
+            private final ExceptionalIterator<? extends B, E> iterB = b.elements;
+            private final ExceptionalIterator<? extends C, E> iterC = c.elements;
+
+            @Override
+            public boolean hasNext() throws E {
+                return iterA.hasNext() || iterB.hasNext() || iterC.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
+                        iterC.hasNext() ? iterC.next() : valueForNoneC);
+            }
+        }, mergeCloseHandlers(Array.asList(a, b, c)));
+    }
+
+    private static <E extends Exception> Deque<Try.Runnable<? extends E>> mergeCloseHandlers(Collection<? extends ExceptionalStream<?, E>> closeHandlersList) {
+        if (N.isNullOrEmpty(closeHandlersList)) {
+            return null;
+        }
+
+        int count = 0;
+
+        for (ExceptionalStream<?, E> s : closeHandlersList) {
+            count += N.size(s.closeHandlers);
+        }
+
+        if (count == 0) {
+            return null;
+        }
+
+        final Deque<Try.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(count);
+
+        for (ExceptionalStream<?, E> s : closeHandlersList) {
+            if (N.notNullOrEmpty(s.closeHandlers)) {
+                newCloseHandlers.addAll(s.closeHandlers);
+            }
+        }
+
+        return newCloseHandlers;
+    }
+
+    /**
+     *
+     * @param predicate
+     * @return
+     */
+    public ExceptionalStream<T, E> filter(final Try.Predicate<? super T, ? extends E> predicate) {
+        checkArgNotNull(predicate, "predicate");
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean hasNext = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (hasNext == false) {
+                    while (elements.hasNext()) {
+                        next = elements.next();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext == false && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
             }
         }, sorted, comparator, closeHandlers);
     }
@@ -1722,6 +1873,35 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
+     * Distinct and filter by occurrences.
+     *
+     * @param keyMapper
+     * @param occurrencesFilter
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public ExceptionalStream<T, E> distinctBy(final Try.Function<? super T, ?, ? extends E> keyMapper, final Try.Predicate<? super Long, E> occurrencesFilter) {
+        final Supplier<? extends Map<Keyed<Object, T>, Long>> supplier = Suppliers.<Keyed<Object, T>, Long> ofLinkedHashMap();
+
+        final Try.Function<T, Keyed<Object, T>, E> keyedMapper = new Try.Function<T, Keyed<Object, T>, E>() {
+            @Override
+            public Keyed<Object, T> apply(T t) throws E {
+                return Keyed.of(keyMapper.apply(t), t);
+            }
+        };
+
+        final Try.Predicate<Map.Entry<Keyed<Object, T>, Long>, E> predicate = new Try.Predicate<Map.Entry<Keyed<Object, T>, Long>, E>() {
+            @Override
+            public boolean test(Map.Entry<Keyed<Object, T>, Long> e) throws E {
+                return occurrencesFilter.test(e.getValue());
+            }
+        };
+
+        return groupBy(keyedMapper, Collectors.counting(), supplier).filter(predicate)
+                .map((Try.Function<Map.Entry<Keyed<Object, T>, Long>, T, E>) (Try.Function) KK);
+    }
+
+    /**
      *
      * @param <U>
      * @param mapper
@@ -1827,12 +2007,29 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     public <R> ExceptionalStream<R, E> flattMap(final Try.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
         checkArgNotNull(mapper, "mapper");
 
-        return flatMap(new Try.Function<T, ExceptionalStream<? extends R, ? extends E>, E>() {
+        return newStream(new ExceptionalIterator<R, E>() {
+            private Iterator<? extends R> cur = null;
+            private Collection<? extends R> c = null;
+
             @Override
-            public ExceptionalStream<? extends R, ? extends E> apply(T t) throws E {
-                return ExceptionalStream.of(mapper.apply(t));
+            public boolean hasNext() throws E {
+                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
+                    c = mapper.apply(elements.next());
+                    cur = N.isNullOrEmpty(c) ? null : c.iterator();
+                }
+
+                return cur != null && cur.hasNext();
             }
-        });
+
+            @Override
+            public R next() throws E {
+                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur.next();
+            }
+        }, closeHandlers);
     }
 
     /**
@@ -2157,7 +2354,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @throws E the e
      */
     public <K, A, D> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Collector<? super T, A, D> downstream) throws E {
+            final Collector<? super T, A, D> downstream) {
         return groupBy(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
@@ -2174,7 +2371,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @throws E the e
      */
     public <K, A, D, M extends Map<K, D>> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E {
+            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
         return groupBy(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
     }
 
@@ -2192,7 +2389,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @throws E the e
      */
     public <K, V, A, D, M extends Map<K, D>> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream) throws E {
+            final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream) {
         return groupBy(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
@@ -2212,7 +2409,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public <K, V, A, D, M extends Map<K, D>> ExceptionalStream<Map.Entry<K, D>, E> groupBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Try.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, A, D> downstream,
-            final Supplier<? extends M> mapFactory) throws E {
+            final Supplier<? extends M> mapFactory) {
         checkArgNotNull(keyMapper, "keyMapper");
         checkArgNotNull(valueMapper, "valueMapper");
         checkArgNotNull(downstream, "downstream");
@@ -2239,6 +2436,16 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 }
             }
         }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param keyMapper
+     * @return
+     */
+    public <K> ExceptionalStream<Map.Entry<K, Integer>, E> countBy(final Try.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return groupBy(keyMapper, Collectors.countingInt());
     }
 
     /**
@@ -3307,6 +3514,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      *
+     * @return
+     */
+    public ExceptionalStream<T, E> skipNull() {
+        return filter(Fnn.notNull());
+    }
+
+    /**
+     *
      * @param maxSize
      * @return
      */
@@ -3579,6 +3794,377 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 }
             }
         });
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Beta
+    public ExceptionalStream<Indexed<T>, E> indexed() {
+        return map(new Try.Function<T, Indexed<T>, E>() {
+            private final MutableLong idx = new MutableLong(0);
+
+            @Override
+            public Indexed<T> apply(T t) {
+                return Indexed.of(t, idx.getAndIncrement());
+            }
+        });
+    }
+
+    /**
+     *
+     * @param <T2>
+     * @param <R>
+     * @param b
+     * @param zipFunction
+     * @return
+     */
+    @IntermediateOp
+    public <T2, R> ExceptionalStream<R, E> zipWith(final ExceptionalStream<T2, E> b, final Try.BiFunction<? super T, ? super T2, R, E> zipFunction) {
+        return zip(this, b, zipFunction);
+    }
+
+    /**
+     *
+     * @param <T2>
+     * @param <R>
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
+     */
+    @IntermediateOp
+    public <T2, R> ExceptionalStream<R, E> zipWith(final ExceptionalStream<T2, E> b, final T valueForNoneA, final T2 valueForNoneB,
+            final Try.BiFunction<? super T, ? super T2, R, E> zipFunction) {
+        return zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
+    }
+
+    /**
+     *
+     * @param <T2>
+     * @param <T3>
+     * @param <R>
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
+     */
+    @IntermediateOp
+    public <T2, T3, R> ExceptionalStream<R, E> zipWith(final ExceptionalStream<T2, E> b, final ExceptionalStream<T3, E> c,
+            final Try.TriFunction<? super T, ? super T2, ? super T3, R, E> zipFunction) {
+        return zip(this, b, c, zipFunction);
+    }
+
+    /**
+     *
+     * @param <T2>
+     * @param <T3>
+     * @param <R>
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
+     */
+    @IntermediateOp
+    public <T2, T3, R> ExceptionalStream<R, E> zipWith(final ExceptionalStream<T2, E> b, final ExceptionalStream<T3, E> c, final T valueForNoneA,
+            final T2 valueForNoneB, final T3 valueForNoneC, final Try.TriFunction<? super T, ? super T2, ? super T3, R, E> zipFunction) {
+        return zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, U>, E> innerJoin(final Collection<U> b, final Try.Function<? super T, ?, E> leftKeyMapper,
+            final Try.Function<? super U, ?, E> rightKeyMapper) {
+
+        return flatMap(new Try.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+            private ListMultimap<Object, U> rightKeyMap = null;
+
+            @Override
+            public ExceptionalStream<Pair<T, U>, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+                }
+
+                return ExceptionalStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(new Try.Function<U, Pair<T, U>, E>() {
+                    @Override
+                    public Pair<T, U> apply(U u) {
+                        return Pair.of(t, u);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b
+     * @param predicate
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, U>, E> innerJoin(final Collection<U> b, final Try.BiPredicate<? super T, ? super U, E> predicate) {
+        return flatMap(new Try.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+            @Override
+            public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
+                return ExceptionalStream.<U, E> of(b).filter(new Try.Predicate<U, E>() {
+                    @Override
+                    public boolean test(final U u) throws E {
+                        return predicate.test(t, u);
+                    }
+                }).map(new Try.Function<U, Pair<T, U>, E>() {
+                    @Override
+                    public Pair<T, U> apply(U u) {
+                        return Pair.of(t, u);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, U>, E> fullJoin(final Collection<U> b, final Try.Function<? super T, ?, E> leftKeyMapper,
+            final Try.Function<? super U, ?, E> rightKeyMapper) {
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+        return flatMap(new Try.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+            private ListMultimap<Object, U> rightKeyMap = null;
+
+            @Override
+            public ExceptionalStream<Pair<T, U>, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isNullOrEmpty(values) ? ExceptionalStream.of(Pair.of(t, (U) null))
+                        : ExceptionalStream.<U, E> of(values).map(new Try.Function<U, Pair<T, U>, E>() {
+                            @Override
+                            public Pair<T, U> apply(U u) throws E {
+                                joinedRights.put(u, u);
+
+                                return Pair.of(t, u);
+                            }
+                        });
+            }
+        }).append(ExceptionalStream.<U, E> of(b).filter(new Try.Predicate<U, E>() {
+            @Override
+            public boolean test(U u) {
+                return joinedRights.containsKey(u) == false;
+            }
+        }).map(new Try.Function<U, Pair<T, U>, E>() {
+            @Override
+            public Pair<T, U> apply(U u) {
+                return Pair.of((T) null, u);
+            }
+        }));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b
+     * @param predicate
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, U>, E> fullJoin(final Collection<U> b, final Try.BiPredicate<? super T, ? super U, E> predicate) {
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+        return flatMap(new Try.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+            @Override
+            public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
+                return ExceptionalStream.<U, E> of(b).filter(new Try.Predicate<U, E>() {
+                    @Override
+                    public boolean test(final U u) throws E {
+                        return predicate.test(t, u);
+                    }
+                }).map(new Try.Function<U, Pair<T, U>, E>() {
+                    @Override
+                    public Pair<T, U> apply(U u) {
+                        joinedRights.put(u, u);
+
+                        return Pair.of(t, u);
+                    }
+                }).appendIfEmpty(Pair.of(t, (U) null));
+            }
+        }).append(ExceptionalStream.<U, E> of(b).filter(new Try.Predicate<U, E>() {
+            @Override
+            public boolean test(U u) {
+                return joinedRights.containsKey(u) == false;
+            }
+        }).map(new Try.Function<U, Pair<T, U>, E>() {
+            @Override
+            public Pair<T, U> apply(U u) {
+                return Pair.of((T) null, u);
+            }
+        }));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, U>, E> leftJoin(final Collection<U> b, final Try.Function<? super T, ?, E> leftKeyMapper,
+            final Try.Function<? super U, ?, E> rightKeyMapper) {
+        return flatMap(new Try.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+            private ListMultimap<Object, U> rightKeyMap = null;
+
+            @Override
+            public ExceptionalStream<Pair<T, U>, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isNullOrEmpty(values) ? ExceptionalStream.<Pair<T, U>, E> of(Pair.of(t, (U) null))
+                        : ExceptionalStream.<U, E> of(values).map(new Try.Function<U, Pair<T, U>, E>() {
+                            @Override
+                            public Pair<T, U> apply(U u) {
+                                return Pair.of(t, u);
+                            }
+                        });
+            }
+        });
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b
+     * @param predicate
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, U>, E> leftJoin(final Collection<U> b, final Try.BiPredicate<? super T, ? super U, E> predicate) {
+        return flatMap(new Try.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+            @Override
+            public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
+                return ExceptionalStream.<U, E> of(b).filter(new Try.Predicate<U, E>() {
+                    @Override
+                    public boolean test(final U u) throws E {
+                        return predicate.test(t, u);
+                    }
+                }).map(new Try.Function<U, Pair<T, U>, E>() {
+                    @Override
+                    public Pair<T, U> apply(U u) {
+                        return Pair.of(t, u);
+                    }
+                }).appendIfEmpty(Pair.of(t, (U) null));
+            }
+        });
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, U>, E> rightJoin(final Collection<U> b, final Try.Function<? super T, ?, E> leftKeyMapper,
+            final Try.Function<? super U, ?, E> rightKeyMapper) {
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+        return flatMap(new Try.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+            private ListMultimap<Object, U> rightKeyMap = null;
+
+            @Override
+            public ExceptionalStream<Pair<T, U>, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+                }
+
+                return ExceptionalStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(new Try.Function<U, Pair<T, U>, E>() {
+                    @Override
+                    public Pair<T, U> apply(U u) {
+                        joinedRights.put(u, u);
+
+                        return Pair.of(t, u);
+                    }
+                });
+            }
+        }).append(ExceptionalStream.<U, E> of(b).filter(new Try.Predicate<U, E>() {
+            @Override
+            public boolean test(U u) {
+                return joinedRights.containsKey(u) == false;
+            }
+        }).map(new Try.Function<U, Pair<T, U>, E>() {
+            @Override
+            public Pair<T, U> apply(U u) {
+                return Pair.of((T) null, u);
+            }
+        }));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b
+     * @param predicate
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, U>, E> rightJoin(final Collection<U> b, final Try.BiPredicate<? super T, ? super U, E> predicate) {
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+
+        return flatMap(new Try.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+            @Override
+            public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
+                return ExceptionalStream.<U, E> of(b).filter(new Try.Predicate<U, E>() {
+                    @Override
+                    public boolean test(final U u) throws E {
+                        return predicate.test(t, u);
+                    }
+                }).map(new Try.Function<U, Pair<T, U>, E>() {
+                    @Override
+                    public Pair<T, U> apply(U u) {
+                        joinedRights.put(u, u);
+
+                        return Pair.of(t, u);
+                    }
+                });
+            }
+        }).append(ExceptionalStream.<U, E> of(b).filter(new Try.Predicate<U, E>() {
+            @Override
+            public boolean test(U u) {
+                return joinedRights.containsKey(u) == false;
+            }
+        }).map(new Try.Function<U, Pair<T, U>, E>() {
+            @Override
+            public Pair<T, U> apply(U u) {
+                return Pair.of((T) null, u);
+            }
+        }));
     }
 
     /**
@@ -3996,6 +4582,39 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         } finally {
             close();
         }
+    }
+
+    /**
+     *
+     * @param atLeast
+     * @param atMost
+     * @param predicate
+     * @return
+     * @throws E
+     */
+    public boolean nMatch(final long atLeast, final long atMost, final Try.Predicate<? super T, ? extends E> predicate) throws E {
+        checkArgNotNegative(atLeast, "atLeast");
+        checkArgNotNegative(atMost, "atMost");
+        checkArgNotNull(predicate, "predicate");
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+
+        assertNotClosed();
+
+        long cnt = 0;
+
+        try {
+            while (elements.hasNext()) {
+                if (predicate.test(elements.next())) {
+                    if (++cnt > atMost) {
+                        return false;
+                    }
+                }
+            }
+        } finally {
+            close();
+        }
+
+        return cnt >= atLeast && cnt <= atMost;
     }
 
     /**
@@ -4924,6 +5543,31 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return func.apply(collect(collector));
     }
 
+    public String join(final CharSequence delimiter) throws E {
+        return join(delimiter, "", "");
+    }
+
+    public String join(CharSequence delimiter, CharSequence prefix, CharSequence suffix) throws E {
+        assertNotClosed();
+
+        try {
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+
+            while (elements.hasNext()) {
+                joiner.append(elements.next());
+            }
+
+            return joiner.toString();
+        } finally {
+            close();
+        }
+    }
+
+    @Beta
+    public void println() throws E {
+        N.println(join(", ", "[", "]"));
+    }
+
     /**
      *
      * @return
@@ -4971,6 +5615,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             });
         } else {
             return Stream.of(new ObjIteratorEx<T>() {
+
                 @Override
                 public boolean hasNext() {
                     try {
@@ -5019,6 +5664,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 }
             });
         }
+
     }
 
     //    public <E2 extends Exception> ExceptionalStream<T, E2> __(final Class<E2> targetExceptionType) {
@@ -5135,8 +5781,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @throws E the e
      */
     @Beta
-    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(
-            Try.Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>, ? extends E> transfer) throws E {
+    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) {
         checkArgNotNull(transfer, "transfer");
 
         return transfer.apply(this);
@@ -5383,24 +6028,24 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return obj;
     }
 
-    //    /**
-    //     *
-    //     * @param b
-    //     * @param errorMessage
-    //     */
-    //    private void checkArgument(boolean b, String errorMessage) {
-    //        if (!b) {
-    //            try {
-    //                N.checkArgument(b, errorMessage);
-    //            } finally {
-    //                try {
-    //                    close();
-    //                } catch (Exception e) {
-    //                    throw N.toRuntimeException(e);
-    //                }
-    //            }
-    //        }
-    //    }
+    /**
+     *
+     * @param b
+     * @param errorMessage
+     */
+    private void checkArgument(boolean b, String errorMessage) {
+        if (!b) {
+            try {
+                N.checkArgument(b, errorMessage);
+            } finally {
+                try {
+                    close();
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+        }
+    }
 
     /**
      *
