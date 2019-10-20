@@ -2160,10 +2160,11 @@ class CommonUtil {
     }
 
     /**
-     * Converts a list of row(which can be: Map/Entity) into a <code>DataSet</code>.
+     * The first row will be used as column names if its type is array or list,
+     * or obtain the column names from first row if its type is entity or map.
      *
      * @param <T>
-     * @param rows list of row which can be: Map/Entity.
+     * @param rows list of row which can be: Map/Entity/Array/List
      * @return
      */
     public static <T> DataSet newDataSet(final Collection<T> rows) {
@@ -2171,11 +2172,12 @@ class CommonUtil {
     }
 
     /**
-     * Converts a list of row(which can be: Map/Entity/Array/Collection) into a <code>DataSet</code>.
+     * If the specified {@code columnNames} is null or empty, the first row will be used as column names if its type is array or list,
+     * or obtain the column names from first row if its type is entity or map.
      *
      * @param <T>
      * @param columnNames
-     * @param rowList
+     * @param rows list of row which can be: Map/Entity/Array/List
      * @return
      */
     public static <T> DataSet newDataSet(Collection<String> columnNames, Collection<T> rowList) {
@@ -2186,89 +2188,81 @@ class CommonUtil {
             return CommonUtil.newEmptyDataSet(columnNames);
         }
 
-        final int rowSize = rowList.size();
+        int startRowIndex = 0;
 
         if (CommonUtil.isNullOrEmpty(columnNames)) {
-            final Set<String> columnNameSet = CommonUtil.newLinkedHashSet();
-            Set<Class<?>> clsSet = null;
-            Map<Class<?>, Set<String>> clsSignedPropNameSetMap = new HashMap<>();
+            final T firstNonNullRow = N.firstNonNull(rowList).orElse(null);
 
-            Class<?> cls = null;
-            Type<?> type = null;
+            if (firstNonNullRow == null) {
+                return CommonUtil.newEmptyDataSet();
+            }
 
-            for (Object e : rowList) {
-                if (e == null) {
-                    continue;
-                }
+            final Class<?> cls = firstNonNullRow.getClass();
+            final Type<?> type = CommonUtil.typeOf(cls);
 
-                cls = e.getClass();
-                type = CommonUtil.typeOf(cls);
+            if (type.isMap()) {
+                columnNames = new ArrayList<>(((Map<String, Object>) firstNonNullRow).keySet());
+            } else if (type.isEntity()) {
+                if (N.isDirtyMarker(cls)) {
+                    final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) firstNonNullRow);
+                    columnNames = new ArrayList<>(signedPropNames.size());
+                    Method method = null;
 
-                if (type.isMap()) {
-                    columnNameSet.addAll(((Map<String, Object>) e).keySet());
-                } else if (type.isEntity()) {
-                    if (e instanceof DirtyMarker) {
-                        Set<String> clsSignedPropNameSet = clsSignedPropNameSetMap.get(cls);
+                    for (String signedPropName : signedPropNames) {
+                        method = ClassUtil.getPropGetMethod(cls, signedPropName);
 
-                        if (clsSignedPropNameSet == null) {
-                            clsSignedPropNameSet = CommonUtil.newHashSet();
-                            clsSignedPropNameSetMap.put(cls, clsSignedPropNameSet);
+                        if (method != null) {
+                            columnNames.add(ClassUtil.getPropNameByMethod(method));
                         }
-
-                        Method method = null;
-
-                        for (String signedPropName : DirtyMarkerUtil.signedPropNames((DirtyMarker) e)) {
-                            if (clsSignedPropNameSet.add(signedPropName) == false) {
-                                continue;
-                            }
-
-                            method = ClassUtil.getPropGetMethod(cls, signedPropName);
-
-                            if (method != null) {
-                                columnNameSet.add(ClassUtil.getPropNameByMethod(method));
-                            }
-                        }
-                    } else {
-                        if (clsSet == null) {
-                            clsSet = CommonUtil.newHashSet();
-                        }
-
-                        if (clsSet.contains(cls)) {
-                            continue;
-                        }
-
-                        columnNameSet.addAll(ClassUtil.checkPropGetMethodList(cls).keySet());
-                        clsSet.add(cls);
                     }
                 } else {
-                    throw new IllegalArgumentException("'columnNameList' is required if the sepcified row type is not Entity or Map");
+                    columnNames = new ArrayList<>(ClassUtil.checkPropGetMethodList(cls).keySet());
                 }
-            }
+            } else if (type.isArray()) {
+                final Object[] a = (Object[]) firstNonNullRow;
+                columnNames = new ArrayList<>(a.length);
 
-            // re-order column.
-            for (Map.Entry<Class<?>, Set<String>> entry : clsSignedPropNameSetMap.entrySet()) {
-                final List<String> intersecion = N.intersection(ClassUtil.getPropGetMethodList(entry.getKey()).keySet(), columnNameSet);
-                columnNameSet.removeAll(intersecion);
-                columnNameSet.addAll(intersecion);
-            }
+                for (Object e : a) {
+                    columnNames.add(N.stringOf(e));
+                }
 
-            columnNames = new ArrayList<>(columnNameSet);
+                startRowIndex = 1;
+            } else if (type.isCollection()) {
+                final Collection<?> c = (Collection<?>) firstNonNullRow;
+                columnNames = new ArrayList<>(c.size());
+
+                for (Object e : c) {
+                    columnNames.add(N.stringOf(e));
+                }
+
+                startRowIndex = 1;
+            } else {
+                throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
+            }
 
             if (CommonUtil.isNullOrEmpty(columnNames)) {
                 throw new IllegalArgumentException("Column name list can not be obtained from row list because it's empty or null");
             }
         }
 
+        final int rowCount = rowList.size() - startRowIndex;
         final int columnCount = columnNames.size();
         final List<String> columnNameList = new ArrayList<>(columnNames);
         final List<List<Object>> columnList = new ArrayList<>(columnCount);
+
         for (int i = 0; i < columnCount; i++) {
-            columnList.add(new ArrayList<>(rowSize));
+            columnList.add(new ArrayList<>(rowCount));
         }
 
         Type<?> type = null;
-        for (Object e : rowList) {
-            if (e == null) {
+
+        for (Object row : rowList) {
+            if (startRowIndex-- > 0) {
+                // skip
+                continue;
+            }
+
+            if (row == null) {
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(null);
                 }
@@ -2276,16 +2270,16 @@ class CommonUtil {
                 continue;
             }
 
-            type = CommonUtil.typeOf(e.getClass());
+            type = CommonUtil.typeOf(row.getClass());
 
             if (type.isMap()) {
-                Map<String, Object> props = (Map<String, Object>) e;
+                Map<String, Object> props = (Map<String, Object>) row;
 
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(props.get(columnNameList.get(i)));
                 }
             } else if (type.isEntity()) {
-                Class<?> cls = e.getClass();
+                Class<?> cls = row.getClass();
 
                 Method method = null;
                 for (int i = 0; i < columnCount; i++) {
@@ -2294,30 +2288,30 @@ class CommonUtil {
                     if (method == null) {
                         columnList.get(i).add(null);
                     } else {
-                        columnList.get(i).add(ClassUtil.getPropValue(e, method));
+                        columnList.get(i).add(ClassUtil.getPropValue(row, method));
                     }
                 }
             } else if (type.isArray()) {
                 if (type.isPrimitiveArray()) {
                     for (int i = 0; i < columnCount; i++) {
-                        columnList.get(i).add(Array.get(e, i));
+                        columnList.get(i).add(Array.get(row, i));
                     }
                 } else {
-                    Object[] array = (Object[]) e;
+                    Object[] array = (Object[]) row;
 
                     for (int i = 0; i < columnCount; i++) {
                         columnList.get(i).add(array[i]);
                     }
                 }
             } else if (type.isCollection()) {
-                final Iterator<Object> it = ((Collection<Object>) e).iterator();
+                final Iterator<Object> it = ((Collection<Object>) row).iterator();
 
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(it.next());
                 }
             } else {
                 throw new IllegalArgumentException(
-                        "Unsupported row type: " + ClassUtil.getCanonicalClassName(e.getClass()) + ". Only array, collection, map and entity are supported");
+                        "Unsupported row type: " + ClassUtil.getCanonicalClassName(row.getClass()) + ". Only array, collection, map and entity are supported");
             }
         }
 

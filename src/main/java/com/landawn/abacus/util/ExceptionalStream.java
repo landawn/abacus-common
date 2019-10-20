@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
+import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.SequentialOnly;
@@ -5141,6 +5142,32 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         } finally {
             close();
         }
+    }
+
+    /**
+     * The first row will be used as column names if its type is array or list,
+     * or obtain the column names from first row if its type is entity or map.
+     *
+     * @return
+     * @throws E
+     * @see {@link N#newDataSet(Collection)}
+     */
+    public DataSet toDataSet() throws E {
+        return N.newDataSet(toList());
+    }
+
+    /**
+     * If the specified {@code columnNames} is null or empty, the first row will be used as column names if its type is array or list,
+     * or obtain the column names from first row if its type is entity or map.
+     *
+     *
+     * @param columnNames
+     * @return
+     * @throws E
+     * @see {@link N#newDataSet(Collection, Collection)}
+     */
+    public DataSet toDataSet(List<String> columnNames) throws E {
+        return N.newDataSet(columnNames, toList());
     }
 
     /**

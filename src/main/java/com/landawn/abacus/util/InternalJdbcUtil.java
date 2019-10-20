@@ -346,7 +346,7 @@ final class InternalJdbcUtil {
             };
         } else if (List.class.isAssignableFrom(targetClass)) {
             return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
-                private boolean isListOrArrayList = targetClass.equals(List.class) || targetClass.equals(ArrayList.class);
+                private final boolean isListOrArrayList = targetClass.equals(List.class) || targetClass.equals(ArrayList.class);
 
                 @Override
                 public T apply(ResultSet rs, List<String> columnLabelList) throws SQLException {
@@ -362,17 +362,25 @@ final class InternalJdbcUtil {
             };
         } else if (Map.class.isAssignableFrom(targetClass)) {
             return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
-                private boolean isMapOrHashMap = targetClass.equals(Map.class) || targetClass.equals(HashMap.class);
-                private boolean isLinkedHashMap = targetClass.equals(LinkedHashMap.class);
+                private final boolean isMapOrHashMap = targetClass.equals(Map.class) || targetClass.equals(HashMap.class);
+                private final boolean isLinkedHashMap = targetClass.equals(LinkedHashMap.class);
+                private volatile String[] columnLabels = null;
 
                 @Override
                 public T apply(ResultSet rs, List<String> columnLabelList) throws SQLException {
                     final int columnCount = columnLabelList.size();
+                    String[] columnLabels = this.columnLabels;
+
+                    if (columnLabels == null) {
+                        columnLabels = columnLabelList.toArray(new String[columnCount]);
+                        this.columnLabels = columnLabels;
+                    }
+
                     final Map<String, Object> m = isMapOrHashMap ? new HashMap<>(columnCount)
                             : (isLinkedHashMap ? new LinkedHashMap<>(columnCount) : (Map<String, Object>) N.newInstance(targetClass));
 
                     for (int i = 0; i < columnCount; i++) {
-                        m.put(columnLabelList.get(i), InternalJdbcUtil.getColumnValue(rs, i + 1));
+                        m.put(columnLabels[i], InternalJdbcUtil.getColumnValue(rs, i + 1));
                     }
 
                     return (T) m;
@@ -395,7 +403,7 @@ final class InternalJdbcUtil {
                     Type<?>[] columnTypes = this.columnTypes;
 
                     if (columnLabels == null) {
-                        columnLabels = columnLabelList.toArray(new String[columnLabelList.size()]);
+                        columnLabels = columnLabelList.toArray(new String[columnCount]);
                         this.columnLabels = columnLabels;
                     }
 
@@ -480,7 +488,7 @@ final class InternalJdbcUtil {
      * @param entityClass
      * @return
      */
-    private static Map<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
+    static Map<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
         Map<String, String> result = column2FieldNameMapPool.get(entityClass);
 
         if (result == null) {

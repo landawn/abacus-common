@@ -42,7 +42,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.exception.DuplicatedResultException;
-import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.Comparators;
@@ -54,7 +53,6 @@ import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.Iterables;
-import com.landawn.abacus.util.Iterators;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multimap;
@@ -63,7 +61,6 @@ import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableEntry;
 import com.landawn.abacus.util.Nth;
-import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -3504,50 +3501,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public DataSet toDataSet() {
-        return toDataSet(null);
-    }
-
-    @Override
-    public DataSet toDataSet(boolean isFirstTitle) {
-        assertNotClosed();
-
-        try {
-            if (isFirstTitle) {
-                final ObjIterator<T> iter = this.iteratorEx();
-
-                if (iter.hasNext() == false) {
-                    return N.newDataSet(new ArrayList<String>(0), new ArrayList<List<Object>>(0));
-                }
-
-                final T header = iter.next();
-                final Type<?> type = N.typeOf(header.getClass());
-                List<String> columnNames = null;
-
-                if (type.isArray()) {
-                    final Object[] a = (Object[]) header;
-                    columnNames = new ArrayList<>(a.length);
-
-                    for (Object e : a) {
-                        columnNames.add(N.stringOf(e));
-                    }
-                } else if (type.isCollection()) {
-                    final Collection<?> c = (Collection<?>) header;
-                    columnNames = new ArrayList<>(c.size());
-
-                    for (Object e : c) {
-                        columnNames.add(N.stringOf(e));
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unsupported header type: " + type.name());
-                }
-
-                return N.newDataSet(columnNames, Iterators.toList(iter));
-            } else {
-                return toDataSet(null);
-            }
-        } finally {
-            close();
-        }
+        return N.newDataSet(toList());
     }
 
     @Override

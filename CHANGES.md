@@ -1,4 +1,10 @@
-### 1.9.8
+### 1.9.10
+
+* add `ExceptionalStream.toDataSet`.
+* Improvements and bug fix.
+
+
+### 1.9.9
 
 * add `ExceptionalStream.zip/innerJoin/fullJoin/...`.
 * Improvements and bug fix.

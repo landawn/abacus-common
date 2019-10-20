@@ -2073,25 +2073,26 @@ public abstract class Stream<T>
             Supplier<? extends M> mapFactory);
 
     /**
+     * The first row will be used as column names if its type is array or list,
+     * or obtain the column names from first row if its type is entity or map.
      *
      * @return
+     * @throws E
+     * @see {@link N#newDataSet(Collection)}
      */
     @SequentialOnly
     @TerminalOp
     public abstract DataSet toDataSet();
 
     /**
-     * @param isFirstTitle
-     * @return
-     */
-    @SequentialOnly
-    @TerminalOp
-    public abstract DataSet toDataSet(boolean isFirstTitle);
-
-    /**
+     * If the specified {@code columnNames} is null or empty, the first row will be used as column names if its type is array or list,
+     * or obtain the column names from first row if its type is entity or map.
      *
-     * @param columnNames it can be null or empty if this is Map or entity stream.
+     *
+     * @param columnNames
      * @return
+     * @throws E
+     * @see {@link N#newDataSet(Collection, Collection)}
      */
     @SequentialOnly
     @TerminalOp
