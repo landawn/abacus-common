@@ -1356,7 +1356,7 @@ class IteratorCharStream extends AbstractCharStream {
     }
 
     @Override
-    public CharStream appendIfEmpty(final Supplier<CharStream> supplier) {
+    public CharStream appendIfEmpty(final Supplier<? extends CharStream> supplier) {
         final Holder<CharStream> holder = new Holder<>();
 
         return newStream(new CharIteratorEx() {

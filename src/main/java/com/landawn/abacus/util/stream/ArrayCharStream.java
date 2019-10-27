@@ -1539,7 +1539,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public CharStream appendIfEmpty(final Supplier<CharStream> supplier) {
+    public CharStream appendIfEmpty(final Supplier<? extends CharStream> supplier) {
         if (fromIndex == toIndex) {
             final Holder<CharStream> holder = new Holder<>();
 

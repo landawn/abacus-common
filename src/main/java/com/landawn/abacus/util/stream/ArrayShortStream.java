@@ -1624,7 +1624,7 @@ class ArrayShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream appendIfEmpty(final Supplier<ShortStream> supplier) {
+    public ShortStream appendIfEmpty(final Supplier<? extends ShortStream> supplier) {
         if (fromIndex == toIndex) {
             final Holder<ShortStream> holder = new Holder<>();
 

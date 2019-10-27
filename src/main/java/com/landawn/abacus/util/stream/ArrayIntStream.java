@@ -2296,7 +2296,7 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream appendIfEmpty(final Supplier<IntStream> supplier) {
+    public IntStream appendIfEmpty(final Supplier<? extends IntStream> supplier) {
         if (fromIndex == toIndex) {
             final Holder<IntStream> holder = new Holder<>();
 

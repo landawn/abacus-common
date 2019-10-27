@@ -1356,7 +1356,7 @@ class IteratorByteStream extends AbstractByteStream {
     }
 
     @Override
-    public ByteStream appendIfEmpty(final Supplier<ByteStream> supplier) {
+    public ByteStream appendIfEmpty(final Supplier<? extends ByteStream> supplier) {
         final Holder<ByteStream> holder = new Holder<>();
 
         return newStream(new ByteIteratorEx() {

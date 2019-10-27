@@ -493,7 +493,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     @SequentialOnly
     @IntermediateOp
-    S appendIfEmpty(Supplier<S> suppliers);
+    S appendIfEmpty(Supplier<? extends S> supplier);
 
     /**
      * This is a terminal operation. That's to say this stream will be closed after this operation.

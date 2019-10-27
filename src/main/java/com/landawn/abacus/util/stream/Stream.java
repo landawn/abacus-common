@@ -2337,15 +2337,7 @@ public abstract class Stream<T>
 
     @SequentialOnly
     @IntermediateOp
-    public abstract <U> Stream<Tuple2<T, U>> crossJoin(Stream<? extends U> s);
-
-    @SequentialOnly
-    @IntermediateOp
     public abstract <U, R> Stream<R> crossJoin(Collection<? extends U> c, BiFunction<? super T, ? super U, R> func);
-
-    @SequentialOnly
-    @IntermediateOp
-    public abstract <U, R> Stream<R> crossJoin(Stream<? extends U> s, BiFunction<? super T, ? super U, R> func);
 
     /**
      *
@@ -2483,6 +2475,30 @@ public abstract class Stream<T>
     @ParallelSupported
     @IntermediateOp
     public abstract Stream<T> difference(Function<? super T, ?> mapper, Collection<?> c);
+
+    /**
+     *
+     * @param defaultValue
+     * @return
+     * @see #appendIfEmpty(Object...)
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public final Stream<T> defaultIfEmpty(final T defaultValue) {
+        return appendIfEmpty(defaultValue);
+    }
+
+    /**
+     *
+     * @param supplier
+     * @return
+     * @see #appendIfEmpty(Supplier)
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public final Stream<T> defaultIfEmpty(final Supplier<? extends Stream<T>> supplier) {
+        return appendIfEmpty(supplier);
+    }
 
     //    @SequentialOnly
     //    public abstract Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs);

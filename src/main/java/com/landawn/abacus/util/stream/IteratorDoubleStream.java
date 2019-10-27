@@ -1627,7 +1627,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
     }
 
     @Override
-    public DoubleStream appendIfEmpty(final Supplier<DoubleStream> supplier) {
+    public DoubleStream appendIfEmpty(final Supplier<? extends DoubleStream> supplier) {
         final Holder<DoubleStream> holder = new Holder<>();
 
         return newStream(new DoubleIteratorEx() {

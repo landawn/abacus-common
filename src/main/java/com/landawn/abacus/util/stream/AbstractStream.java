@@ -2341,18 +2341,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U> Stream<Tuple2<T, U>> crossJoin(final Stream<? extends U> s) {
-        return crossJoin(s, Fn.<T, U> tuple2());
-    }
-
-    @Override
     public <U, R> Stream<R> crossJoin(final Collection<? extends U> c, final BiFunction<? super T, ? super U, R> func) {
         return flatMap(t -> Stream.of(c).map(u -> func.apply(t, u)));
-    }
-
-    @Override
-    public <U, R> Stream<R> crossJoin(final Stream<? extends U> s, final BiFunction<? super T, ? super U, R> func) {
-        return flatMap(t -> s.map(u -> func.apply(t, u)));
     }
 
     @Override

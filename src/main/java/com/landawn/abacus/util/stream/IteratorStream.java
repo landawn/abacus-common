@@ -3366,7 +3366,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Stream<T> appendIfEmpty(final Supplier<Stream<T>> supplier) {
+    public Stream<T> appendIfEmpty(final Supplier<? extends Stream<T>> supplier) {
         final Holder<Stream<T>> holder = new Holder<>();
 
         return newStream(new ObjIteratorEx<T>() {

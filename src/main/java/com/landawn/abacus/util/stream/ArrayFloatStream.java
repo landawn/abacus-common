@@ -1823,7 +1823,7 @@ class ArrayFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public FloatStream appendIfEmpty(final Supplier<FloatStream> supplier) {
+    public FloatStream appendIfEmpty(final Supplier<? extends FloatStream> supplier) {
         if (fromIndex == toIndex) {
             final Holder<FloatStream> holder = new Holder<>();
 

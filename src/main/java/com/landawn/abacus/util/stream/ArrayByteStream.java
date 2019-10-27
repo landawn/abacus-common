@@ -1539,7 +1539,7 @@ class ArrayByteStream extends AbstractByteStream {
     }
 
     @Override
-    public ByteStream appendIfEmpty(final Supplier<ByteStream> supplier) {
+    public ByteStream appendIfEmpty(final Supplier<? extends ByteStream> supplier) {
         if (fromIndex == toIndex) {
             final Holder<ByteStream> holder = new Holder<>();
 

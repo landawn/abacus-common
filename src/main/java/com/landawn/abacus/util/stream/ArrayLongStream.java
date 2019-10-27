@@ -1915,7 +1915,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream appendIfEmpty(final Supplier<LongStream> supplier) {
+    public LongStream appendIfEmpty(final Supplier<? extends LongStream> supplier) {
         if (fromIndex == toIndex) {
             final Holder<LongStream> holder = new Holder<>();
 

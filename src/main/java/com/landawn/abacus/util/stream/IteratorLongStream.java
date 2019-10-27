@@ -1718,7 +1718,7 @@ class IteratorLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream appendIfEmpty(final Supplier<LongStream> supplier) {
+    public LongStream appendIfEmpty(final Supplier<? extends LongStream> supplier) {
         final Holder<LongStream> holder = new Holder<>();
 
         return newStream(new LongIteratorEx() {

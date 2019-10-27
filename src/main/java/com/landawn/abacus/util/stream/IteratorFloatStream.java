@@ -1623,7 +1623,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public FloatStream appendIfEmpty(final Supplier<FloatStream> supplier) {
+    public FloatStream appendIfEmpty(final Supplier<? extends FloatStream> supplier) {
         final Holder<FloatStream> holder = new Holder<>();
 
         return newStream(new FloatIteratorEx() {

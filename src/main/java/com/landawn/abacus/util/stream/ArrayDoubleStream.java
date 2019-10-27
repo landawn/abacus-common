@@ -1804,7 +1804,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
     }
 
     @Override
-    public DoubleStream appendIfEmpty(final Supplier<DoubleStream> supplier) {
+    public DoubleStream appendIfEmpty(final Supplier<? extends DoubleStream> supplier) {
         if (fromIndex == toIndex) {
             final Holder<DoubleStream> holder = new Holder<>();
 

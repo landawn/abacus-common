@@ -2029,7 +2029,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream appendIfEmpty(final Supplier<IntStream> supplier) {
+    public IntStream appendIfEmpty(final Supplier<? extends IntStream> supplier) {
         final Holder<IntStream> holder = new Holder<>();
 
         return newStream(new IntIteratorEx() {

@@ -3351,7 +3351,7 @@ class ArrayStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Stream<T> appendIfEmpty(final Supplier<Stream<T>> supplier) {
+    public Stream<T> appendIfEmpty(final Supplier<? extends Stream<T>> supplier) {
         if (fromIndex == toIndex) {
             final Holder<Stream<T>> holder = new Holder<>();
 
