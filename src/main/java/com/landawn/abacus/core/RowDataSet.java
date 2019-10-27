@@ -10920,7 +10920,7 @@ public class RowDataSet implements DataSet, Cloneable {
         private final int pageSize;
 
         /** The page count. */
-        private final int pageCount;
+        private final int totalPages;
 
         /** The current page num. */
         private int currentPageNum;
@@ -10933,7 +10933,7 @@ public class RowDataSet implements DataSet, Cloneable {
         private PaginatedRowDataSet(final int pageSize) {
             this.pageSize = pageSize;
 
-            this.pageCount = ((RowDataSet.this.size() % pageSize) == 0) ? (RowDataSet.this.size() / pageSize) : ((RowDataSet.this.size() / pageSize) + 1);
+            this.totalPages = ((RowDataSet.this.size() % pageSize) == 0) ? (RowDataSet.this.size() / pageSize) : ((RowDataSet.this.size() / pageSize) + 1);
 
             currentPageNum = 0;
         }
@@ -11070,7 +11070,16 @@ public class RowDataSet implements DataSet, Cloneable {
          */
         @Override
         public int pageCount() {
-            return pageCount;
+            return totalPages;
+        }
+
+        /**
+         *
+         * @return
+         */
+        @Override
+        public int totalPages() {
+            return totalPages;
         }
 
         /**

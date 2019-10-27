@@ -86,6 +86,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -2329,6 +2330,22 @@ public abstract class Stream<T>
     @SequentialOnly
     @IntermediateOp
     public abstract Stream<List<T>> cartesianProduct(Collection<? extends Collection<? extends T>> cs);
+
+    @SequentialOnly
+    @IntermediateOp
+    public abstract <U> Stream<Tuple2<T, U>> crossJoin(Collection<? extends U> c);
+
+    @SequentialOnly
+    @IntermediateOp
+    public abstract <U> Stream<Tuple2<T, U>> crossJoin(Stream<? extends U> s);
+
+    @SequentialOnly
+    @IntermediateOp
+    public abstract <U, R> Stream<R> crossJoin(Collection<? extends U> c, BiFunction<? super T, ? super U, R> func);
+
+    @SequentialOnly
+    @IntermediateOp
+    public abstract <U, R> Stream<R> crossJoin(Stream<? extends U> s, BiFunction<? super T, ? super U, R> func);
 
     /**
      *

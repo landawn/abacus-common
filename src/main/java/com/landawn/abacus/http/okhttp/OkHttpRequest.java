@@ -27,6 +27,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import com.landawn.abacus.http.ContentFormat;
 import com.landawn.abacus.http.HTTP;
 import com.landawn.abacus.http.HttpHeaders;
@@ -48,6 +50,7 @@ import okhttp3.CacheControl;
 import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -55,10 +58,9 @@ import okhttp3.Response;
 import okhttp3.internal.Util;
 
 /**
+ * Note: This class contains the codes and docs copied from OkHttp: https://square.github.io/okhttp/ under Apache License v2.
  *
  * @since 1.3
- *
- * @author Haiyang Li
  */
 public class OkHttpRequest {
     private static final Logger logger = LoggerFactory.getLogger(OkHttpRequest.class);
@@ -160,7 +162,20 @@ public class OkHttpRequest {
      * Attaches {@code tag} to the request. It can be used later to cancel the request. If the tag
      * is unspecified or null, the request is canceled by using the request itself as the tag.
      */
-    public OkHttpRequest tag(Object tag) {
+    public OkHttpRequest tag(@Nullable Object tag) {
+        builder.tag(tag);
+        return this;
+    }
+
+    /**
+     * Attaches {@code tag} to the request using {@code type} as a key. Tags can be read from a
+     * request using {@link Request#tag}. Use null to remove any existing tag assigned for {@code
+     * type}.
+     *
+     * <p>Use this API to attach timing, debugging, or other application data to a request so that
+     * you may read it in interceptors, event listeners, or callbacks.
+     */
+    public <T> OkHttpRequest tag(Class<? super T> type, @Nullable T tag) {
         builder.tag(tag);
         return this;
     }
@@ -214,6 +229,12 @@ public class OkHttpRequest {
         return this;
     }
 
+    /**
+     *
+     * @param formBodyByMap
+     * @return
+     * @see {@code FormBody.Builder}
+     */
     public OkHttpRequest body(final Map<?, ?> formBodyByMap) {
         if (N.isNullOrEmpty(formBodyByMap)) {
             this.body = Util.EMPTY_REQUEST;
@@ -230,6 +251,12 @@ public class OkHttpRequest {
         return this;
     }
 
+    /**
+     *
+     * @param formBodyByEntity
+     * @return
+     * @see {@code FormBody.Builder}
+     */
     public OkHttpRequest body(final Object formBodyByEntity) {
         if (formBodyByEntity == null) {
             this.body = Util.EMPTY_REQUEST;
@@ -249,8 +276,27 @@ public class OkHttpRequest {
         return this;
     }
 
+    /**
+     *
+     * @param body
+     * @return
+     * @see {@code RequestBody}
+     */
     public OkHttpRequest body(RequestBody body) {
         this.body = body;
+        return this;
+    }
+
+    /**
+     *
+     * @param content
+     * @param contentType
+     * @return
+     * @see RequestBody#create(MediaType, String)
+     */
+    public OkHttpRequest body(String content, @Nullable MediaType contentType) {
+        this.body = RequestBody.create(contentType, content);
+
         return this;
     }
 
