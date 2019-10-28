@@ -43,6 +43,7 @@ import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -690,11 +691,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
-    public static <T, E extends Exception> ExceptionalStream<T, E> repeat(final T value, final long n) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> repeat(final T element, final long n) {
         N.checkArgNotNegative(n, "n");
 
         if (n == 0) {
             return empty();
+        } else if (n < 10) {
+            return of(Array.repeat(element, (int) n));
         }
 
         return newStream(new ExceptionalIterator<T, E>() {
@@ -711,7 +714,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                     throw new NoSuchElementException();
                 }
 
-                return value;
+                return element;
             }
         });
     }
@@ -3897,12 +3900,22 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     @IntermediateOp
     public <U> ExceptionalStream<Tuple2<T, U>, E> crossJoin(final Collection<? extends U> c) {
-        return crossJoin(c, Fnn.ff(Fn.<T, U> tuple2()));
+        return crossJoin(c, Fnn.<T, U, Tuple2<T, U>, E> ff(Fn.<T, U> tuple2()));
     }
 
     @IntermediateOp
     public <U, R> ExceptionalStream<R, E> crossJoin(final Collection<? extends U> c, final Try.BiFunction<? super T, ? super U, R, ? extends E> func) {
-        return flatMap(t -> ExceptionalStream.<U, E> of(c).map(u -> func.apply(t, u)));
+        return flatMap(new Try.Function<T, ExceptionalStream<R, E>, E>() {
+            @Override
+            public ExceptionalStream<R, E> apply(final T t) throws E {
+                return ExceptionalStream.<U, E> of(c).map(new Try.Function<U, R, E>() {
+                    @Override
+                    public R apply(U u) throws E {
+                        return func.apply(t, u);
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -4663,60 +4676,117 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return cnt >= atLeast && cnt <= atMost;
     }
 
-    /**
-     *
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public Optional<T> findFirst(final Try.Predicate<? super T, ? extends E> predicate) throws E {
-        checkArgNotNull(predicate, "predicate");
+    @TerminalOp
+    @SafeVarargs
+    public final boolean containsAll(final T... a) throws E {
         assertNotClosed();
 
         try {
-            while (elements.hasNext()) {
-                T e = elements.next();
+            if (N.isNullOrEmpty(a)) {
+                return true;
+            } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
+                return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(a[0])));
+            } else if (a.length == 2) {
+                return filter(new Try.Predicate<T, E>() {
+                    private final T val1 = a[0];
+                    private final T val2 = a[1];
 
-                if (predicate.test(e)) {
-                    return Optional.of(e);
-                }
+                    @Override
+                    public boolean test(T t) {
+                        return N.equals(t, val1) || N.equals(t, val2);
+                    }
+                }).distinct().limit(2).count() == 2;
+            } else {
+                return containsAll(N.asSet(a));
             }
-
-            return (Optional<T>) Optional.empty();
         } finally {
             close();
         }
     }
 
-    /**
-     *
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public Optional<T> findLast(final Try.Predicate<? super T, ? extends E> predicate) throws E {
-        checkArgNotNull(predicate, "predicate");
+    @TerminalOp
+    public boolean containsAll(final Collection<? extends T> c) throws E {
         assertNotClosed();
 
         try {
-            if (elements.hasNext() == false) {
-                return (Optional<T>) Optional.empty();
+            if (N.isNullOrEmpty(c)) {
+                return true;
+            } else if (c.size() == 1) {
+                final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
+                return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(val)));
+            } else {
+                final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
+                final int distinctCount = set.size();
+
+                return filter(new Try.Predicate<T, E>() {
+                    @Override
+                    public boolean test(T t) {
+                        return set.contains(t);
+                    }
+                }).distinct().limit(distinctCount).count() == distinctCount;
             }
+        } finally {
+            close();
+        }
+    }
 
-            boolean hasResult = false;
-            T e = null;
-            T result = null;
+    @TerminalOp
+    @SafeVarargs
+    public final boolean containsAny(final T... a) throws E {
+        assertNotClosed();
 
-            while (elements.hasNext()) {
-                e = elements.next();
+        try {
+            if (N.isNullOrEmpty(a)) {
+                return false;
+            } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
+                return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(a[0])));
+            } else if (a.length == 2) {
+                return anyMatch(new Try.Predicate<T, E>() {
+                    private final T val1 = a[0];
+                    private final T val2 = a[1];
 
-                if (predicate.test(e)) {
-                    result = e;
-                    hasResult = true;
-                }
+                    @Override
+                    public boolean test(T t) {
+                        return N.equals(t, val1) || N.equals(t, val2);
+                    }
+                });
+            } else {
+                final Set<T> set = N.asSet(a);
+
+                return anyMatch(new Try.Predicate<T, E>() {
+
+                    @Override
+                    public boolean test(T t) {
+                        return set.contains(t);
+                    }
+
+                });
             }
+        } finally {
+            close();
+        }
+    }
 
-            return hasResult ? Optional.of(result) : (Optional<T>) Optional.empty();
+    @TerminalOp
+    public boolean containsAny(final Collection<? extends T> c) throws E {
+        assertNotClosed();
+
+        try {
+            if (N.isNullOrEmpty(c)) {
+                return false;
+            } else if (c.size() == 1) {
+                final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
+                return anyMatch(Fnn.<T, E> pp(Fn.<T> equal(val)));
+            } else {
+                final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
+
+                return anyMatch(new Try.Predicate<T, E>() {
+                    @Override
+                    public boolean test(T t) {
+                        return set.contains(t);
+                    }
+                });
+            }
         } finally {
             close();
         }

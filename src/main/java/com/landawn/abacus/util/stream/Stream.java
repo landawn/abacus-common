@@ -1474,6 +1474,14 @@ public abstract class Stream<T>
 
     @SequentialOnly
     @TerminalOp
+    public abstract boolean containsAny(T... a);
+
+    @SequentialOnly
+    @TerminalOp
+    public abstract boolean containsAny(Collection<? extends T> c);
+
+    @SequentialOnly
+    @TerminalOp
     public abstract <A> A[] toArray(IntFunction<A[]> generator);
 
     /**
@@ -3665,6 +3673,8 @@ public abstract class Stream<T>
 
         if (n == 0) {
             return empty();
+        } else if (n < 10) {
+            return of(Array.repeat(element, (int) n));
         }
 
         return new IteratorStream<>(new ObjIteratorEx<T>() {

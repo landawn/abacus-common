@@ -904,6 +904,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
         if (n == 0) {
             return empty();
+        } else if (n < 10) {
+            return of(Array.repeat(element, (int) n));
         }
 
         return new IteratorByteStream(new ByteIteratorEx() {
@@ -1121,7 +1123,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @SafeVarargs
     public static ByteStream concat(final byte[]... a) {
         return N.isNullOrEmpty(a) ? empty() : new IteratorByteStream(new ByteIteratorEx() {
-            private final Iterator<byte[]> iter = ObjIterator.of(a);;
+            private final Iterator<byte[]> iter = ObjIterator.of(a);
             private ByteIterator cur;
 
             @Override

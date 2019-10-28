@@ -675,6 +675,8 @@ public abstract class FloatStream
 
         if (n == 0) {
             return empty();
+        } else if (n < 10) {
+            return of(Array.repeat(element, (int) n));
         }
 
         return new IteratorFloatStream(new FloatIteratorEx() {

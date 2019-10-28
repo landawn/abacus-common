@@ -16,6 +16,7 @@
 package com.landawn.abacus.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -919,6 +920,36 @@ public abstract class Fn extends Comparators {
      */
     public static <T> Consumer<T> doNothing() {
         return DO_NOTHING;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param errorMessage
+     * @return
+     */
+    public static <T> Consumer<T> throwRuntimeException(final String errorMessage) {
+        return new Consumer<T>() {
+            @Override
+            public void accept(T t) {
+                throw new RuntimeException(errorMessage);
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param excpetionSupplier
+     * @return
+     */
+    public static <T> Consumer<T> throwException(final Supplier<? extends RuntimeException> excpetionSupplier) {
+        return new Consumer<T>() {
+            @Override
+            public void accept(T t) {
+                throw excpetionSupplier.get();
+            }
+        };
     }
 
     /**
@@ -10803,6 +10834,67 @@ public abstract class Fn extends Comparators {
          */
         public static <T, E extends Exception> Try.Consumer<T, E> doNothing() {
             return Fn.DO_NOTHING;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param errorMessage
+         * @return
+         */
+        public static <T> Try.Consumer<T, RuntimeException> throwRuntimeException(final String errorMessage) {
+            return new Try.Consumer<T, RuntimeException>() {
+                @Override
+                public void accept(T t) throws RuntimeException {
+                    throw new RuntimeException(errorMessage);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param errorMessage
+         * @return
+         */
+        public static <T> Try.Consumer<T, IOException> throwIOException(final String errorMessage) {
+            return new Try.Consumer<T, IOException>() {
+                @Override
+                public void accept(T t) throws IOException {
+                    throw new IOException(errorMessage);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param errorMessage
+         * @return
+         */
+        public static <T> Try.Consumer<T, Exception> throwException(final String errorMessage) {
+            return new Try.Consumer<T, Exception>() {
+                @Override
+                public void accept(T t) throws Exception {
+                    throw new Exception(errorMessage);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <E>
+         * @param excpetionSupplier
+         * @return
+         */
+        public static <T, E extends Exception> Try.Consumer<T, E> throwException(final Supplier<? extends E> excpetionSupplier) {
+            return new Try.Consumer<T, E>() {
+                @Override
+                public void accept(T t) throws E {
+                    throw excpetionSupplier.get();
+                }
+            };
         }
 
         /**

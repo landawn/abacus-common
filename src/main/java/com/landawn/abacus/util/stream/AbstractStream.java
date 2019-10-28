@@ -2735,7 +2735,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             if (N.isNullOrEmpty(a)) {
                 return true;
-            } else if (a.length == 1) {
+            } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
                 return anyMatch(Fn.equal(a[0]));
             } else if (a.length == 2) {
                 return filter(new Predicate<T>() {
@@ -2767,12 +2767,74 @@ abstract class AbstractStream<T> extends Stream<T> {
                 return anyMatch(Fn.equal(val));
             } else {
                 final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
+                final int distinctCount = set.size();
+
                 return filter(new Predicate<T>() {
                     @Override
                     public boolean test(T t) {
                         return set.contains(t);
                     }
-                }).distinct().limit(set.size()).count() == set.size();
+                }).distinct().limit(distinctCount).count() == distinctCount;
+            }
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    @SafeVarargs
+    public final boolean containsAny(final T... a) {
+        assertNotClosed();
+
+        try {
+            if (N.isNullOrEmpty(a)) {
+                return false;
+            } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
+                return anyMatch(Fn.equal(a[0]));
+            } else if (a.length == 2) {
+                return anyMatch(new Predicate<T>() {
+                    private final T val1 = a[0];
+                    private final T val2 = a[1];
+
+                    @Override
+                    public boolean test(T t) {
+                        return N.equals(t, val1) || N.equals(t, val2);
+                    }
+                });
+            } else {
+                final Set<T> set = N.asSet(a);
+
+                return anyMatch(new Predicate<T>() {
+                    @Override
+                    public boolean test(T t) {
+                        return set.contains(t);
+                    }
+                });
+            }
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public boolean containsAny(final Collection<? extends T> c) {
+        assertNotClosed();
+
+        try {
+            if (N.isNullOrEmpty(c)) {
+                return false;
+            } else if (c.size() == 1) {
+                final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
+                return anyMatch(Fn.equal(val));
+            } else {
+                final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
+
+                return anyMatch(new Predicate<T>() {
+                    @Override
+                    public boolean test(T t) {
+                        return set.contains(t);
+                    }
+                });
             }
         } finally {
             close();

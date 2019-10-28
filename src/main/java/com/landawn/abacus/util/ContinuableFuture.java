@@ -45,7 +45,7 @@ public class ContinuableFuture<T> implements Future<T> {
     private static final Logger logger = LoggerFactory.getLogger(ContinuableFuture.class);
 
     /** The Constant DEFAULT_EXECUTOR. */
-    private static final ExecutorService DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 300,
+    private static final ExecutorService DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L,
             TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     static {

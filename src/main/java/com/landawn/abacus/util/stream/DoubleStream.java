@@ -777,6 +777,8 @@ public abstract class DoubleStream
 
         if (n == 0) {
             return empty();
+        } else if (n < 10) {
+            return of(Array.repeat(element, (int) n));
         }
 
         return new IteratorDoubleStream(new DoubleIteratorEx() {

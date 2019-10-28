@@ -986,6 +986,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
         if (n == 0) {
             return empty();
+        } else if (n < 10) {
+            return of(Array.repeat(element, (int) n));
         }
 
         return new IteratorLongStream(new LongIteratorEx() {

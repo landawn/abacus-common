@@ -1174,6 +1174,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
         if (n == 0) {
             return empty();
+        } else if (n < 10) {
+            return of(Array.repeat(element, (int) n));
         }
 
         return new IteratorIntStream(new IntIteratorEx() {

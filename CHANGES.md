@@ -1,3 +1,9 @@
+### 1.9.11
+
+* add `Stream/ExceptionalStream.containsAll/Any`.
+* Improvements and bug fix.
+
+
 ### 1.9.10
 
 * add `ExceptionalStream.toDataSet`.

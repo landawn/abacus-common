@@ -1148,6 +1148,8 @@ public abstract class CharStream
 
         if (n == 0) {
             return empty();
+        } else if (n < 10) {
+            return of(Array.repeat(element, (int) n));
         }
 
         return new IteratorCharStream(new CharIteratorEx() {
