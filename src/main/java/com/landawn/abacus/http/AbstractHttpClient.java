@@ -877,24 +877,10 @@ public abstract class AbstractHttpClient implements Closeable {
 
         if (settings != null) {
             contentFormat = settings.getContentFormat();
-
-            if (contentFormat == null) {
-                String contentType = (String) settings.headers().get(HttpHeaders.Names.CONTENT_TYPE);
-                String contentEncoding = (String) settings.headers().get(HttpHeaders.Names.CONTENT_ENCODING);
-
-                contentFormat = HTTP.getContentFormat(contentType, contentEncoding);
-            }
         }
 
         if (contentFormat == null) {
             contentFormat = _settings.getContentFormat();
-
-            if (contentFormat == null) {
-                String contentType = (String) _settings.headers().get(HttpHeaders.Names.CONTENT_TYPE);
-                String contentEncoding = (String) _settings.headers().get(HttpHeaders.Names.CONTENT_ENCODING);
-
-                contentFormat = HTTP.getContentFormat(contentType, contentEncoding);
-            }
         }
 
         return contentFormat;
@@ -910,19 +896,11 @@ public abstract class AbstractHttpClient implements Closeable {
         String contentType = null;
 
         if (settings != null) {
-            if (settings.getContentFormat() != null) {
-                contentType = HTTP.getContentType(settings.getContentFormat());
-            } else {
-                contentType = (String) settings.headers().get(HttpHeaders.Names.CONTENT_TYPE);
-            }
+            contentType = settings.getContentType();
         }
 
         if (N.isNullOrEmpty(contentType)) {
-            if (_settings.getContentFormat() != null) {
-                contentType = HTTP.getContentType(_settings.getContentFormat());
-            } else {
-                contentType = (String) _settings.headers().get(HttpHeaders.Names.CONTENT_TYPE);
-            }
+            contentType = _settings.getContentType();
         }
 
         return contentType;
@@ -938,19 +916,11 @@ public abstract class AbstractHttpClient implements Closeable {
         String contentEncoding = null;
 
         if (settings != null) {
-            if (settings.getContentFormat() != null) {
-                contentEncoding = HTTP.getContentEncoding(settings.getContentFormat());
-            } else {
-                contentEncoding = (String) settings.headers().get(HttpHeaders.Names.CONTENT_ENCODING);
-            }
+            contentEncoding = settings.getContentEncoding();
         }
 
         if (N.isNullOrEmpty(contentEncoding)) {
-            if (_settings.getContentFormat() != null) {
-                contentEncoding = HTTP.getContentEncoding(_settings.getContentFormat());
-            } else {
-                contentEncoding = (String) _settings.headers().get(HttpHeaders.Names.CONTENT_ENCODING);
-            }
+            contentEncoding = _settings.getContentEncoding();
         }
 
         return contentEncoding;

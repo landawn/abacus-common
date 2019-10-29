@@ -1,3 +1,8 @@
+### 1.9.12
+
+* Improvements and bug fix.
+
+
 ### 1.9.11
 
 * add `Stream/ExceptionalStream.containsAll/Any`.

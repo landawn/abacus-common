@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.http.okhttp;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -295,6 +296,46 @@ public class OkHttpRequest {
      * @see RequestBody#create(MediaType, String)
      */
     public OkHttpRequest body(String content, @Nullable MediaType contentType) {
+        this.body = RequestBody.create(contentType, content);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param content
+     * @param contentType
+     * @return
+     * @see RequestBody#create(MediaType, byte[])
+     */
+    public OkHttpRequest body(final byte[] content, @Nullable MediaType contentType) {
+        this.body = RequestBody.create(contentType, content);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param content
+     * @param offset
+     * @param len
+     * @param contentType
+     * @return
+     * @see RequestBody#create(MediaType, byte[], int, int)
+     */
+    public OkHttpRequest body(final byte[] content, final int offset, final int byteCount, @Nullable MediaType contentType) {
+        this.body = RequestBody.create(contentType, content, offset, byteCount);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param content
+     * @param contentType
+     * @return
+     */
+    public OkHttpRequest body(final File content, @Nullable MediaType contentType) {
         this.body = RequestBody.create(contentType, content);
 
         return this;

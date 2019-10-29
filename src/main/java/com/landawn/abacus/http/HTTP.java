@@ -80,7 +80,7 @@ public final class HTTP {
     static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
     /** The Constant contentFormat2Parser. */
-    private static final Map<ContentFormat, Parser<?, ?>> contentFormat2Parser = new EnumMap<ContentFormat, Parser<?, ?>>(ContentFormat.class);
+    private static final Map<ContentFormat, Parser<?, ?>> contentFormat2Parser = new EnumMap<>(ContentFormat.class);
 
     static {
         contentFormat2Parser.put(ContentFormat.JSON, jsonParser);
@@ -101,7 +101,7 @@ public final class HTTP {
     }
 
     /** The Constant contentFormat2Type. */
-    private static final Map<ContentFormat, String> contentFormat2Type = new EnumMap<ContentFormat, String>(ContentFormat.class);
+    private static final Map<ContentFormat, String> contentFormat2Type = new EnumMap<>(ContentFormat.class);
 
     static {
         contentFormat2Type.put(ContentFormat.XML, HttpHeaders.Values.APPLICATION_XML);
@@ -116,7 +116,7 @@ public final class HTTP {
     }
 
     /** The Constant contentFormat2Encoding. */
-    private static final Map<ContentFormat, String> contentFormat2Encoding = new EnumMap<ContentFormat, String>(ContentFormat.class);
+    private static final Map<ContentFormat, String> contentFormat2Encoding = new EnumMap<>(ContentFormat.class);
 
     static {
         contentFormat2Encoding.put(ContentFormat.XML_GZIP, GZIP);
@@ -132,14 +132,14 @@ public final class HTTP {
     }
 
     /** The Constant contentTypeEncoding2Format. */
-    private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ObjectPool<String, Map<String, ContentFormat>>(64);
+    private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ObjectPool<>(64);
 
     static {
         for (Map.Entry<ContentFormat, String> entry : contentFormat2Type.entrySet()) {
             Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(entry.getValue());
 
             if (contentEncoding2Format == null) {
-                contentEncoding2Format = new HashMap<String, ContentFormat>();
+                contentEncoding2Format = new HashMap<>();
                 contentTypeEncoding2Format.put(entry.getValue(), contentEncoding2Format);
             }
 
@@ -160,7 +160,7 @@ public final class HTTP {
         Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(N.EMPTY_STRING);
 
         if (contentEncoding2Format == null) {
-            contentEncoding2Format = new HashMap<String, ContentFormat>();
+            contentEncoding2Format = new HashMap<>();
             contentTypeEncoding2Format.put(N.EMPTY_STRING, contentEncoding2Format);
         }
 

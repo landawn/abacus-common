@@ -10026,14 +10026,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public boolean hasNext() {
-                checkForComodification();
+                ConcurrentModification();
 
                 return cursor < toRowIndex;
             }
 
             @Override
             public DisposableObjArray next() {
-                checkForComodification();
+                ConcurrentModification();
 
                 if (cursor >= toRowIndex) {
                     throw new NoSuchElementException();
@@ -10048,7 +10048,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public long count() {
-                checkForComodification();
+                ConcurrentModification();
 
                 return toRowIndex - cursor;
             }
@@ -10057,14 +10057,14 @@ public class RowDataSet implements DataSet, Cloneable {
             public void skip(long n) {
                 N.checkArgNotNegative(n, "n");
 
-                checkForComodification();
+                ConcurrentModification();
 
                 cursor = n > toRowIndex - cursor ? toRowIndex : (int) n + cursor;
             }
 
             @Override
             public <A> A[] toArray(A[] a) {
-                checkForComodification();
+                ConcurrentModification();
 
                 final List<Object[]> rows = RowDataSet.this.toList(Object[].class, columnNames, cursor, toRowIndex);
 
@@ -10075,7 +10075,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 return a;
             }
 
-            final void checkForComodification() {
+            final void ConcurrentModification() {
                 if (modCount != expectedModCount) {
                     throw new ConcurrentModificationException();
                 }
@@ -10147,14 +10147,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public boolean hasNext() {
-                checkForComodification();
+                ConcurrentModification();
 
                 return cursor < toRowIndex;
             }
 
             @Override
             public T next() {
-                checkForComodification();
+                ConcurrentModification();
 
                 if (cursor >= toRowIndex) {
                     throw new NoSuchElementException();
@@ -10199,7 +10199,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public long count() {
-                checkForComodification();
+                ConcurrentModification();
 
                 return toRowIndex - cursor;
             }
@@ -10208,14 +10208,14 @@ public class RowDataSet implements DataSet, Cloneable {
             public void skip(long n) {
                 N.checkArgNotNegative(n, "n");
 
-                checkForComodification();
+                ConcurrentModification();
 
                 cursor = n > toRowIndex - cursor ? toRowIndex : (int) n + cursor;
             }
 
             @Override
             public <A> A[] toArray(A[] a) {
-                checkForComodification();
+                ConcurrentModification();
 
                 final List<T> rows = RowDataSet.this.toList(rowClass, columnNames, cursor, toRowIndex);
 
@@ -10226,7 +10226,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 return a;
             }
 
-            final void checkForComodification() {
+            final void ConcurrentModification() {
                 if (modCount != expectedModCount) {
                     throw new ConcurrentModificationException();
                 }
@@ -10297,14 +10297,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public boolean hasNext() {
-                checkForComodification();
+                ConcurrentModification();
 
                 return cursor < toRowIndex;
             }
 
             @Override
             public T next() {
-                checkForComodification();
+                ConcurrentModification();
 
                 if (cursor >= toRowIndex) {
                     throw new NoSuchElementException();
@@ -10321,7 +10321,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public long count() {
-                checkForComodification();
+                ConcurrentModification();
 
                 return toRowIndex - cursor;
             }
@@ -10330,14 +10330,14 @@ public class RowDataSet implements DataSet, Cloneable {
             public void skip(long n) {
                 N.checkArgNotNegative(n, "n");
 
-                checkForComodification();
+                ConcurrentModification();
 
                 cursor = n > toRowIndex - cursor ? toRowIndex : (int) n + cursor;
             }
 
             @Override
             public <A> A[] toArray(A[] a) {
-                checkForComodification();
+                ConcurrentModification();
 
                 final List<T> rows = RowDataSet.this.toList(rowSupplier, columnNames, cursor, toRowIndex);
 
@@ -10348,7 +10348,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 return a;
             }
 
-            final void checkForComodification() {
+            final void ConcurrentModification() {
                 if (modCount != expectedModCount) {
                     throw new ConcurrentModificationException();
                 }
@@ -11010,7 +11010,7 @@ public class RowDataSet implements DataSet, Cloneable {
          */
         @Override
         public DataSet getPage(final int pageNum) {
-            checkForComodification();
+            ConcurrentModification();
             checkPageNumber(pageNum);
 
             synchronized (pagePool) {
@@ -11091,10 +11091,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return Stream.of(iterator());
         }
 
-        /**
-         * Check for comodification.
-         */
-        final void checkForComodification() {
+        final void ConcurrentModification() {
             if (modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
             }
@@ -11135,7 +11132,7 @@ public class RowDataSet implements DataSet, Cloneable {
              */
             @Override
             public DataSet next() {
-                checkForComodification();
+                ConcurrentModification();
 
                 try {
                     DataSet next = getPage(cursor);
@@ -11143,7 +11140,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     return next;
                 } catch (IndexOutOfBoundsException e) {
-                    checkForComodification();
+                    ConcurrentModification();
                     throw new NoSuchElementException();
                 }
             }

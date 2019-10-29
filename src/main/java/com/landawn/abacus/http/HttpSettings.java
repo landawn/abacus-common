@@ -103,7 +103,7 @@ public final class HttpSettings {
 
     /**
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
-     *  
+     *
      *
      * @param readTimeout
      * @return
@@ -167,7 +167,7 @@ public final class HttpSettings {
 
     /**
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
-     *  
+     *
      *
      * @param doInput
      * @return
@@ -245,30 +245,75 @@ public final class HttpSettings {
     public HttpSettings setContentFormat(ContentFormat contentFormat) {
         this.contentFormat = contentFormat;
 
-        if (contentFormat == null || contentFormat == ContentFormat.NONE) {
-            if (headers != null) {
-                headers.remove(HttpHeaders.Names.CONTENT_TYPE);
-                headers.remove(HttpHeaders.Names.CONTENT_ENCODING);
-            }
-        } else {
-            final String contentType = HTTP.getContentType(contentFormat);
+        //    if (contentFormat == null || contentFormat == ContentFormat.NONE) {
+        //        if (headers != null) {
+        //            headers.remove(HttpHeaders.Names.CONTENT_TYPE);
+        //            headers.remove(HttpHeaders.Names.CONTENT_ENCODING);
+        //        }
+        //    } else {
+        //        final String contentType = N.toString(headers().get(HttpHeaders.Names.CONTENT_TYPE));
+        //        final String contentEncoding = N.toString(headers().get(HttpHeaders.Names.CONTENT_ENCODING));
+        //
+        //        if (!contentFormat.equals(HTTP.getContentFormat(contentType, contentEncoding))) {
+        //            final String newContentType = HTTP.getContentType(contentFormat);
+        //
+        //            if (N.isNullOrEmpty(newContentType)) {
+        //                headers().remove(HttpHeaders.Names.CONTENT_TYPE);
+        //            } else {
+        //                header(HttpHeaders.Names.CONTENT_TYPE, newContentType);
+        //            }
+        //
+        //            final String newContentEncoding = HTTP.getContentEncoding(contentFormat);
+        //
+        //            if (N.isNullOrEmpty(newContentEncoding)) {
+        //                headers().remove(HttpHeaders.Names.CONTENT_ENCODING);
+        //            } else {
+        //                header(HttpHeaders.Names.CONTENT_ENCODING, newContentEncoding);
+        //            }
+        //        }
+        //    }
 
-            if (N.isNullOrEmpty(contentType)) {
-                headers.remove(HttpHeaders.Names.CONTENT_TYPE);
-            } else {
+        return this;
+    }
+
+    public HttpSettings setContentType(final String contentType) {
+        header(HttpHeaders.Names.CONTENT_TYPE, contentType);
+
+        return this;
+    }
+
+    public String getContentType() {
+        String contentType = (String) headers().get(HttpHeaders.Names.CONTENT_TYPE);
+
+        if (N.isNullOrEmpty(contentType) && contentFormat != null) {
+            contentType = HTTP.getContentType(contentFormat);
+
+            if (N.notNullOrEmpty(contentType)) {
                 header(HttpHeaders.Names.CONTENT_TYPE, contentType);
             }
+        }
 
-            final String contentEncoding = HTTP.getContentEncoding(contentFormat);
+        return contentType;
+    }
 
-            if (N.isNullOrEmpty(contentEncoding)) {
-                headers.remove(HttpHeaders.Names.CONTENT_ENCODING);
-            } else {
+    public HttpSettings setContentEncoding(final String contentEncoding) {
+        header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
+
+        return this;
+    }
+
+    public String getContentEncoding() {
+        String contentEncoding = (String) headers().get(HttpHeaders.Names.CONTENT_ENCODING);
+
+        if (N.isNullOrEmpty(contentEncoding) && contentFormat != null) {
+            contentEncoding = HTTP.getContentEncoding(contentFormat);
+
+            if (N.notNullOrEmpty(contentEncoding)) {
                 header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
             }
         }
 
-        return this;
+        return contentEncoding;
     }
 
     /**
