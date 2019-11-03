@@ -52,6 +52,12 @@ public class u {
      */
     public static final class Optional<T> {
 
+        /** Presents {@code Boolean.TRUE}. */
+        public static final Optional<Boolean> TRUE = new Optional<>(Boolean.TRUE);
+
+        /** Presents {@code Boolean.FALSE}. */
+        public static final Optional<Boolean> FALSE = new Optional<>(Boolean.FALSE);
+
         /** The Constant EMPTY. */
         private static final Optional<?> EMPTY = new Optional<>();
 
@@ -593,14 +599,14 @@ public class u {
      */
     public static final class OptionalBoolean implements Comparable<OptionalBoolean> {
 
+        /** Presents {@code true}. */
+        public static final OptionalBoolean TRUE = new OptionalBoolean(Boolean.TRUE);
+
+        /** Presents {@code true}. */
+        public static final OptionalBoolean FALSE = new OptionalBoolean(Boolean.FALSE);
+
         /** The Constant EMPTY. */
         private static final OptionalBoolean EMPTY = new OptionalBoolean();
-
-        /** The Constant TRUE. */
-        private static final OptionalBoolean TRUE = new OptionalBoolean(true);
-
-        /** The Constant FALSE. */
-        private static final OptionalBoolean FALSE = new OptionalBoolean(false);
 
         /** The value. */
         private final boolean value;
@@ -4194,6 +4200,12 @@ public class u {
      * @param <T>
      */
     public static final class Nullable<T> {
+
+        /** Presents {@code Boolean.TRUE}. */
+        public static final Nullable<Boolean> TRUE = new Nullable<>(Boolean.TRUE);
+
+        /** Presents {@code Boolean.FALSE}. */
+        public static final Nullable<Boolean> FALSE = new Nullable<>(Boolean.FALSE);
 
         /** The Constant EMPTY. */
         private static final Nullable<?> EMPTY = new Nullable<>();

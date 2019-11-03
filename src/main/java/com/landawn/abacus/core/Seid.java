@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,6 @@ import java.util.TreeMap;
 
 import com.landawn.abacus.EntityId;
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
@@ -160,7 +159,7 @@ public class Seid implements EntityId, Cloneable {
     }
 
     /**
-     * 
+     *
      * @param nameValues
      * @return
      * @deprecated replaced by {@link #from(Map)}
@@ -170,7 +169,7 @@ public class Seid implements EntityId, Cloneable {
         return from(nameValues);
     }
 
-    /** 
+    /**
      *
      * @param nameValues
      * @return
@@ -250,7 +249,7 @@ public class Seid implements EntityId, Cloneable {
         if (values.isEmpty() || (values.size() == 1 && values.containsKey(simplePropName))) {
             values = Collections.singletonMap(simplePropName, propValue);
         } else {
-            final Map<String, Object> newVlaues = new TreeMap<String, Object>(keyComparator);
+            final Map<String, Object> newVlaues = new TreeMap<>(keyComparator);
             newVlaues.putAll(this.values);
             this.values = newVlaues;
 
@@ -277,7 +276,7 @@ public class Seid implements EntityId, Cloneable {
             set(entry.getKey(), entry.getValue());
         } else {
             if (!(values instanceof TreeMap)) {
-                final Map<String, Object> newVlaues = new TreeMap<String, Object>(keyComparator);
+                final Map<String, Object> newVlaues = new TreeMap<>(keyComparator);
                 newVlaues.putAll(this.values);
                 this.values = newVlaues;
             }
@@ -499,7 +498,7 @@ public class Seid implements EntityId, Cloneable {
                     Map.Entry<String, Object> entry2 = it.next();
                     String propName2 = NameUtil.isCanonicalName(entityName, entry2.getKey()) ? NameUtil.getSimpleName(entry2.getKey()) : entry2.getKey();
 
-                    strValue = entityName + ": {" + propName1 + "=" + N.stringOf(entry1.getValue()) + Type.ELEMENT_SEPARATOR + propName2 + "="
+                    strValue = entityName + ": {" + propName1 + "=" + N.stringOf(entry1.getValue()) + N.ELEMENT_SEPARATOR + propName2 + "="
                             + N.stringOf(entry2.getValue()) + "}";
 
                     break;
@@ -519,7 +518,7 @@ public class Seid implements EntityId, Cloneable {
 
                     for (Map.Entry<String, Object> entry : entrySet) {
                         if (i++ > 0) {
-                            sb.append(Type.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            sb.append(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
                         }
 
                         String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();

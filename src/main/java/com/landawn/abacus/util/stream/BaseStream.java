@@ -27,6 +27,7 @@ import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.exception.DuplicatedResultException;
+import com.landawn.abacus.util.If.Or;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.IntList;
@@ -513,9 +514,10 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @param <E>
      * @param action
      * @throws E
+     * @return
      */
     @TerminalOp
-    <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super S, E> action) throws E;
+    <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super S, E> action) throws E;
 
     //    /**
     //     * <br />

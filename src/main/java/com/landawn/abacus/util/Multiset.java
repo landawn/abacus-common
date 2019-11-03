@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ import java.util.Set;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.If.Or;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.Function;
@@ -43,7 +44,7 @@ import com.landawn.abacus.util.stream.Stream;
 /**
  * A collection that supports order-independent equality, like {@link Set}, but
  * may have duplicate elements.
- * 
+ *
  * <p>Elements of a Multiset that are equal to one another are referred to as
  * <i>occurrences</i> of the same single element. The total number of
  * occurrences of an element in a Multiset is called the <i>count</i> of that
@@ -86,7 +87,7 @@ public final class Multiset<T> implements Iterable<T> {
      */
     public Multiset(int initialCapacity) {
         this.mapSupplier = Suppliers.ofMap();
-        this.valueMap = new HashMap<T, MutableInt>(initialCapacity);
+        this.valueMap = new HashMap<>(initialCapacity);
     }
 
     /**
@@ -171,7 +172,7 @@ public final class Multiset<T> implements Iterable<T> {
      */
     public static <T> Multiset<T> from(final Map<? extends T, Integer> m) {
         if (N.isNullOrEmpty(m)) {
-            return new Multiset<T>();
+            return new Multiset<>();
         }
 
         final Multiset<T> multiset = new Multiset<>(Maps.newTargetMap(m));
@@ -747,7 +748,7 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * Remove one occurrence from the specified elements. 
+     * Remove one occurrence from the specified elements.
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
      * @param e
@@ -758,7 +759,7 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * Remove the specified occurrences from the specified element. 
+     * Remove the specified occurrences from the specified element.
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
      * @param e
@@ -1020,7 +1021,7 @@ public final class Multiset<T> implements Iterable<T> {
     }
 
     /**
-     * Remove the specified occurrences from the specified elements. 
+     * Remove the specified occurrences from the specified elements.
      * The elements will be removed from this set if the occurrences equals to or less than 0 after the operation.
      *
      * @param c
@@ -1249,7 +1250,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      */
     public Multiset<T> copy() {
-        final Multiset<T> copy = new Multiset<T>(mapSupplier);
+        final Multiset<T> copy = new Multiset<>(mapSupplier);
 
         copy.addAll(this);
 
@@ -1530,20 +1531,20 @@ public final class Multiset<T> implements Iterable<T> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multiset:
-     * 
+     *
      * <pre>
      * final int oldValue = get(e);
-     * 
+     *
      * if (oldValue > 0) {
      *     return oldValue;
      * }
-     * 
+     *
      * final int newValue = mappingFunction.apply(e);
-     * 
+     *
      * if (newValue > 0) {
      *     set(e, newValue);
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1573,22 +1574,22 @@ public final class Multiset<T> implements Iterable<T> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multiset:
-     * 
-     * <pre> 
+     *
+     * <pre>
      * final int oldValue = get(e);
-     * 
+     *
      * if (oldValue == 0) {
      *     return oldValue;
      * }
-     * 
+     *
      * final int newValue = remappingFunction.apply(e, oldValue);
-     * 
+     *
      * if (newValue > 0) {
      *     set(e, newValue);
      * } else {
      *     remove(e);
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1620,11 +1621,11 @@ public final class Multiset<T> implements Iterable<T> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multiset:
-     * 
+     *
      * <pre>
      * final int oldValue = get(key);
      * final int newValue = remappingFunction.apply(key, oldValue);
-     * 
+     *
      * if (newValue > 0) {
      *     set(key, newValue);
      * } else {
@@ -1632,7 +1633,7 @@ public final class Multiset<T> implements Iterable<T> {
      *         remove(key);
      *     }
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1661,11 +1662,11 @@ public final class Multiset<T> implements Iterable<T> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multiset:
-     * 
+     *
      * <pre>
      * int oldValue = get(key);
      * int newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
-     * 
+     *
      * if (newValue > 0) {
      *     set(key, newValue);
      * } else {
@@ -1673,7 +1674,7 @@ public final class Multiset<T> implements Iterable<T> {
      *         remove(key);
      *     }
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1810,10 +1811,8 @@ public final class Multiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super Multiset<T>, E> action) throws E {
-        if (size() > 0) {
-            action.accept(this);
-        }
+    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super Multiset<T>, E> action) throws E {
+        return If.is(size() > 0).then(this, action);
     }
 
     /**

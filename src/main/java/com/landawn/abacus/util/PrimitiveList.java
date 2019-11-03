@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ import java.util.RandomAccess;
 import java.util.Set;
 
 import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.If.Or;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntFunction;
 
@@ -238,7 +239,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      * Returns List of {@code PrimitiveList 'L'} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     *  
+     *
      *
      * @param fromIndex
      * @param toIndex
@@ -253,7 +254,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     //
     //    /**
     //     * Split the List by the specified predicate.
-    //     * 
+    //     *
     //     * <pre>
     //     * <code>
     //     * // split the number sequence by window 5.
@@ -268,7 +269,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     //     * }).forEach(N::println);
     //     * </code>
     //     * </pre>
-    //     * 
+    //     *
     //     * @param fromIndex
     //     * @param toIndex
     //     * @param predicate
@@ -493,7 +494,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param action
      * @throws E the e
      */
-    public abstract <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super L, E> action) throws E;
+    public abstract <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super L, E> action) throws E;
 
     /**
      * Println.

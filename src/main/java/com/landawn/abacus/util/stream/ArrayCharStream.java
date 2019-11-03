@@ -28,6 +28,7 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
+import com.landawn.abacus.util.If.Or;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
@@ -1609,14 +1610,18 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super CharStream, E> action) throws E {
+    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super CharStream, E> action) throws E {
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
+
+                return Or.TRUE;
             }
         } finally {
             close();
         }
+
+        return Or.FALSE;
     }
 
     @Override

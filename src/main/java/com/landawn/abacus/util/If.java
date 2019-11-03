@@ -21,9 +21,9 @@ import com.landawn.abacus.util.function.Supplier;
 
 // TODO: Auto-generated Javadoc
 /**
- * This class is mainly designed for functional programming. 
+ * This class is mainly designed for functional programming.
  * Generally the traditional "{@code if-else}" or ternary operator: "{@code ? : }" is preferred over this class.
- * 
+ *
  * @author HaiYang Li
  *
  */
@@ -244,7 +244,7 @@ public final class If {
      * @param s
      * @return
      */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu. 
+    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If isNullOrEmptyOrBlank(final CharSequence s) {
         return is(N.isNullOrEmptyOrBlank(s));
     }
@@ -416,7 +416,7 @@ public final class If {
      * @param s
      * @return
      */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu. 
+    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If notNullOrEmptyOrBlank(final CharSequence s) {
         return is(N.notNullOrEmptyOrBlank(s));
     }
@@ -517,10 +517,10 @@ public final class If {
     public static final class Or {
 
         /** The Constant TRUE. */
-        private static final Or TRUE = new Or(true);
+        public static final Or TRUE = new Or(true);
 
         /** The Constant FALSE. */
-        private static final Or FALSE = new Or(false);
+        public static final Or FALSE = new Or(false);
 
         /** The b. */
         private final boolean b;
@@ -597,9 +597,9 @@ public final class If {
     }
 
     //    /**
-    //     * This class is mainly designed for functional programming. 
+    //     * This class is mainly designed for functional programming.
     //     * Generally the traditional "{@code if-else}" or ternary operator: "{@code ? : }" is preferred over this class.
-    //     * 
+    //     *
     //     * @author HaiYang Li
     //     *
     //     */
@@ -628,7 +628,7 @@ public final class If {
     //
     //        /**
     //         * {@code true} for {@code index >= 0}, {@code false} for {@code index < 0}.
-    //         * 
+    //         *
     //         * @param index
     //         * @return
     //         */
@@ -701,7 +701,7 @@ public final class If {
     //            return is(N.isNullOrEmpty(m));
     //        }
     //
-    //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu. 
+    //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     //        public static IF isNullOrEmptyOrBlank(final CharSequence s) {
     //            return is(N.isNullOrEmptyOrBlank(s));
     //        }
@@ -771,7 +771,7 @@ public final class If {
     //            return is(N.notNullOrEmpty(m));
     //        }
     //
-    //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu. 
+    //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     //        public static IF notNullOrEmptyOrBlank(final CharSequence s) {
     //            return is(N.notNullOrEmptyOrBlank(s));
     //        }

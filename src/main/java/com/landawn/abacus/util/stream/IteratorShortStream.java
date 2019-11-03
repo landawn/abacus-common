@@ -28,6 +28,7 @@ import java.util.Set;
 
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.If.Or;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
@@ -1545,14 +1546,18 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super ShortStream, E> action) throws E {
+    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super ShortStream, E> action) throws E {
         try {
             if (elements.hasNext()) {
                 action.accept(this);
+
+                return Or.TRUE;
             }
         } finally {
             close();
         }
+
+        return Or.FALSE;
     }
 
     @Override

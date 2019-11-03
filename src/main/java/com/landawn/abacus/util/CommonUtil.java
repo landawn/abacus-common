@@ -119,13 +119,6 @@ class CommonUtil {
     // ArrayBlockingQueue.
     static final int POOL_SIZE = Internals.POOL_SIZE;
 
-    /** The Constant ELEMENT_SEPARATOR. */
-    // ...
-    static final String ELEMENT_SEPARATOR = Type.ELEMENT_SEPARATOR;
-
-    /** The Constant ELEMENT_SEPARATOR_CHAR_ARRAY. */
-    static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = Type.ELEMENT_SEPARATOR_CHAR_ARRAY;
-
     /**
      * An empty immutable {@code Boolean} array.
      */
@@ -204,6 +197,12 @@ class CommonUtil {
      * @since 2.2
      */
     static final char CHAR_CR = WD.CHAR_CR;
+
+    /** The element separator. */
+    public static final String ELEMENT_SEPARATOR = ", ".intern();
+
+    /** The element separator char array. */
+    public static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
 
     // ...
     /**

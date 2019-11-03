@@ -49,7 +49,6 @@ import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.parser.JSONSerializationConfig;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.parser.KryoParser;
-import com.landawn.abacus.parser.Parser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XMLConstants;
 import com.landawn.abacus.parser.XMLParser;
@@ -3810,7 +3809,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 if (rowIndex > fromRowIndex) {
-                    bw.write(Parser.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
                 }
 
                 bw.write(WD._BRACE_L);
@@ -3821,7 +3820,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     type = element == null ? null : N.typeOf(element.getClass());
 
                     if (i > 0) {
-                        bw.write(Parser.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
 
                     bw.write(charArrayOfColumnNames[i]);
@@ -4486,7 +4485,7 @@ public class RowDataSet implements DataSet, Cloneable {
             if (writeTitle) {
                 for (int i = 0; i < columnCount; i++) {
                     if (i > 0) {
-                        bw.write(Parser.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
 
                     bw.write(getColumnName(columnIndexes[i]));
@@ -4505,7 +4504,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int i = 0; i < columnCount; i++) {
                     if (i > 0) {
-                        bw.write(Parser.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                        bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
 
                     element = _columnList.get(columnIndexes[i]).get(rowIndex);

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ import java.util.Random;
 import java.util.Set;
 
 import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.If.Or;
 import com.landawn.abacus.util.Try.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -1595,13 +1596,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *    if (isEmpty()) {
      *        return OptionalShort.empty();
      *    }
-     * 
+     *
      *    short result = elementData[0];
-     * 
+     *
      *    for (int i = 1; i < size; i++) {
      *        result = accumulator.applyAsShort(result, elementData[i]);
      *    }
-     * 
+     *
      *    return OptionalShort.of(result);
      * </code>
      * </pre>
@@ -1632,13 +1633,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *     if (isEmpty()) {
      *         return identity;
      *     }
-     * 
+     *
      *     short result = identity;
-     * 
+     *
      *     for (int i = 0; i < size; i++) {
      *         result = accumulator.applyAsShort(result, elementData[i]);
      *    }
-     * 
+     *
      *     return result;
      * </code>
      * </pre>
@@ -1897,7 +1898,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns List of {@code ShortList} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
-     *  
+     *
      *
      * @param fromIndex
      * @param toIndex
@@ -2336,10 +2337,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super ShortList, E> action) throws E {
-        if (size > 0) {
-            action.accept(this);
-        }
+    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super ShortList, E> action) throws E {
+        return If.is(size > 0).then(this, action);
     }
 
     /**

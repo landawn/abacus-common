@@ -28,6 +28,7 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
+import com.landawn.abacus.util.If.Or;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
@@ -1609,14 +1610,18 @@ class ArrayByteStream extends AbstractByteStream {
     }
 
     @Override
-    public <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super ByteStream, E> action) throws E {
+    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super ByteStream, E> action) throws E {
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
+
+                return Or.TRUE;
             }
         } finally {
             close();
         }
+
+        return Or.FALSE;
     }
 
     @Override
