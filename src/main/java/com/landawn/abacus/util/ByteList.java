@@ -26,7 +26,7 @@ import java.util.Random;
 import java.util.Set;
 
 import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.If.Or;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.Try.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
@@ -2292,7 +2292,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super ByteList, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super ByteList, E> action) throws E {
         return If.is(size > 0).then(this, action);
     }
 

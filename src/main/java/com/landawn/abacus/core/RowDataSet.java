@@ -23,7 +23,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +49,9 @@ import com.landawn.abacus.parser.JSONSerializationConfig;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.parser.XMLConstants;
 import com.landawn.abacus.parser.XMLParser;
 import com.landawn.abacus.parser.XMLSerializationConfig;
@@ -1850,18 +1852,19 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
             }
         } else if (rowType.isEntity()) {
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             final Object[] a = new Object[this._columnNameList.size()];
-            Method propGetMethod = null;
+            PropInfo propInfo = null;
             int idx = 0;
 
             for (String columnName : this._columnNameList) {
-                propGetMethod = ClassUtil.getPropGetMethod(rowClass, columnName);
+                propInfo = entityInfo.getPropInfo(columnName);
 
-                if (propGetMethod == null) {
+                if (propInfo == null) {
                     throw new IllegalArgumentException("Column (" + columnName + ") is not found in entity (" + rowClass + ")");
                 }
 
-                a[idx++] = ClassUtil.getPropValue(row, propGetMethod);
+                a[idx++] = propInfo.getPropValue(row);
             }
 
             if (rowIndex == size()) {
@@ -2777,31 +2780,24 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             final boolean ignoreUnknownProperty = columnNames == _columnNameList;
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             String propName = null;
-            Method method = null;
+            PropInfo propInfo = null;
 
             for (int columnIndex : columnIndexes) {
                 propName = _columnNameList.get(columnIndexes[columnIndex]);
-                method = ClassUtil.getPropSetMethod(rowClass, propName);
+                propInfo = entityInfo.getPropInfo(propName);
 
-                if (method == null) {
-                    method = ClassUtil.getPropGetMethod(rowClass, propName);
-
-                    if (method != null) {
-                        for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                            ClassUtil.setPropValueByGet(rowList.get(rowIndex - fromRowIndex), method, _columnList.get(columnIndex).get(rowIndex));
-                        }
-                    } else {
-                        for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                            if (ClassUtil.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
-                                    ignoreUnknownProperty) == false) {
-                                break;
-                            }
+                if (propInfo == null) {
+                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
+                        if (ClassUtil.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
+                                ignoreUnknownProperty) == false) {
+                            break;
                         }
                     }
                 } else {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        ClassUtil.setPropValue(rowList.get(rowIndex - fromRowIndex), method, _columnList.get(columnIndex).get(rowIndex));
+                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), _columnList.get(columnIndex).get(rowIndex));
                     }
                 }
             }
@@ -2927,31 +2923,24 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             final boolean ignoreUnknownProperty = columnNames == _columnNameList;
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             String propName = null;
-            Method method = null;
+            PropInfo propInfo = null;
 
             for (int columnIndex : columnIndexes) {
                 propName = _columnNameList.get(columnIndexes[columnIndex]);
-                method = ClassUtil.getPropSetMethod(rowClass, propName);
+                propInfo = entityInfo.getPropInfo(propName);
 
-                if (method == null) {
-                    method = ClassUtil.getPropGetMethod(rowClass, propName);
-
-                    if (method != null) {
-                        for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                            ClassUtil.setPropValueByGet(rowList.get(rowIndex - fromRowIndex), method, _columnList.get(columnIndex).get(rowIndex));
-                        }
-                    } else {
-                        for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                            if (ClassUtil.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
-                                    ignoreUnknownProperty) == false) {
-                                break;
-                            }
+                if (propInfo == null) {
+                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
+                        if (ClassUtil.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
+                                ignoreUnknownProperty) == false) {
+                            break;
                         }
                     }
                 } else {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        ClassUtil.setPropValue(rowList.get(rowIndex - fromRowIndex), method, _columnList.get(columnIndex).get(rowIndex));
+                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), _columnList.get(columnIndex).get(rowIndex));
                     }
                 }
             }

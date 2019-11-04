@@ -36,7 +36,7 @@ import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.If.Or;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.IntSummaryStatistics;
@@ -2100,18 +2100,18 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super IntStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super IntStream, E> action) throws E {
         try {
             if (elements.hasNext()) {
                 action.accept(this);
 
-                return Or.TRUE;
+                return OrElse.TRUE;
             }
         } finally {
             close();
         }
 
-        return Or.FALSE;
+        return OrElse.FALSE;
     }
 
     @Override

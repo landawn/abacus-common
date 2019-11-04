@@ -17,7 +17,6 @@ package com.landawn.abacus.condition;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
@@ -190,21 +189,12 @@ public class Between extends AbstractCondition {
      */
     @Override
     public String toString(NamingPolicy namingPolicy) {
-        switch (namingPolicy) {
-            case LOWER_CAMEL_CASE:
-                return propName + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + parameter2String(minValue, namingPolicy) + WD.COMMA_SPACE
-                        + parameter2String(maxValue, namingPolicy) + WD._PARENTHESES_R;
-
-            case LOWER_CASE_WITH_UNDERSCORE:
-                return ClassUtil.toLowerCaseWithUnderscore(propName) + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L
-                        + parameter2String(minValue, namingPolicy) + WD.COMMA_SPACE + parameter2String(maxValue, namingPolicy) + WD._PARENTHESES_R;
-
-            case UPPER_CASE_WITH_UNDERSCORE:
-                return ClassUtil.toUpperCaseWithUnderscore(propName) + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L
-                        + parameter2String(minValue, namingPolicy) + WD.COMMA_SPACE + parameter2String(maxValue, namingPolicy) + WD._PARENTHESES_R;
-
-            default:
-                throw new IllegalArgumentException("Unsupported naming policy: " + namingPolicy);
+        if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+            return propName + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + parameter2String(minValue, namingPolicy) + WD.COMMA_SPACE
+                    + parameter2String(maxValue, namingPolicy) + WD._PARENTHESES_R;
+        } else {
+            return namingPolicy.convert(propName) + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + parameter2String(minValue, namingPolicy)
+                    + WD.COMMA_SPACE + parameter2String(maxValue, namingPolicy) + WD._PARENTHESES_R;
         }
     }
 

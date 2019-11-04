@@ -39,7 +39,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
-import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XMLDeserializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.ClassUtil;
@@ -52,7 +51,7 @@ import com.landawn.abacus.util.WD;
 /**
  * It's a quick way to deploy json/xml web service by
  * <code>WebServiceServlet</code>
- * 
+ *
  * <pre>
  *  {@code
  *     <servlet>
@@ -66,7 +65,7 @@ import com.landawn.abacus.util.WD;
  *         </init-param>
  *         <init-param>
  *     </servlet>
- * 
+ *
  *     <servlet-mapping>
  *         <servlet-name>helloWebService</servlet-name>
  *         <url-pattern>/HelloWebService/*</url-pattern>
@@ -328,10 +327,10 @@ public class WebServiceServlet extends AbstractHttpServlet {
                     }
                 }
 
-                ParserFactory.registerXMLBindingClass(parameterClass);
+                ClassUtil.registerXMLBindingClass(parameterClass);
 
                 if (!void.class.equals(method.getReturnType())) {
-                    ParserFactory.registerXMLBindingClass(method.getReturnType());
+                    ClassUtil.registerXMLBindingClass(method.getReturnType());
                 }
             } else {
                 methodParameterClassMap.put(methodName, Map.class);

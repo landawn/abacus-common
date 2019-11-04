@@ -28,7 +28,7 @@ import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.FloatIterator;
-import com.landawn.abacus.util.If.Or;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.LongList;
@@ -1986,18 +1986,18 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super LongStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super LongStream, E> action) throws E {
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
 
-                return Or.TRUE;
+                return OrElse.TRUE;
             }
         } finally {
             close();
         }
 
-        return Or.FALSE;
+        return OrElse.FALSE;
     }
 
     @Override

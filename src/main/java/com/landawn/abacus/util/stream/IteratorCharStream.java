@@ -27,7 +27,7 @@ import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.If.Or;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
@@ -1427,18 +1427,18 @@ class IteratorCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super CharStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super CharStream, E> action) throws E {
         try {
             if (elements.hasNext()) {
                 action.accept(this);
 
-                return Or.TRUE;
+                return OrElse.TRUE;
             }
         } finally {
             close();
         }
 
-        return Or.FALSE;
+        return OrElse.FALSE;
     }
 
     @Override

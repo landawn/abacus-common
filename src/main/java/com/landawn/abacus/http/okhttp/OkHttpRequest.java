@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -37,6 +36,9 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.parser.XMLParser;
 import com.landawn.abacus.util.AndroidUtil;
 import com.landawn.abacus.util.BufferedReader;
@@ -267,10 +269,11 @@ public class OkHttpRequest {
         final Class<?> cls = formBodyByEntity.getClass();
         N.checkArgument(ClassUtil.isEntity(cls), "{} is not an entity class with getter/setter methods", cls);
 
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
         final FormBody.Builder builder = new FormBody.Builder();
 
-        for (Map.Entry<String, Method> entry : ClassUtil.getPropGetMethodList(cls).entrySet()) {
-            builder.add(entry.getKey(), N.stringOf(ClassUtil.getPropValue(formBodyByEntity, entry.getValue())));
+        for (PropInfo propInfo : entityInfo.propInfoList) {
+            builder.add(propInfo.name, N.stringOf(propInfo.getPropValue(formBodyByEntity)));
         }
 
         this.body = builder.build();

@@ -99,9 +99,9 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.Tuple.Tuple1;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -442,6 +442,9 @@ public final class ClassUtil {
     /** The Constant methodPropNamePool. */
     private static final Map<Method, String> methodPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
+    /** The Constant fieldTypeArgumentsPool. */
+    private static final Map<Field, Class<?>[]> fieldTypeArgumentsPool = new ObjectPool<>(POOL_SIZE * 2);
+
     /** The Constant methodTypeArgumentsPool. */
     private static final Map<Method, Class<?>[]> methodTypeArgumentsPool = new ObjectPool<>(POOL_SIZE * 2);
 
@@ -491,6 +494,19 @@ public final class ClassUtil {
     /** The Constant classDeclaredMethodPool. */
     private static final Map<Class<?>, Map<String, Map<Class<?>[], Method>>> classDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
 
+    /** The Constant registeredNonEntityClass. */
+    private static final Map<Class<?>, Class<?>> registeredNonEntityClass = new ObjectPool<>(POOL_SIZE);
+
+    static {
+        registeredNonEntityClass.put(Object.class, Object.class);
+        registeredNonEntityClass.put(Class.class, Class.class);
+        registeredNonEntityClass.put(Calendar.class, Calendar.class);
+        registeredNonEntityClass.put(java.util.Date.class, java.util.Date.class);
+        registeredNonEntityClass.put(java.sql.Date.class, java.sql.Date.class);
+        registeredNonEntityClass.put(java.sql.Time.class, java.sql.Time.class);
+        registeredNonEntityClass.put(java.sql.Timestamp.class, java.sql.Timestamp.class);
+    }
+
     /**
      * The Constant CLASS_MASK.
      *
@@ -532,7 +548,8 @@ public final class ClassUtil {
      *
      * @param cls
      */
-    public static void registerXMLBindingClassForPropGetSetMethod(final Class<?> cls) {
+    @SuppressWarnings("deprecation")
+    public static void registerXMLBindingClass(final Class<?> cls) {
         if (registeredXMLBindingClassList.containsKey(cls)) {
             return;
         }
@@ -547,6 +564,8 @@ public final class ClassUtil {
                 entityPropFieldPool.remove(cls);
                 loadPropGetSetMethodList(cls);
             }
+
+            ParserUtil.refreshEntityPropInfo(cls);
         }
     }
 
@@ -555,8 +574,23 @@ public final class ClassUtil {
      *
      * @param cls
      */
+    @SuppressWarnings("deprecation")
     public static void registerNonEntityClass(final Class<?> cls) {
-        TypeFactory.registerNonEntityClass(cls);
+        registeredNonEntityClass.put(cls, cls);
+
+        synchronized (entityDeclaredPropGetMethodPool) {
+            registeredXMLBindingClassList.put(cls, false);
+
+            if (entityDeclaredPropGetMethodPool.containsKey(cls)) {
+                entityDeclaredPropGetMethodPool.remove(cls);
+                entityDeclaredPropSetMethodPool.remove(cls);
+
+                entityPropFieldPool.remove(cls);
+                loadPropGetSetMethodList(cls);
+            }
+
+            ParserUtil.refreshEntityPropInfo(cls);
+        }
     }
 
     /**
@@ -649,7 +683,7 @@ public final class ClassUtil {
             if (N.notNullOrEmpty(canonicalClassName) && (canonicalClassName.startsWith("java.lang.") || canonicalClassName.startsWith("java.util."))) {
                 b = false;
             } else {
-                b = N.typeOf(cls).isEntity();
+                b = !registeredNonEntityClass.containsKey(cls) && N.notNullOrEmpty(ClassUtil.getPropNameList(cls));
             }
 
             entityClassPool.put(cls, b);
@@ -956,37 +990,60 @@ public final class ClassUtil {
      * @param method
      * @return
      */
+    public static Class<?>[] getTypeArgumentsByField(final Field field) {
+        Class<?>[] typeParameterClasses = fieldTypeArgumentsPool.get(field);
+
+        if (typeParameterClasses == null) {
+            final java.lang.reflect.Type genericParameterType = field.getGenericType();
+            typeParameterClasses = getTypeArguments(genericParameterType);
+
+            fieldTypeArgumentsPool.put(field, typeParameterClasses);
+        }
+
+        return typeParameterClasses.length == 0 ? typeParameterClasses : typeParameterClasses.clone();
+    }
+
+    /**
+     * Gets the type arguments by method.
+     *
+     * @param method
+     * @return
+     */
     public static Class<?>[] getTypeArgumentsByMethod(final Method method) {
         Class<?>[] typeParameterClasses = methodTypeArgumentsPool.get(method);
 
         if (typeParameterClasses == null) {
-            java.lang.reflect.Type genericParameterType = N.isNullOrEmpty(method.getGenericParameterTypes()) ? method.getGenericReturnType()
+            final java.lang.reflect.Type genericParameterType = N.isNullOrEmpty(method.getGenericParameterTypes()) ? method.getGenericReturnType()
                     : method.getGenericParameterTypes()[0];
 
-            if (genericParameterType instanceof ParameterizedType) {
-                ParameterizedType aType = (ParameterizedType) genericParameterType;
-                java.lang.reflect.Type[] parameterArgTypes = aType.getActualTypeArguments();
-                typeParameterClasses = new Class[parameterArgTypes.length];
-
-                for (int i = 0; i < parameterArgTypes.length; i++) {
-                    if (parameterArgTypes[i] instanceof Class) {
-                        typeParameterClasses[i] = (Class<?>) parameterArgTypes[i];
-                    } else if (parameterArgTypes[i] instanceof ParameterizedType && ((ParameterizedType) parameterArgTypes[i]).getRawType() instanceof Class) {
-                        typeParameterClasses[i] = (Class<?>) ((ParameterizedType) parameterArgTypes[i]).getRawType();
-                    } else {
-                        typeParameterClasses = new Class<?>[0];
-
-                        break;
-                    }
-                }
-            } else {
-                typeParameterClasses = new Class<?>[0];
-            }
+            typeParameterClasses = getTypeArguments(genericParameterType);
 
             methodTypeArgumentsPool.put(method, typeParameterClasses);
         }
 
         return typeParameterClasses.length == 0 ? typeParameterClasses : typeParameterClasses.clone();
+    }
+
+    public static Class<?>[] getTypeArguments(java.lang.reflect.Type genericParameterType) {
+        if (genericParameterType instanceof ParameterizedType) {
+            final ParameterizedType aType = (ParameterizedType) genericParameterType;
+            final java.lang.reflect.Type[] parameterArgTypes = aType.getActualTypeArguments();
+            final Class<?>[] typeParameterClasses = new Class[parameterArgTypes.length];
+
+            for (int i = 0; i < parameterArgTypes.length; i++) {
+                if (parameterArgTypes[i] instanceof Class) {
+                    typeParameterClasses[i] = (Class<?>) parameterArgTypes[i];
+                } else if (parameterArgTypes[i] instanceof ParameterizedType && ((ParameterizedType) parameterArgTypes[i]).getRawType() instanceof Class) {
+                    typeParameterClasses[i] = (Class<?>) ((ParameterizedType) parameterArgTypes[i]).getRawType();
+                } else {
+                    return new Class<?>[0];
+                }
+            }
+
+            return typeParameterClasses;
+        } else {
+            return new Class<?>[0];
+        }
     }
 
     /**
@@ -1698,11 +1755,11 @@ public final class ClassUtil {
             for (int i = allClasses.size() - 1; i >= 0; i--) {
                 clazz = allClasses.get(i);
 
-                if (java.util.Date.class.isAssignableFrom(clazz) || Calendar.class.equals(clazz)) {
+                if (registeredNonEntityClass.containsKey(clazz)) {
                     continue;
                 }
 
-                Map<String, String> statisFinalFields = getPublicStaticStringFields(clazz);
+                final Map<String, String> staticFinalFields = getPublicStaticStringFields(clazz);
 
                 String propName = null;
 
@@ -1712,21 +1769,17 @@ public final class ClassUtil {
                         if (isFieldGetMethod(method, field)) {
                             propName = getPropNameByMethod(method);
 
-                            try {
-                                if (!field.equals(clazz.getDeclaredField(propName))) {
-                                    propName = field.getName();
-                                }
-                            } catch (Exception e) {
-                                // ignore.
+                            if (!field.equals(getDeclaredField(clazz, propName))) {
+                                propName = field.getName();
                             }
 
-                            propName = (statisFinalFields.get(propName) != null) ? statisFinalFields.get(propName) : propName;
+                            propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
 
                             if (propGetMethodMap.containsKey(propName)) {
                                 break;
                             }
 
-                            setMethod = getSetMethod(clazz, propName, method);
+                            setMethod = getSetMethod(clazz, method);
 
                             if (setMethod != null) {
                                 field.setAccessible(true);
@@ -1746,18 +1799,27 @@ public final class ClassUtil {
                             }
                         }
                     }
+
+                    if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+                        propName = field.getName();
+                        propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
+
+                        if (!propGetMethodMap.containsKey(propName)) {
+                            propFieldMap.put(propName, field);
+                        }
+                    }
                 }
 
                 for (Method method : clazz.getMethods()) {
                     if (isGetMethod(method)) {
                         propName = getPropNameByMethod(method);
-                        propName = (statisFinalFields.get(propName) != null) ? statisFinalFields.get(propName) : propName;
+                        propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
 
                         if (propGetMethodMap.containsKey(propName)) {
                             continue;
                         }
 
-                        setMethod = getSetMethod(clazz, propName, method);
+                        setMethod = getSetMethod(clazz, method);
 
                         if (setMethod != null) {
                             propGetMethodMap.put(propName, method);
@@ -1795,7 +1857,7 @@ public final class ClassUtil {
 
             // for Double-Checked Locking is Broke initialize it before
             // put it into map.
-            Map<String, Field> tempFieldMap = new ObjectPool<>(64);
+            Map<String, Field> tempFieldMap = new ObjectPool<>(N.max(64, propFieldMap.size()));
             tempFieldMap.putAll(propFieldMap);
             tempFieldMap.keySet();
             entityPropFieldPool.put(cls, tempFieldMap);
@@ -1805,7 +1867,7 @@ public final class ClassUtil {
             entityDeclaredPropGetMethodPool.put(cls, unmodifiableMethodMap);
 
             if (entityPropGetMethodPool.get(cls) == null) {
-                Map<String, Method> tmp = new ObjectPool<>(64);
+                Map<String, Method> tmp = new ObjectPool<>(N.max(64, propGetMethodMap.size()));
                 tmp.putAll(propGetMethodMap);
                 entityPropGetMethodPool.put(cls, tmp);
             } else {
@@ -1819,14 +1881,22 @@ public final class ClassUtil {
             entityDeclaredPropSetMethodPool.put(cls, unmodifiableMethodMap);
 
             if (entityPropSetMethodPool.get(cls) == null) {
-                Map<String, Method> tmp = new ObjectPool<>(64);
+                Map<String, Method> tmp = new ObjectPool<>(N.max(64, propSetMethodMap.size()));
                 tmp.putAll(propSetMethodMap);
                 entityPropSetMethodPool.put(cls, tmp);
             } else {
                 entityPropSetMethodPool.get(cls).putAll(propSetMethodMap);
             }
 
-            entityDeclaredPropNameListPool.put(cls, ImmutableList.copyOf(propSetMethodMap.keySet()));
+            final List<String> propNameList = new ArrayList<>(propFieldMap.keySet());
+
+            for (String propName : propGetMethodMap.keySet()) {
+                if (!propNameList.contains(propName)) {
+                    propNameList.add(propName);
+                }
+            }
+
+            entityDeclaredPropNameListPool.put(cls, ImmutableList.of(propNameList));
         }
     }
 
@@ -1859,13 +1929,12 @@ public final class ClassUtil {
             return false;
         }
 
-        String fieldName = field.getName();
-        String methodName = method.getName();
+        final String fieldName = field.getName();
+        final String methodName = method.getName();
+        final String propName = methodName
+                .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
 
-        return (methodName.equalsIgnoreCase(fieldName))
-                || (methodName.startsWith(IS) && (methodName.equalsIgnoreCase(fieldName) || methodName.substring(2).equalsIgnoreCase(fieldName)))
-                || (methodName.startsWith(HAS) && (methodName.equalsIgnoreCase(fieldName) || methodName.substring(3).equalsIgnoreCase(fieldName)))
-                || (methodName.startsWith(GET) && methodName.substring(3).equalsIgnoreCase(fieldName));
+        return propName.equalsIgnoreCase(fieldName) || (fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
     }
 
     /**
@@ -1888,13 +1957,16 @@ public final class ClassUtil {
      * Gets the sets the method.
      *
      * @param clazz
-     * @param propName
      * @param getMethod
      * @return
      */
-    private static Method getSetMethod(final Class<?> clazz, final String propName, final Method getMethod) {
-        Method setMethod = internalGetDeclaredMethod(clazz, propName.equalsIgnoreCase(getMethod.getName()) ? propName : SET + propName,
-                getMethod.getReturnType());
+    private static Method getSetMethod(final Class<?> clazz, final Method getMethod) {
+        final String getMethodName = getMethod.getName();
+
+        final String setMethodName = SET
+                + (getMethodName.substring(getMethodName.startsWith(IS) ? 2 : ((getMethodName.startsWith(HAS) || getMethodName.startsWith(GET)) ? 3 : 0)));
+
+        Method setMethod = internalGetDeclaredMethod(clazz, setMethodName, getMethod.getReturnType());
 
         return ((setMethod != null) && (void.class.equals(setMethod.getReturnType()) || setMethod.getDeclaringClass().equals(setMethod.getReturnType())))
                 ? setMethod
@@ -1909,7 +1981,7 @@ public final class ClassUtil {
      * @return
      */
     private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
-        Map<String, String> statisFinalFields = new HashMap<>();
+        final Map<String, String> statisFinalFields = new HashMap<>();
 
         for (Field field : cls.getFields()) {
             if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())
@@ -2067,8 +2139,13 @@ public final class ClassUtil {
         Field field = propFieldMap.get(propName);
 
         if (field == null) {
+            if (!ClassUtil.isEntity(cls)) {
+                throw new IllegalArgumentException(
+                        "No property getter/setter method or public field found in the specified entity: " + ClassUtil.getCanonicalClassName(cls));
+            }
+
             synchronized (entityDeclaredPropGetMethodPool) {
-                Map<String, Method> getterMethodList = ClassUtil.checkPropGetMethodList(cls);
+                final Map<String, Method> getterMethodList = ClassUtil.getPropGetMethodList(cls);
 
                 for (String key : getterMethodList.keySet()) {
                     if (isPropName(cls, propName, key)) {
@@ -2199,7 +2276,7 @@ public final class ClassUtil {
             List<Method> inlinePropGetMethodQueue = null;
 
             if (inlinePropGetMethodMap == null) {
-                inlinePropGetMethodMap = new ObjectPool<>(ClassUtil.getPropGetMethodList(cls).size());
+                inlinePropGetMethodMap = new ObjectPool<>(ClassUtil.getPropNameList(cls).size());
                 entityInlinePropGetMethodPool.put(cls, inlinePropGetMethodMap);
             } else {
                 inlinePropGetMethodQueue = inlinePropGetMethodMap.get(propName);
@@ -2232,11 +2309,17 @@ public final class ClassUtil {
             }
 
             if (inlinePropGetMethodQueue.size() == 0) {
-                if (ignoreUnknownProperty) {
-                    return null;
+                final PropInfo propInfo = ParserUtil.getEntityInfo(entity.getClass()).getPropInfo(propName);
+
+                if (propInfo != null) {
+                    return propInfo.getPropValue(entity);
                 } else {
-                    throw new IllegalArgumentException(
-                            "No property method found with property name: " + propName + " in class " + ClassUtil.getCanonicalClassName(cls));
+                    if (ignoreUnknownProperty) {
+                        return null;
+                    } else {
+                        throw new IllegalArgumentException(
+                                "No property method found with property name: " + propName + " in class " + ClassUtil.getCanonicalClassName(cls));
+                    }
                 }
             } else {
                 Object propEntity = entity;
@@ -2290,7 +2373,7 @@ public final class ClassUtil {
                 List<Method> inlinePropSetMethodQueue = null;
 
                 if (inlinePropSetMethodMap == null) {
-                    inlinePropSetMethodMap = new ObjectPool<>(ClassUtil.getPropGetMethodList(cls).size());
+                    inlinePropSetMethodMap = new ObjectPool<>(ClassUtil.getPropNameList(cls).size());
                     entityInlinePropSetMethodPool.put(cls, inlinePropSetMethodMap);
                 } else {
                     inlinePropSetMethodQueue = inlinePropSetMethodMap.get(propName);
@@ -2340,10 +2423,18 @@ public final class ClassUtil {
                 }
 
                 if (inlinePropSetMethodQueue.size() == 0) {
-                    if (ignoreUnknownProperty) {
-                        return false;
+                    final PropInfo propInfo = ParserUtil.getEntityInfo(entity.getClass()).getPropInfo(propName);
+
+                    if (propInfo != null) {
+                        propInfo.setPropValue(entity, propValue);
+                        return true;
                     } else {
-                        throw new IllegalArgumentException("No property method found with property name: " + propName + " in class " + cls.getCanonicalName());
+                        if (ignoreUnknownProperty) {
+                            return false;
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "No property method found with property name: " + propName + " in class " + cls.getCanonicalName());
+                        }
                     }
                 } else {
                     Object propEntity = entity;
@@ -2390,15 +2481,61 @@ public final class ClassUtil {
         String propName = methodPropNamePool.get(getSetMethod);
 
         if (propName == null) {
-            String methodName = getSetMethod.getName();
+            final String methodName = getSetMethod.getName();
+            final Class<?>[] paramTypes = getSetMethod.getParameterTypes();
+            final Class<?> targetType = N.isNullOrEmpty(paramTypes) ? getSetMethod.getReturnType() : paramTypes[0];
 
-            if (getDeclaredField(getSetMethod.getDeclaringClass(), methodName) != null) {
-                propName = methodName;
-            } else if (methodName.startsWith(IS)) {
-                propName = formalizePropName(methodName.substring(2));
-            } else if (methodName.startsWith(GET) || methodName.startsWith(SET) || methodName.startsWith(HAS)) {
-                propName = formalizePropName(methodName.substring(3));
-            } else {
+            Field field = getDeclaredField(getSetMethod.getDeclaringClass(), methodName);
+
+            if (field != null && field.getType().isAssignableFrom(targetType)) {
+                propName = field.getName();
+            }
+
+            field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + methodName);
+
+            if (field != null && field.getType().isAssignableFrom(targetType)) {
+                propName = field.getName();
+            }
+
+            if (N.isNullOrEmpty(propName) && ((methodName.startsWith(IS) && methodName.length() > 2)
+                    || ((methodName.startsWith(GET) || methodName.startsWith(SET) || methodName.startsWith(HAS)) && methodName.length() > 3))) {
+                final String newName = methodName.substring(methodName.startsWith(IS) ? 2 : 3);
+                field = getDeclaredField(getSetMethod.getDeclaringClass(), StringUtil.uncapitalize(newName));
+
+                if (field != null && field.getType().isAssignableFrom(targetType)) {
+                    propName = field.getName();
+                }
+
+                if (N.isNullOrEmpty(propName) && newName.charAt(0) != '_') {
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + StringUtil.uncapitalize(newName));
+
+                    if (field != null && field.getType().isAssignableFrom(targetType)) {
+                        propName = field.getName();
+                    }
+                }
+
+                if (N.isNullOrEmpty(propName)) {
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), formalizePropName(newName));
+
+                    if (field != null && field.getType().isAssignableFrom(targetType)) {
+                        propName = field.getName();
+                    }
+                }
+
+                if (N.isNullOrEmpty(propName) && newName.charAt(0) != '_') {
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + formalizePropName(newName));
+
+                    if (field != null && field.getType().isAssignableFrom(targetType)) {
+                        propName = field.getName();
+                    }
+                }
+
+                if (N.isNullOrEmpty(propName)) {
+                    propName = formalizePropName(newName);
+                }
+            }
+
+            if (N.isNullOrEmpty(propName)) {
                 propName = methodName;
             }
 
@@ -2663,22 +2800,6 @@ public final class ClassUtil {
         }
 
         return false;
-    }
-
-    /**
-     * Check prop get method list.
-     *
-     * @param cls
-     * @return
-     */
-    static Map<String, Method> checkPropGetMethodList(final Class<?> cls) {
-        Map<String, Method> getterMethodList = getPropGetMethodList(cls);
-
-        if (getterMethodList.size() == 0) {
-            throw new IllegalArgumentException("No property getter/setter method found in the specified entity: " + getCanonicalClassName(cls));
-        }
-
-        return getterMethodList;
     }
 
     /**

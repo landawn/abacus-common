@@ -440,6 +440,7 @@ public final class PropertiesUtil {
         }
 
         Class<?> targetClass = null;
+
         if (isFirstCall) {
             targetClass = targetProperties == null ? (inputClass == null ? Properties.class : inputClass) : targetProperties.getClass();
         } else {
@@ -527,7 +528,6 @@ public final class PropertiesUtil {
         }
 
         if (targetProperties != null) {
-
             Set<String> oldKeySet = N.newHashSet(properties.keySet());
             Method removeMethod = null;
             for (String key : oldKeySet) {

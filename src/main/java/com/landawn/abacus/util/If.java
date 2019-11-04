@@ -446,8 +446,8 @@ public final class If {
      *
      * @return
      */
-    public Or thenDoNothing() {
-        return Or.of(b);
+    public OrElse thenDoNothing() {
+        return OrElse.of(b);
     }
 
     /**
@@ -457,14 +457,14 @@ public final class If {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Or then(final Try.Runnable<E> cmd) throws E {
+    public <E extends Exception> OrElse then(final Try.Runnable<E> cmd) throws E {
         N.checkArgNotNull(cmd);
 
         if (b) {
             cmd.run();
         }
 
-        return Or.of(b);
+        return OrElse.of(b);
     }
 
     /**
@@ -476,14 +476,14 @@ public final class If {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> Or then(final U init, final Try.Consumer<? super U, E> action) throws E {
+    public <U, E extends Exception> OrElse then(final U init, final Try.Consumer<? super U, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (b) {
             action.accept(init);
         }
 
-        return Or.of(b);
+        return OrElse.of(b);
     }
 
     /**
@@ -493,14 +493,14 @@ public final class If {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Or thenThrow(final Supplier<? extends E> exceptionSupplier) throws E {
+    public <E extends Exception> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws E {
         N.checkArgNotNull(exceptionSupplier);
 
         if (b) {
             throw exceptionSupplier.get();
         }
 
-        return Or.of(b);
+        return OrElse.of(b);
     }
 
     //    public <T, E extends Exception> Nullable<T> then(final Try.Callable<T, E> callable) throws E {
@@ -512,15 +512,18 @@ public final class If {
     //    }
 
     /**
-     * The Class Or.
+     * The Class OrElse.
      */
-    public static final class Or {
+    public static final class OrElse {
+        /**
+         * For internal only
+         */
+        public static final OrElse TRUE = new OrElse(true);
 
-        /** The Constant TRUE. */
-        public static final Or TRUE = new Or(true);
-
-        /** The Constant FALSE. */
-        public static final Or FALSE = new Or(false);
+        /**
+         * For internal only
+         */
+        public static final OrElse FALSE = new OrElse(false);
 
         /** The b. */
         private final boolean b;
@@ -530,7 +533,7 @@ public final class If {
          *
          * @param b
          */
-        Or(final boolean b) {
+        OrElse(final boolean b) {
             this.b = b;
         }
 
@@ -539,7 +542,7 @@ public final class If {
          * @param b
          * @return
          */
-        static Or of(boolean b) {
+        static OrElse of(boolean b) {
             return b ? TRUE : FALSE;
         }
 

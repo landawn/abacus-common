@@ -33,7 +33,7 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.BiIterator;
 import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.If.Or;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.ImmutableEntry;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Joiner;
@@ -861,7 +861,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
         return s.applyIfNotEmpty(ss -> func.apply(EntryStream.this));
     }
 
-    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super EntryStream<K, V>, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super EntryStream<K, V>, E> action) throws E {
         return s.acceptIfNotEmpty(ss -> action.accept(EntryStream.this));
     }
 

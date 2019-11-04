@@ -50,7 +50,7 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.If.Or;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Holder;
@@ -3015,18 +3015,18 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
-    public Or acceptIfNotEmpty(Try.Consumer<? super ExceptionalStream<T, E>, E> action) throws E {
+    public OrElse acceptIfNotEmpty(Try.Consumer<? super ExceptionalStream<T, E>, E> action) throws E {
         try {
             if (elements.hasNext()) {
                 action.accept(this);
 
-                return Or.TRUE;
+                return OrElse.TRUE;
             }
         } finally {
             close();
         }
 
-        return Or.FALSE;
+        return OrElse.FALSE;
     }
 
     /**

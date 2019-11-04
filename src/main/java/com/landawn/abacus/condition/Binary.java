@@ -16,7 +16,6 @@ package com.landawn.abacus.condition;
 
 import java.util.List;
 
-import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
@@ -145,20 +144,10 @@ public class Binary extends AbstractCondition {
      */
     @Override
     public String toString(NamingPolicy namingPolicy) {
-        switch (namingPolicy) {
-            case LOWER_CAMEL_CASE:
-                return propName + WD._SPACE + getOperator().toString() + WD._SPACE + parameter2String(propValue, namingPolicy);
-
-            case LOWER_CASE_WITH_UNDERSCORE:
-                return ClassUtil.toLowerCaseWithUnderscore(propName) + WD._SPACE + getOperator().toString() + WD._SPACE
-                        + parameter2String(propValue, namingPolicy);
-
-            case UPPER_CASE_WITH_UNDERSCORE:
-                return ClassUtil.toUpperCaseWithUnderscore(propName) + WD._SPACE + getOperator().toString() + WD._SPACE
-                        + parameter2String(propValue, namingPolicy);
-
-            default:
-                throw new IllegalArgumentException("Unsupported naming policy: " + namingPolicy);
+        if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+            return propName + WD._SPACE + getOperator().toString() + WD._SPACE + parameter2String(propValue, namingPolicy);
+        } else {
+            return namingPolicy.convert(propName) + WD._SPACE + getOperator().toString() + WD._SPACE + parameter2String(propValue, namingPolicy);
         }
     }
 

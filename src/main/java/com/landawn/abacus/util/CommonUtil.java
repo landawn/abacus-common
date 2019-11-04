@@ -74,6 +74,9 @@ import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
 import com.landawn.abacus.core.RowDataSet;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.u.Nullable;
@@ -2215,7 +2218,7 @@ class CommonUtil {
                         }
                     }
                 } else {
-                    columnNames = new ArrayList<>(ClassUtil.checkPropGetMethodList(cls).keySet());
+                    columnNames = new ArrayList<>(ClassUtil.getPropNameList(cls));
                 }
             } else if (type.isArray()) {
                 final Object[] a = (Object[]) firstNonNullRow;
@@ -2278,16 +2281,17 @@ class CommonUtil {
                     columnList.get(i).add(props.get(columnNameList.get(i)));
                 }
             } else if (type.isEntity()) {
-                Class<?> cls = row.getClass();
+                final Class<?> cls = row.getClass();
+                final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+                PropInfo propInfo = null;
 
-                Method method = null;
                 for (int i = 0; i < columnCount; i++) {
-                    method = ClassUtil.getPropGetMethod(cls, columnNameList.get(i));
+                    propInfo = entityInfo.getPropInfo(columnNameList.get(i));
 
-                    if (method == null) {
+                    if (propInfo == null) {
                         columnList.get(i).add(null);
                     } else {
-                        columnList.get(i).add(ClassUtil.getPropValue(row, method));
+                        columnList.get(i).add(propInfo.getPropValue(row));
                     }
                 }
             } else if (type.isArray()) {
@@ -6387,14 +6391,10 @@ class CommonUtil {
                     }
                 }
             } else {
-                final Map<String, Method> srcGetterMethodList = ClassUtil.checkPropGetMethodList(srcCls);
+                final EntityInfo entityInfo = ParserUtil.getEntityInfo(srcCls);
 
-                try {
-                    for (Map.Entry<String, Method> entry : srcGetterMethodList.entrySet()) {
-                        ClassUtil.setPropValue(targetEntity, entry.getKey(), entry.getValue().invoke(sourceEntity), ignoreUnknownProperty);
-                    }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw N.toRuntimeException(e);
+                for (PropInfo propInfo : entityInfo.propInfoList) {
+                    ClassUtil.setPropValue(targetEntity, propInfo.name, propInfo.getPropValue(sourceEntity), ignoreUnknownProperty);
                 }
             }
         } else {
@@ -6443,16 +6443,12 @@ class CommonUtil {
                 }
             }
         } else {
-            Map<String, Method> srcGetterMethodList = ClassUtil.checkPropGetMethodList(srcCls);
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(srcCls);
 
-            try {
-                for (Map.Entry<String, Method> entry : srcGetterMethodList.entrySet()) {
-                    if (ignorePropNames == null || ignorePropNames.contains(entry.getKey()) == false) {
-                        ClassUtil.setPropValue(targetEntity, entry.getKey(), entry.getValue().invoke(sourceEntity), ignoreUnknownProperty);
-                    }
+            for (PropInfo propInfo : entityInfo.propInfoList) {
+                if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
+                    ClassUtil.setPropValue(targetEntity, propInfo.name, propInfo.getPropValue(sourceEntity), ignoreUnknownProperty);
                 }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
             }
         }
     }
@@ -6531,15 +6527,11 @@ class CommonUtil {
             DirtyMarkerUtil.signedPropNames(dirtyMarkerEntity).clear();
             DirtyMarkerUtil.dirtyPropNames(dirtyMarkerEntity).clear();
         } else {
-            Class<?> cls = entity.getClass();
-            Map<String, Method> setterMethodList = ClassUtil.getPropSetMethodList(cls);
+            final Class<?> cls = entity.getClass();
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
 
-            if (setterMethodList.size() == 0) {
-                throw new IllegalArgumentException("No property getter/setter method found in the specified entity: " + ClassUtil.getCanonicalClassName(cls));
-            }
-
-            for (Method propSetMethod : setterMethodList.values()) {
-                ClassUtil.setPropValue(entity, propSetMethod, null);
+            for (PropInfo propInfo : entityInfo.propInfoList) {
+                propInfo.setPropValue(entity, null);
             }
         }
     }

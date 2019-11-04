@@ -30,7 +30,7 @@ import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.FloatIterator;
-import com.landawn.abacus.util.If.Or;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.IntSummaryStatistics;
@@ -2367,18 +2367,18 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super IntStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super IntStream, E> action) throws E {
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
 
-                return Or.TRUE;
+                return OrElse.TRUE;
             }
         } finally {
             close();
         }
 
-        return Or.FALSE;
+        return OrElse.FALSE;
     }
 
     @Override

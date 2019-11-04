@@ -31,7 +31,7 @@ import java.util.Set;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.If.Or;
+import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.Function;
@@ -1811,7 +1811,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> Or acceptIfNotEmpty(Try.Consumer<? super Multiset<T>, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super Multiset<T>, E> action) throws E {
         return If.is(size() > 0).then(this, action);
     }
 
