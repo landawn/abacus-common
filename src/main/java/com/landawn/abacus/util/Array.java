@@ -1497,6 +1497,12 @@ public final class Array {
         return a;
     }
 
+    public static String[] repeat(final String element, final int n) {
+        final String[] a = N.newArray(String.class, n);
+        N.fill(a, element);
+        return a;
+    }
+
     /**
      *
      * @param <T>
@@ -1504,7 +1510,10 @@ public final class Array {
      * @param n
      * @return
      * @throws NullPointerException if the specified {@code element} is null.
+     * @see N#repeat(Object, int)
+     * @deprecated prefer to {@link N#repeat(Object, int)} because this method throws NullPointerException when element is {@code null}
      */
+    @Deprecated
     public static <T> T[] repeat(final T element, final int n) throws NullPointerException {
         final T[] a = N.newArray(element.getClass(), n);
         N.fill(a, element);

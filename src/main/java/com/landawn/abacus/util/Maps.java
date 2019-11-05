@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -397,7 +396,7 @@ public final class Maps {
         if (N.isNullOrEmpty(keys)) {
             return new ArrayList<>(0);
         } else if (N.isNullOrEmpty(map)) {
-            return new ArrayList<>(Arrays.asList(Array.repeat(defaultValue, keys.size())));
+            return N.repeat(defaultValue, keys.size());
         }
 
         final List<V> result = new ArrayList<>(keys.size());
@@ -538,7 +537,7 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<K, V>() : new LinkedHashMap<K, V>();
+        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
         Object val = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -565,8 +564,8 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<K, Pair<V, Nullable<V>>>()
-                : new LinkedHashMap<K, Pair<V, Nullable<V>>>();
+        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<>()
+                : new LinkedHashMap<>();
 
         if (N.isNullOrEmpty(map2)) {
             for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -601,8 +600,8 @@ public final class Maps {
         final boolean isIdentityHashMap = (N.notNullOrEmpty(map) && map instanceof IdentityHashMap)
                 || (N.notNullOrEmpty(map2) && map2 instanceof IdentityHashMap);
 
-        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<K, Pair<Nullable<V>, Nullable<V>>>()
-                : new LinkedHashMap<K, Pair<Nullable<V>, Nullable<V>>>();
+        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<>()
+                : new LinkedHashMap<>();
 
         if (N.notNullOrEmpty(map)) {
             if (N.isNullOrEmpty(map2)) {
