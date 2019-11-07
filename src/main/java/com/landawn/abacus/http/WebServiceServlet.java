@@ -947,7 +947,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
         // SHOULD NOT set it true here.
         // if (method != null) {
-        // method.setAccessible(true);
+        // ClassUtil.setAccessible(method, true);
         // }
 
         return method;

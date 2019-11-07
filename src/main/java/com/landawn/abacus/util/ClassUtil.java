@@ -28,6 +28,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -1150,7 +1151,7 @@ public final class ClassUtil {
     //
     //        // SHOULD NOT set it true here.
     //        // if (method != null) {
-    //        // method.setAccessible(true);
+    //        // ClassUtil.setAccessible(method, true);
     //        // }
     //
     //        return method;
@@ -1475,7 +1476,7 @@ public final class ClassUtil {
                 constructor = cls.getDeclaredConstructor(parameterTypes);
 
                 // SHOULD NOT set it true here.
-                // constructor.setAccessible(true);
+                // ClassUtil.setAccessible(constructor, true);
             } catch (NoSuchMethodException e) {
                 // ignore.
             }
@@ -1517,7 +1518,7 @@ public final class ClassUtil {
 
             // SHOULD NOT set it true here.
             // if (method != null) {
-            // method.setAccessible(true);
+            // ClassUtil.setAccessible(method, true);
             // }
 
             if (method != null) {
@@ -1782,7 +1783,10 @@ public final class ClassUtil {
                             setMethod = getSetMethod(clazz, method);
 
                             if (setMethod != null) {
-                                field.setAccessible(true);
+                                ClassUtil.setAccessibleQuietly(field, true);
+                                ClassUtil.setAccessibleQuietly(method, true);
+                                ClassUtil.setAccessibleQuietly(setMethod, true);
+
                                 propFieldMap.put(propName, field);
                                 propGetMethodMap.put(propName, method);
                                 propSetMethodMap.put(propName, setMethod);
@@ -1791,7 +1795,10 @@ public final class ClassUtil {
                             }
 
                             if (isJAXBGetMethod(instance, method)) {
-                                field.setAccessible(true);
+                                ClassUtil.setAccessibleQuietly(field, true);
+                                ClassUtil.setAccessibleQuietly(method, true);
+                                ClassUtil.setAccessibleQuietly(setMethod, true);
+
                                 propFieldMap.put(propName, field);
                                 propGetMethodMap.put(propName, method);
 
@@ -1805,6 +1812,8 @@ public final class ClassUtil {
                         propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
 
                         if (!propGetMethodMap.containsKey(propName)) {
+                            ClassUtil.setAccessibleQuietly(field, true);
+
                             propFieldMap.put(propName, field);
                         }
                     }
@@ -1822,6 +1831,9 @@ public final class ClassUtil {
                         setMethod = getSetMethod(clazz, method);
 
                         if (setMethod != null) {
+                            ClassUtil.setAccessibleQuietly(method, true);
+                            ClassUtil.setAccessibleQuietly(setMethod, true);
+
                             propGetMethodMap.put(propName, method);
                             propSetMethodMap.put(propName, setMethod);
 
@@ -1829,6 +1841,8 @@ public final class ClassUtil {
                         }
 
                         if (isJAXBGetMethod(instance, method)) {
+                            ClassUtil.setAccessibleQuietly(method, true);
+
                             propGetMethodMap.put(propName, method);
 
                             continue;
@@ -2203,19 +2217,27 @@ public final class ClassUtil {
      * @param propValue
      */
     public static void setPropValue(final Object entity, final Method propSetMethod, Object propValue) {
-        try {
-            propSetMethod.invoke(entity, propValue == null ? N.defaultValueOf(propSetMethod.getParameterTypes()[0]) : propValue);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            if (logger.isWarnEnabled()) {
-                logger.warn(e, "Failed to set property value by method: " + propSetMethod);
+        if (propValue == null) {
+            try {
+                propSetMethod.invoke(entity, N.defaultValueOf(propSetMethod.getParameterTypes()[0]));
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw N.toRuntimeException(e);
             }
-
-            propValue = N.convert(propValue, ParserUtil.getEntityInfo(entity.getClass()).getPropInfo(propSetMethod.getName()).jsonXmlType);
-
+        } else {
             try {
                 propSetMethod.invoke(entity, propValue);
-            } catch (IllegalAccessException | InvocationTargetException e2) {
-                throw N.toRuntimeException(e);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn(e, "Failed to set property value by method: " + propSetMethod);
+                }
+
+                propValue = N.convert(propValue, ParserUtil.getEntityInfo(entity.getClass()).getPropInfo(propSetMethod.getName()).jsonXmlType);
+
+                try {
+                    propSetMethod.invoke(entity, propValue);
+                } catch (IllegalAccessException | InvocationTargetException e2) {
+                    throw N.toRuntimeException(e);
+                }
             }
         }
     }
@@ -2236,9 +2258,13 @@ public final class ClassUtil {
         final Object rt = invokeMethod(entity, propGetMethod);
 
         if (rt instanceof Collection) {
-            ((Collection<?>) rt).addAll((Collection) propValue);
+            final Collection<?> c = (Collection<?>) rt;
+            c.clear();
+            c.addAll((Collection) propValue);
         } else if (rt instanceof Map) {
-            ((Map<?, ?>) rt).putAll((Map) propValue);
+            final Map<?, ?> m = (Map<?, ?>) rt;
+            m.clear();
+            m.putAll((Map) propValue);
         } else {
             throw new IllegalArgumentException("Failed to set property value by getter method '" + propGetMethod.getName() + "'");
         }
@@ -2268,10 +2294,12 @@ public final class ClassUtil {
      * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnknownProperty is false.
      */
     public static <T> T getPropValue(final Object entity, final String propName, final boolean ignoreUnknownProperty) {
-        Method getMethod = getPropGetMethod(entity.getClass(), propName);
+        final Class<?> cls = entity.getClass();
+        final PropInfo propInfo = ParserUtil.getEntityInfo(cls).getPropInfo(propName);
 
-        if (getMethod == null) {
-            Class<?> cls = entity.getClass();
+        if (propInfo != null) {
+            return propInfo.getPropValue(entity);
+        } else {
             Map<String, List<Method>> inlinePropGetMethodMap = entityInlinePropGetMethodPool.get(cls);
             List<Method> inlinePropGetMethodQueue = null;
 
@@ -2309,17 +2337,11 @@ public final class ClassUtil {
             }
 
             if (inlinePropGetMethodQueue.size() == 0) {
-                final PropInfo propInfo = ParserUtil.getEntityInfo(entity.getClass()).getPropInfo(propName);
-
-                if (propInfo != null) {
-                    return propInfo.getPropValue(entity);
+                if (ignoreUnknownProperty) {
+                    return null;
                 } else {
-                    if (ignoreUnknownProperty) {
-                        return null;
-                    } else {
-                        throw new IllegalArgumentException(
-                                "No property method found with property name: " + propName + " in class " + ClassUtil.getCanonicalClassName(cls));
-                    }
+                    throw new IllegalArgumentException(
+                            "No property method found with property name: " + propName + " in class " + ClassUtil.getCanonicalClassName(cls));
                 }
             } else {
                 Object propEntity = entity;
@@ -2334,8 +2356,6 @@ public final class ClassUtil {
 
                 return (T) propEntity;
             }
-        } else {
-            return getPropValue(entity, getMethod);
         }
     }
 
@@ -2361,11 +2381,12 @@ public final class ClassUtil {
      * @throws IllegalArgumentException if the specified property can't be set and ignoreUnknownProperty is false.
      */
     public static boolean setPropValue(final Object entity, final String propName, final Object propValue, final boolean ignoreUnknownProperty) {
-        Method setMethod = getPropSetMethod(entity.getClass(), propName);
+        final Class<?> cls = entity.getClass();
+        final PropInfo propInfo = ParserUtil.getEntityInfo(cls).getPropInfo(propName);
 
-        if (setMethod == null) {
-            final Class<?> cls = entity.getClass();
-
+        if (propInfo != null) {
+            propInfo.setPropValue(entity, propValue);
+        } else {
             Method getMethod = getPropGetMethod(cls, propName);
 
             if (getMethod == null) {
@@ -2385,6 +2406,7 @@ public final class ClassUtil {
                     final String[] strs = Splitter.with(PROP_NAME_SEPARATOR).splitToArray(propName);
 
                     if (strs.length > 1) {
+                        Method setMethod = null;
                         Class<?> propClass = cls;
 
                         for (int i = 0, len = strs.length; i < len; i++) {
@@ -2423,18 +2445,10 @@ public final class ClassUtil {
                 }
 
                 if (inlinePropSetMethodQueue.size() == 0) {
-                    final PropInfo propInfo = ParserUtil.getEntityInfo(entity.getClass()).getPropInfo(propName);
-
-                    if (propInfo != null) {
-                        propInfo.setPropValue(entity, propValue);
-                        return true;
+                    if (ignoreUnknownProperty) {
+                        return false;
                     } else {
-                        if (ignoreUnknownProperty) {
-                            return false;
-                        } else {
-                            throw new IllegalArgumentException(
-                                    "No property method found with property name: " + propName + " in class " + cls.getCanonicalName());
-                        }
+                        throw new IllegalArgumentException("No property method found with property name: " + propName + " in class " + cls.getCanonicalName());
                     }
                 } else {
                     Object propEntity = entity;
@@ -2464,8 +2478,6 @@ public final class ClassUtil {
             } else {
                 setPropValueByGet(entity, getMethod, propValue);
             }
-        } else {
-            setPropValue(entity, setMethod, propValue);
         }
 
         return true;
@@ -2822,6 +2834,34 @@ public final class ClassUtil {
         return classFilePath;
     }
 
+    /**
+     *
+     * @param accessibleObject
+     * @param flag
+     */
+    public static void setAccessible(final AccessibleObject accessibleObject, final boolean flag) {
+        if (accessibleObject != null && accessibleObject.isAccessible() != flag) {
+            accessibleObject.setAccessible(flag);
+        }
+    }
+
+    /**
+     *
+     * @param accessibleObject
+     * @param flag
+     * @return {@code true} if no error happens, otherwise {@code false} is returned.
+     */
+    public static boolean setAccessibleQuietly(final AccessibleObject accessibleObject, final boolean flag) {
+        try {
+            setAccessible(accessibleObject, flag);
+        } catch (Exception e) {
+            logger.warn("Failed to set accessible for : " + accessibleObject + " with flag: " + flag, e);
+            return false;
+        }
+
+        return true;
+    }
+
     //    private static Class[] getTypeArguments(Class cls) {
     //        java.lang.reflect.Type[] typeArgs = null;
     //        java.lang.reflect.Type[] genericInterfaces = cls.getGenericInterfaces();
@@ -2884,7 +2924,7 @@ public final class ClassUtil {
     //
     //        // SHOULD NOT set it true here.
     //        // if (method != null) {
-    //        // method.setAccessible(true);
+    //        // ClassUtil.setAccessible(method, true);
     //        // }
     //
     //        return method;

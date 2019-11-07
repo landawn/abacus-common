@@ -118,14 +118,14 @@ public abstract class StringUtil {
         strValueField = ((tmp != null) && tmp.getName().equals("value") && tmp.getType().equals(char[].class)) ? tmp : null;
 
         if (strValueField != null) {
-            strValueField.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(strValueField, true);
         }
 
         Constructor<String> tmpConstructor = null;
 
         try {
             tmpConstructor = String.class.getDeclaredConstructor(char[].class, boolean.class);
-            tmpConstructor.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(tmpConstructor, true);
         } catch (Exception e) {
             // ignore.
         }

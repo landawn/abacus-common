@@ -297,7 +297,7 @@ public final class URLEncodedUtil {
                     propValue = propType.valueOf(value);
                 }
 
-                ClassUtil.setPropValue(result, name, propValue);
+                entityInfo.setPropValue(result, name, propValue);
             }
 
         } finally {

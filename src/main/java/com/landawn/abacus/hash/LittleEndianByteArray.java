@@ -17,13 +17,14 @@ package com.landawn.abacus.hash;
 import java.nio.ByteOrder;
 
 import com.landawn.abacus.hash.Util.Longs;
+import com.landawn.abacus.util.ClassUtil;
 
 import sun.misc.Unsafe;
 
 // TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
- * 
+ *
  * Utility functions for loading and storing values from a byte array.
  *
  * @author Kevin Damm
@@ -201,7 +202,7 @@ final class LittleEndianByteArray {
                     public sun.misc.Unsafe run() throws Exception {
                         Class<sun.misc.Unsafe> k = sun.misc.Unsafe.class;
                         for (java.lang.reflect.Field f : k.getDeclaredFields()) {
-                            f.setAccessible(true);
+                            ClassUtil.setAccessible(f, true);
                             Object x = f.get(null);
                             if (k.isInstance(x)) {
                                 return k.cast(x);
@@ -256,10 +257,10 @@ final class LittleEndianByteArray {
               Unsafe.getLong() at all, but the performance benefit on x86_64 is too great to ignore, so as
               a compromise, we enable the optimization only on platforms that we specifically know to
               work.
-            
+
               In the future, the use of Unsafe.getLong() should be replaced by ByteBuffer.getLong(), which
               will have an efficient native implementation in JDK 9.
-            
+
             */
             final String arch = System.getProperty("os.arch");
             if ("amd64".equals(arch)) {

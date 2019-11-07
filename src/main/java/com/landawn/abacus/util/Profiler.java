@@ -296,7 +296,7 @@ public final class Profiler {
             final Method setUpForMethod, final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum,
             final long threadDelay, final int loopNum, final long loopDelay) {
         if (!method.isAccessible()) {
-            method.setAccessible(true);
+            ClassUtil.setAccessible(method, true);
         }
         gc();
         N.sleep(1000);
@@ -449,7 +449,7 @@ public final class Profiler {
         if (method == null) {
             throw new IllegalArgumentException("No method found by name: " + methodName);
         } else if (!method.isAccessible()) {
-            method.setAccessible(true);
+            ClassUtil.setAccessible(method, true);
         }
         return method;
     }

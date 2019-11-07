@@ -697,8 +697,6 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
         if (n == 0) {
             return empty();
-        } else if (n < 10) {
-            return of(N.repeat(element, (int) n));
         }
 
         return newStream(new ExceptionalIterator<T, E>() {

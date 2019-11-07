@@ -108,8 +108,8 @@ public final class IOUtil {
             Method deMethod = ClassUtil.getDeclaredMethod(cls, "decode", Charset.class, byte[].class, int.class, int.class);
 
             if (enMethod != null && deMethod != null) {
-                enMethod.setAccessible(true);
-                deMethod.setAccessible(true);
+                ClassUtil.setAccessible(enMethod, true);
+                ClassUtil.setAccessible(deMethod, true);
 
                 char[] chars = "abc".toCharArray();
                 byte[] bytes = ClassUtil.invokeMethod(enMethod, Charsets.UTF_8, chars, 1, 1);

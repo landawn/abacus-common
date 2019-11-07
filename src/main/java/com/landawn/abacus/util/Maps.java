@@ -537,7 +537,7 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
+        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<K, V>() : new LinkedHashMap<K, V>();
         Object val = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -564,8 +564,8 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<>()
-                : new LinkedHashMap<>();
+        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<K, Pair<V, Nullable<V>>>()
+                : new LinkedHashMap<K, Pair<V, Nullable<V>>>();
 
         if (N.isNullOrEmpty(map2)) {
             for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -600,8 +600,8 @@ public final class Maps {
         final boolean isIdentityHashMap = (N.notNullOrEmpty(map) && map instanceof IdentityHashMap)
                 || (N.notNullOrEmpty(map2) && map2 instanceof IdentityHashMap);
 
-        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<>()
-                : new LinkedHashMap<>();
+        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<K, Pair<Nullable<V>, Nullable<V>>>()
+                : new LinkedHashMap<K, Pair<Nullable<V>, Nullable<V>>>();
 
         if (N.notNullOrEmpty(map)) {
             if (N.isNullOrEmpty(map2)) {
@@ -1197,9 +1197,9 @@ public final class Maps {
             propInfo = entityInfo.getPropInfo(propName);
 
             if (propInfo == null) {
-                ClassUtil.setPropValue(entity, propName, propValue, ignoreUnknownProperty);
+                entityInfo.setPropValue(entity, propName, propValue, ignoreUnknownProperty);
             } else {
-                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && ClassUtil.isEntity(propInfo.clazz)) {
+                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
                     propInfo.setPropValue(entity, map2Entity(propInfo.clazz, (Map<String, Object>) propValue, ignoreNullProperty, ignoreUnknownProperty));
                 } else {
                     propInfo.setPropValue(entity, propValue);
@@ -1237,9 +1237,9 @@ public final class Maps {
             propInfo = entityInfo.getPropInfo(propName);
 
             if (propInfo == null) {
-                ClassUtil.setPropValue(entity, propName, propValue, false);
+                entityInfo.setPropValue(entity, propName, propValue, false);
             } else {
-                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && ClassUtil.isEntity(propInfo.clazz)) {
+                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
                     propInfo.setPropValue(entity, map2Entity(propInfo.clazz, (Map<String, Object>) propValue));
                 } else {
                     propInfo.setPropValue(entity, propValue);

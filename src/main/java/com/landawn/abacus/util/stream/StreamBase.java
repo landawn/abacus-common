@@ -577,7 +577,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
 
         if (listElementDataField != null) {
-            listElementDataField.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(listElementDataField, true);
         }
 
         tmp = null;
@@ -591,7 +591,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         listSizeField = tmp != null && tmp.getType().equals(int.class) ? tmp : null;
 
         if (listSizeField != null) {
-            listSizeField.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(listSizeField, true);
         }
     }
 

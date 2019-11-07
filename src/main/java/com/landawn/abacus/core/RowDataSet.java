@@ -2314,6 +2314,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         } else if (rowType.isEntity()) {
             final boolean ignoreUnknownProperty = columnNames == _columnNameList;
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowType.clazz());
             Object result = output;
             String propName = null;
             Object propValue = null;
@@ -2322,7 +2323,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 propName = _columnNameList.get(columnIndexes[i]);
                 propValue = _columnList.get(columnIndexes[i]).get(rowNum);
 
-                ClassUtil.setPropValue(result, propName, propValue, ignoreUnknownProperty);
+                entityInfo.setPropValue(result, propName, propValue, ignoreUnknownProperty);
             }
 
             if (result instanceof DirtyMarker) {
@@ -2790,7 +2791,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 if (propInfo == null) {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (ClassUtil.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
+                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
                                 ignoreUnknownProperty) == false) {
                             break;
                         }
@@ -2933,7 +2934,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 if (propInfo == null) {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (ClassUtil.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
+                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
                                 ignoreUnknownProperty) == false) {
                             break;
                         }
@@ -3131,6 +3132,7 @@ public class RowDataSet implements DataSet, Cloneable {
         } else if (valueType.isEntity()) {
             final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
             final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             Object value = null;
             String propName = null;
 
@@ -3139,8 +3141,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-
-                    ClassUtil.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
+                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
                 }
 
                 if (isDirtyMarker) {
@@ -3258,6 +3259,7 @@ public class RowDataSet implements DataSet, Cloneable {
         } else if (valueType.isEntity()) {
             final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
             final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             Object value = null;
             String propName = null;
 
@@ -3266,8 +3268,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-
-                    ClassUtil.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
+                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
                 }
 
                 if (isDirtyMarker) {
@@ -3460,6 +3461,7 @@ public class RowDataSet implements DataSet, Cloneable {
         } else if (elementType.isEntity()) {
             final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
             final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             Object value = null;
             String propName = null;
 
@@ -3468,8 +3470,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-
-                    ClassUtil.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
+                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
                 }
 
                 if (isDirtyMarker) {
@@ -3589,6 +3590,7 @@ public class RowDataSet implements DataSet, Cloneable {
         } else if (elementType.isEntity()) {
             final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
             final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             Object value = null;
             String propName = null;
 
@@ -3597,8 +3599,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-
-                    ClassUtil.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
+                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
                 }
 
                 if (isDirtyMarker) {

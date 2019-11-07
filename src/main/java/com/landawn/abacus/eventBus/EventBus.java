@@ -884,9 +884,7 @@ public class EventBus {
             this.isPossibleLambdaSubscriber = Subscriber.class.isAssignableFrom(method.getDeclaringClass()) && method.getName().equals("on")
                     && parameterType.equals(Object.class) && subscribe == null;
 
-            if (method.isAccessible() == false) {
-                method.setAccessible(true);
-            }
+            ClassUtil.setAccessible(method, true);
         }
 
         /**

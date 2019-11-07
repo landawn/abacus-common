@@ -1498,7 +1498,7 @@ public final class Array {
     }
 
     public static String[] repeat(final String element, final int n) {
-        final String[] a = N.newArray(String.class, n);
+        final String[] a = new String[n];
         N.fill(a, element);
         return a;
     }

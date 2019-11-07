@@ -495,7 +495,7 @@ class CommonUtil {
         listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
 
         if (listElementDataField != null) {
-            listElementDataField.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(listElementDataField, true);
         }
 
         tmp = null;
@@ -509,7 +509,7 @@ class CommonUtil {
         listSizeField = tmp != null && tmp.getType().equals(int.class) ? tmp : null;
 
         if (listSizeField != null) {
-            listSizeField.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(listSizeField, true);
         }
     }
 
@@ -1107,7 +1107,7 @@ class CommonUtil {
     private static <T> T invoke(final Constructor<T> c, final Object... args)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (c.isAccessible() == false) {
-            c.setAccessible(true);
+            ClassUtil.setAccessible(c, true);
         }
 
         return c.newInstance(args);
@@ -6368,7 +6368,8 @@ class CommonUtil {
      * @param selectPropNames
      */
     public static void merge(final Object sourceEntity, final Object targetEntity, final Collection<String> selectPropNames) {
-        final Class<?> srcCls = sourceEntity.getClass();
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
         final boolean ignoreUnknownProperty = selectPropNames == null;
 
         if (selectPropNames == null) {
@@ -6379,34 +6380,18 @@ class CommonUtil {
                     // logger.warn("no property is signed in the specified source entity: "
                     // + toString(entity));
                 } else {
-                    Method srcPropGetMethod = null;
-
-                    try {
-                        for (String propName : signedPropNames) {
-                            srcPropGetMethod = ClassUtil.getPropGetMethod(srcCls, propName);
-                            ClassUtil.setPropValue(targetEntity, propName, srcPropGetMethod.invoke(sourceEntity), ignoreUnknownProperty);
-                        }
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw N.toRuntimeException(e);
+                    for (String propName : signedPropNames) {
+                        targetEntityInfo.setPropValue(targetEntity, propName, srcEntityInfo.getPropValue(sourceEntity, propName), ignoreUnknownProperty);
                     }
                 }
             } else {
-                final EntityInfo entityInfo = ParserUtil.getEntityInfo(srcCls);
-
-                for (PropInfo propInfo : entityInfo.propInfoList) {
-                    ClassUtil.setPropValue(targetEntity, propInfo.name, propInfo.getPropValue(sourceEntity), ignoreUnknownProperty);
+                for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propInfo.getPropValue(sourceEntity), ignoreUnknownProperty);
                 }
             }
         } else {
-            Method srcPropGetMethod = null;
-
-            try {
-                for (String propName : selectPropNames) {
-                    srcPropGetMethod = ClassUtil.getPropGetMethod(srcCls, propName);
-                    ClassUtil.setPropValue(targetEntity, propName, srcPropGetMethod.invoke(sourceEntity), ignoreUnknownProperty);
-                }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+            for (String propName : selectPropNames) {
+                targetEntityInfo.setPropValue(targetEntity, propName, srcEntityInfo.getPropValue(sourceEntity, propName), ignoreUnknownProperty);
             }
         }
     }
@@ -6419,7 +6404,8 @@ class CommonUtil {
      * @param ignorePropNames
      */
     public static void merge(final Object sourceEntity, final Object targetEntity, final boolean ignoreUnknownProperty, final Set<String> ignorePropNames) {
-        final Class<?> srcCls = sourceEntity.getClass();
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
 
         if (sourceEntity instanceof DirtyMarker) {
             final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
@@ -6428,26 +6414,16 @@ class CommonUtil {
                 // logger.warn("no property is signed in the specified source entity: "
                 // + toString(entity));
             } else {
-                try {
-                    Method srcPropGetMethod = null;
-
-                    for (String propName : signedPropNames) {
-                        if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
-                            srcPropGetMethod = ClassUtil.getPropGetMethod(srcCls, propName);
-
-                            ClassUtil.setPropValue(targetEntity, propName, srcPropGetMethod.invoke(sourceEntity), ignoreUnknownProperty);
-                        }
+                for (String propName : signedPropNames) {
+                    if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
+                        targetEntityInfo.setPropValue(targetEntity, propName, srcEntityInfo.getPropValue(sourceEntity, propName), ignoreUnknownProperty);
                     }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw N.toRuntimeException(e);
                 }
             }
         } else {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(srcCls);
-
-            for (PropInfo propInfo : entityInfo.propInfoList) {
+            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
                 if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
-                    ClassUtil.setPropValue(targetEntity, propInfo.name, propInfo.getPropValue(sourceEntity), ignoreUnknownProperty);
+                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propInfo.getPropValue(sourceEntity), ignoreUnknownProperty);
                 }
             }
         }
@@ -6465,8 +6441,10 @@ class CommonUtil {
             return;
         }
 
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+
         for (String propName : propNames) {
-            ClassUtil.setPropValue(entity, propName, null);
+            entityInfo.setPropValue(entity, propName, null);
         }
 
         if (entity instanceof DirtyMarker) {
@@ -6490,8 +6468,10 @@ class CommonUtil {
             return;
         }
 
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+
         for (String propName : propNames) {
-            ClassUtil.setPropValue(entity, propName, null);
+            entityInfo.setPropValue(entity, propName, null);
         }
 
         if (entity instanceof DirtyMarker) {
@@ -6511,6 +6491,9 @@ class CommonUtil {
             return;
         }
 
+        final Class<?> cls = entity.getClass();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+
         if (entity instanceof DirtyMarker) {
             final DirtyMarker dirtyMarkerEntity = (DirtyMarker) entity;
             final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames(dirtyMarkerEntity);
@@ -6521,15 +6504,12 @@ class CommonUtil {
             }
 
             for (String propName : signedPropNames) {
-                ClassUtil.setPropValue(entity, propName, null);
+                entityInfo.setPropValue(entity, propName, null);
             }
 
             DirtyMarkerUtil.signedPropNames(dirtyMarkerEntity).clear();
             DirtyMarkerUtil.dirtyPropNames(dirtyMarkerEntity).clear();
         } else {
-            final Class<?> cls = entity.getClass();
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
-
             for (PropInfo propInfo : entityInfo.propInfoList) {
                 propInfo.setPropValue(entity, null);
             }

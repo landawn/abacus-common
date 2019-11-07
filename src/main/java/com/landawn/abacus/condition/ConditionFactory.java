@@ -22,6 +22,8 @@ import java.util.Map;
 
 import com.landawn.abacus.EntityId;
 import com.landawn.abacus.condition.Expression.Expr;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SortDirection;
@@ -233,22 +235,23 @@ public class ConditionFactory {
     public static Or eqOr(final Object entity, final Collection<String> selectPropNames) {
         N.checkArgNotNullOrEmpty(selectPropNames, "selectPropNames");
 
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
         final Iterator<String> iter = selectPropNames.iterator();
 
         if (selectPropNames.size() == 1) {
             final String propName = iter.next();
-            return or(eq(propName, ClassUtil.getPropValue(entity, propName)));
+            return or(eq(propName, entityInfo.getPropValue(entity, propName)));
         } else if (selectPropNames.size() == 2) {
             final String propName1 = iter.next();
             final String propName2 = iter.next();
-            return eq(propName1, ClassUtil.getPropValue(entity, propName1)).or(eq(propName2, ClassUtil.getPropValue(entity, propName2)));
+            return eq(propName1, entityInfo.getPropValue(entity, propName1)).or(eq(propName2, entityInfo.getPropValue(entity, propName2)));
         } else {
             final Condition[] conds = new Condition[selectPropNames.size()];
             String propName = null;
 
             for (int i = 0, size = selectPropNames.size(); i < size; i++) {
                 propName = iter.next();
-                conds[i] = CF.eq(propName, ClassUtil.getPropValue(entity, propName));
+                conds[i] = CF.eq(propName, entityInfo.getPropValue(entity, propName));
             }
 
             return or(conds);
@@ -304,22 +307,23 @@ public class ConditionFactory {
     public static And eqAnd(final Object entity, final Collection<String> selectPropNames) {
         N.checkArgNotNullOrEmpty(selectPropNames, "selectPropNames");
 
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
         final Iterator<String> iter = selectPropNames.iterator();
 
         if (selectPropNames.size() == 1) {
             final String propName = iter.next();
-            return and(eq(propName, ClassUtil.getPropValue(entity, propName)));
+            return and(eq(propName, entityInfo.getPropValue(entity, propName)));
         } else if (selectPropNames.size() == 2) {
             final String propName1 = iter.next();
             final String propName2 = iter.next();
-            return eq(propName1, ClassUtil.getPropValue(entity, propName1)).and(eq(propName2, ClassUtil.getPropValue(entity, propName2)));
+            return eq(propName1, entityInfo.getPropValue(entity, propName1)).and(eq(propName2, entityInfo.getPropValue(entity, propName2)));
         } else {
             final Condition[] conds = new Condition[selectPropNames.size()];
             String propName = null;
 
             for (int i = 0, size = selectPropNames.size(); i < size; i++) {
                 propName = iter.next();
-                conds[i] = CF.eq(propName, ClassUtil.getPropValue(entity, propName));
+                conds[i] = CF.eq(propName, entityInfo.getPropValue(entity, propName));
             }
 
             return and(conds);

@@ -3673,8 +3673,6 @@ public abstract class Stream<T>
 
         if (n == 0) {
             return empty();
-        } else if (n < 10) {
-            return of(N.repeat(element, (int) n));
         }
 
         return new IteratorStream<>(new ObjIteratorEx<T>() {

@@ -17,6 +17,8 @@ package com.landawn.abacus.util;
 import java.util.Collection;
 import java.util.Map;
 
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
@@ -1464,11 +1466,12 @@ public class Joiner implements AutoCloseable {
 
         N.checkArgument(ClassUtil.isEntity(cls), "'entity' must be entity class with getter/setter methods");
 
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
 
         for (String propName : ClassUtil.getPropNameList(cls)) {
-            propValue = ClassUtil.getPropValue(entity, propName);
+            propValue = entityInfo.getPropValue(entity, propName);
 
             if (propValue != null || skipNull == false) {
                 if (sb == null) {

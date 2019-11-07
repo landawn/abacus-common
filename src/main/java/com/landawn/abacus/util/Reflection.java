@@ -18,7 +18,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -133,10 +132,7 @@ public final class Reflection<T> {
         }
 
         final Constructor<T> constructor = getDeclaredConstructor(cls, getTypes(args));
-
-        if (Modifier.isPublic(constructor.getModifiers()) == false && constructor.isAccessible() == false) {
-            constructor.setAccessible(true);
-        }
+        ClassUtil.setAccessible(constructor, true);
 
         return new Reflection<>(cls, ClassUtil.invokeConstructor(constructor, args));
     }
@@ -161,10 +157,7 @@ public final class Reflection<T> {
         } else {
             try {
                 final Field field = getField(fieldName);
-
-                if (Modifier.isPublic(field.getModifiers()) == false && field.isAccessible() == false) {
-                    field.setAccessible(true);
-                }
+                ClassUtil.setAccessible(field, true);
 
                 return (V) field.get(target);
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
@@ -185,10 +178,7 @@ public final class Reflection<T> {
         } else {
             try {
                 final Field field = getField(fieldName);
-
-                if (Modifier.isPublic(field.getModifiers()) == false && field.isAccessible() == false) {
-                    field.setAccessible(true);
-                }
+                ClassUtil.setAccessible(field, true);
 
                 field.set(target, value);
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
@@ -213,10 +203,7 @@ public final class Reflection<T> {
         } else {
             try {
                 final Method method = getDeclaredMethod(cls, methodName, getTypes(args));
-
-                if (Modifier.isPublic(method.getModifiers()) == false && method.isAccessible() == false) {
-                    method.setAccessible(true);
-                }
+                ClassUtil.setAccessible(method, true);
 
                 return (V) method.invoke(target, args);
             } catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
