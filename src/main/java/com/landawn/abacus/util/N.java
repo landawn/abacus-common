@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -41,6 +42,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
@@ -52,6 +54,7 @@ import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
+import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.BiPredicate;
@@ -434,6 +437,85 @@ public final class N extends CommonUtil {
         }
 
         return c.contains(e);
+    }
+
+    /**
+     * Contains all.
+     *
+     * @param c the c
+     * @param objsToFind the objs to find
+     * @return true, if successful
+     */
+    public static boolean containsAll(final Collection<?> c, final Collection<?> objsToFind) {
+        if (N.isNullOrEmpty(objsToFind)) {
+            return true;
+        } else if (N.isNullOrEmpty(c)) {
+            return false;
+        }
+
+        return c.containsAll(objsToFind);
+    }
+
+    /**
+     * Contains all.
+     *
+     * @param c the c
+     * @param objsToFind the objs to find
+     * @return true, if successful
+     */
+    public static boolean containsAll(final Collection<?> c, final Object[] objsToFind) {
+        if (N.isNullOrEmpty(objsToFind)) {
+            return true;
+        } else if (N.isNullOrEmpty(c)) {
+            return false;
+        }
+
+        return c.containsAll(Array.asList(objsToFind));
+    }
+
+    /**
+     * Contains any.
+     *
+     * @param c the c
+     * @param objsToFind the objs to find
+     * @return true, if successful
+     */
+    public static boolean containsAny(final Collection<?> c, final Collection<?> objsToFind) {
+        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToFind)) {
+            return false;
+        }
+
+        return !N.disjoint(c, objsToFind);
+    }
+
+    /**
+     * Contains any.
+     *
+     * @param c the c
+     * @param objsToFind the objs to find
+     * @return true, if successful
+     */
+    public static boolean containsAny(final Collection<?> c, final Object[] objsToFind) {
+        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToFind)) {
+            return false;
+        }
+
+        return !N.disjoint(c, Array.asList(objsToFind));
+    }
+
+    /**
+     * Gets the only element.
+     *
+     * @param <T> the generic type
+     * @param iterable the iterable
+     * @return throws DuplicatedResultException if there are more than one elements in the specified {@code iterable}.
+     */
+    public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> iterable) throws DuplicatedResultException {
+        if (iterable == null) {
+            return Nullable.empty();
+        }
+
+        return Iterators.getOnlyElement(iterable.iterator());
     }
 
     /**
@@ -1659,6 +1741,144 @@ public final class N extends CommonUtil {
 
             if (bOccurrences.isEmpty()) {
                 break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Different set.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the sets the
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
+        if (N.isNullOrEmpty(a)) {
+            return N.newHashSet();
+        } else if (N.isNullOrEmpty(b)) {
+            return N.newHashSet(a);
+        }
+
+        final Set<T> result = N.newHashSet(a);
+
+        N.removeAll(a, (Collection) b);
+
+        return result;
+    }
+
+    /**
+     * Symmetric different set.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the sets the
+     */
+    public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(b) ? N.<T> newHashSet() : N.<T> newHashSet(b);
+        } else if (N.isNullOrEmpty(b)) {
+            return N.isNullOrEmpty(a) ? N.<T> newHashSet() : N.<T> newHashSet(a);
+        }
+
+        final Set<T> commonSet = commonSet(a, b);
+        final Set<T> result = N.newHashSet(a);
+
+        for (T e : a) {
+            if (!commonSet.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        for (T e : b) {
+            if (!commonSet.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Common set.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param b the b
+     * @return the sets the
+     */
+    public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
+        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+            return N.newHashSet();
+        }
+
+        return commonSet(Array.asList(a, (Collection<? extends T>) b));
+    }
+
+    /**
+     * Common set.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @return the sets the
+     */
+    public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
+        if (N.isNullOrEmpty(c)) {
+            return N.newHashSet();
+        } else if (c.size() == 1) {
+            return N.newHashSet(c.iterator().next());
+        }
+
+        Collection<? extends T> smallest = null;
+
+        for (final Collection<? extends T> e : c) {
+            if (N.isNullOrEmpty(e)) {
+                return N.newHashSet();
+            }
+
+            if (smallest == null || e.size() < smallest.size()) {
+                smallest = e;
+            }
+        }
+
+        final Map<T, MutableInt> map = new HashMap<>();
+
+        for (T e : smallest) {
+            map.put(e, new MutableInt(1));
+        }
+
+        int cnt = 1;
+        MutableInt val = null;
+
+        for (final Collection<? extends T> ec : c) {
+            if (ec == smallest) {
+                continue;
+            }
+
+            for (T e : ec) {
+                val = map.get(e);
+
+                if (val == null) {
+                    // do nothing.
+                } else if (val.intValue() < cnt) {
+                    // map.remove(e);
+                } else if (val.intValue() == cnt) {
+                    val.increment();
+                }
+            }
+
+            cnt++;
+        }
+
+        final Set<T> result = N.newHashSet(map.size());
+
+        for (Map.Entry<T, MutableInt> entry : map.entrySet()) {
+            if (entry.getValue().intValue() == cnt) {
+                result.add(entry.getKey());
             }
         }
 
@@ -10409,7 +10629,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -10429,7 +10649,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -10449,7 +10669,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -10469,7 +10689,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -10489,7 +10709,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -10509,7 +10729,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -10529,7 +10749,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -10550,7 +10770,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -10571,7 +10791,7 @@ public final class N extends CommonUtil {
             m.put(p, sortedList.get((int) (size * p.doubleValue())));
         }
 
-        return ImmutableMap.of(m);
+        return m;
     }
 
     /**
@@ -19321,5 +19541,200 @@ public final class N extends CommonUtil {
         }
 
         return Triple.of(l, m, r);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param b
+     * @return
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U> List<Tuple2<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
+        return Iterables.crossJoin(a, b);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param func
+     * @return
+     * @throws E
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, R, E extends Exception> List<R> crossJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiFunction<? super T, ? super U, R, E> func) throws E {
+        return Iterables.crossJoin(a, b, func);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param a the a
+     * @param b the b
+     * @param leftKeyMapper the left key mapper
+     * @param rightKeyMapper the right key mapper
+     * @return the list
+     * @throws E the e
+     * @throws E2 the e2
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
+            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+        return Iterables.innerJoin(a, b, leftKeyMapper, rightKeyMapper);
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param b the b
+     * @param predicate the predicate
+     * @return the list
+     * @throws E the e
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, E extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        return Iterables.innerJoin(a, b, predicate);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param a the a
+     * @param b the b
+     * @param leftKeyMapper the left key mapper
+     * @param rightKeyMapper the right key mapper
+     * @return the list
+     * @throws E the e
+     * @throws E2 the e2
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
+            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+        return Iterables.fullJoin(a, b, leftKeyMapper, rightKeyMapper);
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param b the b
+     * @param predicate the predicate
+     * @return the list
+     * @throws E the e
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, E extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        return Iterables.fullJoin(a, b, predicate);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param a the a
+     * @param b the b
+     * @param leftKeyMapper the left key mapper
+     * @param rightKeyMapper the right key mapper
+     * @return the list
+     * @throws E the e
+     * @throws E2 the e2
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
+            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+        return Iterables.leftJoin(a, b, leftKeyMapper, rightKeyMapper);
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param b the b
+     * @param predicate the predicate
+     * @return the list
+     * @throws E the e
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, E extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        return Iterables.leftJoin(a, b, predicate);
+    }
+
+    /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param a the a
+     * @param b the b
+     * @param leftKeyMapper the left key mapper
+     * @param rightKeyMapper the right key mapper
+     * @return the list
+     * @throws E the e
+     * @throws E2 the e2
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
+            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+        return Iterables.rightJoin(a, b, leftKeyMapper, rightKeyMapper);
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <T> the generic type
+     * @param <U> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param b the b
+     * @param predicate the predicate
+     * @return the list
+     * @throws E the e
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, U, E extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        return Iterables.rightJoin(a, b, predicate);
     }
 }

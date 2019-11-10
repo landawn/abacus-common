@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -40,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -66,48 +66,6 @@ public final class Iterables {
      */
     private Iterables() {
         // singleton.
-    }
-
-    /**
-     * Returns a read-only <code>Seq</code>.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the immutable collection<? extends t>
-     */
-    public static <T> ImmutableCollection<? extends T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
-
-        if (N.isNullOrEmpty(c)) {
-            return ImmutableList.empty();
-        }
-
-        if (c instanceof List) {
-            return ImmutableList.of(((List<T>) c).subList(fromIndex, toIndex));
-        }
-
-        return new Slice<>(c, fromIndex, toIndex);
-    }
-
-    /**
-     * Returns a read-only <code>Seq</code>.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
-     * @return the immutable collection<? extends t>
-     */
-    public static <T> ImmutableCollection<? extends T> slice(final T[] a, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
-        if (N.isNullOrEmpty(a)) {
-            return ImmutableList.empty();
-        }
-
-        return ImmutableList.of(Array.asList(a).subList(fromIndex, toIndex));
     }
 
     /**
@@ -387,85 +345,6 @@ public final class Iterables {
     }
 
     /**
-     * Contains all.
-     *
-     * @param c the c
-     * @param objsToFind the objs to find
-     * @return true, if successful
-     */
-    public static boolean containsAll(final Collection<?> c, final Collection<?> objsToFind) {
-        if (N.isNullOrEmpty(objsToFind)) {
-            return true;
-        } else if (N.isNullOrEmpty(c)) {
-            return false;
-        }
-
-        return c.containsAll(objsToFind);
-    }
-
-    /**
-     * Contains all.
-     *
-     * @param c the c
-     * @param objsToFind the objs to find
-     * @return true, if successful
-     */
-    public static boolean containsAll(final Collection<?> c, final Object[] objsToFind) {
-        if (N.isNullOrEmpty(objsToFind)) {
-            return true;
-        } else if (N.isNullOrEmpty(c)) {
-            return false;
-        }
-
-        return c.containsAll(Array.asList(objsToFind));
-    }
-
-    /**
-     * Contains any.
-     *
-     * @param c the c
-     * @param objsToFind the objs to find
-     * @return true, if successful
-     */
-    public static boolean containsAny(final Collection<?> c, final Collection<?> objsToFind) {
-        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToFind)) {
-            return false;
-        }
-
-        return !N.disjoint(c, objsToFind);
-    }
-
-    /**
-     * Contains any.
-     *
-     * @param c the c
-     * @param objsToFind the objs to find
-     * @return true, if successful
-     */
-    public static boolean containsAny(final Collection<?> c, final Object[] objsToFind) {
-        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToFind)) {
-            return false;
-        }
-
-        return !N.disjoint(c, Array.asList(objsToFind));
-    }
-
-    /**
-     * Gets the only element.
-     *
-     * @param <T> the generic type
-     * @param iterable the iterable
-     * @return throws DuplicatedResultException if there are more than one elements in the specified {@code iterable}.
-     */
-    public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> iterable) {
-        if (iterable == null) {
-            return Nullable.empty();
-        }
-
-        return Iterators.getOnlyElement(iterable.iterator());
-    }
-
-    /**
      * Index of.
      *
      * @param c the c
@@ -598,7 +477,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the optional int
      * @throws E the e
+     * @deprecated replace by N.findFirstIndex
+     * @see N#findFirstIndex(Object[], com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return OptionalInt.empty();
@@ -622,7 +504,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the optional int
      * @throws E the e
+     * @deprecated replace by N.findFirstIndex
+     * @see N#findFirstIndex(Collection, com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
@@ -650,7 +535,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the optional int
      * @throws E the e
+     * @deprecated replace by N.findLastIndex
+     * @see N#findLastIndex(Object[], com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return OptionalInt.empty();
@@ -674,7 +562,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the optional int
      * @throws E the e
+     * @deprecated replace by N.findLastIndex
+     * @see N#findLastIndex(Collection, com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
@@ -856,7 +747,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the nullable
      * @throws E the e
+     * @deprecated replace by N.findFirst
+     * @see N#findFirst(Object[], com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Nullable.empty();
@@ -880,7 +774,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the nullable
      * @throws E the e
+     * @deprecated replace by N.findFirst
+     * @see N#findFirst(Collection, com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> Nullable<T> findFirst(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Nullable.empty();
@@ -904,7 +801,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the nullable
      * @throws E the e
+     * @deprecated replace by N.findLast
+     * @see N#findLast(Object[], com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Nullable.empty();
@@ -928,7 +828,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the nullable
      * @throws E the e
+     * @deprecated replace by N.findLast
+     * @see N#findLast(Collection, com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> Nullable<T> findLast(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
         return findLast(c, predicate, false);
     }
@@ -942,7 +845,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the optional
      * @throws E the e
+     * @deprecated replace by N.findFirstNonNull
+     * @see N#findFirstNonNull(Object[], com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Optional.empty();
@@ -966,7 +872,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the optional
      * @throws E the e
+     * @deprecated replace by N.findFirstNonNull
+     * @see N#findFirstNonNull(Collection, com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Optional.empty();
@@ -990,7 +899,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the optional
      * @throws E the e
+     * @deprecated replace by N.findLastNonNull
+     * @see N#findLastNonNull(Object[], com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Optional.empty();
@@ -1014,7 +926,10 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the optional
      * @throws E the e
+     * @deprecated replace by N.findLastNonNull
+     * @see N#findLastNonNull(Collection, com.landawn.abacus.util.Try.Predicate)
      */
+    @Deprecated
     public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
         return findLast(c, predicate, true);
     }
@@ -1207,73 +1122,6 @@ public final class Iterables {
         }
 
         return Pair.of(findFirst(a, predicateForFirst), findLast(a, predicateForLast));
-    }
-
-    /**
-     * Return at most first <code>n</code> elements.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @return the list
-     */
-    public static <T> List<T> first(final Collection<? extends T> c, final int n) {
-        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
-
-        if (N.isNullOrEmpty(c) || n == 0) {
-            return new ArrayList<>();
-        } else if (c.size() <= n) {
-            return new ArrayList<>(c);
-        } else if (c instanceof List) {
-            return new ArrayList<>(((List<T>) c).subList(0, n));
-        } else {
-            final List<T> result = new ArrayList<>(N.min(n, c.size()));
-            int cnt = 0;
-
-            for (T e : c) {
-                result.add(e);
-
-                if (++cnt == n) {
-                    break;
-                }
-            }
-
-            return result;
-        }
-    }
-
-    /**
-     * Return at most last <code>n</code> elements.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
-     * @return the list
-     */
-    public static <T> List<T> last(final Collection<? extends T> c, final int n) {
-        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
-
-        if (N.isNullOrEmpty(c) || n == 0) {
-            return new ArrayList<>();
-        } else if (c.size() <= n) {
-            return new ArrayList<>(c);
-        } else if (c instanceof List) {
-            return new ArrayList<>(((List<T>) c).subList(c.size() - n, c.size()));
-        } else {
-            final List<T> result = new ArrayList<>(N.min(n, c.size()));
-            final Iterator<? extends T> iter = c.iterator();
-            int offset = c.size() - n;
-
-            while (offset-- > 0) {
-                iter.next();
-            }
-
-            while (iter.hasNext()) {
-                result.add(iter.next());
-            }
-
-            return result;
-        }
     }
 
     /**
@@ -1908,137 +1756,48 @@ public final class Iterables {
     }
 
     /**
-     * Different set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the sets the
+     * @param <T>
+     * @param <U>
+     * @param a
+     * @param b
+     * @return
+     * @see N#crossJoin(Collection, Collection)
+     * @deprecated replaced by {@code N.crossJoin(Collection, Collection)}
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.newHashSet();
-        } else if (N.isNullOrEmpty(b)) {
-            return N.newHashSet(a);
-        }
-
-        final Set<T> result = N.newHashSet(a);
-
-        N.removeAll(a, (Collection) b);
-
-        return result;
+    @Deprecated
+    public static <T, U> List<Tuple2<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
+        return crossJoin(a, b, Fn.<T, U> tuple2());
     }
 
     /**
-     * Symmetric different set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the sets the
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param b
+     * @param func
+     * @return
+     * @throws E
+     * @see N#crossJoin(Collection, Collection, com.landawn.abacus.util.Try.BiFunction)
+     * @deprecated replaced by {@code N.crossJoin(Collection, Collection, com.landawn.abacus.util.Try.BiFunction)}
      */
-    public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? N.<T> newHashSet() : N.<T> newHashSet(b);
-        } else if (N.isNullOrEmpty(b)) {
-            return N.isNullOrEmpty(a) ? N.<T> newHashSet() : N.<T> newHashSet(a);
-        }
+    @Deprecated
+    public static <T, U, R, E extends Exception> List<R> crossJoin(final Collection<T> a, final Collection<U> b,
+            final Try.BiFunction<? super T, ? super U, R, E> func) throws E {
+        N.checkArgNotNull(func, "func");
 
-        final Set<T> commonSet = Iterables.commonSet(a, b);
-        final Set<T> result = N.newHashSet(a);
+        final List<R> result = new ArrayList<>(N.size(a) * N.size(b));
 
-        for (T e : a) {
-            if (!commonSet.contains(e)) {
-                result.add(e);
-            }
-        }
-
-        for (T e : b) {
-            if (!commonSet.contains(e)) {
-                result.add(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Common set.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
-     * @return the sets the
-     */
-    public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-            return N.newHashSet();
+            return result;
         }
 
-        return commonSet(Array.asList(a, (Collection<? extends T>) b));
-    }
-
-    /**
-     * Common set.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the sets the
-     */
-    public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
-        if (N.isNullOrEmpty(c)) {
-            return N.newHashSet();
-        } else if (c.size() == 1) {
-            return N.newHashSet(c.iterator().next());
-        }
-
-        Collection<? extends T> smallest = null;
-
-        for (final Collection<? extends T> e : c) {
-            if (N.isNullOrEmpty(e)) {
-                return N.newHashSet();
-            }
-
-            if (smallest == null || e.size() < smallest.size()) {
-                smallest = e;
-            }
-        }
-
-        final Map<T, MutableInt> map = new HashMap<>();
-
-        for (T e : smallest) {
-            map.put(e, new MutableInt(1));
-        }
-
-        int cnt = 1;
-        MutableInt val = null;
-
-        for (final Collection<? extends T> ec : c) {
-            if (ec == smallest) {
-                continue;
-            }
-
-            for (T e : ec) {
-                val = map.get(e);
-
-                if (val == null) {
-                    // do nothing.
-                } else if (val.intValue() < cnt) {
-                    // map.remove(e);
-                } else if (val.intValue() == cnt) {
-                    val.increment();
-                }
-            }
-
-            cnt++;
-        }
-
-        final Set<T> result = N.newHashSet(map.size());
-
-        for (Map.Entry<T, MutableInt> entry : map.entrySet()) {
-            if (entry.getValue().intValue() == cnt) {
-                result.add(entry.getKey());
+        for (T ae : a) {
+            for (U be : b) {
+                result.add(func.apply(ae, be));
             }
         }
 
@@ -2059,8 +1818,11 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      * @throws E2 the e2
+     * @see N#innerJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     * @deprecated replaced by {@code N.innerJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
+    @Deprecated
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
             final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
@@ -2095,8 +1857,11 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the list
      * @throws E the e
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     * @see N#innerJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     * @deprecated replaced by {@code N.innerJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
      */
+    @Deprecated
     public static <T, U, E extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
             final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
         final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
@@ -2130,8 +1895,11 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      * @throws E2 the e2
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     * @see N#fullJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     * @deprecated replaced by {@code N.fullJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
+    @Deprecated
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
             final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
@@ -2182,8 +1950,11 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the list
      * @throws E the e
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     * @see N#fullJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     * @deprecated replaced by {@code N.fullJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
      */
+    @Deprecated
     public static <T, U, E extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
             final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
         final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
@@ -2239,8 +2010,11 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      * @throws E2 the e2
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     * @see N#leftJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     * @deprecated replaced by {@code N.leftJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
+    @Deprecated
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
             final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
@@ -2281,8 +2055,11 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the list
      * @throws E the e
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     * @see N#leftJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     * @deprecated replaced by {@code N.leftJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
      */
+    @Deprecated
     public static <T, U, E extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
             final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
@@ -2327,8 +2104,11 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      * @throws E2 the e2
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     * @see N#rightJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     * @deprecated replaced by {@code N.rightJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
+    @Deprecated
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
             final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(b));
@@ -2369,8 +2149,11 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the list
      * @throws E the e
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     * @see N#rightJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+     * @deprecated replaced by {@code N.rightJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
      */
+    @Deprecated
     public static <T, U, E extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
             final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(b));

@@ -1305,7 +1305,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @return
      */
-    public Set<T> elements() {
+    public ImmutableSet<T> elements() {
         return ImmutableSet.of(valueMap.keySet());
     }
 

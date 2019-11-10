@@ -605,8 +605,8 @@ public final class CodeGenerator {
             }
 
             for (Class<?> superClass : allClasses) {
-                parentGetterMethods.addAll(ClassUtil.getPropGetMethodList(superClass).values());
-                parentSettterMethods.putAll(ClassUtil.getPropSetMethodList(superClass));
+                parentGetterMethods.addAll(ClassUtil.getPropGetMethods(superClass).values());
+                parentSettterMethods.putAll(ClassUtil.getPropSetMethods(superClass));
             }
         }
 
@@ -1041,7 +1041,7 @@ public final class CodeGenerator {
                 .append(IOUtil.LINE_SEPARATOR);
         sb.append(iden).append("final ").append(targetClassName).append(" result = new ").append(targetClassName).append("();").append(IOUtil.LINE_SEPARATOR);
 
-        for (Map.Entry<String, Method> entry : ClassUtil.getPropGetMethodList(sourceClass).entrySet()) {
+        for (Map.Entry<String, Method> entry : ClassUtil.getPropGetMethods(sourceClass).entrySet()) {
             final Method getMethod = entry.getValue();
             String propName = entry.getKey();
 

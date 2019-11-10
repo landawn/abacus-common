@@ -480,7 +480,7 @@ final class InternalJdbcUtil {
     }
 
     /** The Constant column2FieldNameMapPool. */
-    private static final Map<Class<?>, Map<String, String>> column2FieldNameMapPool = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, ImmutableMap<String, String>> column2FieldNameMapPool = new ConcurrentHashMap<>();
 
     /**
      * Gets the column 2 field name map.
@@ -488,12 +488,11 @@ final class InternalJdbcUtil {
      * @param entityClass
      * @return
      */
-    static Map<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
-        Map<String, String> result = column2FieldNameMapPool.get(entityClass);
+    static ImmutableMap<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
+        ImmutableMap<String, String> result = column2FieldNameMapPool.get(entityClass);
 
         if (result == null) {
-            result = N.newBiMap(LinkedHashMap.class, LinkedHashMap.class);
-
+            final Map<String, String> biMap = N.newBiMap(LinkedHashMap.class, LinkedHashMap.class);
             final Set<Field> allFields = N.newHashSet();
 
             for (Class<?> superClass : ClassUtil.getAllSuperclasses(entityClass)) {
@@ -519,14 +518,14 @@ final class InternalJdbcUtil {
                     }
 
                     if (N.notNullOrEmpty(columnName)) {
-                        result.put(columnName, field.getName());
-                        result.put(columnName.toLowerCase(), field.getName());
-                        result.put(columnName.toUpperCase(), field.getName());
+                        biMap.put(columnName, field.getName());
+                        biMap.put(columnName.toLowerCase(), field.getName());
+                        biMap.put(columnName.toUpperCase(), field.getName());
                     }
                 }
             }
 
-            result = ImmutableMap.of(result);
+            result = ImmutableMap.of(biMap);
 
             column2FieldNameMapPool.put(entityClass, result);
         }

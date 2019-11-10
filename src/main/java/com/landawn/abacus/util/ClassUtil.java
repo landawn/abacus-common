@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -100,6 +99,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
@@ -411,18 +411,20 @@ public final class ClassUtil {
     /** The Constant registeredNonPropGetSetMethodPool. */
     private static final Map<Class<?>, Set<String>> registeredNonPropGetSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
+    /** The Constant entityDeclaredPropNameListPool. */
+    private static final Map<Class<?>, ImmutableList<String>> entityDeclaredPropNameListPool = new ObjectPool<>(POOL_SIZE);
+
+    /** The Constant entityPropFieldPool. */
+    private static final Map<Class<?>, ImmutableMap<String, Field>> entityDeclaredPropFieldPool = new ObjectPool<>(POOL_SIZE);
+
     /** The Constant entityPropFieldPool. */
     private static final Map<Class<?>, Map<String, Field>> entityPropFieldPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityDeclaredPropNameListPool. */
-    // ...
-    private static final Map<Class<?>, List<String>> entityDeclaredPropNameListPool = new ObjectPool<>(POOL_SIZE);
-
     /** The Constant entityDeclaredPropGetMethodPool. */
-    private static final Map<Class<?>, Map<String, Method>> entityDeclaredPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, ImmutableMap<String, Method>> entityDeclaredPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
 
     /** The Constant entityDeclaredPropSetMethodPool. */
-    private static final Map<Class<?>, Map<String, Method>> entityDeclaredPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, ImmutableMap<String, Method>> entityDeclaredPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
     /** The Constant entityPropGetMethodPool. */
     private static final Map<Class<?>, Map<String, Method>> entityPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
@@ -679,13 +681,7 @@ public final class ClassUtil {
         Boolean b = entityClassPool.get(cls);
 
         if (b == null) {
-            final String canonicalClassName = ClassUtil.getCanonicalClassName(cls);
-
-            if (N.notNullOrEmpty(canonicalClassName) && (canonicalClassName.startsWith("java.lang.") || canonicalClassName.startsWith("java.util."))) {
-                b = false;
-            } else {
-                b = !registeredNonEntityClass.containsKey(cls) && N.notNullOrEmpty(ClassUtil.getPropNameList(cls));
-            }
+            b = !registeredNonEntityClass.containsKey(cls) && N.notNullOrEmpty(ClassUtil.getPropNameList(cls));
 
             entityClassPool.put(cls, b);
         }
@@ -1624,8 +1620,8 @@ public final class ClassUtil {
      * @param cls
      * @return
      */
-    public static List<String> getPropNameList(final Class<?> cls) {
-        List<String> propNameList = entityDeclaredPropNameListPool.get(cls);
+    public static ImmutableList<String> getPropNameList(final Class<?> cls) {
+        ImmutableList<String> propNameList = entityDeclaredPropNameListPool.get(cls);
 
         if (propNameList == null) {
             loadPropGetSetMethodList(cls);
@@ -1642,21 +1638,21 @@ public final class ClassUtil {
      * @param propNameToExcluded
      * @return
      */
-    public static List<String> getPropNameListExclusively(final Class<?> cls, final Set<String> propNameToExcluded) {
+    public static List<String> getPropNamesExclusively(final Class<?> cls, final Set<String> propNameToExcluded) {
         final List<String> propNameList = getPropNameList(cls);
 
         if (N.isNullOrEmpty(propNameToExcluded)) {
             return new ArrayList<>(propNameList);
         } else {
-            final List<String> res = new ArrayList<>(propNameList.size() - propNameToExcluded.size());
+            final List<String> result = new ArrayList<>(propNameList.size() - propNameToExcluded.size());
 
             for (String propName : propNameList) {
                 if (!propNameToExcluded.contains(propName)) {
-                    res.add(propName);
+                    result.add(propName);
                 }
             }
 
-            return res;
+            return result;
         }
     }
 
@@ -1668,14 +1664,128 @@ public final class ClassUtil {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static List<String> getPropNameListExclusively(final Class<?> cls, final Collection<String> propNameToExcluded) {
+    public static List<String> getPropNamesExclusively(final Class<?> cls, final Collection<String> propNameToExcluded) {
         if (N.isNullOrEmpty(propNameToExcluded)) {
             return new ArrayList<>(getPropNameList(cls));
         } else if (propNameToExcluded instanceof Set) {
-            return getPropNameListExclusively(cls, (Set) propNameToExcluded);
+            return getPropNamesExclusively(cls, (Set) propNameToExcluded);
         } else {
-            return getPropNameListExclusively(cls, N.newHashSet(propNameToExcluded));
+            return getPropNamesExclusively(cls, N.newHashSet(propNameToExcluded));
         }
+    }
+
+    /**
+     *
+     * @param entity
+     * @return
+     */
+    public static List<String> getNonNullPropNames(final Object entity) {
+        return getPropNames(entity, Fn.<Object> notNull());
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param entity
+     * @param propValueFilter
+     * @return
+     * @throws E
+     */
+    public static <E extends Exception> List<String> getPropNames(final Object entity, Try.Predicate<Object, E> propValueFilter) throws E {
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+        final int size = entityInfo.propInfoList.size();
+        final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
+
+        for (PropInfo propInfo : entityInfo.propInfoList) {
+            if (propValueFilter.test(propInfo.getPropValue(result))) {
+                result.add(propInfo.name);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param entity
+     * @param propValueFilter first parameter is property value, second parameter is property type.
+     * @return
+     * @throws E
+     */
+    public static <E extends Exception> List<String> getPropNames(final Object entity, Try.BiPredicate<Object, Type<Object>, E> propValueFilter) throws E {
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+        final int size = entityInfo.propInfoList.size();
+        final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
+
+        for (PropInfo propInfo : entityInfo.propInfoList) {
+            if (propValueFilter.test(propInfo.getPropValue(result), propInfo.type)) {
+                result.add(propInfo.name);
+            }
+        }
+
+        return result;
+    }
+
+    public static ImmutableMap<String, Field> getPropFields(final Class<?> cls) {
+        ImmutableMap<String, Field> getterMethodList = entityDeclaredPropFieldPool.get(cls);
+
+        if (getterMethodList == null) {
+            loadPropGetSetMethodList(cls);
+            getterMethodList = entityDeclaredPropFieldPool.get(cls);
+        }
+
+        return getterMethodList;
+    }
+
+    /**
+     * Gets the prop field.
+     *
+     * @param cls
+     * @param propName
+     * @return
+     */
+    public static Field getPropField(final Class<?> cls, final String propName) {
+        Map<String, Field> propFieldMap = entityPropFieldPool.get(cls);
+
+        if (propFieldMap == null) {
+            loadPropGetSetMethodList(cls);
+            propFieldMap = entityPropFieldPool.get(cls);
+        }
+
+        Field field = propFieldMap.get(propName);
+
+        if (field == null) {
+            if (!ClassUtil.isEntity(cls)) {
+                throw new IllegalArgumentException(
+                        "No property getter/setter method or public field found in the specified entity: " + ClassUtil.getCanonicalClassName(cls));
+            }
+
+            synchronized (entityDeclaredPropGetMethodPool) {
+                final Map<String, Method> getterMethodList = ClassUtil.getPropGetMethods(cls);
+
+                for (String key : getterMethodList.keySet()) {
+                    if (isPropName(cls, propName, key)) {
+                        field = propFieldMap.get(key);
+
+                        break;
+                    }
+                }
+
+                if ((field == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
+                    field = getPropField(cls, formalizePropName(propName));
+                }
+
+                // set method mask to avoid query next time.
+                if (field == null) {
+                    field = FIELD_MASK;
+                }
+
+                propFieldMap.put(propName, field);
+            }
+        }
+
+        return (field == FIELD_MASK) ? null : field;
     }
 
     /**
@@ -1686,8 +1796,8 @@ public final class ClassUtil {
      * @param cls
      * @return
      */
-    public static Map<String, Method> getPropGetMethodList(final Class<?> cls) {
-        Map<String, Method> getterMethodList = entityDeclaredPropGetMethodPool.get(cls);
+    public static ImmutableMap<String, Method> getPropGetMethods(final Class<?> cls) {
+        ImmutableMap<String, Method> getterMethodList = entityDeclaredPropGetMethodPool.get(cls);
 
         if (getterMethodList == null) {
             loadPropGetSetMethodList(cls);
@@ -1698,13 +1808,64 @@ public final class ClassUtil {
     }
 
     /**
+     * Returns the property get method declared in the specified {@code cls}
+     * with the specified property name {@code propName}.
+     * {@code null} is returned if no method is found.
+     *
+     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * getter/setter method for the class/bean generated/wrote by JAXB
+     * specification
+     *
+     * @param cls
+     * @param propName
+     * @return
+     */
+    public static Method getPropGetMethod(final Class<?> cls, final String propName) {
+        Map<String, Method> propGetMethodMap = entityPropGetMethodPool.get(cls);
+
+        if (propGetMethodMap == null) {
+            loadPropGetSetMethodList(cls);
+            propGetMethodMap = entityPropGetMethodPool.get(cls);
+        }
+
+        Method method = propGetMethodMap.get(propName);
+
+        if (method == null) {
+            synchronized (entityDeclaredPropGetMethodPool) {
+                Map<String, Method> getterMethodList = getPropGetMethods(cls);
+
+                for (String key : getterMethodList.keySet()) {
+                    if (isPropName(cls, propName, key)) {
+                        method = getterMethodList.get(key);
+
+                        break;
+                    }
+                }
+
+                if ((method == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
+                    method = getPropGetMethod(cls, formalizePropName(propName));
+                }
+
+                // set method mask to avoid query next time.
+                if (method == null) {
+                    method = METHOD_MASK;
+                }
+
+                propGetMethodMap.put(propName, method);
+            }
+        }
+
+        return (method == METHOD_MASK) ? null : method;
+    }
+
+    /**
      * Gets the prop set method list.
      *
      * @param cls
      * @return
      */
-    public static Map<String, Method> getPropSetMethodList(final Class<?> cls) {
-        Map<String, Method> setterMethodList = entityDeclaredPropSetMethodPool.get(cls);
+    public static ImmutableMap<String, Method> getPropSetMethods(final Class<?> cls) {
+        ImmutableMap<String, Method> setterMethodList = entityDeclaredPropSetMethodPool.get(cls);
 
         if (setterMethodList == null) {
             loadPropGetSetMethodList(cls);
@@ -1743,11 +1904,12 @@ public final class ClassUtil {
             Map<String, Method> propGetMethodMap = new LinkedHashMap<>();
             Map<String, Method> propSetMethodMap = new LinkedHashMap<>();
 
-            List<Class<?>> allClasses = new ArrayList<>();
+            final List<Class<?>> allClasses = new ArrayList<>();
             allClasses.add(cls);
+            Class<?> superClass = null;
 
-            while (allClasses.get(allClasses.size() - 1).getSuperclass() != null) {
-                allClasses.add(allClasses.get(allClasses.size() - 1).getSuperclass());
+            while ((superClass = allClasses.get(allClasses.size() - 1).getSuperclass()) != null && !superClass.equals(Object.class)) {
+                allClasses.add(superClass);
             }
 
             Class<?> clazz = null;
@@ -1830,7 +1992,7 @@ public final class ClassUtil {
 
                         setMethod = getSetMethod(clazz, method);
 
-                        if (setMethod != null) {
+                        if (setMethod != null && !propGetMethodMap.containsValue(method)) {
                             ClassUtil.setAccessibleQuietly(method, true);
                             ClassUtil.setAccessibleQuietly(setMethod, true);
 
@@ -1840,7 +2002,7 @@ public final class ClassUtil {
                             continue;
                         }
 
-                        if (isJAXBGetMethod(instance, method)) {
+                        if (isJAXBGetMethod(instance, method) && !propGetMethodMap.containsValue(method)) {
                             ClassUtil.setAccessibleQuietly(method, true);
 
                             propGetMethodMap.put(propName, method);
@@ -1854,13 +2016,14 @@ public final class ClassUtil {
             for (Class<?> key : registeredNonPropGetSetMethodPool.keySet()) {
                 if (key.isAssignableFrom(cls)) {
                     final Set<String> set = registeredNonPropGetSetMethodPool.get(key);
+                    final List<String> methodNames = new ArrayList<>(propGetMethodMap.keySet());
 
                     for (String nonPropName : set) {
-                        for (String propName : propGetMethodMap.keySet()) {
+                        for (String propName : methodNames) {
                             if (propName.equalsIgnoreCase(nonPropName)) {
+                                propFieldMap.remove(propName);
                                 propGetMethodMap.remove(propName);
                                 propSetMethodMap.remove(propName);
-                                propFieldMap.remove(propName);
 
                                 break;
                             }
@@ -1870,15 +2033,18 @@ public final class ClassUtil {
             }
 
             // for Double-Checked Locking is Broke initialize it before
+            final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.of(propFieldMap);
+            unmodifiableFieldMap.keySet();
+            entityDeclaredPropFieldPool.put(cls, unmodifiableFieldMap);
+
             // put it into map.
-            Map<String, Field> tempFieldMap = new ObjectPool<>(N.max(64, propFieldMap.size()));
+            final Map<String, Field> tempFieldMap = new ObjectPool<>(N.max(64, propFieldMap.size()));
             tempFieldMap.putAll(propFieldMap);
-            tempFieldMap.keySet();
             entityPropFieldPool.put(cls, tempFieldMap);
 
-            Map<String, Method> unmodifiableMethodMap = Collections.unmodifiableMap(propGetMethodMap);
-            unmodifiableMethodMap.keySet();
-            entityDeclaredPropGetMethodPool.put(cls, unmodifiableMethodMap);
+            final ImmutableMap<String, Method> unmodifiableGetMethodMap = ImmutableMap.of(propGetMethodMap);
+            unmodifiableGetMethodMap.keySet();
+            entityDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
             if (entityPropGetMethodPool.get(cls) == null) {
                 Map<String, Method> tmp = new ObjectPool<>(N.max(64, propGetMethodMap.size()));
@@ -1890,9 +2056,9 @@ public final class ClassUtil {
 
             // for Double-Checked Locking is Broke initialize it before
             // put it into map.
-            unmodifiableMethodMap = Collections.unmodifiableMap(propSetMethodMap);
-            unmodifiableMethodMap.keySet();
-            entityDeclaredPropSetMethodPool.put(cls, unmodifiableMethodMap);
+            final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.of(propSetMethodMap);
+            unmodifiableSetMethodMap.keySet();
+            entityDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
             if (entityPropSetMethodPool.get(cls) == null) {
                 Map<String, Method> tmp = new ObjectPool<>(N.max(64, propSetMethodMap.size()));
@@ -2015,57 +2181,6 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns the property get method declared in the specified {@code cls}
-     * with the specified property name {@code propName}.
-     * {@code null} is returned if no method is found.
-     *
-     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
-     * getter/setter method for the class/bean generated/wrote by JAXB
-     * specification
-     *
-     * @param cls
-     * @param propName
-     * @return
-     */
-    public static Method getPropGetMethod(final Class<?> cls, final String propName) {
-        Map<String, Method> propGetMethodMap = entityPropGetMethodPool.get(cls);
-
-        if (propGetMethodMap == null) {
-            loadPropGetSetMethodList(cls);
-            propGetMethodMap = entityPropGetMethodPool.get(cls);
-        }
-
-        Method method = propGetMethodMap.get(propName);
-
-        if (method == null) {
-            synchronized (entityDeclaredPropGetMethodPool) {
-                Map<String, Method> getterMethodList = getPropGetMethodList(cls);
-
-                for (String key : getterMethodList.keySet()) {
-                    if (isPropName(cls, propName, key)) {
-                        method = getterMethodList.get(key);
-
-                        break;
-                    }
-                }
-
-                if ((method == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
-                    method = getPropGetMethod(cls, formalizePropName(propName));
-                }
-
-                // set method mask to avoid query next time.
-                if (method == null) {
-                    method = METHOD_MASK;
-                }
-
-                propGetMethodMap.put(propName, method);
-            }
-        }
-
-        return (method == METHOD_MASK) ? null : method;
-    }
-
-    /**
      * Checks if is prop name.
      *
      * @param cls
@@ -2109,7 +2224,7 @@ public final class ClassUtil {
 
         if (method == null) {
             synchronized (entityDeclaredPropGetMethodPool) {
-                Map<String, Method> setterMethodList = getPropSetMethodList(cls);
+                Map<String, Method> setterMethodList = getPropSetMethods(cls);
 
                 for (String key : setterMethodList.keySet()) {
                     if (isPropName(cls, propName, key)) {
@@ -2133,56 +2248,6 @@ public final class ClassUtil {
         }
 
         return (method == METHOD_MASK) ? null : method;
-    }
-
-    /**
-     * Gets the prop field.
-     *
-     * @param cls
-     * @param propName
-     * @return
-     */
-    public static Field getPropField(final Class<?> cls, final String propName) {
-        Map<String, Field> propFieldMap = entityPropFieldPool.get(cls);
-
-        if (propFieldMap == null) {
-            loadPropGetSetMethodList(cls);
-            propFieldMap = entityPropFieldPool.get(cls);
-        }
-
-        Field field = propFieldMap.get(propName);
-
-        if (field == null) {
-            if (!ClassUtil.isEntity(cls)) {
-                throw new IllegalArgumentException(
-                        "No property getter/setter method or public field found in the specified entity: " + ClassUtil.getCanonicalClassName(cls));
-            }
-
-            synchronized (entityDeclaredPropGetMethodPool) {
-                final Map<String, Method> getterMethodList = ClassUtil.getPropGetMethodList(cls);
-
-                for (String key : getterMethodList.keySet()) {
-                    if (isPropName(cls, propName, key)) {
-                        field = propFieldMap.get(key);
-
-                        break;
-                    }
-                }
-
-                if ((field == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
-                    field = getPropField(cls, formalizePropName(propName));
-                }
-
-                // set method mask to avoid query next time.
-                if (field == null) {
-                    field = FIELD_MASK;
-                }
-
-                propFieldMap.put(propName, field);
-            }
-        }
-
-        return (field == FIELD_MASK) ? null : field;
     }
 
     /**

@@ -32,7 +32,7 @@ import com.landawn.abacus.util.N;
 public final class CriteriaUtil {
 
     /** The Constant clauseOperators. */
-    private static final Set<Operator> clauseOperators;
+    private static final ImmutableSet<Operator> clauseOperators;
 
     static {
         final Set<Operator> set = N.newLinkedHashSet();

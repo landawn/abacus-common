@@ -79,8 +79,10 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
@@ -432,13 +434,13 @@ class CommonUtil {
 
     /** The Constant enumListPool. */
     // ...
-    private static final Map<Class<? extends Enum<?>>, List<? extends Enum<?>>> enumListPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<? extends Enum<?>>, ImmutableList<? extends Enum<?>>> enumListPool = new ObjectPool<>(POOL_SIZE);
 
     /** The Constant enumSetPool. */
-    private static final Map<Class<? extends Enum<?>>, Set<? extends Enum<?>>> enumSetPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<? extends Enum<?>>, ImmutableSet<? extends Enum<?>>> enumSetPool = new ObjectPool<>(POOL_SIZE);
 
     /** The Constant enumMapPool. */
-    private static final Map<Class<? extends Enum<?>>, BiMap<? extends Enum<?>, String>> enumMapPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<? extends Enum<?>>, ImmutableBiMap<? extends Enum<?>, String>> enumMapPool = new ObjectPool<>(POOL_SIZE);
 
     /** The Constant nameTypePool. */
     private static final Map<String, Type<?>> nameTypePool = new ObjectPool<>(POOL_SIZE);
@@ -970,8 +972,8 @@ class CommonUtil {
      * @param enumClass
      * @return
      */
-    public static <E extends Enum<E>> List<E> enumListOf(final Class<E> enumClass) {
-        List<E> enumList = (List<E>) enumListPool.get(enumClass);
+    public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
+        ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
 
         if (enumList == null) {
             enumList = ImmutableList.of(CommonUtil.asList(enumClass.getEnumConstants()));
@@ -989,8 +991,8 @@ class CommonUtil {
      * @param enumClass
      * @return
      */
-    public static <E extends Enum<E>> Set<E> enumSetOf(final Class<E> enumClass) {
-        Set<E> enumSet = (Set<E>) enumSetPool.get(enumClass);
+    public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
+        ImmutableSet<E> enumSet = (ImmutableSet<E>) enumSetPool.get(enumClass);
 
         if (enumSet == null) {
             enumSet = ImmutableSet.of(EnumSet.allOf(enumClass));
@@ -1008,8 +1010,8 @@ class CommonUtil {
      * @param enumClass
      * @return
      */
-    public static <E extends Enum<E>> BiMap<E, String> enumMapOf(final Class<E> enumClass) {
-        BiMap<E, String> enumMap = (BiMap<E, String>) enumMapPool.get(enumClass);
+    public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
+        ImmutableBiMap<E, String> enumMap = (ImmutableBiMap<E, String>) enumMapPool.get(enumClass);
 
         if (enumMap == null) {
             final EnumMap<E, String> keyMap = new EnumMap<>(enumClass);
@@ -1020,7 +1022,7 @@ class CommonUtil {
                 valueMap.put(e.name(), e);
             }
 
-            enumMap = new BiMap<>(ImmutableMap.of(keyMap), ImmutableMap.of(valueMap));
+            enumMap = ImmutableBiMap.of(new BiMap<>(keyMap, valueMap));
 
             enumMapPool.put(enumClass, enumMap);
         }
@@ -7108,8 +7110,20 @@ class CommonUtil {
      * @return
      */
     public static <T> T firstOrNullIfEmpty(final Collection<T> c) {
+        return firstOrDefaultIfEmpty(c, null);
+    }
+
+    /**
+     * First or default if empty.
+     *
+     * @param <T>
+     * @param c
+     * @param defaultValueForEmpty
+     * @return
+     */
+    public static <T> T firstOrDefaultIfEmpty(final Collection<T> c, final T defaultValueForEmpty) {
         if (CommonUtil.isNullOrEmpty(c)) {
-            return null;
+            return defaultValueForEmpty;
         }
 
         if (c instanceof List && c instanceof RandomAccess) {
@@ -7127,8 +7141,20 @@ class CommonUtil {
      * @return
      */
     public static <T> T lastOrNullIfEmpty(final Collection<T> c) {
+        return lastOrDefaultIfEmpty(c, null);
+    }
+
+    /**
+     * Last or default if empty.
+     *
+     * @param <T>
+     * @param c
+     * @param defaultValueForEmpty
+     * @return
+     */
+    public static <T> T lastOrDefaultIfEmpty(final Collection<T> c, final T defaultValueForEmpty) {
         if (CommonUtil.isNullOrEmpty(c)) {
-            return null;
+            return defaultValueForEmpty;
         }
 
         if (c instanceof List) {
@@ -7151,6 +7177,254 @@ class CommonUtil {
 
             return e;
         }
+    }
+
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the nullable
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findFirst(a, predicate);
+    }
+
+    /**
+     * Find first.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the nullable
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> Nullable<T> findFirst(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findFirst(c, predicate);
+    }
+
+    /**
+     * Find last.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the nullable
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findLast(a, predicate);
+    }
+
+    /**
+     * Find last.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the nullable
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> Nullable<T> findLast(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findLast(c, predicate);
+    }
+
+    /**
+     * Find first non null.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findFirstNonNull(a, predicate);
+    }
+
+    /**
+     * Find first non null.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findFirstNonNull(c, predicate);
+    }
+
+    /**
+     * Find last non null.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findLastNonNull(a, predicate);
+    }
+
+    /**
+     * Find last non null.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the optional
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findLastNonNull(c, predicate);
+    }
+
+    /**
+     * Return at most first <code>n</code> elements.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param n the n
+     * @return the list
+     */
+    public static <T> List<T> first(final Collection<? extends T> c, final int n) {
+        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (N.isNullOrEmpty(c) || n == 0) {
+            return new ArrayList<>();
+        } else if (c.size() <= n) {
+            return new ArrayList<>(c);
+        } else if (c instanceof List) {
+            return new ArrayList<>(((List<T>) c).subList(0, n));
+        } else {
+            final List<T> result = new ArrayList<>(N.min(n, c.size()));
+            int cnt = 0;
+
+            for (T e : c) {
+                result.add(e);
+
+                if (++cnt == n) {
+                    break;
+                }
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     * Return at most last <code>n</code> elements.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param n the n
+     * @return the list
+     */
+    public static <T> List<T> last(final Collection<? extends T> c, final int n) {
+        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (N.isNullOrEmpty(c) || n == 0) {
+            return new ArrayList<>();
+        } else if (c.size() <= n) {
+            return new ArrayList<>(c);
+        } else if (c instanceof List) {
+            return new ArrayList<>(((List<T>) c).subList(c.size() - n, c.size()));
+        } else {
+            final List<T> result = new ArrayList<>(N.min(n, c.size()));
+            final Iterator<? extends T> iter = c.iterator();
+            int offset = c.size() - n;
+
+            while (offset-- > 0) {
+                iter.next();
+            }
+
+            while (iter.hasNext()) {
+                result.add(iter.next());
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     * Returns a read-only <code>ImmutableCollection</code>.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the immutable collection<? extends t>
+     */
+    public static <T> ImmutableList<? extends T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
+        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+
+        if (N.isNullOrEmpty(c)) {
+            return ImmutableList.empty();
+        }
+
+        return ImmutableList.of(((List<T>) c).subList(fromIndex, toIndex));
+    }
+
+    /**
+     * Returns a read-only <code>ImmutableCollection</code>.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the immutable collection<? extends t>
+     */
+    public static <T> ImmutableCollection<? extends T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+
+        if (N.isNullOrEmpty(c)) {
+            return ImmutableList.empty();
+        }
+
+        if (c instanceof List) {
+            return slice((List<T>) c, fromIndex, toIndex);
+        }
+
+        return new Slice<>(c, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns a read-only <code>Seq</code>.
+     *
+     * @param <T> the generic type
+     * @param a the a
+     * @param fromIndex the from index
+     * @param toIndex the to index
+     * @return the immutable collection<? extends t>
+     */
+    public static <T> ImmutableList<? extends T> slice(final T[] a, final int fromIndex, final int toIndex) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a)) {
+            return ImmutableList.empty();
+        }
+
+        return slice(Array.asList(a), fromIndex, toIndex);
     }
 
     /**
@@ -17664,6 +17938,66 @@ class CommonUtil {
         }
 
         return Collections.lastIndexOfSubList(sourceList, targetSubList);
+    }
+
+    /**
+     * Find first index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findFirstIndex(a, predicate);
+    }
+
+    /**
+     * Find first index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findFirstIndex(c, predicate);
+    }
+
+    /**
+     * Find last index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findLastIndex(a, predicate);
+    }
+
+    /**
+     * Find last index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the optional int
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
+        return Iterables.findLastIndex(c, predicate);
     }
 
     /**

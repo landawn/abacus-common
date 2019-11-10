@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,52 @@ public final class Iterators {
         while (iter.hasNext()) {
             if (N.equals(iter.next(), objToFind)) {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param iter
+     * @param objToFind
+     * @return true, if successful
+     */
+    public static boolean containsAny(final Iterator<?> iter, final Set<?> objsToFind) {
+        if (iter == null || N.isNullOrEmpty(objsToFind)) {
+            return false;
+        }
+
+        while (iter.hasNext()) {
+            if (objsToFind.contains(iter.next())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param iter
+     * @param objToFind
+     * @return true, if successful
+     */
+    public static boolean containsAll(final Iterator<?> iter, final Collection<?> objsToFind) {
+        if (N.isNullOrEmpty(objsToFind)) {
+            return true;
+        } else if (iter == null) {
+            return false;
+        }
+
+        final Set<?> set = new HashSet<>(objsToFind);
+
+        while (iter.hasNext()) {
+            if (set.remove(iter.next())) {
+                if (set.size() == 0) {
+                    return true;
+                }
             }
         }
 

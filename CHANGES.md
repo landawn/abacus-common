@@ -1,3 +1,10 @@
+### 1.9.16
+
+* Rename `ClassUtil.getPropGetMethodList/getPropSetMethodList` to `ClassUtil.getPropGetMethods/getPropSetMethods`.
+
+* Improvements and bug fix.
+
+
 ### 1.9.15
 
 * Improvements and bug fix.

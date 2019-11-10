@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ import com.landawn.abacus.util.function.Supplier;
 
 // TODO: Auto-generated Javadoc
 /**
- * A BiMap (or "bidirectional map") is a map that preserves the uniqueness of its values as well as that of its keys. 
+ * A BiMap (or "bidirectional map") is a map that preserves the uniqueness of its values as well as that of its keys.
  * This constraint enables BiMaps to support an "inverse view", which is another BiMap containing the same entries as this BiMap but with reversed keys and values.
  *
  * @author Haiyang Li
@@ -513,7 +513,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public Set<K> keySet() {
+    public ImmutableSet<K> keySet() {
         return ImmutableSet.of(keyMap.keySet());
     }
 
@@ -523,7 +523,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public Set<V> values() {
+    public ImmutableSet<V> values() {
         return ImmutableSet.of(valueMap.keySet());
     }
 
@@ -589,7 +589,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Returns the inverse view of this BiMap, which maps each of this bimap's values to its associated key. 
+     * Returns the inverse view of this BiMap, which maps each of this bimap's values to its associated key.
      * The two BiMaps are backed by the same data; any changes to one will appear in the other.
      *
      * @return
