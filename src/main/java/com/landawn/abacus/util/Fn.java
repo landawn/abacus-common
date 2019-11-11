@@ -3383,6 +3383,19 @@ public abstract class Fn extends Comparators {
     /**
      *
      * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param collector
+     * @return
+     */
+    @Beta
+    public static <T, A, R> Collector<T, A, R> from(final java.util.stream.Collector<T, A, R> collector) {
+        return Collector.from(collector);
+    }
+
+    /**
+     *
+     * @param <T>
      * @param predicate
      * @return
      */
