@@ -451,6 +451,9 @@ public final class ClassUtil {
     /** The Constant methodTypeArgumentsPool. */
     private static final Map<Method, Class<?>[]> methodTypeArgumentsPool = new ObjectPool<>(POOL_SIZE * 2);
 
+    /** The Constant fieldParameterizedTypeNamePool. */
+    private static final Map<Field, String> fieldParameterizedTypeNamePool = new ObjectPool<>(POOL_SIZE * 2);
+
     /** The Constant methodParameterizedTypeNamePool. */
     private static final Map<Method, String> methodParameterizedTypeNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
@@ -919,6 +922,24 @@ public final class ClassUtil {
 
             cls = cls.getSuperclass();
         }
+    }
+
+    /**
+     * Gets the parameterized type name by method.
+     *
+     * @param field
+     * @return
+     */
+    public static String getParameterizedTypeNameByField(final Field field) {
+        String parameterizedTypeName = fieldParameterizedTypeNamePool.get(field);
+
+        if (parameterizedTypeName == null) {
+            parameterizedTypeName = formatParameterizedTypeName((field.getGenericType()).toString());
+
+            fieldParameterizedTypeNamePool.put(field, parameterizedTypeName);
+        }
+
+        return parameterizedTypeName;
     }
 
     /**
@@ -2812,27 +2833,16 @@ public final class ClassUtil {
         List<String> idPropNames = idPropNamesMap.get(targetClass);
 
         if (idPropNames == null) {
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
             final Set<String> idPropNameSet = N.newLinkedHashSet();
-            final Set<Field> allFields = N.newLinkedHashSet();
 
-            for (Class<?> superClass : ClassUtil.getAllSuperclasses(targetClass)) {
-                allFields.addAll(Array.asList(superClass.getDeclaredFields()));
-            }
-
-            allFields.addAll(Array.asList(targetClass.getDeclaredFields()));
-
-            for (Field field : allFields) {
-                if (ClassUtil.getPropGetMethod(targetClass, field.getName()) == null
-                        && ClassUtil.getPropGetMethod(targetClass, ClassUtil.formalizePropName(field.getName())) == null) {
-                    continue;
-                }
-
-                if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(ReadOnlyId.class)) {
-                    idPropNameSet.add(field.getName());
+            for (PropInfo propInfo : entityInfo.propInfoList) {
+                if (propInfo.isAnnotationPresent(Id.class) || propInfo.isAnnotationPresent(ReadOnlyId.class)) {
+                    idPropNameSet.add(propInfo.name);
                 } else {
                     try {
-                        if (field.isAnnotationPresent(javax.persistence.Id.class)) {
-                            idPropNameSet.add(field.getName());
+                        if (propInfo.isAnnotationPresent(javax.persistence.Id.class)) {
+                            idPropNameSet.add(propInfo.name);
                         }
                     } catch (Throwable e) {
                         // ignore
@@ -2847,11 +2857,11 @@ public final class ClassUtil {
             }
 
             if (N.isNullOrEmpty(idPropNameSet)) {
-                final Field idField = ClassUtil.getPropField(targetClass, "id");
+                final PropInfo idPropInfo = entityInfo.getPropInfo("id");
                 final Set<Class<?>> idType = N.<Class<?>> asSet(int.class, Integer.class, long.class, Long.class, String.class, Timestamp.class, UUID.class);
 
-                if (idField != null && idType.contains(idField.getType())) {
-                    idPropNameSet.add(idField.getName());
+                if (idPropInfo != null && idType.contains(idPropInfo.clazz)) {
+                    idPropNameSet.add(idPropInfo.name);
                 }
             }
 

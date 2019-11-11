@@ -34,7 +34,6 @@ import com.landawn.abacus.util.WD;
  * one {@code clause}, they should be composed in one {@code Criteria} condition.
  *
  * @author Haiyang Li
- * @see com.landawn.abacus.condition.Predicate
  * @since 0.8
  */
 public class Criteria extends AbstractCondition {

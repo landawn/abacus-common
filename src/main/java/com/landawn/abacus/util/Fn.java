@@ -3279,6 +3279,110 @@ public abstract class Fn extends Comparators {
     /**
      *
      * @param <T>
+     * @param supplier
+     * @return
+     */
+    @Beta
+    public static <T> Supplier<T> from(final java.util.function.Supplier<T> supplier) {
+        return () -> supplier.get();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param predicate
+     * @return
+     */
+    @Beta
+    public static <T> Predicate<T> from(final java.util.function.Predicate<T> predicate) {
+        return t -> predicate.test(t);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param predicate
+     * @return
+     */
+    @Beta
+    public static <T, U> BiPredicate<T, U> from(final java.util.function.BiPredicate<T, U> predicate) {
+        return (t, u) -> predicate.test(t, u);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param consumer
+     * @return
+     */
+    @Beta
+    public static <T> Consumer<T> from(final java.util.function.Consumer<T> consumer) {
+        return t -> consumer.accept(t);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param consumer
+     * @return
+     */
+    @Beta
+    public static <T, U> BiConsumer<T, U> from(final java.util.function.BiConsumer<T, U> consumer) {
+        return (t, u) -> consumer.accept(t, u);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param function
+     * @return
+     */
+    @Beta
+    public static <T, R> Function<T, R> from(final java.util.function.Function<T, R> function) {
+        return t -> function.apply(t);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param function
+     * @return
+     */
+    @Beta
+    public static <T, U, R> BiFunction<T, U, R> from(final java.util.function.BiFunction<T, U, R> function) {
+        return (t, u) -> function.apply(t, u);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param op
+     * @return
+     */
+    @Beta
+    public static <T> UnaryOperator<T> from(final java.util.function.UnaryOperator<T> op) {
+        return t -> op.apply(t);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param op
+     * @return
+     */
+    @Beta
+    public static <T> BinaryOperator<T> from(final java.util.function.BinaryOperator<T> op) {
+        return (t1, t2) -> op.apply(t1, t2);
+    }
+
+    /**
+     *
+     * @param <T>
      * @param predicate
      * @return
      */

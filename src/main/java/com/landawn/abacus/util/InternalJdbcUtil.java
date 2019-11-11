@@ -16,7 +16,6 @@
 
 package com.landawn.abacus.util;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -27,7 +26,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.DirtyMarker;
@@ -493,35 +491,26 @@ final class InternalJdbcUtil {
 
         if (result == null) {
             final Map<String, String> biMap = N.newBiMap(LinkedHashMap.class, LinkedHashMap.class);
-            final Set<Field> allFields = N.newHashSet();
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+            String columnName = null;
 
-            for (Class<?> superClass : ClassUtil.getAllSuperclasses(entityClass)) {
-                allFields.addAll(Array.asList(superClass.getDeclaredFields()));
-            }
-
-            allFields.addAll(Array.asList(entityClass.getDeclaredFields()));
-
-            for (Field field : allFields) {
-                if (ClassUtil.getPropGetMethod(entityClass, field.getName()) != null) {
-                    String columnName = null;
-
-                    if (field.isAnnotationPresent(Column.class)) {
-                        columnName = field.getAnnotation(Column.class).value();
-                    } else {
-                        try {
-                            if (field.isAnnotationPresent(javax.persistence.Column.class)) {
-                                columnName = field.getAnnotation(javax.persistence.Column.class).name();
-                            }
-                        } catch (Throwable e) {
-                            logger.warn("To support javax.persistence.Table/Column, please add dependence javax.persistence:persistence-api");
+            for (PropInfo propInfo : entityInfo.propInfoList) {
+                if (propInfo.isAnnotationPresent(Column.class)) {
+                    columnName = propInfo.getAnnotation(Column.class).value();
+                } else {
+                    try {
+                        if (propInfo.isAnnotationPresent(javax.persistence.Column.class)) {
+                            columnName = propInfo.getAnnotation(javax.persistence.Column.class).name();
                         }
+                    } catch (Throwable e) {
+                        logger.warn("To support javax.persistence.Table/Column, please add dependence javax.persistence:persistence-api");
                     }
+                }
 
-                    if (N.notNullOrEmpty(columnName)) {
-                        biMap.put(columnName, field.getName());
-                        biMap.put(columnName.toLowerCase(), field.getName());
-                        biMap.put(columnName.toUpperCase(), field.getName());
-                    }
+                if (N.notNullOrEmpty(columnName)) {
+                    biMap.put(columnName, propInfo.name);
+                    biMap.put(columnName.toLowerCase(), propInfo.name);
+                    biMap.put(columnName.toUpperCase(), propInfo.name);
                 }
             }
 
