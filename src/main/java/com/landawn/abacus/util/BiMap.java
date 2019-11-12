@@ -142,7 +142,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1) {
-        final BiMap<K, V> map = new BiMap<>();
+        final BiMap<K, V> map = new BiMap<>(1);
 
         map.put(k1, v1);
 
@@ -162,7 +162,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2) {
-        final BiMap<K, V> map = new BiMap<>();
+        final BiMap<K, V> map = new BiMap<>(2);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -185,7 +185,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
-        final BiMap<K, V> map = new BiMap<>();
+        final BiMap<K, V> map = new BiMap<>(3);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -212,7 +212,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4) {
-        final BiMap<K, V> map = new BiMap<>();
+        final BiMap<K, V> map = new BiMap<>(4);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -242,7 +242,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5) {
-        final BiMap<K, V> map = new BiMap<>();
+        final BiMap<K, V> map = new BiMap<>(5);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -275,7 +275,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6) {
-        final BiMap<K, V> map = new BiMap<>();
+        final BiMap<K, V> map = new BiMap<>(6);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -311,7 +311,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     public static <K, V, k extends K, v extends V> BiMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
-        final BiMap<K, V> map = new BiMap<>();
+        final BiMap<K, V> map = new BiMap<>(7);
 
         map.put(k1, v1);
         map.put(k2, v2);

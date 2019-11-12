@@ -106,7 +106,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1) {
-        final SetMultimap<K, E> map = new SetMultimap<>();
+        final SetMultimap<K, E> map = new SetMultimap<>(1);
 
         map.put(k1, v1);
 
@@ -124,7 +124,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2) {
-        final SetMultimap<K, E> map = new SetMultimap<>();
+        final SetMultimap<K, E> map = new SetMultimap<>(2);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -145,7 +145,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3) {
-        final SetMultimap<K, E> map = new SetMultimap<>();
+        final SetMultimap<K, E> map = new SetMultimap<>(3);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -169,7 +169,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4) {
-        final SetMultimap<K, E> map = new SetMultimap<>();
+        final SetMultimap<K, E> map = new SetMultimap<>(4);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -197,7 +197,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5) {
-        final SetMultimap<K, E> map = new SetMultimap<>();
+        final SetMultimap<K, E> map = new SetMultimap<>(5);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -228,7 +228,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6) {
-        final SetMultimap<K, E> map = new SetMultimap<>();
+        final SetMultimap<K, E> map = new SetMultimap<>(6);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -506,7 +506,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             }
         }
 
-        return new SetMultimap<K, E>((Map<K, Set<E>>) map, valueType);
+        return new SetMultimap<>((Map<K, Set<E>>) map, valueType);
     }
 
     /**
@@ -810,7 +810,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    /**
     //     * Returns a synchronized {@code SetMultimap} which shares the same internal {@code Map} with this {@code SetMultimap}.
     //     * That's to say the changes in one of the returned {@code SetMultimap} and this {@code SetMultimap} will impact another one.
-    //     * 
+    //     *
     //     * @see Collections#synchronizedMap(Map)
     //     */
     //    @Override

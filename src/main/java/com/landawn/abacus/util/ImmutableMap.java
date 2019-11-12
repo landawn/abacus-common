@@ -73,7 +73,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @return
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1) {
-        return new ImmutableMap<K, V>(Collections.singletonMap(k1, v1));
+        return new ImmutableMap<>(Collections.singletonMap(k1, v1));
     }
 
     /**
@@ -90,7 +90,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2) {
         final Map<k, v> map = N.asLinkedHashMap(k1, v1, k2, v2);
-        return new ImmutableMap<K, V>(map);
+        return new ImmutableMap<>(map);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      */
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
         final Map<k, v> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3);
-        return new ImmutableMap<K, V>(map);
+        return new ImmutableMap<>(map);
     }
 
     /**
@@ -131,7 +131,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4) {
         final Map<k, v> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4);
-        return new ImmutableMap<K, V>(map);
+        return new ImmutableMap<>(map);
     }
 
     /**
@@ -155,7 +155,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5) {
         final Map<k, v> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
-        return new ImmutableMap<K, V>(map);
+        return new ImmutableMap<>(map);
     }
 
     /**
@@ -181,7 +181,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6) {
         final Map<k, v> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6);
-        return new ImmutableMap<K, V>(map);
+        return new ImmutableMap<>(map);
     }
 
     /**
@@ -209,7 +209,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     public static <K, V, k extends K, v extends V> ImmutableMap<K, V> of(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
         final Map<k, v> map = N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7);
-        return new ImmutableMap<K, V>(map);
+        return new ImmutableMap<>(map);
     }
 
     /**
@@ -518,5 +518,33 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     @Override
     public String toString() {
         return map.toString();
+    }
+
+    public static <K, V> Builder<K, V> builder() {
+        return new Builder<>();
+    }
+
+    public static class Builder<K, V> {
+        private final Map<K, V> map;
+
+        Builder() {
+            map = new HashMap<>();
+        }
+
+        public Builder<K, V> put(final K key, final V value) {
+            map.put(key, value);
+
+            return this;
+        }
+
+        public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) {
+            map.putAll(m);
+
+            return this;
+        }
+
+        public ImmutableMap<K, V> build() {
+            return ImmutableMap.of(map);
+        }
     }
 }

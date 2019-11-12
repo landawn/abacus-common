@@ -242,19 +242,6 @@ public class Builder<T> {
 
     /**
      *
-     * @param <E>
-     * @param consumer
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> Builder<T> accept(final Try.Consumer<? super T, E> consumer) throws E {
-        consumer.accept(val);
-
-        return this;
-    }
-
-    /**
-     *
      * @param <R>
      * @param <E>
      * @param mapper
@@ -279,6 +266,31 @@ public class Builder<T> {
 
     /**
      *
+     * @param <E>
+     * @param consumer
+     * @return
+     * @throws E the e
+     */
+    public <E extends Exception> Builder<T> accept(final Try.Consumer<? super T, E> consumer) throws E {
+        consumer.accept(val);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param <E>
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public <R, E extends Exception> R apply(final Try.Function<? super T, R, E> func) throws E {
+        return func.apply(val);
+    }
+
+    /**
+     *
      * @return
      */
     public Stream<T> stream() {
@@ -288,7 +300,7 @@ public class Builder<T> {
     //    /**
     //    * Returns an empty <code>Nullable</code> if {@code val()} is {@code null} while {@code targetType} is primitive or can't be assigned to {@code targetType}.
     //    * Please be aware that {@code null} can be assigned to any {@code Object} type except primitive types: {@code boolean/char/byte/short/int/long/double}.
-    //    * 
+    //    *
     //    * @param val
     //    * @param targetType
     //    * @return
@@ -303,7 +315,7 @@ public class Builder<T> {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param b
     //     * @param actionForTrue do nothing if it's {@code null} even {@code b} is true.
     //     * @param actionForFalse do nothing if it's {@code null} even {@code b} is false.
@@ -324,7 +336,7 @@ public class Builder<T> {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param predicate
     //     * @param actionForTrue do nothing if it's {@code null} even {@code b} is true.
     //     * @param actionForFalse do nothing if it's {@code null} even {@code b} is false.
@@ -347,7 +359,7 @@ public class Builder<T> {
     //
     //    /**
     //     * Returns an empty {@code Optional} if {@code cmd} is executed successfully, otherwise a {@code Optional} with the exception threw.
-    //     * 
+    //     *
     //     * @param cmd
     //     * @return
     //     */
@@ -362,7 +374,7 @@ public class Builder<T> {
     //
     //    /**
     //     * Returns a {@code Pair} with {@code left=returnedValue, right=null} if {@code cmd} is executed successfully, otherwise a {@code Pair} with {@code left=null, right=exception}.
-    //     * 
+    //     *
     //     * @param cmd
     //     * @return
     //     */
@@ -376,7 +388,7 @@ public class Builder<T> {
     //
     //    /**
     //     * Returns a {@code Nullable} with the value returned by {@code action} or an empty {@code Nullable} if exception happens.
-    //     * 
+    //     *
     //     * @param cmd
     //     * @return
     //     */
@@ -2486,7 +2498,7 @@ public class Builder<T> {
         }
 
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param e
         //         * @return return the specified {@code output}
@@ -2497,7 +2509,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param e
         //         * @return return the specified {@code output}
@@ -2512,7 +2524,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param e
         //         * @return return the specified {@code output}
@@ -2527,7 +2539,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param e
         //         * @return return the specified {@code output}
@@ -2542,7 +2554,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param key
         //         * @param value
@@ -2555,7 +2567,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param entryToAdd
         //         * @return
@@ -2567,7 +2579,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param entriesToAdd
         //         * @return
@@ -2583,7 +2595,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param key
         //         * @param value
@@ -2599,7 +2611,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param entryToAdd
         //         * @return
@@ -2613,7 +2625,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param key
         //         * @param oldValue
@@ -2635,7 +2647,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param key
         //         * @param oldValue
@@ -2657,7 +2669,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param key
         //         * @return
@@ -2673,7 +2685,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param key
         //         * @return
@@ -2692,7 +2704,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param key
         //         * @param value
@@ -2712,7 +2724,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param keys
         //         * @return
@@ -2731,7 +2743,7 @@ public class Builder<T> {
         //        }
         //
         //        /**
-        //         * 
+        //         *
         //         * @param output
         //         * @param entriesToRemove
         //         * @return

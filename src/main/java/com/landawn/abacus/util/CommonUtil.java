@@ -4280,7 +4280,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1) {
-        final Map<K, V> map = new HashMap<>();
+        final Map<K, V> map = new HashMap<>(1);
         map.put(k1, v1);
         return map;
     }
@@ -4298,7 +4298,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2) {
-        final Map<K, V> map = new HashMap<>();
+        final Map<K, V> map = new HashMap<>(2);
         map.put(k1, v1);
         map.put(k2, v2);
         return map;
@@ -4319,7 +4319,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
-        final Map<K, V> map = new HashMap<>();
+        final Map<K, V> map = new HashMap<>(3);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4344,7 +4344,7 @@ class CommonUtil {
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4) {
-        final Map<K, V> map = new HashMap<>();
+        final Map<K, V> map = new HashMap<>(4);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4372,7 +4372,7 @@ class CommonUtil {
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5) {
-        final Map<K, V> map = new HashMap<>();
+        final Map<K, V> map = new HashMap<>(5);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4403,7 +4403,7 @@ class CommonUtil {
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6) {
-        final Map<K, V> map = new HashMap<>();
+        final Map<K, V> map = new HashMap<>(6);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4437,7 +4437,7 @@ class CommonUtil {
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
-        final Map<K, V> map = new HashMap<>();
+        final Map<K, V> map = new HashMap<>(7);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4492,7 +4492,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1) {
-        final Map<K, V> map = new LinkedHashMap<>();
+        final Map<K, V> map = new LinkedHashMap<>(1);
         map.put(k1, v1);
         return map;
     }
@@ -4511,7 +4511,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2) {
-        final Map<K, V> map = new LinkedHashMap<>();
+        final Map<K, V> map = new LinkedHashMap<>(2);
         map.put(k1, v1);
         map.put(k2, v2);
         return map;
@@ -4533,7 +4533,7 @@ class CommonUtil {
      * @return
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
-        final Map<K, V> map = new LinkedHashMap<>();
+        final Map<K, V> map = new LinkedHashMap<>(3);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4559,7 +4559,7 @@ class CommonUtil {
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4) {
-        final Map<K, V> map = new LinkedHashMap<>();
+        final Map<K, V> map = new LinkedHashMap<>(4);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4588,7 +4588,7 @@ class CommonUtil {
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5) {
-        final Map<K, V> map = new LinkedHashMap<>();
+        final Map<K, V> map = new LinkedHashMap<>(5);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4620,7 +4620,7 @@ class CommonUtil {
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6) {
-        final Map<K, V> map = new LinkedHashMap<>();
+        final Map<K, V> map = new LinkedHashMap<>(6);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
@@ -4655,7 +4655,7 @@ class CommonUtil {
      */
     public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
             final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
-        final Map<K, V> map = new LinkedHashMap<>();
+        final Map<K, V> map = new LinkedHashMap<>(7);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);

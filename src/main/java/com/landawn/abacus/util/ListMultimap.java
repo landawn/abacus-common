@@ -107,7 +107,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     public static <K, E> ListMultimap<K, E> of(final K k1, final E v1) {
-        final ListMultimap<K, E> map = new ListMultimap<>();
+        final ListMultimap<K, E> map = new ListMultimap<>(1);
 
         map.put(k1, v1);
 
@@ -125,7 +125,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     public static <K, E> ListMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2) {
-        final ListMultimap<K, E> map = new ListMultimap<>();
+        final ListMultimap<K, E> map = new ListMultimap<>(2);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -146,7 +146,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     public static <K, E> ListMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3) {
-        final ListMultimap<K, E> map = new ListMultimap<>();
+        final ListMultimap<K, E> map = new ListMultimap<>(3);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -170,7 +170,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     public static <K, E> ListMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4) {
-        final ListMultimap<K, E> map = new ListMultimap<>();
+        final ListMultimap<K, E> map = new ListMultimap<>(4);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -198,7 +198,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     public static <K, E> ListMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5) {
-        final ListMultimap<K, E> map = new ListMultimap<>();
+        final ListMultimap<K, E> map = new ListMultimap<>(5);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -229,7 +229,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     public static <K, E> ListMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6) {
-        final ListMultimap<K, E> map = new ListMultimap<>();
+        final ListMultimap<K, E> map = new ListMultimap<>(6);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -263,7 +263,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     public static <K, E> ListMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6, final K k7, final E v7) {
-        final ListMultimap<K, E> map = new ListMultimap<>();
+        final ListMultimap<K, E> map = new ListMultimap<>(7);
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -507,7 +507,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             }
         }
 
-        return new ListMultimap<K, E>((Map<K, List<E>>) map, valueType);
+        return new ListMultimap<>((Map<K, List<E>>) map, valueType);
     }
 
     /**
@@ -811,7 +811,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     //    /**
     //     * Returns a synchronized {@code ListMultimap} which shares the same internal {@code Map} with this {@code ListMultimap}.
     //     * That's to say the changes in one of the returned {@code ListMultimap} and this {@code ListMultimap} will impact another one.
-    //     * 
+    //     *
     //     * @see Collections#synchronizedMap(Map)
     //     */
     //    @Override
