@@ -271,7 +271,7 @@ public class AsyncExecutor {
      * @param futureTask
      * @return
      */
-    private <T> ContinuableFuture<T> execute(final FutureTask<T> futureTask) {
+    <T> ContinuableFuture<T> execute(final FutureTask<T> futureTask) {
         final Executor executor = getExecutor();
 
         executor.execute(futureTask);
@@ -284,7 +284,7 @@ public class AsyncExecutor {
      *
      * @return
      */
-    private Executor getExecutor() {
+    Executor getExecutor() {
         if (executor == null) {
             synchronized (this) {
                 if (executor == null) {

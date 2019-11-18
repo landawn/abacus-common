@@ -15,6 +15,7 @@
 package com.landawn.abacus.annotation;
 
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
@@ -26,7 +27,7 @@ import java.lang.annotation.Target;
  * The Interface Column.
  */
 @Documented
-@Target(value = { FIELD })
+@Target(value = { FIELD, METHOD })
 @Retention(RUNTIME)
 public @interface Column {
 

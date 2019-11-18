@@ -142,7 +142,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see N#asyncExecute(Callable)
      */
     @Deprecated
-    public static <T, E extends Exception> ContinuableFuture<T> call(final Try.Callable<T, E> action) {
+    public static <T> ContinuableFuture<T> call(final Callable<T> action) {
         return call(action, DEFAULT_EXECUTOR);
     }
 
@@ -154,7 +154,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param executor
      * @return
      */
-    public static <T, E extends Exception> ContinuableFuture<T> call(final Try.Callable<T, E> action, final Executor executor) {
+    public static <T> ContinuableFuture<T> call(final Callable<T> action, final Executor executor) {
         final FutureTask<T> futureTask = new FutureTask<>(new Callable<T>() {
             @Override
             public T call() throws Exception {
@@ -782,7 +782,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action
      * @return
      */
-    public <R, E extends Exception> ContinuableFuture<R> thenCall(final Try.Callable<R, E> action) {
+    public <R> ContinuableFuture<R> thenCall(final Callable<R> action) {
         return execute(new Callable<R>() {
             @Override
             public R call() throws Exception {
@@ -920,7 +920,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action
      * @return
      */
-    public <R, E extends Exception> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<?> other, final Try.Callable<R, E> action) {
+    public <R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<?> other, final Callable<R> action) {
         return execute(new Callable<R>() {
             @Override
             public R call() throws Exception {
@@ -1067,7 +1067,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action
      * @return
      */
-    public <R, E extends Exception> ContinuableFuture<R> callAfterEither(final ContinuableFuture<?> other, final Try.Callable<R, RuntimeException> action) {
+    public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<?> other, final Callable<R> action) {
         return execute(new Callable<R>() {
             @Override
             public R call() throws Exception {

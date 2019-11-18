@@ -38,6 +38,7 @@ import java.util.Queue;
 import java.util.RandomAccess;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -18431,6 +18432,14 @@ public final class N extends CommonUtil {
                 return retry.call(cmd);
             }
         });
+    }
+
+    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command, final Executor executor) {
+        return ContinuableFuture.run(command, executor);
+    }
+
+    public static <T> ContinuableFuture<T> asyncExecute(final Callable<T> command, final Executor executor) {
+        return ContinuableFuture.call(command, executor);
     }
 
     /**
