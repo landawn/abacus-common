@@ -466,11 +466,11 @@ public final class ClassUtil {
     }
 
     /** The Constant nonGetMethodName. */
-    private static final Set<String> nonGetMethodName = N.newHashSet(16);
+    private static final Set<String> nonGetSetMethodName = N.newHashSet(16);
 
     static {
-        nonGetMethodName.add("getClass");
-        nonGetMethodName.add("hashCode");
+        nonGetSetMethodName.add("getClass");
+        nonGetSetMethodName.add("hashCode");
     }
 
     /** The Constant packagePool. */
@@ -648,11 +648,7 @@ public final class ClassUtil {
                 } else {
                     propMethodMap.put(propName, method);
                 }
-            } else if (method.getName().startsWith(SET)) {
-                if ((method.getParameterTypes().length != 1)) {
-                    throw new IllegalArgumentException("Invalid set method: " + method.getName());
-                }
-
+            } else if (isSetMethod(method)) {
                 Map<String, Method> propMethodMap = entityPropSetMethodPool.get(cls);
 
                 if (propMethodMap == null) {
@@ -1802,6 +1798,10 @@ public final class ClassUtil {
                     field = FIELD_MASK;
                 }
 
+                //    } else {
+                //        ClassUtil.setAccessibleQuietly(field, true);
+                //    }
+
                 propFieldMap.put(propName, field);
             }
         }
@@ -1963,10 +1963,10 @@ public final class ClassUtil {
                                 break;
                             }
 
-                            setMethod = getSetMethod(clazz, method);
+                            setMethod = getSetMethod(method);
 
                             if (setMethod != null) {
-                                ClassUtil.setAccessibleQuietly(field, true);
+                                // ClassUtil.setAccessibleQuietly(field, true);
                                 ClassUtil.setAccessibleQuietly(method, true);
                                 ClassUtil.setAccessibleQuietly(setMethod, true);
 
@@ -1975,10 +1975,8 @@ public final class ClassUtil {
                                 propSetMethodMap.put(propName, setMethod);
 
                                 break;
-                            }
-
-                            if (isJAXBGetMethod(instance, method)) {
-                                ClassUtil.setAccessibleQuietly(field, true);
+                            } else if (isJAXBGetMethod(instance, method)) {
+                                // ClassUtil.setAccessibleQuietly(field, true);
                                 ClassUtil.setAccessibleQuietly(method, true);
                                 ClassUtil.setAccessibleQuietly(setMethod, true);
 
@@ -2011,7 +2009,7 @@ public final class ClassUtil {
                             continue;
                         }
 
-                        setMethod = getSetMethod(clazz, method);
+                        setMethod = getSetMethod(method);
 
                         if (setMethod != null && !propGetMethodMap.containsValue(method)) {
                             ClassUtil.setAccessibleQuietly(method, true);
@@ -2111,7 +2109,7 @@ public final class ClassUtil {
         String mn = method.getName();
 
         return (mn.startsWith(GET) || mn.startsWith(IS) || mn.startsWith(HAS) || getDeclaredField(method.getDeclaringClass(), mn) != null)
-                && (N.isNullOrEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetMethodName.contains(mn);
+                && (N.isNullOrEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
     }
 
     /**
@@ -2130,8 +2128,13 @@ public final class ClassUtil {
             return false;
         }
 
-        final String fieldName = field.getName();
         final String methodName = method.getName();
+
+        if (getDeclaredField(method.getDeclaringClass(), methodName) != null) {
+            return true;
+        }
+
+        final String fieldName = field.getName();
         final String propName = methodName
                 .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
 
@@ -2154,24 +2157,37 @@ public final class ClassUtil {
         }
     }
 
+    private static boolean isSetMethod(final Method method) {
+        String mn = method.getName();
+
+        return (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null) && N.len(method.getParameterTypes()) == 1
+                && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(method.getDeclaringClass()))
+                && !nonGetSetMethodName.contains(mn);
+    }
+
     /**
      * Gets the sets the method.
      *
-     * @param clazz
+     * @param declaringClass
      * @param getMethod
      * @return
      */
-    private static Method getSetMethod(final Class<?> clazz, final Method getMethod) {
+    private static Method getSetMethod(final Method getMethod) {
+        final Class<?> declaringClass = getMethod.getDeclaringClass();
         final String getMethodName = getMethod.getName();
 
         final String setMethodName = SET
                 + (getMethodName.substring(getMethodName.startsWith(IS) ? 2 : ((getMethodName.startsWith(HAS) || getMethodName.startsWith(GET)) ? 3 : 0)));
 
-        Method setMethod = internalGetDeclaredMethod(clazz, setMethodName, getMethod.getReturnType());
+        Method setMethod = internalGetDeclaredMethod(declaringClass, setMethodName, getMethod.getReturnType());
 
-        return ((setMethod != null) && (void.class.equals(setMethod.getReturnType()) || setMethod.getDeclaringClass().equals(setMethod.getReturnType())))
-                ? setMethod
-                : null;
+        if (setMethod == null && getDeclaredField(declaringClass, getMethodName) != null) {
+            setMethod = internalGetDeclaredMethod(declaringClass, getMethodName, getMethod.getReturnType());
+        }
+
+        return ((setMethod != null)
+                && (void.class.equals(setMethod.getReturnType()) || setMethod.getReturnType().isAssignableFrom(setMethod.getDeclaringClass()))) ? setMethod
+                        : null;
     }
 
     /**

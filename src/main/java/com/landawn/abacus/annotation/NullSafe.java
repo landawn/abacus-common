@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.CONSTRUCTOR, ElementType.METHOD })
+@Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER })
 /**
  * 
  * @since 1.2

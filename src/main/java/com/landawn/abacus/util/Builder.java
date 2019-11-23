@@ -14,12 +14,21 @@
 
 package com.landawn.abacus.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import com.landawn.abacus.DataSet;
+import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Try.Predicate;
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -217,6 +226,48 @@ public class Builder<T> {
         return new DataSetBuilder(val);
     }
 
+    @SuppressWarnings("rawtypes")
+    private static final Map<Class<?>, Function<Object, Builder>> creatorMap = new HashMap<>();
+
+    static {
+        initCreatorMap();
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static void initCreatorMap() {
+        creatorMap.put(BooleanList.class, val -> Builder.of((BooleanList) val));
+        creatorMap.put(CharList.class, val -> Builder.of((CharList) val));
+        creatorMap.put(ByteList.class, val -> Builder.of((ByteList) val));
+        creatorMap.put(ShortList.class, val -> Builder.of((ShortList) val));
+        creatorMap.put(IntList.class, val -> Builder.of((IntList) val));
+        creatorMap.put(LongList.class, val -> Builder.of((LongList) val));
+        creatorMap.put(FloatList.class, val -> Builder.of((FloatList) val));
+        creatorMap.put(DoubleList.class, val -> Builder.of((DoubleList) val));
+
+        creatorMap.put(List.class, val -> Builder.of((List) val));
+        creatorMap.put(ArrayList.class, val -> Builder.of((List) val));
+        creatorMap.put(LinkedList.class, val -> Builder.of((List) val));
+
+        creatorMap.put(Set.class, val -> Builder.of((Collection) val));
+        creatorMap.put(HashSet.class, val -> Builder.of((Collection) val));
+        creatorMap.put(LinkedHashSet.class, val -> Builder.of((Collection) val));
+
+        creatorMap.put(Map.class, val -> Builder.of((Map) val));
+        creatorMap.put(HashMap.class, val -> Builder.of((Map) val));
+        creatorMap.put(LinkedHashMap.class, val -> Builder.of((Map) val));
+        creatorMap.put(TreeMap.class, val -> Builder.of((Map) val));
+
+        creatorMap.put(Multiset.class, val -> Builder.of((Multiset) val));
+        creatorMap.put(LongMultiset.class, val -> Builder.of((LongMultiset) val));
+
+        creatorMap.put(Multimap.class, val -> Builder.of((Multimap) val));
+        creatorMap.put(ListMultimap.class, val -> Builder.of((Multimap) val));
+        creatorMap.put(SetMultimap.class, val -> Builder.of((Multimap) val));
+
+        creatorMap.put(DataSet.class, val -> Builder.of((DataSet) val));
+        creatorMap.put(RowDataSet.class, val -> Builder.of((DataSet) val));
+    }
+
     /**
      *
      * @param <T>
@@ -224,8 +275,33 @@ public class Builder<T> {
      * @return
      * @throws NullPointerException if the specified {@code val} is {@code null}.
      */
+    @SuppressWarnings("rawtypes")
     public static final <T> Builder<T> of(T val) {
-        return new Builder<>(val);
+        N.checkArgNotNull(val);
+
+        final Function<Object, Builder> func = creatorMap.get(val.getClass());
+
+        if (func != null) {
+            return func.apply(val);
+        }
+
+        Builder result = null;
+
+        if (val instanceof List) {
+            result = of((List) val);
+        } else if (val instanceof Collection) {
+            result = of((Collection) val);
+        } else if (val instanceof Map) {
+            result = of((Map) val);
+        } else if (val instanceof Multimap) {
+            result = of((Multimap) val);
+        } else if (val instanceof DataSet) {
+            result = of((Multiset) val);
+        } else {
+            result = new Builder<>(val);
+        }
+
+        return result;
     }
 
     //    public static <T> Builder<T> get(final Supplier<T> supplier) {
