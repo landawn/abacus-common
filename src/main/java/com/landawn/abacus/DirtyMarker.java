@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Internal;
 
 // TODO: Auto-generated Javadoc
@@ -30,6 +31,7 @@ import com.landawn.abacus.annotation.Internal;
  * @since 0.8
  */
 @JsonIgnoreProperties({ "dirty" })
+@AccessFieldByMethod
 public interface DirtyMarker {
 
     /**
@@ -41,7 +43,7 @@ public interface DirtyMarker {
 
     /**
      * Returns the mapping record version when it's loaded.
-     * 
+     *
      * @return long
      */
     @XmlTransient
@@ -49,7 +51,7 @@ public interface DirtyMarker {
 
     /**
      * Check if there is any property modified in this entity.
-     * 
+     *
      * @return boolean
      */
     @XmlTransient
@@ -99,8 +101,8 @@ public interface DirtyMarker {
 
     /**
      * Returns the names of the signed properties. It's for the internal design and implementation in Abacus, should not be used externally.
-     * 
-     * 
+     *
+     *
      * @return Collection<String> Must not modify the returned collection
      */
     @XmlTransient
@@ -110,7 +112,7 @@ public interface DirtyMarker {
 
     /**
      * Returns the names of updated properties. It's for the internal design and implementation in Abacus, should not be used externally.
-     * 
+     *
      * @return Collection<String>  Must not modify the returned collection
      */
     @XmlTransient

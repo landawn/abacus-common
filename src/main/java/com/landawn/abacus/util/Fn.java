@@ -1565,6 +1565,22 @@ public abstract class Fn extends Comparators {
     }
 
     /**
+     * Checks if is null.
+     *
+     * @param <T>
+     * @param valueExtractor
+     * @return
+     */
+    public static <T> Predicate<T> isNull(final Function<T, ?> valueExtractor) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T t) {
+                return valueExtractor.apply(t) == null;
+            }
+        };
+    }
+
+    /**
      * Checks if is null or empty.
      *
      * @param <T>
@@ -1572,6 +1588,21 @@ public abstract class Fn extends Comparators {
      */
     public static <T extends CharSequence> Predicate<T> isNullOrEmpty() {
         return (Predicate<T>) IS_NULL_OR_EMPTY;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param valueExtractor
+     * @return
+     */
+    public static <T> Predicate<T> isNullOrEmpty(final Function<T, ? extends CharSequence> valueExtractor) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T t) {
+                return N.isNullOrEmpty(valueExtractor.apply(t));
+            }
+        };
     }
 
     /**
@@ -1587,10 +1618,41 @@ public abstract class Fn extends Comparators {
     /**
      *
      * @param <T>
+     * @param valueExtractor
+     * @return
+     */
+    public static <T> Predicate<T> isNullOrEmptyOrBlank(final Function<T, ? extends CharSequence> valueExtractor) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T t) {
+                return N.isNullOrEmptyOrBlank(valueExtractor.apply(t));
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <T>
      * @return
      */
     public static <T> Predicate<T> notNull() {
         return NOT_NULL;
+    }
+
+    /**
+     * Not null
+     *
+     * @param <T>
+     * @param valueExtractor
+     * @return
+     */
+    public static <T> Predicate<T> notNull(final Function<T, ?> valueExtractor) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T t) {
+                return valueExtractor.apply(t) != null;
+            }
+        };
     }
 
     /**
@@ -1604,6 +1666,21 @@ public abstract class Fn extends Comparators {
     }
 
     /**
+     *
+     * @param <T>
+     * @param valueExtractor
+     * @return
+     */
+    public static <T> Predicate<T> notNullOrEmpty(final Function<T, ? extends CharSequence> valueExtractor) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T t) {
+                return N.notNullOrEmpty(valueExtractor.apply(t));
+            }
+        };
+    }
+
+    /**
      * Not null or empty or blank.
      *
      * @param <T>
@@ -1611,6 +1688,21 @@ public abstract class Fn extends Comparators {
      */
     public static <T extends CharSequence> Predicate<T> notNullOrEmptyOrBlank() {
         return (Predicate<T>) NOT_NULL_OR_EMPTY_OR_BLANK;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param valueExtractor
+     * @return
+     */
+    public static <T> Predicate<T> notNullOrEmptyOrBlank(final Function<T, ? extends CharSequence> valueExtractor) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T t) {
+                return N.notNullOrEmptyOrBlank(valueExtractor.apply(t));
+            }
+        };
     }
 
     /**

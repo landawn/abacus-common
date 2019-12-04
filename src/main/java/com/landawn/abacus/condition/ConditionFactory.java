@@ -24,8 +24,8 @@ import com.landawn.abacus.EntityId;
 import com.landawn.abacus.condition.Expression.Expr;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
-import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.SQLBuilder;
 import com.landawn.abacus.util.SortDirection;
 import com.landawn.abacus.util.WD;
 
@@ -223,7 +223,7 @@ public class ConditionFactory {
      * @return
      */
     public static Or eqOr(final Object entity) {
-        return eqOr(entity, ClassUtil.getPropNameList(entity.getClass()));
+        return eqOr(entity, SQLBuilder.getSelectPropNamesByClass(entity.getClass(), false, null));
     }
 
     /**
@@ -295,7 +295,7 @@ public class ConditionFactory {
      * @return
      */
     public static And eqAnd(final Object entity) {
-        return eqAnd(entity, ClassUtil.getPropNameList(entity.getClass()));
+        return eqAnd(entity, SQLBuilder.getSelectPropNamesByClass(entity.getClass(), false, null));
     }
 
     /**
@@ -357,7 +357,7 @@ public class ConditionFactory {
     public static Or eqAndOr(final Collection<?> entities) {
         N.checkArgNotNullOrEmpty(entities, "entities");
 
-        return eqAndOr(entities, ClassUtil.getPropNameList(N.firstNonNull(entities).orNull().getClass()));
+        return eqAndOr(entities, SQLBuilder.getSelectPropNamesByClass(N.firstNonNull(entities).orNull().getClass(), false, null));
     }
 
     /**

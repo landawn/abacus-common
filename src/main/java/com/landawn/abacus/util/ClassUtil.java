@@ -93,6 +93,7 @@ import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.ReadOnlyId;
+import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.NameUtil;
 import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -686,6 +687,15 @@ public final class ClassUtil {
         }
 
         return b;
+    }
+
+    /**
+     *
+     * @param cls
+     * @return
+     */
+    public static boolean isDirtyMarker(final Class<?> cls) {
+        return DirtyMarkerUtil.isDirtyMarker(cls);
     }
 
     /**
