@@ -1,3 +1,8 @@
+### 1.9.20
+
+* Improvements and bug fix.
+
+
 ### 1.9.19
 
 * Add `AccessFieldByMethod`.
