@@ -386,8 +386,8 @@ final class InternalJdbcUtil {
             };
         } else if (ClassUtil.isEntity(targetClass)) {
             return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
-                private boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(targetClass);
-                private EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+                private final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(targetClass);
+                private final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
                 private volatile String[] columnLabels = null;
                 private volatile PropInfo[] propInfos;
                 private volatile Type<?>[] columnTypes = null;
@@ -461,7 +461,7 @@ final class InternalJdbcUtil {
             };
         } else {
             return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
-                private Type<? extends T> targetType = N.typeOf(targetClass);
+                private final Type<? extends T> targetType = N.typeOf(targetClass);
                 private int columnCount = 0;
 
                 @Override

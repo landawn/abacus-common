@@ -559,9 +559,7 @@ class CommonUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(final String typeName) {
-        if (typeName == null) {
-            return null;
-        }
+        N.checkArgNotNull(typeName, "typeName");
 
         Type<?> type = nameTypePool.get(typeName);
 
@@ -582,9 +580,7 @@ class CommonUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(final Class<?> cls) {
-        if (cls == null) {
-            return null;
-        }
+        N.checkArgNotNull(cls, "cls");
 
         Type<?> type = clsTypePool.get(cls);
 
@@ -4466,21 +4462,6 @@ class CommonUtil {
     }
 
     /**
-     *
-     * @param a pairs of property name and value or a Java Entity Object what
-     *            allows access to properties using getter and setter methods.
-     * @return
-     */
-    @SafeVarargs
-    public static Map<String, Object> asProps(final Object... a) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return new LinkedHashMap<>();
-        }
-
-        return newMap(new LinkedHashMap<String, Object>(CommonUtil.initHashCapacity(a.length / 2)), a);
-    }
-
-    /**
      * As linked hash map.
      *
      * @param <K> the key type
@@ -4681,6 +4662,21 @@ class CommonUtil {
         }
 
         return newMap(new LinkedHashMap<K, V>(CommonUtil.initHashCapacity(a.length / 2)), a);
+    }
+
+    /**
+     *
+     * @param a pairs of property name and value or a Java Entity Object what
+     *            allows access to properties using getter and setter methods.
+     * @return
+     */
+    @SafeVarargs
+    public static Map<String, Object> asProps(final Object... a) {
+        if (CommonUtil.isNullOrEmpty(a)) {
+            return new LinkedHashMap<>();
+        }
+    
+        return newMap(new LinkedHashMap<String, Object>(CommonUtil.initHashCapacity(a.length / 2)), a);
     }
 
     /**

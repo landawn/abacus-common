@@ -29,6 +29,9 @@ import java.util.TreeMap;
 
 import com.landawn.abacus.EntityId;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
@@ -75,11 +78,11 @@ public class Seid implements EntityId, Cloneable {
     @Deprecated
     @Internal
     public Seid(String entityName) {
-        if (N.isNullOrEmpty(entityName)) {
-            throw new IllegalArgumentException("Entity name can't be null or empty");
-        }
+        //    if (N.isNullOrEmpty(entityName)) {
+        //        throw new IllegalArgumentException("Entity name can't be null or empty");
+        //    }
 
-        this.entityName = entityName;
+        this.entityName = entityName == null ? N.EMPTY_STRING : entityName;
     }
 
     /**
@@ -176,6 +179,44 @@ public class Seid implements EntityId, Cloneable {
      */
     public static Seid from(Map<String, Object> nameValues) {
         return new Seid(nameValues);
+    }
+
+    /**
+     *
+     * @param entity
+     * @return
+     */
+    public static Seid from(Object entity) {
+        @SuppressWarnings("deprecation")
+        final List<String> idPropNames = ClassUtil.getIdFieldNames(entity.getClass());
+
+        if (N.isNullOrEmpty(idPropNames)) {
+            throw new IllegalArgumentException("No id property defined in class: " + ClassUtil.getCanonicalClassName(entity.getClass()));
+        }
+
+        return from(entity, idPropNames);
+    }
+
+    /**
+     *
+     * @param entity
+     * @param idPropNames
+     * @return
+     */
+    public static Seid from(Object entity, Collection<String> idPropNames) {
+        if (N.isNullOrEmpty(idPropNames)) {
+            throw new IllegalArgumentException("Id property names can't be null or empty");
+        }
+
+        final Class<?> cls = entity.getClass();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final Seid seid = Seid.of(ClassUtil.getSimpleClassName(cls));
+
+        for (String idPropName : idPropNames) {
+            seid.set(idPropName, entityInfo.getPropInfo(idPropName).getPropValue(entity));
+        }
+
+        return seid;
     }
 
     /**

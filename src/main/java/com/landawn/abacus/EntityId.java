@@ -14,6 +14,7 @@
 
 package com.landawn.abacus;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,7 +40,7 @@ public interface EntityId {
     }
 
     /**
-     * 
+     *
      * @param entityName
      * @param propName
      * @param propValue
@@ -63,7 +64,7 @@ public interface EntityId {
     }
 
     /**
-     * 
+     *
      * @param entityName
      * @param propName1
      * @param propValue1
@@ -91,7 +92,7 @@ public interface EntityId {
     }
 
     /**
-     * 
+     *
      * @param entityName
      * @param propName1
      * @param propValue1
@@ -107,7 +108,7 @@ public interface EntityId {
         return Seid.of(entityName).set(propName1, propValue1).set(propName2, propValue2).set(propName3, propValue3);
     }
 
-    /** 
+    /**
      *
      * @param nameValues
      * @return
@@ -116,7 +117,7 @@ public interface EntityId {
         return Seid.from(nameValues);
     }
 
-    /** 
+    /**
      *
      * @param entityName
      * @param nameValues
@@ -130,7 +131,26 @@ public interface EntityId {
     }
 
     /**
-     * 
+     *
+     * @param entity
+     * @return
+     */
+    public static EntityId from(Object entity) {
+        return Seid.from(entity);
+    }
+
+    /**
+     *
+     * @param entity
+     * @param idPropNames
+     * @return
+     */
+    public static EntityId from(Object entity, Collection<String> idPropNames) {
+        return Seid.from(entity, idPropNames);
+    }
+
+    /**
+     *
      * @return String
      */
     String entityName();
@@ -144,14 +164,14 @@ public interface EntityId {
     <T> T get(String propName);
 
     /**
-     * 
+     *
      * @param propName
      * @return
      */
     int getInt(String propName);
 
     /**
-     * 
+     *
      * @param propName
      * @return
      */
@@ -167,14 +187,14 @@ public interface EntityId {
     <T> T get(Class<T> clazz, String propName);
 
     /**
-     * 
+     *
      * @param propName
      * @return
      */
     boolean containsKey(String propName);
 
     /**
-     * 
+     *
      * @return Set<String>
      */
     Set<String> keySet();
@@ -192,7 +212,7 @@ public interface EntityId {
     int size();
 
     /**
-     * 
+     *
      * @return
      */
     boolean isEmpty();

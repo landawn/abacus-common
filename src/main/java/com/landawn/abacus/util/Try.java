@@ -151,11 +151,11 @@ public final class Try<T extends AutoCloseable> {
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param cmd
     //     * @throws RuntimeException if some error happens
     //     */
-    //    public static <U> void run(final U init, final Try.Consumer<? super U, ? extends Exception> cmd) {
+    //    public static <U> void run(final U init, final Try.Consumer<? super U, ? extends Throwable> cmd) {
     //        try {
     //            cmd.accept(init);
     //        } catch (Exception e) {
@@ -163,7 +163,7 @@ public final class Try<T extends AutoCloseable> {
     //        }
     //    }
     //
-    //    public static <U> void run(final U init, final Try.Consumer<? super U, ? extends Exception> cmd,
+    //    public static <U> void run(final U init, final Try.Consumer<? super U, ? extends Throwable> cmd,
     //            final com.landawn.abacus.util.function.Consumer<? super Exception> actionOnError) {
     //        N.checkArgNotNull(actionOnError);
     //
@@ -293,7 +293,7 @@ public final class Try<T extends AutoCloseable> {
     //     * @return
     //     * @throws RuntimeException if some error happens
     //     */
-    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Exception> cmd) {
+    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Throwable> cmd) {
     //        try {
     //            return cmd.apply(init);
     //        } catch (Exception e) {
@@ -302,13 +302,13 @@ public final class Try<T extends AutoCloseable> {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param init
     //     * @param cmd
     //     * @param actionOnError
     //     * @return
     //     */
-    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Exception> cmd,
+    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Throwable> cmd,
     //            final com.landawn.abacus.util.function.Function<? super Exception, R> actionOnError) {
     //        N.checkArgNotNull(actionOnError);
     //
@@ -320,13 +320,13 @@ public final class Try<T extends AutoCloseable> {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param init
     //     * @param cmd
     //     * @param supplier
     //     * @return
     //     */
-    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Exception> cmd,
+    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Throwable> cmd,
     //            final com.landawn.abacus.util.function.Supplier<R> supplier) {
     //        N.checkArgNotNull(supplier);
     //
@@ -338,13 +338,13 @@ public final class Try<T extends AutoCloseable> {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param init
     //     * @param cmd
     //     * @param defaultValue
     //     * @return
     //     */
-    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Exception> cmd, final R defaultValue) {
+    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Throwable> cmd, final R defaultValue) {
     //        try {
     //            return cmd.apply(init);
     //        } catch (Exception e) {
@@ -353,7 +353,7 @@ public final class Try<T extends AutoCloseable> {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param init
     //     * @param cmd
     //     * @param predicate
@@ -361,7 +361,7 @@ public final class Try<T extends AutoCloseable> {
     //     * @return the value returned <code>Supplier.get()</code> if some error happens and <code>predicate</code> return true.
     //     * @throws RuntimeException if some error happens and <code>predicate</code> return false.
     //     */
-    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Exception> cmd,
+    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Throwable> cmd,
     //            final com.landawn.abacus.util.function.Predicate<? super Exception> predicate, final com.landawn.abacus.util.function.Supplier<R> supplier) {
     //        N.checkArgNotNull(predicate);
     //        N.checkArgNotNull(supplier);
@@ -378,7 +378,7 @@ public final class Try<T extends AutoCloseable> {
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param init
     //     * @param cmd
     //     * @param predicate
@@ -386,7 +386,7 @@ public final class Try<T extends AutoCloseable> {
     //     * @return the <code>defaultValue()</code> if some error happens and <code>predicate</code> return true.
     //     * @throws RuntimeException if some error happens and <code>predicate</code> return false.
     //     */
-    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Exception> cmd,
+    //    public static <U, R> R call(final U init, final Try.Function<? super U, R, ? extends Throwable> cmd,
     //            final com.landawn.abacus.util.function.Predicate<? super Exception> predicate, final R defaultValue) {
     //        N.checkArgNotNull(predicate);
     //
@@ -401,7 +401,7 @@ public final class Try<T extends AutoCloseable> {
     //        }
     //    }
 
-    //    public static <E extends Exception> Try.Callable<Void, E> callable(final Try.Runnable<E> cmd) {
+    //    public static <E extends Throwable> Try.Callable<Void, E> callable(final Try.Runnable<E> cmd) {
     //        N.checkArgNotNull(cmd);
     //
     //        return new Try.Callable<Void, E>() {
@@ -580,12 +580,13 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface Runnable<E extends Exception> {
+    public static interface Runnable<E extends Exception> extends Throwables.Runnable<E> {
 
         /**
          *
          * @throws E the e
          */
+        @Override
         void run() throws E;
     }
 
@@ -595,7 +596,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface Callable<R, E extends Exception> extends java.util.concurrent.Callable<R> {
+    public static interface Callable<R, E extends Exception> extends Throwables.Callable<R, E>, java.util.concurrent.Callable<R> {
 
         /**
          *
@@ -612,7 +613,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface Supplier<T, E extends Exception> {
+    public static interface Supplier<T, E extends Throwable> {
 
         /**
          *
@@ -627,7 +628,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanSupplier<E extends Exception> {
+    public static interface BooleanSupplier<E extends Throwable> {
 
         /**
          * Gets the as boolean.
@@ -643,7 +644,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharSupplier<E extends Exception> {
+    public static interface CharSupplier<E extends Throwable> {
 
         /**
          * Gets the as char.
@@ -659,7 +660,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteSupplier<E extends Exception> {
+    public static interface ByteSupplier<E extends Throwable> {
 
         /**
          * Gets the as byte.
@@ -675,7 +676,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortSupplier<E extends Exception> {
+    public static interface ShortSupplier<E extends Throwable> {
 
         /**
          * Gets the as short.
@@ -691,7 +692,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntSupplier<E extends Exception> {
+    public static interface IntSupplier<E extends Throwable> {
 
         /**
          * Gets the as int.
@@ -707,7 +708,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongSupplier<E extends Exception> {
+    public static interface LongSupplier<E extends Throwable> {
 
         /**
          * Gets the as long.
@@ -723,7 +724,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatSupplier<E extends Exception> {
+    public static interface FloatSupplier<E extends Throwable> {
 
         /**
          * Gets the as float.
@@ -739,7 +740,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleSupplier<E extends Exception> {
+    public static interface DoubleSupplier<E extends Throwable> {
 
         /**
          * Gets the as double.
@@ -756,7 +757,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface Predicate<T, E extends Exception> {
+    public static interface Predicate<T, E extends Throwable> {
 
         /**
          *
@@ -774,7 +775,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <U>
      * @param <E>
      */
-    public static interface BiPredicate<T, U, E extends Exception> {
+    public static interface BiPredicate<T, U, E extends Throwable> {
 
         /**
          *
@@ -794,7 +795,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <C>
      * @param <E>
      */
-    public static interface TriPredicate<A, B, C, E extends Exception> {
+    public static interface TriPredicate<A, B, C, E extends Throwable> {
 
         /**
          *
@@ -816,7 +817,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <D>
      * @param <E>
      */
-    public static interface QuadPredicate<A, B, C, D, E extends Exception> {
+    public static interface QuadPredicate<A, B, C, D, E extends Throwable> {
 
         /**
          *
@@ -837,7 +838,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface Function<T, R, E extends Exception> {
+    public static interface Function<T, R, E extends Throwable> {
 
         /**
          *
@@ -854,7 +855,7 @@ public final class Try<T extends AutoCloseable> {
          * @param consumer
          * @return
          */
-        public static <T, E extends Exception> Function<T, Void, E> convert(final Consumer<T, E> consumer) {
+        public static <T, E extends Throwable> Function<T, Void, E> convert(final Consumer<T, E> consumer) {
             N.checkArgNotNull(consumer);
 
             return new Function<T, Void, E>() {
@@ -876,7 +877,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface BiFunction<T, U, R, E extends Exception> {
+    public static interface BiFunction<T, U, R, E extends Throwable> {
 
         /**
          *
@@ -895,7 +896,7 @@ public final class Try<T extends AutoCloseable> {
          * @param biConsumer
          * @return
          */
-        public static <T, U, E extends Exception> BiFunction<T, U, Void, E> convert(final BiConsumer<T, U, E> biConsumer) {
+        public static <T, U, E extends Throwable> BiFunction<T, U, Void, E> convert(final BiConsumer<T, U, E> biConsumer) {
             N.checkArgNotNull(biConsumer);
 
             return new BiFunction<T, U, Void, E>() {
@@ -918,7 +919,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface TriFunction<A, B, C, R, E extends Exception> {
+    public static interface TriFunction<A, B, C, R, E extends Throwable> {
 
         /**
          *
@@ -939,7 +940,7 @@ public final class Try<T extends AutoCloseable> {
          * @param triConsumer
          * @return
          */
-        public static <A, B, C, E extends Exception> TriFunction<A, B, C, Void, E> convert(final TriConsumer<A, B, C, E> triConsumer) {
+        public static <A, B, C, E extends Throwable> TriFunction<A, B, C, Void, E> convert(final TriConsumer<A, B, C, E> triConsumer) {
             N.checkArgNotNull(triConsumer);
 
             return new TriFunction<A, B, C, Void, E>() {
@@ -963,7 +964,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface QuadFunction<A, B, C, D, R, E extends Exception> {
+    public static interface QuadFunction<A, B, C, D, R, E extends Throwable> {
 
         /**
          *
@@ -983,7 +984,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface Consumer<T, E extends Exception> {
+    public static interface Consumer<T, E extends Throwable> {
 
         /**
          *
@@ -1000,7 +1001,7 @@ public final class Try<T extends AutoCloseable> {
          * @param func
          * @return
          */
-        public static <T, R, E extends Exception> Consumer<T, E> convert(final Function<T, R, E> func) {
+        public static <T, R, E extends Throwable> Consumer<T, E> convert(final Function<T, R, E> func) {
             N.checkArgNotNull(func);
 
             return new Consumer<T, E>() {
@@ -1019,7 +1020,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <U>
      * @param <E>
      */
-    public static interface BiConsumer<T, U, E extends Exception> {
+    public static interface BiConsumer<T, U, E extends Throwable> {
 
         /**
          *
@@ -1038,7 +1039,7 @@ public final class Try<T extends AutoCloseable> {
          * @param func
          * @return
          */
-        public static <T, U, R, E extends Exception> BiConsumer<T, U, E> convert(final BiFunction<T, U, R, E> func) {
+        public static <T, U, R, E extends Throwable> BiConsumer<T, U, E> convert(final BiFunction<T, U, R, E> func) {
             N.checkArgNotNull(func);
 
             return new BiConsumer<T, U, E>() {
@@ -1058,7 +1059,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <C>
      * @param <E>
      */
-    public static interface TriConsumer<A, B, C, E extends Exception> {
+    public static interface TriConsumer<A, B, C, E extends Throwable> {
 
         /**
          *
@@ -1079,7 +1080,7 @@ public final class Try<T extends AutoCloseable> {
          * @param func
          * @return
          */
-        public static <A, B, C, R, E extends Exception> TriConsumer<A, B, C, E> convert(final TriFunction<A, B, C, R, E> func) {
+        public static <A, B, C, R, E extends Throwable> TriConsumer<A, B, C, E> convert(final TriFunction<A, B, C, R, E> func) {
             N.checkArgNotNull(func);
 
             return new TriConsumer<A, B, C, E>() {
@@ -1100,7 +1101,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <D>
      * @param <E>
      */
-    public static interface QuadConsumer<A, B, C, D, E extends Exception> {
+    public static interface QuadConsumer<A, B, C, D, E extends Throwable> {
 
         /**
          *
@@ -1119,7 +1120,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface IndexedConsumer<T, E extends Exception> {
+    public static interface IndexedConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -1137,7 +1138,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface IndexedBiConsumer<U, T, E extends Exception> {
+    public static interface IndexedBiConsumer<U, T, E extends Throwable> {
 
         /**
          *
@@ -1156,7 +1157,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface IndexedFunction<T, R, E extends Exception> {
+    public static interface IndexedFunction<T, R, E extends Throwable> {
 
         /**
          *
@@ -1176,7 +1177,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface IndexedBiFunction<U, T, R, E extends Exception> {
+    public static interface IndexedBiFunction<U, T, R, E extends Throwable> {
 
         /**
          *
@@ -1195,7 +1196,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface IndexedPredicate<T, E extends Exception> {
+    public static interface IndexedPredicate<T, E extends Throwable> {
 
         /**
          *
@@ -1214,7 +1215,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface IndexedBiPredicate<U, T, E extends Exception> {
+    public static interface IndexedBiPredicate<U, T, E extends Throwable> {
 
         /**
          *
@@ -1232,7 +1233,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanPredicate<E extends Exception> {
+    public static interface BooleanPredicate<E extends Throwable> {
 
         /**
          *
@@ -1249,7 +1250,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface BooleanFunction<R, E extends Exception> {
+    public static interface BooleanFunction<R, E extends Throwable> {
 
         /**
          *
@@ -1265,7 +1266,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanConsumer<E extends Exception> {
+    public static interface BooleanConsumer<E extends Throwable> {
 
         /**
          *
@@ -1280,7 +1281,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharPredicate<E extends Exception> {
+    public static interface CharPredicate<E extends Throwable> {
 
         /**
          *
@@ -1297,7 +1298,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface CharFunction<R, E extends Exception> {
+    public static interface CharFunction<R, E extends Throwable> {
 
         /**
          *
@@ -1313,7 +1314,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharConsumer<E extends Exception> {
+    public static interface CharConsumer<E extends Throwable> {
 
         /**
          *
@@ -1328,7 +1329,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BytePredicate<E extends Exception> {
+    public static interface BytePredicate<E extends Throwable> {
 
         /**
          *
@@ -1345,7 +1346,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface ByteFunction<R, E extends Exception> {
+    public static interface ByteFunction<R, E extends Throwable> {
 
         /**
          *
@@ -1361,7 +1362,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteConsumer<E extends Exception> {
+    public static interface ByteConsumer<E extends Throwable> {
 
         /**
          *
@@ -1376,7 +1377,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortPredicate<E extends Exception> {
+    public static interface ShortPredicate<E extends Throwable> {
 
         /**
          *
@@ -1393,7 +1394,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface ShortFunction<R, E extends Exception> {
+    public static interface ShortFunction<R, E extends Throwable> {
 
         /**
          *
@@ -1409,7 +1410,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortConsumer<E extends Exception> {
+    public static interface ShortConsumer<E extends Throwable> {
 
         /**
          *
@@ -1424,7 +1425,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntPredicate<E extends Exception> {
+    public static interface IntPredicate<E extends Throwable> {
 
         /**
          *
@@ -1441,7 +1442,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface IntFunction<R, E extends Exception> {
+    public static interface IntFunction<R, E extends Throwable> {
 
         /**
          *
@@ -1457,7 +1458,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntConsumer<E extends Exception> {
+    public static interface IntConsumer<E extends Throwable> {
 
         /**
          *
@@ -1472,7 +1473,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongPredicate<E extends Exception> {
+    public static interface LongPredicate<E extends Throwable> {
 
         /**
          *
@@ -1489,7 +1490,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface LongFunction<R, E extends Exception> {
+    public static interface LongFunction<R, E extends Throwable> {
 
         /**
          *
@@ -1505,7 +1506,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongConsumer<E extends Exception> {
+    public static interface LongConsumer<E extends Throwable> {
 
         /**
          *
@@ -1520,7 +1521,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatPredicate<E extends Exception> {
+    public static interface FloatPredicate<E extends Throwable> {
 
         /**
          *
@@ -1537,7 +1538,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface FloatFunction<R, E extends Exception> {
+    public static interface FloatFunction<R, E extends Throwable> {
 
         /**
          *
@@ -1553,7 +1554,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatConsumer<E extends Exception> {
+    public static interface FloatConsumer<E extends Throwable> {
 
         /**
          *
@@ -1568,7 +1569,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoublePredicate<E extends Exception> {
+    public static interface DoublePredicate<E extends Throwable> {
 
         /**
          *
@@ -1585,7 +1586,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface DoubleFunction<R, E extends Exception> {
+    public static interface DoubleFunction<R, E extends Throwable> {
 
         /**
          *
@@ -1601,7 +1602,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleConsumer<E extends Exception> {
+    public static interface DoubleConsumer<E extends Throwable> {
 
         /**
          *
@@ -1617,7 +1618,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ToBooleanFunction<T, E extends Exception> {
+    public static interface ToBooleanFunction<T, E extends Throwable> {
 
         /**
          * Apply as boolean.
@@ -1635,7 +1636,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ToCharFunction<T, E extends Exception> {
+    public static interface ToCharFunction<T, E extends Throwable> {
 
         /**
          * Apply as char.
@@ -1653,7 +1654,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ToByteFunction<T, E extends Exception> {
+    public static interface ToByteFunction<T, E extends Throwable> {
 
         /**
          * Apply as byte.
@@ -1671,7 +1672,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ToShortFunction<T, E extends Exception> {
+    public static interface ToShortFunction<T, E extends Throwable> {
 
         /**
          * Apply as short.
@@ -1689,7 +1690,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ToIntFunction<T, E extends Exception> {
+    public static interface ToIntFunction<T, E extends Throwable> {
 
         /**
          * Apply as int.
@@ -1707,7 +1708,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ToLongFunction<T, E extends Exception> {
+    public static interface ToLongFunction<T, E extends Throwable> {
 
         /**
          * Apply as long.
@@ -1725,7 +1726,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ToFloatFunction<T, E extends Exception> {
+    public static interface ToFloatFunction<T, E extends Throwable> {
 
         /**
          * Apply as float.
@@ -1743,7 +1744,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ToDoubleFunction<T, E extends Exception> {
+    public static interface ToDoubleFunction<T, E extends Throwable> {
 
         /**
          * Apply as double.
@@ -1761,7 +1762,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface UnaryOperator<T, E extends Exception> extends Function<T, T, E> {
+    public static interface UnaryOperator<T, E extends Throwable> extends Function<T, T, E> {
     }
 
     /**
@@ -1770,7 +1771,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface BinaryOperator<T, E extends Exception> extends BiFunction<T, T, T, E> {
+    public static interface BinaryOperator<T, E extends Throwable> extends BiFunction<T, T, T, E> {
     }
 
     /**
@@ -1779,7 +1780,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface TernaryOperator<T, E extends Exception> extends BiFunction<T, T, T, E> {
+    public static interface TernaryOperator<T, E extends Throwable> extends BiFunction<T, T, T, E> {
     }
 
     /**
@@ -1787,7 +1788,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanUnaryOperator<E extends Exception> {
+    public static interface BooleanUnaryOperator<E extends Throwable> {
 
         /**
          * Apply as boolean.
@@ -1804,7 +1805,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharUnaryOperator<E extends Exception> {
+    public static interface CharUnaryOperator<E extends Throwable> {
 
         /**
          * Apply as char.
@@ -1821,7 +1822,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteUnaryOperator<E extends Exception> {
+    public static interface ByteUnaryOperator<E extends Throwable> {
 
         /**
          * Apply as byte.
@@ -1838,7 +1839,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortUnaryOperator<E extends Exception> {
+    public static interface ShortUnaryOperator<E extends Throwable> {
 
         /**
          * Apply as short.
@@ -1855,7 +1856,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntUnaryOperator<E extends Exception> {
+    public static interface IntUnaryOperator<E extends Throwable> {
 
         /**
          * Apply as int.
@@ -1872,7 +1873,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongUnaryOperator<E extends Exception> {
+    public static interface LongUnaryOperator<E extends Throwable> {
 
         /**
          * Apply as long.
@@ -1889,7 +1890,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatUnaryOperator<E extends Exception> {
+    public static interface FloatUnaryOperator<E extends Throwable> {
 
         /**
          * Apply as float.
@@ -1906,7 +1907,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleUnaryOperator<E extends Exception> {
+    public static interface DoubleUnaryOperator<E extends Throwable> {
 
         /**
          * Apply as double.
@@ -1923,7 +1924,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanBinaryOperator<E extends Exception> {
+    public static interface BooleanBinaryOperator<E extends Throwable> {
 
         /**
          * Apply as boolean.
@@ -1941,7 +1942,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharBinaryOperator<E extends Exception> {
+    public static interface CharBinaryOperator<E extends Throwable> {
 
         /**
          * Apply as char.
@@ -1959,7 +1960,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteBinaryOperator<E extends Exception> {
+    public static interface ByteBinaryOperator<E extends Throwable> {
 
         /**
          * Apply as byte.
@@ -1977,7 +1978,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortBinaryOperator<E extends Exception> {
+    public static interface ShortBinaryOperator<E extends Throwable> {
 
         /**
          * Apply as short.
@@ -1995,7 +1996,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntBinaryOperator<E extends Exception> {
+    public static interface IntBinaryOperator<E extends Throwable> {
 
         /**
          * Apply as int.
@@ -2013,7 +2014,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongBinaryOperator<E extends Exception> {
+    public static interface LongBinaryOperator<E extends Throwable> {
 
         /**
          * Apply as long.
@@ -2031,7 +2032,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatBinaryOperator<E extends Exception> {
+    public static interface FloatBinaryOperator<E extends Throwable> {
 
         /**
          * Apply as float.
@@ -2049,7 +2050,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleBinaryOperator<E extends Exception> {
+    public static interface DoubleBinaryOperator<E extends Throwable> {
 
         /**
          * Apply as double.
@@ -2067,7 +2068,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanTernaryOperator<E extends Exception> {
+    public static interface BooleanTernaryOperator<E extends Throwable> {
 
         /**
          * Apply as boolean.
@@ -2086,7 +2087,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharTernaryOperator<E extends Exception> {
+    public static interface CharTernaryOperator<E extends Throwable> {
 
         /**
          * Apply as char.
@@ -2105,7 +2106,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteTernaryOperator<E extends Exception> {
+    public static interface ByteTernaryOperator<E extends Throwable> {
 
         /**
          * Apply as byte.
@@ -2124,7 +2125,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortTernaryOperator<E extends Exception> {
+    public static interface ShortTernaryOperator<E extends Throwable> {
 
         /**
          * Apply as short.
@@ -2143,7 +2144,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntTernaryOperator<E extends Exception> {
+    public static interface IntTernaryOperator<E extends Throwable> {
 
         /**
          * Apply as int.
@@ -2162,7 +2163,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongTernaryOperator<E extends Exception> {
+    public static interface LongTernaryOperator<E extends Throwable> {
 
         /**
          * Apply as long.
@@ -2181,7 +2182,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatTernaryOperator<E extends Exception> {
+    public static interface FloatTernaryOperator<E extends Throwable> {
 
         /**
          * Apply as float.
@@ -2200,7 +2201,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleTernaryOperator<E extends Exception> {
+    public static interface DoubleTernaryOperator<E extends Throwable> {
 
         /**
          * Apply as double.
@@ -2219,7 +2220,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanBiPredicate<E extends Exception> {
+    public static interface BooleanBiPredicate<E extends Throwable> {
 
         /**
          *
@@ -2236,7 +2237,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharBiPredicate<E extends Exception> {
+    public static interface CharBiPredicate<E extends Throwable> {
 
         /**
          *
@@ -2253,7 +2254,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteBiPredicate<E extends Exception> {
+    public static interface ByteBiPredicate<E extends Throwable> {
 
         /**
          *
@@ -2270,7 +2271,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortBiPredicate<E extends Exception> {
+    public static interface ShortBiPredicate<E extends Throwable> {
 
         /**
          *
@@ -2287,7 +2288,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntBiPredicate<E extends Exception> {
+    public static interface IntBiPredicate<E extends Throwable> {
 
         /**
          *
@@ -2304,7 +2305,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongBiPredicate<E extends Exception> {
+    public static interface LongBiPredicate<E extends Throwable> {
 
         /**
          *
@@ -2321,7 +2322,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatBiPredicate<E extends Exception> {
+    public static interface FloatBiPredicate<E extends Throwable> {
 
         /**
          *
@@ -2338,7 +2339,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleBiPredicate<E extends Exception> {
+    public static interface DoubleBiPredicate<E extends Throwable> {
 
         /**
          *
@@ -2356,7 +2357,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface BooleanBiFunction<R, E extends Exception> {
+    public static interface BooleanBiFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2374,7 +2375,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface CharBiFunction<R, E extends Exception> {
+    public static interface CharBiFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2392,7 +2393,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface ByteBiFunction<R, E extends Exception> {
+    public static interface ByteBiFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2410,7 +2411,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface ShortBiFunction<R, E extends Exception> {
+    public static interface ShortBiFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2428,7 +2429,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface IntBiFunction<R, E extends Exception> {
+    public static interface IntBiFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2446,7 +2447,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface LongBiFunction<R, E extends Exception> {
+    public static interface LongBiFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2464,7 +2465,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface FloatBiFunction<R, E extends Exception> {
+    public static interface FloatBiFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2482,7 +2483,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface DoubleBiFunction<R, E extends Exception> {
+    public static interface DoubleBiFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2499,7 +2500,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanBiConsumer<E extends Exception> {
+    public static interface BooleanBiConsumer<E extends Throwable> {
 
         /**
          *
@@ -2515,7 +2516,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharBiConsumer<E extends Exception> {
+    public static interface CharBiConsumer<E extends Throwable> {
 
         /**
          *
@@ -2531,7 +2532,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteBiConsumer<E extends Exception> {
+    public static interface ByteBiConsumer<E extends Throwable> {
 
         /**
          *
@@ -2547,7 +2548,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortBiConsumer<E extends Exception> {
+    public static interface ShortBiConsumer<E extends Throwable> {
 
         /**
          *
@@ -2563,7 +2564,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntBiConsumer<E extends Exception> {
+    public static interface IntBiConsumer<E extends Throwable> {
 
         /**
          *
@@ -2579,7 +2580,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongBiConsumer<E extends Exception> {
+    public static interface LongBiConsumer<E extends Throwable> {
 
         /**
          *
@@ -2595,7 +2596,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatBiConsumer<E extends Exception> {
+    public static interface FloatBiConsumer<E extends Throwable> {
 
         /**
          *
@@ -2611,7 +2612,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleBiConsumer<E extends Exception> {
+    public static interface DoubleBiConsumer<E extends Throwable> {
 
         /**
          *
@@ -2627,7 +2628,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanTriPredicate<E extends Exception> {
+    public static interface BooleanTriPredicate<E extends Throwable> {
 
         /**
          *
@@ -2645,7 +2646,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharTriPredicate<E extends Exception> {
+    public static interface CharTriPredicate<E extends Throwable> {
 
         /**
          *
@@ -2663,7 +2664,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteTriPredicate<E extends Exception> {
+    public static interface ByteTriPredicate<E extends Throwable> {
 
         /**
          *
@@ -2681,7 +2682,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortTriPredicate<E extends Exception> {
+    public static interface ShortTriPredicate<E extends Throwable> {
 
         /**
          *
@@ -2699,7 +2700,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntTriPredicate<E extends Exception> {
+    public static interface IntTriPredicate<E extends Throwable> {
 
         /**
          *
@@ -2717,7 +2718,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongTriPredicate<E extends Exception> {
+    public static interface LongTriPredicate<E extends Throwable> {
 
         /**
          *
@@ -2735,7 +2736,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatTriPredicate<E extends Exception> {
+    public static interface FloatTriPredicate<E extends Throwable> {
 
         /**
          *
@@ -2753,7 +2754,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleTriPredicate<E extends Exception> {
+    public static interface DoubleTriPredicate<E extends Throwable> {
 
         /**
          *
@@ -2772,7 +2773,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface BooleanTriFunction<R, E extends Exception> {
+    public static interface BooleanTriFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2791,7 +2792,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface CharTriFunction<R, E extends Exception> {
+    public static interface CharTriFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2810,7 +2811,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface ByteTriFunction<R, E extends Exception> {
+    public static interface ByteTriFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2829,7 +2830,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface ShortTriFunction<R, E extends Exception> {
+    public static interface ShortTriFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2848,7 +2849,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface IntTriFunction<R, E extends Exception> {
+    public static interface IntTriFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2867,7 +2868,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface LongTriFunction<R, E extends Exception> {
+    public static interface LongTriFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2886,7 +2887,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface FloatTriFunction<R, E extends Exception> {
+    public static interface FloatTriFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2905,7 +2906,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <R>
      * @param <E>
      */
-    public static interface DoubleTriFunction<R, E extends Exception> {
+    public static interface DoubleTriFunction<R, E extends Throwable> {
 
         /**
          *
@@ -2923,7 +2924,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface BooleanTriConsumer<E extends Exception> {
+    public static interface BooleanTriConsumer<E extends Throwable> {
 
         /**
          *
@@ -2940,7 +2941,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface CharTriConsumer<E extends Exception> {
+    public static interface CharTriConsumer<E extends Throwable> {
 
         /**
          *
@@ -2957,7 +2958,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ByteTriConsumer<E extends Exception> {
+    public static interface ByteTriConsumer<E extends Throwable> {
 
         /**
          *
@@ -2974,7 +2975,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface ShortTriConsumer<E extends Exception> {
+    public static interface ShortTriConsumer<E extends Throwable> {
 
         /**
          *
@@ -2991,7 +2992,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface IntTriConsumer<E extends Exception> {
+    public static interface IntTriConsumer<E extends Throwable> {
 
         /**
          *
@@ -3008,7 +3009,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface LongTriConsumer<E extends Exception> {
+    public static interface LongTriConsumer<E extends Throwable> {
 
         /**
          *
@@ -3025,7 +3026,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface FloatTriConsumer<E extends Exception> {
+    public static interface FloatTriConsumer<E extends Throwable> {
 
         /**
          *
@@ -3042,7 +3043,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param <E>
      */
-    public static interface DoubleTriConsumer<E extends Exception> {
+    public static interface DoubleTriConsumer<E extends Throwable> {
 
         /**
          *
@@ -3060,7 +3061,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ObjBooleanConsumer<T, E extends Exception> {
+    public static interface ObjBooleanConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -3077,7 +3078,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ObjCharConsumer<T, E extends Exception> {
+    public static interface ObjCharConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -3094,7 +3095,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ObjByteConsumer<T, E extends Exception> {
+    public static interface ObjByteConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -3111,7 +3112,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ObjShortConsumer<T, E extends Exception> {
+    public static interface ObjShortConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -3128,7 +3129,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ObjIntConsumer<T, E extends Exception> {
+    public static interface ObjIntConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -3145,7 +3146,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ObjLongConsumer<T, E extends Exception> {
+    public static interface ObjLongConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -3162,7 +3163,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ObjFloatConsumer<T, E extends Exception> {
+    public static interface ObjFloatConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -3179,7 +3180,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T>
      * @param <E>
      */
-    public static interface ObjDoubleConsumer<T, E extends Exception> {
+    public static interface ObjDoubleConsumer<T, E extends Throwable> {
 
         /**
          *
@@ -3208,13 +3209,14 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface Runnable<E extends Exception, E2 extends Exception> {
+        public static interface Runnable<E extends Exception, E2 extends Exception> extends Throwables.EE.Runnable<E, E2> {
 
             /**
              *
              * @throws E the e
              * @throws E2 the e2
              */
+            @Override
             void run() throws E, E2;
         }
 
@@ -3225,7 +3227,8 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface Callable<R, E extends Exception, E2 extends Exception> extends java.util.concurrent.Callable<R> {
+        public static interface Callable<R, E extends Exception, E2 extends Exception>
+                extends Throwables.EE.Callable<R, E, E2>, java.util.concurrent.Callable<R> {
 
             /**
              *
@@ -3244,7 +3247,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface Supplier<T, E extends Exception, E2 extends Exception> {
+        public static interface Supplier<T, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3262,7 +3265,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface Predicate<T, E extends Exception, E2 extends Exception> {
+        public static interface Predicate<T, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3282,7 +3285,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface BiPredicate<T, U, E extends Exception, E2 extends Exception> {
+        public static interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3304,7 +3307,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface TriPredicate<A, B, C, E extends Exception, E2 extends Exception> {
+        public static interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3326,7 +3329,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface Function<T, R, E extends Exception, E2 extends Exception> {
+        public static interface Function<T, R, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3347,7 +3350,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface BiFunction<T, U, R, E extends Exception, E2 extends Exception> {
+        public static interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3370,7 +3373,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface TriFunction<A, B, C, R, E extends Exception, E2 extends Exception> {
+        public static interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3391,7 +3394,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface Consumer<T, E extends Exception, E2 extends Exception> {
+        public static interface Consumer<T, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3410,7 +3413,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface BiConsumer<T, U, E extends Exception, E2 extends Exception> {
+        public static interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3431,7 +3434,7 @@ public final class Try<T extends AutoCloseable> {
          * @param <E>
          * @param <E2>
          */
-        public static interface TriConsumer<A, B, C, E extends Exception, E2 extends Exception> {
+        public static interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable> {
 
             /**
              *
@@ -3450,52 +3453,52 @@ public final class Try<T extends AutoCloseable> {
     //            // Singleton. Utility class.
     //        }
     //
-    //        public static interface Runnable<E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface Runnable<E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            void run() throws E, E2, E3;
     //        }
     //
-    //        public static interface Callable<R, E extends Exception, E2 extends Exception, E3 extends Exception> extends java.util.concurrent.Callable<R> {
+    //        public static interface Callable<R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> extends java.util.concurrent.Callable<R> {
     //            @Override
     //            R call() throws E, E2, E3;
     //        }
     //
-    //        public static interface Supplier<T, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface Supplier<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            T get() throws E, E2, E3;
     //        }
     //
-    //        public static interface Predicate<T, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface Predicate<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            boolean test(T t) throws E, E2, E3;
     //        }
     //
-    //        public static interface BiPredicate<T, U, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            boolean test(T t, U u) throws E, E2, E3;
     //        }
     //
-    //        public static interface TriPredicate<A, B, C, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            boolean test(A a, B b, C c) throws E, E2, E3;
     //        }
     //
-    //        public static interface Function<T, R, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface Function<T, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            R apply(T t) throws E, E2, E3;
     //        }
     //
-    //        public static interface BiFunction<T, U, R, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            R apply(T t, U u) throws E, E2, E3;
     //        }
     //
-    //        public static interface TriFunction<A, B, C, R, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            R apply(A a, B b, C c) throws E, E2, E3;
     //        }
     //
-    //        public static interface Consumer<T, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface Consumer<T, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            void accept(T t) throws E, E2, E3;
     //        }
     //
-    //        public static interface BiConsumer<T, U, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            void accept(T t, U u) throws E, E2, E3;
     //        }
     //
-    //        public static interface TriConsumer<A, B, C, E extends Exception, E2 extends Exception, E3 extends Exception> {
+    //        public static interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable, E3 extends Throwable> {
     //            void accept(A a, B b, C c) throws E, E2, E3;
     //        }
     //    }
