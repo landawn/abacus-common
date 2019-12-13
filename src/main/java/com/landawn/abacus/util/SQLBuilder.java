@@ -319,7 +319,7 @@ public abstract class SQLBuilder {
     static final String SPACE_AS_SPACE = WD.SPACE + WD.AS + WD.SPACE;
 
     /** The Constant entityTablePropColumnNameMap. */
-    private static final Map<Class<?>, Map<NamingPolicy, Map<String, String>>> entityTablePropColumnNameMap = new ObjectPool<>(N.POOL_SIZE);
+    private static final Map<Class<?>, Map<NamingPolicy, ImmutableMap<String, String>>> entityTablePropColumnNameMap = new ObjectPool<>(N.POOL_SIZE);
 
     /** The Constant subEntityPropNamesPool. */
     private static final Map<Class<?>, ImmutableSet<String>> subEntityPropNamesPool = new ObjectPool<>(N.POOL_SIZE);
@@ -462,6 +462,76 @@ public abstract class SQLBuilder {
     }
 
     /**
+     * Gets the insert prop names by class.
+     *
+     * @param entity
+     * @param excludedPropNames
+     * @return
+     */
+    @Internal
+    public static Collection<String> getInsertPropNames(final Object entity, final Set<String> excludedPropNames) {
+        final Class<?> entityClass = entity.getClass();
+        final boolean isDirtyMarker = ClassUtil.isDirtyMarker(entityClass);
+
+        if (isDirtyMarker) {
+            final Collection<String> signedPropNames = ((DirtyMarker) entity).signedPropNames();
+
+            if (N.isNullOrEmpty(excludedPropNames)) {
+                return signedPropNames;
+            } else {
+                final List<String> tmp = new ArrayList<>(signedPropNames);
+                tmp.removeAll(excludedPropNames);
+                return tmp;
+            }
+        } else {
+            final Collection<String>[] val = loadPropNamesByClass(entityClass);
+
+            if (N.isNullOrEmpty(excludedPropNames)) {
+                final Collection<String> idPropNames = ClassUtil.getIdFieldNames(entityClass);
+
+                if (N.isNullOrEmpty(idPropNames)) {
+                    return val[2];
+                } else {
+                    final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+                    for (String idPropName : idPropNames) {
+                        if (!isDefaultIdPropValue(entityInfo.getPropInfo(idPropName))) {
+                            return val[2];
+                        }
+                    }
+
+                    return val[3];
+                }
+            } else {
+                final List<String> tmp = new ArrayList<>(val[2]);
+                tmp.removeAll(excludedPropNames);
+                return tmp;
+            }
+        }
+    }
+
+    /**
+     * Gets the insert prop names by class.
+     *
+     * @param entityClass
+     * @param excludedPropNames
+     * @return
+     */
+    @Internal
+    public static Collection<String> getInsertPropNamesByClass(final Class<?> entityClass, final Set<String> excludedPropNames) {
+        final Collection<String>[] val = loadPropNamesByClass(entityClass);
+        final Collection<String> propNames = val[2];
+
+        if (N.isNullOrEmpty(excludedPropNames)) {
+            return propNames;
+        } else {
+            final List<String> tmp = new ArrayList<>(propNames);
+            tmp.removeAll(excludedPropNames);
+            return tmp;
+        }
+    }
+
+    /**
      * Gets the select prop names by class.
      *
      * @param entityClass
@@ -485,41 +555,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Gets the insert prop names by class.
-     *
-     * @param entity
-     * @param excludedPropNames
-     * @return
-     */
-    @Internal
-    public static Collection<String> getInsertPropNamesByClass(final Object entity, final Set<String> excludedPropNames) {
-        final Class<?> entityClass = entity.getClass();
-        final Collection<String>[] val = loadPropNamesByClass(entityClass);
-
-        if (N.isNullOrEmpty(excludedPropNames)) {
-            final Collection<String> idPropNames = ClassUtil.getIdFieldNames(entityClass);
-
-            if (N.isNullOrEmpty(idPropNames)) {
-                return val[2];
-            } else {
-                final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-
-                for (String idPropName : idPropNames) {
-                    if (isDefaultIdPropValue(entityInfo.getPropInfo(idPropName))) {
-                        return val[3];
-                    }
-                }
-
-                return val[2];
-            }
-        } else {
-            final List<String> tmp = new ArrayList<>(val[2]);
-            tmp.removeAll(excludedPropNames);
-            return tmp;
-        }
-    }
-
-    /**
      * Checks if is default id prop value.
      *
      * @param propValue
@@ -528,27 +563,6 @@ public abstract class SQLBuilder {
     @Internal
     static boolean isDefaultIdPropValue(final Object propValue) {
         return (propValue == null) || (propValue instanceof Number && (((Number) propValue).longValue() == 0));
-    }
-
-    /**
-     * Gets the insert prop names by class.
-     *
-     * @param entityClass
-     * @param excludedPropNames
-     * @return
-     */
-    @Internal
-    public static Collection<String> getInsertPropNamesByClass(final Class<?> entityClass, final Set<String> excludedPropNames) {
-        final Collection<String>[] val = loadPropNamesByClass(entityClass);
-        final Collection<String> propNames = val[2];
-
-        if (N.isNullOrEmpty(excludedPropNames)) {
-            return propNames;
-        } else {
-            final List<String> tmp = new ArrayList<>(propNames);
-            tmp.removeAll(excludedPropNames);
-            return tmp;
-        }
     }
 
     /**
@@ -3054,13 +3068,13 @@ public abstract class SQLBuilder {
      *
      * @return
      */
-    private static Map<String, String> getPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy) {
+    public static ImmutableMap<String, String> getPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy) {
         if (entityClass == null || Map.class.isAssignableFrom(entityClass)) {
-            return N.emptyMap();
+            return ImmutableMap.empty();
         }
 
-        final Map<NamingPolicy, Map<String, String>> namingColumnNameMap = entityTablePropColumnNameMap.get(entityClass);
-        Map<String, String> result = null;
+        final Map<NamingPolicy, ImmutableMap<String, String>> namingColumnNameMap = entityTablePropColumnNameMap.get(entityClass);
+        ImmutableMap<String, String> result = null;
 
         if (namingColumnNameMap == null || (result = namingColumnNameMap.get(namingPolicy)) == null) {
             result = registerEntityPropColumnNameMap(entityClass, namingPolicy, null);
@@ -3074,7 +3088,7 @@ public abstract class SQLBuilder {
      *
      * @param entityClass annotated with @Table, @Column
      */
-    private static Map<String, String> registerEntityPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy,
+    private static ImmutableMap<String, String> registerEntityPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy,
             final Set<Class<?>> registeringClasses) {
         N.checkArgNotNull(entityClass);
 
@@ -3135,7 +3149,9 @@ public abstract class SQLBuilder {
             propColumnNameMap = N.<String, String> emptyMap();
         }
 
-        Map<NamingPolicy, Map<String, String>> namingPropColumnMap = entityTablePropColumnNameMap.get(entityClass);
+        final ImmutableMap<String, String> result = ImmutableMap.of(propColumnNameMap);
+
+        Map<NamingPolicy, ImmutableMap<String, String>> namingPropColumnMap = entityTablePropColumnNameMap.get(entityClass);
 
         if (namingPropColumnMap == null) {
             namingPropColumnMap = new EnumMap<>(NamingPolicy.class);
@@ -3144,9 +3160,9 @@ public abstract class SQLBuilder {
             entityTablePropColumnNameMap.put(entityClass, namingPropColumnMap);
         }
 
-        namingPropColumnMap.put(namingPolicy, propColumnNameMap);
+        namingPropColumnMap.put(namingPolicy, result);
 
-        return propColumnNameMap;
+        return result;
     }
 
     private static String formalizeColumnName(final String propName, final NamingPolicy namingPolicy) {
@@ -3175,7 +3191,7 @@ public abstract class SQLBuilder {
                 Maps.removeKeys(instance.props, excludedPropNames);
             }
         } else {
-            final Collection<String> propNames = getInsertPropNamesByClass(entity, excludedPropNames);
+            final Collection<String> propNames = getInsertPropNames(entity, excludedPropNames);
             final Map<String, Object> map = N.newHashMap(N.initHashCapacity(propNames.size()));
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
 
