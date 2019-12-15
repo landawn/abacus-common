@@ -2511,11 +2511,12 @@ public abstract class SQLBuilder {
             this.entityClass = entityClass;
             final Collection<String> propNames = getUpdatePropNamesByClass(entityClass, excludedPropNames);
             final Set<String> dirtyPropNames = DirtyMarkerUtil.isDirtyMarker(entityClass) ? DirtyMarkerUtil.dirtyPropNames((DirtyMarker) entity) : null;
+            final boolean isEmptyDirtyPropNames = N.isNullOrEmpty(dirtyPropNames);
             final Map<String, Object> props = N.newHashMap(N.initHashCapacity(N.isNullOrEmpty(dirtyPropNames) ? propNames.size() : dirtyPropNames.size()));
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
             for (String propName : propNames) {
-                if (dirtyPropNames == null || dirtyPropNames.contains(propName)) {
+                if (isEmptyDirtyPropNames || dirtyPropNames.contains(propName)) {
                     props.put(propName, entityInfo.getPropValue(entity, propName));
                 }
             }

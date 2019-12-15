@@ -296,7 +296,11 @@ public class Builder<T> {
         } else if (val instanceof Multimap) {
             result = of((Multimap) val);
         } else if (val instanceof DataSet) {
+            result = of((DataSet) val);
+        } else if (val instanceof Multiset) {
             result = of((Multiset) val);
+        } else if (val instanceof LongMultiset) {
+            result = of((LongMultiset) val);
         } else {
             result = new Builder<>(val);
         }

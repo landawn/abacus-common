@@ -9263,19 +9263,19 @@ public abstract class Fn extends Comparators {
      */
     public static abstract class FnC {
 
-        /** The Constant POSITIVE. */
-        private static final CharPredicate POSITIVE = new CharPredicate() {
+        /** The Constant IS_ZERO. */
+        private static final CharPredicate IS_ZERO = new CharPredicate() {
             @Override
             public boolean test(char t) {
-                return t > 0;
+                return t == 0;
             }
         };
 
-        /** The Constant NOT_NEGATIVE. */
-        private static final CharPredicate NOT_NEGATIVE = new CharPredicate() {
+        /** The Constant IS_WHITE_SPACE. */
+        private static final CharPredicate IS_WHITESPACE = new CharPredicate() {
             @Override
             public boolean test(char t) {
-                return t >= 0;
+                return Character.isWhitespace(t);
             }
         };
 
@@ -9346,16 +9346,16 @@ public abstract class Fn extends Comparators {
          *
          * @return
          */
-        public static CharPredicate positve() {
-            return POSITIVE;
+        public static CharPredicate isZero() {
+            return IS_ZERO;
         }
 
         /**
          *
          * @return
          */
-        public static CharPredicate notNegative() {
-            return NOT_NEGATIVE;
+        public static CharPredicate isWhitespace() {
+            return IS_WHITESPACE;
         }
 
         /**
