@@ -1748,6 +1748,14 @@ public final class EntryStream<K, V> implements AutoCloseable {
         return new EntryStream<>(Stream.<Map.Entry<K, V>> empty());
     }
 
+    public static <K, V> EntryStream<K, V> ofNullable(final Map.Entry<K, V> entry) {
+        if (entry == null) {
+            return EntryStream.<K, V> empty();
+        }
+
+        return of(Stream.of(entry));
+    }
+
     public static <K, V> EntryStream<K, V> of(K k1, V v1) {
         return of(Stream.of(new SimpleImmutableEntry<>(k1, v1)));
     }

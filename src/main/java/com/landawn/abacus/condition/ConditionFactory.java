@@ -25,6 +25,7 @@ import com.landawn.abacus.condition.Expression.Expr;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Primitives;
 import com.landawn.abacus.util.SQLBuilder;
 import com.landawn.abacus.util.SortDirection;
 import com.landawn.abacus.util.WD;
@@ -1305,6 +1306,36 @@ public class ConditionFactory {
      */
     public static NaturalJoin naturalJoin(final Collection<String> joinEntities, final Condition condition) {
         return new NaturalJoin(joinEntities, condition);
+    }
+
+    /**
+     *
+     * @param propName
+     * @param values
+     * @return
+     */
+    public static In in(final String propName, final int[] values) {
+        return in(propName, Primitives.box(values));
+    }
+
+    /**
+     *
+     * @param propName
+     * @param values
+     * @return
+     */
+    public static In in(final String propName, final long[] values) {
+        return in(propName, Primitives.box(values));
+    }
+
+    /**
+     *
+     * @param propName
+     * @param values
+     * @return
+     */
+    public static In in(final String propName, final double[] values) {
+        return in(propName, Primitives.box(values));
     }
 
     /**

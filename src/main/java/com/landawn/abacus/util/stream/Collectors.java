@@ -741,6 +741,13 @@ public abstract class Collectors {
         }
     };
 
+    static final Function<Pair<BigInteger, MutableLong>, Optional<BigDecimal>> AveragingBigInteger_Finisher_2 = new Function<Pair<BigInteger, MutableLong>, Optional<BigDecimal>>() {
+        @Override
+        public Optional<BigDecimal> apply(Pair<BigInteger, MutableLong> a) {
+            return a.right.value() == 0 ? Optional.<BigDecimal> empty() : Optional.of(new BigDecimal(a.left).divide(new BigDecimal(a.right.value())));
+        }
+    };
+
     static final Supplier<Pair<BigDecimal, MutableLong>> AveragingBigDecimal_Supplier = new Supplier<Pair<BigDecimal, MutableLong>>() {
         @Override
         public Pair<BigDecimal, MutableLong> get() {
@@ -761,6 +768,13 @@ public abstract class Collectors {
         @Override
         public BigDecimal apply(Pair<BigDecimal, MutableLong> a) {
             return a.right.value() == 0 ? BigDecimal.ZERO : a.left.divide(new BigDecimal(a.right.value()));
+        }
+    };
+
+    static final Function<Pair<BigDecimal, MutableLong>, Optional<BigDecimal>> AveragingBigDecimal_Finisher_2 = new Function<Pair<BigDecimal, MutableLong>, Optional<BigDecimal>>() {
+        @Override
+        public Optional<BigDecimal> apply(Pair<BigDecimal, MutableLong> a) {
+            return a.right.value() == 0 ? Optional.<BigDecimal> empty() : Optional.of(a.left.divide(new BigDecimal(a.right.value())));
         }
     };
 
@@ -1968,6 +1982,40 @@ public abstract class Collectors {
         return minOrThrow(comparator, noSuchElementExceptionSupplier);
     }
 
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        return min(Comparators.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, T> minByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
+        return minOrGet(Comparators.comparingBy(keyMapper), other);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T, X extends RuntimeException> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper,
+            final Supplier<? extends X> exceptionSupplier) {
+        return minOrThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+        return minOrThrow(Comparators.comparingBy(keyMapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        return max(Comparators.comparingBy(keyMapper));
+    }
+
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> minForNonEmpty() {
+        return minForNonEmpty(Fn.nullsLast());
+    }
+
+    public static <T> Collector<T, ?, T> minForNonEmpty(final Comparator<? super T> comparator) {
+        return minOrThrow(comparator);
+    }
+
     public static <T extends Comparable<? super T>> Collector<T, ?, Optional<T>> max() {
         return max(Fn.nullsFirst());
     }
@@ -2017,32 +2065,6 @@ public abstract class Collectors {
     }
 
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(Comparators.comparingBy(keyMapper));
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
-        return minOrGet(Comparators.comparingBy(keyMapper), other);
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static <T, X extends RuntimeException> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper,
-            final Supplier<? extends X> exceptionSupplier) {
-        return minOrThrow(Comparators.comparingBy(keyMapper), exceptionSupplier);
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return minOrThrow(Comparators.comparingBy(keyMapper));
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(Comparators.comparingBy(keyMapper));
-    }
-
-    @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
         return maxOrGet(Comparators.comparingBy(keyMapper), other);
     }
@@ -2056,6 +2078,14 @@ public abstract class Collectors {
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
         return maxOrThrow(Comparators.comparingBy(keyMapper));
+    }
+
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> maxForNonEmpty() {
+        return maxForNonEmpty(Fn.nullsLast());
+    }
+
+    public static <T> Collector<T, ?, T> maxForNonEmpty(final Comparator<? super T> comparator) {
+        return maxOrThrow(comparator);
     }
 
     @SuppressWarnings("rawtypes")
@@ -2110,6 +2140,14 @@ public abstract class Collectors {
         };
 
         return combine(Collectors.min(comparator), Collectors.max(comparator), finisher2);
+    }
+
+    public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxForNonEmpty() {
+        return minMaxForNonEmpty(Fn.nullsLast());
+    }
+
+    public static <T> Collector<T, ?, Pair<T, T>> minMaxForNonEmpty(final Comparator<? super T> comparator) {
+        return combine(Collectors.minForNonEmpty(comparator), Collectors.maxForNonEmpty(comparator), Fn.<T, T> pair());
     }
 
     @SuppressWarnings("rawtypes")
@@ -2726,22 +2764,6 @@ public abstract class Collectors {
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, OptionalLong> summingIntt(final ToIntFunction<? super T> mapper) {
-        final Supplier<long[]> supplier = SummingInt_Supplier_2;
-
-        final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
-            @Override
-            public void accept(long[] a, T t) {
-                a[0] += mapper.applyAsInt(t);
-            }
-        };
-
-        final BinaryOperator<long[]> combiner = SummingInt_Combiner_2;
-        final Function<long[], OptionalLong> finisher = SummingInt_Finisher_2;
-
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
-    }
-
     public static <T> Collector<T, ?, Long> summingLong(final ToLongFunction<? super T> mapper) {
         final Supplier<long[]> supplier = SummingLong_Supplier;
 
@@ -2758,22 +2780,6 @@ public abstract class Collectors {
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, OptionalLong> summingLongg(final ToLongFunction<? super T> mapper) {
-        final Supplier<long[]> supplier = SummingLong_Supplier_2;
-
-        final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
-            @Override
-            public void accept(long[] a, T t) {
-                a[0] += mapper.applyAsLong(t);
-            }
-        };
-
-        final BinaryOperator<long[]> combiner = SummingLong_Combiner_2;
-        final Function<long[], OptionalLong> finisher = SummingLong_Finisher_2;
-
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
-    }
-
     public static <T> Collector<T, ?, Double> summingDouble(final ToDoubleFunction<? super T> mapper) {
         final Supplier<KahanSummation> supplier = SummingDouble_Supplier;
 
@@ -2786,22 +2792,6 @@ public abstract class Collectors {
 
         final BinaryOperator<KahanSummation> combiner = SummingDouble_Combiner;
         final Function<KahanSummation, Double> finisher = SummingDouble_Finisher;
-
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
-    }
-
-    public static <T> Collector<T, ?, OptionalDouble> summingDoubble(final ToDoubleFunction<? super T> mapper) {
-        final Supplier<KahanSummation> supplier = SummingDouble_Supplier_2;
-
-        final BiConsumer<KahanSummation, T> accumulator = new BiConsumer<KahanSummation, T>() {
-            @Override
-            public void accept(KahanSummation a, T t) {
-                a.add(mapper.applyAsDouble(t));
-            }
-        };
-
-        final BinaryOperator<KahanSummation> combiner = SummingDouble_Combiner_2;
-        final Function<KahanSummation, OptionalDouble> finisher = SummingDouble_Finisher_2;
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
@@ -2838,24 +2828,7 @@ public abstract class Collectors {
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, Double> averagingInt(final ToIntFunction<? super T> mapper) {
-        final Supplier<long[]> supplier = AveragingInt_Supplier;
-
-        final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
-            @Override
-            public void accept(long[] a, T t) {
-                a[0] += mapper.applyAsInt(t);
-                a[1]++;
-            }
-        };
-
-        final BinaryOperator<long[]> combiner = AveragingInt_Combiner;
-        final Function<long[], Double> finisher = AveragingInt_Finisher;
-
-        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
-    }
-
-    public static <T> Collector<T, ?, OptionalDouble> averagingIntt(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingInt(final ToIntFunction<? super T> mapper) {
         final Supplier<long[]> supplier = AveragingInt_Supplier;
 
         final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
@@ -2872,24 +2845,24 @@ public abstract class Collectors {
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, Double> averagingLong(final ToLongFunction<? super T> mapper) {
-        final Supplier<long[]> supplier = AveragingLong_Supplier;
-
+    public static <T> Collector<T, ?, Double> averagingIntForNonEmpty(final ToIntFunction<? super T> mapper) {
+        final Supplier<long[]> supplier = AveragingInt_Supplier;
+    
         final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
             @Override
             public void accept(long[] a, T t) {
-                a[0] += mapper.applyAsLong(t);
+                a[0] += mapper.applyAsInt(t);
                 a[1]++;
             }
         };
-
-        final BinaryOperator<long[]> combiner = AveragingLong_Combiner;
-        final Function<long[], Double> finisher = AveragingLong_Finisher;
-
+    
+        final BinaryOperator<long[]> combiner = AveragingInt_Combiner;
+        final Function<long[], Double> finisher = AveragingInt_Finisher;
+    
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, OptionalDouble> averagingLongg(final ToLongFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingLong(final ToLongFunction<? super T> mapper) {
         final Supplier<long[]> supplier = AveragingLong_Supplier;
 
         final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
@@ -2906,23 +2879,24 @@ public abstract class Collectors {
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, Double> averagingDouble(final ToDoubleFunction<? super T> mapper) {
-        final Supplier<KahanSummation> supplier = AveragingDouble_Supplier;
+    public static <T> Collector<T, ?, Double> averagingLongForNonEmpty(final ToLongFunction<? super T> mapper) {
+        final Supplier<long[]> supplier = AveragingLong_Supplier;
 
-        final BiConsumer<KahanSummation, T> accumulator = new BiConsumer<KahanSummation, T>() {
+        final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
             @Override
-            public void accept(KahanSummation a, T t) {
-                a.add(mapper.applyAsDouble(t));
+            public void accept(long[] a, T t) {
+                a[0] += mapper.applyAsLong(t);
+                a[1]++;
             }
         };
 
-        final BinaryOperator<KahanSummation> combiner = AveragingDouble_Combiner;
-        final Function<KahanSummation, Double> finisher = AveragingDouble_Finisher;
+        final BinaryOperator<long[]> combiner = AveragingLong_Combiner;
+        final Function<long[], Double> finisher = AveragingLong_Finisher;
 
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, OptionalDouble> averagingDoubble(final ToDoubleFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingDouble(final ToDoubleFunction<? super T> mapper) {
         final Supplier<KahanSummation> supplier = AveragingDouble_Supplier;
 
         final BiConsumer<KahanSummation, T> accumulator = new BiConsumer<KahanSummation, T>() {
@@ -2938,7 +2912,40 @@ public abstract class Collectors {
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, BigDecimal> averagingBigInteger(final Function<? super T, BigInteger> mapper) {
+    public static <T> Collector<T, ?, Double> averagingDoubleForNonEmpty(final ToDoubleFunction<? super T> mapper) {
+        final Supplier<KahanSummation> supplier = AveragingDouble_Supplier;
+
+        final BiConsumer<KahanSummation, T> accumulator = new BiConsumer<KahanSummation, T>() {
+            @Override
+            public void accept(KahanSummation a, T t) {
+                a.add(mapper.applyAsDouble(t));
+            }
+        };
+
+        final BinaryOperator<KahanSummation> combiner = AveragingDouble_Combiner;
+        final Function<KahanSummation, Double> finisher = AveragingDouble_Finisher;
+
+        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+    }
+
+    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> mapper) {
+        final Supplier<Pair<BigInteger, MutableLong>> supplier = AveragingBigInteger_Supplier;
+
+        final BiConsumer<Pair<BigInteger, MutableLong>, T> accumulator = new BiConsumer<Pair<BigInteger, MutableLong>, T>() {
+            @Override
+            public void accept(Pair<BigInteger, MutableLong> a, T t) {
+                a.setLeft(a.left.add(mapper.apply(t)));
+                a.right.increment();
+            }
+        };
+
+        final BinaryOperator<Pair<BigInteger, MutableLong>> combiner = AveragingBigInteger_Combiner;
+        final Function<Pair<BigInteger, MutableLong>, Optional<BigDecimal>> finisher = AveragingBigInteger_Finisher_2;
+
+        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+    }
+
+    public static <T> Collector<T, ?, BigDecimal> averagingBigIntegerForNonEmpty(final Function<? super T, BigInteger> mapper) {
         final Supplier<Pair<BigInteger, MutableLong>> supplier = AveragingBigInteger_Supplier;
 
         final BiConsumer<Pair<BigInteger, MutableLong>, T> accumulator = new BiConsumer<Pair<BigInteger, MutableLong>, T>() {
@@ -2955,7 +2962,24 @@ public abstract class Collectors {
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
-    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+        final Supplier<Pair<BigDecimal, MutableLong>> supplier = AveragingBigDecimal_Supplier;
+
+        final BiConsumer<Pair<BigDecimal, MutableLong>, T> accumulator = new BiConsumer<Pair<BigDecimal, MutableLong>, T>() {
+            @Override
+            public void accept(Pair<BigDecimal, MutableLong> a, T t) {
+                a.setLeft(a.left.add(mapper.apply(t)));
+                a.right.increment();
+            }
+        };
+
+        final BinaryOperator<Pair<BigDecimal, MutableLong>> combiner = AveragingBigDecimal_Combiner;
+        final Function<Pair<BigDecimal, MutableLong>, Optional<BigDecimal>> finisher = AveragingBigDecimal_Finisher_2;
+
+        return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+    }
+
+    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimalForNonEmpty(final Function<? super T, BigDecimal> mapper) {
         final Supplier<Pair<BigDecimal, MutableLong>> supplier = AveragingBigDecimal_Supplier;
 
         final BiConsumer<Pair<BigDecimal, MutableLong>, T> accumulator = new BiConsumer<Pair<BigDecimal, MutableLong>, T>() {

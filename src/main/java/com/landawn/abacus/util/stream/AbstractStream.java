@@ -2322,17 +2322,17 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public OptionalDouble averageInt(ToIntFunction<? super T> mapper) {
-        return collect(Collectors.averagingIntt(mapper));
+        return collect(Collectors.averagingInt(mapper));
     }
 
     @Override
     public OptionalDouble averageLong(ToLongFunction<? super T> mapper) {
-        return collect(Collectors.averagingLongg(mapper));
+        return collect(Collectors.averagingLong(mapper));
     }
 
     @Override
     public OptionalDouble averageDouble(ToDoubleFunction<? super T> mapper) {
-        return collect(Collectors.averagingDoubble(mapper));
+        return collect(Collectors.averagingDouble(mapper));
     }
 
     @Override
