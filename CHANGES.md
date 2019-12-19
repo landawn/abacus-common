@@ -1,3 +1,10 @@
+### 1.10
+
+* Replace `Collectors.summing/averagingIntt/longg/doubble` with `Collectors.summing/averagingInt/long/doubleForNonEmpty`.
+
+* Improvements and bug fix.
+
+
 ### 1.9.23
 
 * Improvements and bug fix.

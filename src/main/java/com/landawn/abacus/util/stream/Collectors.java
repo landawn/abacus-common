@@ -2142,14 +2142,6 @@ public abstract class Collectors {
         return combine(Collectors.min(comparator), Collectors.max(comparator), finisher2);
     }
 
-    public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxForNonEmpty() {
-        return minMaxForNonEmpty(Fn.nullsLast());
-    }
-
-    public static <T> Collector<T, ?, Pair<T, T>> minMaxForNonEmpty(final Comparator<? super T> comparator) {
-        return combine(Collectors.minForNonEmpty(comparator), Collectors.maxForNonEmpty(comparator), Fn.<T, T> pair());
-    }
-
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper) {
         return minMax(Comparators.comparingBy(keyMapper));
@@ -2159,6 +2151,14 @@ public abstract class Collectors {
     public static <T, R> Collector<T, ?, Optional<R>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper,
             final BiFunction<? super T, ? super T, ? extends R> finisher) {
         return minMax(Comparators.comparingBy(keyMapper), finisher);
+    }
+
+    public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxForNonEmpty() {
+        return minMaxForNonEmpty(Fn.nullsLast());
+    }
+
+    public static <T> Collector<T, ?, Pair<T, T>> minMaxForNonEmpty(final Comparator<? super T> comparator) {
+        return combine(Collectors.minForNonEmpty(comparator), Collectors.maxForNonEmpty(comparator), Fn.<T, T> pair());
     }
 
     /**
@@ -2847,7 +2847,7 @@ public abstract class Collectors {
 
     public static <T> Collector<T, ?, Double> averagingIntForNonEmpty(final ToIntFunction<? super T> mapper) {
         final Supplier<long[]> supplier = AveragingInt_Supplier;
-    
+
         final BiConsumer<long[], T> accumulator = new BiConsumer<long[], T>() {
             @Override
             public void accept(long[] a, T t) {
@@ -2855,10 +2855,10 @@ public abstract class Collectors {
                 a[1]++;
             }
         };
-    
+
         final BinaryOperator<long[]> combiner = AveragingInt_Combiner;
         final Function<long[], Double> finisher = AveragingInt_Finisher;
-    
+
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
