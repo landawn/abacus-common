@@ -58,7 +58,7 @@ class Log4Jv2Logger extends AbstractLogger {
     public Log4Jv2Logger(String name) {
         super(name);
         // if (!existsLog4JFile) {
-        // throw new AbacusException("Failed to initilze Log4j Logger Factory");
+        // throw new RuntimeException("Failed to initilze Log4j Logger Factory");
         // }
         //
         loggerImpl = (ExtendedLogger) org.apache.logging.log4j.LogManager.getLogger(name);

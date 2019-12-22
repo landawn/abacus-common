@@ -31,7 +31,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
@@ -162,7 +161,7 @@ public abstract class Configuration {
      * @param element
      */
     protected void complexElement2Attr(Element element) {
-        throw new AbacusException("Unknow element: " + element.getNodeName());
+        throw new RuntimeException("Unknow element: " + element.getNodeName());
     }
 
     /**
@@ -242,7 +241,7 @@ public abstract class Configuration {
      */
     private static File findFile(String configFileName, boolean isDir, Set<String> foundDir) {
         if (N.isNullOrEmpty(configFileName)) {
-            throw new AbacusException("target file name can't be empty or null: " + configFileName);
+            throw new RuntimeException("target file name can't be empty or null: " + configFileName);
         }
 
         if (logger.isInfoEnabled()) {
@@ -373,7 +372,7 @@ public abstract class Configuration {
      */
     public static File findFileInDir(String configFileName, File dir, boolean isDir) {
         if (N.isNullOrEmpty(configFileName)) {
-            throw new AbacusException("target file name can't be empty or null: " + configFileName);
+            throw new RuntimeException("target file name can't be empty or null: " + configFileName);
         }
 
         String folderPrefix = null;

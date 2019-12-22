@@ -54,6 +54,7 @@ import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.Tuple.Tuple1;
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -8357,7 +8358,7 @@ public abstract class Fn extends Comparators {
         private static final BinaryOperator THROWING_MERGER = new BinaryOperator() {
             @Override
             public Object apply(Object t, Object u) {
-                throw new IllegalStateException(String.format("Duplicate key (attempted merging values %s and %s)", t, u));
+                throw new DuplicatedResultException(String.format("Duplicate key (attempted merging values %s and %s)", t, u));
             }
         };
 

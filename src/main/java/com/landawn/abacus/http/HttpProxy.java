@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -243,7 +242,7 @@ public final class HttpProxy {
                                         operationConfig.setRequestUrl(path);
                                     }
                                 } catch (Exception e) {
-                                    throw new AbacusException("Failed to extract String 'value' from @%s annotation:" + annotationType.getSimpleName());
+                                    throw new RuntimeException("Failed to extract String 'value' from @%s annotation:" + annotationType.getSimpleName());
                                 }
                             }
 
@@ -270,7 +269,7 @@ public final class HttpProxy {
                                     operationConfig.paramFields[i] = (Field) parameterAnnotation;
 
                                     if (operationConfig.paramNameTypeMap.put(operationConfig.paramFields[i].value(), operationConfig.paramTypes[i]) != null) {
-                                        throw new AbacusException("Duplicated parameter names: " + operationConfig.paramFields[i].value());
+                                        throw new RuntimeException("Duplicated parameter names: " + operationConfig.paramFields[i].value());
                                     }
                                 } else if (parameterAnnotation.annotationType() == Path.class) {
                                     operationConfig.validatePathName(((Path) parameterAnnotation).value());
@@ -278,7 +277,7 @@ public final class HttpProxy {
                                     operationConfig.paramPaths[i] = (Path) parameterAnnotation;
 
                                     if (operationConfig.paramNameTypeMap.put(operationConfig.paramPaths[i].value(), operationConfig.paramTypes[i]) != null) {
-                                        throw new AbacusException("Duplicated parameter names: " + operationConfig.paramPaths[i].value());
+                                        throw new RuntimeException("Duplicated parameter names: " + operationConfig.paramPaths[i].value());
                                     }
                                 }
                             }
@@ -1377,12 +1376,12 @@ public final class HttpProxy {
          */
         void validatePathName(final String name) {
             if (!PARAM_NAME_REGEX.matcher(name).matches()) {
-                throw new AbacusException(String.format("@Path parameter name must match %s. Found: %s", PARAM_URL_REGEX.pattern(), name));
+                throw new RuntimeException(String.format("@Path parameter name must match %s. Found: %s", PARAM_URL_REGEX.pattern(), name));
             }
 
             // Verify URL replacement name is actually present in the URL path.
             if (!requestUrlParamNames.containsKey(name)) {
-                throw new AbacusException(String.format("URL \"%s\" does not contain \"{%s}\".", requestUrl, name));
+                throw new RuntimeException(String.format("URL \"%s\" does not contain \"{%s}\".", requestUrl, name));
             }
         }
 

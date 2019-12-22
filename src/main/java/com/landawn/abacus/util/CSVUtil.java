@@ -41,6 +41,8 @@ import com.landawn.abacus.DataSet;
 import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.logging.Logger;
+import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.JSONParser;
@@ -60,6 +62,9 @@ import com.landawn.abacus.type.Type;
  * @since 0.8
  */
 public final class CSVUtil {
+
+    /** The Constant logger. */
+    private static final Logger logger = LoggerFactory.getLogger(CSVUtil.class);
 
     /** The Constant jsonParser. */
     private static final JSONParser jsonParser = ParserFactory.createJSONParser();
@@ -1683,8 +1688,7 @@ public final class CSVUtil {
                 result++;
 
                 if ((result % batchSize) == 0) {
-                    stmt.executeBatch();
-                    stmt.clearBatch();
+                    executeBatch(stmt);
 
                     if (batchInterval > 0) {
                         N.sleep(batchInterval);
@@ -1695,8 +1699,7 @@ public final class CSVUtil {
             }
 
             if ((result % batchSize) > 0) {
-                stmt.executeBatch();
-                stmt.clearBatch();
+                executeBatch(stmt);
             }
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
@@ -1707,6 +1710,18 @@ public final class CSVUtil {
         }
 
         return result;
+    }
+
+    private static int[] executeBatch(final PreparedStatement stmt) throws SQLException {
+        try {
+            return stmt.executeBatch();
+        } finally {
+            try {
+                stmt.clearBatch();
+            } catch (SQLException e) {
+                logger.error("Failed to clear batch parameters after executeBatch", e);
+            }
+        }
     }
 
     /**
@@ -2026,8 +2041,7 @@ public final class CSVUtil {
                 result++;
 
                 if ((result % batchSize) == 0) {
-                    stmt.executeBatch();
-                    stmt.clearBatch();
+                    executeBatch(stmt);
 
                     if (batchInterval > 0) {
                         N.sleep(batchInterval);
@@ -2038,8 +2052,7 @@ public final class CSVUtil {
             }
 
             if ((result % batchSize) > 0) {
-                stmt.executeBatch();
-                stmt.clearBatch();
+                executeBatch(stmt);
             }
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
@@ -2325,8 +2338,7 @@ public final class CSVUtil {
                 stmt.addBatch();
 
                 if ((++result % batchSize) == 0) {
-                    stmt.executeBatch();
-                    stmt.clearBatch();
+                    executeBatch(stmt);
 
                     if (batchInterval > 0) {
                         N.sleep(batchInterval);
@@ -2337,8 +2349,7 @@ public final class CSVUtil {
             }
 
             if ((result % batchSize) > 0) {
-                stmt.executeBatch();
-                stmt.clearBatch();
+                executeBatch(stmt);
             }
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);

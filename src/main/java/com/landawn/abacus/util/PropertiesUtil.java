@@ -45,7 +45,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
@@ -436,7 +435,7 @@ public final class PropertiesUtil {
 
         // TODO it's difficult to support duplicated property and may be misused.
         if (hasDuplicatedPropName(node)) {
-            throw new AbacusException("The source xml document contains duplicated properties which has same node tag name in the same root.");
+            throw new RuntimeException("The source xml document contains duplicated properties which has same node tag name in the same root.");
         }
 
         Class<?> targetClass = null;
@@ -823,7 +822,7 @@ public final class PropertiesUtil {
 
             // TODO it's difficult to support duplicated property and may be misused.
             if (hasDuplicatedPropName(root)) {
-                throw new AbacusException("The source xml document contains duplicated properties which has same node tag name in the same root.");
+                throw new RuntimeException("The source xml document contains duplicated properties which has same node tag name in the same root.");
             }
 
             if (className == null) {

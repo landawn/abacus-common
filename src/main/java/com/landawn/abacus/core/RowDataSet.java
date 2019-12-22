@@ -9877,7 +9877,7 @@ public class RowDataSet implements DataSet, Cloneable {
     //    @Override
     //    public <T extends Comparable<? super T>> Map<String, T> percentiles(final String columnName) {
     //        if (size() == 0) {
-    //            throw new AbacusException("The size of dataset is 0");
+    //            throw new RuntimeException("The size of dataset is 0");
     //        }
     //
     //        final Object[] columns = getColumn(columnName).toArray();
@@ -9890,7 +9890,7 @@ public class RowDataSet implements DataSet, Cloneable {
     //    @Override
     //    public <T> Map<String, T> percentiles(final String columnName, final Comparator<? super T> comparator) {
     //        if (size() == 0) {
-    //            throw new AbacusException("The size of dataset is 0");
+    //            throw new RuntimeException("The size of dataset is 0");
     //        }
     //
     //        final T[] columns = (T[]) getColumn(columnName).toArray();
@@ -9930,7 +9930,7 @@ public class RowDataSet implements DataSet, Cloneable {
     //    @Override
     //    public <T extends Comparable<? super T>> Map<String, T> percentiles(final String columnName) {
     //        if (size() == 0) {
-    //            throw new AbacusException("The size of dataset is 0");
+    //            throw new RuntimeException("The size of dataset is 0");
     //        }
     //
     //        final Object[] columns = getColumn(columnName).toArray();
@@ -9943,7 +9943,7 @@ public class RowDataSet implements DataSet, Cloneable {
     //    @Override
     //    public <T> Map<String, T> percentiles(final String columnName, final Comparator<? super T> comparator) {
     //        if (size() == 0) {
-    //            throw new AbacusException("The size of dataset is 0");
+    //            throw new RuntimeException("The size of dataset is 0");
     //        }
     //
     //        final T[] columns = (T[]) getColumn(columnName).toArray();

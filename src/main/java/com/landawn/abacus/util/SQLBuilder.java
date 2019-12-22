@@ -51,7 +51,6 @@ import com.landawn.abacus.condition.In;
 import com.landawn.abacus.condition.Junction;
 import com.landawn.abacus.condition.SubQuery;
 import com.landawn.abacus.core.DirtyMarkerUtil;
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil;
@@ -879,11 +878,11 @@ public abstract class SQLBuilder {
      */
     public SQLBuilder into(final String tableName) {
         if (op != OperationType.ADD) {
-            throw new AbacusException("Invalid operation: " + op);
+            throw new RuntimeException("Invalid operation: " + op);
         }
 
         if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(columnNameList) && N.isNullOrEmpty(props) && N.isNullOrEmpty(propsList)) {
-            throw new AbacusException("Column names or props must be set first by insert");
+            throw new RuntimeException("Column names or props must be set first by insert");
         }
 
         this.tableName = tableName;
@@ -981,7 +980,7 @@ public abstract class SQLBuilder {
                 }
 
                 default:
-                    throw new AbacusException("Not supported SQL policy: " + sqlPolicy);
+                    throw new RuntimeException("Not supported SQL policy: " + sqlPolicy);
             }
         } else if (N.notNullOrEmpty(columnNameList)) {
             switch (sqlPolicy) {
@@ -1028,7 +1027,7 @@ public abstract class SQLBuilder {
                 }
 
                 default:
-                    throw new AbacusException("Not supported SQL policy: " + sqlPolicy);
+                    throw new RuntimeException("Not supported SQL policy: " + sqlPolicy);
             }
         } else if (N.notNullOrEmpty(props)) {
             appendInsertProps(props);
@@ -1127,11 +1126,11 @@ public abstract class SQLBuilder {
      */
     private SQLBuilder from(final String tableName, final String fromCause) {
         if (op != OperationType.QUERY) {
-            throw new AbacusException("Invalid operation: " + op);
+            throw new RuntimeException("Invalid operation: " + op);
         }
 
         if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(columnNameList) && N.isNullOrEmpty(columnAliases)) {
-            throw new AbacusException("Column names or props must be set first by select");
+            throw new RuntimeException("Column names or props must be set first by select");
         }
 
         this.tableName = tableName;
@@ -2306,7 +2305,7 @@ public abstract class SQLBuilder {
                 }
 
                 default:
-                    throw new AbacusException("Not supported SQL policy: " + sqlPolicy);
+                    throw new RuntimeException("Not supported SQL policy: " + sqlPolicy);
             }
         }
 
@@ -2382,7 +2381,7 @@ public abstract class SQLBuilder {
             }
 
             default:
-                throw new AbacusException("Not supported SQL policy: " + sqlPolicy);
+                throw new RuntimeException("Not supported SQL policy: " + sqlPolicy);
         }
 
         columnNameList = null;
@@ -2470,7 +2469,7 @@ public abstract class SQLBuilder {
             }
 
             default:
-                throw new AbacusException("Not supported SQL policy: " + sqlPolicy);
+                throw new RuntimeException("Not supported SQL policy: " + sqlPolicy);
         }
 
         columnNameList = null;
@@ -2555,7 +2554,7 @@ public abstract class SQLBuilder {
      */
     public String sql() {
         if (sb == null) {
-            throw new AbacusException("This SQLBuilder has been closed after sql() was called previously");
+            throw new RuntimeException("This SQLBuilder has been closed after sql() was called previously");
         }
 
         init(true);
@@ -2758,7 +2757,7 @@ public abstract class SQLBuilder {
             }
 
             default:
-                throw new AbacusException("Not supported SQL policy: " + sqlPolicy);
+                throw new RuntimeException("Not supported SQL policy: " + sqlPolicy);
         }
     }
 
@@ -2834,7 +2833,7 @@ public abstract class SQLBuilder {
             }
 
             default:
-                throw new AbacusException("Not supported SQL policy: " + sqlPolicy);
+                throw new RuntimeException("Not supported SQL policy: " + sqlPolicy);
         }
     }
 
@@ -2978,7 +2977,7 @@ public abstract class SQLBuilder {
                 } else if (this instanceof NLC) {
                     sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
                 } else {
-                    throw new AbacusException("Unsupproted subQuery condition: " + cond);
+                    throw new RuntimeException("Unsupproted subQuery condition: " + cond);
                 }
             }
         } else if (cond instanceof Expression) {
@@ -3095,7 +3094,7 @@ public abstract class SQLBuilder {
 
         if (registeringClasses != null) {
             if (registeringClasses.contains(entityClass)) {
-                throw new AbacusException("Cycling references found among: " + registeringClasses);
+                throw new RuntimeException("Cycling references found among: " + registeringClasses);
             } else {
                 registeringClasses.add(entityClass);
             }

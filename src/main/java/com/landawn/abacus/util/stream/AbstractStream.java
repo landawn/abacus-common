@@ -3813,8 +3813,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 stmt.addBatch();
 
                 if ((++cnt % batchSize) == 0) {
-                    stmt.executeBatch();
-                    stmt.clearBatch();
+                    executeBatch(stmt);
 
                     if (batchInterval > 0) {
                         N.sleep(batchInterval);
@@ -3823,13 +3822,24 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             if ((cnt % batchSize) > 0) {
-                stmt.executeBatch();
-                stmt.clearBatch();
+                executeBatch(stmt);
             }
 
             return cnt;
         } finally {
             close();
+        }
+    }
+
+    private int[] executeBatch(final PreparedStatement stmt) throws SQLException {
+        try {
+            return stmt.executeBatch();
+        } finally {
+            try {
+                stmt.clearBatch();
+            } catch (SQLException e) {
+                logger.error("Failed to clear batch parameters after executeBatch", e);
+            }
         }
     }
 

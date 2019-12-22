@@ -21,7 +21,7 @@ package com.landawn.abacus.exception;
  * @author Haiyang Li
  * @since 0.8
  */
-public class ServerException extends AbacusException {
+public class ServerException extends RuntimeException {
     /**
      * Field serialVersionUID.
      */

@@ -38,7 +38,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -469,7 +468,7 @@ public final class HttpClient extends AbstractHttpClient {
 
         if (_activeConnectionCounter.incrementAndGet() > _maxConnection) {
             _activeConnectionCounter.decrementAndGet();
-            throw new AbacusException("Can not get connection, exceeded max connection number: " + _maxConnection);
+            throw new RuntimeException("Can not get connection, exceeded max connection number: " + _maxConnection);
         }
 
         try {

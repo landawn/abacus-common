@@ -21,7 +21,7 @@ package com.landawn.abacus.exception;
  * @author Haiyang Li
  * @since 1.3.29
  */
-public class ObjectNotFoundException extends AbacusException {
+public class ObjectNotFoundException extends IllegalStateException {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = -1806452586200243492L;

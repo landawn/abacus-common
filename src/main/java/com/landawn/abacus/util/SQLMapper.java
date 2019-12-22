@@ -33,7 +33,6 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
@@ -116,7 +115,7 @@ public final class SQLMapper {
                 NodeList sqlMapperEle = doc.getElementsByTagName(SQLMapper.SQL_MAPPER);
 
                 if (0 == sqlMapperEle.getLength()) {
-                    throw new AbacusException("There is no 'sqlMapper' element. ");
+                    throw new RuntimeException("There is no 'sqlMapper' element. ");
                 }
 
                 List<Element> sqlElementList = XMLUtil.getElementsByTagName((Element) sqlMapperEle.item(0), SQL);

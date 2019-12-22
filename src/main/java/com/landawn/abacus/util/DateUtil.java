@@ -2171,7 +2171,7 @@ public abstract class DateUtil {
                     }
 
                 default:
-                    // throw new AbacusException("No valid date format found for: " + str);
+                    // throw new RuntimeException("No valid date format found for: " + str);
                     return null;
             }
         }

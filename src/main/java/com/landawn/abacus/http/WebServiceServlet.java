@@ -34,7 +34,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -186,7 +185,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 : MessageEncryption.valueOf(getInitParameter(config, ENCRYPTION_MESSAGE).toUpperCase());
 
         if (N.isNullOrEmpty(serviceImplClassParameter) && N.isNullOrEmpty(serviceFatoryClassParameter)) {
-            throw new AbacusException("serviceImplClass and serviceFactoryClass can't be null at the same time.");
+            throw new RuntimeException("serviceImplClass and serviceFactoryClass can't be null at the same time.");
         }
 
         Class<?> serviceImplClass = null;
@@ -295,7 +294,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                     try {
                         path = (String) annotationType.getMethod("value").invoke(methodAnnotation);
                     } catch (Exception e) {
-                        throw new AbacusException("Failed to extract String 'value' from @%s annotation:" + annotationType.getSimpleName());
+                        throw new RuntimeException("Failed to extract String 'value' from @%s annotation:" + annotationType.getSimpleName());
                     }
 
                     methodHttpMethodMap.put(methodName, N.asSet(HttpMethod.valueOf(methodInfo.value())));
@@ -530,7 +529,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 if (method == null) {
                     String msg = "The target web service method can't be identified by url";
                     serviceImplLogger.error(msg);
-                    throw new AbacusException(msg);
+                    throw new RuntimeException(msg);
                 }
 
                 parameterClass = methodParameterClassMap.get(method.getName());
@@ -585,7 +584,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                     if (method == null) {
                         String msg = "Unsupported opearation";
                         serviceImplLogger.error(msg);
-                        throw new AbacusException(msg);
+                        throw new RuntimeException(msg);
                     } else {
                         checkHttpMethod(method, httpMethodName);
 
@@ -704,7 +703,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                     if (method == null) {
                         String msg = "Unsupported opearation";
                         serviceImplLogger.error(msg);
-                        throw new AbacusException(msg);
+                        throw new RuntimeException(msg);
                     } else {
                         checkHttpMethod(method, httpMethodName);
 
@@ -753,7 +752,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 default:
                     String msg = "Unsupported content format: " + contentFormat;
                     serviceImplLogger.error(msg);
-                    throw new AbacusException(msg);
+                    throw new RuntimeException(msg);
             }
         } catch (IOException e) {
             String msg = "Failed to process request";
@@ -872,7 +871,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 default:
                     String msg = "Unsupported content type: " + contentFormat;
                     serviceImplLogger.error(msg);
-                    throw new AbacusException(msg);
+                    throw new RuntimeException(msg);
             }
 
             flush(os);
@@ -914,7 +913,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
         if (!methodHttpMethodMap.get(method.getName()).contains(httpMethodName)) {
             String msg = "HTTP method '" + httpMethodName + "' is not supported by operation: " + method.getName();
             serviceImplLogger.error(msg);
-            throw new AbacusException(msg);
+            throw new RuntimeException(msg);
         }
     }
 

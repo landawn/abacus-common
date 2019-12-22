@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
@@ -217,7 +216,7 @@ public abstract class AbstractPool implements Pool {
      */
     protected void assertNotClosed() {
         if (isClosed) {
-            throw new AbacusException(ClassUtil.getCanonicalClassName(getClass()) + " has been closed");
+            throw new RuntimeException(ClassUtil.getCanonicalClassName(getClass()) + " has been closed");
         }
     }
 

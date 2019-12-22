@@ -4794,7 +4794,9 @@ public abstract class Collectors {
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
      * @see Stream#asyncCall(Try.Function)
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, R> streaming(final Function<? super Stream<T>, R> streamingCollector) {
         return streaming((Supplier) queueSupplier, streamingCollector);
@@ -4808,7 +4810,9 @@ public abstract class Collectors {
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
      * @see Stream#asyncCall(Try.Function)
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, R> streaming(final long maxWaitIntervalInMillis, final Function<? super Stream<T>, R> streamingCollector) {
         return streaming(maxWaitIntervalInMillis, (Supplier) queueSupplier, streamingCollector);
@@ -4822,7 +4826,9 @@ public abstract class Collectors {
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
      * @see Stream#asyncCall(Try.Function)
+     * @deprecated
      */
+    @Deprecated
     public static <T, R> Collector<T, ?, R> streaming(final Supplier<? extends BlockingQueue<T>> queueSupplier,
             final Function<? super Stream<T>, R> streamingCollector) {
         return streaming(10, queueSupplier, streamingCollector);
@@ -4837,7 +4843,9 @@ public abstract class Collectors {
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
      * @see Stream#asyncCall(Try.Function)
+     * @deprecated
      */
+    @Deprecated
     public static <T, R> Collector<T, ?, R> streaming(final long maxWaitIntervalInMillis, final Supplier<? extends BlockingQueue<T>> queueSupplier,
             final Function<? super Stream<T>, R> streamingCollector) {
         final Function<Stream<T>, ContinuableFuture<R>> streamingCollector2 = new Function<Stream<T>, ContinuableFuture<R>>() {
@@ -4859,7 +4867,9 @@ public abstract class Collectors {
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
      * @see Stream#asyncCall(Try.Function)
+     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, R> streaming(final Supplier<? extends BlockingQueue<T>> queueSupplier,
             final Function<? super Stream<T>, ContinuableFuture<R>> streamingCollector, final long maxWaitIntervalInMillis) {

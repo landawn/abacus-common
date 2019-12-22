@@ -25,7 +25,6 @@ import java.util.Queue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
@@ -153,7 +152,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 break;
 
             default:
-                throw new AbacusException("Unsupproted eviction policy: " + evictionPolicy.name());
+                throw new RuntimeException("Unsupproted eviction policy: " + evictionPolicy.name());
         }
 
         if (evictDelay > 0) {

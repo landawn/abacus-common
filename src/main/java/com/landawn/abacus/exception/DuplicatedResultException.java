@@ -21,7 +21,7 @@ package com.landawn.abacus.exception;
  * @author Haiyang Li
  * @since 0.8
  */
-public class DuplicatedResultException extends AbacusException {
+public class DuplicatedResultException extends IllegalStateException {
     /**
      * Field serialVersionUID.
      */

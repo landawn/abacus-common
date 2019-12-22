@@ -21,7 +21,7 @@ package com.landawn.abacus.exception;
  * @author Haiyang Li
  * @since 0.8
  */
-public class ParseException extends AbacusException {
+public class ParseException extends RuntimeException {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 7678894353902496315L;

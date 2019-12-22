@@ -20,7 +20,6 @@ import static org.slf4j.spi.LocationAwareLogger.WARN_INT;
 import org.slf4j.helpers.NOPLoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
 
-import com.landawn.abacus.exception.AbacusException;
 import com.landawn.abacus.util.function.Supplier;
 
 // TODO: Auto-generated Javadoc
@@ -49,7 +48,7 @@ class SLF4JLogger extends AbstractLogger {
     public SLF4JLogger(String name) {
         super(name);
         if (org.slf4j.LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory) {
-            throw new AbacusException("Failed to initilze SLF4J Logger Factory");
+            throw new RuntimeException("Failed to initilze SLF4J Logger Factory");
         }
 
         loggerImpl = org.slf4j.LoggerFactory.getLogger(name);
