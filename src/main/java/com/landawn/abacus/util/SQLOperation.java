@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,10 @@ public enum SQLOperation {
      */
     DROP(WD.DROP),
     /**
+     * Field ALTER.
+     */
+    ALTER(WD.ALTER),
+    /**
      * Field SHOW.
      */
     SHOW(WD.SHOW),
@@ -62,10 +66,6 @@ public enum SQLOperation {
      * Field DESCRIBE.
      */
     DESCRIBE(WD.DESCRIBE),
-    /**
-     * Field ALTER.
-     */
-    ALTER(WD.ALTER),
     /**
      * Field USE.
      */
@@ -85,7 +85,15 @@ public enum SQLOperation {
     /**
      * Field ROLLBACK.
      */
-    ROLLBACK(WD.ROLLBACK);
+    ROLLBACK(WD.ROLLBACK),
+    /**
+     * Field CALL.
+     */
+    CALL("CALL"),
+    /**
+     * Field UNKNOWN.
+     */
+    UNKNOWN("UNKNOWN");
 
     /** The name. */
     private String name;
@@ -100,7 +108,7 @@ public enum SQLOperation {
     }
 
     /** The Constant operationMap. */
-    private final static Map<String, SQLOperation> operationMap = new HashMap<String, SQLOperation>();
+    private final static Map<String, SQLOperation> operationMap = new HashMap<>();
 
     static {
         SQLOperation[] values = SQLOperation.values();

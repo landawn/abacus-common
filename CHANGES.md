@@ -1,3 +1,8 @@
+### 1.10.1
+
+* Improvements and bug fix.
+
+
 ### 1.10.0
 
 * Remove `AbacusException`.
