@@ -27,7 +27,7 @@ import java.util.Set;
 
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Try.Function;
+import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -596,7 +596,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(Try.CharPredicate<E> p) throws E {
+    public <E extends Exception> boolean removeIf(Throwables.CharPredicate<E> p) throws E {
         final CharList tmp = new CharList(size());
 
         for (int i = 0; i < size; i++) {
@@ -766,7 +766,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param operator
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Try.CharUnaryOperator<E> operator) throws E {
+    public <E extends Exception> void replaceAll(Throwables.CharUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsChar(elementData[i]);
         }
@@ -780,7 +780,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Try.CharPredicate<E> predicate, char newValue) throws E {
+    public <E extends Exception> boolean replaceIf(Throwables.CharPredicate<E> predicate, char newValue) throws E {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1266,7 +1266,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.CharConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(Throwables.CharConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
@@ -1278,7 +1278,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Try.CharConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.CharConsumer<E> action) throws E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
         if (size > 0) {
@@ -1317,7 +1317,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> OptionalChar findFirst(Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalChar findFirst(Throwables.CharPredicate<E> predicate) throws E {
         for (int i = 0; i < size; i++) {
             if (predicate.test(elementData[i])) {
                 return OptionalChar.of(elementData[i]);
@@ -1334,7 +1334,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> OptionalChar findLast(Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalChar findLast(Throwables.CharPredicate<E> predicate) throws E {
         for (int i = size - 1; i >= 0; i--) {
             if (predicate.test(elementData[i])) {
                 return OptionalChar.of(elementData[i]);
@@ -1352,7 +1352,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> OptionalInt findFirstIndex(Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalInt findFirstIndex(Throwables.CharPredicate<E> predicate) throws E {
         for (int i = 0; i < size; i++) {
             if (predicate.test(elementData[i])) {
                 return OptionalInt.of(i);
@@ -1370,7 +1370,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> OptionalInt findLastIndex(Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalInt findLastIndex(Throwables.CharPredicate<E> predicate) throws E {
         for (int i = size - 1; i >= 0; i--) {
             if (predicate.test(elementData[i])) {
                 return OptionalInt.of(i);
@@ -1388,7 +1388,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean allMatch(Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> boolean allMatch(Throwables.CharPredicate<E> filter) throws E {
         return allMatch(0, size(), filter);
     }
 
@@ -1401,7 +1401,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean allMatch(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> boolean allMatch(final int fromIndex, final int toIndex, Throwables.CharPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         if (size > 0) {
@@ -1423,7 +1423,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean anyMatch(Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> boolean anyMatch(Throwables.CharPredicate<E> filter) throws E {
         return anyMatch(0, size(), filter);
     }
 
@@ -1436,7 +1436,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean anyMatch(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> boolean anyMatch(final int fromIndex, final int toIndex, Throwables.CharPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         if (size > 0) {
@@ -1458,7 +1458,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean noneMatch(Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> boolean noneMatch(Throwables.CharPredicate<E> filter) throws E {
         return noneMatch(0, size(), filter);
     }
 
@@ -1471,7 +1471,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean noneMatch(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> boolean noneMatch(final int fromIndex, final int toIndex, Throwables.CharPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         if (size > 0) {
@@ -1492,7 +1492,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> int count(Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> int count(Throwables.CharPredicate<E> filter) throws E {
         return count(0, size(), filter);
     }
 
@@ -1505,7 +1505,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> int count(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> int count(final int fromIndex, final int toIndex, Throwables.CharPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.count(elementData, fromIndex, toIndex, filter);
@@ -1518,7 +1518,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
-    public <E extends Exception> CharList filter(Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> CharList filter(Throwables.CharPredicate<E> filter) throws E {
         return filter(0, size(), filter);
     }
 
@@ -1531,7 +1531,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> CharList filter(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter) throws E {
+    public <E extends Exception> CharList filter(final int fromIndex, final int toIndex, Throwables.CharPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.filter(elementData, fromIndex, toIndex, filter);
@@ -1545,7 +1545,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a new List with the elements match the provided predicate.
      * @throws E the e
      */
-    public <E extends Exception> CharList filter(Try.CharPredicate<E> filter, int max) throws E {
+    public <E extends Exception> CharList filter(Throwables.CharPredicate<E> filter, int max) throws E {
         return filter(0, size(), filter, max);
     }
 
@@ -1559,7 +1559,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> CharList filter(final int fromIndex, final int toIndex, Try.CharPredicate<E> filter, final int max) throws E {
+    public <E extends Exception> CharList filter(final int fromIndex, final int toIndex, Throwables.CharPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         return N.filter(elementData, fromIndex, toIndex, filter, max);
@@ -1572,7 +1572,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> CharList map(final Try.CharUnaryOperator<E> mapper) throws E {
+    public <E extends Exception> CharList map(final Throwables.CharUnaryOperator<E> mapper) throws E {
         return map(0, size, mapper);
     }
 
@@ -1585,7 +1585,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> CharList map(final int fromIndex, final int toIndex, final Try.CharUnaryOperator<E> mapper) throws E {
+    public <E extends Exception> CharList map(final int fromIndex, final int toIndex, final Throwables.CharUnaryOperator<E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         final CharList result = new CharList(toIndex - fromIndex);
@@ -1606,7 +1606,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <T, E extends Exception> List<T> mapToObj(final Try.CharFunction<? extends T, E> mapper) throws E {
+    public <T, E extends Exception> List<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper) throws E {
         return mapToObj(0, size, mapper);
     }
 
@@ -1621,7 +1621,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Try.CharFunction<? extends T, E> mapper) throws E {
+    public <T, E extends Exception> List<T> mapToObj(final int fromIndex, final int toIndex, final Throwables.CharFunction<? extends T, E> mapper) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<T> result = new ArrayList<>(toIndex - fromIndex);
@@ -1656,7 +1656,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> OptionalChar reduce(final Try.CharBinaryOperator<E> accumulator) throws E {
+    public <E extends Exception> OptionalChar reduce(final Throwables.CharBinaryOperator<E> accumulator) throws E {
         if (isEmpty()) {
             return OptionalChar.empty();
         }
@@ -1694,7 +1694,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> char reduce(final char identity, final Try.CharBinaryOperator<E> accumulator) throws E {
+    public <E extends Exception> char reduce(final char identity, final Throwables.CharBinaryOperator<E> accumulator) throws E {
         if (isEmpty()) {
             return identity;
         }
@@ -2122,8 +2122,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      * @throws E2 the e2
      */
-    public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Try.CharFunction<? extends K, E> keyMapper,
-            Try.CharFunction<? extends V, E2> valueMapper) throws E, E2 {
+    public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.CharFunction<? extends K, E> keyMapper,
+            Throwables.CharFunction<? extends V, E2> valueMapper) throws E, E2 {
         return toMap(keyMapper, valueMapper, Factory.<K, V> ofMap());
     }
 
@@ -2141,9 +2141,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      * @throws E2 the e2
      */
-    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Try.CharFunction<? extends K, E> keyMapper,
-            Try.CharFunction<? extends V, E2> valueMapper, IntFunction<? extends M> mapFactory) throws E, E2 {
-        final Try.BinaryOperator<V, RuntimeException> mergeFunction = Fn.throwingMerger();
+    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.CharFunction<? extends K, E> keyMapper,
+            Throwables.CharFunction<? extends V, E2> valueMapper, IntFunction<? extends M> mapFactory) throws E, E2 {
+        final Throwables.BinaryOperator<V, RuntimeException> mergeFunction = Fn.throwingMerger();
 
         return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
@@ -2163,8 +2163,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public <K, V, E extends Exception, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(Try.CharFunction<? extends K, E> keyMapper,
-            Try.CharFunction<? extends V, E2> valueMapper, Try.BinaryOperator<V, E3> mergeFunction) throws E, E2, E3 {
+    public <K, V, E extends Exception, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(Throwables.CharFunction<? extends K, E> keyMapper,
+            Throwables.CharFunction<? extends V, E2> valueMapper, Throwables.BinaryOperator<V, E3> mergeFunction) throws E, E2, E3 {
         return toMap(keyMapper, valueMapper, mergeFunction, Factory.<K, V> ofMap());
     }
 
@@ -2185,8 +2185,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(Try.CharFunction<? extends K, E> keyMapper,
-            Try.CharFunction<? extends V, E2> valueMapper, Try.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
+    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(Throwables.CharFunction<? extends K, E> keyMapper,
+            Throwables.CharFunction<? extends V, E2> valueMapper, Throwables.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
         final M result = mapFactory.apply(size);
 
         for (int i = 0; i < size; i++) {
@@ -2207,7 +2207,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <K, A, D, E extends Exception> Map<K, D> toMap(Try.CharFunction<? extends K, E> keyMapper, Collector<Character, A, D> downstream) throws E {
+    public <K, A, D, E extends Exception> Map<K, D> toMap(Throwables.CharFunction<? extends K, E> keyMapper, Collector<Character, A, D> downstream) throws E {
         return toMap(keyMapper, downstream, Factory.<K, D> ofMap());
     }
 
@@ -2224,7 +2224,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Try.CharFunction<? extends K, E> keyMapper,
+    public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
             final Collector<Character, A, D> downstream, final IntFunction<? extends M> mapFactory) throws E {
         final M result = mapFactory.apply(size);
         final Supplier<A> downstreamSupplier = downstream.supplier();
@@ -2298,7 +2298,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Try.Function<? super CharList, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super CharList, R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -2323,7 +2323,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void accept(Try.Consumer<? super CharList, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<? super CharList, E> action) throws E {
         action.accept(this);
     }
 
@@ -2335,7 +2335,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super CharList, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CharList, E> action) throws E {
         return If.is(size > 0).then(this, action);
     }
 

@@ -63,7 +63,7 @@ public final class Maps {
      * @return
      * @throws E the e
      */
-    public static <T, K, E extends Exception> Map<K, T> newMap(Collection<? extends T> c, final Try.Function<? super T, ? extends K, E> keyMapper) throws E {
+    public static <T, K, E extends Exception> Map<K, T> newMap(Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, E> keyMapper) throws E {
         N.checkArgNotNull(keyMapper);
 
         if (N.isNullOrEmpty(c)) {
@@ -90,7 +90,7 @@ public final class Maps {
      * @return
      * @throws E the e
      */
-    public static <T, K, E extends Exception> Map<K, T> newLinkedHashMap(Collection<? extends T> c, final Try.Function<? super T, ? extends K, E> keyMapper)
+    public static <T, K, E extends Exception> Map<K, T> newLinkedHashMap(Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, E> keyMapper)
             throws E {
         N.checkArgNotNull(keyMapper);
 
@@ -122,7 +122,7 @@ public final class Maps {
      * @throws E2 the e2
      */
     public static <T, K, V, E extends Exception, E2 extends Exception> Map<K, V> newMap(Collection<? extends T> c,
-            final Try.Function<? super T, ? extends K, E> keyMapper, final Try.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
+            final Throwables.Function<? super T, ? extends K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
@@ -156,7 +156,7 @@ public final class Maps {
      * @throws E2 the e2
      */
     public static <T, K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M newMap(Collection<? extends T> c,
-            final Try.Function<? super T, ? extends K, E> keyMapper, final Try.Function<? super T, ? extends V, E2> valueExtractor,
+            final Throwables.Function<? super T, ? extends K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
             final IntFunction<? extends M> mapSupplier) throws E, E2 {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
@@ -774,7 +774,7 @@ public final class Maps {
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      * @throws E the e
      */
-    public static <K, V, E extends Exception> boolean removeIf(final Map<K, V> map, final Try.Predicate<? super Map.Entry<K, V>, E> filter) throws E {
+    public static <K, V, E extends Exception> boolean removeIf(final Map<K, V> map, final Throwables.Predicate<? super Map.Entry<K, V>, E> filter) throws E {
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -809,7 +809,7 @@ public final class Maps {
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      * @throws E the e
      */
-    public static <K, V, E extends Exception> boolean removeIfKey(final Map<K, V> map, final Try.Predicate<? super K, E> filter) throws E {
+    public static <K, V, E extends Exception> boolean removeIfKey(final Map<K, V> map, final Throwables.Predicate<? super K, E> filter) throws E {
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -844,7 +844,7 @@ public final class Maps {
      * @return {@code true} if there are one or more than one entries removed from the specified map.
      * @throws E the e
      */
-    public static <K, V, E extends Exception> boolean removeIfValue(final Map<K, V> map, final Try.Predicate<? super V, E> filter) throws E {
+    public static <K, V, E extends Exception> boolean removeIfValue(final Map<K, V> map, final Throwables.Predicate<? super V, E> filter) throws E {
         List<K> keysToRemove = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -925,7 +925,7 @@ public final class Maps {
      * @param function
      * @throws E the e
      */
-    public static <K, V, E extends Exception> void replaceAll(final Map<K, V> map, final Try.BiFunction<? super K, ? super V, ? extends V, E> function)
+    public static <K, V, E extends Exception> void replaceAll(final Map<K, V> map, final Throwables.BiFunction<? super K, ? super V, ? extends V, E> function)
             throws E {
         N.checkArgNotNull(function);
 
@@ -966,7 +966,7 @@ public final class Maps {
      * @param action
      * @throws E the e
      */
-    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Try.BiConsumer<? super K, ? super V, E> action) throws E {
+    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (N.isNullOrEmpty(map)) {
@@ -988,7 +988,7 @@ public final class Maps {
      * @return
      * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> filter(final Map<K, V> map, final Try.BiPredicate<? super K, ? super V, E> predicate) throws E {
+    public static <K, V, E extends Exception> Map<K, V> filter(final Map<K, V> map, final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
         if (map == null) {
             return new HashMap<>();
         }
@@ -1015,7 +1015,7 @@ public final class Maps {
      * @return
      * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> filterByKey(final Map<K, V> map, final Try.Predicate<? super K, E> predicate) throws E {
+    public static <K, V, E extends Exception> Map<K, V> filterByKey(final Map<K, V> map, final Throwables.Predicate<? super K, E> predicate) throws E {
         if (map == null) {
             return new HashMap<>();
         }
@@ -1042,7 +1042,7 @@ public final class Maps {
      * @return
      * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> filterByValue(final Map<K, V> map, final Try.Predicate<? super V, E> predicate) throws E {
+    public static <K, V, E extends Exception> Map<K, V> filterByValue(final Map<K, V> map, final Throwables.Predicate<? super V, E> predicate) throws E {
         if (map == null) {
             return new HashMap<>();
         }
@@ -1092,7 +1092,7 @@ public final class Maps {
      * @return
      * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<V, K> invert(final Map<K, V> map, Try.BinaryOperator<K, E> mergeOp) throws E {
+    public static <K, V, E extends Exception> Map<V, K> invert(final Map<K, V> map, Throwables.BinaryOperator<K, E> mergeOp) throws E {
         N.checkArgNotNull(mergeOp, "mergeOp");
 
         if (map == null) {
@@ -2339,7 +2339,7 @@ public final class Maps {
      * @param remappingFunction
      * @throws E the e
      */
-    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Try.BiFunction<? super V, ? super V, ? extends V, E> remappingFunction)
+    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BiFunction<? super V, ? super V, ? extends V, E> remappingFunction)
             throws E {
         final V oldValue = map.get(key);
 

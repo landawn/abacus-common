@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface LongTriFunction<R> extends Try.LongTriFunction<R, RuntimeException> {
+public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, RuntimeException> {
 
     @Override
     R apply(long a, long b, long c);

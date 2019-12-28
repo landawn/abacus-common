@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface CharTriConsumer extends Try.CharTriConsumer<RuntimeException> {
+public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeException> {
 
     @Override
     void accept(char a, char b, char c);

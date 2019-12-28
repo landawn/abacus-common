@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ToShortFunction<T> extends Try.ToShortFunction<T, RuntimeException> {
+public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, RuntimeException> {
 
     static final ToShortFunction<Short> UNBOX = new ToShortFunction<Short>() {
         @Override

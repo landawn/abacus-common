@@ -155,7 +155,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(boolean newValue, Try.BooleanPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(boolean newValue, Throwables.BooleanPredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
             return true;
@@ -174,7 +174,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(boolean newValue, Try.BooleanBiPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(boolean newValue, Throwables.BooleanBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;
             return true;

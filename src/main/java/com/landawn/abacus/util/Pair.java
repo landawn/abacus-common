@@ -184,7 +184,7 @@ public final class Pair<L, R> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setLeftIf(final L newLeft, Try.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
+    public <E extends Exception> boolean setLeftIf(final L newLeft, Throwables.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
         if (predicate.test(this, newLeft)) {
             this.left = newLeft;
             return true;
@@ -205,7 +205,7 @@ public final class Pair<L, R> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setRightIf(final R newRight, Try.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
+    public <E extends Exception> boolean setRightIf(final R newRight, Throwables.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
         if (predicate.test(this, newRight)) {
             this.right = newRight;
             return true;
@@ -227,7 +227,7 @@ public final class Pair<L, R> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(final L newLeft, final R newRight, Try.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate)
+    public <E extends Exception> boolean setIf(final L newLeft, final R newRight, Throwables.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate)
             throws E {
         if (predicate.test(this, newLeft, newRight)) {
             this.left = newLeft;
@@ -339,8 +339,8 @@ public final class Pair<L, R> {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.Consumer<?, E> comsumer) throws E {
-        final Try.Consumer<Object, E> objComsumer = (Try.Consumer<Object, E>) comsumer;
+    public <E extends Exception> void forEach(Throwables.Consumer<?, E> comsumer) throws E {
+        final Throwables.Consumer<Object, E> objComsumer = (Throwables.Consumer<Object, E>) comsumer;
 
         objComsumer.accept(left);
         objComsumer.accept(right);
@@ -352,7 +352,7 @@ public final class Pair<L, R> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(final Try.BiConsumer<? super L, ? super R, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E {
         action.accept(left, right);
     }
 
@@ -362,7 +362,7 @@ public final class Pair<L, R> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(final Try.Consumer<? super Pair<L, R>, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super Pair<L, R>, E> action) throws E {
         action.accept(this);
     }
 
@@ -374,7 +374,7 @@ public final class Pair<L, R> {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(final Try.BiFunction<? super L, ? super R, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, U, E> mapper) throws E {
         return mapper.apply(left, right);
     }
 
@@ -386,7 +386,7 @@ public final class Pair<L, R> {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(final Try.Function<? super Pair<L, R>, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -397,7 +397,7 @@ public final class Pair<L, R> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<Pair<L, R>> filter(final Try.BiPredicate<? super L, ? super R, E> predicate) throws E {
+    public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
         return predicate.test(left, right) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
     }
 
@@ -408,7 +408,7 @@ public final class Pair<L, R> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<Pair<L, R>> filter(final Try.Predicate<? super Pair<L, R>, E> predicate) throws E {
+    public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
     }
 

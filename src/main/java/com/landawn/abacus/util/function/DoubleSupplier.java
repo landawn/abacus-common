@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface DoubleSupplier extends java.util.function.DoubleSupplier, Try.DoubleSupplier<RuntimeException> {
+public interface DoubleSupplier extends java.util.function.DoubleSupplier, Throwables.DoubleSupplier<RuntimeException> {
 
     static final DoubleSupplier ZERO = new DoubleSupplier() {
         @Override

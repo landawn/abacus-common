@@ -67,7 +67,7 @@ import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.PermutationIterator;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Timed;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -1642,12 +1642,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <E extends Exception> void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action) throws E {
+    public <E extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
         forEachPair(action, 1);
     }
 
     @Override
-    public <E extends Exception> void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+    public <E extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
         forEachTriple(action, 1);
     }
 
@@ -2643,13 +2643,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <E extends Exception> Optional<T> findAny(final Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate) throws E {
         return findFirst(predicate);
     }
 
     @Override
-    public <E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final Try.Predicate<? super T, E> predicateForFirst,
-            final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+    public <E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final Throwables.Predicate<? super T, E> predicateForFirst,
+            final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         assertNotClosed();
 
         try {
@@ -2675,7 +2675,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final U init,
-            final Try.BiPredicate<? super T, ? super U, E> predicateForFirst, final Try.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2 {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicateForFirst, final Throwables.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2 {
         assertNotClosed();
 
         try {
@@ -2701,7 +2701,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final Function<? super T, U> preFunc,
-            final Try.BiPredicate<? super T, ? super U, E> predicateForFirst, final Try.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2 {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicateForFirst, final Throwables.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2 {
         assertNotClosed();
 
         try {
@@ -3726,12 +3726,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <E extends Exception> void forEach(Try.Consumer<? super T, E> action) throws E {
+    public <E extends Exception> void forEach(Throwables.Consumer<? super T, E> action) throws E {
         forEach(action, Fn.emptyAction());
     }
 
     @Override
-    public long persist(File file, Try.Function<? super T, String, IOException> toLine) throws IOException {
+    public long persist(File file, Throwables.Function<? super T, String, IOException> toLine) throws IOException {
         final Writer writer = new FileWriter(file);
 
         try {
@@ -3742,7 +3742,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public long persist(OutputStream os, Try.Function<? super T, String, IOException> toLine) throws IOException {
+    public long persist(OutputStream os, Throwables.Function<? super T, String, IOException> toLine) throws IOException {
         final BufferedWriter bw = Objectory.createBufferedWriter(os);
 
         try {
@@ -3753,7 +3753,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public long persist(Writer writer, Try.Function<? super T, String, IOException> toLine) throws IOException {
+    public long persist(Writer writer, Throwables.Function<? super T, String, IOException> toLine) throws IOException {
         assertNotClosed();
 
         try {
@@ -3784,7 +3784,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException {
         PreparedStatement stmt = null;
 
         try {
@@ -3798,7 +3798,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException {
         checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
                 batchInterval);
         assertNotClosed();

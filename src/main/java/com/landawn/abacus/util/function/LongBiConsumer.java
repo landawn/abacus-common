@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface LongBiConsumer extends Try.LongBiConsumer<RuntimeException> {
+public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeException> {
 
     @Override
     void accept(long t, long u);

@@ -30,7 +30,7 @@ import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.Pair;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -333,7 +333,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Try.DoubleConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -345,7 +345,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         final Holder<Throwable> eHolder = new Holder<>();
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     double next = 0;
@@ -624,7 +624,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -636,7 +636,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         final MutableBoolean result = MutableBoolean.of(false);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     double next = 0;
@@ -673,7 +673,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -685,7 +685,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         final MutableBoolean result = MutableBoolean.of(true);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     double next = 0;
@@ -722,7 +722,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -734,7 +734,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         final MutableBoolean result = MutableBoolean.of(true);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     double next = 0;
@@ -771,7 +771,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> OptionalDouble findFirst(final Try.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalDouble findFirst(final Throwables.DoublePredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -784,7 +784,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         final MutableLong index = MutableLong.of(0);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     final Pair<Long, Double> pair = new Pair<>();
@@ -827,7 +827,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> OptionalDouble findLast(final Try.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalDouble findLast(final Throwables.DoublePredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -840,7 +840,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         final MutableLong index = MutableLong.of(0);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     final Pair<Long, Double> pair = new Pair<>();
@@ -881,7 +881,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> OptionalDouble findAny(final Try.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalDouble findAny(final Throwables.DoublePredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -893,7 +893,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
         final Holder<Object> resultHolder = Holder.of(NONE);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     double next = 0;

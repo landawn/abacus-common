@@ -1534,7 +1534,7 @@ class CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> newHashMap(final Collection<? extends V> c, final Try.Function<? super V, ? extends K, E> keyMapper)
+    public static <K, V, E extends Exception> Map<K, V> newHashMap(final Collection<? extends V> c, final Throwables.Function<? super V, ? extends K, E> keyMapper)
             throws E {
         CommonUtil.checkArgNotNull(keyMapper);
 
@@ -1598,7 +1598,7 @@ class CommonUtil {
      * @throws E the e
      */
     public static <K, V, E extends Exception> Map<K, V> newLinkedHashMap(final Collection<? extends V> c,
-            final Try.Function<? super V, ? extends K, E> keyMapper) throws E {
+            final Throwables.Function<? super V, ? extends K, E> keyMapper) throws E {
         CommonUtil.checkArgNotNull(keyMapper);
 
         if (isNullOrEmpty(c)) {
@@ -7186,7 +7186,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findFirst(a, predicate);
     }
 
@@ -7201,7 +7201,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Nullable<T> findFirst(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findFirst(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findFirst(c, predicate);
     }
 
@@ -7216,7 +7216,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findLast(a, predicate);
     }
 
@@ -7231,7 +7231,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Nullable<T> findLast(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findLast(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findLast(c, predicate);
     }
 
@@ -7246,7 +7246,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findFirstNonNull(a, predicate);
     }
 
@@ -7261,7 +7261,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findFirstNonNull(c, predicate);
     }
 
@@ -7276,7 +7276,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findLastNonNull(a, predicate);
     }
 
@@ -7291,7 +7291,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findLastNonNull(c, predicate);
     }
 
@@ -8560,7 +8560,7 @@ class CommonUtil {
      * @param errorMessageSupplier
      * @throws E the e
      */
-    public static <E extends Exception> void checkArgument(boolean b, Try.Supplier<String, E> errorMessageSupplier) throws E {
+    public static <E extends Exception> void checkArgument(boolean b, Throwables.Supplier<String, E> errorMessageSupplier) throws E {
         if (!b) {
             throw new IllegalArgumentException(errorMessageSupplier.get());
         }
@@ -9279,7 +9279,7 @@ class CommonUtil {
      * @param errorMessageSupplier
      * @throws E the e
      */
-    public static <E extends Exception> void checkState(boolean b, Try.Supplier<String, E> errorMessageSupplier) throws E {
+    public static <E extends Exception> void checkState(boolean b, Throwables.Supplier<String, E> errorMessageSupplier) throws E {
         if (!b) {
             throw new IllegalStateException(errorMessageSupplier.get());
         }
@@ -13584,7 +13584,7 @@ class CommonUtil {
      * @return true, if successful
      * @throws E the e
      */
-    public static <T, E extends Exception> boolean swapIf(final Pair<T, T> pair, Try.Predicate<? super Pair<T, T>, E> predicate) throws E {
+    public static <T, E extends Exception> boolean swapIf(final Pair<T, T> pair, Throwables.Predicate<? super Pair<T, T>, E> predicate) throws E {
         if (predicate.test(pair)) {
             pair.set(pair.right, pair.left);
             return true;
@@ -13615,7 +13615,7 @@ class CommonUtil {
      * @return true, if successful
      * @throws E the e
      */
-    public static <T, M, E extends Exception> boolean swapIf(final Triple<T, M, T> triple, Try.Predicate<? super Triple<T, M, T>, E> predicate) throws E {
+    public static <T, M, E extends Exception> boolean swapIf(final Triple<T, M, T> triple, Throwables.Predicate<? super Triple<T, M, T>, E> predicate) throws E {
         if (predicate.test(triple)) {
             final T left = triple.left;
             triple.setLeft(triple.right);
@@ -17947,7 +17947,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findFirstIndex(a, predicate);
     }
 
@@ -17962,7 +17962,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findFirstIndex(c, predicate);
     }
 
@@ -17977,7 +17977,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findLastIndex(a, predicate);
     }
 
@@ -17992,7 +17992,7 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
         return Iterables.findLastIndex(c, predicate);
     }
 

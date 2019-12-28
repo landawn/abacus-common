@@ -292,7 +292,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.BooleanConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.BooleanConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

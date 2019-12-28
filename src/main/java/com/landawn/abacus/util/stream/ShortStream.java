@@ -41,7 +41,7 @@ import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.ShortSummaryStatistics;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -328,22 +328,22 @@ public abstract class ShortStream
      */
     public abstract <R> R collect(Supplier<R> supplier, ObjShortConsumer<? super R> accumulator);
 
-    public abstract <E extends Exception> void forEach(final Try.ShortConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E;
 
-    public abstract <E extends Exception> boolean anyMatch(final Try.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> boolean allMatch(final Try.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> boolean noneMatch(final Try.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> OptionalShort findFirst(final Try.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> OptionalShort findLast(final Try.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception, E2 extends Exception> OptionalShort findFirstOrLast(Try.ShortPredicate<E> predicateForFirst,
-            Try.ShortPredicate<E> predicateForLast) throws E, E2;
+    public abstract <E extends Exception, E2 extends Exception> OptionalShort findFirstOrLast(Throwables.ShortPredicate<E> predicateForFirst,
+            Throwables.ShortPredicate<E> predicateForLast) throws E, E2;
 
-    public abstract <E extends Exception> OptionalShort findAny(final Try.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalShort findAny(final Throwables.ShortPredicate<E> predicate) throws E;
 
     public abstract OptionalShort min();
 
@@ -1756,7 +1756,7 @@ public abstract class ShortStream
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(c.size() - 1);
 
         for (int i = 0, n = N.min(maxThreadNum, c.size() / 2 + 1); i < n; i++) {
-            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     ShortStream a = null;

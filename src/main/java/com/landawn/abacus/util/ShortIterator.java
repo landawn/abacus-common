@@ -293,7 +293,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.ShortConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.ShortConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

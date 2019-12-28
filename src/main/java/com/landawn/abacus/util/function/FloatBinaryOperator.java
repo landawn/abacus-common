@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface FloatBinaryOperator extends Try.FloatBinaryOperator<RuntimeException> {
+public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<RuntimeException> {
 
     @Override
     float applyAsFloat(float left, float right);

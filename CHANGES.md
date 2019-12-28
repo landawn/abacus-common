@@ -1,3 +1,9 @@
+### 1.10.3
+
+* Move functional interfaces from `Try` to `Throwables`.
+* Improvements and bug fix.
+
+
 ### 1.10.1
 
 * Improvements and bug fix.

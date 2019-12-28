@@ -81,14 +81,15 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.StringUtil;
+import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Throwables.BiFunction;
+import com.landawn.abacus.util.Throwables.Predicate;
+import com.landawn.abacus.util.Throwables.TriConsumer;
+import com.landawn.abacus.util.Throwables.TriFunction;
+import com.landawn.abacus.util.Throwables.TriPredicate;
 import com.landawn.abacus.util.TriIterator;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.Try;
-import com.landawn.abacus.util.Try.BiFunction;
-import com.landawn.abacus.util.Try.Predicate;
-import com.landawn.abacus.util.Try.TriConsumer;
-import com.landawn.abacus.util.Try.TriFunction;
-import com.landawn.abacus.util.Try.TriPredicate;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.WD;
@@ -418,7 +419,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void renameColumn(final String columnName, final Try.Function<String, String, E> func) throws E {
+    public <E extends Exception> void renameColumn(final String columnName, final Throwables.Function<String, String, E> func) throws E {
         renameColumn(columnName, func.apply(columnName));
     }
 
@@ -430,7 +431,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void renameColumns(final Collection<String> columnNames, final Try.Function<String, String, E> func) throws E {
+    public <E extends Exception> void renameColumns(final Collection<String> columnNames, final Throwables.Function<String, String, E> func) throws E {
         checkColumnName(columnNames);
 
         final Map<String, String> map = N.newHashMap(N.initHashCapacity(columnNames.size()));
@@ -449,7 +450,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void renameColumns(final Try.Function<String, String, E> func) throws E {
+    public <E extends Exception> void renameColumns(final Throwables.Function<String, String, E> func) throws E {
         renameColumns(_columnNameList, func);
     }
 
@@ -1072,7 +1073,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> void addColumn(String newColumnName, String fromColumnName, Try.Function<T, ?, E> func) throws E {
+    public <T, E extends Exception> void addColumn(String newColumnName, String fromColumnName, Throwables.Function<T, ?, E> func) throws E {
         addColumn(_columnList.size(), newColumnName, fromColumnName, func);
     }
 
@@ -1088,7 +1089,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> void addColumn(int columnIndex, final String newColumnName, String fromColumnName, Try.Function<T, ?, E> func) throws E {
+    public <T, E extends Exception> void addColumn(int columnIndex, final String newColumnName, String fromColumnName, Throwables.Function<T, ?, E> func)
+            throws E {
         checkFrozen();
 
         if (columnIndex < 0 || columnIndex > _columnNameList.size()) {
@@ -1100,7 +1102,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         final List<Object> newColumn = new ArrayList<>(size());
-        final Try.Function<Object, Object, E> mapper2 = (Try.Function<Object, Object, E>) func;
+        final Throwables.Function<Object, Object, E> mapper2 = (Throwables.Function<Object, Object, E>) func;
         final List<Object> column = _columnList.get(checkColumnName(fromColumnName));
 
         for (Object val : column) {
@@ -1125,8 +1127,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void addColumn(String newColumnName, Collection<String> fromColumnNames, Try.Function<? super DisposableObjArray, ?, E> func)
-            throws E {
+    public <E extends Exception> void addColumn(String newColumnName, Collection<String> fromColumnNames,
+            Throwables.Function<? super DisposableObjArray, ?, E> func) throws E {
         addColumn(_columnList.size(), newColumnName, fromColumnNames, func);
     }
 
@@ -1142,7 +1144,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> void addColumn(int columnIndex, final String newColumnName, Collection<String> fromColumnNames,
-            Try.Function<? super DisposableObjArray, ?, E> func) throws E {
+            Throwables.Function<? super DisposableObjArray, ?, E> func) throws E {
         checkFrozen();
 
         if (containsColumn(newColumnName)) {
@@ -1151,7 +1153,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final int size = size();
         final int[] fromColumnIndexes = checkColumnName(fromColumnNames);
-        final Try.Function<DisposableObjArray, Object, E> mapper2 = (Try.Function<DisposableObjArray, Object, E>) func;
+        final Throwables.Function<DisposableObjArray, Object, E> mapper2 = (Throwables.Function<DisposableObjArray, Object, E>) func;
         final List<Object> newColumn = new ArrayList<>(size);
         final Object[] row = new Object[fromColumnIndexes.length];
         final DisposableObjArray disposableArray = DisposableObjArray.wrap(row);
@@ -1203,7 +1205,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, Try.BiFunction<?, ?, ?, E> func) throws E {
+    public <E extends Exception> void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> func) throws E {
         addColumn(_columnList.size(), newColumnName, fromColumnNames, func);
     }
 
@@ -1219,7 +1221,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> void addColumn(int columnIndex, final String newColumnName, Tuple2<String, String> fromColumnNames,
-            Try.BiFunction<?, ?, ?, E> func) throws E {
+            Throwables.BiFunction<?, ?, ?, E> func) throws E {
         checkFrozen();
 
         if (containsColumn(newColumnName)) {
@@ -1231,7 +1233,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> column2 = _columnList.get(checkColumnName(fromColumnNames._2));
 
         @SuppressWarnings("rawtypes")
-        final Try.BiFunction<Object, Object, Object, E> mapper2 = (Try.BiFunction) func;
+        final Throwables.BiFunction<Object, Object, Object, E> mapper2 = (Throwables.BiFunction) func;
         final List<Object> newColumn = new ArrayList<>(size());
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
@@ -1285,7 +1287,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> column2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final List<Object> column3 = _columnList.get(checkColumnName(fromColumnNames._3));
         @SuppressWarnings("rawtypes")
-        final Try.TriFunction<Object, Object, Object, Object, E> mapper2 = (Try.TriFunction) func;
+        final Throwables.TriFunction<Object, Object, Object, Object, E> mapper2 = (Throwables.TriFunction) func;
         final List<Object> newColumn = new ArrayList<>(size());
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
@@ -1409,10 +1411,10 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> void updateColumn(final String columnName, final Try.Function<T, ?, E> func) throws E {
+    public <T, E extends Exception> void updateColumn(final String columnName, final Throwables.Function<T, ?, E> func) throws E {
         checkFrozen();
 
-        final Try.Function<Object, Object, E> func2 = (Try.Function<Object, Object, E>) func;
+        final Throwables.Function<Object, Object, E> func2 = (Throwables.Function<Object, Object, E>) func;
         final List<Object> column = _columnList.get(checkColumnName(columnName));
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -1431,10 +1433,10 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> void updateColumns(final Collection<String> columnNames, final Try.Function<?, ?, E> func) throws E {
+    public <T, E extends Exception> void updateColumns(final Collection<String> columnNames, final Throwables.Function<?, ?, E> func) throws E {
         checkColumnName(columnNames);
 
-        final Try.Function<Object, Object, E> func2 = (Try.Function<Object, Object, E>) func;
+        final Throwables.Function<Object, Object, E> func2 = (Throwables.Function<Object, Object, E>) func;
 
         for (String columnName : columnNames) {
             final List<Object> column = _columnList.get(checkColumnName(columnName));
@@ -1493,7 +1495,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> void combineColumns(Collection<String> columnNames, final String newColumnName,
-            Try.Function<? super DisposableObjArray, ?, E> combineFunc) throws E {
+            Throwables.Function<? super DisposableObjArray, ?, E> combineFunc) throws E {
         addColumn(newColumnName, columnNames, combineFunc);
 
         removeColumns(columnNames);
@@ -1508,7 +1510,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void combineColumns(Try.Predicate<String, E> columnNameFilter, final String newColumnName, Class<?> newColumnClass) throws E {
+    public <E extends Exception> void combineColumns(Throwables.Predicate<String, E> columnNameFilter, final String newColumnName, Class<?> newColumnClass)
+            throws E {
         combineColumns(N.filter(_columnNameList, columnNameFilter), newColumnName, newColumnClass);
     }
 
@@ -1523,8 +1526,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E2 the e2
      */
     @Override
-    public <E extends Exception, E2 extends Exception> void combineColumns(Try.Predicate<String, E> columnNameFilter, final String newColumnName,
-            Try.Function<? super DisposableObjArray, ?, E2> combineFunc) throws E, E2 {
+    public <E extends Exception, E2 extends Exception> void combineColumns(Throwables.Predicate<String, E> columnNameFilter, final String newColumnName,
+            Throwables.Function<? super DisposableObjArray, ?, E2> combineFunc) throws E, E2 {
         combineColumns(N.filter(_columnNameList, columnNameFilter), newColumnName, combineFunc);
     }
 
@@ -1537,8 +1540,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void combineColumns(Tuple2<String, String> columnNames, final String newColumnName, Try.BiFunction<?, ?, ?, E> combineFunc)
-            throws E {
+    public <E extends Exception> void combineColumns(Tuple2<String, String> columnNames, final String newColumnName,
+            Throwables.BiFunction<?, ?, ?, E> combineFunc) throws E {
         addColumn(newColumnName, columnNames, combineFunc);
 
         removeColumns(Arrays.asList(columnNames._1, columnNames._2));
@@ -1554,7 +1557,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> void combineColumns(Tuple3<String, String, String> columnNames, final String newColumnName,
-            Try.TriFunction<?, ?, ?, ?, E> combineFunc) throws E {
+            Throwables.TriFunction<?, ?, ?, ?, E> combineFunc) throws E {
         addColumn(newColumnName, columnNames, combineFunc);
 
         removeColumns(Arrays.asList(columnNames._1, columnNames._2, columnNames._3));
@@ -1571,7 +1574,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception> void divideColumn(final String columnName, Collection<String> newColumnNames,
-            Try.Function<T, ? extends List<?>, E> divideFunc) throws E {
+            Throwables.Function<T, ? extends List<?>, E> divideFunc) throws E {
         checkFrozen();
 
         final int columnIndex = this.checkColumnName(columnName);
@@ -1585,7 +1588,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         @SuppressWarnings("rawtypes")
-        final Try.Function<Object, List<Object>, E> divideFunc2 = (Try.Function) divideFunc;
+        final Throwables.Function<Object, List<Object>, E> divideFunc2 = (Throwables.Function) divideFunc;
         final int newColumnsLen = newColumnNames.size();
         final List<List<Object>> newColumns = new ArrayList<>(newColumnsLen);
 
@@ -1625,7 +1628,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> void divideColumn(final String columnName, Collection<String> newColumnNames, Try.BiConsumer<T, Object[], E> output)
+    public <T, E extends Exception> void divideColumn(final String columnName, Collection<String> newColumnNames, Throwables.BiConsumer<T, Object[], E> output)
             throws E {
         checkFrozen();
 
@@ -1640,7 +1643,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         @SuppressWarnings("rawtypes")
-        final Try.BiConsumer<Object, Object[], E> output2 = (Try.BiConsumer) output;
+        final Throwables.BiConsumer<Object, Object[], E> output2 = (Throwables.BiConsumer) output;
         final int newColumnsLen = newColumnNames.size();
         final List<List<Object>> newColumns = new ArrayList<>(newColumnsLen);
 
@@ -1682,7 +1685,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception> void divideColumn(final String columnName, final Tuple2<String, String> newColumnNames,
-            final Try.BiConsumer<T, Pair<Object, Object>, E> output) throws E {
+            final Throwables.BiConsumer<T, Pair<Object, Object>, E> output) throws E {
         checkFrozen();
 
         final int columnIndex = this.checkColumnName(columnName);
@@ -1690,7 +1693,7 @@ public class RowDataSet implements DataSet, Cloneable {
         this.checkNewColumnName(newColumnNames._2);
 
         @SuppressWarnings("rawtypes")
-        final Try.BiConsumer<Object, Pair<Object, Object>, E> output2 = (Try.BiConsumer) output;
+        final Throwables.BiConsumer<Object, Pair<Object, Object>, E> output2 = (Throwables.BiConsumer) output;
         final List<Object> newColumn1 = new ArrayList<>(size());
         final List<Object> newColumn2 = new ArrayList<>(size());
 
@@ -1727,7 +1730,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception> void divideColumn(final String columnName, final Tuple3<String, String, String> newColumnNames,
-            final Try.BiConsumer<T, Triple<Object, Object, Object>, E> output) throws E {
+            final Throwables.BiConsumer<T, Triple<Object, Object, Object>, E> output) throws E {
         checkFrozen();
 
         final int columnIndex = this.checkColumnName(columnName);
@@ -1736,7 +1739,7 @@ public class RowDataSet implements DataSet, Cloneable {
         this.checkNewColumnName(newColumnNames._3);
 
         @SuppressWarnings("rawtypes")
-        final Try.BiConsumer<Object, Triple<Object, Object, Object>, E> output2 = (Try.BiConsumer) output;
+        final Throwables.BiConsumer<Object, Triple<Object, Object, Object>, E> output2 = (Throwables.BiConsumer) output;
         final List<Object> newColumn1 = new ArrayList<>(size());
         final List<Object> newColumn2 = new ArrayList<>(size());
         final List<Object> newColumn3 = new ArrayList<>(size());
@@ -1950,12 +1953,12 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void updateRow(int rowIndex, Try.Function<?, ?, E> func) throws E {
+    public <E extends Exception> void updateRow(int rowIndex, Throwables.Function<?, ?, E> func) throws E {
         checkFrozen();
 
         this.checkRowNum(rowIndex);
 
-        final Try.Function<Object, Object, E> func2 = (Try.Function<Object, Object, E>) func;
+        final Throwables.Function<Object, Object, E> func2 = (Throwables.Function<Object, Object, E>) func;
 
         for (List<Object> column : _columnList) {
             column.set(rowIndex, func2.apply(column.get(rowIndex)));
@@ -1972,14 +1975,14 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void updateRows(int[] indices, Try.Function<?, ?, E> func) throws E {
+    public <E extends Exception> void updateRows(int[] indices, Throwables.Function<?, ?, E> func) throws E {
         checkFrozen();
 
         for (int rowIndex : indices) {
             this.checkRowNum(rowIndex);
         }
 
-        final Try.Function<Object, Object, E> func2 = (Try.Function<Object, Object, E>) func;
+        final Throwables.Function<Object, Object, E> func2 = (Throwables.Function<Object, Object, E>) func;
 
         for (List<Object> column : _columnList) {
             for (int rowIndex : indices) {
@@ -1997,10 +2000,10 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void updateAll(Try.Function<?, ?, E> func) throws E {
+    public <E extends Exception> void updateAll(Throwables.Function<?, ?, E> func) throws E {
         checkFrozen();
 
-        final Try.Function<Object, Object, E> func2 = (Try.Function<Object, Object, E>) func;
+        final Throwables.Function<Object, Object, E> func2 = (Throwables.Function<Object, Object, E>) func;
         final int size = size();
 
         for (List<Object> column : _columnList) {
@@ -2020,11 +2023,11 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void replaceIf(Try.Predicate<?, E> predicate, Object newValue) throws E {
+    public <E extends Exception> void replaceIf(Throwables.Predicate<?, E> predicate, Object newValue) throws E {
         checkFrozen();
 
         @SuppressWarnings("rawtypes")
-        final Try.Predicate<Object, E> Predicate2 = (Try.Predicate) predicate;
+        final Throwables.Predicate<Object, E> Predicate2 = (Throwables.Predicate) predicate;
         final int size = size();
         Object val = null;
 
@@ -2234,9 +2237,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return Optional.empty();
         }
 
-        final T row = rowSupplier.apply(columnNames.size());
-
-        getRow(N.typeOf(row.getClass()), row, checkColumnName(columnNames), columnNames, 0);
+        final T row = getRow(rowSupplier, columnNames, 0);
 
         return Optional.of(row);
     }
@@ -2358,10 +2359,7 @@ public class RowDataSet implements DataSet, Cloneable {
         if (size() == 0) {
             return Optional.empty();
         }
-
-        final T row = rowSupplier.apply(columnNames.size());
-
-        getRow(N.typeOf(row.getClass()), row, checkColumnName(columnNames), columnNames, size() - 1);
+        final T row = getRow(rowSupplier, columnNames, size() - 1);
 
         return Optional.of(row);
     }
@@ -2469,7 +2467,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void forEach(final Try.Consumer<? super DisposableObjArray, E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<? super DisposableObjArray, E> action) throws E {
         forEach(this._columnNameList, action);
     }
 
@@ -2481,7 +2479,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void forEach(final Collection<String> columnNames, final Try.Consumer<? super DisposableObjArray, E> action) throws E {
+    public <E extends Exception> void forEach(final Collection<String> columnNames, final Throwables.Consumer<? super DisposableObjArray, E> action) throws E {
         forEach(columnNames, 0, size(), action);
     }
 
@@ -2494,7 +2492,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void forEach(final int fromRowIndex, final int toRowIndex, final Try.Consumer<? super DisposableObjArray, E> action) throws E {
+    public <E extends Exception> void forEach(final int fromRowIndex, final int toRowIndex, final Throwables.Consumer<? super DisposableObjArray, E> action)
+            throws E {
         forEach(this._columnNameList, fromRowIndex, toRowIndex, action);
     }
 
@@ -2509,7 +2508,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> void forEach(final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex,
-            final Try.Consumer<? super DisposableObjArray, E> action) throws E {
+            final Throwables.Consumer<? super DisposableObjArray, E> action) throws E {
         final int[] columnIndexes = checkColumnName(columnNames);
         checkRowIndex(fromRowIndex < toRowIndex ? fromRowIndex : (toRowIndex == -1 ? 0 : toRowIndex), fromRowIndex < toRowIndex ? toRowIndex : fromRowIndex);
         N.checkArgNotNull(action);
@@ -2549,7 +2548,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void forEach(Tuple2<String, String> columnNames, Try.BiConsumer<?, ?, E> action) throws E {
+    public <E extends Exception> void forEach(Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws E {
         forEach(columnNames, 0, size(), action);
     }
 
@@ -2563,7 +2562,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void forEach(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Try.BiConsumer<?, ?, E> action) throws E {
+    public <E extends Exception> void forEach(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiConsumer<?, ?, E> action)
+            throws E {
         final List<Object> column1 = _columnList.get(checkColumnName(columnNames._1));
         final List<Object> column2 = _columnList.get(checkColumnName(columnNames._2));
 
@@ -2575,7 +2575,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         @SuppressWarnings("rawtypes")
-        final Try.BiConsumer<Object, Object, E> action2 = (Try.BiConsumer) action;
+        final Throwables.BiConsumer<Object, Object, E> action2 = (Throwables.BiConsumer) action;
 
         if (fromRowIndex <= toRowIndex) {
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
@@ -2624,7 +2624,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         @SuppressWarnings("rawtypes")
-        final Try.TriConsumer<Object, Object, Object, E> action2 = (Try.TriConsumer) action;
+        final Throwables.TriConsumer<Object, Object, Object, E> action2 = (Throwables.TriConsumer) action;
 
         if (fromRowIndex <= toRowIndex) {
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
@@ -4584,7 +4584,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <U, E extends Exception> DataSet groupBy(final String columnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            final Try.Function<? super DisposableObjArray, U, E> rowMapper, final Collector<? super U, ?, ?> collector) throws E {
+            final Throwables.Function<? super DisposableObjArray, U, E> rowMapper, final Collector<? super U, ?, ?> collector) throws E {
         return groupBy(columnName, (Function<?, ?>) null, aggregateResultColumnName, aggregateOnColumnNames, rowMapper, collector);
     }
 
@@ -4601,7 +4601,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception> DataSet groupBy(final String columnName, String aggregateResultColumnName, String aggregateOnColumnName,
-            final Try.Function<Stream<T>, ?, E> func) throws E {
+            final Throwables.Function<Stream<T>, ?, E> func) throws E {
         return groupBy(columnName, (Function<?, ?>) null, aggregateResultColumnName, aggregateOnColumnName, func);
     }
 
@@ -4615,7 +4615,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <K, E extends Exception> DataSet groupBy(final String columnName, Try.Function<K, ?, E> keyMapper) throws E {
+    public <K, E extends Exception> DataSet groupBy(final String columnName, Throwables.Function<K, ?, E> keyMapper) throws E {
         final int columnIndex = checkColumnName(columnName);
 
         final int size = size();
@@ -4633,7 +4633,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final Try.Function<Object, ?, E> keyMapper2 = (Try.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
+        final Throwables.Function<Object, ?, E> keyMapper2 = (Throwables.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
         final List<Object> keyColumn = newColumnList.get(0);
 
         final Set<Object> keySet = N.newHashSet();
@@ -4665,7 +4665,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <K, T, E extends Exception> DataSet groupBy(final String columnName, Try.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
+    public <K, T, E extends Exception> DataSet groupBy(final String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
             String aggregateOnColumnName, final Collector<T, ?, ?> collector) throws E {
         final int columnIndex = checkColumnName(columnName);
         final int aggOnColumnIndex = checkColumnName(aggregateOnColumnName);
@@ -4690,7 +4690,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final Try.Function<Object, ?, E> keyMapper2 = (Try.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
+        final Throwables.Function<Object, ?, E> keyMapper2 = (Throwables.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
         final List<Object> keyColumn = newColumnList.get(0);
         final List<Object> aggResultColumn = newColumnList.get(1);
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
@@ -4743,8 +4743,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E2 the e2
      */
     @Override
-    public <K, T, E extends Exception, E2 extends Exception> DataSet groupBy(final String columnName, Try.Function<K, ?, E> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, final Try.Function<Stream<T>, ?, E2> func) throws E, E2 {
+    public <K, T, E extends Exception, E2 extends Exception> DataSet groupBy(final String columnName, Throwables.Function<K, ?, E> keyMapper,
+            String aggregateResultColumnName, String aggregateOnColumnName, final Throwables.Function<Stream<T>, ?, E2> func) throws E, E2 {
         final RowDataSet result = (RowDataSet) groupBy(columnName, keyMapper, aggregateResultColumnName, aggregateOnColumnName, Collectors.toList());
         final List<Object> column = result._columnList.get(result.getColumnIndex(aggregateResultColumnName));
 
@@ -4776,7 +4776,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <K, E extends Exception> DataSet groupBy(final String columnName, Try.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
+    public <K, E extends Exception> DataSet groupBy(final String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, final Collector<? super Object[], ?, ?> collector) throws E {
         return groupBy(columnName, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, CLONE, collector);
     }
@@ -4798,8 +4798,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E2 the e2
      */
     @Override
-    public <K, U, E extends Exception, E2 extends Exception> DataSet groupBy(final String columnName, Try.Function<K, ?, E> keyMapper,
-            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, final Try.Function<? super DisposableObjArray, U, E2> rowMapper,
+    public <K, U, E extends Exception, E2 extends Exception> DataSet groupBy(final String columnName, Throwables.Function<K, ?, E> keyMapper,
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E2> rowMapper,
             final Collector<? super U, ?, ?> collector) throws E, E2 {
         final int columnIndex = checkColumnName(columnName);
         final int[] aggOnColumnIndexes = checkColumnName(aggregateOnColumnNames);
@@ -4828,7 +4828,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final Try.Function<Object, ?, E> keyMapper2 = (Try.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
+        final Throwables.Function<Object, ?, E> keyMapper2 = (Throwables.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
         final List<Object> keyColumn = newColumnList.get(0);
         final List<Object> aggResultColumn = newColumnList.get(1);
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
@@ -4908,7 +4908,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            final Try.Function<Stream<T>, ?, E> func) throws E {
+            final Throwables.Function<Stream<T>, ?, E> func) throws E {
         return groupBy(columnNames, (Function<? super DisposableObjArray, ?>) null, aggregateResultColumnName, aggregateOnColumnName, func);
     }
 
@@ -4940,7 +4940,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <U, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            final Try.Function<? super DisposableObjArray, U, E> rowMapper, final Collector<? super U, ?, ?> collector) throws E {
+            final Throwables.Function<? super DisposableObjArray, U, E> rowMapper, final Collector<? super U, ?, ?> collector) throws E {
         return groupBy(columnNames, (Function<? super DisposableObjArray, ?>) null, aggregateResultColumnName, aggregateOnColumnNames, rowMapper, collector);
     }
 
@@ -4953,7 +4953,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet groupBy(final Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper)
+    public <E extends Exception> DataSet groupBy(final Collection<String> columnNames, final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper)
             throws E {
         N.checkArgNotNullOrEmpty(columnNames, "columnNames");
 
@@ -5034,7 +5034,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper,
+    public <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, String aggregateOnColumnName, final Collector<T, ?, ?> collector) throws E {
         N.checkArgNotNullOrEmpty(columnNames, "columnNames");
 
@@ -5137,8 +5137,8 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames,
-            Try.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
-            final Try.Function<Stream<T>, ?, E2> func) throws E, E2 {
+            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
+            final Throwables.Function<Stream<T>, ?, E2> func) throws E, E2 {
         final RowDataSet result = (RowDataSet) groupBy(columnNames, keyMapper, aggregateResultColumnName, aggregateOnColumnName, Collectors.toList());
         final List<Object> column = result._columnList.get(result.getColumnIndex(aggregateResultColumnName));
 
@@ -5161,7 +5161,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet groupBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
+    public <E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, final Collector<? super Object[], ?, ?> collector) throws E {
         return groupBy(aggregateOnColumnNames, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, CLONE, collector);
     }
@@ -5183,8 +5183,8 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <U, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames,
-            Try.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            final Try.Function<? super DisposableObjArray, U, E2> rowMapper, final Collector<? super U, ?, ?> collector) throws E, E2 {
+            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            final Throwables.Function<? super DisposableObjArray, U, E2> rowMapper, final Collector<? super U, ?, ?> collector) throws E, E2 {
         N.checkArgNotNullOrEmpty(columnNames, "columnNames");
 
         if (N.notNullOrEmpty(columnNames) && columnNames.contains(aggregateResultColumnName)) {
@@ -5327,7 +5327,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames, final String aggregateResultColumnName,
-            final String aggregateOnColumnName, final Try.Function<Stream<T>, ?, E> func) {
+            final String aggregateOnColumnName, final Throwables.Function<Stream<T>, ?, E> func) {
         return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
@@ -5368,7 +5368,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <U, E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames, final String aggregateResultColumnName,
-            final Collection<String> aggregateOnColumnNames, final Try.Function<? super DisposableObjArray, U, E> rowMapper,
+            final Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E> rowMapper,
             final Collector<? super U, ?, ?> collector) {
         return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
             @Override
@@ -5391,7 +5391,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper) {
+    public <E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames,
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper) {
         return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
@@ -5417,8 +5418,9 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <T, E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper,
-            final String aggregateResultColumnName, final String aggregateOnColumnName, final Collector<T, ?, ?> collector) {
+    public <T, E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames,
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
+            final Collector<T, ?, ?> collector) {
         return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
@@ -5446,8 +5448,8 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception, E2 extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames,
-            final Try.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
-            final Try.Function<Stream<T>, ?, E2> func) {
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
+            final Throwables.Function<Stream<T>, ?, E2> func) {
         return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
@@ -5472,8 +5474,9 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper,
-            final String aggregateResultColumnName, final Collection<String> aggregateOnColumnNames, final Collector<? super Object[], ?, ?> collector) {
+    public <E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames,
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName,
+            final Collection<String> aggregateOnColumnNames, final Collector<? super Object[], ?, ?> collector) {
         return rollup(columnNames, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, CLONE, collector);
     }
 
@@ -5492,8 +5495,8 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <U, E extends Exception, E2 extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames,
-            final Try.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName,
-            final Collection<String> aggregateOnColumnNames, final Try.Function<? super DisposableObjArray, U, E2> rowMapper,
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName,
+            final Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E2> rowMapper,
             final Collector<? super U, ?, ?> collector) {
         return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
             @Override
@@ -5555,7 +5558,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames, final String aggregateResultColumnName,
-            final String aggregateOnColumnName, final Try.Function<Stream<T>, ?, E> func) {
+            final String aggregateOnColumnName, final Throwables.Function<Stream<T>, ?, E> func) {
         return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
@@ -5596,7 +5599,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <U, E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames, final String aggregateResultColumnName,
-            final Collection<String> aggregateOnColumnNames, final Try.Function<? super DisposableObjArray, U, E> rowMapper,
+            final Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E> rowMapper,
             final Collector<? super U, ?, ?> collector) {
         return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
             @Override
@@ -5619,7 +5622,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper) {
+    public <E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames,
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper) {
         return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
@@ -5645,8 +5649,9 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <T, E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper,
-            final String aggregateResultColumnName, final String aggregateOnColumnName, final Collector<T, ?, ?> collector) {
+    public <T, E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames,
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
+            final Collector<T, ?, ?> collector) {
         return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
@@ -5674,8 +5679,8 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T, E extends Exception, E2 extends Exception> Stream<DataSet> cube(final Collection<String> columnNames,
-            final Try.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
-            final Try.Function<Stream<T>, ?, E2> func) {
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
+            final Throwables.Function<Stream<T>, ?, E2> func) {
         return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
@@ -5700,8 +5705,9 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper,
-            final String aggregateResultColumnName, final Collection<String> aggregateOnColumnNames, final Collector<? super Object[], ?, ?> collector) {
+    public <E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames,
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName,
+            final Collection<String> aggregateOnColumnNames, final Collector<? super Object[], ?, ?> collector) {
         return cube(columnNames, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, CLONE, collector);
     }
 
@@ -5720,8 +5726,8 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <U, E extends Exception, E2 extends Exception> Stream<DataSet> cube(final Collection<String> columnNames,
-            final Try.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName,
-            final Collection<String> aggregateOnColumnNames, final Try.Function<? super DisposableObjArray, U, E2> rowMapper,
+            final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName,
+            final Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E2> rowMapper,
             final Collector<? super U, ?, ?> collector) {
         return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
             @Override
@@ -6315,7 +6321,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <K, E extends Exception> DataSet distinctBy(final String columnName, final Try.Function<K, ?, E> keyMapper) throws E {
+    public <K, E extends Exception> DataSet distinctBy(final String columnName, final Throwables.Function<K, ?, E> keyMapper) throws E {
         final int columnIndex = checkColumnName(columnName);
 
         final int size = size();
@@ -6333,7 +6339,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList, newProperties);
         }
 
-        final Try.Function<Object, ?, E> keyMapper2 = (Try.Function<Object, ?, E>) keyMapper;
+        final Throwables.Function<Object, ?, E> keyMapper2 = (Throwables.Function<Object, ?, E>) keyMapper;
         final Set<Object> rowSet = N.newHashSet();
         Object key = null;
         Object value = null;
@@ -6371,7 +6377,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet distinctBy(final Collection<String> columnNames, final Try.Function<? super DisposableObjArray, ?, E> keyMapper)
+    public <E extends Exception> DataSet distinctBy(final Collection<String> columnNames, final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper)
             throws E {
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
 
@@ -6447,7 +6453,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(final Try.Predicate<? super DisposableObjArray, E> filter) throws E {
+    public <E extends Exception> DataSet filter(final Throwables.Predicate<? super DisposableObjArray, E> filter) throws E {
         return filter(filter, size());
     }
 
@@ -6460,7 +6466,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E {
+    public <E extends Exception> DataSet filter(Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws E {
         return filter(0, size(), filter);
     }
 
@@ -6474,7 +6480,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(final int fromRowIndex, final int toRowIndex, final Try.Predicate<? super DisposableObjArray, E> filter)
+    public <E extends Exception> DataSet filter(final int fromRowIndex, final int toRowIndex, final Throwables.Predicate<? super DisposableObjArray, E> filter)
             throws E {
         return filter(fromRowIndex, toRowIndex, filter, size());
     }
@@ -6490,7 +6496,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E {
+    public <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Throwables.Predicate<? super DisposableObjArray, E> filter, int max)
+            throws E {
         return filter(this._columnNameList, fromRowIndex, toRowIndex, filter, max);
     }
 
@@ -6503,7 +6510,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Try.BiPredicate<?, ?, E> filter) throws E {
+    public <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Throwables.BiPredicate<?, ?, E> filter) throws E {
         return filter(columnNames, filter, size());
     }
 
@@ -6517,7 +6524,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Try.BiPredicate<?, ?, E> filter, int max) throws E {
+    public <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Throwables.BiPredicate<?, ?, E> filter, int max) throws E {
         return filter(columnNames, 0, size(), filter, max);
     }
 
@@ -6532,7 +6539,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Try.BiPredicate<?, ?, E> filter)
+    public <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiPredicate<?, ?, E> filter)
             throws E {
         return filter(columnNames, fromRowIndex, toRowIndex, filter, size());
     }
@@ -6549,15 +6556,15 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Try.BiPredicate<?, ?, E> filter, int max)
-            throws E {
+    public <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiPredicate<?, ?, E> filter,
+            int max) throws E {
         final List<Object> column1 = _columnList.get(checkColumnName(columnNames._1));
         final List<Object> column2 = _columnList.get(checkColumnName(columnNames._2));
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(filter);
 
         @SuppressWarnings("rawtypes")
-        final Try.BiPredicate<Object, Object, E> filter2 = (Try.BiPredicate) filter;
+        final Throwables.BiPredicate<Object, Object, E> filter2 = (Throwables.BiPredicate) filter;
         final int size = size();
         final int columnCount = _columnNameList.size();
         final List<String> newColumnNameList = new ArrayList<>(_columnNameList);
@@ -6599,7 +6606,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Try.TriPredicate<?, ?, ?, E> filter) throws E {
+    public <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Throwables.TriPredicate<?, ?, ?, E> filter) throws E {
         return filter(columnNames, filter, size());
     }
 
@@ -6613,7 +6620,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Try.TriPredicate<?, ?, ?, E> filter, int max) throws E {
+    public <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Throwables.TriPredicate<?, ?, ?, E> filter, int max) throws E {
         return filter(columnNames, 0, size(), filter, max);
     }
 
@@ -6629,7 +6636,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex,
-            Try.TriPredicate<?, ?, ?, E> filter) throws E {
+            Throwables.TriPredicate<?, ?, ?, E> filter) throws E {
         return filter(columnNames, fromRowIndex, toRowIndex, filter, size());
     }
 
@@ -6646,7 +6653,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> DataSet filter(final Tuple3<String, String, String> columnNames, final int fromRowIndex, final int toRowIndex,
-            final Try.TriPredicate<?, ?, ?, E> filter, final int max) throws E {
+            final Throwables.TriPredicate<?, ?, ?, E> filter, final int max) throws E {
         final List<Object> column1 = _columnList.get(checkColumnName(columnNames._1));
         final List<Object> column2 = _columnList.get(checkColumnName(columnNames._2));
         final List<Object> column3 = _columnList.get(checkColumnName(columnNames._3));
@@ -6655,7 +6662,7 @@ public class RowDataSet implements DataSet, Cloneable {
         N.checkArgNotNull(filter);
 
         @SuppressWarnings("rawtypes")
-        final TriPredicate<Object, Object, Object, E> filter2 = (Try.TriPredicate) filter;
+        final TriPredicate<Object, Object, Object, E> filter2 = (Throwables.TriPredicate) filter;
         final int size = size();
         final int columnCount = _columnNameList.size();
         final List<String> newColumnNameList = new ArrayList<>(_columnNameList);
@@ -6698,7 +6705,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> DataSet filter(final String columnName, final Try.Predicate<T, E> filter) throws E {
+    public <T, E extends Exception> DataSet filter(final String columnName, final Throwables.Predicate<T, E> filter) throws E {
         return filter(columnName, filter, size());
     }
 
@@ -6713,7 +6720,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> DataSet filter(final String columnName, Try.Predicate<T, E> filter, int max) throws E {
+    public <T, E extends Exception> DataSet filter(final String columnName, Throwables.Predicate<T, E> filter, int max) throws E {
         return filter(columnName, 0, size(), filter, max);
     }
 
@@ -6729,8 +6736,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> DataSet filter(final String columnName, final int fromRowIndex, final int toRowIndex, final Try.Predicate<T, E> filter)
-            throws E {
+    public <T, E extends Exception> DataSet filter(final String columnName, final int fromRowIndex, final int toRowIndex,
+            final Throwables.Predicate<T, E> filter) throws E {
         return filter(columnName, fromRowIndex, toRowIndex, filter, size());
     }
 
@@ -6747,7 +6754,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> DataSet filter(final String columnName, int fromRowIndex, int toRowIndex, Try.Predicate<T, E> filter, int max) throws E {
+    public <T, E extends Exception> DataSet filter(final String columnName, int fromRowIndex, int toRowIndex, Throwables.Predicate<T, E> filter, int max)
+            throws E {
         final int filterColumnIndex = checkColumnName(columnName);
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(filter, "filter");
@@ -6792,7 +6800,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(final Collection<String> columnNames, final Try.Predicate<? super DisposableObjArray, E> filter) throws E {
+    public <E extends Exception> DataSet filter(final Collection<String> columnNames, final Throwables.Predicate<? super DisposableObjArray, E> filter)
+            throws E {
         return filter(columnNames, filter, size());
     }
 
@@ -6806,7 +6815,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet filter(Collection<String> columnNames, Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E {
+    public <E extends Exception> DataSet filter(Collection<String> columnNames, Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws E {
         return filter(columnNames, 0, size(), filter, max);
     }
 
@@ -6822,7 +6831,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> DataSet filter(final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex,
-            final Try.Predicate<? super DisposableObjArray, E> filter) throws E {
+            final Throwables.Predicate<? super DisposableObjArray, E> filter) throws E {
         return filter(columnNames, fromRowIndex, toRowIndex, filter, size());
     }
 
@@ -6839,7 +6848,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> DataSet filter(Collection<String> columnNames, int fromRowIndex, int toRowIndex,
-            Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E {
+            Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws E {
         final int[] filterColumnIndexes = checkColumnName(columnNames);
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(filter, "filter");
@@ -6894,7 +6903,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet map(final String fromColumnName, final Try.Function<?, ?, E> func, final String newColumnName,
+    public <E extends Exception> DataSet map(final String fromColumnName, final Throwables.Function<?, ?, E> func, final String newColumnName,
             final String copyingColumnName) throws E {
         return map(fromColumnName, func, newColumnName, Array.asList(copyingColumnName));
     }
@@ -6910,13 +6919,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet map(final String fromColumnName, final Try.Function<?, ?, E> func, final String newColumnName,
+    public <E extends Exception> DataSet map(final String fromColumnName, final Throwables.Function<?, ?, E> func, final String newColumnName,
             final Collection<String> copyingColumnNames) throws E {
         N.checkArgNotNull(func, "func");
         final int fromColumnIndex = checkColumnName(fromColumnName);
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Try.Function<Object, Object, E> mapper = (Try.Function<Object, Object, E>) func;
+        final Throwables.Function<Object, Object, E> mapper = (Throwables.Function<Object, Object, E>) func;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -6961,7 +6970,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Try.BiFunction<Object, Object, Object, E> mapper = (Try.BiFunction<Object, Object, Object, E>) func;
+        final Throwables.BiFunction<Object, Object, Object, E> mapper = (Throwables.BiFunction<Object, Object, Object, E>) func;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -7008,7 +7017,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Try.TriFunction<Object, Object, Object, Object, E> mapper = (Try.TriFunction<Object, Object, Object, Object, E>) func;
+        final Throwables.TriFunction<Object, Object, Object, Object, E> mapper = (Throwables.TriFunction<Object, Object, Object, Object, E>) func;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -7046,13 +7055,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet map(final Collection<String> fromColumnNames, final Try.Function<DisposableObjArray, ?, E> func,
+    public <E extends Exception> DataSet map(final Collection<String> fromColumnNames, final Throwables.Function<DisposableObjArray, ?, E> func,
             final String newColumnName, final Collection<String> copyingColumnNames) throws E {
         N.checkArgNotNull(func, "func");
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Try.Function<DisposableObjArray, Object, E> mapper = (Try.Function<DisposableObjArray, Object, E>) func;
+        final Throwables.Function<DisposableObjArray, Object, E> mapper = (Throwables.Function<DisposableObjArray, Object, E>) func;
         final int size = size();
         final int fromColumnCount = fromColumnIndices.length;
         final int copyingColumnCount = copyingColumnIndices.length;
@@ -7097,7 +7106,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet flatMap(final String fromColumnName, final Try.Function<?, ? extends Collection<?>, E> func,
+    public <E extends Exception> DataSet flatMap(final String fromColumnName, final Throwables.Function<?, ? extends Collection<?>, E> func,
             final String newColumnName, final String copyingColumnName) throws E {
         return flatMap(fromColumnName, func, newColumnName, Array.asList(copyingColumnName));
     }
@@ -7113,13 +7122,13 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> DataSet flatMap(final String fromColumnName, final Try.Function<?, ? extends Collection<?>, E> func,
+    public <E extends Exception> DataSet flatMap(final String fromColumnName, final Throwables.Function<?, ? extends Collection<?>, E> func,
             final String newColumnName, final Collection<String> copyingColumnNames) throws E {
         N.checkArgNotNull(func, "func");
         final int fromColumnIndex = checkColumnName(fromColumnName);
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Try.Function<Object, Collection<Object>, E> mapper = (Try.Function<Object, Collection<Object>, E>) func;
+        final Throwables.Function<Object, Collection<Object>, E> mapper = (Throwables.Function<Object, Collection<Object>, E>) func;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -7193,7 +7202,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Try.BiFunction<Object, Object, Collection<Object>, E> mapper = (Try.BiFunction<Object, Object, Collection<Object>, E>) func;
+        final Throwables.BiFunction<Object, Object, Collection<Object>, E> mapper = (Throwables.BiFunction<Object, Object, Collection<Object>, E>) func;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -7267,7 +7276,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Try.TriFunction<Object, Object, Object, Collection<Object>, E> mapper = (Try.TriFunction<Object, Object, Object, Collection<Object>, E>) func;
+        final Throwables.TriFunction<Object, Object, Object, Collection<Object>, E> mapper = (Throwables.TriFunction<Object, Object, Object, Collection<Object>, E>) func;
         final int size = size();
         final int copyingColumnCount = copyingColumnIndices.length;
 
@@ -7333,13 +7342,13 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <E extends Exception> DataSet flatMap(final Collection<String> fromColumnNames,
-            final Try.Function<DisposableObjArray, ? extends Collection<?>, E> func, final String newColumnName, final Collection<String> copyingColumnNames)
-            throws E {
+            final Throwables.Function<DisposableObjArray, ? extends Collection<?>, E> func, final String newColumnName,
+            final Collection<String> copyingColumnNames) throws E {
         N.checkArgNotNull(func, "func");
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
         final int[] copyingColumnIndices = N.isNullOrEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
-        final Try.Function<DisposableObjArray, Collection<Object>, E> mapper = (Try.Function<DisposableObjArray, Collection<Object>, E>) func;
+        final Throwables.Function<DisposableObjArray, Collection<Object>, E> mapper = (Throwables.Function<DisposableObjArray, Collection<Object>, E>) func;
         final int size = size();
         final int fromColumnCount = fromColumnIndices.length;
         final int copyingColumnCount = copyingColumnIndices.length;
@@ -10377,7 +10386,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Try.Function<? super DataSet, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super DataSet, R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -10388,7 +10397,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void accept(Try.Consumer<? super DataSet, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<? super DataSet, E> action) throws E {
         action.accept(this);
     }
 

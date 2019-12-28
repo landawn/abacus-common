@@ -16,13 +16,13 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * @author Haiyang Li
  *
  */
-public interface QuadFunction<A, B, C, D, R> extends Try.QuadFunction<A, B, C, D, R, RuntimeException> {
+public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, B, C, D, R, RuntimeException> {
 
     @Override
     R apply(A a, B b, C c, D d);

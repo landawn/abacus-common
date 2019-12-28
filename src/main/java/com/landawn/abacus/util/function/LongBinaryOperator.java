@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface LongBinaryOperator extends java.util.function.LongBinaryOperator, Try.LongBinaryOperator<RuntimeException> {
+public interface LongBinaryOperator extends java.util.function.LongBinaryOperator, Throwables.LongBinaryOperator<RuntimeException> {
 
     @Override
     long applyAsLong(long left, long right);

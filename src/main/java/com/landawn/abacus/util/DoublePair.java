@@ -122,7 +122,7 @@ public final class DoublePair {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.DoubleConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.DoubleConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
     }
@@ -133,7 +133,7 @@ public final class DoublePair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<DoublePair, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<DoublePair, E> action) throws E {
         action.accept(this);
     }
 
@@ -145,7 +145,7 @@ public final class DoublePair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<DoublePair, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<DoublePair, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -156,7 +156,7 @@ public final class DoublePair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<DoublePair> filter(final Try.Predicate<DoublePair, E> predicate) throws E {
+    public <E extends Exception> Optional<DoublePair> filter(final Throwables.Predicate<DoublePair, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<DoublePair> empty();
     }
 

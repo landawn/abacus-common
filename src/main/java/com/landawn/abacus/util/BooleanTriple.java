@@ -96,7 +96,7 @@ public class BooleanTriple {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.BooleanConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.BooleanConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
         comsumer.accept(this._3);
@@ -108,7 +108,7 @@ public class BooleanTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<BooleanTriple, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<BooleanTriple, E> action) throws E {
         action.accept(this);
     }
 
@@ -120,7 +120,7 @@ public class BooleanTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<BooleanTriple, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<BooleanTriple, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -131,7 +131,7 @@ public class BooleanTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<BooleanTriple> filter(final Try.Predicate<BooleanTriple, E> predicate) throws E {
+    public <E extends Exception> Optional<BooleanTriple> filter(final Throwables.Predicate<BooleanTriple, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<BooleanTriple> empty();
     }
 

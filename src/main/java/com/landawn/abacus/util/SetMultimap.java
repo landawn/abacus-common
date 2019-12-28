@@ -321,7 +321,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      * @throws X the x
      */
-    public static <T, K, X extends Exception> SetMultimap<K, T> from(final Collection<? extends T> c, final Try.Function<? super T, ? extends K, X> keyMapper)
+    public static <T, K, X extends Exception> SetMultimap<K, T> from(final Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, X> keyMapper)
             throws X {
         N.checkArgNotNull(keyMapper);
 
@@ -351,7 +351,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @throws X2 the x2
      */
     public static <T, K, E, X extends Exception, X2 extends Exception> SetMultimap<K, E> from(final Collection<? extends T> c,
-            final Try.Function<? super T, ? extends K, X> keyMapper, final Try.Function<? super T, ? extends E, X2> valueExtractor) throws X, X2 {
+            final Throwables.Function<? super T, ? extends K, X> keyMapper, final Throwables.Function<? super T, ? extends E, X2> valueExtractor) throws X, X2 {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
@@ -573,7 +573,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     @Deprecated
     public static <T, K, V extends Collection<T>, M extends Multimap<K, T, V>, X extends Exception> M from(final Collection<? extends T> c,
-            final Try.Function<? super T, ? extends K, X> keyMapper, final IntFunction<? extends M> multimapSupplier) throws X {
+            final Throwables.Function<? super T, ? extends K, X> keyMapper, final IntFunction<? extends M> multimapSupplier) throws X {
         throw new UnsupportedOperationException();
     }
 
@@ -596,8 +596,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     @Deprecated
     public static <T, K, E, V extends Collection<E>, M extends Multimap<K, E, V>, X extends Exception, X2 extends Exception> M from(
-            final Collection<? extends T> c, final Try.Function<? super T, ? extends K, X> keyMapper,
-            final Try.Function<? super T, ? extends E, X2> valueExtractor, final IntFunction<? extends M> multimapSupplier) throws X, X2 {
+            final Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, X> keyMapper,
+            final Throwables.Function<? super T, ? extends E, X2> valueExtractor, final IntFunction<? extends M> multimapSupplier) throws X, X2 {
         throw new UnsupportedOperationException();
     }
 
@@ -709,7 +709,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @throws X the x
      */
     @Override
-    public <X extends Exception> SetMultimap<K, E> filterByKey(Try.Predicate<? super K, X> filter) throws X {
+    public <X extends Exception> SetMultimap<K, E> filterByKey(Throwables.Predicate<? super K, X> filter) throws X {
         final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
 
         for (Map.Entry<K, Set<E>> entry : valueMap.entrySet()) {
@@ -730,7 +730,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @throws X the x
      */
     @Override
-    public <X extends Exception> SetMultimap<K, E> filterByValue(Try.Predicate<? super Set<E>, X> filter) throws X {
+    public <X extends Exception> SetMultimap<K, E> filterByValue(Throwables.Predicate<? super Set<E>, X> filter) throws X {
         final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
 
         for (Map.Entry<K, Set<E>> entry : valueMap.entrySet()) {
@@ -750,7 +750,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @throws X the x
      */
     @Override
-    public <X extends Exception> SetMultimap<K, E> filter(Try.BiPredicate<? super K, ? super Set<E>, X> filter) throws X {
+    public <X extends Exception> SetMultimap<K, E> filter(Throwables.BiPredicate<? super K, ? super Set<E>, X> filter) throws X {
         final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
 
         for (Map.Entry<K, Set<E>> entry : valueMap.entrySet()) {

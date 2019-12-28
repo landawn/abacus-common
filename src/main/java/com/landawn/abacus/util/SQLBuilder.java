@@ -2602,7 +2602,7 @@ public abstract class SQLBuilder {
      * @return
      * @throws EX the ex
      */
-    public <T, EX extends Exception> T apply(final Try.Function<? super SP, T, EX> func) throws EX {
+    public <T, EX extends Exception> T apply(final Throwables.Function<? super SP, T, EX> func) throws EX {
         return func.apply(this.pair());
     }
 
@@ -2612,7 +2612,7 @@ public abstract class SQLBuilder {
      * @param consumer
      * @throws EX the ex
      */
-    public <EX extends Exception> void accept(final Try.Consumer<? super SP, EX> consumer) throws EX {
+    public <EX extends Exception> void accept(final Throwables.Consumer<? super SP, EX> consumer) throws EX {
         consumer.accept(this.pair());
     }
 
@@ -3578,7 +3578,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -3604,6 +3604,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -4006,7 +4056,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -4032,6 +4082,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -4434,7 +4534,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -4460,6 +4560,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -4859,7 +5009,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -4885,6 +5035,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -5284,7 +5484,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -5310,6 +5510,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -5709,7 +5959,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -5735,6 +5985,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -6134,7 +6434,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -6160,6 +6460,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -6559,7 +6909,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -6585,6 +6935,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -6984,7 +7384,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -7010,6 +7410,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -7410,7 +7860,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -7436,6 +7886,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -7836,7 +8336,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -7862,6 +8362,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 
@@ -8262,7 +8812,7 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
-            return selectFrom(entityClass, includeSubEntityProperties, null);
+            return selectFrom(entityClass, includeSubEntityProperties, (Set<String>) null);
         }
 
         /**
@@ -8288,6 +8838,56 @@ public abstract class SQLBuilder {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String expr) {
+            return selectFrom(entityClass, false, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final String expr) {
+            return selectFrom(entityClass, includeSubEntityProperties, null, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames, final String expr) {
+            return selectFrom(entityClass, false, excludedPropNames, expr);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames,
+                final String expr) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
+            } else {
+                return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
             }
         }
 

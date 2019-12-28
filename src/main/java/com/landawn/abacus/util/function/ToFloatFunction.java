@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ToFloatFunction<T> extends Try.ToFloatFunction<T, RuntimeException> {
+public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, RuntimeException> {
 
     static final ToFloatFunction<Float> UNBOX = new ToFloatFunction<Float>() {
         @Override

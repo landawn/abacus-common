@@ -38,7 +38,7 @@ import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalFloat;
@@ -1120,13 +1120,13 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public <E extends Exception> OptionalFloat findAny(final Try.FloatPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalFloat findAny(final Throwables.FloatPredicate<E> predicate) throws E {
         return findFirst(predicate);
     }
 
     @Override
-    public <E extends Exception, E2 extends Exception> OptionalFloat findFirstOrLast(Try.FloatPredicate<E> predicateForFirst,
-            Try.FloatPredicate<E> predicateForLast) throws E, E2 {
+    public <E extends Exception, E2 extends Exception> OptionalFloat findFirstOrLast(Throwables.FloatPredicate<E> predicateForFirst,
+            Throwables.FloatPredicate<E> predicateForLast) throws E, E2 {
         assertNotClosed();
 
         try {

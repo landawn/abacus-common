@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ByteBinaryOperator extends Try.ByteBinaryOperator<RuntimeException> {
+public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<RuntimeException> {
 
     @Override
     byte applyAsByte(byte left, byte right);

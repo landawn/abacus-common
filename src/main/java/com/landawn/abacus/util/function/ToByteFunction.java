@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ToByteFunction<T> extends Try.ToByteFunction<T, RuntimeException> {
+public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeException> {
 
     static final ToByteFunction<Byte> UNBOX = new ToByteFunction<Byte>() {
         @Override

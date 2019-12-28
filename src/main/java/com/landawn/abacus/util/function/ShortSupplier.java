@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ShortSupplier extends Try.ShortSupplier<RuntimeException> {
+public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException> {
 
     static final ShortSupplier ZERO = new ShortSupplier() {
         @Override

@@ -131,7 +131,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(double newValue, Try.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(double newValue, Throwables.DoublePredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
             return true;
@@ -150,7 +150,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(double newValue, Try.DoubleBiPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(double newValue, Throwables.DoubleBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;
             return true;

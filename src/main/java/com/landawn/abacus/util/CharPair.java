@@ -122,7 +122,7 @@ public final class CharPair {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.CharConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.CharConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
     }
@@ -133,7 +133,7 @@ public final class CharPair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<CharPair, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<CharPair, E> action) throws E {
         action.accept(this);
     }
 
@@ -145,7 +145,7 @@ public final class CharPair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<CharPair, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<CharPair, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -156,7 +156,7 @@ public final class CharPair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<CharPair> filter(Try.Predicate<CharPair, E> predicate) throws E {
+    public <E extends Exception> Optional<CharPair> filter(Throwables.Predicate<CharPair, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<CharPair> empty();
     }
 

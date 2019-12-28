@@ -1206,7 +1206,7 @@ public final class ClassUtil {
      * @throws E the e
      */
     public static <E extends Exception> List<Class<?>> getClassesByPackage(String pkgName, boolean isRecursive, boolean skipClassLoaddingException,
-            Try.Predicate<? super Class<?>, E> predicate) throws UncheckedIOException, E {
+            Throwables.Predicate<? super Class<?>, E> predicate) throws UncheckedIOException, E {
         if (logger.isInfoEnabled()) {
             logger.info("Looking for classes in package: " + pkgName);
         }
@@ -1718,7 +1718,7 @@ public final class ClassUtil {
      * @return
      * @throws E
      */
-    public static <E extends Exception> List<String> getPropNames(final Object entity, Try.Predicate<Object, E> propValueFilter) throws E {
+    public static <E extends Exception> List<String> getPropNames(final Object entity, Throwables.Predicate<Object, E> propValueFilter) throws E {
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
         final int size = entityInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
@@ -1740,7 +1740,7 @@ public final class ClassUtil {
      * @return
      * @throws E
      */
-    public static <E extends Exception> List<String> getPropNames(final Object entity, Try.BiPredicate<Object, Type<Object>, E> propValueFilter) throws E {
+    public static <E extends Exception> List<String> getPropNames(final Object entity, Throwables.BiPredicate<Object, Type<Object>, E> propValueFilter) throws E {
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
         final int size = entityInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);

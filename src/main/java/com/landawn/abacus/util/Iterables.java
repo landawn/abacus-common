@@ -478,10 +478,10 @@ public final class Iterables {
      * @return the optional int
      * @throws E the e
      * @deprecated replace by N.findFirstIndex
-     * @see N#findFirstIndex(Object[], com.landawn.abacus.util.Try.Predicate)
+     * @see N#findFirstIndex(Object[], com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findFirstIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -505,10 +505,10 @@ public final class Iterables {
      * @return the optional int
      * @throws E the e
      * @deprecated replace by N.findFirstIndex
-     * @see N#findFirstIndex(Collection, com.landawn.abacus.util.Try.Predicate)
+     * @see N#findFirstIndex(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -536,10 +536,10 @@ public final class Iterables {
      * @return the optional int
      * @throws E the e
      * @deprecated replace by N.findLastIndex
-     * @see N#findLastIndex(Object[], com.landawn.abacus.util.Try.Predicate)
+     * @see N#findLastIndex(Object[], com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findLastIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -563,10 +563,10 @@ public final class Iterables {
      * @return the optional int
      * @throws E the e
      * @deprecated replace by N.findLastIndex
-     * @see N#findLastIndex(Collection, com.landawn.abacus.util.Try.Predicate)
+     * @see N#findLastIndex(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -630,7 +630,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
-            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -654,7 +654,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final T[] a,
-            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -675,7 +675,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
-            final Try.Predicate<? super T, E> predicate) throws E {
+            final Throwables.Predicate<? super T, E> predicate) throws E {
         return findFirstAndLastIndex(c, predicate, predicate);
     }
 
@@ -693,7 +693,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
-            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
             return Pair.of(OptionalInt.empty(), OptionalInt.empty());
         }
@@ -711,7 +711,7 @@ public final class Iterables {
      * @return the pair
      * @throws E the e
      */
-    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Try.Predicate<? super T, E> predicate)
+    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Throwables.Predicate<? super T, E> predicate)
             throws E {
         return findFirstAndLastIndex(a, predicate, predicate);
     }
@@ -730,7 +730,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a,
-            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(a)) {
             return Pair.of(OptionalInt.empty(), OptionalInt.empty());
         }
@@ -748,10 +748,10 @@ public final class Iterables {
      * @return the nullable
      * @throws E the e
      * @deprecated replace by N.findFirst
-     * @see N#findFirst(Object[], com.landawn.abacus.util.Try.Predicate)
+     * @see N#findFirst(Object[], com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findFirst(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Nullable.empty();
         }
@@ -775,10 +775,10 @@ public final class Iterables {
      * @return the nullable
      * @throws E the e
      * @deprecated replace by N.findFirst
-     * @see N#findFirst(Collection, com.landawn.abacus.util.Try.Predicate)
+     * @see N#findFirst(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Nullable<T> findFirst(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findFirst(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Nullable.empty();
         }
@@ -802,10 +802,10 @@ public final class Iterables {
      * @return the nullable
      * @throws E the e
      * @deprecated replace by N.findLast
-     * @see N#findLast(Object[], com.landawn.abacus.util.Try.Predicate)
+     * @see N#findLast(Object[], com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findLast(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Nullable.empty();
         }
@@ -829,10 +829,10 @@ public final class Iterables {
      * @return the nullable
      * @throws E the e
      * @deprecated replace by N.findLast
-     * @see N#findLast(Collection, com.landawn.abacus.util.Try.Predicate)
+     * @see N#findLast(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Nullable<T> findLast(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findLast(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         return findLast(c, predicate, false);
     }
 
@@ -846,10 +846,10 @@ public final class Iterables {
      * @return the optional
      * @throws E the e
      * @deprecated replace by N.findFirstNonNull
-     * @see N#findFirstNonNull(Object[], com.landawn.abacus.util.Try.Predicate)
+     * @see N#findFirstNonNull(Object[], com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Optional.empty();
         }
@@ -873,10 +873,10 @@ public final class Iterables {
      * @return the optional
      * @throws E the e
      * @deprecated replace by N.findFirstNonNull
-     * @see N#findFirstNonNull(Collection, com.landawn.abacus.util.Try.Predicate)
+     * @see N#findFirstNonNull(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Optional.empty();
         }
@@ -900,10 +900,10 @@ public final class Iterables {
      * @return the optional
      * @throws E the e
      * @deprecated replace by N.findLastNonNull
-     * @see N#findLastNonNull(Object[], com.landawn.abacus.util.Try.Predicate)
+     * @see N#findLastNonNull(Object[], com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findLastNonNull(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(a)) {
             return Optional.empty();
         }
@@ -927,10 +927,10 @@ public final class Iterables {
      * @return the optional
      * @throws E the e
      * @deprecated replace by N.findLastNonNull
-     * @see N#findLastNonNull(Collection, com.landawn.abacus.util.Try.Predicate)
+     * @see N#findLastNonNull(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         return findLast(c, predicate, true);
     }
 
@@ -946,7 +946,7 @@ public final class Iterables {
      * @return the r
      * @throws E the e
      */
-    private static <T, R, E extends Exception> R findLast(final Collection<? extends T> c, Try.Predicate<? super T, E> predicate, boolean isForNonNull)
+    private static <T, R, E extends Exception> R findLast(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate, boolean isForNonNull)
             throws E {
         if (N.isNullOrEmpty(c)) {
             return (R) (isForNonNull ? Optional.empty() : Nullable.empty());
@@ -1017,7 +1017,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final Collection<? extends T> c,
-            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
             return Nullable.<T> empty();
         }
@@ -1040,8 +1040,8 @@ public final class Iterables {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final T[] a, final Try.Predicate<? super T, E> predicateForFirst,
-            final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final T[] a, final Throwables.Predicate<? super T, E> predicateForFirst,
+            final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(a)) {
             return Nullable.<T> empty();
         }
@@ -1062,7 +1062,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
-            final Try.Predicate<? super T, E> predicate) throws E {
+            final Throwables.Predicate<? super T, E> predicate) throws E {
         return findFirstAndLast(c, predicate, predicate);
     }
 
@@ -1080,7 +1080,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
-            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
             return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
         }
@@ -1098,7 +1098,7 @@ public final class Iterables {
      * @return the pair
      * @throws E the e
      */
-    public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Try.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
         return findFirstAndLast(a, predicate, predicate);
     }
 
@@ -1116,7 +1116,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a,
-            final Try.Predicate<? super T, E> predicateForFirst, final Try.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(a)) {
             return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
         }
@@ -1136,7 +1136,7 @@ public final class Iterables {
      * @deprecated replaced by {@code N#allMatch(Collection, com.landawn.abacus.util.Try.Predicate)}
      */
     @Deprecated
-    public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(c)) {
             return true;
         }
@@ -1162,7 +1162,7 @@ public final class Iterables {
      * @deprecated replaced by {@code N#allMatch(Object[], com.landawn.abacus.util.Try.Predicate)}
      */
     @Deprecated
-    public static <T, E extends Exception> boolean allMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean allMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(a)) {
             return true;
         }
@@ -1188,7 +1188,7 @@ public final class Iterables {
      * @deprecated replaced by {@code N#anyMatch(Collection, com.landawn.abacus.util.Try.Predicate)}
      */
     @Deprecated
-    public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(c)) {
             return false;
         }
@@ -1214,7 +1214,7 @@ public final class Iterables {
      * @deprecated replaced by {@code N#anyMatch(Object[], com.landawn.abacus.util.Try.Predicate)}
      */
     @Deprecated
-    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(a)) {
             return false;
         }
@@ -1240,7 +1240,7 @@ public final class Iterables {
      * @deprecated replaced by {@code N#noneMatch(Collection, com.landawn.abacus.util.Try.Predicate)}
      */
     @Deprecated
-    public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(c)) {
             return true;
         }
@@ -1266,7 +1266,7 @@ public final class Iterables {
      * @deprecated replaced by {@code N#noneMatch(Object[], com.landawn.abacus.util.Try.Predicate)}
      */
     @Deprecated
-    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         if (N.isNullOrEmpty(a)) {
             return true;
         }
@@ -1295,7 +1295,7 @@ public final class Iterables {
      */
     @Deprecated
     public static <T, E extends Exception> boolean nMatch(final Collection<? extends T> c, final int atLeast, final int atMost,
-            final Try.Predicate<? super T, E> filter) throws E {
+            final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNegative(atLeast, "atLeast");
         N.checkArgNotNegative(atMost, "atMost");
         N.checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -1327,7 +1327,7 @@ public final class Iterables {
      * @deprecated replaced by {@code N#nMatch(Object[], int, int, com.landawn.abacus.util.Try.Predicate)}
      */
     @Deprecated
-    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNegative(atLeast, "atLeast");
         N.checkArgNotNegative(atMost, "atMost");
         N.checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -1354,7 +1354,7 @@ public final class Iterables {
      * @param action the action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Try.BiConsumer<? super T, ? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
         forEachPair(c, action, 1);
     }
 
@@ -1368,7 +1368,7 @@ public final class Iterables {
      * @param increment the increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Try.BiConsumer<? super T, ? super T, E> action,
+    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action,
             final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 2;
@@ -1391,7 +1391,7 @@ public final class Iterables {
      * @param action the action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final T[] a, final Try.BiConsumer<? super T, ? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
         forEachPair(a, action, 1);
     }
 
@@ -1405,7 +1405,7 @@ public final class Iterables {
      * @param increment the increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final T[] a, final Try.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
+    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 2;
         N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -1427,7 +1427,7 @@ public final class Iterables {
      * @param action the action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c, final Try.TriConsumer<? super T, ? super T, ? super T, E> action)
+    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action)
             throws E {
         forEachTriple(c, action, 1);
     }
@@ -1442,7 +1442,7 @@ public final class Iterables {
      * @param increment the increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c, final Try.TriConsumer<? super T, ? super T, ? super T, E> action,
+    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
             final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 3;
@@ -1465,7 +1465,7 @@ public final class Iterables {
      * @param action the action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final T[] a, final Try.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
         forEachTriple(a, action, 1);
     }
 
@@ -1479,7 +1479,7 @@ public final class Iterables {
      * @param increment the increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final T[] a, final Try.TriConsumer<? super T, ? super T, ? super T, E> action,
+    public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
             final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 3;
@@ -1503,7 +1503,7 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhile(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhile(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
@@ -1533,7 +1533,7 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhile(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
@@ -1563,7 +1563,7 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhileInclusive(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhileInclusive(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
@@ -1593,7 +1593,7 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhileInclusive(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhileInclusive(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
@@ -1623,7 +1623,7 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> dropWhile(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> dropWhile(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
@@ -1661,7 +1661,7 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> dropWhile(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> dropWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
@@ -1694,7 +1694,7 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> skipUntil(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> skipUntil(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
@@ -1732,7 +1732,7 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> skipUntil(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> skipUntil(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
@@ -1781,12 +1781,12 @@ public final class Iterables {
      * @param func
      * @return
      * @throws E
-     * @see N#crossJoin(Collection, Collection, com.landawn.abacus.util.Try.BiFunction)
+     * @see N#crossJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiFunction)
      * @deprecated replaced by {@code N.crossJoin(Collection, Collection, com.landawn.abacus.util.Try.BiFunction)}
      */
     @Deprecated
     public static <T, U, R, E extends Exception> List<R> crossJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiFunction<? super T, ? super U, R, E> func) throws E {
+            final Throwables.BiFunction<? super T, ? super U, R, E> func) throws E {
         N.checkArgNotNull(func, "func");
 
         final List<R> result = new ArrayList<>(N.size(a) * N.size(b));
@@ -1818,13 +1818,13 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      * @throws E2 the e2
-     * @see N#innerJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)
+     * @see N#innerJoin(Collection, Collection, com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      * @deprecated replaced by {@code N.innerJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
     @Deprecated
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
 
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
@@ -1857,13 +1857,13 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the list
      * @throws E the e
-     * @see N#innerJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)
+     * @see N#innerJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiPredicate)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      * @deprecated replaced by {@code N.innerJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
      */
     @Deprecated
     public static <T, U, E extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
         final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
 
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
@@ -1895,13 +1895,13 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      * @throws E2 the e2
-     * @see N#fullJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)
+     * @see N#fullJoin(Collection, Collection, com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      * @deprecated replaced by {@code N.fullJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
     @Deprecated
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
 
         if (N.isNullOrEmpty(a)) {
@@ -1950,13 +1950,13 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the list
      * @throws E the e
-     * @see N#fullJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)
+     * @see N#fullJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiPredicate)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      * @deprecated replaced by {@code N.fullJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
      */
     @Deprecated
     public static <T, U, E extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
         final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
 
         if (N.isNullOrEmpty(a)) {
@@ -2010,13 +2010,13 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      * @throws E2 the e2
-     * @see N#leftJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)
+     * @see N#leftJoin(Collection, Collection, com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      * @deprecated replaced by {@code N.leftJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
     @Deprecated
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
 
         if (N.isNullOrEmpty(a)) {
@@ -2055,13 +2055,13 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the list
      * @throws E the e
-     * @see N#leftJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)
+     * @see N#leftJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiPredicate)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      * @deprecated replaced by {@code N.leftJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
      */
     @Deprecated
     public static <T, U, E extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
 
         if (N.isNullOrEmpty(a)) {
@@ -2104,13 +2104,13 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      * @throws E2 the e2
-     * @see N#rightJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)
+     * @see N#rightJoin(Collection, Collection, com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      * @deprecated replaced by {@code N.rightJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
     @Deprecated
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(b));
 
         if (N.isNullOrEmpty(b)) {
@@ -2149,13 +2149,13 @@ public final class Iterables {
      * @param predicate the predicate
      * @return the list
      * @throws E the e
-     * @see N#rightJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)
+     * @see N#rightJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiPredicate)
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      * @deprecated replaced by {@code N.rightJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
      */
     @Deprecated
     public static <T, U, E extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(b));
 
         if (N.isNullOrEmpty(b)) {
@@ -3068,7 +3068,7 @@ public final class Iterables {
      * @param elementParser the element parser
      * @throws E the e
      */
-    public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, final Try.Consumer<? super T, E> elementParser) throws E {
+    public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementParser) throws E {
         parse(iter, elementParser, Fn.emptyAction());
     }
 
@@ -3084,8 +3084,8 @@ public final class Iterables {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, final Try.Consumer<? super T, E> elementParser,
-            final Try.Runnable<E2> onComplete) throws E, E2 {
+    public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementParser,
+            final Throwables.Runnable<E2> onComplete) throws E, E2 {
         parse(iter, 0, Long.MAX_VALUE, elementParser, onComplete);
     }
 
@@ -3101,7 +3101,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, final long offset, final long count,
-            final Try.Consumer<? super T, E> elementParser) throws E {
+            final Throwables.Consumer<? super T, E> elementParser) throws E {
         parse(iter, offset, count, elementParser, Fn.emptyAction());
     }
 
@@ -3120,7 +3120,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, final long offset, final long count,
-            final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
+            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
         parse(iter, offset, count, 0, 0, elementParser, onComplete);
     }
 
@@ -3138,7 +3138,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, long offset, long count, final int processThreadNum,
-            final int queueSize, final Try.Consumer<? super T, E> elementParser) throws E {
+            final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
         parse(iter, offset, count, processThreadNum, queueSize, elementParser, Fn.emptyAction());
     }
 
@@ -3159,7 +3159,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, long offset, long count,
-            final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
         parse(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementParser, onComplete);
     }
 
@@ -3173,7 +3173,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
-            final Try.Consumer<? super T, E> elementParser) throws E {
+            final Throwables.Consumer<? super T, E> elementParser) throws E {
         parse(iterators, elementParser, Fn.emptyAction());
     }
 
@@ -3190,7 +3190,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
-            final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
+            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
         parse(iterators, 0, Long.MAX_VALUE, elementParser, onComplete);
     }
 
@@ -3206,7 +3206,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final Try.Consumer<? super T, E> elementParser) throws E {
+            final Throwables.Consumer<? super T, E> elementParser) throws E {
         parse(iterators, offset, count, elementParser, Fn.emptyAction());
     }
 
@@ -3225,7 +3225,7 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
-            final long count, final Try.Consumer<? super T, E> elementParser, final Try.Runnable<E2> onComplete) throws E, E2 {
+            final long count, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
         parse(iterators, offset, count, 0, 0, 0, elementParser, onComplete);
     }
 
@@ -3242,7 +3242,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser) throws E {
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
         parse(iterators, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
     }
 
@@ -3261,8 +3261,8 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser,
-            final Try.Runnable<E2> onComplete) throws E {
+            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
+            final Throwables.Runnable<E2> onComplete) throws E {
         parse(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementParser);
     }
 
@@ -3281,7 +3281,7 @@ public final class Iterables {
      * @throws E the e
      */
     public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser) throws E {
+            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
         parse(iterators, offset, count, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
     }
 
@@ -3303,8 +3303,8 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
-            final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Try.Consumer<? super T, E> elementParser,
-            final Try.Runnable<E2> onComplete) throws E, E2 {
+            final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
+            final Throwables.Runnable<E2> onComplete) throws E, E2 {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can not be negative", offset, count);
 
         if (N.isNullOrEmpty(iterators)) {

@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface IndexedBiFunction<U, T, R> extends Try.IndexedBiFunction<U, T, R, RuntimeException> {
+public interface IndexedBiFunction<U, T, R> extends Throwables.IndexedBiFunction<U, T, R, RuntimeException> {
 
     @Override
     R apply(U u, int idx, T e);

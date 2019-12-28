@@ -131,7 +131,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(float newValue, Try.FloatPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(float newValue, Throwables.FloatPredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
             return true;
@@ -150,7 +150,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(float newValue, Try.FloatBiPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(float newValue, Throwables.FloatBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;
             return true;

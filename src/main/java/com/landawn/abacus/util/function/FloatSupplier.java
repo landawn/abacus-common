@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface FloatSupplier extends Try.FloatSupplier<RuntimeException> {
+public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException> {
 
     static final FloatSupplier ZERO = new FloatSupplier() {
         @Override

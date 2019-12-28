@@ -136,7 +136,7 @@ public final class FloatTriple {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.FloatConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.FloatConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
         comsumer.accept(this._3);
@@ -148,7 +148,7 @@ public final class FloatTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<FloatTriple, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<FloatTriple, E> action) throws E {
         action.accept(this);
     }
 
@@ -160,7 +160,7 @@ public final class FloatTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<FloatTriple, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<FloatTriple, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -171,7 +171,7 @@ public final class FloatTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<FloatTriple> filter(final Try.Predicate<FloatTriple, E> predicate) throws E {
+    public <E extends Exception> Optional<FloatTriple> filter(final Throwables.Predicate<FloatTriple, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<FloatTriple> empty();
     }
 

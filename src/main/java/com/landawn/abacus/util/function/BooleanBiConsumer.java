@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface BooleanBiConsumer extends Try.BooleanBiConsumer<RuntimeException> {
+public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeException> {
 
     @Override
     void accept(boolean t, boolean u);

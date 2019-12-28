@@ -34,7 +34,7 @@ import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.StringUtil.Strings;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
@@ -884,7 +884,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Try.CharConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws E {
         assertNotClosed();
 
         try {
@@ -1398,7 +1398,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1415,7 +1415,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1432,7 +1432,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1449,7 +1449,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> OptionalChar findFirst(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalChar findFirst(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1466,7 +1466,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> OptionalChar findLast(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalChar findLast(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1597,7 +1597,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super CharStream, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super CharStream, R, E> func) throws E {
         try {
             if (fromIndex < toIndex) {
                 return Optional.of(func.apply(this));
@@ -1610,7 +1610,7 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super CharStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CharStream, E> action) throws E {
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);

@@ -37,7 +37,7 @@ import com.landawn.abacus.util.LongSummaryStatistics;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.StringUtil.Strings;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -1195,7 +1195,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Try.LongConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws E {
         assertNotClosed();
 
         try {
@@ -1709,7 +1709,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.LongPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1726,7 +1726,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.LongPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.LongPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1743,7 +1743,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.LongPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.LongPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1760,7 +1760,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> OptionalLong findFirst(final Try.LongPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1777,7 +1777,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> OptionalLong findLast(final Try.LongPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1973,7 +1973,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super LongStream, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super LongStream, R, E> func) throws E {
         try {
             if (fromIndex < toIndex) {
                 return Optional.of(func.apply(this));
@@ -1986,7 +1986,7 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super LongStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super LongStream, E> action) throws E {
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);

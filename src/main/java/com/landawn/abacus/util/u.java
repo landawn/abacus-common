@@ -161,7 +161,7 @@ public class u {
          * @return itself
          * @throws E the e
          */
-        public <E extends Exception> Optional<T> ifPresent(Try.Consumer<? super T, E> action) throws E {
+        public <E extends Exception> Optional<T> ifPresent(Throwables.Consumer<? super T, E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent()) {
@@ -182,7 +182,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> Optional<T> ifPresentOrElse(Try.Consumer<? super T, E> action, Try.Runnable<E2> emptyAction)
+        public <E extends Exception, E2 extends Exception> Optional<T> ifPresentOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction)
                 throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
@@ -203,7 +203,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<T> filter(Try.Predicate<? super T, E> predicate) throws E {
+        public <E extends Exception> Optional<T> filter(Throwables.Predicate<? super T, E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent() && predicate.test(value)) {
@@ -221,7 +221,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> Nullable<U> map(final Try.Function<? super T, ? extends U, E> mapper) throws E {
+        public <U, E extends Exception> Nullable<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -239,7 +239,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean mapToBoolean(final Try.ToBooleanFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -257,7 +257,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalChar mapToChar(final Try.ToCharFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -275,7 +275,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalByte mapToByte(final Try.ToByteFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -293,7 +293,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalShort mapToShort(final Try.ToShortFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -311,7 +311,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -329,7 +329,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong mapToLong(final Try.ToLongFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -347,7 +347,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalFloat mapToFloat(final Try.ToFloatFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -365,7 +365,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -383,7 +383,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> Optional<U> flatMap(Try.Function<? super T, Optional<U>, E> mapper) throws E {
+        public <U, E extends Exception> Optional<U> flatMap(Throwables.Function<? super T, Optional<U>, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -400,7 +400,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<T> or(Try.Supplier<Optional<? extends T>, E> supplier) throws E {
+        public <E extends Exception> Optional<T> or(Throwables.Supplier<Optional<? extends T>, E> supplier) throws E {
             N.checkArgNotNull(supplier, "supplier");
 
             if (isPresent()) {
@@ -435,7 +435,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> T orElseGet(Try.Supplier<? extends T, E> other) throws E {
+        public <E extends Exception> T orElseGet(Throwables.Supplier<? extends T, E> other) throws E {
             if (isPresent()) {
                 return value;
             } else {
@@ -687,7 +687,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean ifPresent(Try.BooleanConsumer<E> action) throws E {
+        public <E extends Exception> OptionalBoolean ifPresent(Throwables.BooleanConsumer<E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent) {
@@ -708,7 +708,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalBoolean ifPresentOrElse(Try.BooleanConsumer<E> action, Try.Runnable<E2> emptyAction)
+        public <E extends Exception, E2 extends Exception> OptionalBoolean ifPresentOrElse(Throwables.BooleanConsumer<E> action, Throwables.Runnable<E2> emptyAction)
                 throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
@@ -729,7 +729,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean filter(Try.BooleanPredicate<E> predicate) throws E {
+        public <E extends Exception> OptionalBoolean filter(Throwables.BooleanPredicate<E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent && predicate.test(value)) {
@@ -746,7 +746,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean map(final Try.BooleanUnaryOperator<E> mapper) throws E {
+        public <E extends Exception> OptionalBoolean map(final Throwables.BooleanUnaryOperator<E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -765,7 +765,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Try.BooleanFunction<T, E> mapper) throws E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.BooleanFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -782,7 +782,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean flatMap(Try.BooleanFunction<OptionalBoolean, E> mapper) throws E {
+        public <E extends Exception> OptionalBoolean flatMap(Throwables.BooleanFunction<OptionalBoolean, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -799,7 +799,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean or(Try.Supplier<OptionalBoolean, E> supplier) throws E {
+        public <E extends Exception> OptionalBoolean or(Throwables.Supplier<OptionalBoolean, E> supplier) throws E {
             if (isPresent) {
                 return this;
             } else {
@@ -862,7 +862,7 @@ public class u {
          * @return true, if successful
          * @throws E the e
          */
-        public <E extends Exception> boolean orElseGet(Try.BooleanSupplier<E> other) throws E {
+        public <E extends Exception> boolean orElseGet(Throwables.BooleanSupplier<E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -1115,7 +1115,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalChar ifPresent(Try.CharConsumer<E> action) throws E {
+        public <E extends Exception> OptionalChar ifPresent(Throwables.CharConsumer<E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent()) {
@@ -1136,7 +1136,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalChar ifPresentOrElse(Try.CharConsumer<E> action, Try.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalChar ifPresentOrElse(Throwables.CharConsumer<E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -1156,7 +1156,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalChar filter(Try.CharPredicate<E> predicate) throws E {
+        public <E extends Exception> OptionalChar filter(Throwables.CharPredicate<E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent() && predicate.test(value)) {
@@ -1173,7 +1173,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalChar map(final Try.CharUnaryOperator<E> mapper) throws E {
+        public <E extends Exception> OptionalChar map(final Throwables.CharUnaryOperator<E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -1191,7 +1191,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Character, E> mapper) throws E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Character, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -1210,7 +1210,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Try.CharFunction<T, E> mapper) throws E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.CharFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -1227,7 +1227,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalChar flatMap(Try.CharFunction<OptionalChar, E> mapper) throws E {
+        public <E extends Exception> OptionalChar flatMap(Throwables.CharFunction<OptionalChar, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -1244,7 +1244,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalChar or(Try.Supplier<OptionalChar, E> supplier) throws E {
+        public <E extends Exception> OptionalChar or(Throwables.Supplier<OptionalChar, E> supplier) throws E {
             if (isPresent()) {
                 return this;
             } else {
@@ -1295,7 +1295,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> char orElseGet(Try.CharSupplier<E> other) throws E {
+        public <E extends Exception> char orElseGet(Throwables.CharSupplier<E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent()) {
@@ -1554,7 +1554,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalByte ifPresent(Try.ByteConsumer<E> action) throws E {
+        public <E extends Exception> OptionalByte ifPresent(Throwables.ByteConsumer<E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent) {
@@ -1575,7 +1575,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalByte ifPresentOrElse(Try.ByteConsumer<E> action, Try.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalByte ifPresentOrElse(Throwables.ByteConsumer<E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -1595,7 +1595,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalByte filter(Try.BytePredicate<E> predicate) throws E {
+        public <E extends Exception> OptionalByte filter(Throwables.BytePredicate<E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent && predicate.test(value)) {
@@ -1612,7 +1612,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalByte map(final Try.ByteUnaryOperator<E> mapper) throws E {
+        public <E extends Exception> OptionalByte map(final Throwables.ByteUnaryOperator<E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -1630,7 +1630,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Byte, E> mapper) throws E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Byte, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -1649,7 +1649,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Try.ByteFunction<T, E> mapper) throws E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.ByteFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -1666,7 +1666,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalByte flatMap(Try.ByteFunction<OptionalByte, E> mapper) throws E {
+        public <E extends Exception> OptionalByte flatMap(Throwables.ByteFunction<OptionalByte, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -1683,7 +1683,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalByte or(Try.Supplier<OptionalByte, E> supplier) throws E {
+        public <E extends Exception> OptionalByte or(Throwables.Supplier<OptionalByte, E> supplier) throws E {
             if (isPresent) {
                 return this;
             } else {
@@ -1734,7 +1734,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> byte orElseGet(Try.ByteSupplier<E> other) throws E {
+        public <E extends Exception> byte orElseGet(Throwables.ByteSupplier<E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -1984,7 +1984,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalShort ifPresent(Try.ShortConsumer<E> action) throws E {
+        public <E extends Exception> OptionalShort ifPresent(Throwables.ShortConsumer<E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent) {
@@ -2005,7 +2005,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalShort ifPresentOrElse(Try.ShortConsumer<E> action, Try.Runnable<E2> emptyAction)
+        public <E extends Exception, E2 extends Exception> OptionalShort ifPresentOrElse(Throwables.ShortConsumer<E> action, Throwables.Runnable<E2> emptyAction)
                 throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
@@ -2026,7 +2026,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalShort filter(Try.ShortPredicate<E> predicate) throws E {
+        public <E extends Exception> OptionalShort filter(Throwables.ShortPredicate<E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent && predicate.test(value)) {
@@ -2043,7 +2043,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalShort map(final Try.ShortUnaryOperator<E> mapper) throws E {
+        public <E extends Exception> OptionalShort map(final Throwables.ShortUnaryOperator<E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2061,7 +2061,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Short, E> mapper) throws E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Short, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2080,7 +2080,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Try.ShortFunction<T, E> mapper) throws E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.ShortFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2097,7 +2097,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalShort flatMap(Try.ShortFunction<OptionalShort, E> mapper) throws E {
+        public <E extends Exception> OptionalShort flatMap(Throwables.ShortFunction<OptionalShort, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2114,7 +2114,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalShort or(Try.Supplier<OptionalShort, E> supplier) throws E {
+        public <E extends Exception> OptionalShort or(Throwables.Supplier<OptionalShort, E> supplier) throws E {
             if (isPresent) {
                 return this;
             } else {
@@ -2165,7 +2165,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> short orElseGet(Try.ShortSupplier<E> other) throws E {
+        public <E extends Exception> short orElseGet(Throwables.ShortSupplier<E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -2443,7 +2443,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt ifPresent(Try.IntConsumer<E> action) throws E {
+        public <E extends Exception> OptionalInt ifPresent(Throwables.IntConsumer<E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent) {
@@ -2464,7 +2464,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalInt ifPresentOrElse(Try.IntConsumer<E> action, Try.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalInt ifPresentOrElse(Throwables.IntConsumer<E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -2484,7 +2484,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt filter(Try.IntPredicate<E> predicate) throws E {
+        public <E extends Exception> OptionalInt filter(Throwables.IntPredicate<E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent && predicate.test(value)) {
@@ -2501,7 +2501,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt map(final Try.IntUnaryOperator<E> mapper) throws E {
+        public <E extends Exception> OptionalInt map(final Throwables.IntUnaryOperator<E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2519,7 +2519,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong mapToLong(final Try.ToLongFunction<Integer, E> mapper) throws E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Integer, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2537,7 +2537,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<Integer, E> mapper) throws E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Integer, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2556,7 +2556,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Try.IntFunction<T, E> mapper) throws E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.IntFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2573,7 +2573,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt flatMap(Try.IntFunction<OptionalInt, E> mapper) throws E {
+        public <E extends Exception> OptionalInt flatMap(Throwables.IntFunction<OptionalInt, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2590,7 +2590,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt or(Try.Supplier<OptionalInt, E> supplier) throws E {
+        public <E extends Exception> OptionalInt or(Throwables.Supplier<OptionalInt, E> supplier) throws E {
             if (isPresent) {
                 return this;
             } else {
@@ -2641,7 +2641,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> int orElseGet(Try.IntSupplier<E> other) throws E {
+        public <E extends Exception> int orElseGet(Throwables.IntSupplier<E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -2916,7 +2916,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong ifPresent(Try.LongConsumer<E> action) throws E {
+        public <E extends Exception> OptionalLong ifPresent(Throwables.LongConsumer<E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent) {
@@ -2937,7 +2937,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalLong ifPresentOrElse(Try.LongConsumer<E> action, Try.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalLong ifPresentOrElse(Throwables.LongConsumer<E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -2957,7 +2957,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong filter(Try.LongPredicate<E> predicate) throws E {
+        public <E extends Exception> OptionalLong filter(Throwables.LongPredicate<E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent && predicate.test(value)) {
@@ -2974,7 +2974,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong map(final Try.LongUnaryOperator<E> mapper) throws E {
+        public <E extends Exception> OptionalLong map(final Throwables.LongUnaryOperator<E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -2992,7 +2992,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Long, E> mapper) throws E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Long, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3010,7 +3010,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<Long, E> mapper) throws E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Long, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3029,7 +3029,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Try.LongFunction<T, E> mapper) throws E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.LongFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3046,7 +3046,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong flatMap(Try.LongFunction<OptionalLong, E> mapper) throws E {
+        public <E extends Exception> OptionalLong flatMap(Throwables.LongFunction<OptionalLong, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3063,7 +3063,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong or(Try.Supplier<OptionalLong, E> supplier) throws E {
+        public <E extends Exception> OptionalLong or(Throwables.Supplier<OptionalLong, E> supplier) throws E {
             if (isPresent) {
                 return this;
             } else {
@@ -3114,7 +3114,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> long orElseGet(Try.LongSupplier<E> other) throws E {
+        public <E extends Exception> long orElseGet(Throwables.LongSupplier<E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -3376,7 +3376,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalFloat ifPresent(Try.FloatConsumer<E> action) throws E {
+        public <E extends Exception> OptionalFloat ifPresent(Throwables.FloatConsumer<E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent) {
@@ -3397,7 +3397,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalFloat ifPresentOrElse(Try.FloatConsumer<E> action, Try.Runnable<E2> emptyAction)
+        public <E extends Exception, E2 extends Exception> OptionalFloat ifPresentOrElse(Throwables.FloatConsumer<E> action, Throwables.Runnable<E2> emptyAction)
                 throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
@@ -3418,7 +3418,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalFloat filter(Try.FloatPredicate<E> predicate) throws E {
+        public <E extends Exception> OptionalFloat filter(Throwables.FloatPredicate<E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent && predicate.test(value)) {
@@ -3435,7 +3435,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalFloat map(final Try.FloatUnaryOperator<E> mapper) throws E {
+        public <E extends Exception> OptionalFloat map(final Throwables.FloatUnaryOperator<E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3453,7 +3453,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<Float, E> mapper) throws E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Float, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3472,7 +3472,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Try.FloatFunction<T, E> mapper) throws E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.FloatFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3489,7 +3489,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalFloat flatMap(Try.FloatFunction<OptionalFloat, E> mapper) throws E {
+        public <E extends Exception> OptionalFloat flatMap(Throwables.FloatFunction<OptionalFloat, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3506,7 +3506,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalFloat or(Try.Supplier<OptionalFloat, E> supplier) throws E {
+        public <E extends Exception> OptionalFloat or(Throwables.Supplier<OptionalFloat, E> supplier) throws E {
             if (isPresent) {
                 return this;
             } else {
@@ -3557,7 +3557,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> float orElseGet(Try.FloatSupplier<E> other) throws E {
+        public <E extends Exception> float orElseGet(Throwables.FloatSupplier<E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -3820,7 +3820,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble ifPresent(Try.DoubleConsumer<E> action) throws E {
+        public <E extends Exception> OptionalDouble ifPresent(Throwables.DoubleConsumer<E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent) {
@@ -3841,7 +3841,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalDouble ifPresentOrElse(Try.DoubleConsumer<E> action, Try.Runnable<E2> emptyAction)
+        public <E extends Exception, E2 extends Exception> OptionalDouble ifPresentOrElse(Throwables.DoubleConsumer<E> action, Throwables.Runnable<E2> emptyAction)
                 throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
@@ -3862,7 +3862,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble filter(Try.DoublePredicate<E> predicate) throws E {
+        public <E extends Exception> OptionalDouble filter(Throwables.DoublePredicate<E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent && predicate.test(value)) {
@@ -3879,7 +3879,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble map(final Try.DoubleUnaryOperator<E> mapper) throws E {
+        public <E extends Exception> OptionalDouble map(final Throwables.DoubleUnaryOperator<E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3897,7 +3897,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<Double, E> mapper) throws E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Double, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3915,7 +3915,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong mapToLong(final Try.ToLongFunction<Double, E> mapper) throws E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Double, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3934,7 +3934,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> Nullable<T> mapToObj(final Try.DoubleFunction<T, E> mapper) throws E {
+        public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.DoubleFunction<T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3951,7 +3951,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble flatMap(Try.DoubleFunction<OptionalDouble, E> mapper) throws E {
+        public <E extends Exception> OptionalDouble flatMap(Throwables.DoubleFunction<OptionalDouble, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent) {
@@ -3968,7 +3968,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble or(Try.Supplier<OptionalDouble, E> supplier) throws E {
+        public <E extends Exception> OptionalDouble or(Throwables.Supplier<OptionalDouble, E> supplier) throws E {
             if (isPresent) {
                 return this;
             } else {
@@ -4019,7 +4019,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> double orElseGet(Try.DoubleSupplier<E> other) throws E {
+        public <E extends Exception> double orElseGet(Throwables.DoubleSupplier<E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent) {
@@ -4344,7 +4344,7 @@ public class u {
          * @return itself
          * @throws E the e
          */
-        public <E extends Exception> Nullable<T> ifPresent(Try.Consumer<? super T, E> action) throws E {
+        public <E extends Exception> Nullable<T> ifPresent(Throwables.Consumer<? super T, E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isPresent()) {
@@ -4365,7 +4365,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> Nullable<T> ifPresentOrElse(Try.Consumer<? super T, E> action, Try.Runnable<E2> emptyAction)
+        public <E extends Exception, E2 extends Exception> Nullable<T> ifPresentOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction)
                 throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
@@ -4387,7 +4387,7 @@ public class u {
          * @return itself
          * @throws E the e
          */
-        public <E extends Exception> Nullable<T> ifNotNull(Try.Consumer<? super T, E> action) throws E {
+        public <E extends Exception> Nullable<T> ifNotNull(Throwables.Consumer<? super T, E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isNotNull()) {
@@ -4408,7 +4408,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> Nullable<T> ifNotNullOrElse(Try.Consumer<? super T, E> action, Try.Runnable<E2> emptyAction)
+        public <E extends Exception, E2 extends Exception> Nullable<T> ifNotNullOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction)
                 throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
@@ -4429,7 +4429,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Nullable<T> filter(Try.Predicate<? super T, E> predicate) throws E {
+        public <E extends Exception> Nullable<T> filter(Throwables.Predicate<? super T, E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isPresent() && predicate.test(value)) {
@@ -4447,7 +4447,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<T> filterIfNotNull(Try.Predicate<? super T, E> predicate) throws E {
+        public <E extends Exception> Optional<T> filterIfNotNull(Throwables.Predicate<? super T, E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isNotNull() && predicate.test(value)) {
@@ -4465,7 +4465,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> Nullable<U> map(Try.Function<? super T, ? extends U, E> mapper) throws E {
+        public <U, E extends Exception> Nullable<U> map(Throwables.Function<? super T, ? extends U, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4483,7 +4483,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean mapToBoolean(final Try.ToBooleanFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4501,7 +4501,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalChar mapToChar(final Try.ToCharFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4519,7 +4519,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalByte mapToByte(final Try.ToByteFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4537,7 +4537,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalShort mapToShort(final Try.ToShortFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4555,7 +4555,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt mapToInt(final Try.ToIntFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4573,7 +4573,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong mapToLong(final Try.ToLongFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4591,7 +4591,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalFloat mapToFloat(final Try.ToFloatFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4609,7 +4609,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Try.ToDoubleFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4628,7 +4628,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> Nullable<U> mapIfNotNull(Try.Function<? super T, ? extends U, E> mapper) throws E {
+        public <U, E extends Exception> Nullable<U> mapIfNotNull(Throwables.Function<? super T, ? extends U, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4646,7 +4646,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalBoolean mapToBooleanIfNotNull(final Try.ToBooleanFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalBoolean mapToBooleanIfNotNull(final Throwables.ToBooleanFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4664,7 +4664,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalChar mapToCharIfNotNull(final Try.ToCharFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalChar mapToCharIfNotNull(final Throwables.ToCharFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4682,7 +4682,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalByte mapToByteIfNotNull(final Try.ToByteFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalByte mapToByteIfNotNull(final Throwables.ToByteFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4700,7 +4700,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalShort mapToShortIfNotNull(final Try.ToShortFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalShort mapToShortIfNotNull(final Throwables.ToShortFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4718,7 +4718,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalInt mapToIntIfNotNull(final Try.ToIntFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalInt mapToIntIfNotNull(final Throwables.ToIntFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4736,7 +4736,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalLong mapToLongIfNotNull(final Try.ToLongFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalLong mapToLongIfNotNull(final Throwables.ToLongFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4754,7 +4754,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalFloat mapToFloatIfNotNull(final Try.ToFloatFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalFloat mapToFloatIfNotNull(final Throwables.ToFloatFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4772,7 +4772,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> OptionalDouble mapToDoubleIfNotNull(final Try.ToDoubleFunction<? super T, E> mapper) throws E {
+        public <E extends Exception> OptionalDouble mapToDoubleIfNotNull(final Throwables.ToDoubleFunction<? super T, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4790,7 +4790,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> Nullable<U> flatMap(Try.Function<? super T, Nullable<U>, E> mapper) throws E {
+        public <U, E extends Exception> Nullable<U> flatMap(Throwables.Function<? super T, Nullable<U>, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isPresent()) {
@@ -4809,7 +4809,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> Nullable<U> flatMapIfNotNull(Try.Function<? super T, Nullable<U>, E> mapper) throws E {
+        public <U, E extends Exception> Nullable<U> flatMapIfNotNull(Throwables.Function<? super T, Nullable<U>, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -4826,7 +4826,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Nullable<T> or(Try.Supplier<Nullable<? extends T>, E> supplier) throws E {
+        public <E extends Exception> Nullable<T> or(Throwables.Supplier<Nullable<? extends T>, E> supplier) throws E {
             N.checkArgNotNull(supplier, "supplier");
 
             if (isPresent()) {
@@ -4844,7 +4844,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Nullable<T> orIfNull(Try.Supplier<Nullable<? extends T>, E> supplier) throws E {
+        public <E extends Exception> Nullable<T> orIfNull(Throwables.Supplier<Nullable<? extends T>, E> supplier) throws E {
             N.checkArgNotNull(supplier, "supplier");
 
             if (isNotNull()) {
@@ -4883,7 +4883,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> T orElseGet(Try.Supplier<? extends T, E> other) throws E {
+        public <E extends Exception> T orElseGet(Throwables.Supplier<? extends T, E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isPresent()) {
@@ -4943,7 +4943,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> T orElseGetIfNull(Try.Supplier<? extends T, E> other) throws E {
+        public <E extends Exception> T orElseGetIfNull(Throwables.Supplier<? extends T, E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isNotNull()) {
@@ -5334,7 +5334,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public final <E extends Exception> T getAndUpdate(Try.UnaryOperator<T, E> updateFunction) throws E {
+        public final <E extends Exception> T getAndUpdate(Throwables.UnaryOperator<T, E> updateFunction) throws E {
             final T res = value;
             this.value = updateFunction.apply(value);
             return res;
@@ -5348,7 +5348,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public final <E extends Exception> T updateAndGet(Try.UnaryOperator<T, E> updateFunction) throws E {
+        public final <E extends Exception> T updateAndGet(Throwables.UnaryOperator<T, E> updateFunction) throws E {
             this.value = updateFunction.apply(value);
             return value;
         }
@@ -5363,7 +5363,7 @@ public class u {
          * @return true, if successful
          * @throws E the e
          */
-        public <E extends Exception> boolean setIf(final T newValue, final Try.Predicate<? super T, E> predicate) throws E {
+        public <E extends Exception> boolean setIf(final T newValue, final Throwables.Predicate<? super T, E> predicate) throws E {
             if (predicate.test(value)) {
                 this.value = newValue;
                 return true;
@@ -5382,7 +5382,7 @@ public class u {
          * @return true, if successful
          * @throws E the e
          */
-        public <E extends Exception> boolean setIf(final T newValue, final Try.BiPredicate<? super T, ? super T, E> predicate) throws E {
+        public <E extends Exception> boolean setIf(final T newValue, final Throwables.BiPredicate<? super T, ? super T, E> predicate) throws E {
             if (predicate.test(value, newValue)) {
                 this.value = newValue;
                 return true;
@@ -5416,7 +5416,7 @@ public class u {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void ifNotNull(Try.Consumer<? super T, E> action) throws E {
+        public <E extends Exception> void ifNotNull(Throwables.Consumer<? super T, E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isNotNull()) {
@@ -5434,7 +5434,7 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> void ifNotNullOrElse(Try.Consumer<? super T, E> action, Try.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> void ifNotNullOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -5451,7 +5451,7 @@ public class u {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super T, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super T, E> action) throws E {
             action.accept(value);
         }
 
@@ -5461,10 +5461,10 @@ public class u {
          * @param <E>
          * @param action
          * @throws E the e
-         * @deprecated replaced by {@link #ifNotNull(com.landawn.abacus.util.Try.Consumer)}
+         * @deprecated replaced by {@link #ifNotNull(com.landawn.abacus.util.Throwables.Consumer)}
          */
         @Deprecated
-        public <E extends Exception> void acceptIfNotNull(final Try.Consumer<? super T, E> action) throws E {
+        public <E extends Exception> void acceptIfNotNull(final Throwables.Consumer<? super T, E> action) throws E {
             N.checkArgNotNull(action, "action");
 
             if (isNotNull()) {
@@ -5480,7 +5480,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super T, ? extends U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super T, ? extends U, E> mapper) throws E {
             return mapper.apply(value);
         }
 
@@ -5493,7 +5493,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> Nullable<U> mapIfNotNull(final Try.Function<? super T, ? extends U, E> mapper) throws E {
+        public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws E {
             N.checkArgNotNull(mapper, "mapper");
 
             if (isNotNull()) {
@@ -5510,7 +5510,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Nullable<T> filter(final Try.Predicate<? super T, E> predicate) throws E {
+        public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E {
             if (predicate.test(value)) {
                 return Nullable.of(value);
             } else {
@@ -5526,7 +5526,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<T> filterIfNotNull(final Try.Predicate<? super T, E> predicate) throws E {
+        public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws E {
             N.checkArgNotNull(predicate, "predicate");
 
             if (isNotNull() && predicate.test(value)) {
@@ -5554,7 +5554,7 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> T orElseGetIfNull(Try.Supplier<? extends T, E> other) throws E {
+        public <E extends Exception> T orElseGetIfNull(Throwables.Supplier<? extends T, E> other) throws E {
             N.checkArgNotNull(other, "other");
 
             if (isNotNull()) {

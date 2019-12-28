@@ -873,7 +873,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeAllOccurrencesIf(Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.Predicate<? super T, E> predicate) throws E {
         Set<T> removingKeys = null;
 
         for (T key : this.valueMap.keySet()) {
@@ -903,7 +903,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeAllOccurrencesIf(Try.BiPredicate<? super T, ? super Integer, E> predicate) throws E {
+    public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.BiPredicate<? super T, ? super Integer, E> predicate) throws E {
         Set<T> removingKeys = null;
 
         for (Map.Entry<T, MutableInt> entry : this.valueMap.entrySet()) {
@@ -934,7 +934,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final int occurrences, Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> boolean removeIf(final int occurrences, Throwables.Predicate<? super T, E> predicate) throws E {
         checkOccurrences(occurrences);
 
         Set<T> removingKeys = null;
@@ -967,7 +967,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final int occurrences, Try.BiPredicate<? super T, ? super Integer, E> predicate) throws E {
+    public <E extends Exception> boolean removeIf(final int occurrences, Throwables.BiPredicate<? super T, ? super Integer, E> predicate) throws E {
         checkOccurrences(occurrences);
 
         Set<T> removingKeys = null;
@@ -1103,7 +1103,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Try.Predicate<? super T, E> predicate, final int newOccurrences) throws E {
+    public <E extends Exception> boolean replaceIf(Throwables.Predicate<? super T, E> predicate, final int newOccurrences) throws E {
         checkOccurrences(newOccurrences);
 
         boolean modified = false;
@@ -1146,7 +1146,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Try.BiPredicate<? super T, ? super Integer, E> predicate, final int newOccurrences) throws E {
+    public <E extends Exception> boolean replaceIf(Throwables.BiPredicate<? super T, ? super Integer, E> predicate, final int newOccurrences) throws E {
         checkOccurrences(newOccurrences);
 
         boolean modified = false;
@@ -1188,7 +1188,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param function
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Try.BiFunction<? super T, ? super Integer, Integer, E> function) throws E {
+    public <E extends Exception> void replaceAll(Throwables.BiFunction<? super T, ? super Integer, Integer, E> function) throws E {
         List<T> keyToRemove = null;
         Integer newVal = null;
 
@@ -1470,7 +1470,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Multiset<T> filter(Try.Predicate<? super T, E> filter) throws E {
+    public <E extends Exception> Multiset<T> filter(Throwables.Predicate<? super T, E> filter) throws E {
         final Multiset<T> result = new Multiset<>(mapSupplier.get());
 
         for (Map.Entry<T, MutableInt> entry : valueMap.entrySet()) {
@@ -1489,7 +1489,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Multiset<T> filter(Try.BiPredicate<? super T, Integer, E> filter) throws E {
+    public <E extends Exception> Multiset<T> filter(Throwables.BiPredicate<? super T, Integer, E> filter) throws E {
         final Multiset<T> result = new Multiset<>(mapSupplier.get());
 
         for (Map.Entry<T, MutableInt> entry : valueMap.entrySet()) {
@@ -1507,7 +1507,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final Try.Consumer<? super T, E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         for (T e : valueMap.keySet()) {
@@ -1521,7 +1521,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final Try.ObjIntConsumer<? super T, E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.ObjIntConsumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         for (Map.Entry<T, MutableInt> entry : valueMap.entrySet()) {
@@ -1554,7 +1554,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> int computeIfAbsent(T e, Try.Function<? super T, Integer, E> mappingFunction) throws E {
+    public <E extends Exception> int computeIfAbsent(T e, Throwables.Function<? super T, Integer, E> mappingFunction) throws E {
         N.checkArgNotNull(mappingFunction);
 
         final int oldValue = get(e);
@@ -1599,7 +1599,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> int computeIfPresent(T e, Try.BiFunction<? super T, Integer, Integer, E> remappingFunction) throws E {
+    public <E extends Exception> int computeIfPresent(T e, Throwables.BiFunction<? super T, Integer, Integer, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
 
         final int oldValue = get(e);
@@ -1643,7 +1643,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> int compute(T key, Try.BiFunction<? super T, Integer, Integer, E> remappingFunction) throws E {
+    public <E extends Exception> int compute(T key, Throwables.BiFunction<? super T, Integer, Integer, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
 
         final int oldValue = get(key);
@@ -1685,7 +1685,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> int merge(T key, int value, Try.BiFunction<Integer, Integer, Integer, E> remappingFunction) throws E {
+    public <E extends Exception> int merge(T key, int value, Throwables.BiFunction<Integer, Integer, Integer, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
         N.checkArgNotNull(value);
 
@@ -1777,7 +1777,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Exception> R apply(Try.Function<? super Multiset<T>, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super Multiset<T>, R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -1790,7 +1790,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super Multiset<T>, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super Multiset<T>, R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -1800,7 +1800,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<? super Multiset<T>, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<? super Multiset<T>, E> action) throws E {
         action.accept(this);
     }
 
@@ -1811,7 +1811,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super Multiset<T>, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Multiset<T>, E> action) throws E {
         return If.is(size() > 0).then(this, action);
     }
 

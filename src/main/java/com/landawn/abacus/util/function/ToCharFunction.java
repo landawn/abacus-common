@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ToCharFunction<T> extends Try.ToCharFunction<T, RuntimeException> {
+public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeException> {
 
     static final ToCharFunction<Character> UNBOX = new ToCharFunction<Character>() {
         @Override

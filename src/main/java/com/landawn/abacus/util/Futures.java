@@ -27,7 +27,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.landawn.abacus.util.Try.TriFunction;
+import com.landawn.abacus.util.Throwables.TriFunction;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Tuple.Tuple4;
@@ -62,8 +62,8 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
-            final Try.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet) {
-        return compose(cf1, cf2, zipFunctionForGet, new Try.Function<Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception>() {
+            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet) {
+        return compose(cf1, cf2, zipFunctionForGet, new Throwables.Function<Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception>() {
             @Override
             public R apply(Tuple4<Future<T1>, Future<T2>, Long, TimeUnit> t) throws Exception {
                 return zipFunctionForGet.apply(t._1, t._2);
@@ -83,16 +83,16 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
-            final Try.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet,
-            final Try.Function<? super Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
+            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet,
+            final Throwables.Function<? super Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2);
 
-        return compose(cfs, new Try.Function<List<Future<?>>, R, Exception>() {
+        return compose(cfs, new Throwables.Function<List<Future<?>>, R, Exception>() {
             @Override
             public R apply(List<Future<?>> c) throws Exception {
                 return zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1));
             }
-        }, new Try.Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>() {
+        }, new Throwables.Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>() {
             @Override
             public R apply(Tuple3<List<Future<?>>, Long, TimeUnit> t) throws Exception {
                 return zipFunctionTimeoutGet.apply(Tuple.of((Future<T1>) t._1.get(0), (Future<T2>) t._1.get(1), t._2, t._3));
@@ -113,8 +113,8 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
-            final Try.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, R, Exception> zipFunctionForGet) {
-        return compose(cf1, cf2, cf3, zipFunctionForGet, new Try.Function<Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, Exception>() {
+            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, R, Exception> zipFunctionForGet) {
+        return compose(cf1, cf2, cf3, zipFunctionForGet, new Throwables.Function<Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, Exception>() {
             @Override
             public R apply(Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit> t) throws Exception {
                 return zipFunctionForGet.apply(t._1, t._2, t._3);
@@ -136,16 +136,16 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
-            final Try.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, R, Exception> zipFunctionForGet,
-            final Try.Function<? super Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
+            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, R, Exception> zipFunctionForGet,
+            final Throwables.Function<? super Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2, cf3);
 
-        return compose(cfs, new Try.Function<List<Future<?>>, R, Exception>() {
+        return compose(cfs, new Throwables.Function<List<Future<?>>, R, Exception>() {
             @Override
             public R apply(List<Future<?>> c) throws Exception {
                 return zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1), (Future<T3>) c.get(2));
             }
-        }, new Try.Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>() {
+        }, new Throwables.Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>() {
             @Override
             public R apply(Tuple3<List<Future<?>>, Long, TimeUnit> t) throws Exception {
                 return zipFunctionTimeoutGet.apply(Tuple.of((Future<T1>) t._1.get(0), (Future<T2>) t._1.get(1), (Future<T3>) t._1.get(2), t._2, t._3));
@@ -163,8 +163,8 @@ public final class Futures {
      * @return
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
-            final Try.Function<? super FC, R, Exception> zipFunctionForGet) {
-        return compose(cfs, zipFunctionForGet, new Try.Function<Tuple3<FC, Long, TimeUnit>, R, Exception>() {
+            final Throwables.Function<? super FC, R, Exception> zipFunctionForGet) {
+        return compose(cfs, zipFunctionForGet, new Throwables.Function<Tuple3<FC, Long, TimeUnit>, R, Exception>() {
             @Override
             public R apply(Tuple3<FC, Long, TimeUnit> t) throws Exception {
                 return zipFunctionForGet.apply(t._1);
@@ -183,8 +183,8 @@ public final class Futures {
      * @return
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
-            final Try.Function<? super FC, R, Exception> zipFunctionForGet,
-            final Try.Function<? super Tuple3<FC, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
+            final Throwables.Function<? super FC, R, Exception> zipFunctionForGet,
+            final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
         N.checkArgument(N.notNullOrEmpty(cfs), "'cfs' can't be null or empty");
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);
@@ -272,7 +272,7 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, E extends Exception> ContinuableFuture<Tuple2<T1, T2>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2) {
-        return allOf(Arrays.asList(cf1, cf2)).map(new Try.Function<List<Object>, Tuple2<T1, T2>, E>() {
+        return allOf(Arrays.asList(cf1, cf2)).map(new Throwables.Function<List<Object>, Tuple2<T1, T2>, E>() {
             @Override
             public Tuple2<T1, T2> apply(List<Object> t) {
                 return Tuple.of((T1) t.get(0), (T2) t.get(1));
@@ -293,7 +293,7 @@ public final class Futures {
      */
     public static <T1, T2, T3, E extends Exception> ContinuableFuture<Tuple3<T1, T2, T3>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3) {
-        return allOf(Arrays.asList(cf1, cf2, cf3)).map(new Try.Function<List<Object>, Tuple3<T1, T2, T3>, E>() {
+        return allOf(Arrays.asList(cf1, cf2, cf3)).map(new Throwables.Function<List<Object>, Tuple3<T1, T2, T3>, E>() {
             @Override
             public Tuple3<T1, T2, T3> apply(List<Object> t) {
                 return Tuple.of((T1) t.get(0), (T2) t.get(1), (T3) t.get(2));
@@ -316,7 +316,7 @@ public final class Futures {
      */
     public static <T1, T2, T3, T4, E extends Exception> ContinuableFuture<Tuple4<T1, T2, T3, T4>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4) {
-        return allOf(Arrays.asList(cf1, cf2, cf3, cf4)).map(new Try.Function<List<Object>, Tuple4<T1, T2, T3, T4>, E>() {
+        return allOf(Arrays.asList(cf1, cf2, cf3, cf4)).map(new Throwables.Function<List<Object>, Tuple4<T1, T2, T3, T4>, E>() {
             @Override
             public Tuple4<T1, T2, T3, T4> apply(List<Object> t) {
                 return Tuple.of((T1) t.get(0), (T2) t.get(1), (T3) t.get(2), (T4) t.get(3));
@@ -341,7 +341,7 @@ public final class Futures {
      */
     public static <T1, T2, T3, T4, T5, E extends Exception> ContinuableFuture<Tuple5<T1, T2, T3, T4, T5>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5) {
-        return allOf(Arrays.asList(cf1, cf2, cf3, cf4, cf5)).map(new Try.Function<List<Object>, Tuple5<T1, T2, T3, T4, T5>, E>() {
+        return allOf(Arrays.asList(cf1, cf2, cf3, cf4, cf5)).map(new Throwables.Function<List<Object>, Tuple5<T1, T2, T3, T4, T5>, E>() {
             @Override
             public Tuple5<T1, T2, T3, T4, T5> apply(List<Object> t) {
                 return Tuple.of((T1) t.get(0), (T2) t.get(1), (T3) t.get(2), (T4) t.get(3), (T5) t.get(4));
@@ -369,7 +369,7 @@ public final class Futures {
     public static <T1, T2, T3, T4, T5, T6, E extends Exception> ContinuableFuture<Tuple6<T1, T2, T3, T4, T5, T6>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
             final Future<? extends T6> cf6) {
-        return allOf(Arrays.asList(cf1, cf2, cf3, cf4, cf5, cf6)).map(new Try.Function<List<Object>, Tuple6<T1, T2, T3, T4, T5, T6>, E>() {
+        return allOf(Arrays.asList(cf1, cf2, cf3, cf4, cf5, cf6)).map(new Throwables.Function<List<Object>, Tuple6<T1, T2, T3, T4, T5, T6>, E>() {
             @Override
             public Tuple6<T1, T2, T3, T4, T5, T6> apply(List<Object> t) {
                 return Tuple.of((T1) t.get(0), (T2) t.get(1), (T3) t.get(2), (T4) t.get(3), (T5) t.get(4), (T6) t.get(5));
@@ -399,7 +399,7 @@ public final class Futures {
     public static <T1, T2, T3, T4, T5, T6, T7, E extends Exception> ContinuableFuture<Tuple7<T1, T2, T3, T4, T5, T6, T7>> combine(
             final Future<? extends T1> cf1, final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4,
             final Future<? extends T5> cf5, final Future<? extends T6> cf6, final Future<? extends T7> cf7) {
-        return allOf(Arrays.asList(cf1, cf2, cf3, cf4, cf5, cf6, cf7)).map(new Try.Function<List<Object>, Tuple7<T1, T2, T3, T4, T5, T6, T7>, E>() {
+        return allOf(Arrays.asList(cf1, cf2, cf3, cf4, cf5, cf6, cf7)).map(new Throwables.Function<List<Object>, Tuple7<T1, T2, T3, T4, T5, T6, T7>, E>() {
             @Override
             public Tuple7<T1, T2, T3, T4, T5, T6, T7> apply(List<Object> t) {
                 return Tuple.of((T1) t.get(0), (T2) t.get(1), (T3) t.get(2), (T4) t.get(3), (T5) t.get(4), (T6) t.get(5), (T7) t.get(6));
@@ -419,8 +419,8 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, R, E extends Exception> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
-            final Try.BiFunction<? super T1, ? super T2, R, E> action) {
-        return allOf(Arrays.asList(cf1, cf2)).map(new Try.Function<List<Object>, R, E>() {
+            final Throwables.BiFunction<? super T1, ? super T2, R, E> action) {
+        return allOf(Arrays.asList(cf1, cf2)).map(new Throwables.Function<List<Object>, R, E>() {
             @Override
             public R apply(List<Object> t) throws E {
                 return action.apply((T1) t.get(0), (T2) t.get(1));
@@ -443,7 +443,7 @@ public final class Futures {
      */
     public static <T1, T2, T3, R, E extends Exception> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final TriFunction<? super T1, ? super T2, ? super T3, R, E> action) {
-        return allOf(Arrays.asList(cf1, cf2, cf3)).map(new Try.Function<List<Object>, R, E>() {
+        return allOf(Arrays.asList(cf1, cf2, cf3)).map(new Throwables.Function<List<Object>, R, E>() {
             @Override
             public R apply(List<Object> t) throws E {
                 return action.apply((T1) t.get(0), (T2) t.get(1), (T3) t.get(2));
@@ -461,7 +461,7 @@ public final class Futures {
      * @return
      */
     public static <T, R, E extends Exception> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
-            final Try.Function<List<T>, R, E> action) {
+            final Throwables.Function<List<T>, R, E> action) {
         final ContinuableFuture<List<T>> f = allOf(cfs);
         return f.map(action);
     }

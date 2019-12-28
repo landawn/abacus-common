@@ -17,7 +17,7 @@ package com.landawn.abacus.util.function;
 import java.util.function.Function;
 
 import com.landawn.abacus.util.Fn.UnaryOperators;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -25,7 +25,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface UnaryOperator<T> extends Function<T, T>, java.util.function.UnaryOperator<T>, Try.UnaryOperator<T, RuntimeException> {
+public interface UnaryOperator<T> extends Function<T, T>, java.util.function.UnaryOperator<T>, Throwables.UnaryOperator<T, RuntimeException> {
 
     static <T> UnaryOperator<T> identity() {
         return UnaryOperators.identity();

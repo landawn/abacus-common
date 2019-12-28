@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface CharPredicate extends Try.CharPredicate<RuntimeException> {
+public interface CharPredicate extends Throwables.CharPredicate<RuntimeException> {
 
     static final CharPredicate ALWAYS_TRUE = new CharPredicate() {
         @Override

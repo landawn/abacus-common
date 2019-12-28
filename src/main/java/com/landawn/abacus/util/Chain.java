@@ -71,7 +71,7 @@ public final class Chain {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ComparisonChain compare(T left, T right, Try.BiFunction<? super T, ? super T, Integer, E> func) throws E {
+    public static <T, E extends Exception> ComparisonChain compare(T left, T right, Throwables.BiFunction<? super T, ? super T, Integer, E> func) throws E {
         return new ComparisonChain().compare(left, right, func);
     }
 
@@ -215,7 +215,7 @@ public final class Chain {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> EquivalenceChain equals(T left, T right, Try.BiFunction<? super T, ? super T, Boolean, E> func) throws E {
+    public static <T, E extends Exception> EquivalenceChain equals(T left, T right, Throwables.BiFunction<? super T, ? super T, Boolean, E> func) throws E {
         return new EquivalenceChain().equals(left, right, func);
     }
 
@@ -342,7 +342,7 @@ public final class Chain {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> HashCodeChain hash(T value, Try.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> HashCodeChain hash(T value, Throwables.ToIntFunction<? super T, E> func) throws E {
         return new HashCodeChain().hash(value, func);
     }
 
@@ -487,7 +487,7 @@ public final class Chain {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> ComparisonChain compare(T left, T right, Try.BiFunction<? super T, ? super T, Integer, E> func) throws E {
+        public <T, E extends Exception> ComparisonChain compare(T left, T right, Throwables.BiFunction<? super T, ? super T, Integer, E> func) throws E {
             N.checkArgNotNull(func, "func");
 
             if (result == 0) {
@@ -701,7 +701,7 @@ public final class Chain {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> EquivalenceChain equals(T left, T right, Try.BiFunction<? super T, ? super T, Boolean, E> func) throws E {
+        public <T, E extends Exception> EquivalenceChain equals(T left, T right, Throwables.BiFunction<? super T, ? super T, Boolean, E> func) throws E {
             N.checkArgNotNull(func, "func");
 
             if (result) {
@@ -892,7 +892,7 @@ public final class Chain {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> HashCodeChain hash(T value, Try.ToIntFunction<? super T, E> func) throws E {
+        public <T, E extends Exception> HashCodeChain hash(T value, Throwables.ToIntFunction<? super T, E> func) throws E {
             N.checkArgNotNull(func, "func");
 
             result = result * 31 + func.applyAsInt(value);

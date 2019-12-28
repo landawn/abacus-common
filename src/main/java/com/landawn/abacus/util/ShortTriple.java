@@ -136,7 +136,7 @@ public class ShortTriple {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.ShortConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.ShortConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
         comsumer.accept(this._3);
@@ -148,7 +148,7 @@ public class ShortTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<ShortTriple, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<ShortTriple, E> action) throws E {
         action.accept(this);
     }
 
@@ -160,7 +160,7 @@ public class ShortTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<ShortTriple, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<ShortTriple, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -171,7 +171,7 @@ public class ShortTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<ShortTriple> filter(final Try.Predicate<ShortTriple, E> predicate) throws E {
+    public <E extends Exception> Optional<ShortTriple> filter(final Throwables.Predicate<ShortTriple, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<ShortTriple> empty();
     }
 

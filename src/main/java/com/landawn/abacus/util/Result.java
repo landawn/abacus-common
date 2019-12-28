@@ -83,7 +83,7 @@ public final class Result<T, E extends Throwable> {
      * @param actionOnFailure
      * @throws E2 the e2
      */
-    public <E2 extends Exception> void ifFailure(final Try.Consumer<? super E, E2> actionOnFailure) throws E2 {
+    public <E2 extends Exception> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
         ifFailureOrElse(actionOnFailure, Fn.doNothing());
     }
 
@@ -97,8 +97,8 @@ public final class Result<T, E extends Throwable> {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public <E2 extends Exception, E3 extends Exception> void ifFailureOrElse(final Try.Consumer<? super E, E2> actionOnFailure,
-            final Try.Consumer<? super T, E3> actionOnSuccess) throws E2, E3 {
+    public <E2 extends Exception, E3 extends Exception> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
+            final Throwables.Consumer<? super T, E3> actionOnSuccess) throws E2, E3 {
         N.checkArgNotNull(actionOnFailure, "actionOnFailure");
         N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
 
@@ -115,7 +115,7 @@ public final class Result<T, E extends Throwable> {
      * @param actionOnSuccess
      * @throws E2 the e2
      */
-    public <E2 extends Exception> void ifSuccess(final Try.Consumer<? super T, E2> actionOnSuccess) throws E2 {
+    public <E2 extends Exception> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {
         ifSuccessOrElse(actionOnSuccess, Fn.doNothing());
     }
 
@@ -129,8 +129,8 @@ public final class Result<T, E extends Throwable> {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public <E2 extends Exception, E3 extends Exception> void ifSuccessOrElse(final Try.Consumer<? super T, E2> actionOnSuccess,
-            final Try.Consumer<? super E, E3> actionOnFailure) throws E2, E3 {
+    public <E2 extends Exception, E3 extends Exception> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
+            final Throwables.Consumer<? super E, E3> actionOnFailure) throws E2, E3 {
         N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
         N.checkArgNotNull(actionOnFailure, "actionOnFailure");
 

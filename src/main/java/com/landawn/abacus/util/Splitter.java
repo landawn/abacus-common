@@ -635,7 +635,7 @@ public final class Splitter {
      * @return
      * @throws E the e
      */
-    public <T, E extends Exception> T splitAndThen(final CharSequence source, Try.Function<? super List<String>, T, E> converter) throws E {
+    public <T, E extends Exception> T splitAndThen(final CharSequence source, Throwables.Function<? super List<String>, T, E> converter) throws E {
         N.checkArgNotNull(converter, "converter");
 
         return converter.apply(split(source));
@@ -1049,7 +1049,7 @@ public final class Splitter {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> T splitAndThen(final CharSequence source, Try.Function<? super Map<String, String>, T, E> converter) throws E {
+        public <T, E extends Exception> T splitAndThen(final CharSequence source, Throwables.Function<? super Map<String, String>, T, E> converter) throws E {
             return converter.apply(split(source));
         }
     }

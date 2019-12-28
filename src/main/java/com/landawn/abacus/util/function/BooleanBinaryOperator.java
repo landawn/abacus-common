@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface BooleanBinaryOperator extends Try.BooleanBinaryOperator<RuntimeException> {
+public interface BooleanBinaryOperator extends Throwables.BooleanBinaryOperator<RuntimeException> {
 
     @Override
     boolean applyAsBoolean(boolean left, boolean right);

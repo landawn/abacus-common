@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface CharFunction<R> extends Try.CharFunction<R, RuntimeException> {
+public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeException> {
     static final CharFunction<Character> BOX = new CharFunction<Character>() {
         @Override
         public Character apply(char value) {

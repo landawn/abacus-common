@@ -131,7 +131,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(int newValue, Try.IntPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(int newValue, Throwables.IntPredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
             return true;
@@ -150,7 +150,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(int newValue, Try.IntBiPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(int newValue, Throwables.IntBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;
             return true;

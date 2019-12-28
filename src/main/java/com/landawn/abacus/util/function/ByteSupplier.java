@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ByteSupplier extends Try.ByteSupplier<RuntimeException> {
+public interface ByteSupplier extends Throwables.ByteSupplier<RuntimeException> {
 
     static final ByteSupplier ZERO = new ByteSupplier() {
         @Override

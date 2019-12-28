@@ -34,7 +34,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Properties;
 import com.landawn.abacus.util.TriIterator;
 import com.landawn.abacus.util.Triple;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
@@ -144,7 +144,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void renameColumn(String columnName, Try.Function<String, String, E> func) throws E;
+    <E extends Exception> void renameColumn(String columnName, Throwables.Function<String, String, E> func) throws E;
 
     /**
      *
@@ -153,7 +153,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void renameColumns(Collection<String> columnNames, Try.Function<String, String, E> func) throws E;
+    <E extends Exception> void renameColumns(Collection<String> columnNames, Throwables.Function<String, String, E> func) throws E;
 
     /**
      *
@@ -161,7 +161,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void renameColumns(Try.Function<String, String, E> func) throws E;
+    <E extends Exception> void renameColumns(Throwables.Function<String, String, E> func) throws E;
 
     /**
      *
@@ -581,7 +581,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <T, E extends Exception> void addColumn(String newColumnName, String fromColumnName, Try.Function<T, ?, E> func) throws E;
+    <T, E extends Exception> void addColumn(String newColumnName, String fromColumnName, Throwables.Function<T, ?, E> func) throws E;
 
     /**
      * Generate the new column values from the specified column by the specified <code>Function</code>.
@@ -594,7 +594,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <T, E extends Exception> void addColumn(int columnIndex, String newColumnName, String fromColumnName, Try.Function<T, ?, E> func) throws E;
+    <T, E extends Exception> void addColumn(int columnIndex, String newColumnName, String fromColumnName, Throwables.Function<T, ?, E> func) throws E;
 
     /**
      * Generate the new column values from the specified columns by the specified <code>Function</code>.
@@ -605,7 +605,7 @@ public interface DataSet {
      * @param func DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @throws E the e
      */
-    <E extends Exception> void addColumn(String newColumnName, Collection<String> fromColumnNames, Try.Function<? super DisposableObjArray, ?, E> func)
+    <E extends Exception> void addColumn(String newColumnName, Collection<String> fromColumnNames, Throwables.Function<? super DisposableObjArray, ?, E> func)
             throws E;
 
     /**
@@ -619,7 +619,7 @@ public interface DataSet {
      * @throws E the e
      */
     <E extends Exception> void addColumn(int columnIndex, String newColumnName, Collection<String> fromColumnNames,
-            Try.Function<? super DisposableObjArray, ?, E> func) throws E;
+            Throwables.Function<? super DisposableObjArray, ?, E> func) throws E;
 
     /**
      * Generate the new column values from the specified columns by the specified <code>Function</code>.
@@ -630,7 +630,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, Try.BiFunction<?, ?, ?, E> func) throws E;
+    <E extends Exception> void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> func) throws E;
 
     /**
      * Generate the new column values from the specified columns by the specified <code>Function</code>.
@@ -642,7 +642,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void addColumn(int columnIndex, String newColumnName, Tuple2<String, String> fromColumnNames, Try.BiFunction<?, ?, ?, E> func)
+    <E extends Exception> void addColumn(int columnIndex, String newColumnName, Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> func)
             throws E;
 
     /**
@@ -654,7 +654,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, Try.TriFunction<?, ?, ?, ?, E> func) throws E;
+    <E extends Exception> void addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ?, E> func) throws E;
 
     /**
      * Generate the new column values from the specified columns by the specified <code>Function</code>.
@@ -667,7 +667,7 @@ public interface DataSet {
      * @throws E the e
      */
     <E extends Exception> void addColumn(int columnIndex, String newColumnName, Tuple3<String, String, String> fromColumnNames,
-            Try.TriFunction<?, ?, ?, ?, E> func) throws E;
+            Throwables.TriFunction<?, ?, ?, ?, E> func) throws E;
 
     /**
      * Remove the column with the specified columnName from this DataSet.
@@ -692,7 +692,7 @@ public interface DataSet {
      * @param filter column name filter
      * @throws E the e
      */
-    <E extends Exception> void removeColumns(Try.Predicate<String, E> filter) throws E;
+    <E extends Exception> void removeColumns(Throwables.Predicate<String, E> filter) throws E;
 
     /**
      * Remove the column(s) whose name matches the specified {@code filter}.
@@ -703,7 +703,7 @@ public interface DataSet {
      * @deprecated replaced by {@code removeColumns}.
      */
     @Deprecated
-    <E extends Exception> void removeColumnsIf(Try.Predicate<String, E> filter) throws E;
+    <E extends Exception> void removeColumnsIf(Throwables.Predicate<String, E> filter) throws E;
 
     /**
      * Update the values of the specified column by the specified Try.Function.
@@ -714,7 +714,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <T, E extends Exception> void updateColumn(String columnName, Try.Function<T, ?, E> func) throws E;
+    <T, E extends Exception> void updateColumn(String columnName, Throwables.Function<T, ?, E> func) throws E;
 
     /**
      * Update the values of the specified columns one by one with the specified Try.Function.
@@ -725,7 +725,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <T, E extends Exception> void updateColumns(Collection<String> columnNames, Try.Function<?, ?, E> func) throws E;
+    <T, E extends Exception> void updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E;
 
     /**
      * Convert the specified column to target type.
@@ -766,7 +766,7 @@ public interface DataSet {
      * @param combineFunc DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @throws E the e
      */
-    <E extends Exception> void combineColumns(Collection<String> columnNames, String newColumnName, Try.Function<? super DisposableObjArray, ?, E> combineFunc)
+    <E extends Exception> void combineColumns(Collection<String> columnNames, String newColumnName, Throwables.Function<? super DisposableObjArray, ?, E> combineFunc)
             throws E;
 
     /**
@@ -777,7 +777,7 @@ public interface DataSet {
      * @param combineFunc
      * @throws E the e
      */
-    <E extends Exception> void combineColumns(Tuple2<String, String> columnNames, String newColumnName, Try.BiFunction<?, ?, ?, E> combineFunc) throws E;
+    <E extends Exception> void combineColumns(Tuple2<String, String> columnNames, String newColumnName, Throwables.BiFunction<?, ?, ?, E> combineFunc) throws E;
 
     /**
      *
@@ -787,7 +787,7 @@ public interface DataSet {
      * @param combineFunc
      * @throws E the e
      */
-    <E extends Exception> void combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, Try.TriFunction<?, ?, ?, ?, E> combineFunc)
+    <E extends Exception> void combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, Throwables.TriFunction<?, ?, ?, ?, E> combineFunc)
             throws E;
 
     /**
@@ -798,7 +798,7 @@ public interface DataSet {
      * @param newColumnClass it can be Object[]/List/Set/Map/Entity
      * @throws E the e
      */
-    <E extends Exception> void combineColumns(Try.Predicate<String, E> columnNameFilter, String newColumnName, Class<?> newColumnClass) throws E;
+    <E extends Exception> void combineColumns(Throwables.Predicate<String, E> columnNameFilter, String newColumnName, Class<?> newColumnClass) throws E;
 
     /**
      *
@@ -810,8 +810,8 @@ public interface DataSet {
      * @throws E the e
      * @throws E2 the e2
      */
-    <E extends Exception, E2 extends Exception> void combineColumns(Try.Predicate<String, E> columnNameFilter, String newColumnName,
-            Try.Function<? super DisposableObjArray, ?, E2> combineFunc) throws E, E2;
+    <E extends Exception, E2 extends Exception> void combineColumns(Throwables.Predicate<String, E> columnNameFilter, String newColumnName,
+            Throwables.Function<? super DisposableObjArray, ?, E2> combineFunc) throws E, E2;
 
     /**
      *
@@ -822,7 +822,7 @@ public interface DataSet {
      * @param divideFunc
      * @throws E the e
      */
-    <T, E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Try.Function<T, ? extends List<?>, E> divideFunc) throws E;
+    <T, E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Throwables.Function<T, ? extends List<?>, E> divideFunc) throws E;
 
     /**
      *
@@ -833,7 +833,7 @@ public interface DataSet {
      * @param output
      * @throws E the e
      */
-    <T, E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Try.BiConsumer<T, Object[], E> output) throws E;
+    <T, E extends Exception> void divideColumn(String columnName, Collection<String> newColumnNames, Throwables.BiConsumer<T, Object[], E> output) throws E;
 
     /**
      *
@@ -844,7 +844,7 @@ public interface DataSet {
      * @param output
      * @throws E the e
      */
-    <T, E extends Exception> void divideColumn(String columnName, Tuple2<String, String> newColumnNames, Try.BiConsumer<T, Pair<Object, Object>, E> output)
+    <T, E extends Exception> void divideColumn(String columnName, Tuple2<String, String> newColumnNames, Throwables.BiConsumer<T, Pair<Object, Object>, E> output)
             throws E;
 
     /**
@@ -857,7 +857,7 @@ public interface DataSet {
      * @throws E the e
      */
     <T, E extends Exception> void divideColumn(String columnName, Tuple3<String, String, String> newColumnNames,
-            Try.BiConsumer<T, Triple<Object, Object, Object>, E> output) throws E;
+            Throwables.BiConsumer<T, Triple<Object, Object, Object>, E> output) throws E;
 
     /**
      * Adds the row.
@@ -904,7 +904,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void updateRow(int rowIndex, Try.Function<?, ?, E> func) throws E;
+    <E extends Exception> void updateRow(int rowIndex, Throwables.Function<?, ?, E> func) throws E;
 
     /**
      * Update the values in the specified rows one by one with the specified Try.Function.
@@ -914,7 +914,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void updateRows(int[] indices, Try.Function<?, ?, E> func) throws E;
+    <E extends Exception> void updateRows(int[] indices, Throwables.Function<?, ?, E> func) throws E;
 
     /**
      * Update all the values in this DataSet with the specified Try.Function.
@@ -923,7 +923,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <E extends Exception> void updateAll(Try.Function<?, ?, E> func) throws E;
+    <E extends Exception> void updateAll(Throwables.Function<?, ?, E> func) throws E;
 
     /**
      * Replace all the values in this DataSet with the specified new value if it matches the specified condition.
@@ -933,7 +933,7 @@ public interface DataSet {
      * @param newValue
      * @throws E the e
      */
-    <E extends Exception> void replaceIf(Try.Predicate<?, E> func, Object newValue) throws E;
+    <E extends Exception> void replaceIf(Throwables.Predicate<?, E> func, Object newValue) throws E;
 
     /**
      * Returns the current row number.
@@ -1090,7 +1090,7 @@ public interface DataSet {
      * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @throws E the e
      */
-    <E extends Exception> void forEach(Try.Consumer<? super DisposableObjArray, E> action) throws E;
+    <E extends Exception> void forEach(Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
 
     /**
      * Performs the given action for each row of the {@code DataSet}
@@ -1102,7 +1102,7 @@ public interface DataSet {
      * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @throws E the e
      */
-    <E extends Exception> void forEach(Collection<String> columnNames, Try.Consumer<? super DisposableObjArray, E> action) throws E;
+    <E extends Exception> void forEach(Collection<String> columnNames, Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
 
     /**
      * Performs the given action for each row of the {@code DataSet}
@@ -1115,7 +1115,7 @@ public interface DataSet {
      * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @throws E the e
      */
-    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Try.Consumer<? super DisposableObjArray, E> action) throws E;
+    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
 
     /**
      * Performs the given action for each row of the {@code DataSet}
@@ -1129,7 +1129,7 @@ public interface DataSet {
      * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @throws E the e
      */
-    <E extends Exception> void forEach(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Try.Consumer<? super DisposableObjArray, E> action)
+    <E extends Exception> void forEach(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Throwables.Consumer<? super DisposableObjArray, E> action)
             throws E;
 
     /**
@@ -1139,7 +1139,7 @@ public interface DataSet {
      * @param action
      * @throws E the e
      */
-    <E extends Exception> void forEach(Tuple2<String, String> columnNames, Try.BiConsumer<?, ?, E> action) throws E;
+    <E extends Exception> void forEach(Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws E;
 
     /**
      *
@@ -1150,7 +1150,7 @@ public interface DataSet {
      * @param action
      * @throws E the e
      */
-    <E extends Exception> void forEach(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Try.BiConsumer<?, ?, E> action) throws E;
+    <E extends Exception> void forEach(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiConsumer<?, ?, E> action) throws E;
 
     /**
      *
@@ -1159,7 +1159,7 @@ public interface DataSet {
      * @param action
      * @throws E the e
      */
-    <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, Try.TriConsumer<?, ?, ?, E> action) throws E;
+    <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, Throwables.TriConsumer<?, ?, ?, E> action) throws E;
 
     /**
      *
@@ -1170,7 +1170,7 @@ public interface DataSet {
      * @param action
      * @throws E the e
      */
-    <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Try.TriConsumer<?, ?, ?, E> action)
+    <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.TriConsumer<?, ?, ?, E> action)
             throws E;
 
     /**
@@ -1996,7 +1996,7 @@ public interface DataSet {
      * @throws E the e
      */
     <T, E extends Exception> DataSet groupBy(String columnName, String aggregateResultColumnName, String aggregateOnColumnName,
-            Try.Function<Stream<T>, ?, E> func) throws E;
+            Throwables.Function<Stream<T>, ?, E> func) throws E;
 
     /**
      *
@@ -2022,7 +2022,7 @@ public interface DataSet {
      * @throws E the e
      */
     <U, E extends Exception> DataSet groupBy(String columnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Try.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector) throws E;
+            Throwables.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector) throws E;
 
     /**
      *
@@ -2033,7 +2033,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <K, E extends Exception> DataSet groupBy(String columnName, Try.Function<K, ?, E> keyMapper) throws E;
+    <K, E extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper) throws E;
 
     /**
      *
@@ -2048,7 +2048,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <K, T, E extends Exception> DataSet groupBy(String columnName, Try.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
+    <K, T, E extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
             String aggregateOnColumnName, Collector<T, ?, ?> collector) throws E;
 
     /**
@@ -2066,8 +2066,8 @@ public interface DataSet {
      * @throws E the e
      * @throws E2 the e2
      */
-    <K, T, E extends Exception, E2 extends Exception> DataSet groupBy(String columnName, Try.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
-            String aggregateOnColumnName, Try.Function<Stream<T>, ?, E2> func) throws E, E2;
+    <K, T, E extends Exception, E2 extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
+            String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, E2> func) throws E, E2;
 
     /**
      *
@@ -2081,7 +2081,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <K, E extends Exception> DataSet groupBy(String columnName, Try.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
+    <K, E extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector) throws E;
 
     /**
@@ -2100,8 +2100,8 @@ public interface DataSet {
      * @throws E the e
      * @throws E2 the e2
      */
-    <K, U, E extends Exception, E2 extends Exception> DataSet groupBy(String columnName, Try.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Try.Function<? super DisposableObjArray, U, E2> rowMapper, Collector<? super U, ?, ?> collector)
+    <K, U, E extends Exception, E2 extends Exception> DataSet groupBy(String columnName, Throwables.Function<K, ?, E> keyMapper, String aggregateResultColumnName,
+            Collection<String> aggregateOnColumnNames, Throwables.Function<? super DisposableObjArray, U, E2> rowMapper, Collector<? super U, ?, ?> collector)
             throws E, E2;
 
     /**
@@ -2134,7 +2134,7 @@ public interface DataSet {
      * @throws E the e
      */
     <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            Try.Function<Stream<T>, ?, E> func) throws E;
+            Throwables.Function<Stream<T>, ?, E> func) throws E;
 
     /**
      *
@@ -2160,7 +2160,7 @@ public interface DataSet {
      * @throws E the e
      */
     <U, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Try.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector) throws E;
+            Throwables.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector) throws E;
 
     /**
      *
@@ -2170,7 +2170,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet groupBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper) throws E;
+    <E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper) throws E;
 
     /**
      *
@@ -2184,7 +2184,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector) throws E;
 
     /**
@@ -2201,8 +2201,8 @@ public interface DataSet {
      * @throws E the e
      * @throws E2 the e2
      */
-    <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
-            String aggregateResultColumnName, String aggregateOnColumnName, Try.Function<Stream<T>, ?, E2> func) throws E, E2;
+    <T, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+            String aggregateResultColumnName, String aggregateOnColumnName, Throwables.Function<Stream<T>, ?, E2> func) throws E, E2;
 
     /**
      *
@@ -2215,7 +2215,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet groupBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <E extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector) throws E;
 
     /**
@@ -2233,8 +2233,8 @@ public interface DataSet {
      * @throws E the e
      * @throws E2 the e2
      */
-    <U, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
-            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Try.Function<? super DisposableObjArray, U, E2> rowMapper,
+    <U, E extends Exception, E2 extends Exception> DataSet groupBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Throwables.Function<? super DisposableObjArray, U, E2> rowMapper,
             Collector<? super U, ?, ?> collector) throws E, E2;
 
     /**
@@ -2266,7 +2266,7 @@ public interface DataSet {
      * @return
      */
     <T, E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            Try.Function<Stream<T>, ?, E> func);
+            Throwables.Function<Stream<T>, ?, E> func);
 
     /**
      *
@@ -2291,7 +2291,7 @@ public interface DataSet {
      * @return
      */
     <U, E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Try.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector);
+            Throwables.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector);
 
     /**
      *
@@ -2300,7 +2300,7 @@ public interface DataSet {
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @return
      */
-    <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper);
+    <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper);
 
     /**
      *
@@ -2313,7 +2313,7 @@ public interface DataSet {
      * @param collector
      * @return
      */
-    <T, E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <T, E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
@@ -2329,8 +2329,8 @@ public interface DataSet {
      * @return
      */
     <T, E extends Exception, E2 extends Exception> Stream<DataSet> rollup(Collection<String> columnNames,
-            Try.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
-            Try.Function<Stream<T>, ?, E2> func);
+            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
+            Throwables.Function<Stream<T>, ?, E2> func);
 
     /**
      *
@@ -2342,7 +2342,7 @@ public interface DataSet {
      * @param collector
      * @return
      */
-    <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
 
     /**
@@ -2359,8 +2359,8 @@ public interface DataSet {
      * @return
      */
     <U, E extends Exception, E2 extends Exception> Stream<DataSet> rollup(Collection<String> columnNames,
-            Try.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Try.Function<? super DisposableObjArray, U, E2> rowMapper, Collector<? super U, ?, ?> collector);
+            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, U, E2> rowMapper, Collector<? super U, ?, ?> collector);
 
     /**
      *
@@ -2391,7 +2391,7 @@ public interface DataSet {
      * @return
      */
     <T, E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-            Try.Function<Stream<T>, ?, E> func);
+            Throwables.Function<Stream<T>, ?, E> func);
 
     /**
      *
@@ -2416,7 +2416,7 @@ public interface DataSet {
      * @return
      */
     <U, E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Try.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector);
+            Throwables.Function<? super DisposableObjArray, U, E> rowMapper, Collector<? super U, ?, ?> collector);
 
     /**
      *
@@ -2425,7 +2425,7 @@ public interface DataSet {
      * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
      * @return
      */
-    <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper);
+    <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper);
 
     /**
      *
@@ -2438,7 +2438,7 @@ public interface DataSet {
      * @param collector
      * @return
      */
-    <T, E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <T, E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, String aggregateOnColumnName, Collector<T, ?, ?> collector);
 
     /**
@@ -2454,8 +2454,8 @@ public interface DataSet {
      * @return
      */
     <T, E extends Exception, E2 extends Exception> Stream<DataSet> cube(Collection<String> columnNames,
-            Try.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
-            Try.Function<Stream<T>, ?, E2> func);
+            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
+            Throwables.Function<Stream<T>, ?, E2> func);
 
     /**
      *
@@ -2467,7 +2467,7 @@ public interface DataSet {
      * @param collector
      * @return
      */
-    <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper,
+    <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper,
             String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
 
     /**
@@ -2484,8 +2484,8 @@ public interface DataSet {
      * @return
      */
     <U, E extends Exception, E2 extends Exception> Stream<DataSet> cube(Collection<String> columnNames,
-            Try.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Try.Function<? super DisposableObjArray, U, E2> rowMapper, Collector<? super U, ?, ?> collector);
+            Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Throwables.Function<? super DisposableObjArray, U, E2> rowMapper, Collector<? super U, ?, ?> collector);
 
     /**
      *
@@ -2632,7 +2632,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <K, E extends Exception> DataSet distinctBy(String columnName, Try.Function<K, ?, E> keyMapper) throws E;
+    <K, E extends Exception> DataSet distinctBy(String columnName, Throwables.Function<K, ?, E> keyMapper) throws E;
 
     /**
      * Returns a new <code>DataSet</code> with the rows de-duplicated by the values in the specified columns.
@@ -2651,7 +2651,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet distinctBy(Collection<String> columnNames, Try.Function<? super DisposableObjArray, ?, E> keyMapper) throws E;
+    <E extends Exception> DataSet distinctBy(Collection<String> columnNames, Throwables.Function<? super DisposableObjArray, ?, E> keyMapper) throws E;
 
     /**
      *
@@ -2660,7 +2660,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Try.Predicate<? super DisposableObjArray, E> filter) throws E;
+    <E extends Exception> DataSet filter(Throwables.Predicate<? super DisposableObjArray, E> filter) throws E;
 
     /**
      *
@@ -2670,7 +2670,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
+    <E extends Exception> DataSet filter(Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
 
     /**
      *
@@ -2681,7 +2681,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Try.Predicate<? super DisposableObjArray, E> filter) throws E;
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Throwables.Predicate<? super DisposableObjArray, E> filter) throws E;
 
     /**
      *
@@ -2693,7 +2693,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
+    <E extends Exception> DataSet filter(int fromRowIndex, int toRowIndex, Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
 
     /**
      *
@@ -2703,7 +2703,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Try.BiPredicate<?, ?, E> filter) throws E;
+    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Throwables.BiPredicate<?, ?, E> filter) throws E;
 
     /**
      *
@@ -2714,7 +2714,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Try.BiPredicate<?, ?, E> filter, int max) throws E;
+    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, Throwables.BiPredicate<?, ?, E> filter, int max) throws E;
 
     /**
      *
@@ -2726,7 +2726,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Try.BiPredicate<?, ?, E> filter) throws E;
+    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiPredicate<?, ?, E> filter) throws E;
 
     /**
      *
@@ -2739,7 +2739,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Try.BiPredicate<?, ?, E> filter, int max)
+    <E extends Exception> DataSet filter(Tuple2<String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.BiPredicate<?, ?, E> filter, int max)
             throws E;
 
     /**
@@ -2750,7 +2750,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Try.TriPredicate<?, ?, ?, E> filter) throws E;
+    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Throwables.TriPredicate<?, ?, ?, E> filter) throws E;
 
     /**
      *
@@ -2761,7 +2761,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Try.TriPredicate<?, ?, ?, E> filter, int max) throws E;
+    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, Throwables.TriPredicate<?, ?, ?, E> filter, int max) throws E;
 
     /**
      *
@@ -2773,7 +2773,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Try.TriPredicate<?, ?, ?, E> filter)
+    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.TriPredicate<?, ?, ?, E> filter)
             throws E;
 
     /**
@@ -2787,7 +2787,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Try.TriPredicate<?, ?, ?, E> filter,
+    <E extends Exception> DataSet filter(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.TriPredicate<?, ?, ?, E> filter,
             int max) throws E;
 
     /**
@@ -2799,7 +2799,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet filter(String columnName, Try.Predicate<T, E> filter) throws E;
+    <T, E extends Exception> DataSet filter(String columnName, Throwables.Predicate<T, E> filter) throws E;
 
     /**
      *
@@ -2811,7 +2811,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet filter(String columnName, Try.Predicate<T, E> filter, int max) throws E;
+    <T, E extends Exception> DataSet filter(String columnName, Throwables.Predicate<T, E> filter, int max) throws E;
 
     /**
      *
@@ -2824,7 +2824,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet filter(String columnName, int fromRowIndex, int toRowIndex, Try.Predicate<T, E> filter) throws E;
+    <T, E extends Exception> DataSet filter(String columnName, int fromRowIndex, int toRowIndex, Throwables.Predicate<T, E> filter) throws E;
 
     /**
      *
@@ -2838,7 +2838,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <T, E extends Exception> DataSet filter(String columnName, int fromRowIndex, int toRowIndex, Try.Predicate<T, E> filter, int max) throws E;
+    <T, E extends Exception> DataSet filter(String columnName, int fromRowIndex, int toRowIndex, Throwables.Predicate<T, E> filter, int max) throws E;
 
     /**
      *
@@ -2848,7 +2848,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Collection<String> columnNames, Try.Predicate<? super DisposableObjArray, E> filter) throws E;
+    <E extends Exception> DataSet filter(Collection<String> columnNames, Throwables.Predicate<? super DisposableObjArray, E> filter) throws E;
 
     /**
      *
@@ -2859,7 +2859,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Collection<String> columnNames, Try.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
+    <E extends Exception> DataSet filter(Collection<String> columnNames, Throwables.Predicate<? super DisposableObjArray, E> filter, int max) throws E;
 
     /**
      *
@@ -2871,7 +2871,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Try.Predicate<? super DisposableObjArray, E> filter)
+    <E extends Exception> DataSet filter(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Throwables.Predicate<? super DisposableObjArray, E> filter)
             throws E;
 
     /**
@@ -2885,7 +2885,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet filter(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Try.Predicate<? super DisposableObjArray, E> filter,
+    <E extends Exception> DataSet filter(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Throwables.Predicate<? super DisposableObjArray, E> filter,
             int max) throws E;
 
     /**
@@ -2898,7 +2898,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(String fromColumnName, Try.Function<?, ?, E> func, String newColumnName, String copyingColumnName) throws E;
+    <E extends Exception> DataSet map(String fromColumnName, Throwables.Function<?, ?, E> func, String newColumnName, String copyingColumnName) throws E;
 
     /**
      *
@@ -2910,7 +2910,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(String fromColumnName, Try.Function<?, ?, E> func, String newColumnName, Collection<String> copyingColumnNames) throws E;
+    <E extends Exception> DataSet map(String fromColumnName, Throwables.Function<?, ?, E> func, String newColumnName, Collection<String> copyingColumnNames) throws E;
 
     /**
      *
@@ -2922,7 +2922,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Tuple2<String, String> fromColumnNames, Try.BiFunction<?, ?, ?, E> func, String newColumnName,
+    <E extends Exception> DataSet map(Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> func, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
@@ -2935,7 +2935,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Tuple3<String, String, String> fromColumnNames, Try.TriFunction<?, ?, ?, ?, E> func, String newColumnName,
+    <E extends Exception> DataSet map(Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ?, E> func, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
@@ -2948,7 +2948,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet map(Collection<String> fromColumnNames, Try.Function<DisposableObjArray, ?, E> func, String newColumnName,
+    <E extends Exception> DataSet map(Collection<String> fromColumnNames, Throwables.Function<DisposableObjArray, ?, E> func, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
@@ -2961,7 +2961,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(String fromColumnName, Try.Function<?, ? extends Collection<?>, E> func, String newColumnName,
+    <E extends Exception> DataSet flatMap(String fromColumnName, Throwables.Function<?, ? extends Collection<?>, E> func, String newColumnName,
             String copyingColumnName) throws E;
 
     /**
@@ -2974,7 +2974,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(String fromColumnName, Try.Function<?, ? extends Collection<?>, E> func, String newColumnName,
+    <E extends Exception> DataSet flatMap(String fromColumnName, Throwables.Function<?, ? extends Collection<?>, E> func, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
@@ -2987,7 +2987,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Tuple2<String, String> fromColumnNames, Try.BiFunction<?, ?, ? extends Collection<?>, E> func, String newColumnName,
+    <E extends Exception> DataSet flatMap(Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ? extends Collection<?>, E> func, String newColumnName,
             Collection<String> copyingColumnNames) throws E;
 
     /**
@@ -3000,7 +3000,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Tuple3<String, String, String> fromColumnNames, Try.TriFunction<?, ?, ?, ? extends Collection<?>, E> func,
+    <E extends Exception> DataSet flatMap(Tuple3<String, String, String> fromColumnNames, Throwables.TriFunction<?, ?, ?, ? extends Collection<?>, E> func,
             String newColumnName, Collection<String> copyingColumnNames) throws E;
 
     /**
@@ -3013,7 +3013,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <E extends Exception> DataSet flatMap(Collection<String> fromColumnNames, Try.Function<DisposableObjArray, ? extends Collection<?>, E> func,
+    <E extends Exception> DataSet flatMap(Collection<String> fromColumnNames, Throwables.Function<DisposableObjArray, ? extends Collection<?>, E> func,
             String newColumnName, Collection<String> copyingColumnNames) throws E;
 
     /**
@@ -3610,7 +3610,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <R, E extends Exception> R apply(Try.Function<? super DataSet, R, E> func) throws E;
+    <R, E extends Exception> R apply(Throwables.Function<? super DataSet, R, E> func) throws E;
 
     /**
      *
@@ -3618,7 +3618,7 @@ public interface DataSet {
      * @param action
      * @throws E the e
      */
-    <E extends Exception> void accept(Try.Consumer<? super DataSet, E> action) throws E;
+    <E extends Exception> void accept(Throwables.Consumer<? super DataSet, E> action) throws E;
 
     /**
      * Method freeze.

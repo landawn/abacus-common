@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -85,7 +86,7 @@ import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.ShortIterator;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
@@ -1356,26 +1357,28 @@ public abstract class Stream<T>
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEach(Try.Consumer<? super T, E> action) throws E;
+    public abstract <E extends Exception> void forEach(Throwables.Consumer<? super T, E> action) throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception, E2 extends Exception> void forEach(Try.Consumer<? super T, E> action, Try.Runnable<E2> onComplete) throws E, E2;
+    public abstract <E extends Exception, E2 extends Exception> void forEach(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> onComplete)
+            throws E, E2;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <U, E extends Exception, E2 extends Exception> void forEach(final Try.Function<? super T, ? extends Collection<U>, E> flatMapper,
-            final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2;
+    public abstract <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper,
+            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2;
 
     @ParallelSupported
     @TerminalOp
     public abstract <T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(
-            final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
-            final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3;
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action) throws E;
+    public abstract <E extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E> action) throws E;
 
     /**
      * Slide with <code>windowSize = 2</code> and the specified <code>increment</code>, then <code>consume</code> by the specified <code>mapper</code>.
@@ -1386,11 +1389,11 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action, final int increment) throws E;
+    public abstract <E extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment) throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action) throws E;
+    public abstract <E extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E;
 
     /**
      * Slide with <code>windowSize = 3</code> and the specified <code>increment</code>, then <code>consume</code> by the specified <code>mapper</code>.
@@ -1401,36 +1404,37 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E;
+    public abstract <E extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment)
+            throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean anyMatch(Try.Predicate<? super T, E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(Throwables.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean allMatch(Try.Predicate<? super T, E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(Throwables.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean noneMatch(Try.Predicate<? super T, E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(Throwables.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean nMatch(long atLeast, long atMost, Try.Predicate<? super T, E> predicate) throws E;
+    public abstract <E extends Exception> boolean nMatch(long atLeast, long atMost, Throwables.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> Optional<T> findFirst(Try.Predicate<? super T, E> predicate) throws E;
+    public abstract <E extends Exception> Optional<T> findFirst(Throwables.Predicate<? super T, E> predicate) throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> Optional<T> findLast(Try.Predicate<? super T, E> predicate) throws E;
+    public abstract <E extends Exception> Optional<T> findLast(Throwables.Predicate<? super T, E> predicate) throws E;
 
     @SequentialOnly
     @TerminalOp
-    public abstract <E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(Try.Predicate<? super T, E> predicateForFirst,
-            Try.Predicate<? super T, E2> predicateForLast) throws E, E2;
+    public abstract <E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(Throwables.Predicate<? super T, E> predicateForFirst,
+            Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2;
 
     /**
      * <br />
@@ -1444,7 +1448,8 @@ public abstract class Stream<T>
     @SequentialOnly
     @TerminalOp
     public abstract <U, E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final U init,
-            final Try.BiPredicate<? super T, ? super U, E> predicateForFirst, final Try.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2;
+            final Throwables.BiPredicate<? super T, ? super U, E> predicateForFirst, final Throwables.BiPredicate<? super T, ? super U, E2> predicateForLast)
+            throws E, E2;
 
     /**
      * <br />
@@ -1458,11 +1463,12 @@ public abstract class Stream<T>
     @SequentialOnly
     @TerminalOp
     public abstract <U, E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final Function<? super T, U> preFunc,
-            final Try.BiPredicate<? super T, ? super U, E> predicateForFirst, final Try.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2;
+            final Throwables.BiPredicate<? super T, ? super U, E> predicateForFirst, final Throwables.BiPredicate<? super T, ? super U, E2> predicateForLast)
+            throws E, E2;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> Optional<T> findAny(Try.Predicate<? super T, E> predicate) throws E;
+    public abstract <E extends Exception> Optional<T> findAny(Throwables.Predicate<? super T, E> predicate) throws E;
 
     @SequentialOnly
     @TerminalOp
@@ -2630,25 +2636,25 @@ public abstract class Stream<T>
 
     @SequentialOnly
     @TerminalOp
-    public abstract long persist(File file, Try.Function<? super T, String, IOException> toLine) throws IOException;
+    public abstract long persist(File file, Throwables.Function<? super T, String, IOException> toLine) throws IOException;
 
     @SequentialOnly
     @TerminalOp
-    public abstract long persist(OutputStream os, Try.Function<? super T, String, IOException> toLine) throws IOException;
+    public abstract long persist(OutputStream os, Throwables.Function<? super T, String, IOException> toLine) throws IOException;
 
     @SequentialOnly
     @TerminalOp
-    public abstract long persist(Writer writer, Try.Function<? super T, String, IOException> toLine) throws IOException;
+    public abstract long persist(Writer writer, Throwables.Function<? super T, String, IOException> toLine) throws IOException;
 
     @SequentialOnly
     @TerminalOp
     public abstract long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
+            final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
 
     @SequentialOnly
     @TerminalOp
     public abstract long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
+            final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
 
     /**
      * Remember to close this Stream after the iteration is done, if needed.
@@ -2697,10 +2703,10 @@ public abstract class Stream<T>
      * @return
      */
     @Beta
-    public <E extends Exception> ContinuableFuture<Void> asyncRun(final Try.Consumer<? super Stream<T>, E> action) {
+    public <E extends Exception> ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super Stream<T>, E> action) {
         checkArgNotNull(action, "action");
 
-        return DEFAULT_ASYNC_EXECUTOR.execute(new Try.Runnable<E>() {
+        return DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<E>() {
             @Override
             public void run() throws E {
                 action.accept(Stream.this);
@@ -2715,11 +2721,11 @@ public abstract class Stream<T>
      * @return
      */
     @Beta
-    public <E extends Exception> ContinuableFuture<Void> asyncRun(final Try.Consumer<? super Stream<T>, E> action, final Executor executor) {
+    public <E extends Exception> ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super Stream<T>, E> action, final Executor executor) {
         checkArgNotNull(action, "action");
         checkArgNotNull(executor, "executor");
 
-        return ContinuableFuture.run(new Try.Runnable<E>() {
+        return ContinuableFuture.run(new Throwables.Runnable<E>() {
             @Override
             public void run() throws E {
                 action.accept(Stream.this);
@@ -2733,12 +2739,12 @@ public abstract class Stream<T>
      * @return
      */
     @Beta
-    public <R, E extends Exception> ContinuableFuture<R> asyncCall(final Try.Function<? super Stream<T>, R, E> action) {
+    public <R, E extends Exception> ContinuableFuture<R> asyncCall(final Throwables.Function<? super Stream<T>, R, E> action) {
         checkArgNotNull(action, "action");
 
-        return DEFAULT_ASYNC_EXECUTOR.execute(new Try.Callable<R, E>() {
+        return DEFAULT_ASYNC_EXECUTOR.execute(new Callable<R>() {
             @Override
-            public R call() throws E {
+            public R call() throws Exception {
                 return action.apply(Stream.this);
             }
         });
@@ -2751,13 +2757,13 @@ public abstract class Stream<T>
      * @return
      */
     @Beta
-    public <R, E extends Exception> ContinuableFuture<R> asyncCall(final Try.Function<? super Stream<T>, R, E> action, final Executor executor) {
+    public <R, E extends Exception> ContinuableFuture<R> asyncCall(final Throwables.Function<? super Stream<T>, R, E> action, final Executor executor) {
         checkArgNotNull(action, "action");
         checkArgNotNull(executor, "executor");
 
-        return ContinuableFuture.call(new Try.Callable<R, E>() {
+        return ContinuableFuture.call(new Callable<R>() {
             @Override
-            public R call() throws E {
+            public R call() throws Exception {
                 return action.apply(Stream.this);
             }
         }, executor);
@@ -3972,7 +3978,7 @@ public abstract class Stream<T>
      * @return
      * @throws UncheckedSQLException
      */
-    public static <T> Stream<T> rows(final ResultSet resultSet, final Try.Function<ResultSet, T, SQLException> rowMapper) throws UncheckedSQLException {
+    public static <T> Stream<T> rows(final ResultSet resultSet, final Throwables.Function<ResultSet, T, SQLException> rowMapper) throws UncheckedSQLException {
         return ExceptionalStream.rows(resultSet, rowMapper).unchecked();
     }
 
@@ -3984,7 +3990,7 @@ public abstract class Stream<T>
      * @return
      * @throws UncheckedSQLException
      */
-    public static <T> Stream<T> rows(final ResultSet resultSet, final Try.BiFunction<ResultSet, List<String>, T, SQLException> rowMapper)
+    public static <T> Stream<T> rows(final ResultSet resultSet, final Throwables.BiFunction<ResultSet, List<String>, T, SQLException> rowMapper)
             throws UncheckedSQLException {
         return ExceptionalStream.rows(resultSet, rowMapper).unchecked();
     }
@@ -4666,7 +4672,7 @@ public abstract class Stream<T>
         final int threadNum = Math.min(c.size(), readThreadNum);
 
         for (int i = 0; i < threadNum; i++) {
-            DEFAULT_ASYNC_EXECUTOR.execute(new Try.Runnable<RuntimeException>() {
+            DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     try {
@@ -4826,7 +4832,7 @@ public abstract class Stream<T>
         final int threadNum = Math.min(c.size(), readThreadNum);
 
         for (int i = 0; i < threadNum; i++) {
-            DEFAULT_ASYNC_EXECUTOR.execute(new Try.Runnable<RuntimeException>() {
+            DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     try {
@@ -9493,7 +9499,7 @@ public abstract class Stream<T>
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(c.size() - 1);
 
         for (int i = 0, n = N.min(maxThreadNum, c.size() / 2 + 1); i < n; i++) {
-            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     Stream<T> a = null;
@@ -9586,7 +9592,7 @@ public abstract class Stream<T>
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(c.size() - 1);
 
         for (int i = 0, n = N.min(maxThreadNum, c.size() / 2 + 1); i < n; i++) {
-            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     Iterator<? extends T> a = null;
@@ -9632,7 +9638,7 @@ public abstract class Stream<T>
     private static <B, A> void readToQueue(final Iterator<? extends A> a, final Iterator<? extends B> b, final AsyncExecutor asyncExecutor,
             final AtomicInteger threadCounterA, final AtomicInteger threadCounterB, final BlockingQueue<A> queueA, final BlockingQueue<B> queueB,
             final Holder<Throwable> eHolder, final MutableBoolean onGoing) {
-        asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+        asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
             @Override
             public void run() {
                 try {
@@ -9657,7 +9663,7 @@ public abstract class Stream<T>
             }
         });
 
-        asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+        asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
             @Override
             public void run() {
                 try {
@@ -9687,7 +9693,7 @@ public abstract class Stream<T>
             final AsyncExecutor asyncExecutor, final AtomicInteger threadCounterA, final AtomicInteger threadCounterB, final AtomicInteger threadCounterC,
             final BlockingQueue<A> queueA, final BlockingQueue<B> queueB, final BlockingQueue<C> queueC, final Holder<Throwable> eHolder,
             final MutableBoolean onGoing) {
-        asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+        asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
             @Override
             public void run() {
                 try {
@@ -9712,7 +9718,7 @@ public abstract class Stream<T>
             }
         });
 
-        asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+        asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
             @Override
             public void run() {
                 try {
@@ -9737,7 +9743,7 @@ public abstract class Stream<T>
             }
         });
 
-        asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+        asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
             @Override
             public void run() {
                 try {
@@ -9775,7 +9781,7 @@ public abstract class Stream<T>
             final AtomicInteger count = counters[idx];
             final BlockingQueue<Object> queue = queues[idx];
 
-            asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     try {

@@ -30,7 +30,7 @@ import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.Pair;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -257,7 +257,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Try.CharConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -269,7 +269,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         final Holder<Throwable> eHolder = new Holder<>();
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     char next = 0;
@@ -548,7 +548,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -560,7 +560,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         final MutableBoolean result = MutableBoolean.of(false);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     char next = 0;
@@ -597,7 +597,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -609,7 +609,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         final MutableBoolean result = MutableBoolean.of(true);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     char next = 0;
@@ -646,7 +646,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -658,7 +658,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         final MutableBoolean result = MutableBoolean.of(true);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     char next = 0;
@@ -695,7 +695,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
     }
 
     @Override
-    public <E extends Exception> OptionalChar findFirst(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalChar findFirst(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -708,7 +708,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         final MutableLong index = MutableLong.of(0);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     final Pair<Long, Character> pair = new Pair<>();
@@ -751,7 +751,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
     }
 
     @Override
-    public <E extends Exception> OptionalChar findLast(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalChar findLast(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -764,7 +764,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         final MutableLong index = MutableLong.of(0);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     final Pair<Long, Character> pair = new Pair<>();
@@ -805,7 +805,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
     }
 
     @Override
-    public <E extends Exception> OptionalChar findAny(final Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalChar findAny(final Throwables.CharPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1) {
@@ -817,7 +817,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         final Holder<Object> resultHolder = Holder.of(NONE);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     char next = 0;

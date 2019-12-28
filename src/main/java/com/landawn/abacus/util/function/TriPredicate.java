@@ -15,14 +15,14 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * @since 0.8
  * 
  * @author Haiyang Li
  */
-public interface TriPredicate<A, B, C> extends Try.TriPredicate<A, B, C, RuntimeException> {
+public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, RuntimeException> {
 
     @Override
     boolean test(A a, B b, C c);

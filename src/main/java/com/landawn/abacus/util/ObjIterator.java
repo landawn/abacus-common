@@ -380,7 +380,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.Consumer<? super T, E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.Consumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

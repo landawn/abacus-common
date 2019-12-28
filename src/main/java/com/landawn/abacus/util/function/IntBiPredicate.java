@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface IntBiPredicate extends Try.IntBiPredicate<RuntimeException> {
+public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeException> {
 
     static final IntBiPredicate ALWAYS_TRUE = new IntBiPredicate() {
         @Override

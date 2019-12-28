@@ -43,7 +43,7 @@ import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -370,22 +370,22 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     public abstract <R> R collect(Supplier<R> supplier, ObjIntConsumer<? super R> accumulator);
 
-    public abstract <E extends Exception> void forEach(final Try.IntConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws E;
 
-    public abstract <E extends Exception> boolean anyMatch(final Try.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(final Throwables.IntPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> boolean allMatch(final Try.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(final Throwables.IntPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> boolean noneMatch(final Try.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(final Throwables.IntPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> OptionalInt findFirst(final Try.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> OptionalInt findLast(final Try.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception, E2 extends Exception> OptionalInt findFirstOrLast(Try.IntPredicate<E> predicateForFirst,
-            Try.IntPredicate<E> predicateForLast) throws E, E2;
+    public abstract <E extends Exception, E2 extends Exception> OptionalInt findFirstOrLast(Throwables.IntPredicate<E> predicateForFirst,
+            Throwables.IntPredicate<E> predicateForLast) throws E, E2;
 
-    public abstract <E extends Exception> OptionalInt findAny(final Try.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalInt findAny(final Throwables.IntPredicate<E> predicate) throws E;
 
     public abstract OptionalInt min();
 
@@ -2161,7 +2161,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(c.size() - 1);
 
         for (int i = 0, n = N.min(maxThreadNum, c.size() / 2 + 1); i < n; i++) {
-            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     IntStream a = null;

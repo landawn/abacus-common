@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ByteBiPredicate extends Try.ByteBiPredicate<RuntimeException> {
+public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeException> {
 
     static final ByteBiPredicate ALWAYS_TRUE = new ByteBiPredicate() {
         @Override

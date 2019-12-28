@@ -14,15 +14,15 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
- * 
+ *
  * @since 1.2
- * 
+ *
  * @author Haiyang Li
  */
-public interface Runnable extends java.lang.Runnable, Try.Runnable<RuntimeException> {
+public interface Runnable extends java.lang.Runnable, Throwables.Runnable<RuntimeException> {
 
     @Override
     void run();

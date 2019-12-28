@@ -293,7 +293,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.DoubleConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.DoubleConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

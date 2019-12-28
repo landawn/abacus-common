@@ -136,7 +136,7 @@ public final class DoubleTriple {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.DoubleConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.DoubleConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
         comsumer.accept(this._3);
@@ -148,7 +148,7 @@ public final class DoubleTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<DoubleTriple, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<DoubleTriple, E> action) throws E {
         action.accept(this);
     }
 
@@ -160,7 +160,7 @@ public final class DoubleTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<DoubleTriple, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<DoubleTriple, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -171,7 +171,7 @@ public final class DoubleTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<DoubleTriple> filter(final Try.Predicate<DoubleTriple, E> predicate) throws E {
+    public <E extends Exception> Optional<DoubleTriple> filter(final Throwables.Predicate<DoubleTriple, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<DoubleTriple> empty();
     }
 

@@ -104,7 +104,7 @@ public final class Retry<T> {
      * @param cmd
      * @throws Exception the exception
      */
-    public void run(final Try.Runnable<? extends Exception> cmd) throws Exception {
+    public void run(final Throwables.Runnable<? extends Exception> cmd) throws Exception {
         try {
             cmd.run();
         } catch (Exception e) {

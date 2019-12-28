@@ -38,7 +38,7 @@ import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -1121,13 +1121,13 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public <E extends Exception> OptionalDouble findAny(final Try.DoublePredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalDouble findAny(final Throwables.DoublePredicate<E> predicate) throws E {
         return findFirst(predicate);
     }
 
     @Override
-    public <E extends Exception, E2 extends Exception> OptionalDouble findFirstOrLast(Try.DoublePredicate<E> predicateForFirst,
-            Try.DoublePredicate<E> predicateForLast) throws E, E2 {
+    public <E extends Exception, E2 extends Exception> OptionalDouble findFirstOrLast(Throwables.DoublePredicate<E> predicateForFirst,
+            Throwables.DoublePredicate<E> predicateForLast) throws E, E2 {
         assertNotClosed();
 
         try {

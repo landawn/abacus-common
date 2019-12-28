@@ -78,7 +78,7 @@ import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.ShortSummaryStatistics;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -4793,7 +4793,7 @@ public abstract class Collectors {
      * @param streamingCollector
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
-     * @see Stream#asyncCall(Try.Function)
+     * @see Stream#asyncCall(Throwables.Function)
      * @deprecated
      */
     @Deprecated
@@ -4809,7 +4809,7 @@ public abstract class Collectors {
      * @param streamingCollector
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
-     * @see Stream#asyncCall(Try.Function)
+     * @see Stream#asyncCall(Throwables.Function)
      * @deprecated
      */
     @Deprecated
@@ -4825,7 +4825,7 @@ public abstract class Collectors {
      * @param streamingCollector
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
-     * @see Stream#asyncCall(Try.Function)
+     * @see Stream#asyncCall(Throwables.Function)
      * @deprecated
      */
     @Deprecated
@@ -4842,7 +4842,7 @@ public abstract class Collectors {
      * @param streamingCollector
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
-     * @see Stream#asyncCall(Try.Function)
+     * @see Stream#asyncCall(Throwables.Function)
      * @deprecated
      */
     @Deprecated
@@ -4866,7 +4866,7 @@ public abstract class Collectors {
      * @param maxWaitIntervalInMillis
      * @return
      * @see Stream#observe(BlockingQueue, Predicate, long)
-     * @see Stream#asyncCall(Try.Function)
+     * @see Stream#asyncCall(Throwables.Function)
      * @deprecated
      */
     @Deprecated

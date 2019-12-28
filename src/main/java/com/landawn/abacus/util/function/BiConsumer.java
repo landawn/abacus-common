@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface BiConsumer<T, U> extends java.util.function.BiConsumer<T, U>, Try.BiConsumer<T, U, RuntimeException> {
+public interface BiConsumer<T, U> extends java.util.function.BiConsumer<T, U>, Throwables.BiConsumer<T, U, RuntimeException> {
 
     @Override
     default BiConsumer<T, U> andThen(java.util.function.BiConsumer<? super T, ? super U> after) {

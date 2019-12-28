@@ -54,7 +54,6 @@ import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -10803,7 +10802,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Try.IntConsumer<E> action) throws E {
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Throwables.IntConsumer<E> action) throws E {
         forEach(startInclusive, endExclusive, 1, action);
     }
 
@@ -10816,7 +10815,8 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Try.IntConsumer<E> action) throws E {
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.IntConsumer<E> action)
+            throws E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero");
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
@@ -10842,8 +10842,8 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final T a, Try.ObjIntConsumer<? super T, E> action)
-            throws E {
+    public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final T a,
+            Throwables.ObjIntConsumer<? super T, E> action) throws E {
         forEach(startInclusive, endExclusive, 1, a, action);
     }
 
@@ -10859,7 +10859,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final T a,
-            Try.ObjIntConsumer<? super T, E> action) throws E {
+            Throwables.ObjIntConsumer<? super T, E> action) throws E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero");
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
@@ -10883,7 +10883,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final T[] a, final Try.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final T[] a, final Throwables.Consumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(a)) {
@@ -10905,7 +10905,8 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex, final Try.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex, final Throwables.Consumer<? super T, E> action)
+            throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
         checkArgNotNull(action);
 
@@ -10932,7 +10933,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final T[] a, final Try.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final T[] a, final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(a)) {
@@ -10952,8 +10953,8 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex, final Try.IndexedConsumer<? super T, E> action)
-            throws E {
+    public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
         checkArgNotNull(action);
 
@@ -10981,7 +10982,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, final Try.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, final Throwables.Consumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(c)) {
@@ -11010,7 +11011,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends T> c, int fromIndex, final int toIndex,
-            final Try.Consumer<? super T, E> action) throws E {
+            final Throwables.Consumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
 
@@ -11081,7 +11082,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, final Try.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(c)) {
@@ -11111,7 +11112,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends T> c, int fromIndex, final int toIndex,
-            final Try.IndexedConsumer<? super T, E> action) throws E {
+            final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);
 
@@ -11186,7 +11187,8 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final T[] a,
-            final Try.Function<? super T, ? extends Collection<U>, E> flatMapper, final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11218,7 +11220,8 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Collection<T> c,
-            final Try.Function<? super T, ? extends Collection<U>, E> flatMapper, final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11254,8 +11257,9 @@ public final class N extends CommonUtil {
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final T[] a,
-            final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
-            final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
         checkArgNotNull(action);
@@ -11298,8 +11302,9 @@ public final class N extends CommonUtil {
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Collection<T> c,
-            final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
-            final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
         checkArgNotNull(action);
@@ -11335,7 +11340,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+    public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
@@ -11357,8 +11362,8 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <A, B, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b, final Try.BiConsumer<? super A, ? super B, E> action)
-            throws E {
+    public static <A, B, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b,
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
@@ -11386,7 +11391,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final A[] a, final B[] b, final C[] c,
-            final Try.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(a) || isNullOrEmpty(b) || isNullOrEmpty(c)) {
@@ -11411,7 +11416,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b, final Collection<C> c,
-            final Try.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(a) || isNullOrEmpty(b) || isNullOrEmpty(c)) {
@@ -11440,7 +11445,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-            final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         checkArgNotNull(action);
 
         final int lenA = len(a);
@@ -11464,7 +11469,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
@@ -11493,7 +11498,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final Try.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         checkArgNotNull(action);
 
         final int lenA = len(a);
@@ -11521,7 +11526,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Collection<A> a, final Collection<B> b, final Collection<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Try.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
@@ -11545,7 +11550,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachNonNull(final T[] a, final Try.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachNonNull(final T[] a, final Throwables.Consumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(a)) {
@@ -11568,7 +11573,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachNonNull(final Collection<T> c, final Try.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachNonNull(final Collection<T> c, final Throwables.Consumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(c)) {
@@ -11596,7 +11601,8 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final T[] a,
-            final Try.Function<? super T, ? extends Collection<U>, E> flatMapper, final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11633,7 +11639,8 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Collection<T> c,
-            final Try.Function<? super T, ? extends Collection<U>, E> flatMapper, final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11674,8 +11681,9 @@ public final class N extends CommonUtil {
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final T[] a,
-            final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
-            final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
         checkArgNotNull(action);
@@ -11725,8 +11733,9 @@ public final class N extends CommonUtil {
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Collection<T> c,
-            final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
-            final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(flatMapper2);
         checkArgNotNull(action);
@@ -11766,7 +11775,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> BooleanList filter(final boolean[] a, final Try.BooleanPredicate<E> filter) throws E {
+    public static <E extends Exception> BooleanList filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -11785,7 +11794,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> BooleanList filter(final boolean[] a, final Try.BooleanPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> BooleanList filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -11805,8 +11814,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> BooleanList filter(final boolean[] a, final int fromIndex, final int toIndex, final Try.BooleanPredicate<E> filter)
-            throws E {
+    public static <E extends Exception> BooleanList filter(final boolean[] a, final int fromIndex, final int toIndex,
+            final Throwables.BooleanPredicate<E> filter) throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -11823,8 +11832,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> BooleanList filter(final boolean[] a, final int fromIndex, final int toIndex, final Try.BooleanPredicate<E> filter,
-            final int max) throws E {
+    public static <E extends Exception> BooleanList filter(final boolean[] a, final int fromIndex, final int toIndex,
+            final Throwables.BooleanPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -11852,7 +11861,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> CharList filter(final char[] a, final Try.CharPredicate<E> filter) throws E {
+    public static <E extends Exception> CharList filter(final char[] a, final Throwables.CharPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -11871,7 +11880,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> CharList filter(final char[] a, final Try.CharPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> CharList filter(final char[] a, final Throwables.CharPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -11891,7 +11900,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> CharList filter(final char[] a, final int fromIndex, final int toIndex, final Try.CharPredicate<E> filter) throws E {
+    public static <E extends Exception> CharList filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter)
+            throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -11908,7 +11918,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> CharList filter(final char[] a, final int fromIndex, final int toIndex, final Try.CharPredicate<E> filter,
+    public static <E extends Exception> CharList filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
@@ -11937,7 +11947,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ByteList filter(final byte[] a, final Try.BytePredicate<E> filter) throws E {
+    public static <E extends Exception> ByteList filter(final byte[] a, final Throwables.BytePredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -11956,7 +11966,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ByteList filter(final byte[] a, final Try.BytePredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> ByteList filter(final byte[] a, final Throwables.BytePredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -11976,7 +11986,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ByteList filter(final byte[] a, final int fromIndex, final int toIndex, final Try.BytePredicate<E> filter) throws E {
+    public static <E extends Exception> ByteList filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter)
+            throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -11993,7 +12004,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ByteList filter(final byte[] a, final int fromIndex, final int toIndex, final Try.BytePredicate<E> filter,
+    public static <E extends Exception> ByteList filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
@@ -12022,7 +12033,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ShortList filter(final short[] a, final Try.ShortPredicate<E> filter) throws E {
+    public static <E extends Exception> ShortList filter(final short[] a, final Throwables.ShortPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12041,7 +12052,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ShortList filter(final short[] a, final Try.ShortPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> ShortList filter(final short[] a, final Throwables.ShortPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12061,7 +12072,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ShortList filter(final short[] a, final int fromIndex, final int toIndex, final Try.ShortPredicate<E> filter) throws E {
+    public static <E extends Exception> ShortList filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter)
+            throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -12078,7 +12090,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ShortList filter(final short[] a, final int fromIndex, final int toIndex, final Try.ShortPredicate<E> filter,
+    public static <E extends Exception> ShortList filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
@@ -12107,7 +12119,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> IntList filter(final int[] a, final Try.IntPredicate<E> filter) throws E {
+    public static <E extends Exception> IntList filter(final int[] a, final Throwables.IntPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12126,7 +12138,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> IntList filter(final int[] a, final Try.IntPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> IntList filter(final int[] a, final Throwables.IntPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12146,7 +12158,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> IntList filter(final int[] a, final int fromIndex, final int toIndex, final Try.IntPredicate<E> filter) throws E {
+    public static <E extends Exception> IntList filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter)
+            throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -12163,8 +12176,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> IntList filter(final int[] a, final int fromIndex, final int toIndex, final Try.IntPredicate<E> filter, final int max)
-            throws E {
+    public static <E extends Exception> IntList filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter,
+            final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -12192,7 +12205,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> LongList filter(final long[] a, final Try.LongPredicate<E> filter) throws E {
+    public static <E extends Exception> LongList filter(final long[] a, final Throwables.LongPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12211,7 +12224,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> LongList filter(final long[] a, final Try.LongPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> LongList filter(final long[] a, final Throwables.LongPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12231,7 +12244,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> LongList filter(final long[] a, final int fromIndex, final int toIndex, final Try.LongPredicate<E> filter) throws E {
+    public static <E extends Exception> LongList filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter)
+            throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -12248,7 +12262,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> LongList filter(final long[] a, final int fromIndex, final int toIndex, final Try.LongPredicate<E> filter,
+    public static <E extends Exception> LongList filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
@@ -12277,7 +12291,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> FloatList filter(final float[] a, final Try.FloatPredicate<E> filter) throws E {
+    public static <E extends Exception> FloatList filter(final float[] a, final Throwables.FloatPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12296,7 +12310,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> FloatList filter(final float[] a, final Try.FloatPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> FloatList filter(final float[] a, final Throwables.FloatPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12316,7 +12330,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> FloatList filter(final float[] a, final int fromIndex, final int toIndex, final Try.FloatPredicate<E> filter) throws E {
+    public static <E extends Exception> FloatList filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter)
+            throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -12333,7 +12348,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> FloatList filter(final float[] a, final int fromIndex, final int toIndex, final Try.FloatPredicate<E> filter,
+    public static <E extends Exception> FloatList filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
@@ -12362,7 +12377,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> DoubleList filter(final double[] a, final Try.DoublePredicate<E> filter) throws E {
+    public static <E extends Exception> DoubleList filter(final double[] a, final Throwables.DoublePredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12381,7 +12396,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> DoubleList filter(final double[] a, final Try.DoublePredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> DoubleList filter(final double[] a, final Throwables.DoublePredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12401,7 +12416,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> DoubleList filter(final double[] a, final int fromIndex, final int toIndex, final Try.DoublePredicate<E> filter)
+    public static <E extends Exception> DoubleList filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter)
             throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
@@ -12419,7 +12434,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> DoubleList filter(final double[] a, final int fromIndex, final int toIndex, final Try.DoublePredicate<E> filter,
+    public static <E extends Exception> DoubleList filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
@@ -12449,7 +12464,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12469,7 +12484,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final Try.Predicate<? super T, E> filter, final int max) throws E {
+    public static <T, E extends Exception> List<T> filter(final T[] a, final Throwables.Predicate<? super T, E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -12490,7 +12505,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Try.Predicate<? super T, E> filter)
+    public static <T, E extends Exception> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Throwables.Predicate<? super T, E> filter)
             throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
@@ -12509,7 +12524,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Try.Predicate<? super T, E> filter,
+    public static <T, E extends Exception> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Throwables.Predicate<? super T, E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
@@ -12539,7 +12554,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(c)) {
@@ -12559,7 +12574,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter, final int max) throws E {
+    public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter, final int max)
+            throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(c)) {
@@ -12581,7 +12597,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Predicate<? super T, E> filter) throws E {
+            final Throwables.Predicate<? super T, E> filter) throws E {
         return filter(c, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -12598,7 +12614,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Predicate<? super T, E> filter, final int max) throws E {
+            final Throwables.Predicate<? super T, E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(filter);
 
@@ -12657,7 +12673,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Try.Predicate<? super T, E> filter,
+    public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Throwables.Predicate<? super T, E> filter,
             final IntFunction<R> supplier) throws E {
         checkArgNotNull(filter);
 
@@ -12680,7 +12696,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Try.Predicate<? super T, E> filter, final int max,
+    public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final Throwables.Predicate<? super T, E> filter, final int max,
             final IntFunction<R> supplier) throws E {
         checkArgNotNull(filter);
 
@@ -12705,7 +12721,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Predicate<? super T, E> filter, final IntFunction<R> supplier) throws E {
+            final Throwables.Predicate<? super T, E> filter, final IntFunction<R> supplier) throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE, supplier);
     }
 
@@ -12726,7 +12742,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier) throws E {
+            final Throwables.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -12757,7 +12773,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter,
+    public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter,
             final IntFunction<R> supplier) throws E {
         checkArgNotNull(filter);
 
@@ -12780,7 +12796,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter,
+    public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter,
             final int max, final IntFunction<R> supplier) throws E {
         checkArgNotNull(filter);
 
@@ -12805,7 +12821,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Predicate<? super T, E> filter, final IntFunction<R> supplier) throws E {
+            final Throwables.Predicate<? super T, E> filter, final IntFunction<R> supplier) throws E {
         return filter(c, fromIndex, toIndex, filter, Integer.MAX_VALUE, supplier);
     }
 
@@ -12824,7 +12840,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R extends Collection<T>, E extends Exception> R filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier) throws E {
+            final Throwables.Predicate<? super T, E> filter, final int max, final IntFunction<R> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(filter);
 
@@ -12886,7 +12902,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> BooleanList mapToBoolean(final T[] a, final Try.ToBooleanFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> BooleanList mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -12910,7 +12926,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> BooleanList mapToBoolean(final T[] a, final int fromIndex, final int toIndex,
-            final Try.ToBooleanFunction<? super T, E> func) throws E {
+            final Throwables.ToBooleanFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -12937,7 +12953,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> BooleanList mapToBoolean(final Collection<? extends T> c, final Try.ToBooleanFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> BooleanList mapToBoolean(final Collection<? extends T> c, final Throwables.ToBooleanFunction<? super T, E> func)
+            throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -12961,7 +12978,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> BooleanList mapToBoolean(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToBooleanFunction<? super T, E> func) throws E {
+            final Throwables.ToBooleanFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13006,7 +13023,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> CharList mapToChar(final T[] a, final Try.ToCharFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> CharList mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -13029,8 +13046,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> CharList mapToChar(final T[] a, final int fromIndex, final int toIndex, final Try.ToCharFunction<? super T, E> func)
-            throws E {
+    public static <T, E extends Exception> CharList mapToChar(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.ToCharFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -13057,7 +13074,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> CharList mapToChar(final Collection<? extends T> c, final Try.ToCharFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> CharList mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -13081,7 +13098,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> CharList mapToChar(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToCharFunction<? super T, E> func) throws E {
+            final Throwables.ToCharFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13126,7 +13143,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ByteList mapToByte(final T[] a, final Try.ToByteFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> ByteList mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -13149,8 +13166,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ByteList mapToByte(final T[] a, final int fromIndex, final int toIndex, final Try.ToByteFunction<? super T, E> func)
-            throws E {
+    public static <T, E extends Exception> ByteList mapToByte(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.ToByteFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -13177,7 +13194,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ByteList mapToByte(final Collection<? extends T> c, final Try.ToByteFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> ByteList mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -13201,7 +13218,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> ByteList mapToByte(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToByteFunction<? super T, E> func) throws E {
+            final Throwables.ToByteFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13246,7 +13263,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ShortList mapToShort(final T[] a, final Try.ToShortFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> ShortList mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -13270,7 +13287,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> ShortList mapToShort(final T[] a, final int fromIndex, final int toIndex,
-            final Try.ToShortFunction<? super T, E> func) throws E {
+            final Throwables.ToShortFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -13297,7 +13314,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ShortList mapToShort(final Collection<? extends T> c, final Try.ToShortFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> ShortList mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -13321,7 +13338,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> ShortList mapToShort(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToShortFunction<? super T, E> func) throws E {
+            final Throwables.ToShortFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13366,7 +13383,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> IntList mapToInt(final T[] a, final Try.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> IntList mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -13389,8 +13406,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> IntList mapToInt(final T[] a, final int fromIndex, final int toIndex, final Try.ToIntFunction<? super T, E> func)
-            throws E {
+    public static <T, E extends Exception> IntList mapToInt(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -13417,7 +13434,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> IntList mapToInt(final Collection<? extends T> c, final Try.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> IntList mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -13441,7 +13458,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> IntList mapToInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13486,7 +13503,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> LongList mapToLong(final T[] a, final Try.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> LongList mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -13509,8 +13526,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> LongList mapToLong(final T[] a, final int fromIndex, final int toIndex, final Try.ToLongFunction<? super T, E> func)
-            throws E {
+    public static <T, E extends Exception> LongList mapToLong(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -13537,7 +13554,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> LongList mapToLong(final Collection<? extends T> c, final Try.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> LongList mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -13561,7 +13578,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> LongList mapToLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13606,7 +13623,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> FloatList mapToFloat(final T[] a, final Try.ToFloatFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> FloatList mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -13630,7 +13647,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> FloatList mapToFloat(final T[] a, final int fromIndex, final int toIndex,
-            final Try.ToFloatFunction<? super T, E> func) throws E {
+            final Throwables.ToFloatFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -13657,7 +13674,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> FloatList mapToFloat(final Collection<? extends T> c, final Try.ToFloatFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> FloatList mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -13681,7 +13698,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> FloatList mapToFloat(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToFloatFunction<? super T, E> func) throws E {
+            final Throwables.ToFloatFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13726,7 +13743,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> DoubleList mapToDouble(final T[] a, final Try.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> DoubleList mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -13750,7 +13767,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> DoubleList mapToDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Try.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -13777,7 +13794,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> DoubleList mapToDouble(final Collection<? extends T> c, final Try.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> DoubleList mapToDouble(final Collection<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func)
+            throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -13801,7 +13819,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> DoubleList mapToDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13846,7 +13864,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> map(final T[] a, final Try.Function<? super T, ? extends R, E> func) throws E {
+    public static <T, R, E extends Exception> List<R> map(final T[] a, final Throwables.Function<? super T, ? extends R, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -13871,7 +13889,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> map(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends R, E> func) throws E {
+            final Throwables.Function<? super T, ? extends R, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -13898,7 +13916,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> map(final Collection<? extends T> c, final Try.Function<? super T, ? extends R, E> func) throws E {
+    public static <T, R, E extends Exception> List<R> map(final Collection<? extends T> c, final Throwables.Function<? super T, ? extends R, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -13923,7 +13941,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends R, E> func) throws E {
+            final Throwables.Function<? super T, ? extends R, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -13970,7 +13988,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final Try.Function<? super T, ? extends R, E> func,
+    public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final Throwables.Function<? super T, ? extends R, E> func,
             final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
@@ -13998,7 +14016,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -14028,7 +14046,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final Collection<? extends T> c,
-            final Try.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -14055,7 +14073,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C map(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R, E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -14100,7 +14118,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final Try.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
+    public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func)
+            throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -14125,7 +14144,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -14158,7 +14177,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final Collection<? extends T> c,
-            final Try.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -14183,7 +14202,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -14237,7 +14256,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a,
-            final Try.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -14264,7 +14283,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -14299,7 +14318,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Collection<? extends T> c,
-            final Try.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -14326,7 +14345,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends Collection<? extends R>, E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -14384,8 +14403,8 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      */
     public static <T, T2, R, C extends Collection<R>, E extends Exception, E2 extends Exception> List<R> flatMap(final T[] a,
-            final Try.Function<? super T, ? extends Collection<? extends T2>, E> func,
-            final Try.Function<? super T2, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<? extends T2>, E> func,
+            final Throwables.Function<? super T2, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
 
         return flatMap(a, func, func2, Factory.<R> ofList());
     }
@@ -14409,8 +14428,8 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      */
     public static <T, T2, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final T[] a,
-            final Try.Function<? super T, ? extends Collection<? extends T2>, E> func,
-            final Try.Function<? super T2, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<? extends T2>, E> func,
+            final Throwables.Function<? super T2, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
         checkArgNotNull(func);
         checkArgNotNull(func2);
 
@@ -14454,8 +14473,8 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      */
     public static <T, T2, R, C extends Collection<R>, E extends Exception, E2 extends Exception> List<R> flatMap(final Collection<? extends T> c,
-            final Try.Function<? super T, ? extends Collection<? extends T2>, E> func,
-            final Try.Function<? super T2, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<? extends T2>, E> func,
+            final Throwables.Function<? super T2, ? extends Collection<? extends R>, E2> func2) throws E, E2 {
 
         return flatMap(c, func, func2, Factory.<R> ofList());
     }
@@ -14479,8 +14498,8 @@ public final class N extends CommonUtil {
      * @throws E2 the e2
      */
     public static <T, T2, R, C extends Collection<R>, E extends Exception, E2 extends Exception> C flatMap(final Collection<? extends T> c,
-            final Try.Function<? super T, ? extends Collection<? extends T2>, E> func,
-            final Try.Function<? super T2, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<? extends T2>, E> func,
+            final Throwables.Function<? super T2, ? extends Collection<? extends R>, E2> func2, final IntFunction<? extends C> supplier) throws E, E2 {
         checkArgNotNull(func);
         checkArgNotNull(func2);
 
@@ -14518,7 +14537,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flattMap(final T[] a, final Try.Function<? super T, ? extends R[], E> func) throws E {
+    public static <T, R, E extends Exception> List<R> flattMap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -14543,7 +14562,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flattMap(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends R[], E> func) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -14575,7 +14594,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flattMap(final Collection<? extends T> c, final Try.Function<? super T, ? extends R[], E> func) throws E {
+    public static <T, R, E extends Exception> List<R> flattMap(final Collection<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> func)
+            throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -14600,7 +14620,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, E extends Exception> List<R> flattMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends R[], E> func) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -14653,7 +14673,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final T[] a, final Try.Function<? super T, ? extends R[], E> func,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func,
             final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
@@ -14681,7 +14701,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
@@ -14716,7 +14736,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final Collection<? extends T> c,
-            final Try.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
@@ -14743,7 +14763,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
+            final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
@@ -14816,7 +14836,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> int sumInt(final T[] a, final Try.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> int sumInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(a)) {
             return 0;
         }
@@ -14835,7 +14855,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> int sumInt(final T[] a, final int fromIndex, final int toIndex, final Try.ToIntFunction<? super T, E> func)
+    public static <T, E extends Exception> int sumInt(final T[] a, final int fromIndex, final int toIndex, final Throwables.ToIntFunction<? super T, E> func)
             throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
@@ -14883,7 +14903,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> int sumInt(final Collection<? extends T> c, final Try.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> int sumInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(c)) {
             return 0;
         }
@@ -14909,7 +14929,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -14974,7 +14994,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> long sumLong(final T[] a, final Try.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> long sumLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(a)) {
             return 0L;
         }
@@ -14993,7 +15013,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> long sumLong(final T[] a, final int fromIndex, final int toIndex, final Try.ToLongFunction<? super T, E> func)
+    public static <T, E extends Exception> long sumLong(final T[] a, final int fromIndex, final int toIndex, final Throwables.ToLongFunction<? super T, E> func)
             throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
@@ -15041,7 +15061,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> long sumLong(final Collection<? extends T> c, final Try.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> long sumLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(c)) {
             return 0L;
         }
@@ -15067,7 +15087,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> long sumLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -15132,7 +15152,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> double sumDouble(final T[] a, final Try.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> double sumDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(a)) {
             return 0D;
         }
@@ -15151,8 +15171,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> double sumDouble(final T[] a, final int fromIndex, final int toIndex, final Try.ToDoubleFunction<? super T, E> func)
-            throws E {
+    public static <T, E extends Exception> double sumDouble(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -15199,7 +15219,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> double sumDouble(final Collection<? extends T> c, final Try.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> double sumDouble(final Collection<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(c)) {
             return 0D;
         }
@@ -15225,7 +15245,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> double sumDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -15290,7 +15310,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> OptionalDouble averageInt(final T[] a, final Try.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> OptionalDouble averageInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(a)) {
             return OptionalDouble.empty();
         }
@@ -15310,7 +15330,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex,
-            final Try.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -15351,7 +15371,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> OptionalDouble averageInt(final Collection<? extends T> c, final Try.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> OptionalDouble averageInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> func)
+            throws E {
         if (isNullOrEmpty(c)) {
             return OptionalDouble.empty();
         }
@@ -15371,7 +15392,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToIntFunction<? super T, E> func) throws E {
+            final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -15412,7 +15433,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> OptionalDouble averageLong(final T[] a, final Try.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> OptionalDouble averageLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(a)) {
             return OptionalDouble.empty();
         }
@@ -15432,7 +15453,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex,
-            final Try.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -15473,7 +15494,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> OptionalDouble averageLong(final Collection<? extends T> c, final Try.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> OptionalDouble averageLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> func)
+            throws E {
         if (isNullOrEmpty(c)) {
             return OptionalDouble.empty();
         }
@@ -15493,7 +15515,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToLongFunction<? super T, E> func) throws E {
+            final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -15534,7 +15556,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> OptionalDouble averageDouble(final T[] a, final Try.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> OptionalDouble averageDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(a)) {
             return OptionalDouble.empty();
         }
@@ -15554,7 +15576,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex,
-            final Try.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
@@ -15601,7 +15623,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> OptionalDouble averageDouble(final Collection<? extends T> c, final Try.ToDoubleFunction<? super T, E> func)
+    public static <T, E extends Exception> OptionalDouble averageDouble(final Collection<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func)
             throws E {
         if (isNullOrEmpty(c)) {
             return OptionalDouble.empty();
@@ -15628,7 +15650,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.ToDoubleFunction<? super T, E> func) throws E {
+            final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -15672,7 +15694,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final boolean[] a, final Try.BooleanPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -15694,7 +15716,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final boolean[] a, final int fromIndex, final int toIndex, final Try.BooleanPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final boolean[] a, final int fromIndex, final int toIndex, final Throwables.BooleanPredicate<E> filter)
+            throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -15723,7 +15746,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final char[] a, final Try.CharPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final char[] a, final Throwables.CharPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -15745,7 +15768,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final char[] a, final int fromIndex, final int toIndex, final Try.CharPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -15774,7 +15797,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final byte[] a, final Try.BytePredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final byte[] a, final Throwables.BytePredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -15796,7 +15819,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final byte[] a, final int fromIndex, final int toIndex, final Try.BytePredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -15825,7 +15848,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final short[] a, final Try.ShortPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final short[] a, final Throwables.ShortPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -15847,7 +15870,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final short[] a, final int fromIndex, final int toIndex, final Try.ShortPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -15876,7 +15899,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final int[] a, final Try.IntPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final int[] a, final Throwables.IntPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -15898,7 +15921,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final int[] a, final int fromIndex, final int toIndex, final Try.IntPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -15927,7 +15950,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final long[] a, final Try.LongPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final long[] a, final Throwables.LongPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -15949,7 +15972,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final long[] a, final int fromIndex, final int toIndex, final Try.LongPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -15978,7 +16001,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final float[] a, final Try.FloatPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final float[] a, final Throwables.FloatPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -16000,7 +16023,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final float[] a, final int fromIndex, final int toIndex, final Try.FloatPredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -16029,7 +16052,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final double[] a, final Try.DoublePredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final double[] a, final Throwables.DoublePredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -16051,7 +16074,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> int count(final double[] a, final int fromIndex, final int toIndex, final Try.DoublePredicate<E> filter) throws E {
+    public static <E extends Exception> int count(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter)
+            throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -16081,7 +16105,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> int count(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> int count(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
@@ -16104,7 +16128,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> int count(final T[] a, final int fromIndex, final int toIndex, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> int count(final T[] a, final int fromIndex, final int toIndex, final Throwables.Predicate<? super T, E> filter)
+            throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
@@ -16134,7 +16159,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> int count(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> int count(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(c)) {
@@ -16158,7 +16183,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> int count(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Predicate<? super T, E> filter) throws E {
+            final Throwables.Predicate<? super T, E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(filter);
 
@@ -17342,7 +17367,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> distinctBy(final T[] a, final Try.Function<? super T, ?, E> keyMapper) throws E {
+    public static <T, E extends Exception> List<T> distinctBy(final T[] a, final Throwables.Function<? super T, ?, E> keyMapper) throws E {
         if (isNullOrEmpty(a)) {
             return new ArrayList<>();
         }
@@ -17366,7 +17391,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final T[] a, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ?, E> keyMapper) throws E {
+            final Throwables.Function<? super T, ?, E> keyMapper) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a)) {
@@ -17398,7 +17423,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> distinctBy(final Collection<? extends T> c, final Try.Function<? super T, ?, E> keyMapper) throws E {
+    public static <T, E extends Exception> List<T> distinctBy(final Collection<? extends T> c, final Throwables.Function<? super T, ?, E> keyMapper) throws E {
         if (isNullOrEmpty(c)) {
             return new ArrayList<>();
         }
@@ -17422,7 +17447,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> distinctBy(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Try.Function<? super T, ?, E> keyMapper) throws E {
+            final Throwables.Function<? super T, ?, E> keyMapper) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
@@ -17472,7 +17497,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         return Iterables.allMatch(c, filter);
     }
 
@@ -17486,7 +17511,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean allMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean allMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         return Iterables.allMatch(a, filter);
     }
 
@@ -17500,7 +17525,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         return Iterables.anyMatch(c, filter);
     }
 
@@ -17514,7 +17539,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean anyMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         return Iterables.anyMatch(a, filter);
     }
 
@@ -17528,7 +17553,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
         return Iterables.noneMatch(c, filter);
     }
 
@@ -17542,7 +17567,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean noneMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         return Iterables.noneMatch(a, filter);
     }
 
@@ -17559,7 +17584,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, E extends Exception> boolean nMatch(final Collection<? extends T> c, final int atLeast, final int atMost,
-            final Try.Predicate<? super T, E> filter) throws E {
+            final Throwables.Predicate<? super T, E> filter) throws E {
         return Iterables.nMatch(c, atLeast, atMost, filter);
     }
 
@@ -17575,7 +17600,8 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Try.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Throwables.Predicate<? super T, E> filter)
+            throws E {
         return Iterables.nMatch(a, atLeast, atMost, filter);
     }
 
@@ -18287,7 +18313,7 @@ public final class N extends CommonUtil {
      * @param retryInterval
      * @param retryCondition
      */
-    public static void execute(final Try.Runnable<? extends Exception> cmd, final int retryTimes, final long retryInterval,
+    public static void execute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryInterval,
             final Predicate<? super Exception> retryCondition) {
         try {
             Retry.of(retryTimes, retryInterval, retryCondition).run(cmd);
@@ -18320,7 +18346,7 @@ public final class N extends CommonUtil {
      * @param command
      * @return
      */
-    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command) {
+    public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command) {
         return asyncExecutor.execute(command);
     }
 
@@ -18330,8 +18356,14 @@ public final class N extends CommonUtil {
      * @param delayInMillis
      * @return
      */
-    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command, final long delayInMillis) {
-        return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(Fnn.toCallable(command), delayInMillis, TimeUnit.MILLISECONDS));
+    public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command, final long delayInMillis) {
+        return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                command.run();
+                return null;
+            }
+        }, delayInMillis, TimeUnit.MILLISECONDS));
     }
 
     /**
@@ -18340,7 +18372,7 @@ public final class N extends CommonUtil {
      * @return
      */
     @SafeVarargs
-    public static List<ContinuableFuture<Void>> asyncExecute(final Try.Runnable<? extends Exception>... commands) {
+    public static List<ContinuableFuture<Void>> asyncExecute(final Throwables.Runnable<? extends Exception>... commands) {
         return asyncExecutor.execute(commands);
     }
 
@@ -18349,7 +18381,7 @@ public final class N extends CommonUtil {
      * @param commands
      * @return
      */
-    public static List<ContinuableFuture<Void>> asyncExecute(final List<? extends Try.Runnable<? extends Exception>> commands) {
+    public static List<ContinuableFuture<Void>> asyncExecute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
         return asyncExecutor.execute(commands);
     }
 
@@ -18403,8 +18435,8 @@ public final class N extends CommonUtil {
      * @param retryCondition
      * @return
      */
-    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervalInMillis,
-            final Predicate<? super Exception> retryCondition) {
+    public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes,
+            final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition) {
         return asyncExecutor.execute(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -18434,7 +18466,7 @@ public final class N extends CommonUtil {
         });
     }
 
-    public static ContinuableFuture<Void> asyncExecute(final Try.Runnable<? extends Exception> command, final Executor executor) {
+    public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command, final Executor executor) {
         return ContinuableFuture.run(command, executor);
     }
 
@@ -18578,7 +18610,7 @@ public final class N extends CommonUtil {
      *
      * @param cmd
      */
-    public static void runUninterruptibly(final Try.Runnable<InterruptedException> cmd) {
+    public static void runUninterruptibly(final Throwables.Runnable<InterruptedException> cmd) {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -18610,7 +18642,7 @@ public final class N extends CommonUtil {
      * @param timeoutInMillis
      * @param cmd
      */
-    public static void runUninterruptibly(final long timeoutInMillis, final Try.LongConsumer<InterruptedException> cmd) {
+    public static void runUninterruptibly(final long timeoutInMillis, final Throwables.LongConsumer<InterruptedException> cmd) {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -18648,7 +18680,7 @@ public final class N extends CommonUtil {
      * @param unit
      * @param cmd
      */
-    public static void runUninterruptibly(final long timeout, final TimeUnit unit, final Try.BiConsumer<Long, TimeUnit, InterruptedException> cmd) {
+    public static void runUninterruptibly(final long timeout, final TimeUnit unit, final Throwables.BiConsumer<Long, TimeUnit, InterruptedException> cmd) {
         checkArgNotNull(unit, "unit");
         checkArgNotNull(cmd);
 
@@ -18687,7 +18719,7 @@ public final class N extends CommonUtil {
      * @param cmd
      * @return
      */
-    public static <T> T callUninterruptibly(Try.Callable<T, InterruptedException> cmd) {
+    public static <T> T callUninterruptibly(Throwables.Callable<T, InterruptedException> cmd) {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -18719,7 +18751,7 @@ public final class N extends CommonUtil {
      * @param cmd
      * @return
      */
-    public static <T> T callUninterruptibly(final long timeoutInMillis, final Try.LongFunction<T, InterruptedException> cmd) {
+    public static <T> T callUninterruptibly(final long timeoutInMillis, final Throwables.LongFunction<T, InterruptedException> cmd) {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -18758,7 +18790,7 @@ public final class N extends CommonUtil {
      * @param cmd
      * @return
      */
-    public static <T> T callUninterruptibly(final long timeout, final TimeUnit unit, final Try.BiFunction<Long, TimeUnit, T, InterruptedException> cmd) {
+    public static <T> T callUninterruptibly(final long timeout, final TimeUnit unit, final Throwables.BiFunction<Long, TimeUnit, T, InterruptedException> cmd) {
         checkArgNotNull(unit, "unit");
         checkArgNotNull(cmd);
 
@@ -18875,7 +18907,7 @@ public final class N extends CommonUtil {
      * @param func
      * @return
      */
-    public static <T, R, E extends Exception> Nullable<R> tryOrEmpty(final T init, final Try.Function<? super T, R, E> func) {
+    public static <T, R, E extends Exception> Nullable<R> tryOrEmpty(final T init, final Throwables.Function<? super T, R, E> func) {
         try {
             return Nullable.of(func.apply(init));
         } catch (Exception e) {
@@ -18894,7 +18926,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <R, E extends Exception> Nullable<R> ifOrEmpty(final boolean b, final Try.Supplier<R, E> supplier) throws E {
+    public static <R, E extends Exception> Nullable<R> ifOrEmpty(final boolean b, final Throwables.Supplier<R, E> supplier) throws E {
         if (b) {
             return Nullable.of(supplier.get());
         } else {
@@ -18915,7 +18947,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> Nullable<R> ifOrEmpty(final boolean b, final T init, final Try.Function<? super T, R, E> func) throws E {
+    public static <T, R, E extends Exception> Nullable<R> ifOrEmpty(final boolean b, final T init, final Throwables.Function<? super T, R, E> func) throws E {
         if (b) {
             return Nullable.of(func.apply(init));
         } else {
@@ -18934,8 +18966,8 @@ public final class N extends CommonUtil {
      * @throws E1 the e1
      * @throws E2 the e2
      */
-    public static <E1 extends Exception, E2 extends Exception> void ifOrElse(final boolean b, final Try.Runnable<E1> actionForTrue,
-            final Try.Runnable<E2> actionForFalse) throws E1, E2 {
+    public static <E1 extends Exception, E2 extends Exception> void ifOrElse(final boolean b, final Throwables.Runnable<E1> actionForTrue,
+            final Throwables.Runnable<E2> actionForFalse) throws E1, E2 {
         if (b) {
             if (actionForTrue != null) {
                 actionForTrue.run();
@@ -18960,8 +18992,8 @@ public final class N extends CommonUtil {
      * @throws E1 the e1
      * @throws E2 the e2
      */
-    public static <T, E1 extends Exception, E2 extends Exception> void ifOrElse(final boolean b, final T init, final Try.Consumer<? super T, E1> actionForTrue,
-            final Try.Consumer<? super T, E2> actionForFalse) throws E1, E2 {
+    public static <T, E1 extends Exception, E2 extends Exception> void ifOrElse(final boolean b, final T init,
+            final Throwables.Consumer<? super T, E1> actionForTrue, final Throwables.Consumer<? super T, E2> actionForFalse) throws E1, E2 {
         if (b) {
             if (actionForTrue != null) {
                 actionForTrue.accept(init);
@@ -19062,7 +19094,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b, final Try.BiFunction<? super T, ? super T, Nth, E> nextSelector) throws E {
+    public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b, final Throwables.BiFunction<? super T, ? super T, Nth, E> nextSelector)
+            throws E {
         if (isNullOrEmpty(a)) {
             return isNullOrEmpty(b) ? new ArrayList<>() : asList(b);
         } else if (isNullOrEmpty(b)) {
@@ -19105,7 +19138,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> merge(final Collection<? extends T> a, final Collection<? extends T> b,
-            final Try.BiFunction<? super T, ? super T, Nth, E> nextSelector) throws E {
+            final Throwables.BiFunction<? super T, ? super T, Nth, E> nextSelector) throws E {
         if (isNullOrEmpty(a)) {
             return isNullOrEmpty(b) ? new ArrayList<>() : new ArrayList<>(b);
         } else if (isNullOrEmpty(b)) {
@@ -19180,7 +19213,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final Try.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+    public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction)
+            throws E {
         if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
             return new ArrayList<>();
         }
@@ -19208,7 +19242,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final Collection<A> a, final Collection<B> b,
-            final Try.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
         if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
             return new ArrayList<>();
         }
@@ -19240,7 +19274,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c,
-            final Try.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
         if (isNullOrEmpty(a) || isNullOrEmpty(b) || isNullOrEmpty(c)) {
             return new ArrayList<>();
         }
@@ -19270,7 +19304,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c,
-            final Try.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
         if (isNullOrEmpty(a) || isNullOrEmpty(b) || isNullOrEmpty(c)) {
             return new ArrayList<>();
         }
@@ -19303,7 +19337,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-            final Try.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
         final int lenA = len(a);
         final int lenB = len(b);
         final int maxLen = max(lenA, lenB);
@@ -19331,7 +19365,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final Collection<A> a, final Collection<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Try.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
         final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b.iterator();
         final int lenA = size(a);
@@ -19364,7 +19398,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final Try.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
         final int lenA = len(a);
         final int lenB = len(b);
         final int lenC = len(c);
@@ -19396,7 +19430,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Try.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
         final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b.iterator();
         final Iterator<C> iterC = c == null ? ObjIterator.<C> empty() : c.iterator();
@@ -19426,7 +19460,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, L, R, E extends Exception> Pair<List<L>, List<R>> unzip(final Collection<? extends T> c,
-            final Try.BiConsumer<? super T, Pair<L, R>, E> unzip) throws E {
+            final Throwables.BiConsumer<? super T, Pair<L, R>, E> unzip) throws E {
         final int len = size(c);
 
         final List<L> l = new ArrayList<>(len);
@@ -19460,7 +19494,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, L, R, LC extends Collection<L>, RC extends Collection<R>, E extends Exception> Pair<LC, RC> unzip(final Collection<? extends T> c,
-            final Try.BiConsumer<? super T, Pair<L, R>, E> unzip, final IntFunction<? extends Collection<?>> supplier) throws E {
+            final Throwables.BiConsumer<? super T, Pair<L, R>, E> unzip, final IntFunction<? extends Collection<?>> supplier) throws E {
         final int len = size(c);
 
         final LC l = (LC) supplier.apply(len);
@@ -19492,7 +19526,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, L, M, R, E extends Exception> Triple<List<L>, List<M>, List<R>> unzipp(final Collection<? extends T> c,
-            final Try.BiConsumer<? super T, Triple<L, M, R>, E> unzip) throws E {
+            final Throwables.BiConsumer<? super T, Triple<L, M, R>, E> unzip) throws E {
         final int len = size(c);
 
         final List<L> l = new ArrayList<>(len);
@@ -19530,8 +19564,8 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, L, M, R, LC extends Collection<L>, MC extends Collection<M>, RC extends Collection<R>, E extends Exception> Triple<LC, MC, RC> unzipp(
-            final Collection<? extends T> c, final Try.BiConsumer<? super T, Triple<L, M, R>, E> unzip, final IntFunction<? extends Collection<?>> supplier)
-            throws E {
+            final Collection<? extends T> c, final Throwables.BiConsumer<? super T, Triple<L, M, R>, E> unzip,
+            final IntFunction<? extends Collection<?>> supplier) throws E {
         final int len = size(c);
 
         final LC l = (LC) supplier.apply(len);
@@ -19579,7 +19613,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, R, E extends Exception> List<R> crossJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiFunction<? super T, ? super U, R, E> func) throws E {
+            final Throwables.BiFunction<? super T, ? super U, R, E> func) throws E {
         return Iterables.crossJoin(a, b, func);
     }
 
@@ -19601,7 +19635,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         return Iterables.innerJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19620,7 +19654,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, E extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
         return Iterables.innerJoin(a, b, predicate);
     }
 
@@ -19642,7 +19676,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         return Iterables.fullJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19661,7 +19695,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, E extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
         return Iterables.fullJoin(a, b, predicate);
     }
 
@@ -19683,7 +19717,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         return Iterables.leftJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19702,7 +19736,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, E extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
         return Iterables.leftJoin(a, b, predicate);
     }
 
@@ -19724,7 +19758,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Try.Function<? super T, ?, E> leftKeyMapper, final Try.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
         return Iterables.rightJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19743,7 +19777,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, E extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Try.BiPredicate<? super T, ? super U, E> predicate) throws E {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
         return Iterables.rightJoin(a, b, predicate);
     }
 }

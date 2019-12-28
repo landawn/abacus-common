@@ -47,7 +47,7 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableEntry;
 import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BiFunction;
@@ -857,11 +857,11 @@ public final class EntryStream<K, V> implements AutoCloseable {
         }));
     }
 
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super EntryStream<K, V>, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super EntryStream<K, V>, R, E> func) throws E {
         return s.applyIfNotEmpty(ss -> func.apply(EntryStream.this));
     }
 
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super EntryStream<K, V>, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super EntryStream<K, V>, E> action) throws E {
         return s.acceptIfNotEmpty(ss -> action.accept(EntryStream.this));
     }
 
@@ -899,12 +899,12 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
-    public <E extends Exception> void forEach(final Try.Consumer<? super Map.Entry<K, V>, E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
         s.forEach(action);
     }
 
     @ParallelSupported
-    public <E extends Exception> void forEach(final Try.BiConsumer<? super K, ? super V, E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
         s.forEach(Fn.Entries.ec(action));
     }
 
@@ -951,52 +951,52 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
-    public <E extends Exception> boolean anyMatch(final Try.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
         return s.anyMatch(predicate);
     }
 
     @ParallelSupported
-    public <E extends Exception> boolean anyMatch(final Try.BiPredicate<? super K, ? super V, E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
         return s.anyMatch(Fn.Entries.ep(predicate));
     }
 
     @ParallelSupported
-    public <E extends Exception> boolean allMatch(final Try.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
         return s.allMatch(predicate);
     }
 
     @ParallelSupported
-    public <E extends Exception> boolean allMatch(final Try.BiPredicate<? super K, ? super V, E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
         return s.allMatch(Fn.Entries.ep(predicate));
     }
 
     @ParallelSupported
-    public <E extends Exception> boolean noneMatch(final Try.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
         return s.noneMatch(predicate);
     }
 
     @ParallelSupported
-    public <E extends Exception> boolean noneMatch(final Try.BiPredicate<? super K, ? super V, E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
         return s.noneMatch(Fn.Entries.ep(predicate));
     }
 
     @ParallelSupported
-    public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Try.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+    public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
         return s.findFirst(predicate);
     }
 
     @ParallelSupported
-    public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Try.BiPredicate<? super K, ? super V, E> predicate) throws E {
+    public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
         return s.findFirst(Fn.Entries.ep(predicate));
     }
 
     @ParallelSupported
-    public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Try.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+    public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
         return s.findAny(predicate);
     }
 
     @ParallelSupported
-    public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Try.BiPredicate<? super K, ? super V, E> predicate) throws E {
+    public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
         return s.findAny(Fn.Entries.ep(predicate));
     }
 

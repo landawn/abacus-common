@@ -293,7 +293,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.CharConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.CharConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

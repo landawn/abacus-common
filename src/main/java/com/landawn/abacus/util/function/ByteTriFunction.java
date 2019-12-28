@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ByteTriFunction<R> extends Try.ByteTriFunction<R, RuntimeException> {
+public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, RuntimeException> {
 
     @Override
     R apply(byte a, byte b, byte c);

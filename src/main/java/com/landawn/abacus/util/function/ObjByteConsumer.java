@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ObjByteConsumer<T> extends Try.ObjByteConsumer<T, RuntimeException> {
+public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, RuntimeException> {
 
     @Override
     void accept(T t, byte value);

@@ -52,7 +52,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         }
 
         @Override
-        public void forEachRemaining(Try.BiConsumer action) throws Exception {
+        public void forEachRemaining(Throwables.BiConsumer action) throws Exception {
             N.checkArgNotNull(action);
         }
 
@@ -114,7 +114,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Try.BiConsumer<? super K, ? super V, E> action) throws E {
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 Map.Entry<K, V> entry = null;
@@ -192,7 +192,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 while (hasNext.getAsBoolean()) {
@@ -261,7 +261,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 while (cursor.value() < toIndex) {
@@ -377,7 +377,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 while (iterA.hasNext() && iterB.hasNext()) {
@@ -438,7 +438,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
                 N.checkArgNotNull(action);
 
                 while (iter1.hasNext() || iter2.hasNext()) {
@@ -507,7 +507,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param action
      * @throws E the e
      */
-    public abstract <E extends Exception> void forEachRemaining(final Try.BiConsumer<? super A, ? super B, E> action) throws E;
+    public abstract <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E;
 
     /**
      * It's preferred to call <code>forEachRemaining(Try.BiConsumer)</code> to avoid the create the unnecessary <code>Pair</code> Objects.

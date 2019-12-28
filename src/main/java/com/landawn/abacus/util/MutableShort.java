@@ -131,7 +131,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(short newValue, Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(short newValue, Throwables.ShortPredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
             return true;
@@ -150,7 +150,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(short newValue, Try.ShortBiPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(short newValue, Throwables.ShortBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;
             return true;

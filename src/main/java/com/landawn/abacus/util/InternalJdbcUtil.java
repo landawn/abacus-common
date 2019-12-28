@@ -315,7 +315,7 @@ final class InternalJdbcUtil {
      * @param targetClass
      * @return
      */
-    static <T> Try.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass) {
+    static <T> Throwables.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass) {
         return to(targetClass, false);
     }
 
@@ -327,9 +327,9 @@ final class InternalJdbcUtil {
      * @param ignoreNonMatchedColumns
      * @return
      */
-    static <T> Try.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass, final boolean ignoreNonMatchedColumns) {
+    static <T> Throwables.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass, final boolean ignoreNonMatchedColumns) {
         if (Object[].class.isAssignableFrom(targetClass)) {
-            return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
+            return new Throwables.BiFunction<ResultSet, List<String>, T, SQLException>() {
                 @Override
                 public T apply(ResultSet rs, List<String> columnLabelList) throws SQLException {
                     final int columnCount = columnLabelList.size();
@@ -343,7 +343,7 @@ final class InternalJdbcUtil {
                 }
             };
         } else if (List.class.isAssignableFrom(targetClass)) {
-            return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
+            return new Throwables.BiFunction<ResultSet, List<String>, T, SQLException>() {
                 private final boolean isListOrArrayList = targetClass.equals(List.class) || targetClass.equals(ArrayList.class);
 
                 @Override
@@ -359,7 +359,7 @@ final class InternalJdbcUtil {
                 }
             };
         } else if (Map.class.isAssignableFrom(targetClass)) {
-            return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
+            return new Throwables.BiFunction<ResultSet, List<String>, T, SQLException>() {
                 private final boolean isMapOrHashMap = targetClass.equals(Map.class) || targetClass.equals(HashMap.class);
                 private final boolean isLinkedHashMap = targetClass.equals(LinkedHashMap.class);
                 private volatile String[] columnLabels = null;
@@ -385,7 +385,7 @@ final class InternalJdbcUtil {
                 }
             };
         } else if (ClassUtil.isEntity(targetClass)) {
-            return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
+            return new Throwables.BiFunction<ResultSet, List<String>, T, SQLException>() {
                 private final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(targetClass);
                 private final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
                 private volatile String[] columnLabels = null;
@@ -460,7 +460,7 @@ final class InternalJdbcUtil {
                 }
             };
         } else {
-            return new Try.BiFunction<ResultSet, List<String>, T, SQLException>() {
+            return new Throwables.BiFunction<ResultSet, List<String>, T, SQLException>() {
                 private final Type<? extends T> targetType = N.typeOf(targetClass);
                 private int columnCount = 0;
 

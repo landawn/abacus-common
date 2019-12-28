@@ -917,7 +917,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeAllOccurrencesIf(Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.Predicate<? super T, E> predicate) throws E {
         Set<T> removingKeys = null;
 
         for (T key : this.valueMap.keySet()) {
@@ -947,7 +947,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeAllOccurrencesIf(Try.BiPredicate<? super T, ? super Long, E> predicate) throws E {
+    public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.BiPredicate<? super T, ? super Long, E> predicate) throws E {
         Set<T> removingKeys = null;
 
         for (Map.Entry<T, MutableLong> entry : this.valueMap.entrySet()) {
@@ -978,7 +978,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final long occurrences, Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> boolean removeIf(final long occurrences, Throwables.Predicate<? super T, E> predicate) throws E {
         checkOccurrences(occurrences);
 
         Set<T> removingKeys = null;
@@ -1011,7 +1011,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(final long occurrences, Try.BiPredicate<? super T, ? super Long, E> predicate) throws E {
+    public <E extends Exception> boolean removeIf(final long occurrences, Throwables.BiPredicate<? super T, ? super Long, E> predicate) throws E {
         checkOccurrences(occurrences);
 
         Set<T> removingKeys = null;
@@ -1147,7 +1147,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Try.Predicate<? super T, E> predicate, final int newOccurrences) throws E {
+    public <E extends Exception> boolean replaceIf(Throwables.Predicate<? super T, E> predicate, final int newOccurrences) throws E {
         checkOccurrences(newOccurrences);
 
         boolean modified = false;
@@ -1190,7 +1190,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Try.BiPredicate<? super T, ? super Long, E> predicate, final int newOccurrences) throws E {
+    public <E extends Exception> boolean replaceIf(Throwables.BiPredicate<? super T, ? super Long, E> predicate, final int newOccurrences) throws E {
         checkOccurrences(newOccurrences);
 
         boolean modified = false;
@@ -1232,7 +1232,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param function
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Try.BiFunction<? super T, ? super Long, Long, E> function) throws E {
+    public <E extends Exception> void replaceAll(Throwables.BiFunction<? super T, ? super Long, Long, E> function) throws E {
         List<T> keyToRemove = null;
         Long newVal = null;
 
@@ -1514,7 +1514,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> LongMultiset<T> filter(Try.Predicate<? super T, E> filter) throws E {
+    public <E extends Exception> LongMultiset<T> filter(Throwables.Predicate<? super T, E> filter) throws E {
         final LongMultiset<T> result = new LongMultiset<>(mapSupplier.get());
 
         for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
@@ -1533,7 +1533,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> LongMultiset<T> filter(Try.BiPredicate<? super T, Long, E> filter) throws E {
+    public <E extends Exception> LongMultiset<T> filter(Throwables.BiPredicate<? super T, Long, E> filter) throws E {
         final LongMultiset<T> result = new LongMultiset<>(mapSupplier.get());
 
         for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
@@ -1551,7 +1551,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final Try.Consumer<? super T, E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         for (T e : valueMap.keySet()) {
@@ -1565,7 +1565,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final Try.ObjLongConsumer<? super T, E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.ObjLongConsumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         for (Map.Entry<T, MutableLong> entry : valueMap.entrySet()) {
@@ -1598,7 +1598,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> long computeIfAbsent(T e, Try.Function<? super T, Long, E> mappingFunction) throws E {
+    public <E extends Exception> long computeIfAbsent(T e, Throwables.Function<? super T, Long, E> mappingFunction) throws E {
         N.checkArgNotNull(mappingFunction);
 
         final long oldValue = get(e);
@@ -1643,7 +1643,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> long computeIfPresent(T e, Try.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
+    public <E extends Exception> long computeIfPresent(T e, Throwables.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
 
         final long oldValue = get(e);
@@ -1687,7 +1687,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> long compute(T key, Try.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
+    public <E extends Exception> long compute(T key, Throwables.BiFunction<? super T, Long, Long, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
 
         final long oldValue = get(key);
@@ -1729,7 +1729,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> long merge(T key, long value, Try.BiFunction<Long, Long, Long, E> remappingFunction) throws E {
+    public <E extends Exception> long merge(T key, long value, Throwables.BiFunction<Long, Long, Long, E> remappingFunction) throws E {
         N.checkArgNotNull(remappingFunction);
         N.checkArgNotNull(value);
 
@@ -1821,7 +1821,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Exception> R apply(Try.Function<? super LongMultiset<T>, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super LongMultiset<T>, R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -1834,7 +1834,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Try.Function<? super LongMultiset<T>, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super LongMultiset<T>, R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -1844,7 +1844,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<? super LongMultiset<T>, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<? super LongMultiset<T>, E> action) throws E {
         action.accept(this);
     }
 
@@ -1855,7 +1855,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super LongMultiset<T>, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super LongMultiset<T>, E> action) throws E {
         return If.is(size() > 0).then(this, action);
     }
 

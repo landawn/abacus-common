@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface Predicate<T> extends java.util.function.Predicate<T>, Try.Predicate<T, RuntimeException> {
+public interface Predicate<T> extends java.util.function.Predicate<T>, Throwables.Predicate<T, RuntimeException> {
 
     @Override
     boolean test(T value);

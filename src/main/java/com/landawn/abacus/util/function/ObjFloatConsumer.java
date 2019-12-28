@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ObjFloatConsumer<T> extends Try.ObjFloatConsumer<T, RuntimeException> {
+public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, RuntimeException> {
 
     @Override
     void accept(T t, float value);

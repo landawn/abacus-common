@@ -293,7 +293,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.FloatConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.FloatConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.ShortSummaryStatistics;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -254,7 +254,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Try.ShortConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
@@ -272,7 +272,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         int cursor = fromIndex + sliceIndex * sliceSize;
@@ -292,7 +292,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         short next = 0;
@@ -917,7 +917,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
@@ -935,7 +935,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         int cursor = fromIndex + sliceIndex * sliceSize;
@@ -958,7 +958,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         short next = 0;
@@ -996,7 +996,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
@@ -1014,7 +1014,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         int cursor = fromIndex + sliceIndex * sliceSize;
@@ -1037,7 +1037,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         short next = 0;
@@ -1075,7 +1075,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
@@ -1093,7 +1093,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         int cursor = fromIndex + sliceIndex * sliceSize;
@@ -1116,7 +1116,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         short next = 0;
@@ -1154,7 +1154,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
     }
 
     @Override
-    public <E extends Exception> OptionalShort findFirst(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
@@ -1172,7 +1172,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         int cursor = fromIndex + sliceIndex * sliceSize;
@@ -1204,7 +1204,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         final Pair<Integer, Short> pair = new Pair<>();
@@ -1248,7 +1248,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
     }
 
     @Override
-    public <E extends Exception> OptionalShort findLast(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
@@ -1266,7 +1266,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         final int from = fromIndex + sliceIndex * sliceSize;
@@ -1298,7 +1298,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             final MutableInt cursor = MutableInt.of(toIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         final Pair<Integer, Short> pair = new Pair<>();
@@ -1342,7 +1342,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
     }
 
     @Override
-    public <E extends Exception> OptionalShort findAny(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalShort findAny(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
@@ -1360,7 +1360,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         int cursor = fromIndex + sliceIndex * sliceSize;
@@ -1391,7 +1391,7 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                futureList.add(asyncExecutor.execute(new Try.Runnable<RuntimeException>() {
+                futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                     @Override
                     public void run() {
                         short next = 0;

@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface DoubleTriFunction<R> extends Try.DoubleTriFunction<R, RuntimeException> {
+public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, RuntimeException> {
 
     @Override
     R apply(double a, double b, double c);

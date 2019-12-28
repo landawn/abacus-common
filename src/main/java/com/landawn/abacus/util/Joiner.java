@@ -1643,7 +1643,7 @@ public class Joiner implements AutoCloseable {
      * @return
      * @throws E the e
      */
-    public <T, E extends Exception> T map(Try.Function<? super String, T, E> mapper) throws E {
+    public <T, E extends Exception> T map(Throwables.Function<? super String, T, E> mapper) throws E {
         return mapper.apply(toString());
     }
 
@@ -1661,7 +1661,7 @@ public class Joiner implements AutoCloseable {
      * @return
      * @throws E the e
      */
-    public <T, E extends Exception> Nullable<T> mapIfNotEmpty(Try.Function<? super String, T, E> mapper) throws E {
+    public <T, E extends Exception> Nullable<T> mapIfNotEmpty(Throwables.Function<? super String, T, E> mapper) throws E {
         N.checkArgNotNull(mapper);
 
         return buffer == null ? Nullable.<T> empty() : Nullable.of(mapper.apply(toString()));

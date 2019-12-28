@@ -131,7 +131,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(byte newValue, Try.BytePredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(byte newValue, Throwables.BytePredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
             return true;
@@ -150,7 +150,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(byte newValue, Try.ByteBiPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(byte newValue, Throwables.ByteBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;
             return true;

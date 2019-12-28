@@ -131,7 +131,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(long newValue, Try.LongPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(long newValue, Throwables.LongPredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
             return true;
@@ -150,7 +150,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(long newValue, Try.LongBiPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(long newValue, Throwables.LongBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;
             return true;

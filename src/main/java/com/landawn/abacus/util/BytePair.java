@@ -122,7 +122,7 @@ public class BytePair {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.ByteConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.ByteConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
     }
@@ -133,7 +133,7 @@ public class BytePair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<BytePair, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<BytePair, E> action) throws E {
         action.accept(this);
     }
 
@@ -145,7 +145,7 @@ public class BytePair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<BytePair, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<BytePair, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -156,7 +156,7 @@ public class BytePair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<BytePair> filter(final Try.Predicate<BytePair, E> predicate) throws E {
+    public <E extends Exception> Optional<BytePair> filter(final Throwables.Predicate<BytePair, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<BytePair> empty();
     }
 

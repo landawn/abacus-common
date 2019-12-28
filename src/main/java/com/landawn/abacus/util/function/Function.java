@@ -16,7 +16,7 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface Function<T, R> extends java.util.function.Function<T, R>, Try.Function<T, R, RuntimeException> {
+public interface Function<T, R> extends java.util.function.Function<T, R>, Throwables.Function<T, R, RuntimeException> {
 
     static <T> Function<T, T> identity() {
         return Fn.identity();

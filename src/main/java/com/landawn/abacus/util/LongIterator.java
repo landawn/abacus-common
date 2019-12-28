@@ -293,7 +293,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.LongConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.LongConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

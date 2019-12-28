@@ -45,7 +45,7 @@ import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -353,22 +353,22 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     public abstract <R> R collect(Supplier<R> supplier, ObjLongConsumer<? super R> accumulator);
 
-    public abstract <E extends Exception> void forEach(final Try.LongConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws E;
 
-    public abstract <E extends Exception> boolean anyMatch(final Try.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> boolean allMatch(final Try.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(final Throwables.LongPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> boolean noneMatch(final Try.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(final Throwables.LongPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> OptionalLong findFirst(final Try.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception> OptionalLong findLast(final Try.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate) throws E;
 
-    public abstract <E extends Exception, E2 extends Exception> OptionalLong findFirstOrLast(Try.LongPredicate<E> predicateForFirst,
-            Try.LongPredicate<E> predicateForLast) throws E, E2;
+    public abstract <E extends Exception, E2 extends Exception> OptionalLong findFirstOrLast(Throwables.LongPredicate<E> predicateForFirst,
+            Throwables.LongPredicate<E> predicateForLast) throws E, E2;
 
-    public abstract <E extends Exception> OptionalLong findAny(final Try.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalLong findAny(final Throwables.LongPredicate<E> predicate) throws E;
 
     public abstract OptionalLong min();
 
@@ -1915,7 +1915,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(c.size() - 1);
 
         for (int i = 0, n = N.min(maxThreadNum, c.size() / 2 + 1); i < n; i++) {
-            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Try.Runnable<RuntimeException>() {
+            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     LongStream a = null;

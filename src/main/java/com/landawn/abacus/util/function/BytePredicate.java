@@ -4,9 +4,9 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
-public interface BytePredicate extends Try.BytePredicate<RuntimeException> {
+public interface BytePredicate extends Throwables.BytePredicate<RuntimeException> {
 
     static final BytePredicate ALWAYS_TRUE = new BytePredicate() {
         @Override

@@ -293,7 +293,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.ByteConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.ByteConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

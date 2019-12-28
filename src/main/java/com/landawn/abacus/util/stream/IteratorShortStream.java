@@ -37,7 +37,7 @@ import com.landawn.abacus.util.Primitives;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.ShortSummaryStatistics;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -972,7 +972,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Try.ShortConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E {
         assertNotClosed();
 
         try {
@@ -1343,7 +1343,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1360,7 +1360,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1377,7 +1377,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1394,7 +1394,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> OptionalShort findFirst(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1413,7 +1413,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> OptionalShort findLast(final Try.ShortPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1533,7 +1533,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super ShortStream, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ShortStream, R, E> func) throws E {
         try {
             if (elements.hasNext()) {
                 return Optional.of(func.apply(this));
@@ -1546,7 +1546,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super ShortStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super ShortStream, E> action) throws E {
         try {
             if (elements.hasNext()) {
                 action.accept(this);

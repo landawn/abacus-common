@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface LongFunction<R> extends java.util.function.LongFunction<R>, Try.LongFunction<R, RuntimeException> {
+public interface LongFunction<R> extends java.util.function.LongFunction<R>, Throwables.LongFunction<R, RuntimeException> {
     static final LongFunction<Long> BOX = new LongFunction<Long>() {
         @Override
         public Long apply(long value) {

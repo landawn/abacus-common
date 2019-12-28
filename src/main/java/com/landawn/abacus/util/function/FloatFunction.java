@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface FloatFunction<R> extends Try.FloatFunction<R, RuntimeException> {
+public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeException> {
     static final FloatFunction<Float> BOX = new FloatFunction<Float>() {
         @Override
         public Float apply(float value) {

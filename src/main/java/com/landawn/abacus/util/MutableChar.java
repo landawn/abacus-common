@@ -123,7 +123,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(char newValue, Try.CharPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(char newValue, Throwables.CharPredicate<E> predicate) throws E {
         if (predicate.test(this.value)) {
             this.value = newValue;
             return true;
@@ -142,7 +142,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(char newValue, Try.CharBiPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean setIf(char newValue, Throwables.CharBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;
             return true;

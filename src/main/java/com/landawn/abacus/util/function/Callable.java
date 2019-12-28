@@ -14,15 +14,15 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
- * 
+ *
  * @since 1.2
- * 
+ *
  * @author Haiyang Li
  */
-public interface Callable<R> extends java.util.concurrent.Callable<R>, Try.Callable<R, RuntimeException> {
+public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwables.Callable<R, RuntimeException> {
 
     @Override
     R call();

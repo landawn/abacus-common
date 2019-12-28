@@ -60,7 +60,7 @@ public abstract class Tuple {
         }
 
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
             N.checkArgNotNull(consumer);
             // do nothing.
         }
@@ -120,7 +120,7 @@ public abstract class Tuple {
      * @param consumer
      * @throws E the e
      */
-    public abstract <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E;
+    public abstract <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E;
 
     /**
      *
@@ -508,8 +508,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
         }
@@ -520,7 +520,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple1<T1>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple1<T1>, E> action) throws E {
             action.accept(this);
         }
 
@@ -532,7 +532,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple1<T1>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple1<T1>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -543,7 +543,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple1<T1>> filter(final Try.Predicate<? super Tuple1<T1>, E> predicate) throws E {
+        public <E extends Exception> Optional<Tuple1<T1>> filter(final Throwables.Predicate<? super Tuple1<T1>, E> predicate) throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple1<T1>> empty();
         }
 
@@ -714,8 +714,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
             objConsumer.accept(_2);
@@ -727,7 +727,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple2<T1, T2>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple2<T1, T2>, E> action) throws E {
             action.accept(this);
         }
 
@@ -737,7 +737,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.BiConsumer<? super T1, ? super T2, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.BiConsumer<? super T1, ? super T2, E> action) throws E {
             action.accept(_1, _2);
         }
 
@@ -749,7 +749,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple2<T1, T2>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple2<T1, T2>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -761,7 +761,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.BiFunction<? super T1, ? super T2, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.BiFunction<? super T1, ? super T2, U, E> mapper) throws E {
             return mapper.apply(_1, _2);
         }
 
@@ -772,7 +772,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Try.Predicate<? super Tuple2<T1, T2>, E> predicate) throws E {
+        public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.Predicate<? super Tuple2<T1, T2>, E> predicate) throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple2<T1, T2>> empty();
         }
 
@@ -783,7 +783,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Try.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
+        public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
             return predicate.test(_1, _2) ? Optional.of(this) : Optional.<Tuple2<T1, T2>> empty();
         }
 
@@ -956,8 +956,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
             objConsumer.accept(_2);
@@ -970,7 +970,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple3<T1, T2, T3>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple3<T1, T2, T3>, E> action) throws E {
             action.accept(this);
         }
 
@@ -980,7 +980,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.TriConsumer<? super T1, ? super T2, ? super T3, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.TriConsumer<? super T1, ? super T2, ? super T3, E> action) throws E {
             action.accept(_1, _2, _3);
         }
 
@@ -992,7 +992,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple3<T1, T2, T3>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple3<T1, T2, T3>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -1004,7 +1004,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.TriFunction<? super T1, ? super T2, ? super T3, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.TriFunction<? super T1, ? super T2, ? super T3, U, E> mapper) throws E {
             return mapper.apply(_1, _2, _3);
         }
 
@@ -1015,7 +1015,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Try.Predicate<? super Tuple3<T1, T2, T3>, E> predicate) throws E {
+        public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.Predicate<? super Tuple3<T1, T2, T3>, E> predicate) throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple3<T1, T2, T3>> empty();
         }
 
@@ -1026,7 +1026,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Try.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate) throws E {
+        public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate) throws E {
             return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<Tuple3<T1, T2, T3>> empty();
         }
 
@@ -1207,8 +1207,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
             objConsumer.accept(_2);
@@ -1222,7 +1222,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple4<T1, T2, T3, T4>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple4<T1, T2, T3, T4>, E> action) throws E {
             action.accept(this);
         }
 
@@ -1234,7 +1234,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple4<T1, T2, T3, T4>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple4<T1, T2, T3, T4>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -1245,7 +1245,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple4<T1, T2, T3, T4>> filter(final Try.Predicate<? super Tuple4<T1, T2, T3, T4>, E> predicate) throws E {
+        public <E extends Exception> Optional<Tuple4<T1, T2, T3, T4>> filter(final Throwables.Predicate<? super Tuple4<T1, T2, T3, T4>, E> predicate) throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple4<T1, T2, T3, T4>> empty();
         }
 
@@ -1426,8 +1426,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
             objConsumer.accept(_2);
@@ -1442,7 +1442,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple5<T1, T2, T3, T4, T5>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple5<T1, T2, T3, T4, T5>, E> action) throws E {
             action.accept(this);
         }
 
@@ -1454,7 +1454,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple5<T1, T2, T3, T4, T5>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple5<T1, T2, T3, T4, T5>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -1465,7 +1465,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple5<T1, T2, T3, T4, T5>> filter(final Try.Predicate<? super Tuple5<T1, T2, T3, T4, T5>, E> predicate)
+        public <E extends Exception> Optional<Tuple5<T1, T2, T3, T4, T5>> filter(final Throwables.Predicate<? super Tuple5<T1, T2, T3, T4, T5>, E> predicate)
                 throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple5<T1, T2, T3, T4, T5>> empty();
         }
@@ -1656,8 +1656,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
             objConsumer.accept(_2);
@@ -1673,7 +1673,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> action) throws E {
             action.accept(this);
         }
 
@@ -1685,7 +1685,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple6<T1, T2, T3, T4, T5, T6>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple6<T1, T2, T3, T4, T5, T6>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -1696,7 +1696,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple6<T1, T2, T3, T4, T5, T6>> filter(final Try.Predicate<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> predicate)
+        public <E extends Exception> Optional<Tuple6<T1, T2, T3, T4, T5, T6>> filter(final Throwables.Predicate<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> predicate)
                 throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple6<T1, T2, T3, T4, T5, T6>> empty();
         }
@@ -1896,8 +1896,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
             objConsumer.accept(_2);
@@ -1914,7 +1914,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, E> action) throws E {
             action.accept(this);
         }
 
@@ -1926,7 +1926,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -1938,7 +1938,7 @@ public abstract class Tuple {
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple7<T1, T2, T3, T4, T5, T6, T7>> filter(
-                final Try.Predicate<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, E> predicate) throws E {
+                final Throwables.Predicate<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, E> predicate) throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple7<T1, T2, T3, T4, T5, T6, T7>> empty();
         }
 
@@ -2145,8 +2145,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
             objConsumer.accept(_2);
@@ -2164,7 +2164,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, E> action) throws E {
             action.accept(this);
         }
 
@@ -2176,7 +2176,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -2188,7 +2188,7 @@ public abstract class Tuple {
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> filter(
-                final Try.Predicate<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, E> predicate) throws E {
+                final Throwables.Predicate<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, E> predicate) throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> empty();
         }
 
@@ -2403,8 +2403,8 @@ public abstract class Tuple {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Try.Consumer<?, E> consumer) throws E {
-            final Try.Consumer<Object, E> objConsumer = (Try.Consumer<Object, E>) consumer;
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
             objConsumer.accept(_2);
@@ -2423,7 +2423,7 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Try.Consumer<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, E> action) throws E {
             action.accept(this);
         }
 
@@ -2435,7 +2435,7 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <U, E extends Exception> U map(final Try.Function<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, U, E> mapper) throws E {
+        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, U, E> mapper) throws E {
             return mapper.apply(this);
         }
 
@@ -2447,7 +2447,7 @@ public abstract class Tuple {
          * @throws E the e
          */
         public <E extends Exception> Optional<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> filter(
-                final Try.Predicate<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, E> predicate) throws E {
+                final Throwables.Predicate<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, E> predicate) throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> empty();
         }
 

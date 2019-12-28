@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ShortTriConsumer extends Try.ShortTriConsumer<RuntimeException> {
+public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeException> {
 
     @Override
     void accept(short a, short b, short c);

@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface IndexedConsumer<T> extends Try.IndexedConsumer<T, RuntimeException> {
+public interface IndexedConsumer<T> extends Throwables.IndexedConsumer<T, RuntimeException> {
 
     @Override
     void accept(int idx, T e);

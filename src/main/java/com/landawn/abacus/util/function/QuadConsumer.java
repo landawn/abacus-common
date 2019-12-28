@@ -16,13 +16,13 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * @author Haiyang Li
  *
  */
-public interface QuadConsumer<A, B, C, D> extends Try.QuadConsumer<A, B, C, D, RuntimeException> {
+public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, C, D, RuntimeException> {
 
     @Override
     void accept(A a, B b, C c, D d);

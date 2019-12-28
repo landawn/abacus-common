@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface LongPredicate extends java.util.function.LongPredicate, Try.LongPredicate<RuntimeException> {
+public interface LongPredicate extends java.util.function.LongPredicate, Throwables.LongPredicate<RuntimeException> {
 
     static final LongPredicate ALWAYS_TRUE = new LongPredicate() {
         @Override

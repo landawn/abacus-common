@@ -46,7 +46,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Primitives;
 import com.landawn.abacus.util.ShortIterator;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -1451,7 +1451,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Try.IntConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws E {
         assertNotClosed();
 
         try {
@@ -1822,7 +1822,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.IntPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.IntPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1839,7 +1839,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.IntPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.IntPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1856,7 +1856,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.IntPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.IntPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1873,7 +1873,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> OptionalInt findFirst(final Try.IntPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1892,7 +1892,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> OptionalInt findLast(final Try.IntPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -2087,7 +2087,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super IntStream, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super IntStream, R, E> func) throws E {
         try {
             if (elements.hasNext()) {
                 return Optional.of(func.apply(this));
@@ -2100,7 +2100,7 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super IntStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super IntStream, E> action) throws E {
         try {
             if (elements.hasNext()) {
                 action.accept(this);

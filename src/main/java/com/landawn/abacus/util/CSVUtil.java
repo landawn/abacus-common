@@ -121,7 +121,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final File csvFile, final Collection<String> selectColumnNames, final long offset, final long count,
-            final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
+            final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
         InputStream csvInputStream = null;
 
         try {
@@ -184,7 +184,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final InputStream csvInputStream, final Collection<String> selectColumnNames, final long offset,
-            final long count, final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
+            final long count, final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
         final Reader csvReader = new InputStreamReader(csvInputStream);
 
         return loadCSV(csvReader, selectColumnNames, offset, count, filter);
@@ -238,7 +238,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Reader csvReader, final Collection<String> selectColumnNames, long offset, long count,
-            final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
+            final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
         final BufferedReader br = csvReader instanceof BufferedReader ? (BufferedReader) csvReader : Objectory.createBufferedReader(csvReader);
@@ -353,7 +353,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final File csvFile, final Collection<String> selectColumnNames,
-            final long offset, final long count, final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
+            final long offset, final long count, final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
         InputStream csvInputStream = null;
 
         try {
@@ -421,7 +421,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream,
-            final Collection<String> selectColumnNames, final long offset, final long count, final Try.Predicate<String[], E> filter)
+            final Collection<String> selectColumnNames, final long offset, final long count, final Throwables.Predicate<String[], E> filter)
             throws UncheckedIOException, E {
         final Reader csvReader = new InputStreamReader(csvInputStream);
         return loadCSV(entityClass, csvReader, selectColumnNames, offset, count, filter);
@@ -480,7 +480,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final Reader csvReader, final Collection<String> selectColumnNames,
-            long offset, long count, final Try.Predicate<String[], E> filter) throws UncheckedIOException, E {
+            long offset, long count, final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
         final BufferedReader br = csvReader instanceof BufferedReader ? (BufferedReader) csvReader : Objectory.createBufferedReader(csvReader);
@@ -592,7 +592,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings("rawtypes")
-    public static <E extends Exception> DataSet loadCSV(final File csvFile, final long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> DataSet loadCSV(final File csvFile, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException, E {
         InputStream csvInputStream = null;
 
@@ -649,7 +649,7 @@ public final class CSVUtil {
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final InputStream csvInputStream, final long offset, final long count,
-            final Try.Predicate<String[], E> filter, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException, E {
+            final Throwables.Predicate<String[], E> filter, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException, E {
         final Reader csvReader = new InputStreamReader(csvInputStream);
 
         return loadCSV(csvReader, offset, count, filter, columnTypeMap);
@@ -696,7 +696,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings("rawtypes")
-    public static <E extends Exception> DataSet loadCSV(final Reader csvReader, long offset, long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> DataSet loadCSV(final Reader csvReader, long offset, long count, final Throwables.Predicate<String[], E> filter,
             final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
@@ -805,7 +805,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings("rawtypes")
-    public static <E extends Exception> DataSet loadCSV(final File csvFile, final long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> DataSet loadCSV(final File csvFile, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final List<? extends Type> columnTypeList) throws UncheckedIOException, E {
         InputStream csvInputStream = null;
 
@@ -861,7 +861,7 @@ public final class CSVUtil {
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> DataSet loadCSV(final InputStream csvInputStream, final long offset, final long count,
-            final Try.Predicate<String[], E> filter, final List<? extends Type> columnTypeList) throws E {
+            final Throwables.Predicate<String[], E> filter, final List<? extends Type> columnTypeList) throws E {
         final Reader csvReader = new InputStreamReader(csvInputStream);
 
         return loadCSV(csvReader, offset, count, filter, columnTypeList);
@@ -905,7 +905,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings("rawtypes")
-    public static <E extends Exception> DataSet loadCSV(final Reader csvReader, long offset, long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> DataSet loadCSV(final Reader csvReader, long offset, long count, final Throwables.Predicate<String[], E> filter,
             final List<? extends Type> columnTypeList) throws UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
@@ -1442,7 +1442,7 @@ public final class CSVUtil {
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final boolean skipTitle,
-            final Try.Predicate<String[], E> filter, final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
+            final Throwables.Predicate<String[], E> filter, final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
             final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException, E {
         PreparedStatement stmt = null;
 
@@ -1512,7 +1512,7 @@ public final class CSVUtil {
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final boolean skipTitle,
-            final Try.Predicate<String[], E> filter, final PreparedStatement stmt, final int batchSize, final int batchInterval,
+            final Throwables.Predicate<String[], E> filter, final PreparedStatement stmt, final int batchSize, final int batchInterval,
             final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException, E {
         Reader reader = null;
 
@@ -1582,7 +1582,7 @@ public final class CSVUtil {
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Exception> long importCSV(final InputStream is, final long offset, final long count, final boolean skipTitle,
-            final Try.Predicate<String[], E> filter, final PreparedStatement stmt, final int batchSize, final int batchInterval,
+            final Throwables.Predicate<String[], E> filter, final PreparedStatement stmt, final int batchSize, final int batchInterval,
             final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException, E {
         final Reader reader = new InputStreamReader(is);
 
@@ -1644,7 +1644,7 @@ public final class CSVUtil {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final boolean skipTitle,
-            final Try.Predicate<String[], E> filter, final PreparedStatement stmt, final int batchSize, final int batchInterval,
+            final Throwables.Predicate<String[], E> filter, final PreparedStatement stmt, final int batchSize, final int batchInterval,
             final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
         N.checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
@@ -1779,7 +1779,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings("rawtypes")
-    public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final Connection conn, final String insertSQL, final int batchSize, final int batchInterval, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedSQLException, UncheckedIOException, E {
         PreparedStatement stmt = null;
@@ -1847,7 +1847,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings("rawtypes")
-    public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedSQLException, UncheckedIOException, E {
         Reader reader = null;
@@ -1915,7 +1915,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings("rawtypes")
-    public static <E extends Exception> long importCSV(final InputStream is, long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> long importCSV(final InputStream is, long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedSQLException, UncheckedIOException, E {
         final Reader reader = new InputStreamReader(is);
@@ -1974,7 +1974,7 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedSQLException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
@@ -2077,7 +2077,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final File file, final Connection conn, final String insertSQL,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, stmtSetter);
     }
 
@@ -2096,7 +2096,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final File file, final long offset, final long count, final Connection conn, final String insertSQL, final int batchSize,
-            final int batchInterval, final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            final int batchInterval, final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, offset, count, Fn.<String[]> alwaysTrue(), conn, insertSQL, batchSize, batchInterval, stmtSetter);
     }
@@ -2118,9 +2118,9 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
         PreparedStatement stmt = null;
 
         try {
@@ -2144,7 +2144,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final File file, final PreparedStatement stmt,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
@@ -2162,7 +2162,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final File file, final long offset, final long count, final PreparedStatement stmt, final int batchSize,
-            final int batchInterval, final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            final int batchInterval, final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, offset, count, Fn.<String[]> alwaysTrue(), stmt, batchSize, batchInterval, stmtSetter);
     }
@@ -2184,9 +2184,9 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
         Reader reader = null;
 
         try {
@@ -2210,7 +2210,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final InputStream is, final PreparedStatement stmt,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(is, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
@@ -2228,7 +2228,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final InputStream is, final long offset, final long count, final PreparedStatement stmt, final int batchSize,
-            final int batchInterval, final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            final int batchInterval, final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
             throws UncheckedSQLException, UncheckedIOException {
         return importCSV(is, offset, count, Fn.<String[]> alwaysTrue(), stmt, batchSize, batchInterval, stmtSetter);
     }
@@ -2250,9 +2250,9 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> long importCSV(final InputStream is, long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> long importCSV(final InputStream is, long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
         final Reader reader = new InputStreamReader(is);
         return importCSV(reader, offset, count, filter, stmt, batchSize, batchInterval, stmtSetter);
     }
@@ -2267,7 +2267,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final Reader reader, final PreparedStatement stmt,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(reader, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
@@ -2286,7 +2286,7 @@ public final class CSVUtil {
      */
     @SuppressWarnings({ "unchecked" })
     public static long importCSV(final Reader reader, long offset, final long count, final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
         return importCSV(reader, offset, count, Fn.<String[]> alwaysTrue(), stmt, batchSize, batchInterval, stmtSetter);
     }
 
@@ -2308,9 +2308,9 @@ public final class CSVUtil {
      * @throws E the e
      */
     @SuppressWarnings({ "unchecked" })
-    public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final Try.Predicate<String[], E> filter,
+    public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Try.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
         N.checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
                 batchInterval);

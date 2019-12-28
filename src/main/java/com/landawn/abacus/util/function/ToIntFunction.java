@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ToIntFunction<T> extends java.util.function.ToIntFunction<T>, Try.ToIntFunction<T, RuntimeException> {
+public interface ToIntFunction<T> extends java.util.function.ToIntFunction<T>, Throwables.ToIntFunction<T, RuntimeException> {
 
     static final ToIntFunction<Integer> UNBOX = new ToIntFunction<Integer>() {
         @Override

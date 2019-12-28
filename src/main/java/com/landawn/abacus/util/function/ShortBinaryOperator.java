@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ShortBinaryOperator extends Try.ShortBinaryOperator<RuntimeException> {
+public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<RuntimeException> {
 
     @Override
     short applyAsShort(short left, short right);

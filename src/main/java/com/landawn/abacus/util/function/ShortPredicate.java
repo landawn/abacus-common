@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface ShortPredicate extends Try.ShortPredicate<RuntimeException> {
+public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeException> {
 
     static final ShortPredicate ALWAYS_TRUE = new ShortPredicate() {
         @Override

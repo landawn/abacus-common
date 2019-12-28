@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface IntFunction<R> extends java.util.function.IntFunction<R>, Try.IntFunction<R, RuntimeException> {
+public interface IntFunction<R> extends java.util.function.IntFunction<R>, Throwables.IntFunction<R, RuntimeException> {
     static final IntFunction<Integer> BOX = new IntFunction<Integer>() {
         @Override
         public Integer apply(int value) {

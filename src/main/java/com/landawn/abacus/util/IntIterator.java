@@ -293,7 +293,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Try.IntConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.IntConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         while (hasNext()) {

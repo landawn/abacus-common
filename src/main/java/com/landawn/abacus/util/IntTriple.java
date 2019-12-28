@@ -136,7 +136,7 @@ public final class IntTriple {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.IntConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.IntConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
         comsumer.accept(this._3);
@@ -148,7 +148,7 @@ public final class IntTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<IntTriple, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<IntTriple, E> action) throws E {
         action.accept(this);
     }
 
@@ -160,7 +160,7 @@ public final class IntTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<IntTriple, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<IntTriple, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -171,7 +171,7 @@ public final class IntTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<IntTriple> filter(final Try.Predicate<IntTriple, E> predicate) throws E {
+    public <E extends Exception> Optional<IntTriple> filter(final Throwables.Predicate<IntTriple, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<IntTriple> empty();
     }
 

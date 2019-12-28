@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -47,7 +48,6 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Try;
 
 import okhttp3.CacheControl;
 import okhttp3.FormBody;
@@ -429,7 +429,7 @@ public class OkHttpRequest {
     }
 
     public ContinuableFuture<Response> asyncGet(final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<Response, IOException>() {
+        return ContinuableFuture.call(new Callable<Response>() {
             @Override
             public Response call() throws IOException {
                 return get();
@@ -443,7 +443,7 @@ public class OkHttpRequest {
     }
 
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<T, IOException>() {
+        return ContinuableFuture.call(new Callable<T>() {
             @Override
             public T call() throws IOException {
                 return get(resultClass);
@@ -457,7 +457,7 @@ public class OkHttpRequest {
     }
 
     public ContinuableFuture<Response> asyncPost(final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<Response, IOException>() {
+        return ContinuableFuture.call(new Callable<Response>() {
             @Override
             public Response call() throws IOException {
                 return post();
@@ -471,7 +471,7 @@ public class OkHttpRequest {
     }
 
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<T, IOException>() {
+        return ContinuableFuture.call(new Callable<T>() {
             @Override
             public T call() throws IOException {
                 return post(resultClass);
@@ -485,7 +485,7 @@ public class OkHttpRequest {
     }
 
     public ContinuableFuture<Response> asyncPut(final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<Response, IOException>() {
+        return ContinuableFuture.call(new Callable<Response>() {
             @Override
             public Response call() throws IOException {
                 return put();
@@ -499,7 +499,7 @@ public class OkHttpRequest {
     }
 
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<T, IOException>() {
+        return ContinuableFuture.call(new Callable<T>() {
             @Override
             public T call() throws IOException {
                 return put(resultClass);
@@ -513,7 +513,7 @@ public class OkHttpRequest {
     }
 
     public ContinuableFuture<Response> asyncDelete(final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<Response, IOException>() {
+        return ContinuableFuture.call(new Callable<Response>() {
             @Override
             public Response call() throws IOException {
                 return delete();
@@ -527,7 +527,7 @@ public class OkHttpRequest {
     }
 
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<T, IOException>() {
+        return ContinuableFuture.call(new Callable<T>() {
             @Override
             public T call() throws IOException {
                 return delete(resultClass);
@@ -541,7 +541,7 @@ public class OkHttpRequest {
     }
 
     public ContinuableFuture<Response> asyncHead(final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<Response, IOException>() {
+        return ContinuableFuture.call(new Callable<Response>() {
             @Override
             public Response call() throws IOException {
                 return head();
@@ -555,7 +555,7 @@ public class OkHttpRequest {
     }
 
     public ContinuableFuture<Response> asyncPatch(final Executor executor) {
-        return ContinuableFuture.call(new Try.Callable<Response, IOException>() {
+        return ContinuableFuture.call(new Callable<Response>() {
             @Override
             public Response call() throws IOException {
                 return patch();

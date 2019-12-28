@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
@@ -132,8 +131,14 @@ public class AsyncExecutor {
      * @param command
      * @return
      */
-    public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> command) {
-        return execute(new FutureTask<>(Fnn.toCallable(command)));
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command) {
+        return execute(new FutureTask<>(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                command.run();
+                return null;
+            }
+        }));
     }
 
     /**
@@ -142,7 +147,7 @@ public class AsyncExecutor {
      * @return
      */
     @SafeVarargs
-    public final List<ContinuableFuture<Void>> execute(final Try.Runnable<? extends Exception>... commands) {
+    public final List<ContinuableFuture<Void>> execute(final Throwables.Runnable<? extends Exception>... commands) {
         if (N.isNullOrEmpty(commands)) {
             return new ArrayList<>();
         }
@@ -161,14 +166,14 @@ public class AsyncExecutor {
      * @param commands
      * @return
      */
-    public List<ContinuableFuture<Void>> execute(final List<? extends Try.Runnable<? extends Exception>> commands) {
+    public List<ContinuableFuture<Void>> execute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
         if (N.isNullOrEmpty(commands)) {
             return new ArrayList<>();
         }
 
         final List<ContinuableFuture<Void>> results = new ArrayList<>(commands.size());
 
-        for (Try.Runnable<? extends Exception> cmd : commands) {
+        for (Throwables.Runnable<? extends Exception> cmd : commands) {
             results.add(execute(cmd));
         }
 
@@ -234,7 +239,7 @@ public class AsyncExecutor {
      * @param retryCondition
      * @return
      */
-    public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> action, final int retryTimes, final long retryInterval,
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryInterval,
             final Predicate<? super Exception> retryCondition) {
         return execute(new Callable<Void>() {
             @Override

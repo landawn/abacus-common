@@ -122,7 +122,7 @@ public final class LongPair {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Try.LongConsumer<E> comsumer) throws E {
+    public <E extends Exception> void forEach(Throwables.LongConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
     }
@@ -133,7 +133,7 @@ public final class LongPair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Try.Consumer<LongPair, E> action) throws E {
+    public <E extends Exception> void accept(Throwables.Consumer<LongPair, E> action) throws E {
         action.accept(this);
     }
 
@@ -145,7 +145,7 @@ public final class LongPair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Try.Function<LongPair, U, E> mapper) throws E {
+    public <U, E extends Exception> U map(Throwables.Function<LongPair, U, E> mapper) throws E {
         return mapper.apply(this);
     }
 
@@ -156,7 +156,7 @@ public final class LongPair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<LongPair> filter(final Try.Predicate<LongPair, E> predicate) throws E {
+    public <E extends Exception> Optional<LongPair> filter(final Throwables.Predicate<LongPair, E> predicate) throws E {
         return predicate.test(this) ? Optional.of(this) : Optional.<LongPair> empty();
     }
 

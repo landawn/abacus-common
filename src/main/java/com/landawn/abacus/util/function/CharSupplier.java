@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface CharSupplier extends Try.CharSupplier<RuntimeException> {
+public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> {
 
     static final CharSupplier ZERO = new CharSupplier() {
         @Override

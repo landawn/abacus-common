@@ -39,7 +39,7 @@ import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Primitives;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalFloat;
@@ -1160,7 +1160,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Try.FloatConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws E {
         assertNotClosed();
 
         try {
@@ -1491,7 +1491,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.FloatPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.FloatPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1508,7 +1508,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.FloatPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.FloatPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1525,7 +1525,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.FloatPredicate<E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.FloatPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1542,7 +1542,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public <E extends Exception> OptionalFloat findFirst(final Try.FloatPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalFloat findFirst(final Throwables.FloatPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1561,7 +1561,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public <E extends Exception> OptionalFloat findLast(final Try.FloatPredicate<E> predicate) throws E {
+    public <E extends Exception> OptionalFloat findLast(final Throwables.FloatPredicate<E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -1681,7 +1681,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super FloatStream, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super FloatStream, R, E> func) throws E {
         try {
             if (elements.hasNext()) {
                 return Optional.of(func.apply(this));
@@ -1694,7 +1694,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super FloatStream, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super FloatStream, E> action) throws E {
         try {
             if (elements.hasNext()) {
                 action.accept(this);

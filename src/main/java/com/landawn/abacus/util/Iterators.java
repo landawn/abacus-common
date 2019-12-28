@@ -283,7 +283,7 @@ public final class Iterators {
      * @return
      * @throws E the e
      */
-    public static <T, K, E extends Exception> Map<K, T> toMap(final Iterator<? extends T> iter, final Try.Function<? super T, K, E> keyMapper) throws E {
+    public static <T, K, E extends Exception> Map<K, T> toMap(final Iterator<? extends T> iter, final Throwables.Function<? super T, K, E> keyMapper) throws E {
         N.checkArgNotNull(keyMapper);
 
         if (iter == null) {
@@ -316,7 +316,7 @@ public final class Iterators {
      * @throws E2 the e2
      */
     public static <T, K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(final Iterator<? extends T> iter,
-            final Try.Function<? super T, K, E> keyMapper, final Try.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
+            final Throwables.Function<? super T, K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
@@ -352,7 +352,7 @@ public final class Iterators {
      * @throws E2 the e2
      */
     public static <T, K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Iterator<? extends T> iter,
-            final Try.Function<? super T, K, E> keyMapper, final Try.Function<? super T, ? extends V, E2> valueExtractor,
+            final Throwables.Function<? super T, K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
             final Supplier<? extends M> mapSupplier) throws E, E2 {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
@@ -380,7 +380,7 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Iterator<T> iter, final Try.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Iterator<T> iter, final Throwables.Consumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (iter == null) {
@@ -400,7 +400,7 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Iterator<T> iter, final Try.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Iterator<T> iter, final Throwables.IndexedConsumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (iter == null) {
@@ -427,7 +427,7 @@ public final class Iterators {
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterator<T> iter,
-            final Try.Function<? super T, ? extends Collection<U>, E> flatMapper, final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
         N.checkArgNotNull(flatMapper);
         N.checkArgNotNull(action);
 
@@ -467,8 +467,8 @@ public final class Iterators {
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterator<T> iter,
-            final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
-            final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         N.checkArgNotNull(flatMapper);
         N.checkArgNotNull(flatMapper2);
         N.checkArgNotNull(action);
@@ -508,7 +508,7 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Try.BiConsumer<? super A, ? super B, E> action)
+    public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Throwables.BiConsumer<? super A, ? super B, E> action)
             throws E {
         N.checkArgNotNull(action);
 
@@ -534,7 +534,7 @@ public final class Iterators {
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
-            final Try.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (a == null || b == null || c == null) {
@@ -559,7 +559,7 @@ public final class Iterators {
      * @throws E the e
      */
     public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         N.checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -592,7 +592,7 @@ public final class Iterators {
      * @throws E the e
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Try.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         N.checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -626,7 +626,7 @@ public final class Iterators {
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterator<T> iter,
-            final Try.Function<? super T, ? extends Collection<U>, E> flatMapper, final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
         N.checkArgNotNull(flatMapper);
         N.checkArgNotNull(action);
 
@@ -671,8 +671,8 @@ public final class Iterators {
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Iterator<T> iter,
-            final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
-            final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         N.checkArgNotNull(flatMapper);
         N.checkArgNotNull(flatMapper2);
         N.checkArgNotNull(action);
@@ -717,7 +717,7 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Try.BiConsumer<? super T, ? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
         forEachPair(iter, action, 1);
     }
 
@@ -731,7 +731,7 @@ public final class Iterators {
      * @param increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Try.BiConsumer<? super T, ? super T, E> action, final int increment)
+    public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment)
             throws E {
         N.checkArgNotNull(action);
         final int windowSize = 2;
@@ -776,7 +776,7 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Iterator<T> iter, final Try.TriConsumer<? super T, ? super T, ? super T, E> action)
+    public static <T, E extends Exception> void forEachTriple(final Iterator<T> iter, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action)
             throws E {
         forEachTriple(iter, action, 1);
     }
@@ -791,7 +791,7 @@ public final class Iterators {
      * @param increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Iterator<T> iter, final Try.TriConsumer<? super T, ? super T, ? super T, E> action,
+    public static <T, E extends Exception> void forEachTriple(final Iterator<T> iter, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
             final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 3;
@@ -1748,7 +1748,7 @@ public final class Iterators {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Try.BiConsumer<? super A, ? super B, E> action) throws E {
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
                 while (hasNext()) {
                     cur.forEachRemaining(action);
                 }
@@ -1826,7 +1826,7 @@ public final class Iterators {
             }
 
             @Override
-            public <E extends Exception> void forEachRemaining(final Try.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public <E extends Exception> void forEachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
                 while (hasNext()) {
                     cur.forEachRemaining(action);
                 }

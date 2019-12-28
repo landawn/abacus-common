@@ -46,7 +46,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.ShortIterator;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -2295,7 +2295,8 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception, E2 extends Exception> void forEach(final Try.Consumer<? super T, E> action, final Try.Runnable<E2> onComplete) throws E, E2 {
+    public <E extends Exception, E2 extends Exception> void forEach(final Throwables.Consumer<? super T, E> action, final Throwables.Runnable<E2> onComplete)
+            throws E, E2 {
         assertNotClosed();
 
         try {
@@ -2310,8 +2311,8 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <U, E extends Exception, E2 extends Exception> void forEach(final Try.Function<? super T, ? extends Collection<U>, E> flatMapper,
-            final Try.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+    public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper,
+            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
         assertNotClosed();
 
         Collection<U> c = null;
@@ -2335,8 +2336,9 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(
-            final Try.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Try.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
-            final Try.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         assertNotClosed();
 
         Collection<T2> c2 = null;
@@ -2366,7 +2368,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> void forEachPair(final Try.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
+    public <E extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
         final int windowSize = 2;
         checkArgPositive(increment, "increment");
         assertNotClosed();
@@ -2402,7 +2404,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> void forEachTriple(final Try.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
+    public <E extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
         final int windowSize = 3;
         checkArgPositive(increment, "increment");
         assertNotClosed();
@@ -3181,7 +3183,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -3198,7 +3200,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -3215,7 +3217,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -3232,7 +3234,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> boolean nMatch(final long atLeast, final long atMost, Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> boolean nMatch(final long atLeast, final long atMost, Throwables.Predicate<? super T, E> predicate) throws E {
         checkArgNotNegative(atLeast, "atLeast");
         checkArgNotNegative(atMost, "atMost");
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -3257,7 +3259,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> Optional<T> findFirst(final Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -3276,7 +3278,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> Optional<T> findLast(final Try.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate) throws E {
         assertNotClosed();
 
         try {
@@ -3424,7 +3426,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Try.Function<? super Stream<T>, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Stream<T>, R, E> func) throws E {
         try {
             if (elements.hasNext()) {
                 return Optional.of(func.apply(this));
@@ -3437,7 +3439,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Try.Consumer<? super Stream<T>, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Stream<T>, E> action) throws E {
         try {
             if (elements.hasNext()) {
                 action.accept(this);

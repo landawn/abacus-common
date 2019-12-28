@@ -421,7 +421,7 @@ public final class If {
         return is(N.notNullOrEmptyOrBlank(s));
     }
 
-    //    public <E extends Exception> void thenRun(final Try.Runnable<E> cmd) throws E {
+    //    public <E extends Exception> void thenRun(final Throwables.Runnable<E> cmd) throws E {
     //        if (b) {
     //            cmd.run();
     //        }
@@ -457,7 +457,7 @@ public final class If {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> OrElse then(final Try.Runnable<E> cmd) throws E {
+    public <E extends Exception> OrElse then(final Throwables.Runnable<E> cmd) throws E {
         N.checkArgNotNull(cmd);
 
         if (b) {
@@ -476,7 +476,7 @@ public final class If {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> OrElse then(final U init, final Try.Consumer<? super U, E> action) throws E {
+    public <U, E extends Exception> OrElse then(final U init, final Throwables.Consumer<? super U, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (b) {
@@ -559,7 +559,7 @@ public final class If {
          * @param cmd
          * @throws E the e
          */
-        public <E extends Exception> void orElse(final Try.Runnable<E> cmd) throws E {
+        public <E extends Exception> void orElse(final Throwables.Runnable<E> cmd) throws E {
             N.checkArgNotNull(cmd);
 
             if (!b) {
@@ -575,7 +575,7 @@ public final class If {
          * @param action
          * @throws E the e
          */
-        public <U, E extends Exception> void orElse(final U init, final Try.Consumer<? super U, E> action) throws E {
+        public <U, E extends Exception> void orElse(final U init, final Throwables.Consumer<? super U, E> action) throws E {
             N.checkArgNotNull(action);
 
             if (!b) {

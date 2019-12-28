@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface BooleanTriFunction<R> extends Try.BooleanTriFunction<R, RuntimeException> {
+public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, RuntimeException> {
 
     @Override
     R apply(boolean a, boolean b, boolean c);

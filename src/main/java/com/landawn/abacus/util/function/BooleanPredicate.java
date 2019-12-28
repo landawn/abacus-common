@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Try;
  * 
  * @author Haiyang Li
  */
-public interface BooleanPredicate extends Try.BooleanPredicate<RuntimeException> {
+public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeException> {
 
     static final BooleanPredicate ALWAYS_TRUE = new BooleanPredicate() {
         @Override

@@ -71,7 +71,7 @@ import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.ShortList;
-import com.landawn.abacus.util.Try;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Wrapper;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -123,7 +123,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
 
         DEFAULT_ASYNC_EXECUTOR = new AsyncExecutor(executor) {
             @Override
-            public ContinuableFuture<Void> execute(final Try.Runnable<? extends Exception> command) {
+            public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command) {
                 //    if (threadPoolExecutor.getActiveCount() >= MAX_THREAD_POOL_SIZE) {
                 //        throw new RejectedExecutionException("Task is rejected due to exceed max thread pool size: " + MAX_THREAD_POOL_SIZE);
                 //    }
