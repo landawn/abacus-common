@@ -63,7 +63,8 @@ public final class Maps {
      * @return
      * @throws E the e
      */
-    public static <T, K, E extends Exception> Map<K, T> newMap(Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, E> keyMapper) throws E {
+    public static <T, K, E extends Exception> Map<K, T> newMap(Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, E> keyMapper)
+            throws E {
         N.checkArgNotNull(keyMapper);
 
         if (N.isNullOrEmpty(c)) {
@@ -90,8 +91,8 @@ public final class Maps {
      * @return
      * @throws E the e
      */
-    public static <T, K, E extends Exception> Map<K, T> newLinkedHashMap(Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, E> keyMapper)
-            throws E {
+    public static <T, K, E extends Exception> Map<K, T> newLinkedHashMap(Collection<? extends T> c,
+            final Throwables.Function<? super T, ? extends K, E> keyMapper) throws E {
         N.checkArgNotNull(keyMapper);
 
         if (N.isNullOrEmpty(c)) {
@@ -254,6 +255,34 @@ public final class Maps {
         }
 
         return res;
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param key
+     * @param value
+     * @return
+     * @deprecated replaced by {@link N#newEntry(Object, Object)}
+     */
+    @Deprecated
+    public static <K, V> Map.Entry<K, V> newEntry(final K key, final V value) {
+        return N.newEntry(key, value);
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param key
+     * @param value
+     * @return
+     * @deprecated replaced by {@link N#newImmutableEntry(Object, Object)}
+     */
+    @Deprecated
+    public static <K, V> ImmutableEntry<K, V> newImmutableEntry(final K key, final V value) {
+        return N.newImmutableEntry(key, value);
     }
 
     /**
@@ -537,7 +566,7 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<K, V>() : new LinkedHashMap<K, V>();
+        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
         Object val = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -564,8 +593,7 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<K, Pair<V, Nullable<V>>>()
-                : new LinkedHashMap<K, Pair<V, Nullable<V>>>();
+        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
 
         if (N.isNullOrEmpty(map2)) {
             for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -600,8 +628,7 @@ public final class Maps {
         final boolean isIdentityHashMap = (N.notNullOrEmpty(map) && map instanceof IdentityHashMap)
                 || (N.notNullOrEmpty(map2) && map2 instanceof IdentityHashMap);
 
-        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<K, Pair<Nullable<V>, Nullable<V>>>()
-                : new LinkedHashMap<K, Pair<Nullable<V>, Nullable<V>>>();
+        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
 
         if (N.notNullOrEmpty(map)) {
             if (N.isNullOrEmpty(map2)) {

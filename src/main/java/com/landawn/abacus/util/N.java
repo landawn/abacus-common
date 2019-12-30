@@ -1886,6 +1886,110 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Returns a new {@code List} with specified {@code objToExclude} excluded.
+     * 
+     * @param <T>
+     * @param c
+     * @param objToExclude
+     * @return a new {@code List}
+     */
+    public static <T> List<T> exclude(final Collection<T> c, final Object objToExclude) {
+        if (N.isNullOrEmpty(c)) {
+            return new ArrayList<>();
+        }
+
+        final List<T> result = new ArrayList<>(c.size() - 1);
+
+        for (T e : c) {
+            if (!N.equals(e, objToExclude)) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a new {@code Set} with specified {@code objToExclude} excluded.
+     * 
+     * @param <T>
+     * @param c
+     * @param objToExclude
+     * @return a new {@code Set}
+     */
+    public static <T> Set<T> excludeToSet(final Collection<T> c, final Object objToExclude) {
+        if (N.isNullOrEmpty(c)) {
+            return new HashSet<>();
+        }
+
+        final Set<T> result = new HashSet<>(c.size() - 1);
+
+        for (T e : c) {
+            if (!N.equals(e, objToExclude)) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a new {@code List} with specified {@code objsToExclude} excluded.
+     *
+     * @param c
+     * @param objsToExclude
+     * @return a new {@code List}
+     */
+    public static <T> List<T> excludeAll(final Collection<T> c, final Collection<?> objsToExclude) {
+        if (N.isNullOrEmpty(c)) {
+            return new ArrayList<>();
+        } else if (N.isNullOrEmpty(objsToExclude)) {
+            return new ArrayList<>(c);
+        } else if (objsToExclude.size() == 1) {
+            return exclude(c, N.firstOrNullIfEmpty(objsToExclude));
+        }
+
+        final Set<Object> set = objsToExclude instanceof Set ? ((Set<Object>) objsToExclude) : new HashSet<Object>(objsToExclude);
+        final List<T> result = new ArrayList<>(N.max(0, c.size() - set.size()));
+
+        for (T e : c) {
+            if (!set.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a new {@code Set} with specified {@code objsToExclude} excluded.
+     *
+     * @param c
+     * @param objsToExclude
+     * @return a new {@code Set}
+     */
+    public static <T> Set<T> excludeAllToSet(final Collection<T> c, final Collection<?> objsToExclude) {
+        if (N.isNullOrEmpty(c)) {
+            return new HashSet<>();
+        } else if (N.isNullOrEmpty(objsToExclude)) {
+            return new HashSet<>(c);
+        } else if (objsToExclude.size() == 1) {
+            return excludeToSet(c, N.firstOrNullIfEmpty(objsToExclude));
+        }
+
+        final Set<Object> set = objsToExclude instanceof Set ? ((Set<Object>) objsToExclude) : new HashSet<Object>(objsToExclude);
+        final Set<T> result = new HashSet<>(N.max(0, c.size() - set.size()));
+
+        for (T e : c) {
+            if (!set.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      *
      * @param a
      * @param b
@@ -6142,7 +6246,7 @@ public final class N extends CommonUtil {
      * @param objsToRemove
      * @return true, if successful
      */
-    public static <T> boolean removeAll(final Collection<T> c, final Collection<? extends T> objsToRemove) {
+    public static <T> boolean removeAll(final Collection<T> c, final Collection<?> objsToRemove) {
         if (N.isNullOrEmpty(c) || N.isNullOrEmpty(objsToRemove)) {
             return false;
         }

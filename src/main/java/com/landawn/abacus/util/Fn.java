@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -474,7 +473,7 @@ public abstract class Fn extends Comparators {
     private static final Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>> INVERSE = new Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>>() {
         @Override
         public Map.Entry<Object, Object> apply(Map.Entry<Object, Object> t) {
-            return new SimpleImmutableEntry<>(t.getValue(), t.getKey());
+            return new ImmutableEntry<>(t.getValue(), t.getKey());
         }
     };
 
@@ -482,7 +481,7 @@ public abstract class Fn extends Comparators {
     private static final BiFunction<Object, Object, Map.Entry<Object, Object>> ENTRY = new BiFunction<Object, Object, Map.Entry<Object, Object>>() {
         @Override
         public Map.Entry<Object, Object> apply(Object key, Object value) {
-            return new SimpleImmutableEntry<>(key, value);
+            return new ImmutableEntry<>(key, value);
         }
     };
 
@@ -1278,15 +1277,41 @@ public abstract class Fn extends Comparators {
     /**
      *
      * @param <K> the key type
-     * @param <T>
+     * @param <V> the value type
+     * @param key
+     * @return
+     * @deprecated replaced by {@code Fn#entryWithKey(Object)}
+     */
+    @Deprecated
+    public static <K, V> Function<V, Map.Entry<K, V>> entry(final K key) {
+        return entryWithKey(key);
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper
+     * @return
+     * @deprecated replaced by {@code Fn#entryByKeyMapper(Function)}
+     */
+    @Deprecated
+    public static <K, V> Function<V, Map.Entry<K, V>> entry(final Function<? super V, K> keyMapper) {
+        return entryByKeyMapper(keyMapper);
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
      * @param key
      * @return
      */
-    public static <K, T> Function<T, Map.Entry<K, T>> entry(final K key) {
-        return new Function<T, Map.Entry<K, T>>() {
+    public static <K, V> Function<V, Map.Entry<K, V>> entryWithKey(final K key) {
+        return new Function<V, Map.Entry<K, V>>() {
             @Override
-            public Entry<K, T> apply(T t) {
-                return new SimpleImmutableEntry<>(key, t);
+            public Entry<K, V> apply(V v) {
+                return new ImmutableEntry<>(key, v);
             }
         };
     }
@@ -1294,17 +1319,51 @@ public abstract class Fn extends Comparators {
     /**
      *
      * @param <K> the key type
-     * @param <T>
+     * @param <V> the value type
      * @param keyMapper
      * @return
      */
-    public static <K, T> Function<T, Map.Entry<K, T>> entry(final Function<? super T, K> keyMapper) {
+    public static <K, V> Function<V, Map.Entry<K, V>> entryByKeyMapper(final Function<? super V, K> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
-        return new Function<T, Map.Entry<K, T>>() {
+        return new Function<V, Map.Entry<K, V>>() {
             @Override
-            public Entry<K, T> apply(T t) {
-                return new SimpleImmutableEntry<>(keyMapper.apply(t), t);
+            public Entry<K, V> apply(V v) {
+                return new ImmutableEntry<>(keyMapper.apply(v), v);
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param value
+     * @return
+     */
+    public static <K, V> Function<K, Map.Entry<K, V>> entryWithValue(final V value) {
+        return new Function<K, Map.Entry<K, V>>() {
+            @Override
+            public Entry<K, V> apply(K k) {
+                return new ImmutableEntry<>(k, value);
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param valueMapper
+     * @return
+     */
+    public static <K, V> Function<K, Map.Entry<K, V>> entryByValueMapper(final Function<? super K, V> valueMapper) {
+        N.checkArgNotNull(valueMapper);
+
+        return new Function<K, Map.Entry<K, V>>() {
+            @Override
+            public Entry<K, V> apply(K k) {
+                return new ImmutableEntry<>(k, valueMapper.apply(k));
             }
         };
     }
@@ -1840,10 +1899,12 @@ public abstract class Fn extends Comparators {
     public static <T> Predicate<T> in(final Collection<?> c) {
         N.checkArgNotNull(c);
 
+        final boolean isNotEmpty = N.notNullOrEmpty(c);
+
         return new Predicate<T>() {
             @Override
             public boolean test(T value) {
-                return c != null && c.size() > 0 && c.contains(value);
+                return isNotEmpty && c.contains(value);
             }
         };
     }
@@ -1857,10 +1918,12 @@ public abstract class Fn extends Comparators {
     public static <T> Predicate<T> notIn(final Collection<?> c) {
         N.checkArgNotNull(c);
 
+        final boolean isEmpty = N.isNullOrEmpty(c);
+
         return new Predicate<T>() {
             @Override
             public boolean test(T value) {
-                return c == null || c.size() == 0 || !c.contains(value);
+                return isEmpty || !c.contains(value);
             }
         };
     }
@@ -2887,7 +2950,7 @@ public abstract class Fn extends Comparators {
         return new Function<Map.Entry<K, V>, Map.Entry<KK, V>>() {
             @Override
             public Map.Entry<KK, V> apply(Entry<K, V> entry) {
-                return new SimpleImmutableEntry<>(func.apply(entry.getKey()), entry.getValue());
+                return new ImmutableEntry<>(func.apply(entry.getKey()), entry.getValue());
             }
         };
     }
@@ -2906,7 +2969,7 @@ public abstract class Fn extends Comparators {
         return new Function<Map.Entry<K, V>, Map.Entry<K, VV>>() {
             @Override
             public Map.Entry<K, VV> apply(Entry<K, V> entry) {
-                return new SimpleImmutableEntry<>(entry.getKey(), func.apply(entry.getValue()));
+                return new ImmutableEntry<>(entry.getKey(), func.apply(entry.getValue()));
             }
         };
     }
@@ -8962,7 +9025,8 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <K, V, T, E extends Exception> Throwables.Function<Map.Entry<K, V>, T, E> ef(final Throwables.BiFunction<? super K, ? super V, ? extends T, E> f) {
+        public static <K, V, T, E extends Exception> Throwables.Function<Map.Entry<K, V>, T, E> ef(
+                final Throwables.BiFunction<? super K, ? super V, ? extends T, E> f) {
             N.checkArgNotNull(f, "BiFunction");
 
             return new Throwables.Function<Map.Entry<K, V>, T, E>() {
@@ -11231,7 +11295,8 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <A, B, T, E extends Exception> Throwables.Predicate<T, E> p(final A a, final B b, final Throwables.TriPredicate<A, B, T, E> triPredicate) {
+        public static <A, B, T, E extends Exception> Throwables.Predicate<T, E> p(final A a, final B b,
+                final Throwables.TriPredicate<A, B, T, E> triPredicate) {
             N.checkArgNotNull(triPredicate);
 
             return new Throwables.Predicate<T, E>() {
@@ -11444,7 +11509,8 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <A, B, T, R, E extends Exception> Throwables.Function<T, R, E> f(final A a, final B b, final Throwables.TriFunction<A, B, T, R, E> triFunction) {
+        public static <A, B, T, R, E extends Exception> Throwables.Function<T, R, E> f(final A a, final B b,
+                final Throwables.TriFunction<A, B, T, R, E> triFunction) {
             N.checkArgNotNull(triFunction);
 
             return new Throwables.Function<T, R, E>() {
@@ -11481,7 +11547,8 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <A, T, U, R, E extends Exception> Throwables.BiFunction<T, U, R, E> f(final A a, final Throwables.TriFunction<A, T, U, R, E> triFunction) {
+        public static <A, T, U, R, E extends Exception> Throwables.BiFunction<T, U, R, E> f(final A a,
+                final Throwables.TriFunction<A, T, U, R, E> triFunction) {
             N.checkArgNotNull(triFunction);
 
             return new Throwables.BiFunction<T, U, R, E>() {
@@ -11881,7 +11948,8 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <A, T, E extends Exception> Throwables.Predicate<T, E> sp(final Object mutex, final A a, final Throwables.BiPredicate<A, T, E> biPredicate) {
+        public static <A, T, E extends Exception> Throwables.Predicate<T, E> sp(final Object mutex, final A a,
+                final Throwables.BiPredicate<A, T, E> biPredicate) {
             N.checkArgNotNull(mutex, "mutex");
             N.checkArgNotNull(biPredicate, "biPredicate");
 
@@ -12062,7 +12130,8 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <A, T, R, E extends Exception> Throwables.Function<T, R, E> sf(final Object mutex, final A a, final Throwables.BiFunction<A, T, R, E> biFunction) {
+        public static <A, T, R, E extends Exception> Throwables.Function<T, R, E> sf(final Object mutex, final A a,
+                final Throwables.BiFunction<A, T, R, E> biFunction) {
             N.checkArgNotNull(mutex, "mutex");
             N.checkArgNotNull(biFunction, "biFunction");
 
@@ -12088,7 +12157,8 @@ public abstract class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <T, U, R, E extends Exception> Throwables.BiFunction<T, U, R, E> sf(final Object mutex, final Throwables.BiFunction<T, U, R, E> biFunction) {
+        public static <T, U, R, E extends Exception> Throwables.BiFunction<T, U, R, E> sf(final Object mutex,
+                final Throwables.BiFunction<T, U, R, E> biFunction) {
             N.checkArgNotNull(mutex, "mutex");
             N.checkArgNotNull(biFunction, "biFunction");
 

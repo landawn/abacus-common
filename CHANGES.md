@@ -1,3 +1,9 @@
+### 1.10.4
+
+* Add `N.exclude/excludeAll/excludeToSet/excludeAllToSet`.
+* Improvements and bug fix.
+
+
 ### 1.10.3
 
 * Move functional interfaces from `Try` to `Throwables`.
