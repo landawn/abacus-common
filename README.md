@@ -119,8 +119,9 @@ A general programming library in Java. It's easy to learn and simple to use with
 [DoubleStream](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/DoubleStream_view.html), 
 [EntryStream](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/EntryStream_view.html), 
 [ExceptionalStream](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/ExceptionalStream_view.html), 
-[Fn](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Fn_view.html) and more 
-[Collectors](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Collectors_view.html).
+[Fn](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Fn_view.html), 
+more [Collectors](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Collectors_view.html) and 
+[Throwables](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Throwables_view.html).
 
 * JSON/XML Data Binding: 
 [Parser](https://cdn.staticaly.com/gh/landawn/abacus-util/master/docs/Parser_view.html), 
