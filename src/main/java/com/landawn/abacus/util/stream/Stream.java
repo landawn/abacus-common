@@ -2674,6 +2674,19 @@ public abstract class Stream<T>
     @SequentialOnly
     @IntermediateOp
     @Beta
+    public <E extends Exception> ExceptionalStream<T, E> checked() {
+        return ExceptionalStream.<T, E> of(this);
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param cls
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    @Beta
     public <E extends Exception> ExceptionalStream<T, E> checked(Class<E> cls) {
         return ExceptionalStream.<T, E> of(this);
     }

@@ -1,6 +1,7 @@
 ### 1.10.4
 
 * Add `N.exclude/excludeAll/excludeToSet/excludeAllToSet`.
+* Add `ExceptionalStream.toMultimap`.
 * Improvements and bug fix.
 
 

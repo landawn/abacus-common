@@ -2201,8 +2201,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(Throwables.LongFunction<? extends K, E> keyMapper,
-            Throwables.LongFunction<? extends V, E2> valueMapper, Throwables.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
+    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(
+            Throwables.LongFunction<? extends K, E> keyMapper, Throwables.LongFunction<? extends V, E2> valueMapper,
+            Throwables.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
         final M result = mapFactory.apply(size);
 
         for (int i = 0; i < size; i++) {
@@ -2240,8 +2241,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      * @throws E the e
      */
-    public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Throwables.LongFunction<? extends K, E> keyMapper, final Collector<Long, A, D> downstream,
-            final IntFunction<? extends M> mapFactory) throws E {
+    public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Throwables.LongFunction<? extends K, E> keyMapper,
+            final Collector<Long, A, D> downstream, final IntFunction<? extends M> mapFactory) throws E {
         final M result = mapFactory.apply(size);
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, Long> downstreamAccumulator = downstream.accumulator();
@@ -2393,46 +2394,24 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);
     }
 
-    /**
-     * Ensure capacity internal.
-     *
-     * @param minCapacity
-     */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_LONG_ARRAY) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
 
-        ensureExplicitCapacity(minCapacity);
-    }
-
-    /**
-     * Ensure explicit capacity.
-     *
-     * @param minCapacity
-     */
-    private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
-            grow(minCapacity);
+            int oldCapacity = elementData.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                newCapacity = hugeCapacity(minCapacity);
+            }
+
+            elementData = Arrays.copyOf(elementData, newCapacity);
         }
-    }
-
-    /**
-     *
-     * @param minCapacity
-     */
-    private void grow(int minCapacity) {
-        int oldCapacity = elementData.length;
-        int newCapacity = oldCapacity + (oldCapacity >> 1);
-
-        if (newCapacity - minCapacity < 0) {
-            newCapacity = minCapacity;
-        }
-
-        if (newCapacity - MAX_ARRAY_SIZE > 0) {
-            newCapacity = hugeCapacity(minCapacity);
-        }
-
-        elementData = Arrays.copyOf(elementData, newCapacity);
     }
 }

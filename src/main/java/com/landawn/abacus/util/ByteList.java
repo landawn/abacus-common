@@ -2334,46 +2334,24 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);
     }
 
-    /**
-     * Ensure capacity internal.
-     *
-     * @param minCapacity
-     */
     private void ensureCapacityInternal(int minCapacity) {
         if (elementData == N.EMPTY_BYTE_ARRAY) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
 
-        ensureExplicitCapacity(minCapacity);
-    }
-
-    /**
-     * Ensure explicit capacity.
-     *
-     * @param minCapacity
-     */
-    private void ensureExplicitCapacity(int minCapacity) {
         if (minCapacity - elementData.length > 0) {
-            grow(minCapacity);
+            int oldCapacity = elementData.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                newCapacity = hugeCapacity(minCapacity);
+            }
+
+            elementData = Arrays.copyOf(elementData, newCapacity);
         }
-    }
-
-    /**
-     *
-     * @param minCapacity
-     */
-    private void grow(int minCapacity) {
-        int oldCapacity = elementData.length;
-        int newCapacity = oldCapacity + (oldCapacity >> 1);
-
-        if (newCapacity - minCapacity < 0) {
-            newCapacity = minCapacity;
-        }
-
-        if (newCapacity - MAX_ARRAY_SIZE > 0) {
-            newCapacity = hugeCapacity(minCapacity);
-        }
-
-        elementData = Arrays.copyOf(elementData, newCapacity);
     }
 }

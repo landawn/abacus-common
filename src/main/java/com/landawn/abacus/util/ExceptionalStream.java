@@ -5252,11 +5252,55 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
     }
 
+    @TerminalOp
+    public <K> ListMultimap<K, T> toMultimap(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) throws E {
+        return toMultimap(keyMapper, Suppliers.<K, T> ofListMultimap());
+    }
+
+    @TerminalOp
+    public <K, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            Supplier<? extends M> mapFactory) throws E {
+        final Throwables.Function<T, T, E> valueMapper = Fnn.identity();
+
+        return toMultimap(keyMapper, valueMapper, mapFactory);
+    }
+
+    @TerminalOp
+    public <K, V> ListMultimap<K, V> toMultimap(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper) throws E {
+        return toMultimap(keyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+    }
+
+    @TerminalOp
+    public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M toMultimap(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, Supplier<? extends M> mapFactory) throws E {
+        checkArgNotNull(keyMapper, "keyMapper");
+        checkArgNotNull(valueMapper, "valueMapper");
+        checkArgNotNull(mapFactory, "mapFactory");
+        assertNotClosed();
+
+        try {
+            final M result = mapFactory.get();
+            T next = null;
+
+            while (elements.hasNext()) {
+                next = elements.next();
+
+                result.put(keyMapper.apply(next), valueMapper.apply(next));
+            }
+
+            return result;
+        } finally {
+            close();
+        }
+    }
+
     public Multiset<T> toMultiset() throws E {
         return toMultiset(Suppliers.<T> ofMultiset());
     }
 
     public Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier) throws E {
+        checkArgNotNull(supplier, "supplier");
         assertNotClosed();
 
         try {
@@ -5750,86 +5794,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public Stream<T> unchecked() {
         if (N.isNullOrEmpty(this.closeHandlers)) {
-            return Stream.of(new ObjIteratorEx<T>() {
-                @Override
-                public boolean hasNext() {
-                    try {
-                        return elements.hasNext();
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
-                }
-
-                @Override
-                public T next() {
-                    try {
-                        return elements.next();
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
-                }
-
-                @Override
-                public void skip(long n) {
-                    N.checkArgNotNegative(n, "n");
-
-                    try {
-                        elements.skip(n);
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
-                }
-
-                @Override
-                public long count() {
-                    try {
-                        return elements.count();
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
-                }
-            });
+            return Stream.of(newObjIteratorEx(elements));
         } else {
-            return Stream.of(new ObjIteratorEx<T>() {
-
-                @Override
-                public boolean hasNext() {
-                    try {
-                        return elements.hasNext();
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
-                }
-
-                @Override
-                public T next() {
-                    try {
-                        return elements.next();
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
-                }
-
-                @Override
-                public void skip(long n) {
-                    N.checkArgNotNegative(n, "n");
-
-                    try {
-                        elements.skip(n);
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
-                }
-
-                @Override
-                public long count() {
-                    try {
-                        return elements.count();
-                    } catch (Exception e) {
-                        throw N.toRuntimeException(e);
-                    }
-                }
-            }).onClose(new Runnable() {
+            return Stream.of(newObjIteratorEx(elements)).onClose(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -6242,6 +6209,48 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 }
             }
         }
+    }
+
+    ObjIteratorEx<T> newObjIteratorEx(final ExceptionalIterator<T, E> elements) {
+        return new ObjIteratorEx<T>() {
+            @Override
+            public boolean hasNext() {
+                try {
+                    return elements.hasNext();
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+
+            @Override
+            public T next() {
+                try {
+                    return elements.next();
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+
+            @Override
+            public void skip(long n) {
+                N.checkArgNotNegative(n, "n");
+
+                try {
+                    elements.skip(n);
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+
+            @Override
+            public long count() {
+                try {
+                    return elements.count();
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+        };
     }
 
     /**
