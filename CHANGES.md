@@ -2,6 +2,7 @@
 
 * Add `N.exclude/excludeAll/excludeToSet/excludeAllToSet`.
 * Add `ExceptionalStream.toMultimap`.
+* Add `Splitter.splitToImmutableList` and `MapSplitter.splitToImmutableMap`.
 * Improvements and bug fix.
 
 

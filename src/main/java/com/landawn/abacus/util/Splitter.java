@@ -447,7 +447,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T> List<T> split(Class<T> targetType, final CharSequence source) {
+    public <T> List<T> split(final Class<T> targetType, final CharSequence source) {
         N.checkArgNotNull(targetType, "targetType");
 
         final Type<T> type = N.typeOf(targetType);
@@ -462,7 +462,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T> List<T> split(Type<T> targetType, final CharSequence source) {
+    public <T> List<T> split(final Type<T> targetType, final CharSequence source) {
         N.checkArgNotNull(targetType, "targetType");
 
         final List<T> result = new ArrayList<>();
@@ -498,7 +498,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T, C extends Collection<T>> C split(final C output, Class<T> targetType, final CharSequence source) {
+    public <T, C extends Collection<T>> C split(final C output, final Class<T> targetType, final CharSequence source) {
         N.checkArgNotNull(output, "output");
         N.checkArgNotNull(targetType, "targetType");
 
@@ -516,7 +516,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T, C extends Collection<T>> C split(final C output, Type<T> targetType, final CharSequence source) {
+    public <T, C extends Collection<T>> C split(final C output, final Type<T> targetType, final CharSequence source) {
         N.checkArgNotNull(output, "output");
         N.checkArgNotNull(targetType, "targetType");
 
@@ -549,7 +549,7 @@ public final class Splitter {
      * @param supplier
      * @return
      */
-    public <T, C extends Collection<T>> C split(Class<T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
+    public <T, C extends Collection<T>> C split(final Class<T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
         return split(supplier.get(), targetType, source);
     }
 
@@ -562,8 +562,30 @@ public final class Splitter {
      * @param supplier
      * @return
      */
-    public <T, C extends Collection<T>> C split(Type<T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
+    public <T, C extends Collection<T>> C split(final Type<T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
         return split(supplier.get(), targetType, source);
+    }
+
+    /**
+     * Split to array.
+     *
+     * @param source
+     * @return
+     */
+    public ImmutableList<String> splitToImmutableList(final CharSequence source) {
+        return ImmutableList.of(split(source));
+    }
+
+    /**
+     * Split to array.
+     *
+     * @param <T>
+     * @param arrayType
+     * @param source
+     * @return
+     */
+    public <T> ImmutableList<T> splitToImmutableList(final Class<T> targetType, final CharSequence source) {
+        return ImmutableList.of(split(targetType, source));
     }
 
     /**
@@ -586,7 +608,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T> T splitToArray(Class<T> arrayType, final CharSequence source) {
+    public <T> T splitToArray(final Class<T> arrayType, final CharSequence source) {
         N.checkArgNotNull(arrayType, "arrayType");
 
         final Class<?> eleCls = arrayType.getComponentType();
@@ -786,7 +808,7 @@ public final class Splitter {
          * @param source
          * @return
          */
-        public <K, V> Map<K, V> split(Class<K> keyType, Class<V> valueType, final CharSequence source) {
+        public <K, V> Map<K, V> split(final Class<K> keyType, final Class<V> valueType, final CharSequence source) {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
 
@@ -805,7 +827,7 @@ public final class Splitter {
          * @param source
          * @return
          */
-        public <K, V> Map<K, V> split(Type<K> keyType, Type<V> valueType, final CharSequence source) {
+        public <K, V> Map<K, V> split(final Type<K> keyType, final Type<V> valueType, final CharSequence source) {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
 
@@ -866,7 +888,7 @@ public final class Splitter {
          * @param source
          * @return
          */
-        public <K, V, M extends Map<K, V>> M split(final M output, Class<K> keyType, Class<V> valueType, final CharSequence source) {
+        public <K, V, M extends Map<K, V>> M split(final M output, final Class<K> keyType, final Class<V> valueType, final CharSequence source) {
             N.checkArgNotNull(output, "output");
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
@@ -888,7 +910,7 @@ public final class Splitter {
          * @param source
          * @return
          */
-        public <K, V, M extends Map<K, V>> M split(final M output, Type<K> keyType, Type<V> valueType, final CharSequence source) {
+        public <K, V, M extends Map<K, V>> M split(final M output, final Type<K> keyType, final Type<V> valueType, final CharSequence source) {
             N.checkArgNotNull(output, "output");
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
@@ -967,6 +989,28 @@ public final class Splitter {
         public <K, V, M extends Map<K, V>> M split(final Type<K> keyType, final Type<V> valueType, final CharSequence source,
                 final Supplier<? extends M> supplier) {
             return split(supplier.get(), keyType, valueType, source);
+        }
+
+        /**
+         *
+         * @param source
+         * @return
+         */
+        public ImmutableMap<String, String> splitToImmutableMap(final CharSequence source) {
+            return ImmutableMap.of(split(source));
+        }
+
+        /**
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param keyType
+         * @param valueType
+         * @param source
+         * @return
+         */
+        public <K, V> ImmutableMap<K, V> splitToImmutableMap(final Class<K> keyType, final Class<V> valueType, final CharSequence source) {
+            return ImmutableMap.of(split(keyType, valueType, source));
         }
 
         /**

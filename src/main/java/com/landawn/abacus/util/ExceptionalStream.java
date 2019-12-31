@@ -6069,7 +6069,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 if (ex == null) {
                     ex = e;
                 } else {
-                    if (ex instanceof RuntimeException && !(ex instanceof RuntimeException)) {
+                    if (ex instanceof RuntimeException && !(e instanceof RuntimeException)) {
                         e.addSuppressed(ex);
                         ex = e;
                     } else {
