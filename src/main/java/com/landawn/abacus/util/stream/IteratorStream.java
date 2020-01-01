@@ -44,7 +44,6 @@ import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
@@ -2816,65 +2815,6 @@ class IteratorStream<T> extends AbstractStream<T> {
             while (elements.hasNext()) {
                 next = elements.next();
                 result.put(keyMapper.apply(next), valueMapper.apply(next));
-            }
-
-            return result;
-        } finally {
-            close();
-        }
-    }
-
-    @Override
-    public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M flatToMultimap(final Function<? super T, ? extends Stream<? extends K>> flatKeyMapper,
-            final BiFunction<? super K, ? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
-        assertNotClosed();
-
-        try {
-            final M result = mapFactory.get();
-            ObjIterator<? extends K> keyIter = null;
-            K k = null;
-            T next = null;
-
-            while (elements.hasNext()) {
-                next = elements.next();
-
-                try (Stream<? extends K> ks = flatKeyMapper.apply(next)) {
-                    keyIter = ks.iteratorEx();
-
-                    while (keyIter.hasNext()) {
-                        k = keyIter.next();
-                        result.put(k, valueMapper.apply(k, next));
-                    }
-                }
-            }
-
-            return result;
-        } finally {
-            close();
-        }
-    }
-
-    @Override
-    public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M flattToMultimap(
-            final Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, final BiFunction<? super K, ? super T, ? extends V> valueMapper,
-            final Supplier<? extends M> mapFactory) {
-        assertNotClosed();
-
-        try {
-            final M result = mapFactory.get();
-
-            Collection<? extends K> ks = null;
-            T next = null;
-
-            while (elements.hasNext()) {
-                next = elements.next();
-                ks = flatKeyMapper.apply(next);
-
-                if (N.notNullOrEmpty(ks)) {
-                    for (K k : ks) {
-                        result.put(k, valueMapper.apply(k, next));
-                    }
-                }
             }
 
             return result;

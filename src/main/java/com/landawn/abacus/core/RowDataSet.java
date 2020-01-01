@@ -3313,7 +3313,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMultimap(keyColumnName, valueColumnName, fromRowIndex, toRowIndex, new IntFunction<ListMultimap<K, E>>() {
             @Override
             public ListMultimap<K, E> apply(int len) {
-                return N.newListLinkedMultimap();
+                return N.newLinkedListMultimap();
             }
         });
     }
@@ -3379,7 +3379,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMultimap(rowClass, keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, new IntFunction<ListMultimap<K, E>>() {
             @Override
             public ListMultimap<K, E> apply(int len) {
-                return N.newListLinkedMultimap();
+                return N.newLinkedListMultimap();
             }
         });
     }
@@ -3518,7 +3518,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return toMultimap(rowSupplier, keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, new IntFunction<ListMultimap<K, E>>() {
             @Override
             public ListMultimap<K, E> apply(int len) {
-                return N.newListLinkedMultimap();
+                return N.newLinkedListMultimap();
             }
         });
     }

@@ -41,7 +41,6 @@ import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
-import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
@@ -62,7 +61,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
-
+ 
 /**
  *
  */
@@ -2552,162 +2551,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         return res;
     }
-
-    @Override
-    public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M flatToMultimap(final Function<? super T, ? extends Stream<? extends K>> flatKeyMapper,
-            final BiFunction<? super K, ? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
-        assertNotClosed();
-
-        if (maxThreadNum <= 1) {
-            return super.flatToMultimap(flatKeyMapper, valueMapper, mapFactory);
-        }
-
-        final List<ContinuableFuture<M>> futureList = new ArrayList<>(maxThreadNum);
-        final Holder<Throwable> eHolder = new Holder<>();
-
-        for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Callable<M>() {
-
-                @Override
-                public M call() {
-                    M map = mapFactory.get();
-                    ObjIterator<? extends K> keyIter = null;
-                    K k = null;
-                    T next = null;
-
-                    try {
-                        while (eHolder.value() == null) {
-                            synchronized (elements) {
-                                if (elements.hasNext()) {
-                                    next = elements.next();
-                                } else {
-                                    break;
-                                }
-                            }
-
-                            try (Stream<? extends K> ks = flatKeyMapper.apply(next)) {
-                                keyIter = ks.iteratorEx();
-
-                                while (keyIter.hasNext()) {
-                                    k = keyIter.next();
-                                    map.put(k, valueMapper.apply(k, next));
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        setError(eHolder, e);
-                    }
-
-                    return map;
-                }
-            }));
-        }
-
-        if (eHolder.value() != null) {
-            close();
-            throw N.toRuntimeException(eHolder.value());
-        }
-
-        M res = null;
-
-        try {
-            for (ContinuableFuture<M> future : futureList) {
-                if (res == null) {
-                    res = future.get();
-                } else {
-                    final M m = future.get();
-
-                    for (Map.Entry<K, C> entry : m.entrySet()) {
-                        res.putAll(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            throw N.toRuntimeException(e);
-        } finally {
-            close();
-        }
-
-        return res;
-    }
-
-    @Override
-    public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M flattToMultimap(
-            final Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, final BiFunction<? super K, ? super T, ? extends V> valueMapper,
-            final Supplier<? extends M> mapFactory) {
-        assertNotClosed();
-
-        if (maxThreadNum <= 1) {
-            return super.flattToMultimap(flatKeyMapper, valueMapper, mapFactory);
-        }
-
-        final List<ContinuableFuture<M>> futureList = new ArrayList<>(maxThreadNum);
-        final Holder<Throwable> eHolder = new Holder<>();
-
-        for (int i = 0; i < maxThreadNum; i++) {
-            futureList.add(asyncExecutor.execute(new Callable<M>() {
-
-                @Override
-                public M call() {
-                    M map = mapFactory.get();
-                    Collection<? extends K> ks = null;
-                    T next = null;
-
-                    try {
-                        while (eHolder.value() == null) {
-                            synchronized (elements) {
-                                if (elements.hasNext()) {
-                                    next = elements.next();
-                                } else {
-                                    break;
-                                }
-                            }
-
-                            ks = flatKeyMapper.apply(next);
-
-                            if (N.notNullOrEmpty(ks)) {
-                                for (K k : ks) {
-                                    map.put(k, valueMapper.apply(k, next));
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        setError(eHolder, e);
-                    }
-
-                    return map;
-                }
-            }));
-        }
-
-        if (eHolder.value() != null) {
-            close();
-            throw N.toRuntimeException(eHolder.value());
-        }
-
-        M res = null;
-
-        try {
-            for (ContinuableFuture<M> future : futureList) {
-                if (res == null) {
-                    res = future.get();
-                } else {
-                    final M m = future.get();
-
-                    for (Map.Entry<K, C> entry : m.entrySet()) {
-                        res.putAll(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            throw N.toRuntimeException(e);
-        } finally {
-            close();
-        }
-
-        return res;
-    }
-
+ 
     @Override
     public <A, D> Map<Boolean, D> partitionTo(final Predicate<? super T> predicate, Collector<? super T, A, D> downstream) {
         final Function<T, Boolean> keyMapper = new Function<T, Boolean>() {

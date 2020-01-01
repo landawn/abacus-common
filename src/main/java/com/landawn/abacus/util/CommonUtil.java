@@ -1534,8 +1534,8 @@ class CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<K, V> newHashMap(final Collection<? extends V> c, final Throwables.Function<? super V, ? extends K, E> keyMapper)
-            throws E {
+    public static <K, V, E extends Exception> Map<K, V> newHashMap(final Collection<? extends V> c,
+            final Throwables.Function<? super V, ? extends K, E> keyMapper) throws E {
         CommonUtil.checkArgNotNull(keyMapper);
 
         if (isNullOrEmpty(c)) {
@@ -1849,72 +1849,6 @@ class CommonUtil {
     }
 
     /**
-     * New list linked multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @return
-     */
-    public static <K, E> ListMultimap<K, E> newListLinkedMultimap() {
-        return new ListMultimap<>(LinkedHashMap.class, ArrayList.class);
-    }
-
-    /**
-     * New list linked multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param initialCapacity
-     * @return
-     */
-    public static <K, E> ListMultimap<K, E> newListLinkedMultimap(final int initialCapacity) {
-        return new ListMultimap<>(new LinkedHashMap<K, List<E>>(initialCapacity), ArrayList.class);
-    }
-
-    /**
-     * New list linked multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
-     */
-    public static <K, E> ListMultimap<K, E> newListLinkedMultimap(final Map<? extends K, ? extends E> m) {
-        final ListMultimap<K, E> multiMap = new ListMultimap<>(new LinkedHashMap<K, List<E>>(), ArrayList.class);
-
-        multiMap.putAll(m);
-
-        return multiMap;
-    }
-
-    /**
-     * New list sorted multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @return
-     */
-    public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newListSortedMultimap() {
-        return new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
-    }
-
-    /**
-     * New list sorted multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
-     */
-    public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newListSortedMultimap(final Map<? extends K, ? extends E> m) {
-        final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
-
-        multiMap.putAll(m);
-
-        return multiMap;
-    }
-
-    /**
      * New list multimap.
      *
      * @param <K> the key type
@@ -1956,6 +1890,72 @@ class CommonUtil {
     }
 
     /**
+     * New list linked multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @return
+     */
+    public static <K, E> ListMultimap<K, E> newLinkedListMultimap() {
+        return new ListMultimap<>(LinkedHashMap.class, ArrayList.class);
+    }
+
+    /**
+     * New list linked multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param initialCapacity
+     * @return
+     */
+    public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final int initialCapacity) {
+        return new ListMultimap<>(new LinkedHashMap<K, List<E>>(initialCapacity), ArrayList.class);
+    }
+
+    /**
+     * New list linked multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param m
+     * @return
+     */
+    public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final Map<? extends K, ? extends E> m) {
+        final ListMultimap<K, E> multiMap = new ListMultimap<>(new LinkedHashMap<K, List<E>>(), ArrayList.class);
+
+        multiMap.putAll(m);
+
+        return multiMap;
+    }
+
+    /**
+     * New list sorted multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @return
+     */
+    public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newSortedListMultimap() {
+        return new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
+    }
+
+    /**
+     * New list sorted multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param m
+     * @return
+     */
+    public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newSortedListMultimap(final Map<? extends K, ? extends E> m) {
+        final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
+
+        multiMap.putAll(m);
+
+        return multiMap;
+    }
+
+    /**
      * New set multimap.
      *
      * @param <K> the key type
@@ -1988,72 +1988,6 @@ class CommonUtil {
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = newSetMultimap();
-
-        multiMap.putAll(m);
-
-        return multiMap;
-    }
-
-    /**
-     * New set linked multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @return
-     */
-    public static <K, E> SetMultimap<K, E> newSetLinkedMultimap() {
-        return new SetMultimap<>(LinkedHashMap.class, HashSet.class);
-    }
-
-    /**
-     * New set linked multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param initialCapacity
-     * @return
-     */
-    public static <K, E> SetMultimap<K, E> newSetLinkedMultimap(final int initialCapacity) {
-        return new SetMultimap<>(new LinkedHashMap<K, Set<E>>(initialCapacity), HashSet.class);
-    }
-
-    /**
-     * New set linked multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
-     */
-    public static <K, E> SetMultimap<K, E> newSetLinkedMultimap(final Map<? extends K, ? extends E> m) {
-        final SetMultimap<K, E> multiMap = new SetMultimap<>(new LinkedHashMap<K, Set<E>>(), HashSet.class);
-
-        multiMap.putAll(m);
-
-        return multiMap;
-    }
-
-    /**
-     * New set sorted multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @return
-     */
-    public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSetSortedMultimap() {
-        return new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
-    }
-
-    /**
-     * New set sorted multimap.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
-     */
-    public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSetSortedMultimap(final Map<? extends K, ? extends E> m) {
-        final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
 
         multiMap.putAll(m);
 
@@ -2099,6 +2033,72 @@ class CommonUtil {
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier,
             final Supplier<? extends Set<E>> valueSupplier) {
         return new SetMultimap<>(mapSupplier, valueSupplier);
+    }
+
+    /**
+     * New set linked multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @return
+     */
+    public static <K, E> SetMultimap<K, E> newLinkedSetMultimap() {
+        return new SetMultimap<>(LinkedHashMap.class, HashSet.class);
+    }
+
+    /**
+     * New set linked multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param initialCapacity
+     * @return
+     */
+    public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final int initialCapacity) {
+        return new SetMultimap<>(new LinkedHashMap<K, Set<E>>(initialCapacity), HashSet.class);
+    }
+
+    /**
+     * New set linked multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param m
+     * @return
+     */
+    public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final Map<? extends K, ? extends E> m) {
+        final SetMultimap<K, E> multiMap = new SetMultimap<>(new LinkedHashMap<K, Set<E>>(), HashSet.class);
+
+        multiMap.putAll(m);
+
+        return multiMap;
+    }
+
+    /**
+     * New set sorted multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @return
+     */
+    public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSortedSetMultimap() {
+        return new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
+    }
+
+    /**
+     * New set sorted multimap.
+     *
+     * @param <K> the key type
+     * @param <E>
+     * @param m
+     * @return
+     */
+    public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSortedSetMultimap(final Map<? extends K, ? extends E> m) {
+        final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
+
+        multiMap.putAll(m);
+
+        return multiMap;
     }
 
     /** The Constant MAX_ARRAY_SIZE. */
@@ -4675,7 +4675,7 @@ class CommonUtil {
         if (CommonUtil.isNullOrEmpty(a)) {
             return new LinkedHashMap<>();
         }
-    
+
         return newMap(new LinkedHashMap<String, Object>(CommonUtil.initHashCapacity(a.length / 2)), a);
     }
 
@@ -7261,7 +7261,8 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate)
+            throws E {
         return Iterables.findFirstNonNull(c, predicate);
     }
 
@@ -13615,7 +13616,8 @@ class CommonUtil {
      * @return true, if successful
      * @throws E the e
      */
-    public static <T, M, E extends Exception> boolean swapIf(final Triple<T, M, T> triple, Throwables.Predicate<? super Triple<T, M, T>, E> predicate) throws E {
+    public static <T, M, E extends Exception> boolean swapIf(final Triple<T, M, T> triple, Throwables.Predicate<? super Triple<T, M, T>, E> predicate)
+            throws E {
         if (predicate.test(triple)) {
             final T left = triple.left;
             triple.setLeft(triple.right);
@@ -17962,7 +17964,8 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
+            throws E {
         return Iterables.findFirstIndex(c, predicate);
     }
 
@@ -17992,7 +17995,8 @@ class CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
+            throws E {
         return Iterables.findLastIndex(c, predicate);
     }
 

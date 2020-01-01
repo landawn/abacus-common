@@ -34,7 +34,6 @@ import com.landawn.abacus.util.BiIterator;
 import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.ImmutableEntry;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.ListMultimap;
@@ -1369,7 +1368,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
-    public Map.Entry<K, V> reduce(final ImmutableEntry<K, V> identity, final BinaryOperator<Map.Entry<K, V>> accumulator) {
+    public Map.Entry<K, V> reduce(final Map.Entry<K, V> identity, final BinaryOperator<Map.Entry<K, V>> accumulator) {
         return s.reduce(identity, accumulator);
     }
 

@@ -4012,6 +4012,177 @@ public abstract class Collectors {
         return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
+    /**
+     *
+     * @param keyMapper
+     * @param flatValueMapper
+     * @return
+     * @see Collectors#toMultimap(Function, Function)
+     */
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingValueToMultimap(final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends Stream<? extends V>> flatValueMapper) {
+        return flatMappingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
+    }
+
+    /**
+     *
+     * @param keyMapper
+     * @param flatValueMapper
+     * @param mapFactory
+     * @return
+     * @see Collectors#toMultimap(Function, Function, Supplier)
+     */
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingValueToMultimap(
+            final Function<? super T, K> keyMapper, final Function<? super T, ? extends Stream<? extends V>> flatValueMapper,
+            final Supplier<? extends M> mapFactory) {
+
+        final BiConsumer<M, T> accumulator = new BiConsumer<M, T>() {
+            @Override
+            public void accept(M map, T element) {
+                final K key = keyMapper.apply(element);
+
+                flatValueMapper.apply(element).sequential().forEach(new Consumer<V>() {
+                    @Override
+                    public void accept(V value) {
+                        map.put(key, value);
+                    }
+                });
+            }
+        };
+
+        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
+
+        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    }
+
+    /**
+     *
+     * @param keyMapper
+     * @param flatValueMapper
+     * @return
+     * @see Collectors#toMultimap(Function, Function)
+     */
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingValueToMultimap(final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends Collection<? extends V>> flatValueMapper) {
+        return flattMappingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
+    }
+
+    /**
+     *
+     * @param keyMapper
+     * @param flatValueMapper
+     * @param mapFactory
+     * @return
+     * @see Collectors#toMultimap(Function, Function, Supplier)
+     */
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMappingValueToMultimap(
+            final Function<? super T, K> keyMapper, final Function<? super T, ? extends Collection<? extends V>> flatValueMapper,
+            final Supplier<? extends M> mapFactory) {
+
+        final BiConsumer<M, T> accumulator = new BiConsumer<M, T>() {
+            @Override
+            public void accept(M map, T element) {
+                final K key = keyMapper.apply(element);
+                final Collection<? extends V> values = flatValueMapper.apply(element);
+
+                if (N.notNullOrEmpty(values)) {
+                    for (V value : values) {
+                        map.put(key, value);
+                    }
+                }
+            }
+        };
+
+        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
+
+        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    }
+
+    /**
+     *
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
+     * @see Collectors#toMultimap(Function, Function)
+     */
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyMapper,
+            final Function<? super T, V> valueMapper) {
+        return flatMappingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+    }
+
+    /**
+     *
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
+     * @see Collectors#toMultimap(Function, Function, Supplier)
+     */
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingKeyToMultimap(
+            final Function<? super T, Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper, final Supplier<? extends M> mapFactory) {
+
+        final BiConsumer<M, T> accumulator = new BiConsumer<M, T>() {
+            @Override
+            public void accept(M map, T element) {
+                final V value = valueMapper.apply(element);
+
+                flatKeyMapper.apply(element).sequential().forEach(new Consumer<K>() {
+                    @Override
+                    public void accept(K key) {
+                        map.put(key, value);
+                    }
+                });
+            }
+        };
+
+        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
+
+        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    }
+
+    /**
+     *
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
+     * @see Collectors#toMultimap(Function, Function)
+     */
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingKeyToMultimap(
+            final Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper) {
+        return flattMappingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+    }
+
+    /**
+     *
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
+     * @see Collectors#toMultimap(Function, Function, Supplier)
+     */
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMappingKeyToMultimap(
+            final Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper,
+            final Supplier<? extends M> mapFactory) {
+
+        final BiConsumer<M, T> accumulator = new BiConsumer<M, T>() {
+            @Override
+            public void accept(M map, T element) {
+                final V value = valueMapper.apply(element);
+                final Collection<? extends K> keys = flatKeyMapper.apply(element);
+
+                if (N.notNullOrEmpty(keys)) {
+                    for (K key : keys) {
+                        map.put(key, value);
+                    }
+                }
+            }
+        };
+
+        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
+
+        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    }
+
     public static <T> Collector<T, ?, DataSet> toDataSet() {
         return toDataSet(null);
     }

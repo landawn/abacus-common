@@ -47,7 +47,6 @@ import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fn.BiFunctions;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IOUtil;
@@ -66,8 +65,8 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.PermutationIterator;
 import com.landawn.abacus.util.StringUtil.Strings;
-import com.landawn.abacus.util.Timed;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Timed;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -2272,40 +2271,6 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <K> ListMultimap<K, T> flatToMultimap(Function<? super T, ? extends Stream<? extends K>> flatKeyMapper) {
-        return flatToMultimap(flatKeyMapper, Suppliers.<K, T> ofListMultimap());
-    }
-
-    @Override
-    public <K, V extends Collection<T>, M extends Multimap<K, T, V>> M flatToMultimap(Function<? super T, ? extends Stream<? extends K>> flatKeyMapper,
-            Supplier<? extends M> mapFactory) {
-        return flatToMultimap(flatKeyMapper, BiFunctions.<K, T> returnSecond(), mapFactory);
-    }
-
-    @Override
-    public <K, V> ListMultimap<K, V> flatToMultimap(Function<? super T, ? extends Stream<? extends K>> flatKeyMapper,
-            BiFunction<? super K, ? super T, ? extends V> valueMapper) {
-        return flatToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
-    }
-
-    @Override
-    public <K> ListMultimap<K, T> flattToMultimap(Function<? super T, ? extends Collection<? extends K>> flatKeyMapper) {
-        return flattToMultimap(flatKeyMapper, Suppliers.<K, T> ofListMultimap());
-    }
-
-    @Override
-    public <K, V extends Collection<T>, M extends Multimap<K, T, V>> M flattToMultimap(Function<? super T, ? extends Collection<? extends K>> flatKeyMapper,
-            Supplier<? extends M> mapFactory) {
-        return flattToMultimap(flatKeyMapper, BiFunctions.<K, T> returnSecond(), mapFactory);
-    }
-
-    @Override
-    public <K, V> ListMultimap<K, V> flattToMultimap(Function<? super T, ? extends Collection<? extends K>> flatKeyMapper,
-            BiFunction<? super K, ? super T, ? extends V> valueMapper) {
-        return flattToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
-    }
-
-    @Override
     public long sumInt(ToIntFunction<? super T> mapper) {
         return collect(Collectors.summingInt(mapper));
     }
@@ -2675,7 +2640,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final U init,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicateForFirst, final Throwables.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2 {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicateForFirst, final Throwables.BiPredicate<? super T, ? super U, E2> predicateForLast)
+            throws E, E2 {
         assertNotClosed();
 
         try {
@@ -2701,7 +2667,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, E extends Exception, E2 extends Exception> Optional<T> findFirstOrLast(final Function<? super T, U> preFunc,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicateForFirst, final Throwables.BiPredicate<? super T, ? super U, E2> predicateForLast) throws E, E2 {
+            final Throwables.BiPredicate<? super T, ? super U, E> predicateForFirst, final Throwables.BiPredicate<? super T, ? super U, E2> predicateForLast)
+            throws E, E2 {
         assertNotClosed();
 
         try {

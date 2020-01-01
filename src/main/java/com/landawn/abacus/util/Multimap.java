@@ -1598,6 +1598,10 @@ public class Multimap<K, E, V extends Collection<E>> {
         return copy;
     }
 
+    public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M inverse(final IntFunction<? extends M> multimapSupplier) {
+        return Multimap.invertFrom(this, multimapSupplier);
+    }
+
     /**
      *
      * @return

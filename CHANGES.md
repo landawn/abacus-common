@@ -3,6 +3,8 @@
 * Add `N.exclude/excludeAll/excludeToSet/excludeAllToSet`.
 * Add `ExceptionalStream.toMultimap`.
 * Add `Splitter.splitToImmutableList` and `MapSplitter.splitToImmutableMap`.
+* Add `Collectors.flatMappingValueToMultimap/flatMappingKeyToMultimap`.
+* Remove `Stream.flatToMultimap/flattToMultimap`, replaced by `Collectors.flatMappingValueToMultimap/flatMappingKeyToMultimap`.
 * Improvements and bug fix.
 
 

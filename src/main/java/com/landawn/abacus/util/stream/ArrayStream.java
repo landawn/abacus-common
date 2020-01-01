@@ -38,7 +38,6 @@ import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Throwables;
@@ -2853,60 +2852,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.put(keyMapper.apply(elements[i]), valueMapper.apply(elements[i]));
-            }
-
-            return result;
-        } finally {
-            close();
-        }
-    }
-
-    @Override
-    public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M flatToMultimap(final Function<? super T, ? extends Stream<? extends K>> flatKeyMapper,
-            final BiFunction<? super K, ? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
-        assertNotClosed();
-
-        try {
-            final M result = mapFactory.get();
-            ObjIterator<? extends K> keyIter = null;
-            K k = null;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                try (Stream<? extends K> ks = flatKeyMapper.apply(elements[i])) {
-                    keyIter = ks.iteratorEx();
-
-                    while (keyIter.hasNext()) {
-                        k = keyIter.next();
-                        result.put(k, valueMapper.apply(k, elements[i]));
-                    }
-                }
-            }
-
-            return result;
-        } finally {
-            close();
-        }
-    }
-
-    @Override
-    public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> M flattToMultimap(
-            final Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, final BiFunction<? super K, ? super T, ? extends V> valueMapper,
-            final Supplier<? extends M> mapFactory) {
-        assertNotClosed();
-
-        try {
-            final M result = mapFactory.get();
-
-            Collection<? extends K> ks = null;
-
-            for (int i = fromIndex; i < toIndex; i++) {
-                ks = flatKeyMapper.apply(elements[i]);
-
-                if (N.notNullOrEmpty(ks)) {
-                    for (K k : ks) {
-                        result.put(k, valueMapper.apply(k, elements[i]));
-                    }
-                }
             }
 
             return result;
