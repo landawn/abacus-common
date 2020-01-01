@@ -1890,7 +1890,7 @@ class CommonUtil {
     }
 
     /**
-     * New list linked multimap.
+     * Return a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -1901,7 +1901,7 @@ class CommonUtil {
     }
 
     /**
-     * New list linked multimap.
+     * Return a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -1913,7 +1913,7 @@ class CommonUtil {
     }
 
     /**
-     * New list linked multimap.
+     * Return a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -1929,7 +1929,7 @@ class CommonUtil {
     }
 
     /**
-     * New list sorted multimap.
+     * Return a {@code ListMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -1940,7 +1940,7 @@ class CommonUtil {
     }
 
     /**
-     * New list sorted multimap.
+     * Return a {@code ListMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -2036,7 +2036,7 @@ class CommonUtil {
     }
 
     /**
-     * New set linked multimap.
+     * Return a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -2047,7 +2047,7 @@ class CommonUtil {
     }
 
     /**
-     * New set linked multimap.
+     * Return a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -2059,7 +2059,7 @@ class CommonUtil {
     }
 
     /**
-     * New set linked multimap.
+     * Return a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -2075,7 +2075,8 @@ class CommonUtil {
     }
 
     /**
-     * New set sorted multimap.
+     * Return a {@code SetMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     *
      *
      * @param <K> the key type
      * @param <E>
@@ -2086,7 +2087,7 @@ class CommonUtil {
     }
 
     /**
-     * New set sorted multimap.
+     * Return a {@code SetMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>

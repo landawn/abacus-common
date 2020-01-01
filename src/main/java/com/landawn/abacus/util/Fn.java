@@ -195,16 +195,16 @@ public abstract class Fn extends Comparators {
     /** The Constant CLOSE. */
     private static final Consumer<AutoCloseable> CLOSE = new Consumer<AutoCloseable>() {
         @Override
-        public void accept(AutoCloseable value) {
-            IOUtil.close(value);
+        public void accept(AutoCloseable closeable) {
+            IOUtil.close(closeable);
         }
     };
 
     /** The Constant CLOSE_QUIETLY. */
     private static final Consumer<AutoCloseable> CLOSE_QUIETLY = new Consumer<AutoCloseable>() {
         @Override
-        public void accept(AutoCloseable value) {
-            IOUtil.closeQuietly(value);
+        public void accept(AutoCloseable closeable) {
+            IOUtil.closeQuietly(closeable);
         }
     };
 
@@ -11203,9 +11203,18 @@ public abstract class Fn extends Comparators {
             };
         }
 
-        //    public static <T extends AutoCloseable, E extends Exception> Try.Consumer<T, E> close() {
-        //        return (Try.Consumer<T, E>) Fn.CLOSE;
-        //    }
+        private static final Throwables.Consumer<AutoCloseable, Exception> CLOSE = new Throwables.Consumer<AutoCloseable, Exception>() {
+            @Override
+            public void accept(final AutoCloseable closeable) throws Exception {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            }
+        };
+
+        public static <T extends AutoCloseable> Throwables.Consumer<T, Exception> close() {
+            return (Throwables.Consumer<T, Exception>) CLOSE;
+        }
 
         /**
          *
