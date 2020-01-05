@@ -1,3 +1,9 @@
+### 1.10.5
+
+* Add `N.topp` to `N.top`.
+* Improvements and bug fix.
+
+
 ### 1.10.4
 
 * Add `N.exclude/excludeAll/excludeToSet/excludeAllToSet`.

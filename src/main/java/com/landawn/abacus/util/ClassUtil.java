@@ -1447,6 +1447,11 @@ public final class ClassUtil {
 
         if (clsName == null) {
             clsName = cls.getCanonicalName();
+
+            if (clsName == null) {
+                clsName = cls.getName();
+            }
+
             if (clsName != null) {
                 canonicalClassNamePool.put(cls, clsName);
             }
@@ -1740,7 +1745,8 @@ public final class ClassUtil {
      * @return
      * @throws E
      */
-    public static <E extends Exception> List<String> getPropNames(final Object entity, Throwables.BiPredicate<Object, Type<Object>, E> propValueFilter) throws E {
+    public static <E extends Exception> List<String> getPropNames(final Object entity, Throwables.BiPredicate<Object, Type<Object>, E> propValueFilter)
+            throws E {
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
         final int size = entityInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);

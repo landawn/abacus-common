@@ -1887,7 +1887,7 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new {@code List} with specified {@code objToExclude} excluded.
-     * 
+     *
      * @param <T>
      * @param c
      * @param objToExclude
@@ -1911,7 +1911,7 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new {@code Set} with specified {@code objToExclude} excluded.
-     * 
+     *
      * @param <T>
      * @param c
      * @param objToExclude
@@ -11292,7 +11292,7 @@ public final class N extends CommonUtil {
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final T[] a,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
-            throws E, E2 {
+                    throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11325,7 +11325,7 @@ public final class N extends CommonUtil {
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Collection<T> c,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
-            throws E, E2 {
+                    throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11706,7 +11706,7 @@ public final class N extends CommonUtil {
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final T[] a,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
-            throws E, E2 {
+                    throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11744,7 +11744,7 @@ public final class N extends CommonUtil {
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Collection<T> c,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
-            throws E, E2 {
+                    throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -16896,46 +16896,46 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * The present order is kept in the result list.
      *
      * @param <T>
      * @param a
      * @param n
+     * @param keepEncounterOrder
      * @return
      */
-    public static <T extends Comparable<? super T>> List<T> topp(final T[] a, final int n) {
-        return topp(a, n, NATURAL_ORDER);
+    public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int n, final boolean keepEncounterOrder) {
+        return top(a, n, NATURAL_ORDER, keepEncounterOrder);
     }
 
     /**
-     * The present order is kept in the result list.
      *
      * @param <T>
      * @param a
      * @param n
      * @param cmp
+     * @param keepEncounterOrder
      * @return
      */
-    public static <T> List<T> topp(final T[] a, final int n, final Comparator<? super T> cmp) {
-        return topp(a, 0, len(a), n, cmp);
+    public static <T> List<T> top(final T[] a, final int n, final Comparator<? super T> cmp, final boolean keepEncounterOrder) {
+        return top(a, 0, len(a), n, cmp, keepEncounterOrder);
     }
 
     /**
-     * The present order is kept in the result list.
      *
      * @param <T>
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param n
+     * @param keepEncounterOrder
      * @return
      */
-    public static <T extends Comparable<? super T>> List<T> topp(final T[] a, final int fromIndex, final int toIndex, final int n) {
-        return topp(a, fromIndex, toIndex, n, NATURAL_ORDER);
+    public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n,
+            final boolean keepEncounterOrder) {
+        return top(a, fromIndex, toIndex, n, NATURAL_ORDER, keepEncounterOrder);
     }
 
     /**
-     * The present order is kept in the result list.
      *
      * @param <T>
      * @param a
@@ -16943,11 +16943,17 @@ public final class N extends CommonUtil {
      * @param toIndex
      * @param n
      * @param cmp
+     * @param keepEncounterOrder
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> List<T> topp(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
+    public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp,
+            final boolean keepEncounterOrder) {
         checkArgNotNegative(n, "n");
+
+        if (!keepEncounterOrder) {
+            return top(a, fromIndex, toIndex, n, cmp);
+        }
 
         if (n == 0) {
             return new ArrayList<>();
@@ -16994,40 +17000,39 @@ public final class N extends CommonUtil {
 
         final List<T> res = new ArrayList<>(arrayOfIndexed.length);
 
-        for (int i = 0, len = arrayOfIndexed.length; i < len; i++) {
-            res.add(arrayOfIndexed[i].value());
+        for (Indexed<T> element : arrayOfIndexed) {
+            res.add(element.value());
         }
 
         return res;
     }
 
     /**
-     * The present order is kept in the result list.
      *
      * @param <T>
      * @param c
      * @param n
+     * @param keepEncounterOrder
      * @return
      */
-    public static <T extends Comparable<? super T>> List<T> topp(final Collection<? extends T> c, final int n) {
-        return topp(c, n, null);
+    public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int n, final boolean keepEncounterOrder) {
+        return top(c, n, NATURAL_ORDER, keepEncounterOrder);
     }
 
     /**
-     * The present order is kept in the result list.
      *
      * @param <T>
      * @param c
      * @param n
      * @param cmp
+     * @param keepEncounterOrder
      * @return
      */
-    public static <T> List<T> topp(final Collection<? extends T> c, final int n, final Comparator<? super T> cmp) {
-        return topp(c, 0, size(c), n, cmp);
+    public static <T> List<T> top(final Collection<? extends T> c, final int n, final Comparator<? super T> cmp, final boolean keepEncounterOrder) {
+        return top(c, 0, size(c), n, cmp, keepEncounterOrder);
     }
 
     /**
-     * The present order is kept in the result list.
      *
      * @param <T>
      * @param c
@@ -17036,12 +17041,12 @@ public final class N extends CommonUtil {
      * @param n
      * @return
      */
-    public static <T extends Comparable<? super T>> List<T> topp(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n) {
-        return topp(c, fromIndex, toIndex, n, null);
+    public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n,
+            final boolean keepEncounterOrder) {
+        return top(c, fromIndex, toIndex, n, NATURAL_ORDER, keepEncounterOrder);
     }
 
     /**
-     * The present order is kept in the result list.
      *
      * @param <T>
      * @param c
@@ -17049,11 +17054,17 @@ public final class N extends CommonUtil {
      * @param toIndex
      * @param n
      * @param cmp
+     * @param keepEncounterOrder
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> List<T> topp(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
+    public static <T> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp,
+            final boolean keepEncounterOrder) {
         checkArgNotNegative(n, "n");
+
+        if (!keepEncounterOrder) {
+            return top(c, fromIndex, toIndex, n, cmp);
+        }
 
         if (n == 0) {
             return new ArrayList<>();
@@ -17148,8 +17159,8 @@ public final class N extends CommonUtil {
 
         final List<T> res = new ArrayList<>(arrayOfIndexed.length);
 
-        for (int i = 0, len = arrayOfIndexed.length; i < len; i++) {
-            res.add(arrayOfIndexed[i].value());
+        for (Indexed<T> element : arrayOfIndexed) {
+            res.add(element.value());
         }
 
         return res;

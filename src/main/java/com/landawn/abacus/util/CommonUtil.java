@@ -60,6 +60,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -1039,15 +1041,17 @@ class CommonUtil {
             } else if (cls.equals(List.class)) {
                 return (T) new ArrayList<>();
             } else if (cls.equals(Set.class)) {
-                return (T) CommonUtil.newHashSet();
-            } else if (cls.equals(Queue.class)) {
-                return (T) new LinkedList<>();
-            } else if (cls.equals(Deque.class)) {
-                return (T) new LinkedList<>();
-            } else if (cls.equals(SortedSet.class) || cls.equals(NavigableSet.class)) {
-                return (T) new TreeSet<>();
+                return (T) new HashSet<>();
+            } else if (cls.equals(Queue.class) || cls.equals(Deque.class)) {
+                return (T) new ArrayDeque<>();
             } else if (cls.equals(SortedMap.class) || cls.equals(NavigableMap.class)) {
                 return (T) new TreeMap<>();
+            } else if (cls.equals(SortedSet.class) || cls.equals(NavigableSet.class)) {
+                return (T) new TreeSet<>();
+            } else if (cls.equals(BlockingQueue.class)) {
+                return (T) new LinkedBlockingQueue<>();
+            } else if (cls.equals(BlockingDeque.class)) {
+                return (T) new LinkedBlockingDeque<>();
             }
         }
 
