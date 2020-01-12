@@ -103,7 +103,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @param headers
      * @return
      */
-    public S headers(Map<String, Object> headers) {
+    public S headers(Map<String, ?> headers) {
         checkSettings();
 
         settings.headers(headers);

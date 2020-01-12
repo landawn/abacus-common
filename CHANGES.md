@@ -1,3 +1,9 @@
+### 1.10.6
+
+* `Stream.distinctBy(Function<? super T, K> keyMapper, final BinaryOperator<T> mergeFunction)`.
+* Improvements and bug fix.
+
+
 ### 1.10.5
 
 * Add `N.topp` to `N.top`.

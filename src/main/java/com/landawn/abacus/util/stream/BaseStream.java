@@ -26,6 +26,7 @@ import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
+import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.ImmutableList;
@@ -319,6 +320,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @see IntList#symmetricDifference(IntList)
      */
     @SequentialOnly
+    @IntermediateOp
     S symmetricDifference(Collection<T> c);
 
     /**
@@ -340,6 +342,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @SequentialOnly
     @IntermediateOp
+    @TerminalOpTriggered
     S reversed();
 
     /**
@@ -351,6 +354,19 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @SequentialOnly
     @IntermediateOp
+    @TerminalOpTriggered
+    S rotated(int distance);
+
+    /**
+     *
+     * <br />
+     * This method only run sequentially, even in parallel stream and all elements will be loaded to memory.
+     *
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
     S shuffled();
 
     /**
@@ -362,18 +378,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @SequentialOnly
     @IntermediateOp
+    @TerminalOpTriggered
     S shuffled(Random rnd);
-
-    /**
-     *
-     * <br />
-     * This method only run sequentially, even in parallel stream and all elements will be loaded to memory.
-     *
-     * @return
-     */
-    @SequentialOnly
-    @IntermediateOp
-    S rotated(int distance);
 
     /**
      * Returns a stream consisting of the distinct elements of this stream.
@@ -394,6 +400,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @ParallelSupported
     @IntermediateOp
+    @TerminalOpTriggered
     S sorted();
 
     //    /**
@@ -407,6 +414,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     @ParallelSupported
     @IntermediateOp
+    @TerminalOpTriggered
     S reverseSorted();
 
     /**
@@ -629,11 +637,14 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * Remember to close this Stream after the iteration is done, if needed.
      *
      * @return
+     * @deprecated ? may cause memory/resource leak if forget to close this {@code Stream}
      */
+    @Deprecated
     @SequentialOnly
     ITER iterator();
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
     <SS extends BaseStream> SS __(Function<? super S, SS> transfer);
@@ -647,13 +658,14 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
     S onClose(Runnable closeHandler);
 
     /**
      *
      */
-    @Override
     @SequentialOnly
+    @Override
     void close();
 
     /**
@@ -666,12 +678,16 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      *
      * @return
      */
+    @SequentialOnly
+    @IntermediateOp
     S sequential();
 
     /**
      *
      * @return
      */
+    @SequentialOnly
+    @IntermediateOp
     S parallel();
 
     /**
@@ -679,6 +695,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @param maxThreadNum
      * @return
      */
+    @SequentialOnly
+    @IntermediateOp
     S parallel(int maxThreadNum);
 
     /**
@@ -686,6 +704,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @param splitor
      * @return
      */
+    @SequentialOnly
+    @IntermediateOp
     S parallel(Splitor splitor);
 
     /**
@@ -849,6 +869,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @see <a href="https://www.infoq.com/presentations/parallel-java-se-8#downloadPdf">Understanding Parallel Stream Performance in Java SE 8</a>
      * @see <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel Streams</a>
      */
+    @SequentialOnly
+    @IntermediateOp
     S parallel(int maxThreadNum, Splitor splitor);
 
     /**
@@ -858,6 +880,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @param executor should be able to execute {@code maxThreadNum} * {@code following up operations} in parallel.
      * @return
      */
+    @SequentialOnly
+    @IntermediateOp
     S parallel(int maxThreadNum, Splitor splitor, Executor executor);
 
     /**
@@ -866,6 +890,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @param executor should be able to execute {@code maxThreadNum} * {@code following up operations} in parallel.
      * @return
      */
+    @SequentialOnly
+    @IntermediateOp
     S parallel(int maxThreadNum, Executor executor);
 
     /**
@@ -873,6 +899,8 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      * @param executor should be able to execute {@code maxThreadNum} * {@code following up operations} in parallel.
      * @return
      */
+    @SequentialOnly
+    @IntermediateOp
     S parallel(Executor executor);
 
     //    /**

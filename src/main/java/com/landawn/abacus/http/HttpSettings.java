@@ -366,7 +366,7 @@ public final class HttpSettings {
      * @param headers
      * @return
      */
-    public HttpSettings headers(Map<String, Object> headers) {
+    public HttpSettings headers(Map<String, ?> headers) {
         headers().setAll(headers);
 
         return this;

@@ -152,7 +152,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author haiyang li
  *
  */
-public abstract class Fn extends Comparators {
+public final class Fn extends Comparators {
 
     /** The Constant NONE. */
     private static final Object NONE = new Object();
@@ -8870,6 +8870,44 @@ public abstract class Fn extends Comparators {
             };
         }
 
+        /** The Constant MIN_BY_KEY. */
+        @SuppressWarnings("rawtypes")
+        private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = new BinaryOperator<Map.Entry<Comparable, Object>>() {
+            @Override
+            public Map.Entry<Comparable, Object> apply(Map.Entry<Comparable, Object> t, Map.Entry<Comparable, Object> u) {
+                return N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
+            }
+        };
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> minByKey() {
+            return (BinaryOperator) MIN_BY_KEY;
+        }
+
+        /** The Constant MIN_BY_VALUE. */
+        @SuppressWarnings("rawtypes")
+        private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = new BinaryOperator<Map.Entry<Object, Comparable>>() {
+            @Override
+            public Map.Entry<Object, Comparable> apply(Map.Entry<Object, Comparable> t, Map.Entry<Object, Comparable> u) {
+                return N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
+            }
+        };
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> minByValue() {
+            return (BinaryOperator) MIN_BY_VALUE;
+        }
+
         /**
          *
          * @param <T>
@@ -8913,6 +8951,44 @@ public abstract class Fn extends Comparators {
                     return N.compare(keyMapper.apply(t), keyMapper.apply(u)) >= 0 ? t : u;
                 }
             };
+        }
+
+        /** The Constant MAX_BY_KEY. */
+        @SuppressWarnings("rawtypes")
+        private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = new BinaryOperator<Map.Entry<Comparable, Object>>() {
+            @Override
+            public Map.Entry<Comparable, Object> apply(Map.Entry<Comparable, Object> t, Map.Entry<Comparable, Object> u) {
+                return N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
+            }
+        };
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> maxByKey() {
+            return (BinaryOperator) MAX_BY_KEY;
+        }
+
+        /** The Constant MAX_BY_VALUE. */
+        @SuppressWarnings("rawtypes")
+        private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = new BinaryOperator<Map.Entry<Object, Comparable>>() {
+            @Override
+            public Map.Entry<Object, Comparable> apply(Map.Entry<Object, Comparable> t, Map.Entry<Object, Comparable> u) {
+                return N.compare(t.getValue(), u.getValue()) >= 0 ? t : u;
+            }
+        };
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> maxByValue() {
+            return (BinaryOperator) MAX_BY_VALUE;
         }
     }
 
@@ -11089,6 +11165,30 @@ public abstract class Fn extends Comparators {
          */
         public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
             return Fn.IDENTITY;
+        }
+
+        /**
+         *
+         * @param <K>
+         * @param <V>
+         * @param <E>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, K, E> key() {
+            return (Throwables.Function) Fn.KEY;
+        }
+
+        /**
+         *
+         * @param <K>
+         * @param <V>
+         * @param <E>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, V, E> value() {
+            return (Throwables.Function) Fn.VALUE;
         }
 
         /**

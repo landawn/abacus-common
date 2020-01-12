@@ -50,6 +50,7 @@ import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
+import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.Array;
@@ -417,11 +418,13 @@ public abstract class Stream<T>
     public abstract <K, V> EntryStream<K, V> flatMappToEntry(Function<? super T, ? extends EntryStream<? extends K, ? extends V>> mapper);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K> Stream<Map.Entry<K, List<T>>> groupBy(final Function<? super T, ? extends K> keyMapper);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K> Stream<Map.Entry<K, List<T>>> groupBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory);
 
@@ -433,7 +436,8 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V> Stream<Map.Entry<K, List<V>>> groupBy(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
@@ -445,36 +449,43 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V> Stream<Map.Entry<K, List<V>>> groupBy(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends Map<K, List<V>>> mapFactory);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, A, D> Stream<Map.Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, A, D> Stream<Map.Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V, A, D> Stream<Map.Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V, A, D> Stream<Map.Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream, final Supplier<? extends Map<K, D>> mapFactory);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V> Stream<Map.Entry<K, V>> groupBy(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V> Stream<Map.Entry<K, V>> groupBy(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory);
 
@@ -597,7 +608,8 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate)
      */
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract Stream<Map.Entry<Boolean, List<T>>> partitionBy(final Predicate<? super T> predicate);
 
     /**
@@ -608,22 +620,25 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <A, D> Stream<Map.Entry<Boolean, D>> partitionBy(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream);
 
     @ParallelSupported
     @IntermediateOp
-    @TerminalOp
+    @TerminalOpTriggered
     public <K> Stream<Map.Entry<K, Integer>> countBy(final Function<? super T, ? extends K> keyMapper) {
         return groupBy(keyMapper, Collectors.countingInt());
     }
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K> EntryStream<K, List<T>> groupByToEntry(final Function<? super T, ? extends K> keyMapper);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K> EntryStream<K, List<T>> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory);
 
@@ -635,7 +650,8 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function)
      */
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V> EntryStream<K, List<V>> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper);
 
     /**
@@ -647,36 +663,43 @@ public abstract class Stream<T>
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V> EntryStream<K, List<V>> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends Map<K, List<V>>> mapFactory);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Collector<? super V, A, D> downstream, final Supplier<? extends Map<K, D>> mapFactory);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V> EntryStream<K, V> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <K, V> EntryStream<K, V> groupByToEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory);
 
@@ -687,7 +710,8 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate)
      */
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract EntryStream<Boolean, List<T>> partitionByToEntry(final Predicate<? super T> predicate);
 
     /**
@@ -698,11 +722,13 @@ public abstract class Stream<T>
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract <A, D> EntryStream<Boolean, D> partitionByToEntry(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream);
 
     @ParallelSupported
-    @TerminalOp
+    @IntermediateOp
+    @TerminalOpTriggered
     public <K> EntryStream<K, Integer> countByToEntry(final Function<? super T, ? extends K> keyMapper) {
         return groupByToEntry(keyMapper, Collectors.countingInt());
     }
@@ -1266,6 +1292,7 @@ public abstract class Stream<T>
      * @param keyMapper
      * @param occurrencesFilter
      * @return
+     * @see #groupBy(Function, Collector)
      */
     @ParallelSupported
     @IntermediateOp
@@ -1277,25 +1304,47 @@ public abstract class Stream<T>
                 .map(Fn.<T, K, Long> kk());
     }
 
+    /**
+     * Distinct and filter by occurrences.
+     *
+     * @param keyMapper
+     * @param mergeFunction
+     * @return
+     * @see #groupBy(Function, Function, BinaryOperator)
+     */
     @ParallelSupported
     @IntermediateOp
+    @TerminalOpTriggered
+    public <K> Stream<T> distinctBy(final Function<? super T, K> keyMapper, final BinaryOperator<T> mergeFunction) {
+        final Supplier<? extends Map<K, T>> supplier = isParallel() ? Suppliers.<K, T> ofConcurrentHashMap() : Suppliers.<K, T> ofLinkedHashMap();
+
+        return groupBy(keyMapper, Fn.<T> identity(), mergeFunction, supplier).map(Fn.value());
+    }
+
+    @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public abstract Stream<T> sorted(Comparator<? super T> comparator);
 
     @SuppressWarnings("rawtypes")
     @ParallelSupported
     @IntermediateOp
+    @TerminalOpTriggered
     public abstract Stream<T> sortedBy(Function<? super T, ? extends Comparable> keyMapper);
 
     @ParallelSupported
     @IntermediateOp
+    @TerminalOpTriggered
     public abstract Stream<T> sortedByInt(ToIntFunction<? super T> keyMapper);
 
     @ParallelSupported
     @IntermediateOp
+    @TerminalOpTriggered
     public abstract Stream<T> sortedByLong(ToLongFunction<? super T> keyMapper);
 
     @ParallelSupported
     @IntermediateOp
+    @TerminalOpTriggered
     public abstract Stream<T> sortedByDouble(ToDoubleFunction<? super T> keyMapper);
 
     /**
@@ -2060,6 +2109,10 @@ public abstract class Stream<T>
     @TerminalOp
     public abstract <R> R toSetAndThen(Function<? super Set<T>, R> func);
 
+    @SequentialOnly
+    @TerminalOp
+    public abstract <R, CC extends Collection<T>> R toCollectionAndThen(final Supplier<? extends CC> supplier, final Function<? super CC, R> func);
+
     @ParallelSupported
     @TerminalOp
     public abstract Optional<T> min(Comparator<? super T> comparator);
@@ -2421,9 +2474,9 @@ public abstract class Stream<T>
     //    @SequentialOnly
     //    public abstract Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs);
 
-    @SafeVarargs
     @SequentialOnly
     @IntermediateOp
+    @SafeVarargs
     public final Stream<T> prepend(T... a) {
         return prepend(Arrays.asList(a));
     }
@@ -2432,9 +2485,9 @@ public abstract class Stream<T>
     @IntermediateOp
     public abstract Stream<T> prepend(Collection<? extends T> c);
 
-    @SafeVarargs
     @SequentialOnly
     @IntermediateOp
+    @SafeVarargs
     public final Stream<T> append(T... a) {
         return append(Arrays.asList(a));
     }
@@ -2449,9 +2502,9 @@ public abstract class Stream<T>
     //    @SequentialOnly
     //    public abstract Stream<T> prependAlll(Collection<? extends Collection<? extends T>> cs);
 
-    @SafeVarargs
     @SequentialOnly
     @IntermediateOp
+    @SafeVarargs
     public final Stream<T> appendIfEmpty(T... a) {
         return appendIfEmpty(Arrays.asList(a));
     }
@@ -4587,9 +4640,10 @@ public abstract class Stream<T>
 
         final Iterator<? extends Stream<? extends T>> iterators = c.iterator();
         final int threadNum = Math.min(c.size(), readThreadNum);
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
 
         for (int i = 0; i < threadNum; i++) {
-            DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
+            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     try {
@@ -4640,7 +4694,7 @@ public abstract class Stream<T>
                         threadCounter.decrementAndGet();
                     }
                 }
-            });
+            }));
         }
 
         return of(new QueuedIterator<T>(queueSize) {
@@ -4681,6 +4735,8 @@ public abstract class Stream<T>
             @Override
             public void run() {
                 onGoing.setFalse();
+
+                cancelAll(futureList);
             }
         });
     }
@@ -4747,9 +4803,10 @@ public abstract class Stream<T>
 
         final Iterator<? extends Iterator<? extends T>> iterators = c.iterator();
         final int threadNum = Math.min(c.size(), readThreadNum);
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
 
         for (int i = 0; i < threadNum; i++) {
-            DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
+            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
                     try {
@@ -4794,7 +4851,7 @@ public abstract class Stream<T>
                         threadCounter.decrementAndGet();
                     }
                 }
-            });
+            }));
         }
 
         return of(new QueuedIterator<T>(queueSize) {
@@ -4835,6 +4892,8 @@ public abstract class Stream<T>
             @Override
             public void run() {
                 onGoing.setFalse();
+
+                cancelAll(futureList);
             }
         });
     }
@@ -9732,62 +9791,5 @@ public abstract class Stream<T>
             super(sorted, cmp, closeHandlers);
             // Factory class.
         }
-    }
-
-    /**
-     * SOO = Sequential Only Operations.
-     * These operations run sequentially only, even under parallel stream.
-     *
-     * Mostly, if an operation is a single operation, or has to be executed in order,
-     *  or there is no benefit to execute it in parallel, it will run sequentially, even under parallel stream.
-     *
-     */
-    public enum SOO {
-        split, splitToList, splitToSet, splitAt, splitBy, sliding, slidingToList, //
-        intersection, difference, symmetricDifference, //
-        reversed, shuffled, rotated, distinct, hasDuplicates, //
-        append, prepend, indexed, skip, skipLast, limit, step, //
-        join, queued, merge, persist, //
-        combinations, permutations, orderedPermutations, percentiles, cartesianProduct, //
-        collapse, rangeMap, scan, intersperse, top, kthLargest, last, //
-        count, findFirstOrLast, findFirstAndLast, //
-        toArray, toList, toSet, toMultiset, toLongMultiset, toMatrix, toDataSet, //
-        boxed, iterator, asIntStream, asLongStream, asFloatStream, asDoubleStream, //
-        select, println, onClosed, close;
-    }
-
-    /**
-     * PSO = Parallel supported Operations.
-     * These operations run in parallel under parallel stream.
-     *
-     * Mostly, if an operation can be executed in parallel and has benefit to execute it in parallel. it will run in parallel under parallel stream.
-     *
-     * @author haiyangl
-     *
-     */
-    public enum PSO {
-        map, slidingMap, mapToEntry, mapTo_, mapFirst, mapFirstOrElse, mapLast, mapLastOrElse, //
-        flatMap, flattMap, flatMapp, flatMapTo_, //
-        filter, takeWhile, dropWhile, removeIf, skipNull, //
-        sorted, reverseSorted, distinctBy, distinct_filter, peek, peekFirst, peekLast, //
-        groupBy, groupByEntry, groupTo, partitionBy, partitionByToEntry, paritionTo, countBy, countByToEntry, //
-        min, minBy, max, maxBy, sumInt, sumLong, sumDouble, averageInt, averageLong, averageDouble, //
-        toMap, toMulitmap, summerize, summerizze, //
-        forEach, forEachPair, forEachTriple, anyMatch, allMatch, noneMatch, findFirst, findLast, findAny, //
-        reduce, collect, innerJoin, fullJoin, leftJoin, rightJoin, zipWith;
-    }
-
-    /**
-     * LAIO = Loading All Intermediate Operations.
-     *
-     * Intermediate operations which will load or go through all the elements in the stream.
-     * <br />
-     * These operation are stateful intermediate operations, which means that subsequent operations no longer operate on the backing collection/iterator, but on an internal state.
-     *
-     */
-    public enum LAIO {
-        sorted, sortedBy, reverseSorted, resversed, shuffled, rotated, last_n, //
-        groupBy, groupByToEntity, partitionBy, partitionByToEntity, countBy, countByToEntry; //
-        // HEADD, TAILL, HEAD_AND_TAILL;
     }
 }

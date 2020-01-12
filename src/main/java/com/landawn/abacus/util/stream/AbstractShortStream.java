@@ -38,6 +38,7 @@ import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.ShortSummaryStatistics;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -606,7 +607,11 @@ abstract class AbstractShortStream extends ShortStream {
     public ShortStream reversed() {
         return newStream(new ShortIteratorEx() {
             private boolean initialized = false;
-            private short[] aar;
+
+            private short[] elements;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+
             private int cursor;
 
             @Override
@@ -615,7 +620,7 @@ abstract class AbstractShortStream extends ShortStream {
                     init();
                 }
 
-                return cursor > 0;
+                return cursor > fromIndex;
             }
 
             @Override
@@ -624,11 +629,11 @@ abstract class AbstractShortStream extends ShortStream {
                     init();
                 }
 
-                if (cursor <= 0) {
+                if (cursor <= fromIndex) {
                     throw new NoSuchElementException();
                 }
 
-                return aar[--cursor];
+                return elements[--cursor];
             }
 
             @Override
@@ -637,7 +642,7 @@ abstract class AbstractShortStream extends ShortStream {
                     init();
                 }
 
-                return cursor;
+                return cursor - fromIndex;
             }
 
             @Override
@@ -646,7 +651,7 @@ abstract class AbstractShortStream extends ShortStream {
                     init();
                 }
 
-                cursor = n < cursor ? cursor - (int) n : 0;
+                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
             }
 
             @Override
@@ -655,10 +660,10 @@ abstract class AbstractShortStream extends ShortStream {
                     init();
                 }
 
-                final short[] a = new short[cursor];
+                final short[] a = new short[cursor - fromIndex];
 
-                for (int i = 0; i < cursor; i++) {
-                    a[i] = aar[cursor - i - 1];
+                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+                    a[i] = elements[cursor - i - 1];
                 }
 
                 return a;
@@ -667,20 +672,15 @@ abstract class AbstractShortStream extends ShortStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractShortStream.this.toArray();
-                    cursor = aar.length;
-                }
-            }
-        }, false);
-    }
 
-    @Override
-    public ShortStream shuffled(final Random rnd) {
-        return lazyLoad(new Function<short[], short[]>() {
-            @Override
-            public short[] apply(final short[] a) {
-                N.shuffle(a, rnd);
-                return a;
+                    final Tuple3<short[], Integer, Integer> tp = AbstractShortStream.this.array();
+
+                    elements = tp._1;
+                    fromIndex = tp._2;
+                    toIndex = tp._3;
+
+                    cursor = toIndex;
+                }
             }
         }, false);
     }
@@ -689,7 +689,11 @@ abstract class AbstractShortStream extends ShortStream {
     public ShortStream rotated(final int distance) {
         return newStream(new ShortIteratorEx() {
             private boolean initialized = false;
-            private short[] aar;
+
+            private short[] elements;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+
             private int len;
             private int start;
             private int cnt = 0;
@@ -709,7 +713,7 @@ abstract class AbstractShortStream extends ShortStream {
                     throw new NoSuchElementException();
                 }
 
-                return aar[(start + cnt++) % len];
+                return elements[((start + cnt++) % len) + fromIndex];
             }
 
             @Override
@@ -739,7 +743,7 @@ abstract class AbstractShortStream extends ShortStream {
                 final short[] a = new short[len - cnt];
 
                 for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = aar[(start + i) % len];
+                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
 
                 return a;
@@ -748,8 +752,14 @@ abstract class AbstractShortStream extends ShortStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractShortStream.this.toArray();
-                    len = aar.length;
+
+                    final Tuple3<short[], Integer, Integer> tp = AbstractShortStream.this.array();
+
+                    elements = tp._1;
+                    fromIndex = tp._2;
+                    toIndex = tp._3;
+
+                    len = toIndex - fromIndex;
 
                     if (len > 0) {
                         start = distance % len;
@@ -763,6 +773,17 @@ abstract class AbstractShortStream extends ShortStream {
                 }
             }
         }, distance == 0 && sorted);
+    }
+
+    @Override
+    public ShortStream shuffled(final Random rnd) {
+        return lazyLoad(new Function<short[], short[]>() {
+            @Override
+            public short[] apply(final short[] a) {
+                N.shuffle(a, rnd);
+                return a;
+            }
+        }, false);
     }
 
     @Override

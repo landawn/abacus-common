@@ -37,6 +37,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -605,7 +606,11 @@ abstract class AbstractLongStream extends LongStream {
     public LongStream reversed() {
         return newStream(new LongIteratorEx() {
             private boolean initialized = false;
-            private long[] aar;
+
+            private long[] elements;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+
             private int cursor;
 
             @Override
@@ -614,7 +619,7 @@ abstract class AbstractLongStream extends LongStream {
                     init();
                 }
 
-                return cursor > 0;
+                return cursor > fromIndex;
             }
 
             @Override
@@ -623,11 +628,11 @@ abstract class AbstractLongStream extends LongStream {
                     init();
                 }
 
-                if (cursor <= 0) {
+                if (cursor <= fromIndex) {
                     throw new NoSuchElementException();
                 }
 
-                return aar[--cursor];
+                return elements[--cursor];
             }
 
             @Override
@@ -636,7 +641,7 @@ abstract class AbstractLongStream extends LongStream {
                     init();
                 }
 
-                return cursor;
+                return cursor - fromIndex;
             }
 
             @Override
@@ -645,7 +650,7 @@ abstract class AbstractLongStream extends LongStream {
                     init();
                 }
 
-                cursor = n < cursor ? cursor - (int) n : 0;
+                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
             }
 
             @Override
@@ -654,10 +659,10 @@ abstract class AbstractLongStream extends LongStream {
                     init();
                 }
 
-                final long[] a = new long[cursor];
+                final long[] a = new long[cursor - fromIndex];
 
-                for (int i = 0; i < cursor; i++) {
-                    a[i] = aar[cursor - i - 1];
+                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+                    a[i] = elements[cursor - i - 1];
                 }
 
                 return a;
@@ -666,20 +671,15 @@ abstract class AbstractLongStream extends LongStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractLongStream.this.toArray();
-                    cursor = aar.length;
-                }
-            }
-        }, false);
-    }
 
-    @Override
-    public LongStream shuffled(final Random rnd) {
-        return lazyLoad(new Function<long[], long[]>() {
-            @Override
-            public long[] apply(final long[] a) {
-                N.shuffle(a, rnd);
-                return a;
+                    final Tuple3<long[], Integer, Integer> tp = AbstractLongStream.this.array();
+
+                    elements = tp._1;
+                    fromIndex = tp._2;
+                    toIndex = tp._3;
+
+                    cursor = toIndex;
+                }
             }
         }, false);
     }
@@ -688,7 +688,11 @@ abstract class AbstractLongStream extends LongStream {
     public LongStream rotated(final int distance) {
         return newStream(new LongIteratorEx() {
             private boolean initialized = false;
-            private long[] aar;
+
+            private long[] elements;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+
             private int len;
             private int start;
             private int cnt = 0;
@@ -708,7 +712,7 @@ abstract class AbstractLongStream extends LongStream {
                     throw new NoSuchElementException();
                 }
 
-                return aar[(start + cnt++) % len];
+                return elements[((start + cnt++) % len) + fromIndex];
             }
 
             @Override
@@ -738,7 +742,7 @@ abstract class AbstractLongStream extends LongStream {
                 final long[] a = new long[len - cnt];
 
                 for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = aar[(start + i) % len];
+                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
 
                 return a;
@@ -747,8 +751,14 @@ abstract class AbstractLongStream extends LongStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractLongStream.this.toArray();
-                    len = aar.length;
+
+                    final Tuple3<long[], Integer, Integer> tp = AbstractLongStream.this.array();
+
+                    elements = tp._1;
+                    fromIndex = tp._2;
+                    toIndex = tp._3;
+
+                    len = toIndex - fromIndex;
 
                     if (len > 0) {
                         start = distance % len;
@@ -762,6 +772,17 @@ abstract class AbstractLongStream extends LongStream {
                 }
             }
         }, distance == 0 && sorted);
+    }
+
+    @Override
+    public LongStream shuffled(final Random rnd) {
+        return lazyLoad(new Function<long[], long[]>() {
+            @Override
+            public long[] apply(final long[] a) {
+                N.shuffle(a, rnd);
+                return a;
+            }
+        }, false);
     }
 
     @Override

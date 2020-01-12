@@ -38,6 +38,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -601,7 +602,11 @@ abstract class AbstractByteStream extends ByteStream {
     public ByteStream reversed() {
         return newStream(new ByteIteratorEx() {
             private boolean initialized = false;
-            private byte[] aar;
+
+            private byte[] elements;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+
             private int cursor;
 
             @Override
@@ -610,7 +615,7 @@ abstract class AbstractByteStream extends ByteStream {
                     init();
                 }
 
-                return cursor > 0;
+                return cursor > fromIndex;
             }
 
             @Override
@@ -619,11 +624,11 @@ abstract class AbstractByteStream extends ByteStream {
                     init();
                 }
 
-                if (cursor <= 0) {
+                if (cursor <= fromIndex) {
                     throw new NoSuchElementException();
                 }
 
-                return aar[--cursor];
+                return elements[--cursor];
             }
 
             @Override
@@ -632,7 +637,7 @@ abstract class AbstractByteStream extends ByteStream {
                     init();
                 }
 
-                return cursor;
+                return cursor - fromIndex;
             }
 
             @Override
@@ -641,7 +646,7 @@ abstract class AbstractByteStream extends ByteStream {
                     init();
                 }
 
-                cursor = n < cursor ? cursor - (int) n : 0;
+                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
             }
 
             @Override
@@ -650,10 +655,10 @@ abstract class AbstractByteStream extends ByteStream {
                     init();
                 }
 
-                final byte[] a = new byte[cursor];
+                final byte[] a = new byte[cursor - fromIndex];
 
-                for (int i = 0; i < cursor; i++) {
-                    a[i] = aar[cursor - i - 1];
+                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+                    a[i] = elements[cursor - i - 1];
                 }
 
                 return a;
@@ -662,20 +667,15 @@ abstract class AbstractByteStream extends ByteStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractByteStream.this.toArray();
-                    cursor = aar.length;
-                }
-            }
-        }, false);
-    }
 
-    @Override
-    public ByteStream shuffled(final Random rnd) {
-        return lazyLoad(new Function<byte[], byte[]>() {
-            @Override
-            public byte[] apply(final byte[] a) {
-                N.shuffle(a, rnd);
-                return a;
+                    final Tuple3<byte[], Integer, Integer> tp = AbstractByteStream.this.array();
+
+                    elements = tp._1;
+                    fromIndex = tp._2;
+                    toIndex = tp._3;
+
+                    cursor = toIndex;
+                }
             }
         }, false);
     }
@@ -684,7 +684,11 @@ abstract class AbstractByteStream extends ByteStream {
     public ByteStream rotated(final int distance) {
         return newStream(new ByteIteratorEx() {
             private boolean initialized = false;
-            private byte[] aar;
+
+            private byte[] elements;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+
             private int len;
             private int start;
             private int cnt = 0;
@@ -704,7 +708,7 @@ abstract class AbstractByteStream extends ByteStream {
                     throw new NoSuchElementException();
                 }
 
-                return aar[(start + cnt++) % len];
+                return elements[((start + cnt++) % len) + fromIndex];
             }
 
             @Override
@@ -734,7 +738,7 @@ abstract class AbstractByteStream extends ByteStream {
                 final byte[] a = new byte[len - cnt];
 
                 for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = aar[(start + i) % len];
+                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
 
                 return a;
@@ -743,8 +747,14 @@ abstract class AbstractByteStream extends ByteStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractByteStream.this.toArray();
-                    len = aar.length;
+
+                    final Tuple3<byte[], Integer, Integer> tp = AbstractByteStream.this.array();
+
+                    elements = tp._1;
+                    fromIndex = tp._2;
+                    toIndex = tp._3;
+
+                    len = toIndex - fromIndex;
 
                     if (len > 0) {
                         start = distance % len;
@@ -758,6 +768,17 @@ abstract class AbstractByteStream extends ByteStream {
                 }
             }
         }, distance == 0 && sorted);
+    }
+
+    @Override
+    public ByteStream shuffled(final Random rnd) {
+        return lazyLoad(new Function<byte[], byte[]>() {
+            @Override
+            public byte[] apply(final byte[] a) {
+                N.shuffle(a, rnd);
+                return a;
+            }
+        }, false);
     }
 
     @Override

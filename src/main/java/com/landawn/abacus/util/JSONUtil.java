@@ -51,7 +51,7 @@ public final class JSONUtil {
      * @param map
      * @return
      */
-    public static JSONObject wrap(final Map<String, Object> map) {
+    public static JSONObject wrap(final Map<String, ?> map) {
         return new JSONObject(map);
     }
 

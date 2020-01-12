@@ -514,8 +514,9 @@ public final class HttpHeaders {
      *
      * @param headers
      */
-    HttpHeaders(final Map<String, Object> headers) {
-        this.map = headers;
+    @SuppressWarnings("rawtypes")
+    HttpHeaders(final Map<String, ?> headers) {
+        this.map = (Map) headers;
     }
 
     /**
@@ -531,7 +532,7 @@ public final class HttpHeaders {
      * @param headers
      * @return
      */
-    public static HttpHeaders of(final Map<String, Object> headers) {
+    public static HttpHeaders of(final Map<String, ?> headers) {
         N.checkArgNotNull(headers);
 
         return new HttpHeaders(headers);
@@ -542,7 +543,7 @@ public final class HttpHeaders {
      * @param headers
      * @return
      */
-    public static HttpHeaders copyOf(final Map<String, Object> headers) {
+    public static HttpHeaders copyOf(final Map<String, ?> headers) {
         N.checkArgNotNull(headers);
 
         return new HttpHeaders(new HashMap<>(headers));

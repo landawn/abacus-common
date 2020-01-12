@@ -35,6 +35,8 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
@@ -1280,105 +1282,105 @@ class ArrayCharStream extends AbstractCharStream {
         }
     }
 
-    @Override
-    public CharStream reversed() {
-        return newStream(new CharIteratorEx() {
-            private int cursor = toIndex;
-
-            @Override
-            public boolean hasNext() {
-                return cursor > fromIndex;
-            }
-
-            @Override
-            public char nextChar() {
-                if (cursor <= fromIndex) {
-                    throw new NoSuchElementException();
-                }
-                return elements[--cursor];
-            }
-
-            @Override
-            public long count() {
-                return cursor - fromIndex;
-            }
-
-            @Override
-            public void skip(long n) {
-                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
-            }
-
-            @Override
-            public char[] toArray() {
-                final char[] a = new char[cursor - fromIndex];
-
-                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
-                    a[i] = elements[cursor - i - 1];
-                }
-
-                return a;
-            }
-        }, false);
-    }
-
-    @Override
-    public CharStream rotated(final int distance) {
-        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
-            return newStream(elements, fromIndex, toIndex, sorted);
-        }
-
-        return newStream(new CharIteratorEx() {
-            private final int len = toIndex - fromIndex;
-            private int start;
-            private int cnt = 0;
-
-            {
-
-                start = distance % len;
-
-                if (start < 0) {
-                    start += len;
-                }
-
-                start = len - start;
-            }
-
-            @Override
-            public boolean hasNext() {
-                return cnt < len;
-            }
-
-            @Override
-            public char nextChar() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
-                }
-
-                return elements[((start + cnt++) % len) + fromIndex];
-            }
-
-            @Override
-            public long count() {
-                return len - cnt;
-            }
-
-            @Override
-            public void skip(long n) {
-                cnt = n < len - cnt ? cnt + (int) n : len;
-            }
-
-            @Override
-            public char[] toArray() {
-                final char[] a = new char[len - cnt];
-
-                for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
-                }
-
-                return a;
-            }
-        }, false);
-    }
+    //    @Override
+    //    public CharStream reversed() {
+    //        return newStream(new CharIteratorEx() {
+    //            private int cursor = toIndex;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cursor > fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public char nextChar() {
+    //                if (cursor <= fromIndex) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //                return elements[--cursor];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return cursor - fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public char[] toArray() {
+    //                final char[] a = new char[cursor - fromIndex];
+    //
+    //                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+    //                    a[i] = elements[cursor - i - 1];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
+    //
+    //    @Override
+    //    public CharStream rotated(final int distance) {
+    //        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
+    //            return newStream(elements, fromIndex, toIndex, sorted);
+    //        }
+    //
+    //        return newStream(new CharIteratorEx() {
+    //            private final int len = toIndex - fromIndex;
+    //            private int start;
+    //            private int cnt = 0;
+    //
+    //            {
+    //
+    //                start = distance % len;
+    //
+    //                if (start < 0) {
+    //                    start += len;
+    //                }
+    //
+    //                start = len - start;
+    //            }
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cnt < len;
+    //            }
+    //
+    //            @Override
+    //            public char nextChar() {
+    //                if (hasNext() == false) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                return elements[((start + cnt++) % len) + fromIndex];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return len - cnt;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cnt = n < len - cnt ? cnt + (int) n : len;
+    //            }
+    //
+    //            @Override
+    //            public char[] toArray() {
+    //                final char[] a = new char[len - cnt];
+    //
+    //                for (int i = cnt; i < len; i++) {
+    //                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
 
     @Override
     public CharSummaryStatistics summarize() {
@@ -1622,6 +1624,13 @@ class ArrayCharStream extends AbstractCharStream {
         }
 
         return OrElse.FALSE;
+    }
+
+    @Override
+    Tuple3<char[], Integer, Integer> array() {
+        close();
+
+        return Tuple.of(elements, fromIndex, toIndex);
     }
 
     @Override

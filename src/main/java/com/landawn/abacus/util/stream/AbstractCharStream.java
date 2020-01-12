@@ -38,6 +38,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -601,7 +602,11 @@ abstract class AbstractCharStream extends CharStream {
     public CharStream reversed() {
         return newStream(new CharIteratorEx() {
             private boolean initialized = false;
-            private char[] aar;
+
+            private char[] elements;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+
             private int cursor;
 
             @Override
@@ -610,7 +615,7 @@ abstract class AbstractCharStream extends CharStream {
                     init();
                 }
 
-                return cursor > 0;
+                return cursor > fromIndex;
             }
 
             @Override
@@ -619,11 +624,11 @@ abstract class AbstractCharStream extends CharStream {
                     init();
                 }
 
-                if (cursor <= 0) {
+                if (cursor <= fromIndex) {
                     throw new NoSuchElementException();
                 }
 
-                return aar[--cursor];
+                return elements[--cursor];
             }
 
             @Override
@@ -632,7 +637,7 @@ abstract class AbstractCharStream extends CharStream {
                     init();
                 }
 
-                return cursor;
+                return cursor - fromIndex;
             }
 
             @Override
@@ -641,7 +646,7 @@ abstract class AbstractCharStream extends CharStream {
                     init();
                 }
 
-                cursor = n < cursor ? cursor - (int) n : 0;
+                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
             }
 
             @Override
@@ -650,10 +655,10 @@ abstract class AbstractCharStream extends CharStream {
                     init();
                 }
 
-                final char[] a = new char[cursor];
+                final char[] a = new char[cursor - fromIndex];
 
-                for (int i = 0; i < cursor; i++) {
-                    a[i] = aar[cursor - i - 1];
+                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+                    a[i] = elements[cursor - i - 1];
                 }
 
                 return a;
@@ -662,20 +667,15 @@ abstract class AbstractCharStream extends CharStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractCharStream.this.toArray();
-                    cursor = aar.length;
-                }
-            }
-        }, false);
-    }
 
-    @Override
-    public CharStream shuffled(final Random rnd) {
-        return lazyLoad(new Function<char[], char[]>() {
-            @Override
-            public char[] apply(final char[] a) {
-                N.shuffle(a, rnd);
-                return a;
+                    final Tuple3<char[], Integer, Integer> tp = AbstractCharStream.this.array();
+
+                    elements = tp._1;
+                    fromIndex = tp._2;
+                    toIndex = tp._3;
+
+                    cursor = toIndex;
+                }
             }
         }, false);
     }
@@ -684,7 +684,11 @@ abstract class AbstractCharStream extends CharStream {
     public CharStream rotated(final int distance) {
         return newStream(new CharIteratorEx() {
             private boolean initialized = false;
-            private char[] aar;
+
+            private char[] elements;
+            private int fromIndex = -1;
+            private int toIndex = -1;
+
             private int len;
             private int start;
             private int cnt = 0;
@@ -704,7 +708,7 @@ abstract class AbstractCharStream extends CharStream {
                     throw new NoSuchElementException();
                 }
 
-                return aar[(start + cnt++) % len];
+                return elements[((start + cnt++) % len) + fromIndex];
             }
 
             @Override
@@ -734,7 +738,7 @@ abstract class AbstractCharStream extends CharStream {
                 final char[] a = new char[len - cnt];
 
                 for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = aar[(start + i) % len];
+                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
 
                 return a;
@@ -743,8 +747,14 @@ abstract class AbstractCharStream extends CharStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractCharStream.this.toArray();
-                    len = aar.length;
+
+                    final Tuple3<char[], Integer, Integer> tp = AbstractCharStream.this.array();
+
+                    elements = tp._1;
+                    fromIndex = tp._2;
+                    toIndex = tp._3;
+
+                    len = toIndex - fromIndex;
 
                     if (len > 0) {
                         start = distance % len;
@@ -758,6 +768,17 @@ abstract class AbstractCharStream extends CharStream {
                 }
             }
         }, distance == 0 && sorted);
+    }
+
+    @Override
+    public CharStream shuffled(final Random rnd) {
+        return lazyLoad(new Function<char[], char[]>() {
+            @Override
+            public char[] apply(final char[] a) {
+                N.shuffle(a, rnd);
+                return a;
+            }
+        }, false);
     }
 
     @Override

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.util.ArrayDeque;
@@ -72,6 +73,8 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Wrapper;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -781,6 +784,12 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     //        return Try.of((S) this);
     //    }
 
+    Tuple3<A, Integer, Integer> array() {
+        final A a = toArray();
+
+        return Tuple.of(a, 0, Array.getLength(a));
+    }
+
     @Override
     public synchronized void close() {
         if (isClosed) {
@@ -1432,6 +1441,24 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
                 throw (E) eHolder.value();
             } else {
                 throw N.toRuntimeException(eHolder.value());
+            }
+        }
+    }
+
+    // TODO really works or speed up???
+    static void cancelAll(final List<ContinuableFuture<Void>> futureList) {
+        if (N.isNullOrEmpty(futureList)) {
+            return;
+        }
+
+        for (ContinuableFuture<Void> future : futureList) {
+            if (!(future.isDone() || future.isAllCancelled())) {
+                try {
+                    future.cancelAll(true);
+                } catch (Throwable e) {
+                    // e.printStackTrace();
+                    // ignore
+                }
             }
         }
     }

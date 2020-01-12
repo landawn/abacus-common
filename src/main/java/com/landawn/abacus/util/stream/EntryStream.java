@@ -27,8 +27,10 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.BiIterator;
 import com.landawn.abacus.util.Comparators;
@@ -477,6 +479,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#groupingBy(Function)
      */
     @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, List<V>> groupBy() {
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
@@ -496,6 +500,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#groupingBy(Function, Supplier)
      */
     @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, List<V>> groupBy(final Supplier<? extends Map<K, List<V>>> mapFactory) {
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
@@ -508,6 +514,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, List<VV>> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper) {
 
@@ -523,6 +531,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, List<VV>> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final Supplier<? extends Map<KK, List<VV>>> mapFactory) {
 
@@ -536,6 +546,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public <A, D> EntryStream<K, D> groupBy(final Collector<? super Map.Entry<K, V>, A, D> downstream) {
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
 
@@ -550,6 +562,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public <A, D> EntryStream<K, D> groupBy(final Collector<? super Map.Entry<K, V>, A, D> downstream, final Supplier<? extends Map<K, D>> mapFactory) {
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
 
@@ -565,6 +579,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public <KK, A, D> EntryStream<KK, D> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Collector<? super Map.Entry<K, V>, A, D> downstream) {
 
@@ -579,6 +595,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public <KK, A, D> EntryStream<KK, D> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Collector<? super Map.Entry<K, V>, A, D> downstream, final Supplier<? extends Map<KK, D>> mapFactory) {
 
@@ -591,6 +609,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> groupBy(final BinaryOperator<V> mergeFunction) {
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
@@ -609,6 +629,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @return
      */
     @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> groupBy(final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory) {
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
@@ -629,6 +651,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#groupBy(Function, Function, BinaryOperator)
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, VV> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final BinaryOperator<VV> mergeFunction) {
 
@@ -645,6 +669,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @see Collectors#groupBy(Function, Function, BinaryOperator, Supplier)
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, VV> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final BinaryOperator<VV> mergeFunction,
             final Supplier<? extends Map<KK, VV>> mapFactory) {
@@ -689,11 +715,15 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> sorted(final Comparator<? super Map.Entry<K, V>> comparator) {
         return of(s.sorted(comparator));
     }
 
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> sortedByKey(final Comparator<? super K> keyComparator) {
         final Comparator<Map.Entry<K, V>> comparator = Comparators.comparingByKey(keyComparator);
 
@@ -701,6 +731,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> sortedByValue(final Comparator<? super V> valueComparator) {
         final Comparator<Map.Entry<K, V>> comparator = Comparators.comparingByValue(valueComparator);
 
@@ -709,6 +741,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
 
     @SuppressWarnings("rawtypes")
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> sortedBy(Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper) {
         return of(s.sortedBy(keyMapper));
     }
@@ -719,6 +753,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> sortedByInt(final ToIntFunction<? super Map.Entry<K, V>> keyMapper) {
         final Comparator<? super Map.Entry<K, V>> comparator = Comparators.comparingInt(keyMapper);
 
@@ -731,6 +767,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> sortedByLong(final ToLongFunction<? super Map.Entry<K, V>> keyMapper) {
         final Comparator<? super Map.Entry<K, V>> comparator = Comparators.comparingLong(keyMapper);
 
@@ -743,6 +781,8 @@ public final class EntryStream<K, V> implements AutoCloseable {
      * @return
      */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> sortedByDouble(final ToDoubleFunction<? super Map.Entry<K, V>> keyMapper) {
         final Comparator<? super Map.Entry<K, V>> comparator = Comparators.comparingDouble(keyMapper);
 
@@ -750,11 +790,13 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @SequentialOnly
+    @IntermediateOp
     public EntryStream<K, V> distinct() {
         return of(s.distinct());
     }
 
     @SequentialOnly
+    @IntermediateOp
     public EntryStream<K, V> distinctByKey() {
         final Function<? super Entry<K, V>, K> keyMapper = Fn.key();
 
@@ -766,6 +808,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @SequentialOnly
+    @IntermediateOp
     public EntryStream<K, V> distinctByValue() {
         final Function<? super Entry<K, V>, V> keyMapper = Fn.value();
 
@@ -777,38 +820,72 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
+    @IntermediateOp
     public EntryStream<K, V> distinctBy(final Function<? super Map.Entry<K, V>, ?> keyMapper) {
         return of(s.distinctBy(keyMapper));
     }
 
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> distinct(final Predicate<? super Long> occurrencesFilter) {
         return of(s.distinct(occurrencesFilter));
     }
 
+    /**
+     * 
+     * @param keyMapper
+     * @param occurrencesFilter
+     * @return
+     * @see #groupBy(Function, Collector)
+     */
     @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> distinctBy(final Function<? super Entry<K, V>, ?> keyMapper, final Predicate<? super Long> occurrencesFilter) {
         return of(s.distinctBy(keyMapper, occurrencesFilter));
     }
 
+    /**
+     * 
+     * @param keyMapper
+     * @param mergeFunction
+     * @return
+     * @see #groupBy(Function, Function, BinaryOperator)
+     */
+    @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
+    public EntryStream<K, V> distinctBy(final Function<? super Entry<K, V>, ?> keyMapper, BinaryOperator<Map.Entry<K, V>> mergeFunction) {
+        return of(s.distinctBy(keyMapper, mergeFunction));
+    }
+
     @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> reversed() {
         return of(s.reversed());
     }
 
     @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
+    public EntryStream<K, V> rotated(final int distance) {
+        return of(s.rotated(distance));
+    }
+
+    @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> shuffled() {
         return of(s.shuffled());
     }
 
     @SequentialOnly
+    @IntermediateOp
+    @TerminalOpTriggered
     public EntryStream<K, V> shuffled(final Random rnd) {
         return of(s.shuffled(rnd));
-    }
-
-    @SequentialOnly
-    public EntryStream<K, V> rotated(final int distance) {
-        return of(s.rotated(distance));
     }
 
     @SuppressWarnings("rawtypes")
