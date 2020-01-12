@@ -1,6 +1,8 @@
 ### 1.10.6
 
-* `Stream.distinctBy(Function<? super T, K> keyMapper, final BinaryOperator<T> mergeFunction)`.
+* Remove `Iterables.iterator/N.iterate(T[] ...a)/N.iterate(Collection<T> ...a)`.
+* Add `Stream.distinctBy(Function<? super T, K> keyMapper, final BinaryOperator<T> mergeFunction)`.
+* Add `Stream.cycled`.
 * Improvements and bug fix.
 
 

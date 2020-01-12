@@ -3658,6 +3658,122 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
+    public Stream<T> cycled() {
+        return newStream(new ObjIteratorEx<T>() {
+            private Iterator<T> iter;
+            private List<T> list;
+            private T[] a = (T[]) N.EMPTY_OBJECT_ARRAY;
+            private int cursor = 0;
+            private T e = null;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() {
+                if (initialized == false) {
+                    init();
+                }
+
+                if (!iter.hasNext()) {
+                    a = (T[]) list.toArray();
+                }
+
+                return a.length > 0 || iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (initialized == false) {
+                    init();
+                }
+
+                if (a.length > 0) {
+                    if (cursor >= a.length) {
+                        cursor = 0;
+                    }
+
+                    return a[cursor++];
+                } else {
+                    e = iter.next();
+                    list.add(e);
+
+                    return e;
+                }
+            }
+
+            private void init() {
+                if (initialized == false) {
+                    initialized = true;
+                    iter = AbstractStream.this.iteratorEx();
+                    list = new ArrayList<>();
+                }
+            }
+        }, false, null);
+    }
+
+    @Override
+    public Stream<T> cycled(long times) {
+        checkArgNotNegative(times, "times");
+
+        return newStream(new ObjIteratorEx<T>() {
+            private Iterator<T> iter;
+            private List<T> list;
+            private T[] a = (T[]) N.EMPTY_OBJECT_ARRAY;
+            private int len = 0;
+            private int cursor = -1;
+            private T e = null;
+            private long m = 0;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() {
+                if (initialized == false) {
+                    init();
+                }
+
+                if (!iter.hasNext()) {
+                    a = (T[]) list.toArray();
+                    len = a.length;
+                    cursor = 0;
+                    m = 1;
+                }
+
+                return m < times && (cursor < len || times - m > 1) && (len > 0 || iter.hasNext());
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                if (len > 0) {
+                    if (cursor >= len) {
+                        cursor = 0;
+                        m++;
+                    }
+
+                    return a[cursor++];
+                } else {
+                    e = iter.next();
+                    list.add(e);
+
+                    return e;
+                }
+            }
+
+            private void init() {
+                if (initialized == false) {
+                    initialized = true;
+                    iter = AbstractStream.this.iteratorEx();
+                    list = new ArrayList<>();
+                }
+            }
+        }, false, null);
+    }
+
+    @Override
     public Stream<T> queued() {
         return queued(DEFAULT_QUEUE_SIZE_PER_ITERATOR);
     }

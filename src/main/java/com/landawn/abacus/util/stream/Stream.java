@@ -71,7 +71,6 @@ import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
-import com.landawn.abacus.util.Iterables;
 import com.landawn.abacus.util.Keyed;
 import com.landawn.abacus.util.LineIterator;
 import com.landawn.abacus.util.ListMultimap;
@@ -2542,6 +2541,14 @@ public abstract class Stream<T>
     //     */
     //    @Beta
     //    public abstract <E extends Exception> void acceptIfNotEmpty(Try.Consumer<? super Stream<T>, E> action) throws E;
+
+    @SequentialOnly
+    @IntermediateOp
+    public abstract Stream<T> cycled();
+
+    @SequentialOnly
+    @IntermediateOp
+    public abstract Stream<T> cycled(long times);
 
     /**
      * Returns a new Stream with elements from a temporary queue which is filled by reading the elements from this Stream asynchronously.
@@ -7301,7 +7308,7 @@ public abstract class Stream<T>
      */
     public static <A, B, R> Stream<R> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final BiFunction<? super A, ? super B, R> zipFunction) {
-        return zip(Iterables.iterator(a), Iterables.iterator(b), zipFunction);
+        return zip(N.iterate(a), N.iterate(b), zipFunction);
     }
 
     /**
@@ -7314,7 +7321,7 @@ public abstract class Stream<T>
      */
     public static <A, B, C, R> Stream<R> zip(final Collection<? extends A> a, final Collection<? extends B> b, final Collection<? extends C> c,
             final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
-        return zip(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), zipFunction);
+        return zip(N.iterate(a), N.iterate(b), N.iterate(c), zipFunction);
     }
 
     /**
@@ -7505,7 +7512,7 @@ public abstract class Stream<T>
      */
     public static <A, B, R> Stream<R> zip(final Collection<? extends A> a, final Collection<? extends B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, R> zipFunction) {
-        return zip(Iterables.iterator(a), Iterables.iterator(b), valueForNoneA, valueForNoneB, zipFunction);
+        return zip(N.iterate(a), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction);
     }
 
     /**
@@ -7523,7 +7530,7 @@ public abstract class Stream<T>
      */
     public static <A, B, C, R> Stream<R> zip(final Collection<? extends A> a, final Collection<? extends B> b, final Collection<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
-        return zip(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        return zip(N.iterate(a), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     /**
@@ -7639,7 +7646,7 @@ public abstract class Stream<T>
         final List<Iterator<? extends T>> iterList = new ArrayList<>(len);
 
         for (Collection<? extends T> e : c) {
-            iterList.add(Iterables.iterator(e));
+            iterList.add(N.iterate(e));
         }
 
         return zipp(iterList, valuesForNone, zipFunction);
@@ -7872,7 +7879,7 @@ public abstract class Stream<T>
     //     */
     //    public static <A, B, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b,
     //            final BiFunction<? super A, ? super B, R> zipFunction, final int queueSize) {
-    //        return parallelZip(Iterables.iterator(a), Iterables.iterator(b), zipFunction, queueSize);
+    //        return parallelZip(N.iterate(a), N.iterate(b), zipFunction, queueSize);
     //    }
     //
     //    public static <A, B, C, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b, final Collection<? extends C> c,
@@ -7898,7 +7905,7 @@ public abstract class Stream<T>
     //     */
     //    public static <A, B, C, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b, final Collection<? extends C> c,
     //            final TriFunction<? super A, ? super B, ? super C, R> zipFunction, final int queueSize) {
-    //        return parallelZip(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), zipFunction, queueSize);
+    //        return parallelZip(N.iterate(a), N.iterate(b), N.iterate(c), zipFunction, queueSize);
     //    }
 
     /**
@@ -8206,7 +8213,7 @@ public abstract class Stream<T>
         final List<Iterator<? extends T>> iterList = new ArrayList<>(len);
 
         for (Collection<? extends T> e : c) {
-            iterList.add(Iterables.iterator(e));
+            iterList.add(N.iterate(e));
         }
 
         return parallelZipp(iterList, zipFunction, queueSize);
@@ -8512,7 +8519,7 @@ public abstract class Stream<T>
     //     */
     //    public static <A, B, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b, final A valueForNoneA,
     //            final B valueForNoneB, final BiFunction<? super A, ? super B, R> zipFunction, final int queueSize) {
-    //        return parallelZip(Iterables.iterator(a), Iterables.iterator(b), valueForNoneA, valueForNoneB, zipFunction, queueSize);
+    //        return parallelZip(N.iterate(a), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction, queueSize);
     //    }
     //
     //    /**
@@ -8560,7 +8567,7 @@ public abstract class Stream<T>
     //    public static <A, B, C, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b, final Collection<? extends C> c,
     //            final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, R> zipFunction,
     //            final int queueSize) {
-    //        return parallelZip(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, queueSize);
+    //        return parallelZip(N.iterate(a), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, queueSize);
     //    }
 
     /**
@@ -8913,7 +8920,7 @@ public abstract class Stream<T>
         final List<Iterator<? extends T>> iterList = new ArrayList<>(len);
 
         for (Collection<? extends T> e : c) {
-            iterList.add(Iterables.iterator(e));
+            iterList.add(N.iterate(e));
         }
 
         return parallelZipp(iterList, valuesForNone, zipFunction, queueSize);
@@ -9207,7 +9214,7 @@ public abstract class Stream<T>
      */
     public static <T> Stream<T> merge(final Collection<? extends T> a, final Collection<? extends T> b,
             final BiFunction<? super T, ? super T, Nth> nextSelector) {
-        return merge(Iterables.iterator(a), Iterables.iterator(b), nextSelector);
+        return merge(N.iterate(a), N.iterate(b), nextSelector);
     }
 
     /**
@@ -9220,7 +9227,7 @@ public abstract class Stream<T>
      */
     public static <T> Stream<T> merge(final Collection<? extends T> a, final Collection<? extends T> b, final Collection<? extends T> c,
             final BiFunction<? super T, ? super T, Nth> nextSelector) {
-        return merge(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), nextSelector);
+        return merge(N.iterate(a), N.iterate(b), N.iterate(c), nextSelector);
     }
 
     /**
@@ -9336,7 +9343,7 @@ public abstract class Stream<T>
         final List<Iterator<? extends T>> iterList = new ArrayList<>(c.size());
 
         for (Collection<? extends T> e : c) {
-            iterList.add(Iterables.iterator(e));
+            iterList.add(N.iterate(e));
         }
 
         return mergge(iterList, nextSelector);
@@ -9423,7 +9430,7 @@ public abstract class Stream<T>
         final List<Iterator<? extends T>> iterList = new ArrayList<>(c.size());
 
         for (Collection<? extends T> e : c) {
-            iterList.add(Iterables.iterator(e));
+            iterList.add(N.iterate(e));
         }
 
         return parallelMergge(iterList, nextSelector, maxThreadNum);

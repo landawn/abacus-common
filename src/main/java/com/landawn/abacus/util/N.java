@@ -19125,11 +19125,9 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param a
      * @return
-     * @see Iterators#concat(Object[]...)
      */
-    @SafeVarargs
-    public static <T> ObjIterator<T> iterate(final T[]... a) {
-        return Iterators.concat(a);
+    public static <T> ObjIterator<T> iterate(final T[] a) {
+        return ObjIterator.of(a);
     }
 
     /**
@@ -19137,22 +19135,9 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param a
      * @return
-     * @see Iterators#concat(Collection)
      */
-    @SafeVarargs
-    public static <T> ObjIterator<T> iterate(final Collection<? extends T>... a) {
-        return Iterators.concat(a);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
-     * @return
-     * @see Iterators#concatt(Collection)
-     */
-    public static <T> ObjIterator<T> iterate(final Collection<? extends Collection<? extends T>> c) {
-        return Iterators.concatt(c);
+    public static <T> Iterator<T> iterate(final Iterable<T> iterable) {
+        return iterable == null ? ObjIterator.empty() : iterable.iterator();
     }
 
     /**

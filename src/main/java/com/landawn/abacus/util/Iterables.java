@@ -69,16 +69,6 @@ public final class Iterables {
     }
 
     /**
-     *
-     * @param <T>
-     * @param iterable
-     * @return
-     */
-    public static <T> Iterator<T> iterator(Iterable<T> iterable) {
-        return iterable == null ? ObjIterator.empty() : iterable.iterator();
-    }
-
-    /**
      * Min.
      *
      * @param <T> the generic type

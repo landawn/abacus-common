@@ -1367,7 +1367,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, T, E> zipFunction) {
-        return zip(Iterables.iterator(a), Iterables.iterator(b), zipFunction);
+        return zip(N.iterate(a), N.iterate(b), zipFunction);
     }
 
     /**
@@ -1380,7 +1380,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Collection<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
-        return zip(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), zipFunction);
+        return zip(N.iterate(a), N.iterate(b), N.iterate(c), zipFunction);
     }
 
     /**
@@ -1531,7 +1531,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, E> zipFunction) {
-        return zip(Iterables.iterator(a), Iterables.iterator(b), valueForNoneA, valueForNoneB, zipFunction);
+        return zip(N.iterate(a), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction);
     }
 
     /**
@@ -1550,7 +1550,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Collection<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, T, E> zipFunction) {
-        return zip(Iterables.iterator(a), Iterables.iterator(b), Iterables.iterator(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        return zip(N.iterate(a), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     /**
