@@ -43,7 +43,13 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.u.OptionalByte;
+import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.u.OptionalDouble;
+import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.u.OptionalLong;
+import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
@@ -66,6 +72,76 @@ public final class Iterables {
      */
     private Iterables() {
         // singleton.
+    }
+
+    @SafeVarargs
+    public static OptionalChar min(final char... a) {
+        return a == null || a.length == 0 ? OptionalChar.empty() : OptionalChar.of(N.min(a));
+    }
+
+    @SafeVarargs
+    public static OptionalByte min(final byte... a) {
+        return a == null || a.length == 0 ? OptionalByte.empty() : OptionalByte.of(N.min(a));
+    }
+
+    @SafeVarargs
+    public static OptionalShort min(final short... a) {
+        return a == null || a.length == 0 ? OptionalShort.empty() : OptionalShort.of(N.min(a));
+    }
+
+    @SafeVarargs
+    public static OptionalInt min(final int... a) {
+        return a == null || a.length == 0 ? OptionalInt.empty() : OptionalInt.of(N.min(a));
+    }
+
+    @SafeVarargs
+    public static OptionalLong min(final long... a) {
+        return a == null || a.length == 0 ? OptionalLong.empty() : OptionalLong.of(N.min(a));
+    }
+
+    @SafeVarargs
+    public static OptionalFloat min(final float... a) {
+        return a == null || a.length == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.min(a));
+    }
+
+    @SafeVarargs
+    public static OptionalDouble min(final double... a) {
+        return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.min(a));
+    }
+
+    @SafeVarargs
+    public static OptionalChar max(final char... a) {
+        return a == null || a.length == 0 ? OptionalChar.empty() : OptionalChar.of(N.max(a));
+    }
+
+    @SafeVarargs
+    public static OptionalByte max(final byte... a) {
+        return a == null || a.length == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(a));
+    }
+
+    @SafeVarargs
+    public static OptionalShort max(final short... a) {
+        return a == null || a.length == 0 ? OptionalShort.empty() : OptionalShort.of(N.max(a));
+    }
+
+    @SafeVarargs
+    public static OptionalInt max(final int... a) {
+        return a == null || a.length == 0 ? OptionalInt.empty() : OptionalInt.of(N.max(a));
+    }
+
+    @SafeVarargs
+    public static OptionalLong max(final long... a) {
+        return a == null || a.length == 0 ? OptionalLong.empty() : OptionalLong.of(N.max(a));
+    }
+
+    @SafeVarargs
+    public static OptionalFloat max(final float... a) {
+        return a == null || a.length == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.max(a));
+    }
+
+    @SafeVarargs
+    public static OptionalDouble max(final double... a) {
+        return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(a));
     }
 
     /**
@@ -498,7 +574,8 @@ public final class Iterables {
      * @see N#findFirstIndex(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
+            throws E {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -556,7 +633,8 @@ public final class Iterables {
      * @see N#findLastIndex(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> predicate)
+            throws E {
         if (N.isNullOrEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -866,7 +944,8 @@ public final class Iterables {
      * @see N#findFirstNonNull(Collection, com.landawn.abacus.util.Throwables.Predicate)
      */
     @Deprecated
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate)
+            throws E {
         if (N.isNullOrEmpty(c)) {
             return Optional.empty();
         }
@@ -1030,8 +1109,8 @@ public final class Iterables {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final T[] a, final Throwables.Predicate<? super T, E> predicateForFirst,
-            final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final T[] a,
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(a)) {
             return Nullable.<T> empty();
         }
@@ -1088,7 +1167,8 @@ public final class Iterables {
      * @return the pair
      * @throws E the e
      */
-    public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Throwables.Predicate<? super T, E> predicate)
+            throws E {
         return findFirstAndLast(a, predicate, predicate);
     }
 
@@ -1317,7 +1397,8 @@ public final class Iterables {
      * @deprecated replaced by {@code N#nMatch(Object[], int, int, com.landawn.abacus.util.Try.Predicate)}
      */
     @Deprecated
-    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Throwables.Predicate<? super T, E> filter)
+            throws E {
         N.checkArgNotNegative(atLeast, "atLeast");
         N.checkArgNotNegative(atMost, "atMost");
         N.checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -1344,7 +1425,8 @@ public final class Iterables {
      * @param action the action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action)
+            throws E {
         forEachPair(c, action, 1);
     }
 
@@ -1395,7 +1477,8 @@ public final class Iterables {
      * @param increment the increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
+    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment)
+            throws E {
         N.checkArgNotNull(action);
         final int windowSize = 2;
         N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -1417,8 +1500,8 @@ public final class Iterables {
      * @param action the action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action)
-            throws E {
+    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
         forEachTriple(c, action, 1);
     }
 
@@ -1432,8 +1515,8 @@ public final class Iterables {
      * @param increment the increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
-            final int increment) throws E {
+    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 3;
         N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -1553,7 +1636,8 @@ public final class Iterables {
      * @return the list
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> takeWhileInclusive(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> List<T> takeWhileInclusive(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter)
+            throws E {
         N.checkArgNotNull(filter);
 
         final List<T> result = new ArrayList<>(N.min(9, N.size(c)));
@@ -3074,8 +3158,8 @@ public final class Iterables {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementParser,
-            final Throwables.Runnable<E2> onComplete) throws E, E2 {
+    public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter,
+            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
         parse(iter, 0, Long.MAX_VALUE, elementParser, onComplete);
     }
 
@@ -3149,7 +3233,8 @@ public final class Iterables {
      * @throws E2 the e2
      */
     public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, long offset, long count,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete)
+            throws E, E2 {
         parse(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementParser, onComplete);
     }
 

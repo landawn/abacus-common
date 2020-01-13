@@ -1475,6 +1475,14 @@ public abstract class Stream<T>
     @TerminalOp
     public abstract <E extends Exception> Optional<T> findFirst(Throwables.Predicate<? super T, E> predicate) throws E;
 
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
     @ParallelSupported
     @TerminalOp
     public abstract <E extends Exception> Optional<T> findLast(Throwables.Predicate<? super T, E> predicate) throws E;

@@ -508,6 +508,14 @@ public abstract class CharStream
 
     public abstract <E extends Exception> OptionalChar findFirst(final Throwables.CharPredicate<E> predicate) throws E;
 
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
     public abstract <E extends Exception> OptionalChar findLast(final Throwables.CharPredicate<E> predicate) throws E;
 
     public abstract <E extends Exception, E2 extends Exception> OptionalChar findFirstOrLast(Throwables.CharPredicate<E> predicateForFirst,

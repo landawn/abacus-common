@@ -353,6 +353,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     public abstract <E extends Exception> OptionalByte findFirst(final Throwables.BytePredicate<E> predicate) throws E;
 
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
     public abstract <E extends Exception> OptionalByte findLast(final Throwables.BytePredicate<E> predicate) throws E;
 
     public abstract <E extends Exception, E2 extends Exception> OptionalByte findFirstOrLast(Throwables.BytePredicate<E> predicateForFirst,

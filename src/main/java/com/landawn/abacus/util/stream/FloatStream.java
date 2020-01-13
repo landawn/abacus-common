@@ -355,6 +355,14 @@ public abstract class FloatStream
 
     public abstract <E extends Exception> OptionalFloat findFirst(final Throwables.FloatPredicate<E> predicate) throws E;
 
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
     public abstract <E extends Exception> OptionalFloat findLast(final Throwables.FloatPredicate<E> predicate) throws E;
 
     public abstract <E extends Exception, E2 extends Exception> OptionalFloat findFirstOrLast(Throwables.FloatPredicate<E> predicateForFirst,

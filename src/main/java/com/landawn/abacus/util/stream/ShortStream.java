@@ -338,6 +338,14 @@ public abstract class ShortStream
 
     public abstract <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate) throws E;
 
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
     public abstract <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate) throws E;
 
     public abstract <E extends Exception, E2 extends Exception> OptionalShort findFirstOrLast(Throwables.ShortPredicate<E> predicateForFirst,

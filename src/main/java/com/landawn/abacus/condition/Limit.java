@@ -18,9 +18,9 @@ import static com.landawn.abacus.util.WD._SPACE;
 
 import java.util.List;
 
-import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.WD;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -52,7 +52,7 @@ public class Limit extends AbstractCondition {
      *
      * @param count
      */
-    public Limit(int count) {
+    public Limit(final int count) {
         this(0, count);
     }
 
@@ -62,7 +62,7 @@ public class Limit extends AbstractCondition {
      * @param offset
      * @param count
      */
-    public Limit(int offset, int count) {
+    public Limit(final int offset, final int count) {
         super(Operator.LIMIT);
         this.count = count;
         this.offset = offset;

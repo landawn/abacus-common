@@ -934,11 +934,30 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super EntryStream<K, V>, R, E> func) throws E {
-        return s.applyIfNotEmpty(ss -> func.apply(EntryStream.this));
+        final EntryStream<K, V> tmp = this;
+
+        final Throwables.Function<Stream<Map.Entry<K, V>>, R, E> func2 = new Throwables.Function<Stream<Map.Entry<K, V>>, R, E>() {
+            @Override
+            public R apply(Stream<Entry<K, V>> t) throws E {
+                return func.apply(tmp);
+            }
+        };
+
+        return s.applyIfNotEmpty(func2);
     }
 
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super EntryStream<K, V>, E> action) throws E {
-        return s.acceptIfNotEmpty(ss -> action.accept(EntryStream.this));
+        final EntryStream<K, V> tmp = this;
+
+        final Throwables.Consumer<Stream<Map.Entry<K, V>>, E> action2 = new Throwables.Consumer<Stream<Map.Entry<K, V>>, E>() {
+            @Override
+            public void accept(Stream<Entry<K, V>> t) throws E {
+                action.accept(tmp);
+
+            }
+        };
+
+        return s.acceptIfNotEmpty(action2);
     }
 
     @SequentialOnly

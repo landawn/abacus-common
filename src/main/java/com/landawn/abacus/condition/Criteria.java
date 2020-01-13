@@ -587,7 +587,7 @@ public class Criteria extends AbstractCondition {
      * @param count
      * @return
      */
-    public Criteria limit(int count) {
+    public Criteria limit(final int count) {
         add(new Limit(count));
 
         return this;
@@ -599,7 +599,7 @@ public class Criteria extends AbstractCondition {
      * @param count
      * @return
      */
-    public Criteria limit(int offset, int count) {
+    public Criteria limit(final int offset, final int count) {
         add(new Limit(offset, count));
 
         return this;

@@ -380,6 +380,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
     public abstract <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate) throws E;
 
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
     public abstract <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate) throws E;
 
     public abstract <E extends Exception, E2 extends Exception> OptionalInt findFirstOrLast(Throwables.IntPredicate<E> predicateForFirst,

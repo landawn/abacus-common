@@ -427,7 +427,8 @@ public final class Iterators {
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterator<T> iter,
-            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            throws E, E2 {
         N.checkArgNotNull(flatMapper);
         N.checkArgNotNull(action);
 
@@ -467,7 +468,8 @@ public final class Iterators {
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterator<T> iter,
-            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         N.checkArgNotNull(flatMapper);
         N.checkArgNotNull(flatMapper2);
@@ -508,8 +510,8 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Throwables.BiConsumer<? super A, ? super B, E> action)
-            throws E {
+    public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b,
+            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (a == null || b == null) {
@@ -626,7 +628,8 @@ public final class Iterators {
      * @throws E2 the e2
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterator<T> iter,
-            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
+            final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            throws E, E2 {
         N.checkArgNotNull(flatMapper);
         N.checkArgNotNull(action);
 
@@ -671,7 +674,8 @@ public final class Iterators {
      * @throws E3 the e3
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Iterator<T> iter,
-            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper, final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
+            final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
+            final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
         N.checkArgNotNull(flatMapper);
         N.checkArgNotNull(flatMapper2);
@@ -731,8 +735,8 @@ public final class Iterators {
      * @param increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment)
-            throws E {
+    public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action,
+            final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 2;
         N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -880,13 +884,13 @@ public final class Iterators {
         }
 
         return new ObjIterator<T>() {
-            private Iterator<T> iter = null;
+            private Iterator<T> iter = c.iterator();
             private T next = null;
-            private int cnt = n;
+            private int cnt = 0;
 
             @Override
             public boolean hasNext() {
-                return cnt > 0 || (iter != null && iter.hasNext());
+                return cnt > 0 || iter.hasNext();
             }
 
             @Override
@@ -895,10 +899,7 @@ public final class Iterators {
                     throw new NoSuchElementException();
                 }
 
-                if (iter == null) {
-                    iter = c.iterator();
-                    next = iter.next();
-                } else if (cnt <= 0) {
+                if (cnt <= 0) {
                     next = iter.next();
                     cnt = n;
                 }
@@ -2456,7 +2457,7 @@ public final class Iterators {
      * @param count
      * @return
      */
-    public static <T> ObjIterator<T> limit(final Iterator<T> iter, final long offset, final long count) {
+    public static <T> ObjIterator<T> skipAndLimit(final Iterator<T> iter, final long offset, final long count) {
         N.checkArgNotNegative(count, "offset");
         N.checkArgNotNegative(count, "count");
 
@@ -2497,6 +2498,26 @@ public final class Iterators {
                 skipped = true;
             }
         };
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param iter
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public static <T> ObjIterator<T> slice(final Iterator<T> iter, final long fromIndex, final long toIndex) {
+        if (fromIndex < 0 || fromIndex > toIndex) {
+            throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + "] is out-of-bounds");
+        }
+
+        if (iter == null || fromIndex == toIndex) {
+            return ObjIterator.empty();
+        }
+
+        return skipAndLimit(iter, fromIndex, toIndex - fromIndex);
     }
 
     /**

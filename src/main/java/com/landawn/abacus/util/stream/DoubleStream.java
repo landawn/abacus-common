@@ -356,6 +356,14 @@ public abstract class DoubleStream
 
     public abstract <E extends Exception> OptionalDouble findFirst(final Throwables.DoublePredicate<E> predicate) throws E;
 
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
     public abstract <E extends Exception> OptionalDouble findLast(final Throwables.DoublePredicate<E> predicate) throws E;
 
     public abstract <E extends Exception, E2 extends Exception> OptionalDouble findFirstOrLast(Throwables.DoublePredicate<E> predicateForFirst,

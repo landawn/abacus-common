@@ -1,6 +1,8 @@
 ### 1.10.6
 
 * Remove `Iterables.iterator/N.iterate(T[] ...a)/N.iterate(Collection<T> ...a)`.
+* Rename `Iterators.limit(offset, count)` to `Iterators.skipAndLimit`.
+* Add `Iterators.slice(fromIndex, toIndex)`.
 * Add `Stream.distinctBy(Function<? super T, K> keyMapper, final BinaryOperator<T> mergeFunction)`.
 * Add `Stream.cycled`.
 * Improvements and bug fix.

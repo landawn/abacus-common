@@ -363,6 +363,14 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
     public abstract <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate) throws E;
 
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
     public abstract <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate) throws E;
 
     public abstract <E extends Exception, E2 extends Exception> OptionalLong findFirstOrLast(Throwables.LongPredicate<E> predicateForFirst,
