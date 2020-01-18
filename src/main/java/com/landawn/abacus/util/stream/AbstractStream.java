@@ -3117,6 +3117,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> shuffled(final Random rnd) {
+        checkArgNotNull(rnd, "random");
+
         return lazyLoad(new Function<Object[], Object[]>() {
             @Override
             public Object[] apply(final Object[] a) {

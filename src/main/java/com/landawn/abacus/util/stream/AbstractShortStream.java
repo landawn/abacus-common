@@ -777,6 +777,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream shuffled(final Random rnd) {
+        checkArgNotNull(rnd, "random");
+
         return lazyLoad(new Function<short[], short[]>() {
             @Override
             public short[] apply(final short[] a) {

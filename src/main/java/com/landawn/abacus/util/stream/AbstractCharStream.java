@@ -772,6 +772,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream shuffled(final Random rnd) {
+        checkArgNotNull(rnd, "random");
+
         return lazyLoad(new Function<char[], char[]>() {
             @Override
             public char[] apply(final char[] a) {

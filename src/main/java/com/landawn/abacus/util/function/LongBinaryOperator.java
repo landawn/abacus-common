@@ -23,6 +23,19 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  */
 public interface LongBinaryOperator extends java.util.function.LongBinaryOperator, Throwables.LongBinaryOperator<RuntimeException> {
+    public static final LongBinaryOperator MIN = new LongBinaryOperator() {
+        @Override
+        public long applyAsLong(long left, long right) {
+            return left <= right ? left : right;
+        }
+    };
+
+    public static final LongBinaryOperator MAX = new LongBinaryOperator() {
+        @Override
+        public long applyAsLong(long left, long right) {
+            return left >= right ? left : right;
+        }
+    };
 
     @Override
     long applyAsLong(long left, long right);

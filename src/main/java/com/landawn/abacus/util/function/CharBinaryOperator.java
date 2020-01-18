@@ -23,6 +23,19 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  */
 public interface CharBinaryOperator extends Throwables.CharBinaryOperator<RuntimeException> {
+    public static final CharBinaryOperator MIN = new CharBinaryOperator() {
+        @Override
+        public char applyAsChar(char left, char right) {
+            return left <= right ? left : right;
+        }
+    };
+
+    public static final CharBinaryOperator MAX = new CharBinaryOperator() {
+        @Override
+        public char applyAsChar(char left, char right) {
+            return left >= right ? left : right;
+        }
+    };
 
     @Override
     char applyAsChar(char left, char right);

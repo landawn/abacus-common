@@ -23,6 +23,19 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  */
 public interface IntBinaryOperator extends java.util.function.IntBinaryOperator, Throwables.IntBinaryOperator<RuntimeException> {
+    public static final IntBinaryOperator MIN = new IntBinaryOperator() {
+        @Override
+        public int applyAsInt(int left, int right) {
+            return left <= right ? left : right;
+        }
+    };
+
+    public static final IntBinaryOperator MAX = new IntBinaryOperator() {
+        @Override
+        public int applyAsInt(int left, int right) {
+            return left >= right ? left : right;
+        }
+    };
 
     @Override
     int applyAsInt(int left, int right);

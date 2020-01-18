@@ -1848,6 +1848,20 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
+     *
+     * @param predicate
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    @Beta
+    public ExceptionalStream<T, E> skipUntil(final Throwables.Predicate<? super T, ? extends E> predicate) {
+        checkArgNotNull(predicate, "predicate");
+
+        return dropWhile(Fnn.not(predicate));
+    }
+
+    /**
      * Distinct and filter by occurrences.
      *
      * @return
@@ -1900,6 +1914,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     @SuppressWarnings("rawtypes")
     public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
             final Throwables.Predicate<? super Long, E> occurrencesFilter) {
+        checkArgNotNull(keyMapper, "keyMapper");
+        checkArgNotNull(occurrencesFilter, "occurrencesFilter");
+
         final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
 
         final Throwables.Function<T, Keyed<K, T>, E> keyedMapper = new Throwables.Function<T, Keyed<K, T>, E>() {
@@ -1933,6 +1950,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     @TerminalOpTriggered
     public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
             final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
+        checkArgNotNull(keyMapper, "keyMapper");
+        checkArgNotNull(mergeFunction, "mergeFunction");
+        
         final Supplier<? extends Map<K, T>> supplier = Suppliers.<K, T> ofLinkedHashMap();
 
         return groupBy(keyMapper, Fnn.<T, E> identity(), mergeFunction, supplier).map(Fnn.<K, T, E> value());
@@ -2113,9 +2133,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     @IntermediateOp
     public <R> ExceptionalStream<R, E> slidingMap(final Throwables.BiFunction<? super T, ? super T, R, E> mapper, final int increment,
             final boolean ignoreNotPaired) {
-        final int windowSize = 2;
-
         checkArgPositive(increment, "increment");
+        
+        final int windowSize = 2;
 
         return newStream(new ExceptionalIterator<R, E>() {
             @SuppressWarnings("unchecked")
@@ -2200,9 +2220,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     @IntermediateOp
     public <R> ExceptionalStream<R, E> slidingMap(final Throwables.TriFunction<? super T, ? super T, ? super T, R, E> mapper, final int increment,
             final boolean ignoreNotPaired) {
-        final int windowSize = 3;
-
         checkArgPositive(increment, "increment");
+        
+        final int windowSize = 3;
 
         return newStream(new ExceptionalIterator<R, E>() {
             @SuppressWarnings("unchecked")
@@ -3814,63 +3834,63 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         if (distance == 0) {
             return newStream(elements, closeHandlers);
         }
-    
+
         return newStream(new ExceptionalIterator<T, E>() {
             private boolean initialized = false;
             private T[] aar;
             private int len;
             private int start;
             private int cnt = 0;
-    
+
             @Override
             public boolean hasNext() throws E {
                 if (initialized == false) {
                     init();
                 }
-    
+
                 return cnt < len;
             }
-    
+
             @Override
             public T next() throws E {
                 if (hasNext() == false) {
                     throw new NoSuchElementException();
                 }
-    
+
                 return aar[(start + cnt++) % len];
             }
-    
+
             @Override
             public long count() throws E {
                 if (initialized == false) {
                     init();
                 }
-    
+
                 return len - cnt;
             }
-    
+
             @Override
             public void skip(long n) throws E {
                 if (initialized == false) {
                     init();
                 }
-    
+
                 cnt = n < len - cnt ? cnt + (int) n : len;
             }
-    
+
             private void init() throws E {
                 if (initialized == false) {
                     initialized = true;
                     aar = (T[]) ExceptionalStream.this.toArray();
                     len = aar.length;
-    
+
                     if (len > 0) {
                         start = distance % len;
-    
+
                         if (start < 0) {
                             start += len;
                         }
-    
+
                         start = len - start;
                     }
                 }

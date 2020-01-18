@@ -280,7 +280,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param e
      */
     public void add(double e) {
-        ensureCapacityInternal(size + 1);
+        ensureCapacity(size + 1);
 
         elementData[size++] = e;
     }
@@ -293,7 +293,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public void add(int index, double e) {
         rangeCheckForAdd(index);
 
-        ensureCapacityInternal(size + 1);
+        ensureCapacity(size + 1);
 
         int numMoved = size - index;
 
@@ -319,7 +319,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         int numNew = c.size();
 
-        ensureCapacityInternal(size + numNew);
+        ensureCapacity(size + numNew);
 
         N.copy(c.array(), 0, elementData, size, numNew);
 
@@ -344,7 +344,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         int numNew = c.size();
 
-        ensureCapacityInternal(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         int numMoved = size - index;
 
@@ -387,7 +387,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         int numNew = a.length;
 
-        ensureCapacityInternal(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         int numMoved = size - index;
 
@@ -2321,21 +2321,22 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return size == 0 ? "[]" : N.toString(elementData, 0, size);
     }
 
-    private void ensureCapacityInternal(int minCapacity) {
-        if (elementData == N.EMPTY_DOUBLE_ARRAY) {
-            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
+    private void ensureCapacity(final int minCapacity) {
+        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+            throw new OutOfMemoryError();
         }
 
-        if (minCapacity - elementData.length > 0) {
-            int oldCapacity = elementData.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (N.isNullOrEmpty(elementData)) {
+            elementData = new double[Math.max(DEFAULT_CAPACITY, minCapacity)];
+        } else if (minCapacity - elementData.length > 0) {
+            int newCapacity = (int) (elementData.length * 1.75);
 
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
+            if (newCapacity < 0 || newCapacity > MAX_ARRAY_SIZE) {
+                newCapacity = MAX_ARRAY_SIZE;
             }
 
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
-                newCapacity = hugeCapacity(minCapacity);
+            if (newCapacity < minCapacity) {
+                newCapacity = minCapacity;
             }
 
             elementData = Arrays.copyOf(elementData, newCapacity);

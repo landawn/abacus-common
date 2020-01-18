@@ -47,26 +47,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Default initial capacity.
      */
     static final int DEFAULT_CAPACITY = 10;
-
-    /**
-     * The maximum size of array to allocate. Some VMs reserve some header words in an array. Attempts to allocate
-     * larger arrays may result in OutOfMemoryError: Requested array size exceeds VM limit
-     */
+ 
     static final int MAX_ARRAY_SIZE = N.MAX_ARRAY_SIZE;
-
-    /**
-     *
-     * @param minCapacity
-     * @return
-     */
-    static int hugeCapacity(int minCapacity) {
-        if (minCapacity < 0) {
-            throw new OutOfMemoryError();
-        }
-
-        return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE : MAX_ARRAY_SIZE;
-    }
-
+ 
     /**
      * Returned the backed array.
      *

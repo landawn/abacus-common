@@ -779,6 +779,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream shuffled(final Random rnd) {
+        checkArgNotNull(rnd, "random");
+
         return lazyLoad(new Function<float[], float[]>() {
             @Override
             public float[] apply(final float[] a) {

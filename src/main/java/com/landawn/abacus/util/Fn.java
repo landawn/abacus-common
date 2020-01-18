@@ -11362,6 +11362,60 @@ public final class Fn extends Comparators {
         /**
          *
          * @param <T>
+         * @param predicate
+         * @return
+         */
+        public static <T, E extends Exception> Throwables.Predicate<T, E> not(final Throwables.Predicate<T, E> predicate) {
+            N.checkArgNotNull(predicate);
+
+            return new Throwables.Predicate<T, E>() {
+                @Override
+                public boolean test(T t) throws E {
+                    return !predicate.test(t);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <U>
+         * @param biPredicate
+         * @return
+         */
+        public static <T, U, E extends Exception> Throwables.BiPredicate<T, U, E> not(final Throwables.BiPredicate<T, U, E> biPredicate) {
+            N.checkArgNotNull(biPredicate);
+
+            return new Throwables.BiPredicate<T, U, E>() {
+                @Override
+                public boolean test(T t, U u) throws E {
+                    return !biPredicate.test(t, u);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @param triPredicate
+         * @return
+         */
+        public static <A, B, C, E extends Exception> Throwables.TriPredicate<A, B, C, E> not(final Throwables.TriPredicate<A, B, C, E> triPredicate) {
+            N.checkArgNotNull(triPredicate);
+
+            return new Throwables.TriPredicate<A, B, C, E>() {
+                @Override
+                public boolean test(A a, B b, C c) throws E {
+                    return !triPredicate.test(a, b, c);
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <T>
          * @param <E>
          * @param predicate
          * @return

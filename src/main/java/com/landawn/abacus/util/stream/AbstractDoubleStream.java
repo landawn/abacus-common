@@ -773,6 +773,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream shuffled(final Random rnd) {
+        checkArgNotNull(rnd, "random");
+
         return lazyLoad(new Function<double[], double[]>() {
             @Override
             public double[] apply(final double[] a) {

@@ -24,6 +24,20 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface DoubleBinaryOperator extends java.util.function.DoubleBinaryOperator, Throwables.DoubleBinaryOperator<RuntimeException> {
 
+    public static final DoubleBinaryOperator MIN = new DoubleBinaryOperator() {
+        @Override
+        public double applyAsDouble(double left, double right) {
+            return Math.min(left, right);
+        }
+    };
+
+    public static final DoubleBinaryOperator MAX = new DoubleBinaryOperator() {
+        @Override
+        public double applyAsDouble(double left, double right) {
+            return Math.max(left, right);
+        }
+    };
+
     @Override
     double applyAsDouble(double left, double right);
 }

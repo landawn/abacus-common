@@ -772,6 +772,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream shuffled(final Random rnd) {
+        checkArgNotNull(rnd, "random");
+
         return lazyLoad(new Function<byte[], byte[]>() {
             @Override
             public byte[] apply(final byte[] a) {

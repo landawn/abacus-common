@@ -325,7 +325,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param e
      */
     public void add(byte e) {
-        ensureCapacityInternal(size + 1);
+        ensureCapacity(size + 1);
 
         elementData[size++] = e;
     }
@@ -338,7 +338,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     public void add(int index, byte e) {
         rangeCheckForAdd(index);
 
-        ensureCapacityInternal(size + 1);
+        ensureCapacity(size + 1);
 
         int numMoved = size - index;
 
@@ -364,7 +364,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         int numNew = c.size();
 
-        ensureCapacityInternal(size + numNew);
+        ensureCapacity(size + numNew);
 
         N.copy(c.array(), 0, elementData, size, numNew);
 
@@ -389,7 +389,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         int numNew = c.size();
 
-        ensureCapacityInternal(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         int numMoved = size - index;
 
@@ -432,7 +432,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         int numNew = a.length;
 
-        ensureCapacityInternal(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew); // Increments modCount
 
         int numMoved = size - index;
 
@@ -2142,8 +2142,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(Throwables.ByteFunction<? extends K, E> keyMapper,
-            Throwables.ByteFunction<? extends V, E2> valueMapper, Throwables.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
+    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(
+            Throwables.ByteFunction<? extends K, E> keyMapper, Throwables.ByteFunction<? extends V, E2> valueMapper,
+            Throwables.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
         final M result = mapFactory.apply(size);
 
         for (int i = 0; i < size; i++) {
@@ -2181,8 +2182,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      * @throws E the e
      */
-    public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Throwables.ByteFunction<? extends K, E> keyMapper, final Collector<Byte, A, D> downstream,
-            final IntFunction<? extends M> mapFactory) throws E {
+    public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
+            final Collector<Byte, A, D> downstream, final IntFunction<? extends M> mapFactory) throws E {
         final M result = mapFactory.apply(size);
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, Byte> downstreamAccumulator = downstream.accumulator();
@@ -2334,21 +2335,22 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);
     }
 
-    private void ensureCapacityInternal(int minCapacity) {
-        if (elementData == N.EMPTY_BYTE_ARRAY) {
-            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
+    private void ensureCapacity(final int minCapacity) {
+        if (minCapacity > MAX_ARRAY_SIZE || minCapacity < 0) {
+            throw new OutOfMemoryError();
         }
 
-        if (minCapacity - elementData.length > 0) {
-            int oldCapacity = elementData.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (N.isNullOrEmpty(elementData)) {
+            elementData = new byte[Math.max(DEFAULT_CAPACITY, minCapacity)];
+        } else if (minCapacity - elementData.length > 0) {
+            int newCapacity = (int) (elementData.length * 1.75);
 
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
+            if (newCapacity < 0 || newCapacity > MAX_ARRAY_SIZE) {
+                newCapacity = MAX_ARRAY_SIZE;
             }
 
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
-                newCapacity = hugeCapacity(minCapacity);
+            if (newCapacity < minCapacity) {
+                newCapacity = minCapacity;
             }
 
             elementData = Arrays.copyOf(elementData, newCapacity);

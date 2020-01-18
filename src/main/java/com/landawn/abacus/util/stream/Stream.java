@@ -158,12 +158,26 @@ public abstract class Stream<T>
 
     @SequentialOnly
     @IntermediateOp
-    public <U> Stream<U> select(Class<U> targetType) {
+    public <U> Stream<U> select(Class<U> targetType) {        
         if (isParallel()) {
             return (Stream<U>) sequential().filter(Fn.instanceOf(targetType)).parallel(maxThreadNum(), splitor(), asyncExecutor());
         } else {
             return (Stream<U>) filter(Fn.instanceOf(targetType));
         }
+    }
+
+    /**
+     *
+     * @param predicate
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    @Beta
+    public Stream<T> skipUntil(final Predicate<? super T> predicate) {
+        checkArgNotNull(predicate, "predicate");
+
+        return dropWhile(Fn.not(predicate));
     }
 
     @ParallelSupported
@@ -872,6 +886,12 @@ public abstract class Stream<T>
     @SequentialOnly
     @IntermediateOp
     public abstract <U> Stream<U> scan(final U init, final BiFunction<U, ? super T, U> accumulator, final boolean initIncluded);
+
+    //    @SequentialOnly
+    //    @IntermediateOp
+    //    public <U> Stream<U> scanInclusive(final U init, final BiFunction<U, ? super T, U> accumulator) {
+    //        return scan(init, accumulator, true);
+    //    }
 
     /**
      * Returns Stream of Stream with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
@@ -5106,11 +5126,11 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextChar(), b.hasNext() ? b.nextChar() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, b.nextChar());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextChar() : valueForNoneA, b.hasNext() ? b.nextChar() : valueForNoneB);
             }
         });
     }
@@ -5138,12 +5158,13 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextChar(), b.hasNext() ? b.nextChar() : valueForNoneB, c.hasNext() ? c.nextChar() : valueForNoneC);
+                } else if (b.hasNext()) {
+                    return zipFunction.apply(valueForNoneA, b.nextChar(), c.hasNext() ? c.nextChar() : valueForNoneC);
+                } else {
+                    return zipFunction.apply(valueForNoneA, valueForNoneB, c.nextChar());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextChar() : valueForNoneA, b.hasNext() ? b.nextChar() : valueForNoneB,
-                        c.hasNext() ? c.nextChar() : valueForNoneC);
             }
         });
     }
@@ -5444,11 +5465,11 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextByte(), b.hasNext() ? b.nextByte() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, b.nextByte());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextByte() : valueForNoneA, b.hasNext() ? b.nextByte() : valueForNoneB);
             }
         });
     }
@@ -5476,12 +5497,13 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextByte(), b.hasNext() ? b.nextByte() : valueForNoneB, c.hasNext() ? c.nextByte() : valueForNoneC);
+                } else if (b.hasNext()) {
+                    return zipFunction.apply(valueForNoneA, b.nextByte(), c.hasNext() ? c.nextByte() : valueForNoneC);
+                } else {
+                    return zipFunction.apply(valueForNoneA, valueForNoneB, c.nextByte());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextByte() : valueForNoneA, b.hasNext() ? b.nextByte() : valueForNoneB,
-                        c.hasNext() ? c.nextByte() : valueForNoneC);
             }
         });
     }
@@ -5783,11 +5805,11 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextShort(), b.hasNext() ? b.nextShort() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, b.nextShort());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextShort() : valueForNoneA, b.hasNext() ? b.nextShort() : valueForNoneB);
             }
         });
     }
@@ -5815,12 +5837,13 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextShort(), b.hasNext() ? b.nextShort() : valueForNoneB, c.hasNext() ? c.nextShort() : valueForNoneC);
+                } else if (b.hasNext()) {
+                    return zipFunction.apply(valueForNoneA, b.nextShort(), c.hasNext() ? c.nextShort() : valueForNoneC);
+                } else {
+                    return zipFunction.apply(valueForNoneA, valueForNoneB, c.nextShort());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextShort() : valueForNoneA, b.hasNext() ? b.nextShort() : valueForNoneB,
-                        c.hasNext() ? c.nextShort() : valueForNoneC);
             }
         });
     }
@@ -6121,11 +6144,11 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextInt(), b.hasNext() ? b.nextInt() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, b.nextInt());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextInt() : valueForNoneA, b.hasNext() ? b.nextInt() : valueForNoneB);
             }
         });
     }
@@ -6153,12 +6176,13 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextInt(), b.hasNext() ? b.nextInt() : valueForNoneB, c.hasNext() ? c.nextInt() : valueForNoneC);
+                } else if (b.hasNext()) {
+                    return zipFunction.apply(valueForNoneA, b.nextInt(), c.hasNext() ? c.nextInt() : valueForNoneC);
+                } else {
+                    return zipFunction.apply(valueForNoneA, valueForNoneB, c.nextInt());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextInt() : valueForNoneA, b.hasNext() ? b.nextInt() : valueForNoneB,
-                        c.hasNext() ? c.nextInt() : valueForNoneC);
             }
         });
     }
@@ -6459,11 +6483,11 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextLong(), b.hasNext() ? b.nextLong() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, b.nextLong());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextLong() : valueForNoneA, b.hasNext() ? b.nextLong() : valueForNoneB);
             }
         });
     }
@@ -6491,12 +6515,13 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextLong(), b.hasNext() ? b.nextLong() : valueForNoneB, c.hasNext() ? c.nextLong() : valueForNoneC);
+                } else if (b.hasNext()) {
+                    return zipFunction.apply(valueForNoneA, b.nextLong(), c.hasNext() ? c.nextLong() : valueForNoneC);
+                } else {
+                    return zipFunction.apply(valueForNoneA, valueForNoneB, c.nextLong());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextLong() : valueForNoneA, b.hasNext() ? b.nextLong() : valueForNoneB,
-                        c.hasNext() ? c.nextLong() : valueForNoneC);
             }
         });
     }
@@ -6798,11 +6823,11 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextFloat(), b.hasNext() ? b.nextFloat() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, b.nextFloat());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextFloat() : valueForNoneA, b.hasNext() ? b.nextFloat() : valueForNoneB);
             }
         });
     }
@@ -7137,11 +7162,11 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextDouble(), b.hasNext() ? b.nextDouble() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, b.nextDouble());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextDouble() : valueForNoneA, b.hasNext() ? b.nextDouble() : valueForNoneB);
             }
         });
     }
@@ -7169,12 +7194,13 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.nextDouble(), b.hasNext() ? b.nextDouble() : valueForNoneB, c.hasNext() ? c.nextDouble() : valueForNoneC);
+                } else if (b.hasNext()) {
+                    return zipFunction.apply(valueForNoneA, b.nextDouble(), c.hasNext() ? c.nextDouble() : valueForNoneC);
+                } else {
+                    return zipFunction.apply(valueForNoneA, valueForNoneB, c.nextDouble());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.nextDouble() : valueForNoneA, b.hasNext() ? b.nextDouble() : valueForNoneB,
-                        c.hasNext() ? c.nextDouble() : valueForNoneC);
             }
         });
     }
@@ -7562,11 +7588,11 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.next(), b.hasNext() ? b.next() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, b.next());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.next() : valueForNoneA, b.hasNext() ? b.next() : valueForNoneB);
             }
         });
     }
@@ -7594,12 +7620,13 @@ public abstract class Stream<T>
 
             @Override
             public R next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
+                if (a.hasNext()) {
+                    return zipFunction.apply(a.next(), b.hasNext() ? b.next() : valueForNoneB, c.hasNext() ? c.next() : valueForNoneC);
+                } else if (b.hasNext()) {
+                    return zipFunction.apply(valueForNoneA, b.next(), c.hasNext() ? c.next() : valueForNoneC);
+                } else {
+                    return zipFunction.apply(valueForNoneA, valueForNoneB, c.next());
                 }
-
-                return zipFunction.apply(a.hasNext() ? a.next() : valueForNoneA, b.hasNext() ? b.next() : valueForNoneB,
-                        c.hasNext() ? c.next() : valueForNoneC);
             }
         });
     }

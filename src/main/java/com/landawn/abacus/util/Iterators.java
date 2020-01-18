@@ -2104,7 +2104,11 @@ public final class Iterators {
 
             @Override
             public R next() {
-                return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
+                if (iterA.hasNext()) {
+                    return zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB);
+                } else {
+                    return zipFunction.apply(valueForNoneA, iterB.next());
+                }
             }
         };
     }
@@ -2162,8 +2166,13 @@ public final class Iterators {
 
             @Override
             public R next() {
-                return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
-                        iterC.hasNext() ? iterC.next() : valueForNoneC);
+                if (iterA.hasNext()) {
+                    return zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC);
+                } else if (iterB.hasNext()) {
+                    return zipFunction.apply(valueForNoneA, iterB.next(), iterC.hasNext() ? iterC.next() : valueForNoneC);
+                } else {
+                    return zipFunction.apply(valueForNoneA, valueForNoneB, iterC.next());
+                }
             }
         };
     }

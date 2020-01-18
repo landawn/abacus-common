@@ -776,6 +776,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream shuffled(final Random rnd) {
+        checkArgNotNull(rnd, "random");
+
         return lazyLoad(new Function<long[], long[]>() {
             @Override
             public long[] apply(final long[] a) {

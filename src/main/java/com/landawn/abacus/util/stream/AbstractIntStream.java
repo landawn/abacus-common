@@ -777,6 +777,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream shuffled(final Random rnd) {
+        checkArgNotNull(rnd, "random");
+
         return lazyLoad(new Function<int[], int[]>() {
             @Override
             public int[] apply(final int[] a) {
