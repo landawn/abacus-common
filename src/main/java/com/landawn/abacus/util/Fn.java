@@ -66,22 +66,26 @@ import com.landawn.abacus.util.function.BinaryOperator;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.ByteBiFunction;
 import com.landawn.abacus.util.function.ByteBiPredicate;
+import com.landawn.abacus.util.function.ByteBinaryOperator;
 import com.landawn.abacus.util.function.ByteConsumer;
 import com.landawn.abacus.util.function.ByteFunction;
 import com.landawn.abacus.util.function.BytePredicate;
 import com.landawn.abacus.util.function.CharBiFunction;
 import com.landawn.abacus.util.function.CharBiPredicate;
+import com.landawn.abacus.util.function.CharBinaryOperator;
 import com.landawn.abacus.util.function.CharConsumer;
 import com.landawn.abacus.util.function.CharFunction;
 import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.DoubleBiFunction;
 import com.landawn.abacus.util.function.DoubleBiPredicate;
+import com.landawn.abacus.util.function.DoubleBinaryOperator;
 import com.landawn.abacus.util.function.DoubleConsumer;
 import com.landawn.abacus.util.function.DoubleFunction;
 import com.landawn.abacus.util.function.DoublePredicate;
 import com.landawn.abacus.util.function.FloatBiFunction;
 import com.landawn.abacus.util.function.FloatBiPredicate;
+import com.landawn.abacus.util.function.FloatBinaryOperator;
 import com.landawn.abacus.util.function.FloatConsumer;
 import com.landawn.abacus.util.function.FloatFunction;
 import com.landawn.abacus.util.function.FloatPredicate;
@@ -94,11 +98,13 @@ import com.landawn.abacus.util.function.IndexedFunction;
 import com.landawn.abacus.util.function.IndexedPredicate;
 import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.function.IntBiPredicate;
+import com.landawn.abacus.util.function.IntBinaryOperator;
 import com.landawn.abacus.util.function.IntConsumer;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.IntPredicate;
 import com.landawn.abacus.util.function.LongBiFunction;
 import com.landawn.abacus.util.function.LongBiPredicate;
+import com.landawn.abacus.util.function.LongBinaryOperator;
 import com.landawn.abacus.util.function.LongConsumer;
 import com.landawn.abacus.util.function.LongFunction;
 import com.landawn.abacus.util.function.LongPredicate;
@@ -107,6 +113,7 @@ import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.QuadFunction;
 import com.landawn.abacus.util.function.ShortBiFunction;
 import com.landawn.abacus.util.function.ShortBiPredicate;
+import com.landawn.abacus.util.function.ShortBinaryOperator;
 import com.landawn.abacus.util.function.ShortConsumer;
 import com.landawn.abacus.util.function.ShortFunction;
 import com.landawn.abacus.util.function.ShortPredicate;
@@ -3432,6 +3439,50 @@ public final class Fn extends Comparators {
         };
     }
 
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param supplier
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static <T> Function<Future<T>, T> getOrDefaultOnError(final T defaultValue) {
+    //        return new Function<Future<T>, T>() {
+    //            @Override
+    //            public T apply(Future<T> f) {
+    //                try {
+    //                    return f.get();
+    //                } catch (InterruptedException | ExecutionException e) {
+    //                    // throw N.toRuntimeException(e);
+    //                    return defaultValue;
+    //                }
+    //            }
+    //        };
+    //    }
+    //
+    //    private static final Function<Future<Object>, Object> GET_OR_THROW = new Function<Future<Object>, Object>() {
+    //        @Override
+    //        public Object apply(Future<Object> f) {
+    //            try {
+    //                return f.get();
+    //            } catch (InterruptedException | ExecutionException e) {
+    //                return N.toRuntimeException(e);
+    //            }
+    //        }
+    //    };
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param supplier
+    //     * @return
+    //     */
+    //    @SuppressWarnings("rawtypes")
+    //    @Beta
+    //    public static <T> Function<Future<T>, T> getOrThrowOnError() {
+    //        return (Function) GET_OR_THROW;
+    //    }
+
     /**
      *
      * @param <T>
@@ -4178,6 +4229,31 @@ public final class Fn extends Comparators {
 
     /**
      *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param function
+     * @param defaultOnError
+     * @return
+     */
+    @Beta
+    public static <T, R, E extends Exception> Function<T, R> ff(final Throwables.Function<T, R, E> function, final R defaultOnError) {
+        N.checkArgNotNull(function);
+
+        return new Function<T, R>() {
+            @Override
+            public R apply(T t) {
+                try {
+                    return function.apply(t);
+                } catch (Exception e) {
+                    return defaultOnError;
+                }
+            }
+        };
+    }
+
+    /**
+     *
      * @param <A>
      * @param <T>
      * @param <R>
@@ -4257,6 +4333,32 @@ public final class Fn extends Comparators {
 
     /**
      *
+     * @param <T>
+     * @param <U>
+     * @param <R>
+     * @param <E>
+     * @param biFunction
+     * @param defaultOnError
+     * @return
+     */
+    @Beta
+    public static <T, U, R, E extends Exception> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, E> biFunction, final R defaultOnError) {
+        N.checkArgNotNull(biFunction);
+
+        return new BiFunction<T, U, R>() {
+            @Override
+            public R apply(T t, U u) {
+                try {
+                    return biFunction.apply(t, u);
+                } catch (Exception e) {
+                    return defaultOnError;
+                }
+            }
+        };
+    }
+
+    /**
+     *
      * @param <A>
      * @param <T>
      * @param <U>
@@ -4303,6 +4405,34 @@ public final class Fn extends Comparators {
                     return triFunction.apply(a, b, c);
                 } catch (Exception e) {
                     throw N.toRuntimeException(e);
+                }
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param triFunction
+     * @param defaultOnError
+     * @return
+     */
+    @Beta
+    public static <A, B, C, R, E extends Exception> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, E> triFunction,
+            final R defaultOnError) {
+        N.checkArgNotNull(triFunction);
+
+        return new TriFunction<A, B, C, R>() {
+            @Override
+            public R apply(A a, B b, C c) {
+                try {
+                    return triFunction.apply(a, b, c);
+                } catch (Exception e) {
+                    return defaultOnError;
                 }
             }
         };
@@ -9616,6 +9746,26 @@ public final class Fn extends Comparators {
                 }
             };
         }
+
+        public static final class CharBinaryOperators {
+            private CharBinaryOperators() {
+                // Singleton for utility class.
+            }
+
+            public static final CharBinaryOperator MIN = new CharBinaryOperator() {
+                @Override
+                public char applyAsChar(char left, char right) {
+                    return left <= right ? left : right;
+                }
+            };
+
+            public static final CharBinaryOperator MAX = new CharBinaryOperator() {
+                @Override
+                public char applyAsChar(char left, char right) {
+                    return left >= right ? left : right;
+                }
+            };
+        }
     }
 
     /**
@@ -9867,6 +10017,26 @@ public final class Fn extends Comparators {
                 @Override
                 public Nth apply(byte t, byte u) {
                     return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                }
+            };
+        }
+
+        public static final class ByteBinaryOperators {
+            private ByteBinaryOperators() {
+                // Singleton for utility class.
+            }
+
+            public static final ByteBinaryOperator MIN = new ByteBinaryOperator() {
+                @Override
+                public byte applyAsByte(byte left, byte right) {
+                    return left <= right ? left : right;
+                }
+            };
+
+            public static final ByteBinaryOperator MAX = new ByteBinaryOperator() {
+                @Override
+                public byte applyAsByte(byte left, byte right) {
+                    return left >= right ? left : right;
                 }
             };
         }
@@ -10124,6 +10294,26 @@ public final class Fn extends Comparators {
                 }
             };
         }
+
+        public static final class ShortBinaryOperators {
+            private ShortBinaryOperators() {
+                // Singleton for utility class.
+            }
+
+            public static final ShortBinaryOperator MIN = new ShortBinaryOperator() {
+                @Override
+                public short applyAsShort(short left, short right) {
+                    return left <= right ? left : right;
+                }
+            };
+
+            public static final ShortBinaryOperator MAX = new ShortBinaryOperator() {
+                @Override
+                public short applyAsShort(short left, short right) {
+                    return left >= right ? left : right;
+                }
+            };
+        }
     }
 
     /**
@@ -10375,6 +10565,26 @@ public final class Fn extends Comparators {
                 @Override
                 public Nth apply(int t, int u) {
                     return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                }
+            };
+        }
+
+        public static final class IntBinaryOperators {
+            private IntBinaryOperators() {
+                // Singleton for utility class.
+            }
+
+            public static final IntBinaryOperator MIN = new IntBinaryOperator() {
+                @Override
+                public int applyAsInt(int left, int right) {
+                    return left <= right ? left : right;
+                }
+            };
+
+            public static final IntBinaryOperator MAX = new IntBinaryOperator() {
+                @Override
+                public int applyAsInt(int left, int right) {
+                    return left >= right ? left : right;
                 }
             };
         }
@@ -10632,6 +10842,26 @@ public final class Fn extends Comparators {
                 }
             };
         }
+
+        public static final class LongBinaryOperators {
+            private LongBinaryOperators() {
+                // Singleton for utility class.
+            }
+
+            public static final LongBinaryOperator MIN = new LongBinaryOperator() {
+                @Override
+                public long applyAsLong(long left, long right) {
+                    return left <= right ? left : right;
+                }
+            };
+
+            public static final LongBinaryOperator MAX = new LongBinaryOperator() {
+                @Override
+                public long applyAsLong(long left, long right) {
+                    return left >= right ? left : right;
+                }
+            };
+        }
     }
 
     /**
@@ -10886,6 +11116,26 @@ public final class Fn extends Comparators {
                 }
             };
         }
+
+        public static final class FloatBinaryOperators {
+            private FloatBinaryOperators() {
+                // Singleton for utility class.
+            }
+
+            public static final FloatBinaryOperator MIN = new FloatBinaryOperator() {
+                @Override
+                public float applyAsFloat(float left, float right) {
+                    return left <= right ? left : right;
+                }
+            };
+
+            public static final FloatBinaryOperator MAX = new FloatBinaryOperator() {
+                @Override
+                public float applyAsFloat(float left, float right) {
+                    return left >= right ? left : right;
+                }
+            };
+        }
     }
 
     /**
@@ -11137,6 +11387,26 @@ public final class Fn extends Comparators {
                 @Override
                 public Nth apply(double t, double u) {
                     return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                }
+            };
+        }
+
+        public static final class DoubleBinaryOperators {
+            private DoubleBinaryOperators() {
+                // Singleton for utility class.
+            }
+
+            public static final DoubleBinaryOperator MIN = new DoubleBinaryOperator() {
+                @Override
+                public double applyAsDouble(double left, double right) {
+                    return left <= right ? left : right;
+                }
+            };
+
+            public static final DoubleBinaryOperator MAX = new DoubleBinaryOperator() {
+                @Override
+                public double applyAsDouble(double left, double right) {
+                    return left >= right ? left : right;
                 }
             };
         }

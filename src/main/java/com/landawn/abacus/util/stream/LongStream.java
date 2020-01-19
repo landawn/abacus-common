@@ -29,6 +29,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
@@ -83,6 +85,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
     LongStream(final boolean sorted, final Collection<Runnable> closeHandlers) {
         super(sorted, null, closeHandlers);
+    }
+
+    @Override
+    @ParallelSupported
+    @IntermediateOp
+    @Beta
+    public LongStream skipUntil(final LongPredicate predicate) {
+        return dropWhile(new LongPredicate() {
+            @Override
+            public boolean test(final long t) {
+                return !predicate.test(t);
+            }
+        });
     }
 
     public abstract LongStream map(LongUnaryOperator mapper);

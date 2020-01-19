@@ -27,6 +27,8 @@ import java.util.Queue;
 import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
@@ -83,6 +85,19 @@ public abstract class DoubleStream
         super(sorted, null, closeHandlers);
     }
 
+    @Override
+    @ParallelSupported
+    @IntermediateOp
+    @Beta
+    public DoubleStream skipUntil(final DoublePredicate predicate) {
+        return dropWhile(new DoublePredicate() {
+            @Override
+            public boolean test(final double t) {
+                return !predicate.test(t);
+            }
+        });
+    }
+    
     public abstract DoubleStream map(DoubleUnaryOperator mapper);
 
     public abstract IntStream mapToInt(DoubleToIntFunction mapper);

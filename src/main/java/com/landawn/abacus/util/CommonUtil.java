@@ -8564,9 +8564,8 @@ class CommonUtil {
      * @param <E>
      * @param b
      * @param errorMessageSupplier
-     * @throws E the e
      */
-    public static <E extends Exception> void checkArgument(boolean b, Throwables.Supplier<String, E> errorMessageSupplier) throws E {
+    public static void checkArgument(boolean b, Supplier<String> errorMessageSupplier) {
         if (!b) {
             throw new IllegalArgumentException(errorMessageSupplier.get());
         }
@@ -9282,10 +9281,9 @@ class CommonUtil {
      *
      * @param <E>
      * @param b
-     * @param errorMessageSupplier
-     * @throws E the e
+     * @param errorMessageSupplier 
      */
-    public static <E extends Exception> void checkState(boolean b, Throwables.Supplier<String, E> errorMessageSupplier) throws E {
+    public static void checkState(boolean b, Supplier<String> errorMessageSupplier) {
         if (!b) {
             throw new IllegalStateException(errorMessageSupplier.get());
         }

@@ -23,19 +23,6 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  */
 public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<RuntimeException> {
-    public static final ShortBinaryOperator MIN = new ShortBinaryOperator() {
-        @Override
-        public short applyAsShort(short left, short right) {
-            return left <= right ? left : right;
-        }
-    };
-
-    public static final ShortBinaryOperator MAX = new ShortBinaryOperator() {
-        @Override
-        public short applyAsShort(short left, short right) {
-            return left >= right ? left : right;
-        }
-    };
 
     @Override
     short applyAsShort(short left, short right);

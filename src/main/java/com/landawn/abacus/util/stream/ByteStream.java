@@ -25,6 +25,8 @@ import java.util.Queue;
 import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ByteIterator;
@@ -79,6 +81,19 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     ByteStream(final boolean sorted, final Collection<Runnable> closeHandlers) {
         super(sorted, null, closeHandlers);
+    }
+
+    @Override
+    @ParallelSupported
+    @IntermediateOp
+    @Beta
+    public ByteStream skipUntil(final BytePredicate predicate) {
+        return dropWhile(new BytePredicate() {
+            @Override
+            public boolean test(final byte t) {
+                return !predicate.test(t);
+            }
+        });
     }
 
     public abstract ByteStream map(ByteUnaryOperator mapper);

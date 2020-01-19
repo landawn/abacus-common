@@ -54,7 +54,6 @@ import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.BiPredicate;
@@ -19695,7 +19694,7 @@ public final class N extends CommonUtil {
      * @return
      */
     @SuppressWarnings("deprecation")
-    public static <T, U> List<Tuple2<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
+    public static <T, U> List<Pair<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
         return Iterables.crossJoin(a, b);
     }
 
@@ -19734,8 +19733,8 @@ public final class N extends CommonUtil {
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      */
     @SuppressWarnings("deprecation")
-    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper) throws E, E2 {
         return Iterables.innerJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19775,8 +19774,8 @@ public final class N extends CommonUtil {
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      */
     @SuppressWarnings("deprecation")
-    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper) throws E, E2 {
         return Iterables.fullJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19816,8 +19815,8 @@ public final class N extends CommonUtil {
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      */
     @SuppressWarnings("deprecation")
-    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper) throws E, E2 {
         return Iterables.leftJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19857,8 +19856,8 @@ public final class N extends CommonUtil {
      * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
      */
     @SuppressWarnings("deprecation")
-    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper) throws E, E2 {
         return Iterables.rightJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 

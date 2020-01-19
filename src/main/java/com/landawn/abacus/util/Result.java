@@ -225,6 +225,14 @@ public final class Result<T, E extends Throwable> {
      *
      * @return
      */
+    public Pair<T, E> toPair() {
+        return Pair.of(value, exception);
+    }
+
+    /**
+     *
+     * @return
+     */
     public Tuple2<T, E> toTuple() {
         return Tuple.of(value, exception);
     }

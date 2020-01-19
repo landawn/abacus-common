@@ -1,3 +1,9 @@
+### 1.10.7
+
+* Add `Stream.skipUntil/groupJoin`.
+* Improvements and bug fix.
+
+
 ### 1.10.6
 
 * Remove `Iterables.iterator/N.iterate(T[] ...a)/N.iterate(Collection<T> ...a)`.

@@ -25,6 +25,8 @@ import java.util.Queue;
 import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
@@ -78,6 +80,19 @@ public abstract class ShortStream
 
     ShortStream(final boolean sorted, final Collection<Runnable> closeHandlers) {
         super(sorted, null, closeHandlers);
+    }
+
+    @Override
+    @ParallelSupported
+    @IntermediateOp
+    @Beta
+    public ShortStream skipUntil(final ShortPredicate predicate) {
+        return dropWhile(new ShortPredicate() {
+            @Override
+            public boolean test(final short t) {
+                return !predicate.test(t);
+            }
+        });
     }
 
     public abstract ShortStream map(ShortUnaryOperator mapper);

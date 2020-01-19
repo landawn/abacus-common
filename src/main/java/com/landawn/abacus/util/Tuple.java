@@ -676,14 +676,6 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple2<T2, T1> reversed() {
-            return of(_2, _1);
-        }
-
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2 };
@@ -705,6 +697,22 @@ public abstract class Tuple {
             a[1] = (A) _2;
 
             return a;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Pair<T1, T2> toPair() {
+            return Pair.of(_1, _2);
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Tuple2<T2, T1> reversed() {
+            return of(_2, _1);
         }
 
         /**
@@ -794,14 +802,6 @@ public abstract class Tuple {
         @Override
         public Stream<Tuple2<T1, T2>> stream() {
             return Stream.of(this);
-        }
-
-        /**
-         *
-         * @return
-         */
-        public Pair<T1, T2> toPair() {
-            return Pair.of(_1, _2);
         }
 
         /**
@@ -917,14 +917,6 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple3<T3, T2, T1> reversed() {
-            return new Tuple3<>(_3, _2, _1);
-        }
-
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3 };
@@ -947,6 +939,22 @@ public abstract class Tuple {
             a[2] = (A) _3;
 
             return a;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Triple<T1, T2, T3> toTriple() {
+            return Triple.of(_1, _2, _3);
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Tuple3<T3, T2, T1> reversed() {
+            return new Tuple3<>(_3, _2, _1);
         }
 
         /**
@@ -1026,7 +1034,8 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate) throws E {
+        public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate)
+                throws E {
             return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<Tuple3<T1, T2, T3>> empty();
         }
 
@@ -1037,14 +1046,6 @@ public abstract class Tuple {
         @Override
         public Stream<Tuple3<T1, T2, T3>> stream() {
             return Stream.of(this);
-        }
-
-        /**
-         *
-         * @return
-         */
-        public Triple<T1, T2, T3> toTriple() {
-            return Triple.of(_1, _2, _3);
         }
 
         /**
@@ -1167,14 +1168,6 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple4<T4, T3, T2, T1> reversed() {
-            return new Tuple4<>(_4, _3, _2, _1);
-        }
-
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4 };
@@ -1198,6 +1191,14 @@ public abstract class Tuple {
             a[3] = (A) _4;
 
             return a;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Tuple4<T4, T3, T2, T1> reversed() {
+            return new Tuple4<>(_4, _3, _2, _1);
         }
 
         /**
@@ -1385,14 +1386,6 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple5<T5, T4, T3, T2, T1> reversed() {
-            return new Tuple5<>(_5, _4, _3, _2, _1);
-        }
-
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5 };
@@ -1417,6 +1410,14 @@ public abstract class Tuple {
             a[4] = (A) _5;
 
             return a;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Tuple5<T5, T4, T3, T2, T1> reversed() {
+            return new Tuple5<>(_5, _4, _3, _2, _1);
         }
 
         /**
@@ -1614,14 +1615,6 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple6<T6, T5, T4, T3, T2, T1> reversed() {
-            return new Tuple6<>(_6, _5, _4, _3, _2, _1);
-        }
-
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5, _6 };
@@ -1647,6 +1640,14 @@ public abstract class Tuple {
             a[5] = (A) _6;
 
             return a;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Tuple6<T6, T5, T4, T3, T2, T1> reversed() {
+            return new Tuple6<>(_6, _5, _4, _3, _2, _1);
         }
 
         /**
@@ -1696,8 +1697,8 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple6<T1, T2, T3, T4, T5, T6>> filter(final Throwables.Predicate<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> predicate)
-                throws E {
+        public <E extends Exception> Optional<Tuple6<T1, T2, T3, T4, T5, T6>> filter(
+                final Throwables.Predicate<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> predicate) throws E {
             return predicate.test(this) ? Optional.of(this) : Optional.<Tuple6<T1, T2, T3, T4, T5, T6>> empty();
         }
 
@@ -1853,14 +1854,6 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple7<T7, T6, T5, T4, T3, T2, T1> reversed() {
-            return new Tuple7<>(_7, _6, _5, _4, _3, _2, _1);
-        }
-
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5, _6, _7 };
@@ -1887,6 +1880,14 @@ public abstract class Tuple {
             a[6] = (A) _7;
 
             return a;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Tuple7<T7, T6, T5, T4, T3, T2, T1> reversed() {
+            return new Tuple7<>(_7, _6, _5, _4, _3, _2, _1);
         }
 
         /**
@@ -2101,14 +2102,6 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
-            return new Tuple8<>(_8, _7, _6, _5, _4, _3, _2, _1);
-        }
-
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5, _6, _7, _8 };
@@ -2136,6 +2129,14 @@ public abstract class Tuple {
             a[7] = (A) _8;
 
             return a;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
+            return new Tuple8<>(_8, _7, _6, _5, _4, _3, _2, _1);
         }
 
         /**
@@ -2358,14 +2359,6 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
-            return new Tuple9<>(_9, _8, _7, _6, _5, _4, _3, _2, _1);
-        }
-
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5, _6, _7, _8, _9 };
@@ -2394,6 +2387,14 @@ public abstract class Tuple {
             a[8] = (A) _9;
 
             return a;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
+            return new Tuple9<>(_9, _8, _7, _6, _5, _4, _3, _2, _1);
         }
 
         /**

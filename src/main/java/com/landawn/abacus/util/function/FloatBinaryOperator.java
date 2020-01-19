@@ -23,19 +23,6 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  */
 public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<RuntimeException> {
-    public static final FloatBinaryOperator MIN = new FloatBinaryOperator() {
-        @Override
-        public float applyAsFloat(float left, float right) {
-            return Math.min(left, right);
-        }
-    };
-
-    public static final FloatBinaryOperator MAX = new FloatBinaryOperator() {
-        @Override
-        public float applyAsFloat(float left, float right) {
-            return Math.max(left, right);
-        }
-    };
 
     @Override
     float applyAsFloat(float left, float right);

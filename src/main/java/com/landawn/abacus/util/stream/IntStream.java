@@ -27,6 +27,8 @@ import java.util.Queue;
 import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
@@ -85,6 +87,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
     IntStream(final boolean sorted, final Collection<Runnable> closeHandlers) {
         super(sorted, null, closeHandlers);
+    }
+
+    @Override
+    @ParallelSupported
+    @IntermediateOp
+    @Beta
+    public IntStream skipUntil(final IntPredicate predicate) {
+        return dropWhile(new IntPredicate() {
+            @Override
+            public boolean test(final int t) {
+                return !predicate.test(t);
+            }
+        });
     }
 
     public abstract IntStream map(IntUnaryOperator mapper);

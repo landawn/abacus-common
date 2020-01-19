@@ -26,6 +26,8 @@ import java.util.Queue;
 import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
@@ -81,6 +83,19 @@ public abstract class FloatStream
 
     FloatStream(final boolean sorted, final Collection<Runnable> closeHandlers) {
         super(sorted, null, closeHandlers);
+    }
+
+    @Override
+    @ParallelSupported
+    @IntermediateOp
+    @Beta
+    public FloatStream skipUntil(final FloatPredicate predicate) {
+        return dropWhile(new FloatPredicate() {
+            @Override
+            public boolean test(final float t) {
+                return !predicate.test(t);
+            }
+        });
     }
 
     public abstract FloatStream map(FloatUnaryOperator mapper);

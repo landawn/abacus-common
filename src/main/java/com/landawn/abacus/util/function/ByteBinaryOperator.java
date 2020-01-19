@@ -23,19 +23,6 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  */
 public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<RuntimeException> {
-    public static final ByteBinaryOperator MIN = new ByteBinaryOperator() {
-        @Override
-        public byte applyAsByte(byte left, byte right) {
-            return left <= right ? left : right;
-        }
-    };
-
-    public static final ByteBinaryOperator MAX = new ByteBinaryOperator() {
-        @Override
-        public byte applyAsByte(byte left, byte right) {
-            return left >= right ? left : right;
-        }
-    };
 
     @Override
     byte applyAsByte(byte left, byte right);

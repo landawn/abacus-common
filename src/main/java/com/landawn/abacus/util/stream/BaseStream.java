@@ -121,6 +121,11 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     @Beta
     S dropWhile(P predicate, C actionOnDroppedItem);
 
+    @ParallelSupported
+    @IntermediateOp
+    @Beta
+    S skipUntil(P predicate);
+
     /**
      *
      * @param predicate

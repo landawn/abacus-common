@@ -87,7 +87,6 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -158,7 +157,7 @@ public abstract class Stream<T>
 
     @SequentialOnly
     @IntermediateOp
-    public <U> Stream<U> select(Class<U> targetType) {        
+    public <U> Stream<U> select(Class<U> targetType) {
         if (isParallel()) {
             return (Stream<U>) sequential().filter(Fn.instanceOf(targetType)).parallel(maxThreadNum(), splitor(), asyncExecutor());
         } else {
@@ -171,12 +170,11 @@ public abstract class Stream<T>
      * @param predicate
      * @return
      */
+    @Override
     @SequentialOnly
     @IntermediateOp
     @Beta
     public Stream<T> skipUntil(final Predicate<? super T> predicate) {
-        checkArgNotNull(predicate, "predicate");
-
         return dropWhile(Fn.not(predicate));
     }
 
@@ -1429,6 +1427,10 @@ public abstract class Stream<T>
 
     @ParallelSupported
     @TerminalOp
+    public abstract <E extends Exception> void forEach(Throwables.IndexedConsumer<? super T, E> action) throws E;
+
+    @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception, E2 extends Exception> void forEach(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> onComplete)
             throws E, E2;
 
@@ -2331,7 +2333,7 @@ public abstract class Stream<T>
 
     @SequentialOnly
     @IntermediateOp
-    public abstract <U> Stream<Tuple2<T, U>> crossJoin(Collection<? extends U> c);
+    public abstract <U> Stream<Pair<T, U>> crossJoin(Collection<? extends U> c);
 
     @SequentialOnly
     @IntermediateOp
@@ -2349,7 +2351,8 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> innerJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
+    public abstract <U, K> Stream<Pair<T, U>> innerJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper);
 
     /**
      *
@@ -2376,7 +2379,8 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> fullJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
+    public abstract <U, K> Stream<Pair<T, U>> fullJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper);
 
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
@@ -2402,7 +2406,8 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> leftJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
+    public abstract <U, K> Stream<Pair<T, U>> leftJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper);
 
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
@@ -2428,7 +2433,8 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> rightJoin(Collection<U> b, Function<? super T, ?> leftKeyMapper, Function<? super U, ?> rightKeyMapper);
+    public abstract <U, K> Stream<Pair<T, U>> rightJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper);
 
     /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
@@ -2441,6 +2447,44 @@ public abstract class Stream<T>
     @ParallelSupported
     @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> rightJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
+
+    /**
+     * 
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K> Stream<Pair<T, List<U>>> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper);
+
+    /**
+     * 
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param mergeFunction
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K> Stream<Pair<T, U>> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, BinaryOperator<U> mergeFunction);
+
+    /**
+     * 
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param downstream
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, A, D> Stream<Pair<T, D>> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, Collector<? super U, A, D> downstream);
 
     @ParallelSupported
     @IntermediateOp

@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -1840,8 +1839,8 @@ public final class Iterables {
      * @deprecated replaced by {@code N.crossJoin(Collection, Collection)}
      */
     @Deprecated
-    public static <T, U> List<Tuple2<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
-        return crossJoin(a, b, Fn.<T, U> tuple2());
+    public static <T, U> List<Pair<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
+        return crossJoin(a, b, Fn.<T, U> pair());
     }
 
     /**
@@ -1897,8 +1896,9 @@ public final class Iterables {
      * @deprecated replaced by {@code N.innerJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
     @Deprecated
-    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+            throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
 
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
@@ -1974,8 +1974,9 @@ public final class Iterables {
      * @deprecated replaced by {@code N.fullJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
     @Deprecated
-    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+            throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
 
         if (N.isNullOrEmpty(a)) {
@@ -2089,8 +2090,9 @@ public final class Iterables {
      * @deprecated replaced by {@code N.leftJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
     @Deprecated
-    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+            throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
 
         if (N.isNullOrEmpty(a)) {
@@ -2183,8 +2185,9 @@ public final class Iterables {
      * @deprecated replaced by {@code N.rightJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
      */
     @Deprecated
-    public static <T, U, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ?, E> leftKeyMapper, final Throwables.Function<? super U, ?, E2> rightKeyMapper) throws E, E2 {
+    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+            throws E, E2 {
         final List<Pair<T, U>> result = new ArrayList<>(N.size(b));
 
         if (N.isNullOrEmpty(b)) {

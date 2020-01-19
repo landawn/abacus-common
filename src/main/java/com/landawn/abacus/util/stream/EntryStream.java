@@ -238,6 +238,16 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
+    public <KK> EntryStream<K, V> skipUntil(final Predicate<? super Map.Entry<K, V>> predicate) {
+        return of(s.skipUntil(predicate));
+    }
+
+    @ParallelSupported
+    public <KK> EntryStream<K, V> skipUntil(final BiPredicate<? super K, ? super V> predicate) {
+        return of(s.skipUntil(Fn.Entries.p(predicate)));
+    }
+
+    @ParallelSupported
     public <KK, VV> EntryStream<KK, VV> map(final Function<? super Map.Entry<K, V>, ? extends Map.Entry<? extends KK, ? extends VV>> mapper) {
         return s.mapToEntry(mapper);
     }

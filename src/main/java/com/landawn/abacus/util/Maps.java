@@ -2368,7 +2368,7 @@ public final class Maps {
      * @param remappingFunction
      * @throws E the e
      */
-    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BiFunction<? super V, ? super V, ? extends V, E> remappingFunction)
+    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction)
             throws E {
         final V oldValue = map.get(key);
 

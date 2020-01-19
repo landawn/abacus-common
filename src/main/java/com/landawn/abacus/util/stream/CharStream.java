@@ -25,6 +25,8 @@ import java.util.Queue;
 import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharIterator;
@@ -80,6 +82,19 @@ public abstract class CharStream
 
     CharStream(final boolean sorted, final Collection<Runnable> closeHandlers) {
         super(sorted, null, closeHandlers);
+    }
+
+    @Override
+    @ParallelSupported
+    @IntermediateOp
+    @Beta
+    public CharStream skipUntil(final CharPredicate predicate) {
+        return dropWhile(new CharPredicate() {
+            @Override
+            public boolean test(final char t) {
+                return !predicate.test(t);
+            }
+        });
     }
 
     /**
