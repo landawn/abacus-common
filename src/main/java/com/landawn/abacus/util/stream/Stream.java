@@ -2622,6 +2622,10 @@ public abstract class Stream<T>
     @IntermediateOp
     public abstract Stream<T> cycled(long times);
 
+    @SequentialOnly
+    @IntermediateOp
+    public abstract Stream<List<T>> rollup();
+
     /**
      * Returns a new Stream with elements from a temporary queue which is filled by reading the elements from this Stream asynchronously.
      * Default queue size is 64.

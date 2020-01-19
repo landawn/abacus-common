@@ -1905,7 +1905,7 @@ public final class Iterables {
             return result;
         }
 
-        final ListMultimap<Object, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+        final ListMultimap<K, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
 
         for (T left : a) {
             final List<U> rights = rightKeyMap.get(leftKeyMapper.apply(left));
@@ -1988,7 +1988,7 @@ public final class Iterables {
                 result.add(Pair.of((T) null, right));
             }
         } else {
-            final ListMultimap<Object, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+            final ListMultimap<K, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
             final Map<U, U> joinedRights = new IdentityHashMap<>();
 
             for (T left : a) {
@@ -2102,7 +2102,7 @@ public final class Iterables {
                 result.add(Pair.of(left, (U) null));
             }
         } else {
-            final ListMultimap<Object, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
+            final ListMultimap<K, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
 
             for (T left : a) {
                 final List<U> rights = rightKeyMap.get(leftKeyMapper.apply(left));
@@ -2197,7 +2197,7 @@ public final class Iterables {
                 result.add(Pair.of((T) null, right));
             }
         } else {
-            final ListMultimap<Object, T> leftKeyMap = ListMultimap.from(a, leftKeyMapper);
+            final ListMultimap<K, T> leftKeyMap = ListMultimap.from(a, leftKeyMapper);
 
             for (U right : b) {
                 final List<T> lefts = leftKeyMap.get(rightKeyMapper.apply(right));

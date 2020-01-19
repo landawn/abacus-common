@@ -1,6 +1,6 @@
 ### 1.10.7
 
-* Add `Stream.skipUntil/groupJoin`.
+* Add `Stream.skipUntil/groupJoin/rollup`.
 * Improvements and bug fix.
 
 

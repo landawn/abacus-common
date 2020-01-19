@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
@@ -2497,7 +2498,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(rightKeyMapper, "rightKeyMapper");
 
         return flatMap(new Function<T, Stream<Pair<T, U>>>() {
-            private ListMultimap<Object, U> rightKeyMap = null;
+            private ListMultimap<K, U> rightKeyMap = null;
 
             @Override
             public Stream<Pair<T, U>> apply(final T t) {
@@ -2555,7 +2556,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         final Map<U, U> joinedRights = new IdentityHashMap<>();
 
         return flatMap(new Function<T, Stream<Pair<T, U>>>() {
-            private ListMultimap<Object, U> rightKeyMap = null;
+            private ListMultimap<K, U> rightKeyMap = null;
 
             @Override
             public Stream<Pair<T, U>> apply(final T t) {
@@ -2659,7 +2660,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 val = map.get(leftKeyMapper.apply(t));
 
                 if (val == null) {
-                    return Pair.of(t, new ArrayList<U>(0));
+                    return Pair.<T, List<U>> of(t, new ArrayList<U>(0));
                 } else {
                     return Pair.of(t, val);
                 }
@@ -3958,6 +3959,67 @@ abstract class AbstractStream<T> extends Stream<T> {
                     initialized = true;
                     iter = AbstractStream.this.iteratorEx();
                     list = new ArrayList<>();
+                }
+            }
+        }, false, null);
+    }
+
+    @Override
+    public Stream<List<T>> rollup() {
+        return newStream(new ObjIteratorEx<List<T>>() {
+            private boolean initialized = false;
+            private List<T> elements;
+            private int toIndex = -1;
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (initialized == false) {
+                    init();
+                }
+
+                return cursor < toIndex;
+            }
+
+            @Override
+            public List<T> next() {
+                if (initialized == false) {
+                    init();
+                }
+
+                if (cursor >= toIndex) {
+                    throw new NoSuchElementException();
+                }
+
+                return elements.subList(0, cursor++);
+            }
+
+            @Override
+            public long count() {
+                if (initialized == false) {
+                    init();
+                }
+
+                return toIndex - cursor;
+            }
+
+            @Override
+            public void skip(long n) {
+                if (initialized == false) {
+                    init();
+                }
+
+                cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
+            }
+
+            private void init() {
+                if (initialized == false) {
+                    initialized = true;
+
+                    final Tuple3<Object[], Integer, Integer> tp = AbstractStream.this.array();
+
+                    elements = Arrays.asList((T[]) tp._1).subList(tp._2, tp._3);
+                    toIndex = elements.size() + 1;
                 }
             }
         }, false, null);
