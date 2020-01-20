@@ -110,7 +110,7 @@ public final class DoubleTriple {
      *
      * @return
      */
-    public DoubleTriple reversed() {
+    public DoubleTriple reverse() {
         return new DoubleTriple(_3, _2, _1);
     }
 

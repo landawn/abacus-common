@@ -110,7 +110,7 @@ public final class FloatTriple {
      *
      * @return
      */
-    public FloatTriple reversed() {
+    public FloatTriple reverse() {
         return new FloatTriple(_3, _2, _1);
     }
 

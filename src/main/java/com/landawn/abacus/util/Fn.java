@@ -650,24 +650,7 @@ public final class Fn extends Comparators {
      * @return
      */
     public static <T> Supplier<T> memoize(final Supplier<T> supplier) {
-        return new Supplier<T>() {
-            private volatile boolean initialized = false;
-            private T instance = null;
-
-            @Override
-            public T get() {
-                if (initialized == false) {
-                    synchronized (this) {
-                        if (initialized == false) {
-                            instance = supplier.get();
-                        }
-
-                    }
-                }
-
-                return instance;
-            }
-        };
+        return LazyInitializer.of(supplier);
     }
 
     /**
@@ -6384,7 +6367,7 @@ public final class Fn extends Comparators {
     /**
      * The Class IntFunctions.
      */
-    public static abstract class IntFunctions extends Factory {
+    public static final class IntFunctions extends Factory {
 
         /**
          * Instantiates a new int functions.
@@ -6397,7 +6380,7 @@ public final class Fn extends Comparators {
     /**
      * The Class Suppliers.
      */
-    public static abstract class Suppliers {
+    public static final class Suppliers {
 
         /** The Constant UUID. */
         private static final Supplier<String> UUID = new Supplier<String>() {
@@ -7316,7 +7299,7 @@ public final class Fn extends Comparators {
     /**
      * The Class Predicates.
      */
-    public static abstract class Predicates {
+    public static final class Predicates {
 
         /**
          * Instantiates a new predicates.
@@ -7596,7 +7579,7 @@ public final class Fn extends Comparators {
     /**
      * The Class BiPredicates.
      */
-    public static abstract class BiPredicates {
+    public static final class BiPredicates {
 
         /** The Constant ALWAYS_TRUE. */
         @SuppressWarnings("rawtypes")
@@ -7725,7 +7708,7 @@ public final class Fn extends Comparators {
     /**
      * The Class TriPredicates.
      */
-    public static abstract class TriPredicates {
+    public static final class TriPredicates {
 
         /** The Constant ALWAYS_TRUE. */
         @SuppressWarnings("rawtypes")
@@ -7779,7 +7762,7 @@ public final class Fn extends Comparators {
     /**
      * The Class Consumers.
      */
-    public static abstract class Consumers {
+    public static final class Consumers {
 
         /**
          * Instantiates a new consumers.
@@ -7832,7 +7815,7 @@ public final class Fn extends Comparators {
     /**
      * The Class BiConsumers.
      */
-    public static abstract class BiConsumers {
+    public static final class BiConsumers {
 
         /** The Constant DO_NOTHING. */
         @SuppressWarnings("rawtypes")
@@ -8114,7 +8097,7 @@ public final class Fn extends Comparators {
     /**
      * The Class TriConsumers.
      */
-    public static abstract class TriConsumers {
+    public static final class TriConsumers {
 
         /**
          * Instantiates a new tri consumers.
@@ -8147,7 +8130,7 @@ public final class Fn extends Comparators {
     /**
      * The Class Functions.
      */
-    public static abstract class Functions {
+    public static final class Functions {
 
         /**
          * Instantiates a new functions.
@@ -8202,7 +8185,7 @@ public final class Fn extends Comparators {
     /**
      * The Class BiFunctions.
      */
-    public static abstract class BiFunctions {
+    public static final class BiFunctions {
 
         /** The Constant RETURN_FIRST. */
         private static final BiFunction<Object, Object, Object> RETURN_FIRST = new BiFunction<Object, Object, Object>() {
@@ -8511,7 +8494,7 @@ public final class Fn extends Comparators {
     /**
      * The Class TriFunctions.
      */
-    public static abstract class TriFunctions {
+    public static final class TriFunctions {
 
         /**
          * Instantiates a new tri functions.
@@ -8544,7 +8527,7 @@ public final class Fn extends Comparators {
     /**
      * The Class BinaryOperators.
      */
-    public static abstract class BinaryOperators {
+    public static final class BinaryOperators {
 
         /** The Constant THROWING_MERGER. */
         @SuppressWarnings("rawtypes")
@@ -9125,7 +9108,7 @@ public final class Fn extends Comparators {
     /**
      * The Class UnaryOperators.
      */
-    public static abstract class UnaryOperators {
+    public static final class UnaryOperators {
 
         /** The Constant IDENTITY. */
         @SuppressWarnings("rawtypes")
@@ -9156,7 +9139,7 @@ public final class Fn extends Comparators {
     /**
      * The Class Entries.
      */
-    public static abstract class Entries {
+    public static final class Entries {
 
         /**
          * Instantiates a new entries.
@@ -9358,7 +9341,7 @@ public final class Fn extends Comparators {
     /**
      * The Class Pairs.
      */
-    public static abstract class Pairs {
+    public static final class Pairs {
 
         /** The Constant PAIR_TO_LIST. */
         @SuppressWarnings("rawtypes")
@@ -9410,7 +9393,7 @@ public final class Fn extends Comparators {
     /**
      * The Class Triples.
      */
-    public static abstract class Triples {
+    public static final class Triples {
 
         /** The Constant TRIPLE_TO_LIST. */
         @SuppressWarnings("rawtypes")
@@ -9532,7 +9515,7 @@ public final class Fn extends Comparators {
      * @author haiyangl
      *
      */
-    public static abstract class FnC {
+    public static final class FnC {
 
         /** The Constant IS_ZERO. */
         private static final CharPredicate IS_ZERO = new CharPredicate() {
@@ -9774,7 +9757,7 @@ public final class Fn extends Comparators {
      * @author haiyangl
      *
      */
-    public static abstract class FnB {
+    public static final class FnB {
 
         /** The Constant POSITIVE. */
         private static final BytePredicate POSITIVE = new BytePredicate() {
@@ -10048,7 +10031,7 @@ public final class Fn extends Comparators {
      * @author haiyangl
      *
      */
-    public static abstract class FnS {
+    public static final class FnS {
 
         /** The Constant POSITIVE. */
         private static final ShortPredicate POSITIVE = new ShortPredicate() {
@@ -10322,7 +10305,7 @@ public final class Fn extends Comparators {
      * @author haiyangl
      *
      */
-    public static abstract class FnI {
+    public static final class FnI {
 
         /** The Constant POSITIVE. */
         private static final IntPredicate POSITIVE = new IntPredicate() {
@@ -10596,7 +10579,7 @@ public final class Fn extends Comparators {
      * @author haiyangl
      *
      */
-    public static abstract class FnL {
+    public static final class FnL {
 
         /** The Constant POSITIVE. */
         private static final LongPredicate POSITIVE = new LongPredicate() {
@@ -10870,7 +10853,7 @@ public final class Fn extends Comparators {
      * @author haiyangl
      *
      */
-    public static abstract class FnF {
+    public static final class FnF {
 
         /** The Constant POSITIVE. */
         private static final FloatPredicate POSITIVE = new FloatPredicate() {
@@ -11144,7 +11127,7 @@ public final class Fn extends Comparators {
      * @author haiyangl
      *
      */
-    public static abstract class FnD {
+    public static final class FnD {
 
         /** The Constant POSITIVE. */
         private static final DoublePredicate POSITIVE = new DoublePredicate() {
@@ -11418,13 +11401,24 @@ public final class Fn extends Comparators {
      * @author haiyangl
      *
      */
-    public static abstract class Fnn {
+    public static final class Fnn {
 
         /**
          * Instantiates a new fn.
          */
-        protected Fnn() {
-            // for extention
+        private Fnn() {
+            // Singleton for utility class
+        }
+
+        /**
+         * Returns a {@code Supplier} which returns a single instance created by calling the specified {@code supplier.get()}.
+         *
+         * @param <T>
+         * @param supplier
+         * @return
+         */
+        public static <T, E extends Exception> Throwables.LazyInitializer<T, E> memoize(final Throwables.Supplier<T, E> supplier) {
+            return Throwables.LazyInitializer.of(supplier);
         }
 
         /**

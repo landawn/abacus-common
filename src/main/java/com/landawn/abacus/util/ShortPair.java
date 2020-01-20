@@ -96,7 +96,7 @@ public class ShortPair {
      *
      * @return
      */
-    public ShortPair reversed() {
+    public ShortPair reverse() {
         return new ShortPair(_2, _1);
     }
 

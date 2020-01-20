@@ -2404,7 +2404,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         final Map<U, U> joinedRights = new IdentityHashMap<>();
 
         return flatMap(new Function<T, Stream<Pair<T, U>>>() {
-            private ListMultimap<Object, U> rightKeyMap = null;
+            private volatile ListMultimap<Object, U> rightKeyMap = null;
 
             @Override
             public Stream<Pair<T, U>> apply(final T t) {
@@ -2498,7 +2498,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(rightKeyMapper, "rightKeyMapper");
 
         return flatMap(new Function<T, Stream<Pair<T, U>>>() {
-            private ListMultimap<K, U> rightKeyMap = null;
+            private volatile ListMultimap<K, U> rightKeyMap = null;
 
             @Override
             public Stream<Pair<T, U>> apply(final T t) {
@@ -2556,7 +2556,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         final Map<U, U> joinedRights = new IdentityHashMap<>();
 
         return flatMap(new Function<T, Stream<Pair<T, U>>>() {
-            private ListMultimap<K, U> rightKeyMap = null;
+            private volatile ListMultimap<K, U> rightKeyMap = null;
 
             @Override
             public Stream<Pair<T, U>> apply(final T t) {
@@ -2674,15 +2674,13 @@ abstract class AbstractStream<T> extends Stream<T> {
                     if (ps.isParallel()) {
                         synchronized (this) {
                             if (initialized == false) {
-                                initialized = true;
-
                                 map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor()).groupTo(rightKeyMapper);
+                                initialized = true;
                             }
                         }
                     } else {
-                        initialized = true;
-
                         map = Stream.of(b).groupTo(rightKeyMapper);
+                        initialized = true;
                     }
                 }
             }
@@ -2725,17 +2723,17 @@ abstract class AbstractStream<T> extends Stream<T> {
                     if (ps.isParallel()) {
                         synchronized (this) {
                             if (initialized == false) {
-                                initialized = true;
-
                                 map = Stream.of(b)
                                         .parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor())
                                         .toMap(rightKeyMapper, Fn.<U> identity(), mergeFunction);
+                                
+                                initialized = true;
                             }
                         }
                     } else {
-                        initialized = true;
-
                         map = Stream.of(b).toMap(rightKeyMapper, Fn.<U> identity(), mergeFunction);
+                        
+                        initialized = true;
                     }
                 }
             }
@@ -2778,17 +2776,18 @@ abstract class AbstractStream<T> extends Stream<T> {
                     if (ps.isParallel()) {
                         synchronized (this) {
                             if (initialized == false) {
-                                initialized = true;
 
                                 map = Stream.of(b)
                                         .parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor())
                                         .toMap(rightKeyMapper, Fn.<U> identity(), downstream);
+                                
+                                initialized = true;
                             }
                         }
                     } else {
-                        initialized = true;
-
                         map = Stream.of(b).toMap(rightKeyMapper, Fn.<U> identity(), downstream);
+                        
+                        initialized = true;
                     }
                 }
             }

@@ -96,7 +96,7 @@ public class BytePair {
      *
      * @return
      */
-    public BytePair reversed() {
+    public BytePair reverse() {
         return new BytePair(_2, _1);
     }
 

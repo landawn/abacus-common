@@ -110,7 +110,7 @@ public final class CharTriple {
      *
      * @return
      */
-    public CharTriple reversed() {
+    public CharTriple reverse() {
         return new CharTriple(_3, _2, _1);
     }
 

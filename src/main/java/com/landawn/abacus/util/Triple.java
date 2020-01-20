@@ -317,7 +317,7 @@ public final class Triple<L, M, R> {
      * @return a new instance of Triple&lt;R, M, L&gt;.
      */
     @Beta
-    public Triple<R, M, L> reversed() {
+    public Triple<R, M, L> reverse() {
         return new Triple<>(this.right, this.middle, this.left);
     }
 

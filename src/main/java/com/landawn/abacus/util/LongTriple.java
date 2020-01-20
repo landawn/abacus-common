@@ -110,7 +110,7 @@ public final class LongTriple {
      *
      * @return
      */
-    public LongTriple reversed() {
+    public LongTriple reverse() {
         return new LongTriple(_3, _2, _1);
     }
 

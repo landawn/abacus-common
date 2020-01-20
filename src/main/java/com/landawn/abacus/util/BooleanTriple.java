@@ -70,7 +70,7 @@ public class BooleanTriple {
      *
      * @return
      */
-    public BooleanTriple reversed() {
+    public BooleanTriple reverse() {
         return new BooleanTriple(_3, _2, _1);
     }
 

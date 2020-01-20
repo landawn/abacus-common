@@ -110,7 +110,7 @@ public class ShortTriple {
      *
      * @return
      */
-    public ShortTriple reversed() {
+    public ShortTriple reverse() {
         return new ShortTriple(_3, _2, _1);
     }
 

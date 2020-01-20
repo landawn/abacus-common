@@ -96,7 +96,7 @@ public final class CharPair {
      *
      * @return
      */
-    public CharPair reversed() {
+    public CharPair reverse() {
         return new CharPair(_2, _1);
     }
 

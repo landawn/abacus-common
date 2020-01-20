@@ -96,7 +96,7 @@ public final class LongPair {
      *
      * @return
      */
-    public LongPair reversed() {
+    public LongPair reverse() {
         return new LongPair(_2, _1);
     }
 

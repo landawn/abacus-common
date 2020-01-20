@@ -1,3 +1,10 @@
+### 1.10.8
+
+* Rename `Tuple/Pair/Triple.reversed to reverse`.
+* Add `N.lazyInit/lazyInitialize`.
+* Improvements and bug fix.
+
+
 ### 1.10.7
 
 * Add `Stream.skipUntil/groupJoin/rollup`.

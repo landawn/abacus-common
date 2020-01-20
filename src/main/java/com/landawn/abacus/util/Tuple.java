@@ -711,7 +711,7 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple2<T2, T1> reversed() {
+        public Tuple2<T2, T1> reverse() {
             return of(_2, _1);
         }
 
@@ -953,7 +953,7 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple3<T3, T2, T1> reversed() {
+        public Tuple3<T3, T2, T1> reverse() {
             return new Tuple3<>(_3, _2, _1);
         }
 
@@ -1197,7 +1197,7 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple4<T4, T3, T2, T1> reversed() {
+        public Tuple4<T4, T3, T2, T1> reverse() {
             return new Tuple4<>(_4, _3, _2, _1);
         }
 
@@ -1416,7 +1416,7 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple5<T5, T4, T3, T2, T1> reversed() {
+        public Tuple5<T5, T4, T3, T2, T1> reverse() {
             return new Tuple5<>(_5, _4, _3, _2, _1);
         }
 
@@ -1646,7 +1646,7 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple6<T6, T5, T4, T3, T2, T1> reversed() {
+        public Tuple6<T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple6<>(_6, _5, _4, _3, _2, _1);
         }
 
@@ -1886,7 +1886,7 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple7<T7, T6, T5, T4, T3, T2, T1> reversed() {
+        public Tuple7<T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple7<>(_7, _6, _5, _4, _3, _2, _1);
         }
 
@@ -2135,7 +2135,7 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
+        public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple8<>(_8, _7, _6, _5, _4, _3, _2, _1);
         }
 
@@ -2393,7 +2393,7 @@ public abstract class Tuple {
          *
          * @return
          */
-        public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
+        public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple9<>(_9, _8, _7, _6, _5, _4, _3, _2, _1);
         }
 

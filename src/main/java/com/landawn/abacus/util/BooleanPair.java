@@ -64,7 +64,7 @@ public class BooleanPair {
      *
      * @return
      */
-    public BooleanPair reversed() {
+    public BooleanPair reverse() {
         return new BooleanPair(_2, _1);
     }
 

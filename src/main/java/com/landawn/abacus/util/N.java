@@ -59,6 +59,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Predicate;
+import com.landawn.abacus.util.function.Supplier;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -11291,7 +11292,7 @@ public final class N extends CommonUtil {
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final T[] a,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
-                    throws E, E2 {
+            throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11324,7 +11325,7 @@ public final class N extends CommonUtil {
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Collection<T> c,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
-                    throws E, E2 {
+            throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11705,7 +11706,7 @@ public final class N extends CommonUtil {
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final T[] a,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
-                    throws E, E2 {
+            throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -11743,7 +11744,7 @@ public final class N extends CommonUtil {
      */
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Collection<T> c,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
-                    throws E, E2 {
+            throws E, E2 {
         checkArgNotNull(flatMapper);
         checkArgNotNull(action);
 
@@ -19119,6 +19120,14 @@ public final class N extends CommonUtil {
         }
     }
 
+    public static <T> LazyInitializer<T> lazyInit(final Supplier<T> supplier) {
+        return LazyInitializer.of(supplier);
+    }
+
+    public static <T, E extends Exception> Throwables.LazyInitializer<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
+        return Throwables.LazyInitializer.of(supplier);
+    }
+
     /**
      *
      * @param <T>
@@ -19734,7 +19743,8 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+            throws E, E2 {
         return Iterables.innerJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19775,7 +19785,8 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+            throws E, E2 {
         return Iterables.fullJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19816,7 +19827,8 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+            throws E, E2 {
         return Iterables.leftJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 
@@ -19857,7 +19869,8 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("deprecation")
     public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper) throws E, E2 {
+            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+            throws E, E2 {
         return Iterables.rightJoin(a, b, leftKeyMapper, rightKeyMapper);
     }
 

@@ -296,7 +296,7 @@ public final class Pair<L, R> {
      * @return a new instance of Pair&lt;R, L&gt;.
      */
     @Beta
-    public Pair<R, L> reversed() {
+    public Pair<R, L> reverse() {
         return new Pair<>(this.right, this.left);
     }
 

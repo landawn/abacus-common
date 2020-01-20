@@ -96,7 +96,7 @@ public final class FloatPair {
      *
      * @return
      */
-    public FloatPair reversed() {
+    public FloatPair reverse() {
         return new FloatPair(_2, _1);
     }
 

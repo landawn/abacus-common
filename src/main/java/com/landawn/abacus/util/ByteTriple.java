@@ -110,7 +110,7 @@ public class ByteTriple {
      *
      * @return
      */
-    public ByteTriple reversed() {
+    public ByteTriple reverse() {
         return new ByteTriple(_3, _2, _1);
     }
 

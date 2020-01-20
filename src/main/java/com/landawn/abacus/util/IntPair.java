@@ -96,7 +96,7 @@ public final class IntPair {
      *
      * @return
      */
-    public IntPair reversed() {
+    public IntPair reverse() {
         return new IntPair(_2, _1);
     }
 
