@@ -1,3 +1,9 @@
+### 1.10.9
+
+* Remove `extends EE.XXX` due to error: `overridden method does not throw java.lang.Throwable`.
+* Improvements and bug fix.
+
+
 ### 1.10.8
 
 * Rename `Tuple/Pair/Triple.reversed to reverse`.

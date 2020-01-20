@@ -175,13 +175,12 @@ public final class Throwables {
      *
      * @param <E>
      */
-    public static interface Runnable<E extends Throwable> extends EE.Runnable<E, RuntimeException> {
+    public static interface Runnable<E extends Throwable> {
 
         /**
          *
          * @throws E the e
          */
-        @Override
         void run() throws E;
     }
 
@@ -191,14 +190,13 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
-    public static interface Callable<R, E extends Throwable> extends EE.Callable<R, E, RuntimeException> {
+    public static interface Callable<R, E extends Throwable> {
 
         /**
          *
          * @return
          * @throws E the e
          */
-        @Override
         R call() throws E;
     }
 
@@ -208,14 +206,13 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
-    public static interface Supplier<T, E extends Throwable> extends EE.Supplier<T, E, RuntimeException> {
+    public static interface Supplier<T, E extends Throwable> {
 
         /**
          *
          * @return
          * @throws E the e
          */
-        @Override
         T get() throws E;
     }
 
@@ -353,7 +350,7 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
-    public static interface Predicate<T, E extends Throwable> extends EE.Predicate<T, E, RuntimeException> {
+    public static interface Predicate<T, E extends Throwable> {
 
         /**
          *
@@ -361,7 +358,6 @@ public final class Throwables {
          * @return true, if successful
          * @throws E the e
          */
-        @Override
         boolean test(T t) throws E;
     }
 
@@ -372,7 +368,7 @@ public final class Throwables {
      * @param <U>
      * @param <E>
      */
-    public static interface BiPredicate<T, U, E extends Throwable> extends EE.BiPredicate<T, U, E, RuntimeException> {
+    public static interface BiPredicate<T, U, E extends Throwable> {
 
         /**
          *
@@ -381,7 +377,6 @@ public final class Throwables {
          * @return true, if successful
          * @throws E the e
          */
-        @Override
         boolean test(T t, U u) throws E;
     }
 
@@ -393,7 +388,7 @@ public final class Throwables {
      * @param <C>
      * @param <E>
      */
-    public static interface TriPredicate<A, B, C, E extends Throwable> extends EE.TriPredicate<A, B, C, E, RuntimeException> {
+    public static interface TriPredicate<A, B, C, E extends Throwable> {
 
         /**
          *
@@ -403,7 +398,6 @@ public final class Throwables {
          * @return true, if successful
          * @throws E the e
          */
-        @Override
         boolean test(A a, B b, C c) throws E;
     }
 
@@ -437,7 +431,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
-    public static interface Function<T, R, E extends Throwable> extends EE.Function<T, R, E, RuntimeException> {
+    public static interface Function<T, R, E extends Throwable> {
 
         /**
          *
@@ -445,7 +439,6 @@ public final class Throwables {
          * @return
          * @throws E the e
          */
-        @Override
         R apply(T t) throws E;
 
         /**
@@ -477,7 +470,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
-    public static interface BiFunction<T, U, R, E extends Throwable> extends EE.BiFunction<T, U, R, E, RuntimeException> {
+    public static interface BiFunction<T, U, R, E extends Throwable> {
 
         /**
          *
@@ -486,7 +479,6 @@ public final class Throwables {
          * @return
          * @throws E the e
          */
-        @Override
         R apply(T t, U u) throws E;
 
         /**
@@ -520,7 +512,7 @@ public final class Throwables {
      * @param <R>
      * @param <E>
      */
-    public static interface TriFunction<A, B, C, R, E extends Throwable> extends EE.TriFunction<A, B, C, R, E, RuntimeException> {
+    public static interface TriFunction<A, B, C, R, E extends Throwable> {
 
         /**
          *
@@ -530,7 +522,6 @@ public final class Throwables {
          * @return
          * @throws E the e
          */
-        @Override
         R apply(A a, B b, C c) throws E;
 
         /**
@@ -586,14 +577,13 @@ public final class Throwables {
      * @param <T>
      * @param <E>
      */
-    public static interface Consumer<T, E extends Throwable> extends EE.Consumer<T, E, RuntimeException> {
+    public static interface Consumer<T, E extends Throwable> {
 
         /**
          *
          * @param t
          * @throws E the e
          */
-        @Override
         void accept(T t) throws E;
 
         /**
@@ -623,7 +613,7 @@ public final class Throwables {
      * @param <U>
      * @param <E>
      */
-    public static interface BiConsumer<T, U, E extends Throwable> extends EE.BiConsumer<T, U, E, RuntimeException> {
+    public static interface BiConsumer<T, U, E extends Throwable> {
 
         /**
          *
@@ -631,7 +621,6 @@ public final class Throwables {
          * @param u
          * @throws E the e
          */
-        @Override
         void accept(T t, U u) throws E;
 
         /**
@@ -663,7 +652,7 @@ public final class Throwables {
      * @param <C>
      * @param <E>
      */
-    public static interface TriConsumer<A, B, C, E extends Throwable> extends EE.TriConsumer<A, B, C, E, RuntimeException> {
+    public static interface TriConsumer<A, B, C, E extends Throwable> {
 
         /**
          *
@@ -672,7 +661,6 @@ public final class Throwables {
          * @param c
          * @throws E the e
          */
-        @Override
         void accept(A a, B b, C c) throws E;
 
         /**
@@ -2801,76 +2789,63 @@ public final class Throwables {
             // Singleton. Utility class.
         }
 
-        public static interface Runnable<E extends Throwable, E2 extends Throwable> extends EEE.Runnable<E, E2, RuntimeException> {
+        public static interface Runnable<E extends Throwable, E2 extends Throwable> {
 
-            @Override
             void run() throws E, E2;
         }
 
-        public static interface Callable<R, E extends Throwable, E2 extends Throwable> extends EEE.Callable<R, E, E2, RuntimeException> {
+        public static interface Callable<R, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             R call() throws E, E2;
         }
 
-        public static interface Supplier<T, E extends Throwable, E2 extends Throwable> extends EEE.Supplier<T, E, E2, RuntimeException> {
+        public static interface Supplier<T, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             T get() throws E, E2;
         }
 
-        public static interface Predicate<T, E extends Throwable, E2 extends Throwable> extends EEE.Predicate<T, E, E2, RuntimeException> {
+        public static interface Predicate<T, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             boolean test(T t) throws E, E2;
         }
 
-        public static interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable> extends EEE.BiPredicate<T, U, E, E2, RuntimeException> {
+        public static interface BiPredicate<T, U, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             boolean test(T t, U u) throws E, E2;
         }
 
-        public static interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable> extends EEE.TriPredicate<A, B, C, E, E2, RuntimeException> {
+        public static interface TriPredicate<A, B, C, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             boolean test(A a, B b, C c) throws E, E2;
         }
 
-        public static interface Function<T, R, E extends Throwable, E2 extends Throwable> extends EEE.Function<T, R, E, E2, RuntimeException> {
+        public static interface Function<T, R, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             R apply(T t) throws E, E2;
         }
 
-        public static interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable> extends EEE.BiFunction<T, U, R, E, E2, RuntimeException> {
+        public static interface BiFunction<T, U, R, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             R apply(T t, U u) throws E, E2;
         }
 
-        public static interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable>
-                extends EEE.TriFunction<A, B, C, R, E, E2, RuntimeException> {
+        public static interface TriFunction<A, B, C, R, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             R apply(A a, B b, C c) throws E, E2;
         }
 
-        public static interface Consumer<T, E extends Throwable, E2 extends Throwable> extends EEE.Consumer<T, E, E2, RuntimeException> {
+        public static interface Consumer<T, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             void accept(T t) throws E, E2;
         }
 
-        public static interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable> extends EEE.BiConsumer<T, U, E, E2, RuntimeException> {
+        public static interface BiConsumer<T, U, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             void accept(T t, U u) throws E, E2;
         }
 
-        public static interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable> extends EEE.TriConsumer<A, B, C, E, E2, RuntimeException> {
+        public static interface TriConsumer<A, B, C, E extends Throwable, E2 extends Throwable> {
 
-            @Override
             void accept(A a, B b, C c) throws E, E2;
         }
     }
