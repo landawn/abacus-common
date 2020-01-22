@@ -259,7 +259,6 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream removeIf(final FloatPredicate predicate) {
-        checkArgNotNull(predicate);
 
         return filter(new FloatPredicate() {
             @Override
@@ -271,8 +270,6 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream removeIf(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new FloatPredicate() {
             @Override
@@ -289,8 +286,6 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream filter(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new FloatPredicate() {
             @Override
@@ -307,8 +302,6 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream dropWhile(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new FloatPredicate() {
             @Override
@@ -369,7 +362,6 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public Stream<FloatStream> splitBy(final FloatPredicate where) {
-        checkArgNotNull(where);
 
         final FloatIteratorEx iter = iteratorEx();
 

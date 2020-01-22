@@ -484,8 +484,6 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> mapFirst(final Function<? super T, ? extends T> mapperForFirst) {
-        checkArgNotNull(mapperForFirst);
-
         return newStream(new ObjIteratorEx<T>() {
             private boolean isFirst = true;
 
@@ -547,9 +545,6 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse) {
-        checkArgNotNull(mapperForFirst);
-        checkArgNotNull(mapperForElse);
-
         return newStream(new ObjIteratorEx<R>() {
             private boolean isFirst = true;
 
@@ -590,8 +585,6 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> mapLast(final Function<? super T, ? extends T> mapperForLast) {
-        checkArgNotNull(mapperForLast);
-
         return newStream(new ObjIteratorEx<T>() {
             @Override
             public boolean hasNext() {
@@ -625,9 +618,6 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse) {
-        checkArgNotNull(mapperForLast);
-        checkArgNotNull(mapperForElse);
-
         return newStream(new ObjIteratorEx<R>() {
             @Override
             public boolean hasNext() {
@@ -1406,8 +1396,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     public <C extends Collection<T>> Stream<C> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier) {
         checkArgPositive(chunkSize, "chunkSize");
-        checkArgNotNull(collectionSupplier, "collectionSupplier");
-
+        
         return newStream(new ObjIteratorEx<C>() {
             @Override
             public boolean hasNext() {
@@ -1447,8 +1436,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     public <A, R> Stream<R> split(final int chunkSize, final Collector<? super T, A, R> collector) {
         checkArgPositive(chunkSize, "chunkSize");
-        checkArgNotNull(collector);
-
+        
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -1491,8 +1479,6 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <C extends Collection<T>> Stream<C> split(final Predicate<? super T> predicate, final Supplier<? extends C> collectionSupplier) {
-        checkArgNotNull(predicate, "predicate");
-        checkArgNotNull(collectionSupplier, "collectionSupplier");
 
         return newStream(new ObjIteratorEx<C>() {
             private T next = (T) NONE;
@@ -1539,9 +1525,6 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <A, R> Stream<R> split(final Predicate<? super T> predicate, final Collector<? super T, A, R> collector) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(collector);
-
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -1656,7 +1639,6 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     public <A, R> Stream<R> splitAt(final int where, final Collector<? super T, A, R> collector) {
         checkArgNotNegative(where, "where");
-        checkArgNotNull(collector, "collector");
 
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
@@ -1956,8 +1938,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     public <A, R> Stream<R> sliding(final int windowSize, final int increment, final Collector<? super T, A, R> collector) {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
-        checkArgNotNull(collector);
-
+        
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -2947,21 +2928,21 @@ class IteratorStream<T> extends AbstractStream<T> {
                 if (initialized == false) {
                     initialized = true;
 
-                    final Deque<T> dqueue = n <= 1024 ? new ArrayDeque<>(n) : new LinkedList<>();
+                    final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
 
                     try {
                         while (elements.hasNext()) {
-                            if (dqueue.size() >= n) {
-                                dqueue.pollFirst();
+                            if (deque.size() >= n) {
+                                deque.pollFirst();
                             }
 
-                            dqueue.offerLast(elements.next());
+                            deque.offerLast(elements.next());
                         }
                     } finally {
                         IteratorStream.this.close();
                     }
 
-                    iter = dqueue.iterator();
+                    iter = deque.iterator();
                 }
             }
         }, sorted, cmp);
@@ -2974,15 +2955,15 @@ class IteratorStream<T> extends AbstractStream<T> {
         }
 
         return newStream(new ObjIteratorEx<T>() {
-            private Deque<T> dqueue = null;
+            private Deque<T> deque = null;
 
             @Override
             public boolean hasNext() {
-                if (dqueue == null) {
-                    dqueue = n <= 1024 ? new ArrayDeque<>(n) : new LinkedList<>();
+                if (deque == null) {
+                    deque = new ArrayDeque<>(Math.min(1024, n));
 
-                    while (dqueue.size() < n && elements.hasNext()) {
-                        dqueue.offerLast(elements.next());
+                    while (deque.size() < n && elements.hasNext()) {
+                        deque.offerLast(elements.next());
                     }
                 }
 
@@ -2995,9 +2976,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                     throw new NoSuchElementException();
                 }
 
-                dqueue.offerLast(elements.next());
+                deque.offerLast(elements.next());
 
-                return dqueue.pollFirst();
+                return deque.pollFirst();
             }
 
         }, sorted, cmp);

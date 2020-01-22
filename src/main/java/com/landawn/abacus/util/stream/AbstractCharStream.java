@@ -257,7 +257,6 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream removeIf(final CharPredicate predicate) {
-        checkArgNotNull(predicate);
 
         return filter(new CharPredicate() {
             @Override
@@ -269,8 +268,6 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream removeIf(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new CharPredicate() {
             @Override
@@ -287,8 +284,6 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream filter(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new CharPredicate() {
             @Override
@@ -305,8 +300,6 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream dropWhile(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new CharPredicate() {
             @Override
@@ -367,7 +360,6 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public Stream<CharStream> splitBy(final CharPredicate where) {
-        checkArgNotNull(where);
 
         final CharIteratorEx iter = iteratorEx();
 

@@ -258,7 +258,6 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream removeIf(final DoublePredicate predicate) {
-        checkArgNotNull(predicate);
 
         return filter(new DoublePredicate() {
             @Override
@@ -270,8 +269,6 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream removeIf(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new DoublePredicate() {
             @Override
@@ -288,8 +285,6 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream filter(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new DoublePredicate() {
             @Override
@@ -306,8 +301,6 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream dropWhile(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new DoublePredicate() {
             @Override
@@ -368,7 +361,6 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public Stream<DoubleStream> splitBy(final DoublePredicate where) {
-        checkArgNotNull(where);
 
         final DoubleIteratorEx iter = iteratorEx();
 

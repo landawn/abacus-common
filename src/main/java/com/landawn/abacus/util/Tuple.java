@@ -421,6 +421,14 @@ public abstract class Tuple {
         return (T) result;
     }
 
+    public static <T1, T2, T3> Tuple3<T1, T2, T3> flat(Tuple2<Tuple2<T1, T2>, T3> tp) {
+        return new Tuple3<>(tp._1._1, tp._1._2, tp._2);
+    }
+
+    public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> flatt(Tuple2<Tuple2<Tuple2<T1, T2>, T3>, T4> tp) {
+        return new Tuple4<>(tp._1._1._1, tp._1._1._2, tp._1._2, tp._2);
+    }
+
     /**
      * The Class Tuple1.
      *
@@ -2071,6 +2079,10 @@ public abstract class Tuple {
             this._8 = _8;
         }
 
+        //    public static <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> flat(Tuple2<Tuple7<T1, T2, T3, T4, T5, T6, T7>, T8> tp) {
+        //        return new Tuple8<>(tp._1._1, tp._1._2, tp._1._3, tp._1._4, tp._1._5, tp._1._6, tp._1._7, tp._2);
+        //    }
+
         /**
          *
          * @return
@@ -2327,6 +2339,11 @@ public abstract class Tuple {
             this._8 = _8;
             this._9 = _9;
         }
+
+//    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> flat(
+//            Tuple2<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, T9> tp) {
+//        return new Tuple9<>(tp._1._1, tp._1._2, tp._1._3, tp._1._4, tp._1._5, tp._1._6, tp._1._7, tp._1._8, tp._2);
+//    }
 
         /**
          *

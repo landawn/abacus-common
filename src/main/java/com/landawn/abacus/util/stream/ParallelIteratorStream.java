@@ -61,7 +61,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
- 
+
 /**
  *
  */
@@ -570,9 +570,6 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse) {
-        checkArgNotNull(mapperForFirst);
-        checkArgNotNull(mapperForElse);
-
         if (maxThreadNum <= 1) {
             return super.mapFirstOrElse(mapperForFirst, mapperForElse);
         }
@@ -590,9 +587,6 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse) {
-        checkArgNotNull(mapperForLast);
-        checkArgNotNull(mapperForElse);
-
         if (maxThreadNum <= 1) {
             return super.mapLastOrElse(mapperForLast, mapperForElse);
         }
@@ -2551,7 +2545,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         return res;
     }
- 
+
     @Override
     public <A, D> Map<Boolean, D> partitionTo(final Predicate<? super T> predicate, Collector<? super T, A, D> downstream) {
         final Function<T, Boolean> keyMapper = new Function<T, Boolean>() {

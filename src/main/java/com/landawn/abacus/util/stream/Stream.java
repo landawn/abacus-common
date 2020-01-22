@@ -2327,14 +2327,24 @@ public abstract class Stream<T>
         return cartesianProduct(Arrays.asList(cs));
     }
 
-    @SequentialOnly
-    @IntermediateOp
-    public abstract Stream<List<T>> cartesianProduct(Collection<? extends Collection<? extends T>> cs);
-
+    /**
+     * 
+     * @param <U>
+     * @param c
+     * @return
+     */
     @SequentialOnly
     @IntermediateOp
     public abstract <U> Stream<Pair<T, U>> crossJoin(Collection<? extends U> c);
 
+    /**
+     * 
+     * @param <U>
+     * @param <R>
+     * @param c
+     * @param func
+     * @return
+     */
     @SequentialOnly
     @IntermediateOp
     public abstract <U, R> Stream<R> crossJoin(Collection<? extends U> c, BiFunction<? super T, ? super U, R> func);
@@ -2343,6 +2353,8 @@ public abstract class Stream<T>
      *
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
+     * @param <U>
+     * @param <K>
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2356,8 +2368,28 @@ public abstract class Stream<T>
 
     /**
      *
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> innerJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
+
+    /**
+     *
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
+     * @param <U>
      * @param b
      * @param predicate
      * @return
@@ -2371,6 +2403,8 @@ public abstract class Stream<T>
      *
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
+     * @param <U>
+     * @param <K>
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2383,8 +2417,28 @@ public abstract class Stream<T>
             Function<? super U, ? extends K> rightKeyMapper);
 
     /**
+     *
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> fullJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
+
+    /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
+     * @param <U> 
      * @param b
      * @param predicate
      * @return
@@ -2398,6 +2452,8 @@ public abstract class Stream<T>
      *
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
+     * @param <U>
+     * @param <K>
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2410,8 +2466,28 @@ public abstract class Stream<T>
             Function<? super U, ? extends K> rightKeyMapper);
 
     /**
+     *
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> leftJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
+
+    /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
+     * @param <U>
      * @param b
      * @param predicate
      * @return
@@ -2425,6 +2501,8 @@ public abstract class Stream<T>
      *
      * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
+     * @param <U>
+     * @param <K>
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2437,8 +2515,28 @@ public abstract class Stream<T>
             Function<? super U, ? extends K> rightKeyMapper);
 
     /**
+     *
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> rightJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
+
+    /**
      * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
+     * @param <U>
      * @param b
      * @param predicate
      * @return
@@ -2450,6 +2548,8 @@ public abstract class Stream<T>
 
     /**
      * 
+     * @param <U>
+     * @param <K>
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2462,6 +2562,23 @@ public abstract class Stream<T>
 
     /**
      * 
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super List<U>, R> func);
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2475,6 +2592,27 @@ public abstract class Stream<T>
 
     /**
      * 
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param mergeFunction
+     * @param func
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, BinaryOperator<U> mergeFunction, final BiFunction<? super T, ? super U, R> func);
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
+     * @param <A>
+     * @param <D>
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -2485,6 +2623,29 @@ public abstract class Stream<T>
     @IntermediateOp
     public abstract <U, K, A, D> Stream<Pair<T, D>> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, Collector<? super U, A, D> downstream);
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param downstream
+     * @param func
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, A, D, R> Stream<R> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, Collector<? super U, A, D> downstream, final BiFunction<? super T, ? super D, R> func);
+
+    @SequentialOnly
+    @IntermediateOp
+    public abstract Stream<List<T>> cartesianProduct(Collection<? extends Collection<? extends T>> cs);
 
     @ParallelSupported
     @IntermediateOp

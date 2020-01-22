@@ -1,3 +1,9 @@
+### 1.10.10
+
+* Remove `N/Iterables.crossJoin/innerJoin/fullJoin/leftJoin/rightJoin`, replaced by `Stream.crossJoin/innerJoin/fullJoin/leftJoin/rightJoin`.
+* Improvements and bug fix.
+
+
 ### 1.10.9
 
 * Remove `extends EE.XXX` due to error: `overridden method does not throw java.lang.Throwable`.

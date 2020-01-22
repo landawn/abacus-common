@@ -256,7 +256,6 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream removeIf(final LongPredicate predicate) {
-        checkArgNotNull(predicate);
 
         return filter(new LongPredicate() {
             @Override
@@ -268,8 +267,6 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream removeIf(final LongPredicate predicate, final LongConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new LongPredicate() {
             @Override
@@ -286,8 +283,6 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream filter(final LongPredicate predicate, final LongConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new LongPredicate() {
             @Override
@@ -304,8 +299,6 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream dropWhile(final LongPredicate predicate, final LongConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new LongPredicate() {
             @Override
@@ -366,7 +359,6 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public Stream<LongStream> splitBy(final LongPredicate where) {
-        checkArgNotNull(where);
 
         final LongIteratorEx iter = iteratorEx();
 

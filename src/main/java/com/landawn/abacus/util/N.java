@@ -19694,202 +19694,202 @@ public final class N extends CommonUtil {
         return Triple.of(l, m, r);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param b
-     * @return
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U> List<Pair<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
-        return Iterables.crossJoin(a, b);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param b
-     * @param func
-     * @return
-     * @throws E
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, R, E extends Exception> List<R> crossJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.BiFunction<? super T, ? super U, R, E> func) throws E {
-        return Iterables.crossJoin(a, b, func);
-    }
-
-    /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param a the a
-     * @param b the b
-     * @param leftKeyMapper the left key mapper
-     * @param rightKeyMapper the right key mapper
-     * @return the list
-     * @throws E the e
-     * @throws E2 the e2
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
-            throws E, E2 {
-        return Iterables.innerJoin(a, b, leftKeyMapper, rightKeyMapper);
-    }
-
-    /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param predicate the predicate
-     * @return the list
-     * @throws E the e
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, E extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-        return Iterables.innerJoin(a, b, predicate);
-    }
-
-    /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param a the a
-     * @param b the b
-     * @param leftKeyMapper the left key mapper
-     * @param rightKeyMapper the right key mapper
-     * @return the list
-     * @throws E the e
-     * @throws E2 the e2
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
-            throws E, E2 {
-        return Iterables.fullJoin(a, b, leftKeyMapper, rightKeyMapper);
-    }
-
-    /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param predicate the predicate
-     * @return the list
-     * @throws E the e
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, E extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-        return Iterables.fullJoin(a, b, predicate);
-    }
-
-    /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param a the a
-     * @param b the b
-     * @param leftKeyMapper the left key mapper
-     * @param rightKeyMapper the right key mapper
-     * @return the list
-     * @throws E the e
-     * @throws E2 the e2
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
-            throws E, E2 {
-        return Iterables.leftJoin(a, b, leftKeyMapper, rightKeyMapper);
-    }
-
-    /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param predicate the predicate
-     * @return the list
-     * @throws E the e
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, E extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-        return Iterables.leftJoin(a, b, predicate);
-    }
-
-    /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param a the a
-     * @param b the b
-     * @param leftKeyMapper the left key mapper
-     * @param rightKeyMapper the right key mapper
-     * @return the list
-     * @throws E the e
-     * @throws E2 the e2
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
-            throws E, E2 {
-        return Iterables.rightJoin(a, b, leftKeyMapper, rightKeyMapper);
-    }
-
-    /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-     *
-     * @param <T> the generic type
-     * @param <U> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param b the b
-     * @param predicate the predicate
-     * @return the list
-     * @throws E the e
-     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, U, E extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-        return Iterables.rightJoin(a, b, predicate);
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param a
+    //     * @param b
+    //     * @return
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U> List<Pair<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
+    //        return Iterables.crossJoin(a, b);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <U>
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param a
+    //     * @param b
+    //     * @param func
+    //     * @return
+    //     * @throws E
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, R, E extends Exception> List<R> crossJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.BiFunction<? super T, ? super U, R, E> func) throws E {
+    //        return Iterables.crossJoin(a, b, func);
+    //    }
+    //
+    //    /**
+    //     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    //     *
+    //     * @param <T> the generic type
+    //     * @param <U> the generic type
+    //     * @param <E> the element type
+    //     * @param <E2> the generic type
+    //     * @param a the a
+    //     * @param b the b
+    //     * @param leftKeyMapper the left key mapper
+    //     * @param rightKeyMapper the right key mapper
+    //     * @return the list
+    //     * @throws E the e
+    //     * @throws E2 the e2
+    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+    //            throws E, E2 {
+    //        return Iterables.innerJoin(a, b, leftKeyMapper, rightKeyMapper);
+    //    }
+    //
+    //    /**
+    //     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    //     *
+    //     * @param <T> the generic type
+    //     * @param <U> the generic type
+    //     * @param <E> the element type
+    //     * @param a the a
+    //     * @param b the b
+    //     * @param predicate the predicate
+    //     * @return the list
+    //     * @throws E the e
+    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, E extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+    //        return Iterables.innerJoin(a, b, predicate);
+    //    }
+    //
+    //    /**
+    //     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    //     *
+    //     * @param <T> the generic type
+    //     * @param <U> the generic type
+    //     * @param <E> the element type
+    //     * @param <E2> the generic type
+    //     * @param a the a
+    //     * @param b the b
+    //     * @param leftKeyMapper the left key mapper
+    //     * @param rightKeyMapper the right key mapper
+    //     * @return the list
+    //     * @throws E the e
+    //     * @throws E2 the e2
+    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+    //            throws E, E2 {
+    //        return Iterables.fullJoin(a, b, leftKeyMapper, rightKeyMapper);
+    //    }
+    //
+    //    /**
+    //     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    //     *
+    //     * @param <T> the generic type
+    //     * @param <U> the generic type
+    //     * @param <E> the element type
+    //     * @param a the a
+    //     * @param b the b
+    //     * @param predicate the predicate
+    //     * @return the list
+    //     * @throws E the e
+    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, E extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+    //        return Iterables.fullJoin(a, b, predicate);
+    //    }
+    //
+    //    /**
+    //     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    //     *
+    //     * @param <T> the generic type
+    //     * @param <U> the generic type
+    //     * @param <E> the element type
+    //     * @param <E2> the generic type
+    //     * @param a the a
+    //     * @param b the b
+    //     * @param leftKeyMapper the left key mapper
+    //     * @param rightKeyMapper the right key mapper
+    //     * @return the list
+    //     * @throws E the e
+    //     * @throws E2 the e2
+    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+    //            throws E, E2 {
+    //        return Iterables.leftJoin(a, b, leftKeyMapper, rightKeyMapper);
+    //    }
+    //
+    //    /**
+    //     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    //     *
+    //     * @param <T> the generic type
+    //     * @param <U> the generic type
+    //     * @param <E> the element type
+    //     * @param a the a
+    //     * @param b the b
+    //     * @param predicate the predicate
+    //     * @return the list
+    //     * @throws E the e
+    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, E extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+    //        return Iterables.leftJoin(a, b, predicate);
+    //    }
+    //
+    //    /**
+    //     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    //     *
+    //     * @param <T> the generic type
+    //     * @param <U> the generic type
+    //     * @param <E> the element type
+    //     * @param <E2> the generic type
+    //     * @param a the a
+    //     * @param b the b
+    //     * @param leftKeyMapper the left key mapper
+    //     * @param rightKeyMapper the right key mapper
+    //     * @return the list
+    //     * @throws E the e
+    //     * @throws E2 the e2
+    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
+    //            throws E, E2 {
+    //        return Iterables.rightJoin(a, b, leftKeyMapper, rightKeyMapper);
+    //    }
+    //
+    //    /**
+    //     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    //     *
+    //     * @param <T> the generic type
+    //     * @param <U> the generic type
+    //     * @param <E> the element type
+    //     * @param a the a
+    //     * @param b the b
+    //     * @param predicate the predicate
+    //     * @return the list
+    //     * @throws E the e
+    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
+    //     */
+    //    @SuppressWarnings("deprecation")
+    //    public static <T, U, E extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
+    //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+    //        return Iterables.rightJoin(a, b, predicate);
+    //    }
 }

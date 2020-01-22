@@ -483,9 +483,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse) {
-        checkArgNotNull(mapperForFirst);
-        checkArgNotNull(mapperForElse);
-
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
             return super.mapFirstOrElse(mapperForFirst, mapperForElse);
         }
@@ -504,9 +501,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse) {
-        checkArgNotNull(mapperForLast);
-        checkArgNotNull(mapperForElse);
-
         if (maxThreadNum <= 1 || toIndex - fromIndex <= 1) {
             return new ParallelIteratorStream<>(sequential().mapLastOrElse(mapperForLast, mapperForElse).iteratorEx(), false, null, maxThreadNum, splitor,
                     asyncExecutor, closeHandlers);

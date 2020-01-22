@@ -257,7 +257,6 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream removeIf(final IntPredicate predicate) {
-        checkArgNotNull(predicate);
 
         return filter(new IntPredicate() {
             @Override
@@ -269,8 +268,6 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream removeIf(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new IntPredicate() {
             @Override
@@ -287,8 +284,6 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream filter(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(predicate);
 
         return filter(new IntPredicate() {
             @Override
@@ -305,8 +300,6 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream dropWhile(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
-        checkArgNotNull(predicate);
-        checkArgNotNull(actionOnDroppedItem);
 
         return dropWhile(new IntPredicate() {
             @Override
@@ -367,7 +360,6 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public Stream<IntStream> splitBy(final IntPredicate where) {
-        checkArgNotNull(where);
 
         final IntIteratorEx iter = iteratorEx();
 

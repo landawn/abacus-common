@@ -321,11 +321,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      * @throws X the x
      */
-    public static <T, K, X extends Exception> SetMultimap<K, T> from(final Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, X> keyMapper)
-            throws X {
+    public static <T, K, X extends Exception> SetMultimap<K, T> from(final Collection<? extends T> c,
+            final Throwables.Function<? super T, ? extends K, X> keyMapper) throws X {
         N.checkArgNotNull(keyMapper);
 
-        final SetMultimap<K, T> multimap = N.newSetMultimap(N.initHashCapacity(c == null ? 0 : c.size()));
+        final SetMultimap<K, T> multimap = N.newSetMultimap(N.initHashCapacity(N.size(c)));
 
         if (N.notNullOrEmpty(c)) {
             for (T e : c) {
@@ -355,7 +355,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
-        final SetMultimap<K, E> multimap = N.newSetMultimap(N.initHashCapacity(c == null ? 0 : c.size()));
+        final SetMultimap<K, E> multimap = N.newSetMultimap(N.initHashCapacity(N.size(c)));
 
         if (N.notNullOrEmpty(c)) {
             for (T e : c) {

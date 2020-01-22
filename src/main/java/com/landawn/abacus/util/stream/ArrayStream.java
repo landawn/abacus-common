@@ -511,8 +511,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> mapFirst(final Function<? super T, ? extends T> mapperForFirst) {
-        checkArgNotNull(mapperForFirst);
-
         if (fromIndex == toIndex) {
             return newStream(elements, fromIndex, toIndex, sorted, cmp);
         } else if (toIndex - fromIndex == 1) {
@@ -592,9 +590,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse) {
-        checkArgNotNull(mapperForFirst);
-        checkArgNotNull(mapperForElse);
-
         if (fromIndex == toIndex) {
             return (Stream<R>) this;
         } else if (toIndex - fromIndex == 1) {
@@ -653,8 +648,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> mapLast(final Function<? super T, ? extends T> mapperForLast) {
-        checkArgNotNull(mapperForLast);
-
         if (fromIndex == toIndex) {
             return newStream(elements, fromIndex, toIndex, sorted, cmp);
         } else if (toIndex - fromIndex == 1) {
@@ -714,9 +707,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse) {
-        checkArgNotNull(mapperForLast);
-        checkArgNotNull(mapperForElse);
-
         return newStream(new ObjIteratorEx<R>() {
             private int last = toIndex - 1;
             private int cursor = fromIndex;
@@ -1755,7 +1745,6 @@ class ArrayStream<T> extends AbstractStream<T> {
     @Override
     public <A, R> Stream<R> split(final int chunkSize, final Collector<? super T, A, R> collector) {
         checkArgPositive(chunkSize, "chunkSize");
-        checkArgNotNull(collector);
 
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
@@ -1800,8 +1789,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<Stream<T>> split(final Predicate<? super T> predicate) {
-        checkArgNotNull(predicate, "predicate");
-
         return newStream(new ObjIteratorEx<Stream<T>>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -1838,8 +1825,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<List<T>> splitToList(final Predicate<? super T> predicate) {
-        checkArgNotNull(predicate, "predicate");
-
         return newStream(new ObjIteratorEx<List<T>>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -1876,9 +1861,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public <C extends Collection<T>> Stream<C> split(final Predicate<? super T> predicate, final Supplier<? extends C> collectionSupplier) {
-        checkArgNotNull(predicate, "predicate");
-        checkArgNotNull(collectionSupplier, "collectionSupplier");
-
         return newStream(new ObjIteratorEx<C>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -1919,9 +1901,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public <A, R> Stream<R> split(final Predicate<? super T> predicate, final Collector<? super T, A, R> collector) {
-        checkArgNotNull(predicate, "predicate");
-        checkArgNotNull(collector);
-
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -1978,9 +1957,6 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @Override
     public <A, R> Stream<R> splitAt(final int where, final Collector<? super T, A, R> collector) {
-        checkArgNotNegative(where, "where");
-        checkArgNotNull(collector, "collector");
-
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -2123,7 +2099,6 @@ class ArrayStream<T> extends AbstractStream<T> {
     @Override
     public <C extends Collection<T>> Stream<C> sliding(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier) {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
-        checkArgNotNull(collectionSupplier, "collectionSupplier");
 
         return newStream(new ObjIteratorEx<C>() {
             private int cursor = fromIndex;
@@ -2177,7 +2152,6 @@ class ArrayStream<T> extends AbstractStream<T> {
     @Override
     public <A, R> Stream<R> sliding(final int windowSize, final int increment, final Collector<? super T, A, R> collector) {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
-        checkArgNotNull(collector);
 
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
