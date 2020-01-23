@@ -11457,6 +11457,84 @@ public final class Fn extends Comparators {
 
         /**
          *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V, E extends Exception> Throwables.Function<Entry<K, V>, Entry<V, K>, E> inverse() {
+            return (Throwables.Function) Fn.INVERSE;
+        }
+
+        /**
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V, E extends Exception> Throwables.BiFunction<K, V, Map.Entry<K, V>, E> entry() {
+            return (Throwables.BiFunction) Fn.ENTRY;
+        }
+
+        /**
+         *
+         * @param <L>
+         * @param <R>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <L, R, E extends Exception> Throwables.BiFunction<L, R, Pair<L, R>, E> pair() {
+            return (Throwables.BiFunction) Fn.PAIR;
+        }
+
+        /**
+         *
+         * @param <L>
+         * @param <M>
+         * @param <R>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <L, M, R, E extends Exception> Throwables.TriFunction<L, M, R, Triple<L, M, R>, E> triple() {
+            return (Throwables.TriFunction) Fn.TRIPLE;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T, E extends Exception> Throwables.Function<T, Tuple1<T>, E> tuple1() {
+            return (Throwables.Function) Fn.TUPLE_1;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <U>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T, U, E extends Exception> Throwables.BiFunction<T, U, Tuple2<T, U>, E> tuple2() {
+            return (Throwables.BiFunction) Fn.TUPLE_2;
+        }
+
+        /**
+         *
+         * @param <A>
+         * @param <B>
+         * @param <C>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <A, B, C, E extends Exception> Throwables.TriFunction<A, B, C, Tuple3<A, B, C>, E> tuple3() {
+            return (Throwables.TriFunction) Fn.TUPLE_3;
+        }
+
+        /**
+         *
          * @param <E>
          * @return
          */

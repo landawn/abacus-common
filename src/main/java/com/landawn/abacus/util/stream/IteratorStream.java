@@ -2291,11 +2291,11 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper,
+    public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<? extends U>, E> flatMapper,
             final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
         assertNotClosed();
 
-        Collection<U> c = null;
+        Collection<? extends U> c = null;
         T next = null;
 
         try {

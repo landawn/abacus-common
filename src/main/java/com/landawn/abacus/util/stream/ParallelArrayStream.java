@@ -2497,7 +2497,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     }
 
     @Override
-    public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper,
+    public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<? extends U>, E> flatMapper,
             final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
         assertNotClosed();
 
@@ -2522,7 +2522,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                         int cursor = fromIndex + sliceIndex * sliceSize;
                         final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
-                        Collection<U> c = null;
+                        Collection<? extends U> c = null;
 
                         try {
                             while (cursor < to && eHolder.value() == null) {
@@ -2550,7 +2550,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void run() {
-                        Collection<U> c = null;
+                        Collection<? extends U> c = null;
                         T next = null;
 
                         try {

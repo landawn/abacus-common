@@ -510,6 +510,23 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         });
     }
 
+    /**
+     * Lazy evaluation.
+     * @param supplier
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Supplier<Collection<? extends T>> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+        
+        return ExceptionalStream.<Supplier<Collection<? extends T>>, E> just(supplier)
+                .flattMap(new Throwables.Function<Supplier<Collection<? extends T>>, Collection<? extends T>, E>() {
+                    @Override
+                    public Collection<? extends T> apply(Supplier<Collection<? extends T>> t) throws E {
+                        return t.get();
+                    }
+                });
+    }
+
     public static <K, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, ?> map) {
         if (N.isNullOrEmpty(map)) {
             return empty();
@@ -4035,27 +4052,59 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     /**
      * 
      * @param <U>
-     * @param c
+     * @param b
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<Pair<T, U>, E> crossJoin(final Collection<? extends U> c) {
-        return crossJoin(c, Fnn.<T, U, Pair<T, U>, E> ff(Fn.<T, U> pair()));
+    public <U> ExceptionalStream<Pair<T, U>, E> crossJoin(final Collection<? extends U> b) {
+        return crossJoin(b, Fnn.<T, U, E> pair());
     }
 
     /**
      * 
      * @param <U>
      * @param <R>
-     * @param c
+     * @param b
      * @param func
      * @return
      */
     @IntermediateOp
-    public <U, R> ExceptionalStream<R, E> crossJoin(final Collection<? extends U> c, final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
+    public <U, R> ExceptionalStream<R, E> crossJoin(final Collection<? extends U> b, final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
             @Override
             public ExceptionalStream<R, E> apply(final T t) throws E {
+                return ExceptionalStream.<U, E> of(b).map(new Throwables.Function<U, R, E>() {
+                    @Override
+                    public R apply(U u) throws E {
+                        return func.apply(t, u);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> crossJoin(final ExceptionalStream<? extends U, E> b,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
+        checkArgNotNull(b, "stream");
+
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
+            private Collection<? extends U> c = null;
+
+            @Override
+            public ExceptionalStream<R, E> apply(final T t) throws E {
+                if (c == null) {
+                    c = b.toList();
+                }
+
                 return ExceptionalStream.<U, E> of(c).map(new Throwables.Function<U, R, E>() {
                     @Override
                     public R apply(U u) throws E {
@@ -4076,10 +4125,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K> ExceptionalStream<Pair<T, U>, E> innerJoin(final Collection<U> b,
+    public <U, K> ExceptionalStream<Pair<T, U>, E> innerJoin(final Collection<? extends U> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return innerJoin(b, leftKeyMapper, rightKeyMapper, Fnn.ff(Fn.<T, U> pair()));
+        return innerJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -4094,7 +4143,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> innerJoin(final Collection<U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+    public <U, K, R> ExceptionalStream<R, E> innerJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
 
@@ -4118,6 +4168,43 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
+     * 
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> ExceptionalStream<R, E> innerJoin(final ExceptionalStream<? extends U, E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
+        checkArgNotNull(b, "stream");
+
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public ExceptionalStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = (ListMultimap<K, U>) b.toMultimap(rightKeyMapper);
+                }
+
+                return ExceptionalStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(new Throwables.Function<U, R, E>() {
+                    @Override
+                    public R apply(U u) throws E {
+                        return func.apply(t, u);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
      *
      * @param <U>
      * @param b
@@ -4125,7 +4212,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<Pair<T, U>, E> innerJoin(final Collection<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+    public <U> ExceptionalStream<Pair<T, U>, E> innerJoin(final Collection<? extends U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
         return flatMap(new Throwables.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
             @Override
             public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
@@ -4154,9 +4242,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K> ExceptionalStream<Pair<T, U>, E> fullJoin(final Collection<U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+    public <U, K> ExceptionalStream<Pair<T, U>, E> fullJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return fullJoin(b, leftKeyMapper, rightKeyMapper, Fnn.ff(Fn.<T, U> pair()));
+        return fullJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -4171,7 +4260,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> fullJoin(final Collection<U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+    public <U, K, R> ExceptionalStream<R, E> fullJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -4210,6 +4300,75 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }));
     }
 
+    @SuppressWarnings("rawtypes")
+    private static Throwables.Function HOLDER_VALUE_GETTER = new Throwables.Function<Holder<Object>, Object, RuntimeException>() {
+        @Override
+        public Object apply(Holder<Object> t) {
+            return t.value();
+        }
+    };
+
+    /**
+     *
+     * @param <K>
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> ExceptionalStream<R, E> fullJoin(final ExceptionalStream<? extends U, E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
+        checkArgNotNull(b, "stream");
+
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+        final Holder<List<U>> holder = new Holder<>();
+
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
+            private List<U> c = null;
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public ExceptionalStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    c = (List<U>) b.toList();
+                    rightKeyMap = ListMultimap.from(c, rightKeyMapper);
+                    holder.setValue(c);
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isNullOrEmpty(values) ? ExceptionalStream.of(func.apply(t, (U) null))
+                        : ExceptionalStream.<U, E> of(values).map(new Throwables.Function<U, R, E>() {
+                            @Override
+                            public R apply(U u) throws E {
+                                joinedRights.put(u, u);
+
+                                return func.apply(t, u);
+                            }
+                        });
+            }
+        }).append(ExceptionalStream.<Holder<List<U>>, E> of(holder)
+                .flattMap((Throwables.Function<Holder<List<U>>, List<U>, E>) HOLDER_VALUE_GETTER)
+                .filter(new Throwables.Predicate<U, E>() {
+                    @Override
+                    public boolean test(U u) {
+                        return joinedRights.containsKey(u) == false;
+                    }
+                })
+                .map(new Throwables.Function<U, R, E>() {
+                    @Override
+                    public R apply(U u) throws E {
+                        return func.apply((T) null, u);
+                    }
+                }));
+    }
+
     /**
      *
      * @param <U>
@@ -4218,7 +4377,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<Pair<T, U>, E> fullJoin(final Collection<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+    public <U> ExceptionalStream<Pair<T, U>, E> fullJoin(final Collection<? extends U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
         final Map<U, U> joinedRights = new IdentityHashMap<>();
 
         return flatMap(new Throwables.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
@@ -4261,9 +4421,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K> ExceptionalStream<Pair<T, U>, E> leftJoin(final Collection<U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+    public <U, K> ExceptionalStream<Pair<T, U>, E> leftJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return leftJoin(b, leftKeyMapper, rightKeyMapper, Fnn.ff(Fn.<T, U> pair()));
+        return leftJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -4278,7 +4439,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> leftJoin(final Collection<U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+    public <U, K, R> ExceptionalStream<R, E> leftJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
@@ -4305,13 +4467,54 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      *
+     * @param <K>
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> ExceptionalStream<R, E> leftJoin(final ExceptionalStream<? extends U, E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
+        checkArgNotNull(b, "stream");
+
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public ExceptionalStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    rightKeyMap = (ListMultimap<K, U>) b.toMultimap(rightKeyMapper);
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isNullOrEmpty(values) ? ExceptionalStream.<R, E> of(func.apply(t, (U) null))
+                        : ExceptionalStream.<U, E> of(values).map(new Throwables.Function<U, R, E>() {
+                            @Override
+                            public R apply(U u) throws E {
+                                return func.apply(t, u);
+                            }
+                        });
+            }
+        });
+    }
+
+    /**
+     *
      * @param <U>
      * @param b
      * @param predicate
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<Pair<T, U>, E> leftJoin(final Collection<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+    public <U> ExceptionalStream<Pair<T, U>, E> leftJoin(final Collection<? extends U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
         return flatMap(new Throwables.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
             @Override
             public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
@@ -4340,10 +4543,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K> ExceptionalStream<Pair<T, U>, E> rightJoin(final Collection<U> b,
+    public <U, K> ExceptionalStream<Pair<T, U>, E> rightJoin(final Collection<? extends U> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return rightJoin(b, leftKeyMapper, rightKeyMapper, Fnn.ff(Fn.<T, U> pair()));
+        return rightJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -4358,7 +4561,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> rightJoin(final Collection<U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+    public <U, K, R> ExceptionalStream<R, E> rightJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -4396,13 +4600,72 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      *
+     * @param <K>
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> ExceptionalStream<R, E> rightJoin(final ExceptionalStream<? extends U, E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
+        checkArgNotNull(b, "stream");
+
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+        final Holder<List<U>> holder = new Holder<>();
+
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
+            private List<U> c = null;
+            private ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public ExceptionalStream<R, E> apply(final T t) throws E {
+                if (rightKeyMap == null) {
+                    c = (List<U>) b.toList();
+                    rightKeyMap = ListMultimap.from(c, rightKeyMapper);
+                    holder.setValue(c);
+                }
+
+                return ExceptionalStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(new Throwables.Function<U, R, E>() {
+                    @Override
+                    public R apply(U u) throws E {
+                        joinedRights.put(u, u);
+
+                        return func.apply(t, u);
+                    }
+                });
+            }
+        }).append(ExceptionalStream.<Holder<List<U>>, E> of(holder)
+                .flattMap((Throwables.Function<Holder<List<U>>, List<U>, E>) HOLDER_VALUE_GETTER)
+                .filter(new Throwables.Predicate<U, E>() {
+                    @Override
+                    public boolean test(U u) {
+                        return joinedRights.containsKey(u) == false;
+                    }
+                })
+                .map(new Throwables.Function<U, R, E>() {
+                    @Override
+                    public R apply(U u) throws E {
+                        return func.apply((T) null, u);
+                    }
+                }));
+    }
+
+    /**
+     *
      * @param <U>
      * @param b
      * @param predicate
      * @return
      */
     @IntermediateOp
-    public <U> ExceptionalStream<Pair<T, U>, E> rightJoin(final Collection<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+    public <U> ExceptionalStream<Pair<T, U>, E> rightJoin(final Collection<? extends U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
         final Map<U, U> joinedRights = new IdentityHashMap<>();
 
         return flatMap(new Throwables.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
@@ -4445,10 +4708,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K> ExceptionalStream<Pair<T, List<U>>, E> groupJoin(final Collection<U> b,
+    public <U, K> ExceptionalStream<Pair<T, List<U>>, E> groupJoin(final Collection<? extends U> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return groupJoin(b, leftKeyMapper, rightKeyMapper, Fnn.ff(Fn.<T, List<U>> pair()));
+        return groupJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, List<U>, E> pair());
     }
 
     /**
@@ -4463,7 +4726,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> groupJoin(final Collection<U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+    public <U, K, R> ExceptionalStream<R, E> groupJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super List<U>, R, ? extends E> func) {
 
@@ -4503,6 +4767,57 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * 
      * @param <U>
      * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<? extends U, E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.BiFunction<? super T, ? super List<U>, R, ? extends E> func) {
+        checkArgNotNull(b, "stream");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, List<U>> map = null;
+            private List<U> val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, new ArrayList<U>(0));
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            @SuppressWarnings("rawtypes")
+            private void init() throws E {
+                if (initialized == false) {
+                    initialized = true;
+
+                    map = (Map) b.groupTo(rightKeyMapper);
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
      * @param b
      * @param leftKeyMapper
      * @param rightKeyMapper
@@ -4510,10 +4825,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K> ExceptionalStream<Pair<T, U>, E> groupJoin(final Collection<U> b,
+    public <U, K> ExceptionalStream<Pair<T, U>, E> groupJoin(final Collection<? extends U> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction) {
-        return groupJoin(b, leftKeyMapper, rightKeyMapper, mergeFunction, Fnn.ff(Fn.<T, U> pair()));
+        return groupJoin(b, leftKeyMapper, rightKeyMapper, mergeFunction, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -4529,7 +4844,8 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> groupJoin(final Collection<U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+    public <U, K, R> ExceptionalStream<R, E> groupJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
 
@@ -4569,6 +4885,57 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * 
      * @param <U>
      * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param mergeFunction
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<? extends U, E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
+        checkArgNotNull(b, "stream");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, U> map = null;
+            private U val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, null);
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() throws E {
+                if (initialized == false) {
+                    initialized = true;
+
+                    map = b.toMap(rightKeyMapper, Fnn.<U, E> identity(), mergeFunction);
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
      * @param <A>
      * @param <D>
      * @param b
@@ -4578,10 +4945,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K, A, D> ExceptionalStream<Pair<T, D>, E> groupJoin(final Collection<U> b,
+    public <U, K, A, D> ExceptionalStream<Pair<T, D>, E> groupJoin(final Collection<? extends U> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, A, D> downstream) {
-        return groupJoin(b, leftKeyMapper, rightKeyMapper, downstream, Fnn.ff(Fn.<T, D> pair()));
+        return groupJoin(b, leftKeyMapper, rightKeyMapper, downstream, Fnn.<T, D, E> pair());
     }
 
     /**
@@ -4599,7 +4966,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @return
      */
     @IntermediateOp
-    public <U, K, A, D, R> ExceptionalStream<R, E> groupJoin(final Collection<U> b,
+    public <U, K, A, D, R> ExceptionalStream<R, E> groupJoin(final Collection<? extends U> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, A, D> downstream,
             final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func) {
@@ -4629,6 +4996,59 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                     initialized = true;
 
                     map = ExceptionalStream.<U, E> of(b).toMap(rightKeyMapper, Fnn.<U, E> identity(), downstream);
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param downstream
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <U, K, A, D, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<? extends U, E> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, A, D> downstream,
+            final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func) {
+        checkArgNotNull(b, "stream");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, D> map = null;
+            private D val = null;
+
+            @Override
+            public R apply(T t) throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, ExceptionalStream.<U, E> empty().collect(downstream));
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() throws E {
+                if (initialized == false) {
+                    initialized = true;
+
+                    map = b.toMap(rightKeyMapper, Fnn.<U, E> identity(), downstream);
                 }
             }
         };
@@ -4720,13 +5140,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @throws E3 the e3
      */
     @TerminalOp
-    public <U, E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<U>, ? extends E2> flatMapper,
+    public <U, E2 extends Exception, E3 extends Exception> void forEach(
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E2> flatMapper,
             final Throwables.BiConsumer<? super T, ? super U, ? extends E3> action) throws E, E2, E3 {
         checkArgNotNull(flatMapper, "flatMapper");
         checkArgNotNull(action, "action");
         assertNotClosed();
 
-        Collection<U> c = null;
+        Collection<? extends U> c = null;
         T next = null;
 
         try {

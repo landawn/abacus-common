@@ -1436,8 +1436,9 @@ public abstract class Stream<T>
 
     @ParallelSupported
     @TerminalOp
-    public abstract <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper,
-            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2;
+    public abstract <U, E extends Exception, E2 extends Exception> void forEach(
+            final Throwables.Function<? super T, ? extends Collection<? extends U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
+            throws E, E2;
 
     @ParallelSupported
     @TerminalOp
@@ -2330,24 +2331,36 @@ public abstract class Stream<T>
     /**
      * 
      * @param <U>
-     * @param c
+     * @param b
      * @return
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> crossJoin(Collection<? extends U> c);
+    public abstract <U> Stream<Pair<T, U>> crossJoin(Collection<? extends U> b);
 
     /**
      * 
      * @param <U>
      * @param <R>
-     * @param c
+     * @param b
      * @param func
      * @return
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract <U, R> Stream<R> crossJoin(Collection<? extends U> c, BiFunction<? super T, ? super U, R> func);
+    public abstract <U, R> Stream<R> crossJoin(Collection<? extends U> b, BiFunction<? super T, ? super U, R> func);
+
+    /**
+     * 
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param func
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public abstract <U, R> Stream<R> crossJoin(Stream<? extends U> b, BiFunction<? super T, ? super U, R> func);
 
     /**
      *
@@ -2363,7 +2376,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K> Stream<Pair<T, U>> innerJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K> Stream<Pair<T, U>> innerJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper);
 
     /**
@@ -2382,7 +2395,26 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K, R> Stream<R> innerJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K, R> Stream<R> innerJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
+
+    /**
+     *
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param func
+     * @return
+     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> innerJoin(Stream<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
 
     /**
@@ -2397,7 +2429,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> innerJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
+    public abstract <U> Stream<Pair<T, U>> innerJoin(Collection<? extends U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
      *
@@ -2413,7 +2445,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K> Stream<Pair<T, U>> fullJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K> Stream<Pair<T, U>> fullJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper);
 
     /**
@@ -2432,7 +2464,26 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K, R> Stream<R> fullJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K, R> Stream<R> fullJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
+
+    /**
+    *
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    *
+    * @param <U>
+    * @param <K>
+    * @param <R>
+    * @param b
+    * @param leftKeyMapper
+    * @param rightKeyMapper
+    * @param func
+    * @return
+    * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+    */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> fullJoin(Stream<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
 
     /**
@@ -2446,7 +2497,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> fullJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
+    public abstract <U> Stream<Pair<T, U>> fullJoin(Collection<? extends U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
      *
@@ -2462,7 +2513,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K> Stream<Pair<T, U>> leftJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K> Stream<Pair<T, U>> leftJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper);
 
     /**
@@ -2481,7 +2532,26 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K, R> Stream<R> leftJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K, R> Stream<R> leftJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
+
+    /**
+    *
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    *
+    * @param <U>
+    * @param <K>
+    * @param <R>
+    * @param b
+    * @param leftKeyMapper
+    * @param rightKeyMapper
+    * @param func
+    * @return
+    * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+    */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> leftJoin(Stream<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
 
     /**
@@ -2495,7 +2565,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> leftJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
+    public abstract <U> Stream<Pair<T, U>> leftJoin(Collection<? extends U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
      *
@@ -2511,7 +2581,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K> Stream<Pair<T, U>> rightJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K> Stream<Pair<T, U>> rightJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper);
 
     /**
@@ -2530,7 +2600,26 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K, R> Stream<R> rightJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K, R> Stream<R> rightJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
+
+    /**
+    *
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+    *
+    * @param <U>
+    * @param <K>
+    * @param <R>
+    * @param b
+    * @param leftKeyMapper
+    * @param rightKeyMapper
+    * @param func
+    * @return
+    * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-ful
+    */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> rightJoin(Stream<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func);
 
     /**
@@ -2544,7 +2633,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U> Stream<Pair<T, U>> rightJoin(Collection<U> b, BiPredicate<? super T, ? super U> predicate);
+    public abstract <U> Stream<Pair<T, U>> rightJoin(Collection<? extends U> b, BiPredicate<? super T, ? super U> predicate);
 
     /**
      * 
@@ -2557,7 +2646,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K> Stream<Pair<T, List<U>>> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K> Stream<Pair<T, List<U>>> groupJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper);
 
     /**
@@ -2572,7 +2661,22 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K, R> Stream<R> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K, R> Stream<R> groupJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super List<U>, R> func);
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> groupJoin(Stream<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super List<U>, R> func);
 
     /**
@@ -2587,7 +2691,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K> Stream<Pair<T, U>> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K> Stream<Pair<T, U>> groupJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, BinaryOperator<U> mergeFunction);
 
     /**
@@ -2604,7 +2708,24 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K, R> Stream<R> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K, R> Stream<R> groupJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, BinaryOperator<U> mergeFunction, final BiFunction<? super T, ? super U, R> func);
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param mergeFunction
+     * @param func
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, R> Stream<R> groupJoin(Stream<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, BinaryOperator<U> mergeFunction, final BiFunction<? super T, ? super U, R> func);
 
     /**
@@ -2621,7 +2742,7 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K, A, D> Stream<Pair<T, D>> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K, A, D> Stream<Pair<T, D>> groupJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, Collector<? super U, A, D> downstream);
 
     /**
@@ -2640,7 +2761,26 @@ public abstract class Stream<T>
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <U, K, A, D, R> Stream<R> groupJoin(Collection<U> b, Function<? super T, ? extends K> leftKeyMapper,
+    public abstract <U, K, A, D, R> Stream<R> groupJoin(Collection<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
+            Function<? super U, ? extends K> rightKeyMapper, Collector<? super U, A, D> downstream, final BiFunction<? super T, ? super D, R> func);
+
+    /**
+     * 
+     * @param <U>
+     * @param <K>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b
+     * @param leftKeyMapper
+     * @param rightKeyMapper
+     * @param downstream
+     * @param func
+     * @return
+     */
+    @ParallelSupported
+    @IntermediateOp
+    public abstract <U, K, A, D, R> Stream<R> groupJoin(Stream<? extends U> b, Function<? super T, ? extends K> leftKeyMapper,
             Function<? super U, ? extends K> rightKeyMapper, Collector<? super U, A, D> downstream, final BiFunction<? super T, ? super D, R> func);
 
     @SequentialOnly
@@ -3661,39 +3801,9 @@ public abstract class Stream<T>
      * @return
      */
     public static <T> Stream<T> of(final Supplier<Collection<? extends T>> supplier) {
-        final Iterator<T> iter = new ObjIteratorEx<T>() {
-            private Iterator<? extends T> iterator = null;
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public boolean hasNext() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.hasNext();
-            }
-
-            @Override
-            public T next() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.next();
-            }
-
-            private void init() {
-                final Collection<? extends T> c = supplier.get();
-
-                if (N.isNullOrEmpty(c)) {
-                    iterator = ObjIterator.empty();
-                } else {
-                    iterator = c.iterator();
-                }
-            }
-        };
-
-        return of(iter);
+        return Stream.just(supplier).flattMap(it -> it.get());
     }
 
     public static <K> Stream<K> ofKeys(final Map<K, ?> map) {
@@ -4583,6 +4693,36 @@ public abstract class Stream<T>
         return concat(Array.asList(a));
     }
 
+    public static <T> Stream<T> concat(final List<? extends Collection<? extends T>> c) {
+        if (N.isNullOrEmpty(c)) {
+            return empty();
+        }
+
+        return of(new ObjIteratorEx<T>() {
+            private final Iterator<? extends Collection<? extends T>> iterators = c.iterator();
+            private Collection<? extends T> coll;
+            private Iterator<? extends T> cur;
+
+            @Override
+            public boolean hasNext() {
+                while ((cur == null || cur.hasNext() == false) && iterators.hasNext()) {
+                    cur = (coll = iterators.next()) == null ? null : coll.iterator();
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur.next();
+            }
+        });
+    }
+
     public static <T> Stream<T> concat(final Collection<? extends Stream<? extends T>> c) {
         if (N.isNullOrEmpty(c)) {
             return empty();
@@ -4649,13 +4789,6 @@ public abstract class Stream<T>
 
     // NO NEED.
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @return
@@ -4667,13 +4800,6 @@ public abstract class Stream<T>
     //    /**
     //     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
     //     *
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
@@ -4695,13 +4821,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @return
@@ -4713,13 +4832,6 @@ public abstract class Stream<T>
     //    /**
     //     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
     //     *
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
@@ -4741,13 +4853,6 @@ public abstract class Stream<T>
     //    }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @return
@@ -4758,15 +4863,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-     *
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
@@ -4782,13 +4878,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @return
@@ -4801,13 +4890,6 @@ public abstract class Stream<T>
     /**
      * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
      *
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
@@ -4823,13 +4905,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @return
@@ -4839,13 +4914,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @param readThreadNum
@@ -4857,14 +4925,6 @@ public abstract class Stream<T>
 
     /**
      * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-     *
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, c.size())
@@ -4986,13 +5046,42 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
+     *
+     * @param c
+     * @return
+     */
+    public static <T> Stream<T> parallelConcat(final List<? extends Collection<? extends T>> c) {
+        return parallelConcat(c, DEFAULT_READING_THREAD_NUM);
+    }
+
+    /**
+     *
+     * @param c
+     * @param readThreadNum
+     * @return
+     */
+    public static <T> Stream<T> parallelConcat(final List<? extends Collection<? extends T>> c, final int readThreadNum) {
+        return parallelConcat(c, readThreadNum, calculateQueueSize(c.size()));
+    }
+
+    /**
+     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
+     *
+     *
+     * @param a
+     * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, c.size())
+     * @param queueSize Default value is N.min(128, c.size() * 16)
+     * @return
+     */
+    public static <T> Stream<T> parallelConcat(final List<? extends Collection<? extends T>> c, final int readThreadNum, final int queueSize) {
+        if (N.isNullOrEmpty(c)) {
+            return Stream.empty();
+        }
+
+        return parallelConcatt(Stream.of(c).skipNull().map(it -> it.iterator()).toList(), readThreadNum, queueSize);
+    }
+
+    /**
      *
      * @param c
      * @return
@@ -5002,13 +5091,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @param readThreadNum
@@ -5019,15 +5101,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterators in parallel.
-     *
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelConcat(a,b, ...)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, c.size())
@@ -8026,13 +8099,6 @@ public abstract class Stream<T>
 
     // NO NEED.
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8044,13 +8110,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8067,13 +8126,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8088,13 +8140,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8107,13 +8152,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8132,13 +8170,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8153,13 +8184,6 @@ public abstract class Stream<T>
     //    }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8172,13 +8196,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8271,13 +8288,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8380,13 +8390,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8398,13 +8401,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8423,13 +8419,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8464,13 +8453,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @param zipFunction
@@ -8481,13 +8463,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8513,13 +8488,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @param zipFunction
@@ -8530,13 +8498,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8634,13 +8595,6 @@ public abstract class Stream<T>
 
     // NO NEED.
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8655,13 +8609,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8677,13 +8624,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8700,13 +8640,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8724,14 +8657,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
-    //     *
     //     * @param a
     //     * @param b
     //     * @param valueForNoneA
@@ -8745,14 +8670,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
-    //     *
     //     * @param a
     //     * @param b
     //     * @param valueForNoneA
@@ -8767,13 +8684,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8790,13 +8700,6 @@ public abstract class Stream<T>
     //    }
     //
     //    /**
-    //     * Put the stream in try-catch to stop the back-end reading thread if error happens
-    //     * <br />
-    //     * <code>
-    //     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-    //     *            stream.forEach(N::println);
-    //     *        }
-    //     * </code>
     //     *
     //     * @param a
     //     * @param b
@@ -8815,13 +8718,6 @@ public abstract class Stream<T>
     //    }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8836,13 +8732,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8927,13 +8816,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -8950,13 +8832,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -9054,13 +8929,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -9075,13 +8943,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -9097,13 +8958,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -9120,13 +8974,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param a
      * @param b
@@ -9171,13 +9018,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @param valuesForNone
@@ -9190,13 +9030,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @param valuesForNone
@@ -9226,13 +9059,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @param valuesForNone
@@ -9245,13 +9071,6 @@ public abstract class Stream<T>
     }
 
     /**
-     * Put the stream in try-catch to stop the back-end reading thread if error happens
-     * <br />
-     * <code>
-     * try (Stream<Integer> stream = Stream.parallelZip(a, b, zipFunction)) {
-     *            stream.forEach(N::println);
-     *        }
-     * </code>
      *
      * @param c
      * @param valuesForNone

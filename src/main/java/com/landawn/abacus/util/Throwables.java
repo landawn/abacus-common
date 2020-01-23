@@ -2956,6 +2956,10 @@ public final class Throwables {
         public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) {
             N.checkArgNotNull(supplier);
 
+            if (supplier instanceof LazyInitializer) {
+                return (LazyInitializer<T, E>) supplier;
+            }
+
             return new LazyInitializer<>(supplier);
         }
     }

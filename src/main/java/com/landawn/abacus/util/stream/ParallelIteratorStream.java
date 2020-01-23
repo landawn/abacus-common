@@ -1777,7 +1777,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     }
 
     @Override
-    public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper,
+    public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Collection<? extends U>, E> flatMapper,
             final Throwables.BiConsumer<? super T, ? super U, E2> action) throws E, E2 {
         assertNotClosed();
 
@@ -1793,7 +1793,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             futureList.add(asyncExecutor.execute(new Throwables.Runnable<RuntimeException>() {
                 @Override
                 public void run() {
-                    Collection<U> c = null;
+                    Collection<? extends U> c = null;
                     T next = null;
 
                     try {

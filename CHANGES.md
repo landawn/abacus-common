@@ -1,6 +1,7 @@
 ### 1.10.10
 
 * Remove `N/Iterables.crossJoin/innerJoin/fullJoin/leftJoin/rightJoin`, replaced by `Stream.crossJoin/innerJoin/fullJoin/leftJoin/rightJoin`.
+* Add `Stream.crossJoin/innerJoin/.../groupJoin(Stream<U>...)`.
 * Improvements and bug fix.
 
 

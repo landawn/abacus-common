@@ -72,6 +72,7 @@ import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Timed;
 import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -2315,23 +2316,45 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U> Stream<Pair<T, U>> crossJoin(final Collection<? extends U> c) {
-        return crossJoin(c, Fn.<T, U> pair());
+    public <U> Stream<Pair<T, U>> crossJoin(final Collection<? extends U> b) {
+        return crossJoin(b, Fn.<T, U> pair());
     }
 
     @Override
-    public <U, R> Stream<R> crossJoin(final Collection<? extends U> c, final BiFunction<? super T, ? super U, R> func) {
-        return flatMap(t -> Stream.of(c).map(u -> func.apply(t, u)));
+    public <U, R> Stream<R> crossJoin(final Collection<? extends U> b, final BiFunction<? super T, ? super U, R> func) {
+        return flatMap(t -> Stream.of(b).map(u -> func.apply(t, u)));
     }
 
     @Override
-    public <U, K> Stream<Pair<T, U>> innerJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, R> Stream<R> crossJoin(final Stream<? extends U> b, final BiFunction<? super T, ? super U, R> func) {
+        checkArgNotNull(b, "stream");
+
+        return flatMap(new Function<T, Stream<R>>() {
+            private volatile List<U> c = null;
+
+            @Override
+            public Stream<R> apply(T t) {
+                if (c == null) {
+                    synchronized (b) {
+                        if (c == null) {
+                            c = (List<U>) b.toList();
+                        }
+                    }
+                }
+
+                return Stream.of(c).map(u -> func.apply(t, u));
+            }
+        });
+    }
+
+    @Override
+    public <U, K> Stream<Pair<T, U>> innerJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
         return innerJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
     }
 
     @Override
-    public <U, K, R> Stream<R> innerJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, R> Stream<R> innerJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
@@ -2339,7 +2362,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         //    checkArgNotNull(func, "func");
 
         return flatMap(new Function<T, Stream<R>>() {
-            private ListMultimap<Object, U> rightKeyMap = null;
+            private volatile ListMultimap<K, U> rightKeyMap = null;
 
             @Override
             public Stream<R> apply(final T t) {
@@ -2362,7 +2385,38 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U> Stream<Pair<T, U>> innerJoin(final Collection<U> b, final BiPredicate<? super T, ? super U> predicate) {
+    public <U, K, R> Stream<R> innerJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
+            final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        checkArgNotNull(b, "stream");
+        //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
+        //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
+        //    checkArgNotNull(func, "func");
+
+        return flatMap(new Function<T, Stream<R>>() {
+            private volatile ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public Stream<R> apply(final T t) {
+                if (rightKeyMap == null) {
+                    synchronized (rightKeyMapper) {
+                        if (rightKeyMap == null) {
+                            rightKeyMap = ((Stream<U>) b).toMultimap(rightKeyMapper);
+                        }
+                    }
+                }
+
+                return Stream.of(rightKeyMap.get(leftKeyMapper.apply(t))).map(new Function<U, R>() {
+                    @Override
+                    public R apply(U u) {
+                        return func.apply(t, u);
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public <U> Stream<Pair<T, U>> innerJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(predicate, "predicate");
 
@@ -2385,13 +2439,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U, K> Stream<Pair<T, U>> fullJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K> Stream<Pair<T, U>> fullJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
         return fullJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
     }
 
     @Override
-    public <U, K, R> Stream<R> fullJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, R> Stream<R> fullJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
@@ -2445,7 +2499,64 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U> Stream<Pair<T, U>> fullJoin(final Collection<U> b, final BiPredicate<? super T, ? super U> predicate) {
+    public <U, K, R> Stream<R> fullJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
+            final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        checkArgNotNull(b, "stream");
+        //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
+        //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
+        //    checkArgNotNull(func, "func");
+
+        final boolean isParallelStream = this.isParallel();
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+        final Holder<List<U>> holder = new Holder<>();
+
+        return flatMap(new Function<T, Stream<R>>() {
+            private volatile ListMultimap<Object, U> rightKeyMap = null;
+
+            @Override
+            public Stream<R> apply(final T t) {
+                if (rightKeyMap == null) {
+                    synchronized (rightKeyMapper) {
+                        if (rightKeyMap == null) {
+                            final List<U> c = ((Stream<U>) b).toList();
+                            rightKeyMap = ListMultimap.from(c, rightKeyMapper);
+                            holder.setValue(c);
+                        }
+                    }
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isNullOrEmpty(values) ? Stream.of(func.apply(t, (U) null)) : Stream.of(values).map(new Function<U, R>() {
+                    @Override
+                    public R apply(U u) {
+                        if (isParallelStream) {
+                            synchronized (joinedRights) {
+                                joinedRights.put(u, u);
+                            }
+                        } else {
+                            joinedRights.put(u, u);
+                        }
+
+                        return func.apply(t, u);
+                    }
+                });
+            }
+        }).append(Stream.of(holder).flattMap(it -> it.value()).filter(new Predicate<U>() {
+            @Override
+            public boolean test(U u) {
+                return joinedRights.containsKey(u) == false;
+            }
+        }).map(new Function<U, R>() {
+            @Override
+            public R apply(U u) {
+                return func.apply((T) null, u);
+            }
+        }));
+    }
+
+    @Override
+    public <U> Stream<Pair<T, U>> fullJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(predicate, "predicate");
 
@@ -2489,13 +2600,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U, K> Stream<Pair<T, U>> leftJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K> Stream<Pair<T, U>> leftJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
         return leftJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
     }
 
     @Override
-    public <U, K, R> Stream<R> leftJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, R> Stream<R> leftJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
@@ -2528,7 +2639,40 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U> Stream<Pair<T, U>> leftJoin(final Collection<U> b, final BiPredicate<? super T, ? super U> predicate) {
+    public <U, K, R> Stream<R> leftJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
+            final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        checkArgNotNull(b, "stream");
+        //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
+        //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
+        //    checkArgNotNull(func, "func");
+
+        return flatMap(new Function<T, Stream<R>>() {
+            private volatile ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public Stream<R> apply(final T t) {
+                if (rightKeyMap == null) {
+                    synchronized (rightKeyMapper) {
+                        if (rightKeyMap == null) {
+                            rightKeyMap = ((Stream<U>) b).toMultimap(rightKeyMapper);
+                        }
+                    }
+                }
+
+                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+
+                return N.isNullOrEmpty(values) ? Stream.of(func.apply(t, (U) null)) : Stream.of(values).map(new Function<U, R>() {
+                    @Override
+                    public R apply(U u) {
+                        return func.apply(t, u);
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public <U> Stream<Pair<T, U>> leftJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(predicate, "predicate");
 
@@ -2551,13 +2695,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U, K> Stream<Pair<T, U>> rightJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K> Stream<Pair<T, U>> rightJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
         return rightJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
     }
 
     @Override
-    public <U, K, R> Stream<R> rightJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, R> Stream<R> rightJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
@@ -2609,7 +2753,62 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U> Stream<Pair<T, U>> rightJoin(final Collection<U> b, final BiPredicate<? super T, ? super U> predicate) {
+    public <U, K, R> Stream<R> rightJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
+            final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        checkArgNotNull(b, "stream");
+        //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
+        //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
+        //    checkArgNotNull(func, "func");
+
+        final boolean isParallelStream = this.isParallel();
+        final Map<U, U> joinedRights = new IdentityHashMap<>();
+        final Holder<List<U>> holder = new Holder<>();
+
+        return flatMap(new Function<T, Stream<R>>() {
+            private volatile ListMultimap<K, U> rightKeyMap = null;
+
+            @Override
+            public Stream<R> apply(final T t) {
+                if (rightKeyMap == null) {
+                    synchronized (rightKeyMapper) {
+                        if (rightKeyMap == null) {
+                            final List<U> c = ((Stream<U>) b).toList();
+                            rightKeyMap = ListMultimap.from(c, rightKeyMapper);
+                            holder.setValue(c);
+                        }
+                    }
+                }
+
+                return Stream.of(rightKeyMap.get(leftKeyMapper.apply(t))).map(new Function<U, R>() {
+                    @Override
+                    public R apply(U u) {
+                        if (isParallelStream) {
+                            synchronized (joinedRights) {
+                                joinedRights.put(u, u);
+                            }
+                        } else {
+                            joinedRights.put(u, u);
+                        }
+
+                        return func.apply(t, u);
+                    }
+                });
+            }
+        }).append(Stream.of(holder).flattMap(it -> it.value()).filter(new Predicate<U>() {
+            @Override
+            public boolean test(U u) {
+                return joinedRights.containsKey(u) == false;
+            }
+        }).map(new Function<U, R>() {
+            @Override
+            public R apply(U u) {
+                return func.apply((T) null, u);
+            }
+        }));
+    }
+
+    @Override
+    public <U> Stream<Pair<T, U>> rightJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(predicate, "predicate");
 
@@ -2653,13 +2852,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U, K> Stream<Pair<T, List<U>>> groupJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K> Stream<Pair<T, List<U>>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
         return groupJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, List<U>> pair());
     }
 
     @Override
-    public <U, K, R> Stream<R> groupJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super List<U>, R> func) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
@@ -2695,12 +2894,12 @@ abstract class AbstractStream<T> extends Stream<T> {
                         synchronized (this) {
                             if (initialized == false) {
                                 // map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor()).groupTo(rightKeyMapper); // TODO may not necessary.
-                                map = Stream.of(b).groupTo(rightKeyMapper);
+                                map = Stream.<U> of(b).groupTo(rightKeyMapper);
                                 initialized = true;
                             }
                         }
                     } else {
-                        map = Stream.of(b).groupTo(rightKeyMapper);
+                        map = Stream.<U> of(b).groupTo(rightKeyMapper);
                         initialized = true;
                     }
                 }
@@ -2711,13 +2910,65 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U, K> Stream<Pair<T, U>> groupJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
+            final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super List<U>, R> func) {
+        checkArgNotNull(b, "stream");
+        //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
+        //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
+        //    checkArgNotNull(func, "func");
+
+        final Function<T, R> mapper = new Function<T, R>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, List<U>> map = null;
+            private List<U> val = null;
+
+            @Override
+            public R apply(T t) {
+                if (initialized == false) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, new ArrayList<U>(0));
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() {
+                if (initialized == false) {
+                    @SuppressWarnings("resource")
+                    final Stream<T> ps = AbstractStream.this;
+
+                    if (ps.isParallel()) {
+                        synchronized (this) {
+                            if (initialized == false) {
+                                // map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor()).groupTo(rightKeyMapper); // TODO may not necessary.
+                                map = ((Stream<U>) b).groupTo(rightKeyMapper);
+                                initialized = true;
+                            }
+                        }
+                    } else {
+                        map = ((Stream<U>) b).groupTo(rightKeyMapper);
+                        initialized = true;
+                    }
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    @Override
+    public <U, K> Stream<Pair<T, U>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BinaryOperator<U> mergeFunction) {
         return groupJoin(b, leftKeyMapper, rightKeyMapper, mergeFunction, Fn.<T, U> pair());
     }
 
     @Override
-    public <U, K, R> Stream<R> groupJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BinaryOperator<U> mergeFunction, final BiFunction<? super T, ? super U, R> func) {
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
@@ -2775,13 +3026,71 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U, K, A, D> Stream<Pair<T, D>> groupJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
+            final Function<? super U, ? extends K> rightKeyMapper, final BinaryOperator<U> mergeFunction, final BiFunction<? super T, ? super U, R> func) {
+        checkArgNotNull(b, "stream");
+        //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
+        //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
+        //    checkArgNotNull(mergeFunction, "mergeFunction");
+        //    checkArgNotNull(func, "func");
+
+        final Function<T, R> mapper = new Function<T, R>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, U> map = null;
+            private U val = null;
+
+            @Override
+            public R apply(T t) {
+                if (initialized == false) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, null);
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() {
+                if (initialized == false) {
+                    @SuppressWarnings("resource")
+                    final Stream<T> ps = AbstractStream.this;
+
+                    if (ps.isParallel()) {
+                        synchronized (this) {
+                            if (initialized == false) {
+                                //    map = Stream.of(b)
+                                //            .parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor())
+                                //            .toMap(rightKeyMapper, Fn.<U> identity(), mergeFunction); // TODO may not necessary.
+
+                                map = ((Stream<U>) b).toMap(rightKeyMapper, Fn.<U> identity(), mergeFunction);
+
+                                initialized = true;
+                            }
+                        }
+                    } else {
+                        map = ((Stream<U>) b).toMap(rightKeyMapper, Fn.<U> identity(), mergeFunction);
+
+                        initialized = true;
+                    }
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    @Override
+    public <U, K, A, D> Stream<Pair<T, D>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final Collector<? super U, A, D> downstream) {
         return groupJoin(b, leftKeyMapper, rightKeyMapper, downstream, Fn.<T, D> pair());
     }
 
     @Override
-    public <U, K, A, D, R> Stream<R> groupJoin(final Collection<U> b, final Function<? super T, ? extends K> leftKeyMapper,
+    public <U, K, A, D, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final Collector<? super U, A, D> downstream,
             final BiFunction<? super T, ? super D, R> func) {
         //    checkArgNotNull(b, "b");
@@ -2829,6 +3138,65 @@ abstract class AbstractStream<T> extends Stream<T> {
                         }
                     } else {
                         map = Stream.of(b).toMap(rightKeyMapper, Fn.<U> identity(), downstream);
+
+                        initialized = true;
+                    }
+                }
+            }
+        };
+
+        return map(mapper);
+    }
+
+    @Override
+    public <U, K, A, D, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
+            final Function<? super U, ? extends K> rightKeyMapper, final Collector<? super U, A, D> downstream,
+            final BiFunction<? super T, ? super D, R> func) {
+        checkArgNotNull(b, "stream");
+        //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
+        //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
+        //    checkArgNotNull(downstream, "downstream");
+        //    checkArgNotNull(func, "func");
+
+        final Function<T, R> mapper = new Function<T, R>() {
+            private volatile boolean initialized = false;
+            private volatile Map<K, D> map = null;
+            private D val = null;
+
+            @Override
+            public R apply(T t) {
+                if (initialized == false) {
+                    init();
+                }
+
+                val = map.get(leftKeyMapper.apply(t));
+
+                if (val == null) {
+                    return func.apply(t, Stream.<U> empty().collect(downstream));
+                } else {
+                    return func.apply(t, val);
+                }
+            }
+
+            private void init() {
+                if (initialized == false) {
+                    @SuppressWarnings("resource")
+                    final Stream<T> ps = AbstractStream.this;
+
+                    if (ps.isParallel()) {
+                        synchronized (this) {
+                            if (initialized == false) {
+                                //    map = Stream.of(b)
+                                //            .parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor())
+                                //            .toMap(rightKeyMapper, Fn.<U> identity(), downstream); // TODO may not necessary.
+
+                                map = ((Stream<U>) b).toMap(rightKeyMapper, Fn.<U> identity(), downstream);
+
+                                initialized = true;
+                            }
+                        }
+                    } else {
+                        map = ((Stream<U>) b).toMap(rightKeyMapper, Fn.<U> identity(), downstream);
 
                         initialized = true;
                     }
