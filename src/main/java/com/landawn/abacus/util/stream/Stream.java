@@ -2925,6 +2925,7 @@ public abstract class Stream<T>
 
     @SequentialOnly
     @IntermediateOp
+    @TerminalOpTriggered
     public abstract Stream<List<T>> rollup();
 
     /**
