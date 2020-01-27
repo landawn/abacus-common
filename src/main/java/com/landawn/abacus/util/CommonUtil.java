@@ -7756,7 +7756,7 @@ class CommonUtil {
      *
      * @param a
      * @return
-     * @deprecated replaced by {@link CommonUtil#nullToEmpty(Class, Object[])}
+     * @deprecated replaced by {@link CommonUtil#nullToEmpty(Object[], Class)}
      */
     @Deprecated
     public static Object[] nullToEmpty(final Object[] a) {
@@ -7770,9 +7770,126 @@ class CommonUtil {
      * @param arrayType
      * @param a
      * @return
+     * @deprecated replaced by {@link CommonUtil#nullToEmpty(Object[], Class)}
      */
+    @Deprecated
     public static <T> T[] nullToEmpty(final Class<T[]> arrayType, final T[] a) {
         return a == null ? (T[]) CommonUtil.newArray(arrayType.getComponentType(), 0) : a;
+    }
+
+    /**
+     * Null to empty.
+     *
+     * @param <T>
+     * @param a
+     * @param arrayType
+     * @return
+     */
+    public static <T> T[] nullToEmpty(final T[] a, final Class<T[]> arrayType) {
+        return a == null ? (T[]) CommonUtil.newArray(arrayType.getComponentType(), 0) : a;
+    }
+
+    /**
+     * Returns an immutable empty Collection if the specified ImmutableCollection is <code>null</code>, otherwise itself is returned.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> ImmutableCollection<T> nullToEmpty(final ImmutableCollection<T> c) {
+        return c == null ? ImmutableList.<T> empty() : c;
+    }
+
+    /**
+     * Returns an immutable empty list if the specified ImmutableList is <code>null</code>, otherwise itself is returned.
+     *
+     * @param <T>
+     * @param list
+     * @return
+     */
+    public static <T> ImmutableList<T> nullToEmpty(final ImmutableList<T> list) {
+        return list == null ? ImmutableList.<T> empty() : list;
+    }
+
+    /**
+    * Returns an immutable empty list if the specified ImmutableSet is <code>null</code>, otherwise itself is returned.
+    *
+    * @param <T>
+    * @param set
+    * @return
+    */
+    public static <T> ImmutableSet<T> nullToEmpty(final ImmutableSet<T> set) {
+        return set == null ? ImmutableSet.<T> empty() : set;
+    }
+
+    /**
+     * Returns an immutable empty list if the specified ImmutableSortedSet is <code>null</code>, otherwise itself is returned.
+     *
+     * @param <T>
+     * @param set
+     * @return
+     */
+    public static <T> ImmutableSortedSet<T> nullToEmpty(final ImmutableSortedSet<T> set) {
+        return set == null ? ImmutableSortedSet.<T> empty() : set;
+    }
+
+    /**
+     * Returns an immutable empty list if the specified ImmutableNavigableSet is <code>null</code>, otherwise itself is returned.
+     *
+     * @param <T>
+     * @param set
+     * @return
+     */
+    public static <T> ImmutableNavigableSet<T> nullToEmpty(final ImmutableNavigableSet<T> set) {
+        return set == null ? ImmutableNavigableSet.<T> empty() : set;
+    }
+
+    /**
+     * Returns an immutable empty map if the specified ImmutableMap is <code>null</code>, otherwise itself is returned.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @return
+     */
+    public static <K, V> ImmutableMap<K, V> nullToEmpty(final ImmutableMap<K, V> map) {
+        return map == null ? ImmutableMap.<K, V> empty() : map;
+    }
+
+    /**
+     * Returns an immutable empty map if the specified ImmutableSortedMap is <code>null</code>, otherwise itself is returned.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @return
+     */
+    public static <K, V> ImmutableSortedMap<K, V> nullToEmpty(final ImmutableSortedMap<K, V> map) {
+        return map == null ? ImmutableSortedMap.<K, V> empty() : map;
+    }
+
+    /**
+     * Returns an immutable empty map if the specified ImmutableNavigableMap is <code>null</code>, otherwise itself is returned.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @return
+     */
+    public static <K, V> ImmutableNavigableMap<K, V> nullToEmpty(final ImmutableNavigableMap<K, V> map) {
+        return map == null ? ImmutableNavigableMap.<K, V> empty() : map;
+    }
+
+    /**
+     * Returns an immutable empty map if the specified ImmutableBiMap is <code>null</code>, otherwise itself is returned.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @return
+     */
+    public static <K, V> ImmutableBiMap<K, V> nullToEmpty(final ImmutableBiMap<K, V> map) {
+        return map == null ? ImmutableBiMap.<K, V> empty() : map;
     }
 
     /**

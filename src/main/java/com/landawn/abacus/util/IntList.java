@@ -1325,6 +1325,40 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
+        forEachIndexed(0, size, action);
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IndexedIntConsumer<E> action) throws E {
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+
+        if (size > 0) {
+            if (fromIndex <= toIndex) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    action.accept(i, elementData[i]);
+                }
+            } else {
+                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
+                    action.accept(i, elementData[i]);
+                }
+            }
+        }
+    }
+
+    /**
+     *
      * @return
      */
     public OptionalInt first() {

@@ -1084,6 +1084,40 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedBooleanConsumer<E> action) throws E {
+        forEachIndexed(0, size, action);
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IndexedBooleanConsumer<E> action) throws E {
+        N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
+
+        if (size > 0) {
+            if (fromIndex <= toIndex) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    action.accept(i, elementData[i]);
+                }
+            } else {
+                for (int i = N.min(size - 1, fromIndex); i > toIndex; i--) {
+                    action.accept(i, elementData[i]);
+                }
+            }
+        }
+    }
+
+    /**
+     *
      * @return
      */
     public OptionalBoolean first() {

@@ -107,9 +107,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param <E>
      * @param set
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <E> ImmutableSet<E> of(final Set<? extends E> set) {
+    public static <E> ImmutableSet<E> of(final Set<? extends E> set) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -118,9 +120,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param <E>
      * @param set
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> set) {
+    public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> set) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

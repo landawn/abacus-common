@@ -266,11 +266,12 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param k
      * @param v
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final V put(K k, V v) {
+    public final V put(K k, V v) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -278,22 +279,24 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      *
      * @param o
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final V remove(Object o) {
+    public final V remove(Object o) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
      * @param map
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final void putAll(Map<? extends K, ? extends V> map) {
+    public final void putAll(Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -303,11 +306,12 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param key
      * @param value
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final V putIfAbsent(K key, V value) {
+    public final V putIfAbsent(K key, V value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -316,11 +320,12 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param key
      * @param value
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final boolean remove(Object key, Object value) {
+    public final boolean remove(Object key, Object value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -330,11 +335,12 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param oldValue
      * @param newValue
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final boolean replace(K key, V oldValue, V newValue) {
+    public final boolean replace(K key, V oldValue, V newValue) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -343,11 +349,12 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param key
      * @param value
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final V replace(K key, V value) {
+    public final V replace(K key, V value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -357,11 +364,12 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param key
      * @param mappingFunction
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+    public final V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -371,11 +379,12 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param key
      * @param remappingFunction
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    public final V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -384,11 +393,12 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param key
      * @param remappingFunction
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    public final V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -398,21 +408,23 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      * @param value
      * @param remappingFunction
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    public final V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final void clear() {
+    public final void clear() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

@@ -288,9 +288,11 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param <V> the value type
      * @param map
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) {
+    public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -300,9 +302,11 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param <V> the value type
      * @param map
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
+    public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

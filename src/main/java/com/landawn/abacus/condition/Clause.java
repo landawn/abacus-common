@@ -49,7 +49,7 @@ public abstract class Clause extends Cell {
      * @return
      */
     @Override
-    public And and(Condition condition) {
+    public And and(Condition condition) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -59,7 +59,7 @@ public abstract class Clause extends Cell {
      * @return
      */
     @Override
-    public Or or(Condition condition) {
+    public Or or(Condition condition) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -68,7 +68,7 @@ public abstract class Clause extends Cell {
      * @return
      */
     @Override
-    public Not not() {
+    public Not not() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 }

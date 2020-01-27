@@ -290,9 +290,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param <V> the value type
      * @param sortedMap
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableSortedMap<K, V> of(final SortedMap<? extends K, ? extends V> sortedMap) {
+    public static <K, V> ImmutableSortedMap<K, V> of(final SortedMap<? extends K, ? extends V> sortedMap) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

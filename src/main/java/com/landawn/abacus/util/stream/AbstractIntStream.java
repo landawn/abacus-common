@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
@@ -1039,6 +1040,29 @@ abstract class AbstractIntStream extends IntStream {
     @Override
     public <K, A, D> Map<K, D> toMap(IntFunction<? extends K> keyMapper, Collector<Integer, A, D> downstream) {
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
+    }
+
+    @Override 
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
+        if (isParallel()) {
+            final AtomicInteger idx = new AtomicInteger();
+
+            forEach(new Throwables.IntConsumer<E>() {
+                @Override
+                public void accept(int t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        } else {
+            final MutableInt idx = MutableInt.of(0);
+
+            forEach(new Throwables.IntConsumer<E>() {
+                @Override
+                public void accept(int t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        }
     }
 
     @Override

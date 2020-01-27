@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
@@ -27,6 +28,7 @@ import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IndexedShort;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.Multiset;
+import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.MutableShort;
 import com.landawn.abacus.util.N;
@@ -1039,6 +1041,29 @@ abstract class AbstractShortStream extends ShortStream {
     @Override
     public <K, A, D> Map<K, D> toMap(ShortFunction<? extends K> keyMapper, Collector<Short, A, D> downstream) {
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
+    }
+
+    @Override 
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedShortConsumer<E> action) throws E {
+        if (isParallel()) {
+            final AtomicInteger idx = new AtomicInteger();
+
+            forEach(new Throwables.ShortConsumer<E>() {
+                @Override
+                public void accept(short t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        } else {
+            final MutableInt idx = MutableInt.of(0);
+
+            forEach(new Throwables.ShortConsumer<E>() {
+                @Override
+                public void accept(short t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        }
     }
 
     @Override

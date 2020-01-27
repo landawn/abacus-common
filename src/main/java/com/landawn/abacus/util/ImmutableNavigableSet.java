@@ -106,9 +106,11 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param <E>
      * @param sortedSet
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <E> ImmutableSortedSet<E> of(final SortedSet<? extends E> sortedSet) {
+    public static <E> ImmutableSortedSet<E> of(final SortedSet<? extends E> sortedSet) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

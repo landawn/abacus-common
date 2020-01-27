@@ -83,7 +83,7 @@ public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V>
      */
     @Deprecated
     @Override
-    public V setValue(V v) {
+    public V setValue(V v) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 }

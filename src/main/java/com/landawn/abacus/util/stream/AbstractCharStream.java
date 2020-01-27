@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
@@ -31,6 +32,7 @@ import com.landawn.abacus.util.IndexedChar;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableChar;
+import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
@@ -1034,6 +1036,29 @@ abstract class AbstractCharStream extends CharStream {
     @Override
     public <K, A, D> Map<K, D> toMap(CharFunction<? extends K> keyMapper, Collector<Character, A, D> downstream) {
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
+    }
+
+    @Override 
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedCharConsumer<E> action) throws E {
+        if (isParallel()) {
+            final AtomicInteger idx = new AtomicInteger();
+
+            forEach(new Throwables.CharConsumer<E>() {
+                @Override
+                public void accept(char t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        } else {
+            final MutableInt idx = MutableInt.of(0);
+
+            forEach(new Throwables.CharConsumer<E>() {
+                @Override
+                public void accept(char t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        }
     }
 
     @Override

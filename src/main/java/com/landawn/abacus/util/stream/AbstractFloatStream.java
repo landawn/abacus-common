@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
@@ -32,6 +33,7 @@ import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.KahanSummation;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableFloat;
+import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
@@ -1041,6 +1043,29 @@ abstract class AbstractFloatStream extends FloatStream {
     @Override
     public <K, A, D> Map<K, D> toMap(FloatFunction<? extends K> keyMapper, Collector<Float, A, D> downstream) {
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
+    }
+
+    @Override 
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedFloatConsumer<E> action) throws E {
+        if (isParallel()) {
+            final AtomicInteger idx = new AtomicInteger();
+
+            forEach(new Throwables.FloatConsumer<E>() {
+                @Override
+                public void accept(float t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        } else {
+            final MutableInt idx = MutableInt.of(0);
+
+            forEach(new Throwables.FloatConsumer<E>() {
+                @Override
+                public void accept(float t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        }
     }
 
     @Override

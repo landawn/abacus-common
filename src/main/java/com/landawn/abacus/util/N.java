@@ -11037,14 +11037,14 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final T[] a, final Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(a)) {
             return;
         }
 
-        forEach(a, 0, a.length, action);
+        forEachIndexed(a, 0, a.length, action);
     }
 
     /**
@@ -11057,7 +11057,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
         checkArgNotNull(action);
@@ -11186,7 +11186,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, final Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(c)) {
@@ -11215,7 +11215,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Collection<? extends T> c, int fromIndex, final int toIndex,
+    public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, int fromIndex, final int toIndex,
             final Throwables.IndexedConsumer<? super T, E> action) throws E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size(c));
         checkArgNotNull(action);

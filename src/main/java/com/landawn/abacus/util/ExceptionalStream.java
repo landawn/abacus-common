@@ -5085,7 +5085,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> void forEach(Throwables.IndexedConsumer<? super T, ? extends E2> action) throws E, E2 {
+    public <E2 extends Exception> void forEachIndexed(Throwables.IndexedConsumer<? super T, ? extends E2> action) throws E, E2 {
         checkArgNotNull(action, "action");
         assertNotClosed();
 

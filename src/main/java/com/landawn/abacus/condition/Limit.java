@@ -111,7 +111,7 @@ public class Limit extends AbstractCondition {
      * @return
      */
     @Override
-    public And and(Condition condition) {
+    public And and(Condition condition) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -121,7 +121,7 @@ public class Limit extends AbstractCondition {
      * @return
      */
     @Override
-    public Or or(Condition condition) {
+    public Or or(Condition condition) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -130,7 +130,7 @@ public class Limit extends AbstractCondition {
      * @return
      */
     @Override
-    public Not not() {
+    public Not not() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

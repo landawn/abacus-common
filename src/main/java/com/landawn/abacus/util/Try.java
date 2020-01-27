@@ -15,43 +15,58 @@ package com.landawn.abacus.util;
  */
 
 public final class Try<T extends AutoCloseable> {
-
-    /** The t. */
-    private final T t;
-
-    /**
-     * Instantiates a new try.
-     *
-     * @param t
-     */
-    Try(final T t) {
-        N.checkArgNotNull(t);
-
-        this.t = t;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param t
-     * @return
-     */
-    public static <T extends AutoCloseable> Try<T> with(final T t) {
-        return new Try<>(t);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param supplier
-     * @return
-     */
-    public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> supplier) {
-        try {
-            return new Try<>(supplier.get());
-        } catch (Exception e) {
-            throw N.toRuntimeException(e);
+    private static final AutoCloseable EMPTY = new AutoCloseable() {
+        @Override
+        public void close() throws Exception {
+            // Do nothing.
         }
+    };
+
+    private final T targetResource;
+    private final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier;
+    private final Runnable finalAction;
+
+    Try(final T targetResource, final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction) {
+        this.targetResource = targetResource;
+        this.targetResourceSupplier = targetResourceSupplier;
+        this.finalAction = finalAction;
+    }
+
+    public static <T extends AutoCloseable> Try<T> with(final T targetResource) {
+        N.checkArgNotNull(targetResource, "targetResourceSupplier");
+
+        return new Try<>(targetResource, null, null);
+    }
+
+    public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) {
+        N.checkArgNotNull(targetResource, "targetResourceSupplier");
+        N.checkArgNotNull(finalAction, "finalAction");
+
+        return new Try<>(targetResource, null, finalAction);
+    }
+
+    public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier) {
+        N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
+        return new Try<>(null, targetResourceSupplier, null);
+    }
+
+    public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction) {
+        N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
+        N.checkArgNotNull(finalAction, "finalAction");
+
+        return new Try<>(null, targetResourceSupplier, finalAction);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetResource
+     * @return
+     */
+    public static <T extends AutoCloseable> Try<T> with(final Runnable finalAction) {
+        N.checkArgNotNull(finalAction);
+
+        return new Try<>(null, null, finalAction);
     }
 
     /**
@@ -74,8 +89,6 @@ public final class Try<T extends AutoCloseable> {
      */
     public static void run(final Throwables.Runnable<? extends Exception> cmd,
             final com.landawn.abacus.util.function.Consumer<? super Exception> actionOnError) {
-        N.checkArgNotNull(actionOnError);
-
         try {
             cmd.run();
         } catch (Exception e) {
@@ -106,8 +119,6 @@ public final class Try<T extends AutoCloseable> {
      * @return
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final com.landawn.abacus.util.function.Function<? super Exception, R> actionOnError) {
-        N.checkArgNotNull(actionOnError);
-
         try {
             return cmd.call();
         } catch (Exception e) {
@@ -123,8 +134,6 @@ public final class Try<T extends AutoCloseable> {
      * @return
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final com.landawn.abacus.util.function.Supplier<R> supplier) {
-        N.checkArgNotNull(supplier);
-
         try {
             return cmd.call();
         } catch (Exception e) {
@@ -158,9 +167,6 @@ public final class Try<T extends AutoCloseable> {
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final com.landawn.abacus.util.function.Predicate<? super Exception> predicate,
             final com.landawn.abacus.util.function.Supplier<R> supplier) {
-        N.checkArgNotNull(predicate);
-        N.checkArgNotNull(supplier);
-
         try {
             return cmd.call();
         } catch (Exception e) {
@@ -183,8 +189,6 @@ public final class Try<T extends AutoCloseable> {
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final com.landawn.abacus.util.function.Predicate<? super Exception> predicate,
             final R defaultValue) {
-        N.checkArgNotNull(predicate);
-
         try {
             return cmd.call();
         } catch (Exception e) {
@@ -209,12 +213,14 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd) {
-        try {
-            cmd.accept(t);
+        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
+            cmd.accept(targetResource);
         } catch (Exception e) {
             throw N.toRuntimeException(e);
         } finally {
-            IOUtil.close(t);
+            if (finalAction != null) {
+                finalAction.run();
+            }
         }
     }
 
@@ -225,14 +231,14 @@ public final class Try<T extends AutoCloseable> {
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd,
             final com.landawn.abacus.util.function.Consumer<? super Exception> actionOnError) {
-        N.checkArgNotNull(actionOnError);
-
-        try {
-            cmd.accept(t);
+        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
+            cmd.accept(targetResource);
         } catch (Exception e) {
             actionOnError.accept(e);
         } finally {
-            IOUtil.close(t);
+            if (finalAction != null) {
+                finalAction.run();
+            }
         }
     }
 
@@ -243,12 +249,14 @@ public final class Try<T extends AutoCloseable> {
      * @return
      */
     public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd) {
-        try {
-            return cmd.apply(t);
+        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(targetResource);
         } catch (Exception e) {
             throw N.toRuntimeException(e);
         } finally {
-            IOUtil.close(t);
+            if (finalAction != null) {
+                finalAction.run();
+            }
         }
     }
 
@@ -261,14 +269,14 @@ public final class Try<T extends AutoCloseable> {
      */
     public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd,
             final com.landawn.abacus.util.function.Function<? super Exception, R> actionOnError) {
-        N.checkArgNotNull(actionOnError);
-
-        try {
-            return cmd.apply(t);
+        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(targetResource);
         } catch (Exception e) {
             return actionOnError.apply(e);
         } finally {
-            IOUtil.close(t);
+            if (finalAction != null) {
+                finalAction.run();
+            }
         }
     }
 
@@ -280,14 +288,14 @@ public final class Try<T extends AutoCloseable> {
      * @return
      */
     public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final com.landawn.abacus.util.function.Supplier<R> supplier) {
-        N.checkArgNotNull(supplier);
-
-        try {
-            return cmd.apply(t);
+        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(targetResource);
         } catch (Exception e) {
             return supplier.get();
         } finally {
-            IOUtil.close(t);
+            if (finalAction != null) {
+                finalAction.run();
+            }
         }
     }
 
@@ -299,12 +307,14 @@ public final class Try<T extends AutoCloseable> {
      * @return
      */
     public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final R defaultValue) {
-        try {
-            return cmd.apply(t);
+        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(targetResource);
         } catch (Exception e) {
             return defaultValue;
         } finally {
-            IOUtil.close(t);
+            if (finalAction != null) {
+                finalAction.run();
+            }
         }
     }
 
@@ -318,11 +328,8 @@ public final class Try<T extends AutoCloseable> {
      */
     public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd,
             final com.landawn.abacus.util.function.Predicate<? super Exception> predicate, final com.landawn.abacus.util.function.Supplier<R> supplier) {
-        N.checkArgNotNull(predicate);
-        N.checkArgNotNull(supplier);
-
-        try {
-            return cmd.apply(t);
+        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(targetResource);
         } catch (Exception e) {
             if (predicate.test(e)) {
                 return supplier.get();
@@ -330,7 +337,9 @@ public final class Try<T extends AutoCloseable> {
                 throw N.toRuntimeException(e);
             }
         } finally {
-            IOUtil.close(t);
+            if (finalAction != null) {
+                finalAction.run();
+            }
         }
     }
 
@@ -344,10 +353,8 @@ public final class Try<T extends AutoCloseable> {
      */
     public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd,
             final com.landawn.abacus.util.function.Predicate<? super Exception> predicate, final R defaultValue) {
-        N.checkArgNotNull(predicate);
-
-        try {
-            return cmd.apply(t);
+        try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
+            return cmd.apply(targetResource);
         } catch (Exception e) {
             if (predicate.test(e)) {
                 return defaultValue;
@@ -355,7 +362,9 @@ public final class Try<T extends AutoCloseable> {
                 throw N.toRuntimeException(e);
             }
         } finally {
-            IOUtil.close(t);
+            if (finalAction != null) {
+                finalAction.run();
+            }
         }
     }
 }

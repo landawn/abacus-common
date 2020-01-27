@@ -32,6 +32,7 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
@@ -368,7 +369,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     public abstract <R> R collect(Supplier<R> supplier, ObjLongConsumer<? super R> accumulator);
 
+    @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws E;
+
+    @ParallelSupported
+    @TerminalOp
+    public abstract <E extends Exception> void forEachIndexed(Throwables.IndexedLongConsumer<E> action) throws E;
 
     public abstract <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate) throws E;
 

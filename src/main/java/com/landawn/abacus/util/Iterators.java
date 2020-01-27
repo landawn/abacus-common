@@ -400,7 +400,7 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Iterator<T> iter, final Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final Iterator<T> iter, final Throwables.IndexedConsumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (iter == null) {

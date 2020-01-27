@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
@@ -30,6 +31,7 @@ import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.LongSummaryStatistics;
 import com.landawn.abacus.util.Multiset;
+import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
@@ -1038,6 +1040,29 @@ abstract class AbstractLongStream extends LongStream {
     @Override
     public <K, A, D> Map<K, D> toMap(LongFunction<? extends K> keyMapper, Collector<Long, A, D> downstream) {
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
+    }
+
+    @Override 
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedLongConsumer<E> action) throws E {
+        if (isParallel()) {
+            final AtomicInteger idx = new AtomicInteger();
+
+            forEach(new Throwables.LongConsumer<E>() {
+                @Override
+                public void accept(long t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        } else {
+            final MutableInt idx = MutableInt.of(0);
+
+            forEach(new Throwables.LongConsumer<E>() {
+                @Override
+                public void accept(long t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        }
     }
 
     @Override

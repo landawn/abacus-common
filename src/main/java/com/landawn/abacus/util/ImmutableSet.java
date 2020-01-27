@@ -116,4 +116,17 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
         return new ImmutableSet<>((set instanceof LinkedHashSet || set instanceof SortedSet) ? N.newLinkedHashSet(set) : N.newHashSet(set));
     }
+
+    /**
+     * 
+     * @param <E>
+     * @param c
+     * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
+     */
+    @Deprecated
+    public static <E> ImmutableCollection<E> of(final Collection<? extends E> c) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 }

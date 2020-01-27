@@ -29,7 +29,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <E>
  * @since 0.8
  */
-public abstract class ImmutableCollection<E> extends AbstractCollection<E> {
+public class ImmutableCollection<E> extends AbstractCollection<E> {
 
     /** The coll. */
     final Collection<E> coll;
@@ -45,13 +45,30 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> {
 
     /**
      *
+     * @param <E>
+     * @param c the elements in this <code>Collection</code> are shared by the returned ImmutableCollection.
+     * @return
+     */
+    public static <E> ImmutableCollection<E> of(final Collection<? extends E> c) {
+        if (c == null) {
+            return ImmutableList.empty();
+        } else if (c instanceof ImmutableCollection) {
+            return (ImmutableCollection<E>) c;
+        }
+
+        return new ImmutableCollection<>(c);
+    }
+
+    /**
+     *
      * @param e
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final boolean add(E e) {
+    public final boolean add(E e) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -60,11 +77,12 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> {
      *
      * @param newElements
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final boolean addAll(Collection<? extends E> newElements) {
+    public final boolean addAll(Collection<? extends E> newElements) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -72,11 +90,12 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> {
      *
      * @param object
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final boolean remove(Object object) {
+    public final boolean remove(Object object) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -85,11 +104,12 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> {
      *
      * @param filter
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public boolean removeIf(Predicate<? super E> filter) {
+    public boolean removeIf(Predicate<? super E> filter) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -98,11 +118,12 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> {
      *
      * @param oldElements
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final boolean removeAll(Collection<?> oldElements) {
+    public final boolean removeAll(Collection<?> oldElements) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -110,21 +131,23 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> {
      *
      * @param elementsToKeep
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final boolean retainAll(Collection<?> elementsToKeep) {
+    public final boolean retainAll(Collection<?> elementsToKeep) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final void clear() {
+    public final void clear() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

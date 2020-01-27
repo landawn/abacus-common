@@ -1,3 +1,9 @@
+### 1.10.11
+
+* Rename `forEach(Throwables.IndexedConsumer...)` to `forEachIndexed(Throwables.IndexedConsumer...)`. 
+* Improvements and bug fix.
+
+
 ### 1.10.10
 
 * Remove `N/Iterables.crossJoin/innerJoin/fullJoin/leftJoin/rightJoin`, replaced by `Stream.crossJoin/innerJoin/fullJoin/leftJoin/rightJoin`.

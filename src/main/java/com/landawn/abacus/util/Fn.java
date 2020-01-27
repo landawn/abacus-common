@@ -4667,6 +4667,32 @@ public final class Fn extends Comparators {
         };
     }
 
+    public static <E extends Exception> com.landawn.abacus.util.function.Runnable rr(final Throwables.Runnable<E> runnbale) {
+        return new com.landawn.abacus.util.function.Runnable() {
+            @Override
+            public void run() {
+                try {
+                    runnbale.run();
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+        };
+    }
+
+    public static <R, E extends Exception> com.landawn.abacus.util.function.Callable<R> cc(final Throwables.Callable<R, E> callable) {
+        return new com.landawn.abacus.util.function.Callable<R>() {
+            @Override
+            public R call() {
+                try {
+                    return callable.call();
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+        };
+    }
+
     /**
      * Split this stream by the specified duration.
      *
@@ -12675,6 +12701,14 @@ public final class Fn extends Comparators {
                     }
                 }
             };
+        }
+
+        public static <E extends Exception> Throwables.Runnable<E> rr(final com.landawn.abacus.util.function.Runnable runnable) {
+            return (Throwables.Runnable<E>) runnable;
+        }
+
+        public static <R, E extends Exception> Throwables.Callable<R, E> cc(final com.landawn.abacus.util.function.Callable<R> callable) {
+            return (Throwables.Callable<R, E>) callable;
         }
 
         /**

@@ -28,6 +28,7 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
@@ -358,7 +359,13 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      */
     public abstract <R> R collect(Supplier<R> supplier, ObjByteConsumer<? super R> accumulator);
 
+    @ParallelSupported
+    @TerminalOp
     public abstract <E extends Exception> void forEach(Throwables.ByteConsumer<E> action) throws E;
+
+    @ParallelSupported
+    @TerminalOp
+    public abstract <E extends Exception> void forEachIndexed(Throwables.IndexedByteConsumer<E> action) throws E;
 
     public abstract <E extends Exception> boolean anyMatch(final Throwables.BytePredicate<E> predicate) throws E;
 

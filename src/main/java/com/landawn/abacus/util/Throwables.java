@@ -822,6 +822,134 @@ public final class Throwables {
     }
 
     /**
+     * The Interface IndexedBooleanConsumer.
+     *
+     * @param <E>
+     */
+    public static interface IndexedBooleanConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, boolean e) throws E;
+    }
+
+    /**
+     * The Interface IndexedCharConsumer.
+     *
+     * @param <E>
+     */
+    public static interface IndexedCharConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, char e) throws E;
+    }
+
+    /**
+     * The Interface IndexedByteConsumer.
+     *
+     * @param <E>
+     */
+    public static interface IndexedByteConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, byte e) throws E;
+    }
+
+    /**
+     * The Interface IndexedShortConsumer.
+     *
+     * @param <E>
+     */
+    public static interface IndexedShortConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, short e) throws E;
+    }
+
+    /**
+     * The Interface IndexedIntConsumer.
+     *
+     * @param <E>
+     */
+    public static interface IndexedIntConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, int e) throws E;
+    }
+
+    /**
+     * The Interface IndexedLongConsumer.
+     *
+     * @param <E>
+     */
+    public static interface IndexedLongConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, long e) throws E;
+    }
+
+    /**
+     * The Interface IndexedFloatConsumer.
+     *
+     * @param <E>
+     */
+    public static interface IndexedFloatConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, float e) throws E;
+    }
+
+    /**
+     * The Interface IndexedDoubleConsumer.
+     *
+     * @param <E>
+     */
+    public static interface IndexedDoubleConsumer<E extends Throwable> {
+
+        /**
+         *
+         * @param idx
+         * @param e
+         * @throws E the e
+         */
+        void accept(int idx, double e) throws E;
+    }
+
+    /**
      * The Interface BooleanPredicate.
      *
      * @param <E>

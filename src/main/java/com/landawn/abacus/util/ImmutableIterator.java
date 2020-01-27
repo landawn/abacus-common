@@ -38,7 +38,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      */
     @Deprecated
     @Override
-    public void remove() {
+    public void remove() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

@@ -140,6 +140,19 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * 
+     * @param <E>
+     * @param c
+     * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
+     */
+    @Deprecated
+    public static <E> ImmutableCollection<E> of(final Collection<? extends E> c) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      *
      * @param index
      * @return
@@ -206,11 +219,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @param index
      * @param newElements
      * @return true, if successful
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final boolean addAll(int index, Collection<? extends E> newElements) {
+    public final boolean addAll(int index, Collection<? extends E> newElements) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -219,11 +233,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @param index
      * @param element
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final E set(int index, E element) {
+    public final E set(int index, E element) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -231,11 +246,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      *
      * @param index
      * @param element
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final void add(int index, E element) {
+    public final void add(int index, E element) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -243,33 +259,36 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      *
      * @param index
      * @return
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final E remove(int index) {
+    public final E remove(int index) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
      * @param operator
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final void replaceAll(UnaryOperator<E> operator) {
+    public final void replaceAll(UnaryOperator<E> operator) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      *
      * @param c
-     * @deprecated Unsupported operation.
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
-    public final void sort(Comparator<? super E> c) {
+    public final void sort(Comparator<? super E> c) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 }

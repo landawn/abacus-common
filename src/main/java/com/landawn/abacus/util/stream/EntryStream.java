@@ -1014,6 +1014,11 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
+    public <E extends Exception> void forEachIndexed(final Throwables.IndexedConsumer<? super Map.Entry<K, V>, E> action) throws E {
+        s.forEachIndexed(action);
+    } 
+
+    @ParallelSupported
     public Optional<Map.Entry<K, V>> min(Comparator<? super Map.Entry<K, V>> comparator) {
         return s.min(comparator);
     }

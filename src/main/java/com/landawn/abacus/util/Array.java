@@ -1510,8 +1510,8 @@ public final class Array {
      * @param n
      * @return
      * @throws NullPointerException if the specified {@code element} is null.
-     * @see Array#repeat(Class, Object, int)
-     * @deprecated prefer to {@link Array#repeat(Class, Object, int)} because this method throws NullPointerException when element is {@code null}
+     * @see Array#repeat(Object, int, Class)
+     * @deprecated prefer to {@link Array#repeat(Object, int, Class)} because this method throws NullPointerException when element is {@code null}
      */
     @Deprecated
     public static <T> T[] repeat(final T element, final int n) throws NullPointerException {
@@ -1528,8 +1528,25 @@ public final class Array {
      * @param n
      * @return
      * @throws NullPointerException
+     * @deprecated {@link #repeat(Object, int, Class)}
      */
+    @Deprecated
     public static <T> T[] repeat(final Class<T> elementClass, final T element, final int n) throws NullPointerException {
+        final T[] a = N.newArray(elementClass, n);
+        N.fill(a, element);
+        return a;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param element
+     * @param n
+     * @param elementClass
+     * @return
+     * @throws NullPointerException
+     */
+    public static <T> T[] repeat(final T element, final int n, final Class<T> elementClass) throws NullPointerException {
         final T[] a = N.newArray(elementClass, n);
         N.fill(a, element);
         return a;

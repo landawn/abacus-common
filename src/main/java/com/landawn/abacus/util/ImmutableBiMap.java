@@ -243,9 +243,11 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param <V> the value type
      * @param map
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) {
+    public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -255,9 +257,11 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param <V> the value type
      * @param map
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
+    public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

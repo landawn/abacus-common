@@ -1631,9 +1631,14 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
+    public <E extends Exception> void forEach(Throwables.Consumer<? super T, E> action) throws E {
+        forEach(action, Fn.emptyAction());
+    }
+
+    @Override
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> void forEach(Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedConsumer<? super T, E> action) throws E {
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger();
 
@@ -4494,11 +4499,6 @@ abstract class AbstractStream<T> extends Stream<T> {
     public <T2, T3, R> Stream<R> zipWith(Stream<T2> b, Stream<T3> c, T valueForNoneA, T2 valueForNoneB, T3 valueForNoneC,
             TriFunction<? super T, ? super T2, ? super T3, R> zipFunction) {
         return Stream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
-    }
-
-    @Override
-    public <E extends Exception> void forEach(Throwables.Consumer<? super T, E> action) throws E {
-        forEach(action, Fn.emptyAction());
     }
 
     @Override

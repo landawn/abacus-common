@@ -1427,7 +1427,7 @@ public abstract class Stream<T>
 
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEach(Throwables.IndexedConsumer<? super T, E> action) throws E;
+    public abstract <E extends Exception> void forEachIndexed(Throwables.IndexedConsumer<? super T, E> action) throws E;
 
     @ParallelSupported
     @TerminalOp

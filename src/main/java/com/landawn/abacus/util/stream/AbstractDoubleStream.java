@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.exception.DuplicatedResultException;
@@ -32,6 +33,7 @@ import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.KahanSummation;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableDouble;
+import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Nth;
@@ -1042,6 +1044,29 @@ abstract class AbstractDoubleStream extends DoubleStream {
     @Override
     public <K, A, D> Map<K, D> toMap(DoubleFunction<? extends K> keyMapper, Collector<Double, A, D> downstream) {
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
+    }
+
+    @Override 
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws E {
+        if (isParallel()) {
+            final AtomicInteger idx = new AtomicInteger();
+
+            forEach(new Throwables.DoubleConsumer<E>() {
+                @Override
+                public void accept(double t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        } else {
+            final MutableInt idx = MutableInt.of(0);
+
+            forEach(new Throwables.DoubleConsumer<E>() {
+                @Override
+                public void accept(double t) throws E {
+                    action.accept(idx.getAndIncrement(), t);
+                }
+            });
+        }
     }
 
     @Override
