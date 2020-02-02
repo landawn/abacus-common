@@ -387,4 +387,20 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             action.accept(next());
         }
     }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedConsumer<? super T, E> action) throws E {
+        N.checkArgNotNull(action);
+
+        int idx = 0;
+
+        while (hasNext()) {
+            action.accept(idx++, next());
+        }
+    }
 }

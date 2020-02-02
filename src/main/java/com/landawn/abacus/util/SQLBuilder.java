@@ -47,9 +47,12 @@ import com.landawn.abacus.condition.Cell;
 import com.landawn.abacus.condition.Condition;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 import com.landawn.abacus.condition.Expression;
+import com.landawn.abacus.condition.Having;
 import com.landawn.abacus.condition.In;
+import com.landawn.abacus.condition.InSubQuery;
 import com.landawn.abacus.condition.Junction;
 import com.landawn.abacus.condition.SubQuery;
+import com.landawn.abacus.condition.Where;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -1529,15 +1532,18 @@ public abstract class SQLBuilder {
         }
     }
 
-    /**
-     *
-     * @param cond any literal written in <code>Expression</code> condition won't be formalized
-     * @return
-     */
     public SQLBuilder where(final Condition cond) {
         init(true);
 
         sb.append(_SPACE_WHERE_SPACE);
+
+        appendCondition(cond);
+
+        return this;
+    }
+
+    private SQLBuilder appendClause(final Condition cond) {
+        init(true);
 
         appendCondition(cond);
 
@@ -2905,6 +2911,27 @@ public abstract class SQLBuilder {
             }
 
             sb.append(WD._PARENTHESES_R);
+        } else if (cond instanceof InSubQuery) {
+            final InSubQuery inSubQuery = (InSubQuery) cond;
+            final String propName = inSubQuery.getPropName();
+
+            sb.append(formalizeColumnName(propName));
+
+            sb.append(WD._SPACE);
+            sb.append(inSubQuery.getOperator().toString());
+            sb.append(WD.SPACE_PARENTHESES_L);
+
+            appendCondition(inSubQuery.getSubQuery());
+
+            sb.append(WD._PARENTHESES_R);
+        } else if (cond instanceof Where || cond instanceof Having) {
+            final Cell cell = (Cell) cond;
+
+            sb.append(WD._SPACE);
+            sb.append(cell.getOperator().toString());
+            sb.append(WD._SPACE);
+
+            appendCondition(cell.getCondition());
         } else if (cond instanceof Cell) {
             final Cell cell = (Cell) cond;
 
@@ -2948,36 +2975,67 @@ public abstract class SQLBuilder {
             }
         } else if (cond instanceof SubQuery) {
             final SubQuery subQuery = (SubQuery) cond;
+            final Condition subCond = subQuery.getCondition();
 
             if (N.notNullOrEmpty(subQuery.getSql())) {
                 sb.append(subQuery.getSql());
             } else {
-                if (this instanceof SCSB) {
-                    sb.append(SCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof PSC) {
-                    sb.append(PSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof MSC) {
-                    sb.append(MSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof NSC) {
-                    sb.append(NSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof ACSB) {
-                    sb.append(ACSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof PAC) {
-                    sb.append(PAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof MAC) {
-                    sb.append(MAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof NAC) {
-                    sb.append(NAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof LCSB) {
-                    sb.append(LCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof PLC) {
-                    sb.append(PLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof MLC) {
-                    sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
-                } else if (this instanceof NLC) {
-                    sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).where(subQuery.getCondition()).sql());
+                if (subQuery.getEntityClass() != null) {
+                    if (this instanceof SCSB) {
+                        sb.append(SCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof PSC) {
+                        sb.append(PSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof MSC) {
+                        sb.append(MSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof NSC) {
+                        sb.append(NSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof ACSB) {
+                        sb.append(ACSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof PAC) {
+                        sb.append(PAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof MAC) {
+                        sb.append(MAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof NAC) {
+                        sb.append(NAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof LCSB) {
+                        sb.append(LCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof PLC) {
+                        sb.append(PLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof MLC) {
+                        sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else if (this instanceof NLC) {
+                        sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                    } else {
+                        throw new RuntimeException("Unsupproted subQuery condition: " + cond);
+                    }
                 } else {
-                    throw new RuntimeException("Unsupproted subQuery condition: " + cond);
+                    if (this instanceof SCSB) {
+                        sb.append(SCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof PSC) {
+                        sb.append(PSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof MSC) {
+                        sb.append(MSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof NSC) {
+                        sb.append(NSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof ACSB) {
+                        sb.append(ACSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof PAC) {
+                        sb.append(PAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof MAC) {
+                        sb.append(MAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof NAC) {
+                        sb.append(NAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof LCSB) {
+                        sb.append(LCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof PLC) {
+                        sb.append(PLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof MLC) {
+                        sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else if (this instanceof NLC) {
+                        sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                    } else {
+                        throw new RuntimeException("Unsupproted subQuery condition: " + cond);
+                    }
                 }
             }
         } else if (cond instanceof Expression) {
@@ -3124,9 +3182,11 @@ public abstract class SQLBuilder {
 
                 final Type<?> propType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
 
-                if (propType.isEntity()) {
-                    final Map<String, String> subPropColumnNameMap = registerEntityPropColumnNameMap(propType.clazz(), namingPolicy,
-                            N.<Class<?>> asLinkedHashSet(entityClass));
+                if (propType.isEntity() && (registeringClasses == null || !registeringClasses.contains(propType.clazz()))) {
+                    final Set<Class<?>> newRegisteringClasses = registeringClasses == null ? N.<Class<?>> newLinkedHashSet() : registeringClasses;
+                    newRegisteringClasses.add(entityClass);
+
+                    final Map<String, String> subPropColumnNameMap = registerEntityPropColumnNameMap(propType.clazz(), namingPolicy, newRegisteringClasses);
 
                     if (N.notNullOrEmpty(subPropColumnNameMap)) {
                         final String subTableName = getTableName(propType.clazz(), namingPolicy);

@@ -311,4 +311,20 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     public void forEachRemaining(java.util.function.Consumer<? super Double> action) {
         super.forEachRemaining(action);
     }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        int idx = 0;
+
+        while (hasNext()) {
+            action.accept(idx++, nextDouble());
+        }
+    }
 }

@@ -311,4 +311,20 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     public void forEachRemaining(java.util.function.Consumer<? super Character> action) {
         super.forEachRemaining(action);
     }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedCharConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        int idx = 0;
+
+        while (hasNext()) {
+            action.accept(idx++, nextChar());
+        }
+    }
 }

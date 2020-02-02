@@ -311,4 +311,20 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     public void forEachRemaining(java.util.function.Consumer<? super Integer> action) {
         super.forEachRemaining(action);
     }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        int idx = 0;
+
+        while (hasNext()) {
+            action.accept(idx++, nextInt());
+        }
+    }
 }

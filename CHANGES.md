@@ -1,3 +1,8 @@
+### 1.10.12
+
+* Improvements and bug fix.
+
+
 ### 1.10.11
 
 * Rename `forEach(Throwables.IndexedConsumer...)` to `forEachIndexed(Throwables.IndexedConsumer...)`. 

@@ -10906,6 +10906,41 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Throwables.Runnable<E> action) throws E {
+        forEach(startInclusive, endExclusive, 1, action);
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param startInclusive
+     * @param endExclusive
+     * @param step
+     * @param action
+     * @throws E the e
+     */
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.Runnable<E> action)
+            throws E {
+        checkArgument(step != 0, "The input parameter 'step' can not be zero");
+
+        if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
+            return;
+        }
+
+        long len = (endExclusive * 1L - startInclusive) / step + ((endExclusive * 1L - startInclusive) % step == 0 ? 0 : 1);
+        while (len-- > 0) {
+            action.run();
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param startInclusive
+     * @param endExclusive
+     * @param action
+     * @throws E the e
+     */
     public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Throwables.IntConsumer<E> action) throws E {
         forEach(startInclusive, endExclusive, 1, action);
     }
@@ -10945,7 +10980,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param action
      * @throws E the e
+     * @deprecated use traditional for-loop
      */
+    @Deprecated
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final T a,
             Throwables.ObjIntConsumer<? super T, E> action) throws E {
         forEach(startInclusive, endExclusive, 1, a, action);
@@ -10961,7 +10998,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param action
      * @throws E the e
+     * @deprecated use traditional for-loop
      */
+    @Deprecated
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final T a,
             Throwables.ObjIntConsumer<? super T, E> action) throws E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero");
@@ -11033,55 +11072,6 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param <E>
-     * @param a
-     * @param action
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IndexedConsumer<? super T, E> action) throws E {
-        checkArgNotNull(action);
-
-        if (isNullOrEmpty(a)) {
-            return;
-        }
-
-        forEachIndexed(a, 0, a.length, action);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param action
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
-            final Throwables.IndexedConsumer<? super T, E> action) throws E {
-        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
-        checkArgNotNull(action);
-
-        if (isNullOrEmpty(a)) {
-            return;
-        }
-
-        if (fromIndex <= toIndex) {
-            for (int i = fromIndex; i < toIndex; i++) {
-                action.accept(i, a[i]);
-            }
-        } else {
-            for (int i = min(a.length - 1, toIndex); i > toIndex; i--) {
-                action.accept(i, a[i]);
-            }
-        }
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <C>
-     * @param <E>
      * @param c
      * @param action
      * @throws E the e
@@ -11106,7 +11096,6 @@ public final class N extends CommonUtil {
      * The traditional for loop is still recommended in regular programming.
      *
      * @param <T>
-     * @param <C>
      * @param <E>
      * @param c
      * @param fromIndex
@@ -11179,14 +11168,81 @@ public final class N extends CommonUtil {
 
     /**
      *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param map
+     * @param action
+     * @throws E the e
+     */
+    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
+        checkArgNotNull(action);
+
+        if (isNullOrEmpty(map)) {
+            return;
+        }
+
+        forEach(map.entrySet(), action);
+    }
+
+    /**
+     *
      * @param <T>
-     * @param <C>
+     * @param <E>
+     * @param a
+     * @param action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachIndexed(final T[] a, final Throwables.IndexedConsumer<? super T, E> action) throws E {
+        checkArgNotNull(action);
+
+        if (isNullOrEmpty(a)) {
+            return;
+        }
+
+        forEachIndexed(a, 0, a.length, action);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachIndexed(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.IndexedConsumer<? super T, E> action) throws E {
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, len(a));
+        checkArgNotNull(action);
+
+        if (isNullOrEmpty(a)) {
+            return;
+        }
+
+        if (fromIndex <= toIndex) {
+            for (int i = fromIndex; i < toIndex; i++) {
+                action.accept(i, a[i]);
+            }
+        } else {
+            for (int i = min(a.length - 1, toIndex); i > toIndex; i--) {
+                action.accept(i, a[i]);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param <T>
      * @param <E>
      * @param c
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, final Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, final Throwables.IndexedConsumer<? super T, E> action)
+            throws E {
         checkArgNotNull(action);
 
         if (isNullOrEmpty(c)) {
@@ -11207,7 +11263,6 @@ public final class N extends CommonUtil {
      * The traditional for loop is still recommended in regular programming.
      *
      * @param <T>
-     * @param <C>
      * @param <E>
      * @param c
      * @param fromIndex
@@ -11276,6 +11331,26 @@ public final class N extends CommonUtil {
                 }
             }
         }
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param map
+     * @param action
+     * @throws E the e
+     */
+    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IndexedConsumer<? super Map.Entry<K, V>, E> action)
+            throws E {
+        checkArgNotNull(action);
+
+        if (isNullOrEmpty(map)) {
+            return;
+        }
+
+        forEachIndexed(map.entrySet(), action);
     }
 
     /**

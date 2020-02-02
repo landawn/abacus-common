@@ -1358,6 +1358,16 @@ public class ConditionFactory {
         return new In(propName, values);
     }
 
+    /**
+     *
+     * @param propName
+     * @param subQuery
+     * @return
+     */
+    public static InSubQuery in(final String propName, final SubQuery subQuery) {
+        return new InSubQuery(propName, subQuery);
+    }
+
     //    public static Condition in(final String propName, final SubQuery condition) {
     //        return new Binary(propName, Operator.IN, condition);
     //    }
@@ -1464,6 +1474,17 @@ public class ConditionFactory {
      */
     public static Cell cell(final Operator operator, final Condition condition) {
         return new Cell(operator, condition);
+    }
+
+    /**
+     *
+     * @param entityClass
+     * @param propNames
+     * @param condition
+     * @return
+     */
+    public static SubQuery subQuery(final Class<?> entityClass, final Collection<String> propNames, final Condition condition) {
+        return new SubQuery(entityClass, propNames, condition);
     }
 
     /**

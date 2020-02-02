@@ -311,4 +311,20 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     public void forEachRemaining(java.util.function.Consumer<? super Long> action) {
         super.forEachRemaining(action);
     }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void forEachIndexed(Throwables.IndexedLongConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        int idx = 0;
+
+        while (hasNext()) {
+            action.accept(idx++, nextLong());
+        }
+    }
 }

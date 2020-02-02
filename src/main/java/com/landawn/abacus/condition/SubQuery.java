@@ -22,10 +22,11 @@ import java.util.Collection;
 import java.util.List;
 
 import com.landawn.abacus.condition.ConditionFactory.CF;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.WD;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -39,9 +40,11 @@ public class SubQuery extends AbstractCondition {
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -2791944344613082244L;
 
-    /** The entity name. */
     // For Kryo
     final String entityName;
+
+    // For Kryo
+    final Class<?> entityClass;
 
     /** The prop names. */
     private Collection<String> propNames;
@@ -61,6 +64,7 @@ public class SubQuery extends AbstractCondition {
     // For Kryo
     SubQuery() {
         entityName = null;
+        entityClass = null;
         sql = null;
     }
 
@@ -73,6 +77,7 @@ public class SubQuery extends AbstractCondition {
     public SubQuery(String entityName, String sql) {
         super(Operator.EMPTY);
         this.entityName = entityName;
+        this.entityClass = null;
 
         if (N.isNullOrEmpty(sql)) {
             throw new IllegalArgumentException("The sql script can't be null or empty.");
@@ -83,16 +88,24 @@ public class SubQuery extends AbstractCondition {
         this.sql = sql;
     }
 
-    /**
-     * Instantiates a new sub query.
-     *
-     * @param entityName
-     * @param propNames
-     * @param condition
-     */
     public SubQuery(String entityName, Collection<String> propNames, Condition condition) {
         super(Operator.EMPTY);
         this.entityName = entityName;
+        this.entityClass = null;
+        this.propNames = propNames;
+        if (condition == null || CriteriaUtil.isClause(condition) || condition instanceof Expression) {
+            this.condition = condition;
+        } else {
+            this.condition = CF.where(condition);
+        }
+
+        this.sql = null;
+    }
+
+    public SubQuery(Class<?> entityClass, Collection<String> propNames, Condition condition) {
+        super(Operator.EMPTY);
+        this.entityName = ClassUtil.getSimpleClassName(entityClass);
+        this.entityClass = entityClass;
         this.propNames = propNames;
         if (condition == null || CriteriaUtil.isClause(condition) || condition instanceof Expression) {
             this.condition = condition;
@@ -112,13 +125,12 @@ public class SubQuery extends AbstractCondition {
         return sql;
     }
 
-    /**
-     * Gets the entity name.
-     *
-     * @return
-     */
     public String getEntityName() {
         return entityName;
+    }
+
+    public Class<?> getEntityClass() {
+        return entityClass;
     }
 
     /**
@@ -235,6 +247,7 @@ public class SubQuery extends AbstractCondition {
     public int hashCode() {
         int h = 17;
         h = (h * 31) + ((sql == null) ? 0 : sql.hashCode());
+        h = (h * 31) + ((entityName == null) ? 0 : entityName.hashCode());
         h = (h * 31) + ((propNames == null) ? 0 : propNames.hashCode());
         h = (h * 31) + ((condition == null) ? 0 : condition.hashCode());
 
@@ -255,7 +268,8 @@ public class SubQuery extends AbstractCondition {
         if (obj instanceof SubQuery) {
             SubQuery other = (SubQuery) obj;
 
-            return N.equals(sql, other.sql) && N.equals(propNames, other.propNames) && N.equals(condition, other.condition);
+            return N.equals(sql, other.sql) && N.equals(entityName, other.entityName) && N.equals(propNames, other.propNames)
+                    && N.equals(condition, other.condition);
         }
 
         return false;
